@@ -131,7 +131,7 @@
 https://<你的用户名>.github.io/daily-paper-reader
 ```
 
-完成以上步骤后，后续大多数日常使用和配置都可以直接在网页端完成。
+完成以上步骤后，后续大多数日常使用和配置都可以直接在网页端完成。后续教程参考：[daily-paper-reader 指引](https://ziwenhahaha.github.io/daily-paper-reader/#/tutorial/README)
 
 ## ❓ FAQ
 
