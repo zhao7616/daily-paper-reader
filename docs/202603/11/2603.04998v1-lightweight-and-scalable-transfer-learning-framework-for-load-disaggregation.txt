@@ -1,0 +1,573 @@
+Title: Lightweight and Scalable Transfer Learning Framework for Load Disaggregation
+
+URL Source: https://arxiv.org/pdf/2603.04998v1
+
+Published Time: Fri, 06 Mar 2026 01:47:01 GMT
+
+Number of Pages: 10
+
+Markdown Content:
+> 1
+
+# Lightweight and Scalable Transfer Learning Framework for Load Disaggregation 
+
+L.E. Garcia-Marrero, G. Petrone, and E. Monmasson 
+
+Abstract —Non-Intrusive Load Monitoring (NILM) aims to estimate appliance-level consumption from aggregate electrical signals recorded at a single measurement point. In recent years, the field has increasingly adopted deep learning approaches; how-ever, cross-domain generalization remains a persistent challenge due to variations in appliance characteristics, usage patterns, and background loads across homes. Transfer learning provides a practical paradigm to adapt models with limited target data. However, existing methods often assume a fixed appliance set, lack flexibility for evolving real-world deployments, remain un-suitable for edge devices, or scale poorly for real-time operation. This paper proposes RefQuery, a scalable multi-appliance, multi-task NILM framework that conditions disaggregation on compact appliance fingerprints, allowing one shared model to serve many appliances without a fixed output set. RefQuery keeps a pretrained disaggregation network fully frozen and adapts to a target home by learning only a per-appliance embedding during a lightweight backpropagation stage. Experiments on three public datasets demonstrate that RefQuery delivers a strong accuracy-efficiency trade-off against single-appliance and multi-appliance baselines, including modern Transformer-based methods. These results support RefQuery as a practical path toward scalable, real-time NILM on resource-constrained edge devices. 
+
+Index Terms —Non-Intrusive Load Monitoring, Transfer Learning, Edge Devices, Real-Time Load Disaggregation. 
+
+NOMENCLATURE 
+
+Sets and Indices 
+
+b Building index 
+
+k Appliance index 
+
+t Time index 
+
+H Set of buildings 
+
+K Set of target appliances 
+
+Parameters 
+
+L Window length 
+
+E Embedding dimension 
+
+H Width of shared fully connected layers 
+
+θ Parameters of the feature extractor 
+
+ϕ Parameters of the prediction head 
+
+boff Fixed OFF bias in z-space 
+
+> L.E. Garcia-Marrero and E. Monmasson are with the Syst` emes et Appli-cations des Technologies de l’Information et de l’Energie laboratory, Cergy-Pontoise. G. Petrone and also L.E. Garcia-Marrero are with the Dipartimento di Ingegneria dell’Informazione ed Elettrica e Matematica Applicata/DIEM, University of Salerno, 84084 Fisciano.
+
+Variables 
+
+xb(t) Aggregate mains signal of building by(k) 
+
+> b
+
+(t) Appliance k power signal 
+
+q ∈ RL Query mains window 
+
+r(k) ∈ RL Reference window for appliance k
+
+er , eq ∈ RE Reference and query embeddings 
+
+e(k) 
+
+> r
+
+Reference embedding for appliance k
+
+˜e(k) 
+
+> r
+
+Learned target-domain reference embedding 
+
+ˆy(k) Predicted appliance power 
+
+ˆs(k) Predicted ON/OFF state 
+
+ˆyz Predicted z-normalized power 
+
+L Total loss 
+
+LMSE Power loss 
+
+LBCE State loss I. I NTRODUCTION 
+
+# NON-Intrusive Load Monitoring (NILM), also known as energy disaggregation, aims to extract appliance-level consumption data from aggregate electrical signals recorded at a single measurement point [1]. For NILM to be practical, it must operate under constraints such as the low sampling rates and limited electrical measurements typically provided by low-cost commercial smart meters [2]. Additionally, it must be capable of running on edge devices due to growing concerns about data privacy and transmission costs [2]. From this standpoint, all target-domain computing should occur locally on the device to preserve user privacy and reduce operational complexity [3]. The release of large-scale household energy usage datasets, such as REDD [4], UK-DALE [5], and REFIT [6], has supported the growing use of deep learning (DL) approaches in energy disaggregation. DL models can learn discriminative representations from raw data and often improve disaggrega-tion accuracy in scenarios involving complex load mixtures. These improvements have expanded the range of appliances that can be effectively disaggregated, including complex multi-state devices that remain difficult for classical models to handle [7]. Despite the accuracy of recent DL-based NILM, several state-of-the-art proposals are not designed under the con-straints of edge deployment, where memory and compute are limited. In particular, some accuracy gains are achieved by adopting architectures that increase parameter count and inference-time computation. For example, SAMNet employs a multi-task design with specialized expert and attention mechanisms to exploit interactions between state detection and energy estimation, increasing architectural complexity [8]. 
+
+> arXiv:2603.04998v1 [cs.LG] 5 Mar 2026 2
+
+MATNilm, similarly, introduces a multi-appliance-task frame-work with additional correlation modeling across appliances, adding components beyond a simple shared backbone [9]. In addition, PSSR-Net adopts a deep feature extractor (ResNet50) as its backbone, which is costly for on-device inference and makes any local fine-tuning more demanding [10]. Moreover, most approaches adopt a single-appliance paradigm (one model per appliance), growing storage lin-early with the number of targets. Multi-appliance models, in contrast, reduce redundancy by sharing early layers and either producing outputs for a predetermined appliance set [11], or attaching appliance-specific sub-networks [12], which scales poorly as the number of appliances increases. A more suitable direction for edge deployment is a single model that can address many appliances incrementally, specified through a compact fingerprint. Recent steps in this direction include conditioned multi-target disaggregation [13] and query-based models using appliance embeddings [14]; however, this re-search direction is still in a preliminary phase. On the other hand, generalization remains a primary barrier, since models trained in a source domain often degrade when deployed in a target home due to differences in appliance characteristics, usage patterns, and background loads [1], [15]. A first family of approaches attempts to improve generalization without needing target-domain data by enriching the training distribution. In [16], a data-augmentation strategy is proposed to synthesize diverse appliance activations for training. In [17], a metric-based meta-learning framework is proposed to improve generalizability across domains and label spaces without target-domain retraining. In [18], a self-supervised feature-learning method is proposed to learn representations for appliance recognition under label scarcity. However, these approaches rely on source-side diversity to anticipate deploy-ment conditions, which is insufficient to guarantee robust performance across unseen homes. A second family of methods addresses generalization using only target-domain aggregate data to reduce domain shift. In [19], self-supervised learning is used to pretrain a fea-ture extractor on unlabeled target aggregate signals, and the pretrained weights are then used to initialize the downstream disaggregation model. In [20], domain adaptation is proposed to align source and target distributions through additional objectives computed on unlabeled target aggregates. While these approaches reduce the need for labeled appliance power, they require collecting and processing substantial aggregated data, which is challenging under tight resource constraints. Moreover, adapting solely from aggregated labels does not fully resolve mismatches that arise from variations in appliance instances across different homes. A more practical approach to address the generalization challenge is transfer learning (TL), which adapts a model trained in a source domain to a target domain using a small amount of target-specific data. In [21], the authors propose TL by fine-tuning the final dense layers while keeping the backbone frozen. In [22], a meta-learning-based approach and an ensemble-learning-based approach are proposed, followed by target adaptation. In [11], cross-domain adaptation is performed via supervised retraining of the top dense layers and subsequent fine-tuning of the shared CNN layers. In [12], transfer learning is performed by freezing the shared module and fine-tuning the appliance-specific layers. However, practical transfer learning must enable lightweight adaptation with limited data, operate under hardware constraints, and support scalable, real-time deployment. This paper presents RefQuery, a scalable multi-appliance multi-task NILM framework that supports incremental adap-tation of appliances by learning a lightweight per-appliance embedding during a short backpropagation-based adaptation stage, while keeping a pretrained disaggregation network completely frozen. This clean separation between a stable global model and appliance-specific embeddings enables plug-and-play expansion, simplifies deployment and versioning, and restricts adaptation to a compact, well-defined set of parameters rather than network fine-tuning. The contributions of this work are summarized as follows:  
+
+> •
+
+Development of an appliance-conditioned NILM frame-work that enables multi-appliance disaggregation with a single shared model by conditioning inference on compact appliance embeddings, improving deployment practicality on constrained edge devices.  
+
+> •
+
+Introduction of a novel source-domain training strategy and a novel target-domain adaptation mechanism that allows appliances to be disaggregated without updating network parameters through a lightweight adaptation stage.  
+
+> •
+
+Validation of the proposed solution through extensive experiments on cross-domain transfer learning, limited-data adaptation, and computational scalability, showing that RefQuery achieves competitive accuracy while sub-stantially reducing storage and adaptation costs compared with state-of-the-art baselines, supporting its suitability for real-time edge deployment. The remainder of this paper is organized as follows. Sec-tion II describes the proposed RefQuery framework. Section III presents the model architecture. Section IV outlines the experimental setup, reports the results, and provides the cor-responding analysis, and section V concludes the paper. II. M ETHOD 
+
+A. Framework overview 
+
+This paper presents RefQuery, a multi-task, appliance-conditioned NILM framework. RefQuery estimates both appliance-level power and activation state from aggregate mains by combining a reference appliance embedding with a query mains embedding within a shared model. For each appliance k, assume that there exists a fixed reference window 
+
+r(k) ∈ RL of length L that contains a representative activation pattern of the device. Given a query mains window q ∈ RL
+
+of length L, the reference and query signals are encoded by a shared feature extractor fθ (·) producing embeddings of equal dimensionality E,
+
+e(k) 
+
+> r
+
+= fθ
+
+
+
+r(k)
+
+∈ RE , eq = fθ (q) ∈ RE , (1) 3 
+
+> Fig. 1. Three-stage RefQuery framework. Stage I: the model is trained on multiple source buildings using several appliances per building with joint power (MSE) and state (BCE) supervision; Stage II: in the target domain, the model is frozen and a target-specific reference embedding is learned per appliance using joint power (MSE) and state (BCE) supervision; Stage III: target mains is disaggregated into per-appliance state and power using the learned embeddings.
+
+These embeddings are combined using a prediction head 
+
+hϕ(·, ·) to jointly estimate the appliance’s power and on/off state: 
+
+(ˆ y(k), ˆs(k)) = hϕ
+
+
+
+e(k) 
+
+> r
+
+, e q
+
+
+
+, (2) where ˆy(k) denotes the estimated appliance power and ˆs(k)
+
+the estimated on/off (activation) state. Conditioning on e(k)
+
+> r
+
+allows a single backbone to be reused across appliances by changing only the reference embedding, avoiding per-appliance models and reducing the rigidity of architectures tied to a fixed appliance set, which is beneficial for constrained edge deployment. RefQuery is first trained in a source domain using fully la-belled data, so that the shared feature extractor fθ (·) and head 
+
+hϕ(·, ·) learn a reusable, appliance-conditioned disaggregation function. At deployment in an unseen household, RefQuery performs lightweight adaptation by freezing fθ and hϕ and learning only the appliance reference embedding. For each appliance k, we initialize e(k) 
+
+> r
+
+∈ RE at random and optimize it to minimize prediction error on labeled target-domain data. The same procedure is repeated each time a new appliance is added. Since the reference embedding has a dimensionality of 
+
+E, adaptation in the target domain requires optimizing only E
+
+parameters per appliance, rather than fine-tuning the full net-work, which substantially reduces computation and memory requirements, making personalization feasible on constrained edge devices. Figure 1 illustrates the overall structure of the RefQuery framework, and the following sections provide a detailed explanation of each stage. 
+
+B. Stage I: Training on the Source Domain 
+
+In Stage I, RefQuery is trained in a source domain where both aggregate mains and sub-metered appliance signals are available. We denote by xb(t) the aggregate mains signal of building b, and by y(k) 
+
+> b
+
+(t) the power consumption of appliance k in the same building. For simplicity, we assume that (i) all target appliances k ∈ K are present in every building b ∈ H , and (ii) xb(t) and y(k) 
+
+> b
+
+(t) are time-aligned and sampled at the desired sampling period s; otherwise, additional preprocessing (e.g., resampling and alignment) must be applied before generating the training set. For each building b and appliance k, we generate training quadruples according to Algorithm 1. Briefly, we first con-struct a reference bank Rb,k by collecting candidate reference windows for appliance k in building b. Specifically, for each ON-interval of y(k) 
+
+> b
+
+(t) we extract a length-L window centered at the midpoint of that interval. This yields a set of segments that capture the representative active behavior of appliance k
+
+in building b. Here, it is convenient to set L large enough to capture a complete activation pattern for each target appliance, since L is a fixed window length shared across appliances. Then, for every time index t, a query window from mains 
+
+q = xb[t : t+L] is paired with a reference window sampled from Rb,k . We adopt a Seq2Point formulation [21], where supervision is defined at the window center t + p with 
+
+p = ⌊L/ 2⌋. The regression label is then the instantaneous appliance power yP = y(k) 
+
+> b
+
+[t+p], while the classification label 
+
+yON ∈ { 0, 1} indicates whether appliance k is ON at t+p.
+
+1) ON Intervals Construction: For each appliance signal 
+
+y(k) 
+
+> b
+
+, we construct the ON-interval set Ib,k used in Algorithm 1 by computing a binary activation mask and then extracting contiguous ON segments. We first create a preliminary binary mask by marking a sample as ON whenever the appliance power exceeds a threshold ( 20W ). This yields a raw activation mask that may still include short spurious bursts or brief OFF gaps due to noise and transient fluctuations. To ensure physically consistent activations, we apply two duration-based post-processing rules: (i) ON runs shorter than 60s are removed (set to OFF), and (ii) OFF gaps shorter than 300s are bridged (set to ON) when they are surrounded by ON samples on both sides. Finally, the cleaned mask is converted into ON-intervals by 4
+
+Algorithm 1 Training-set generation (Stage I) 
+
+Require: Window length L; sampling period s; building set 
+
+H; target appliance set K; for each building b ∈ H : mains signal xb and appliance signals {y(k) 
+
+> b
+
+}k∈K ; ON-intervals 
+
+{I b,k }k∈K .
+
+Ensure: Training sets Q (queries), R (references), YP
+
+(power), YON (state), fitted z-normalizers.  
+
+> 1:
+
+p ← ⌊ L/ 2⌋ 
+
+> 2:
+
+Initialize Q, R, YP , YON ← [ ]  
+
+> 3:
+
+for each building b ∈ H do  
+
+> 4:
+
+for each appliance k ∈ K do  
+
+> 5:
+
+N ← | y(k) 
+
+> b
+
+| 
+
+> 6:
+
+Reference bank Rb,k ← [ ]  
+
+> 7:
+
+for each ON-interval [s, e ) in Ib,k do  
+
+> 8:
+
+c ← ⌊ (s + e)/2⌋; t0 ← c − ⌊ L/ 2⌋ 
+
+> 9:
+
+if 0 ≤ t0 and t0 + L ≤ N then  
+
+> 10:
+
+append y(k) 
+
+> b
+
+[t0 : t0+L] to Rb,k  
+
+> 11:
+
+end if  
+
+> 12:
+
+end for  
+
+> 13:
+
+for t = 0 to N − L do  
+
+> 14:
+
+append xb[t : t+L] to Q 
+
+> 15:
+
+append S AMPLE (Rb,k ) to R 
+
+> 16:
+
+append y(k) 
+
+> b
+
+[t+p] to YP 
+
+> 17:
+
+if y(k) 
+
+> b
+
+is ON at t+p then  
+
+> 18:
+
+append 1 to YON  
+
+> 19:
+
+else  
+
+> 20:
+
+append 0 to YON  
+
+> 21:
+
+end if  
+
+> 22:
+
+end for  
+
+> 23:
+
+end for  
+
+> 24:
+
+end for  
+
+> 25:
+
+fit z-normalizers on R, Q, YP ; normalize R, Q, YP 
+
+> 26:
+
+return Q, R, YP , YON 
+
+collecting all maximal contiguous segments where the mask is equal to 1. 
+
+2) Training Loss: Stage I optimizes a multi-task objective that jointly supervises appliance-level power estimation and activation state detection. The power estimation branch is trained using mean squared error (MSE) on the z-normalized appliance power, while the activation branch uses binary cross-entropy (BCE) on binary on/off labels. Normalizing the power target aligns the scale of the regression loss with that of the classification loss, allowing both tasks to contribute comparably. As a result, each loss is assigned equal weight, and the total training loss is defined as the sum of the two terms: 
+
+L = LMSE + LBCE , (3) 
+
+C. Stage II: Target Domain Embedding Learning 
+
+Stage II adapts RefQuery to a target building through a lightweight appliance-specific adaptation stage. Starting from the model trained in Stage I, the parameters of the shared feature extractor fθ (·) and the shared head hϕ(·, ·) are kept fixed. Adaptation is performed by learning, incrementally, for each target appliance k, a target-specific reference embedding 
+
+˜e(k) 
+
+> r
+
+∈ RE , initialized at random. This makes the procedure lightweight because only E parameters are optimized per appliance, while the full network remains unchanged. The embedding ˜e(k) 
+
+> r
+
+is optimized by minimizing the same loss function (3). After adaptation, the learned embedding ˜e(k) 
+
+> r
+
+is fixed and reused for subsequent inference. This design has three key practical benefits. It enables in-cremental on-site personalization without retraining the shared network, avoiding costly updates and preserving previously learned knowledge. This means that it can be easily scaled to new appliances by running the lightweight adaptation phase to learn the appliance fingerprint. It keeps the adaptation footprint predictable and extremely small (scaling only with E). Finally, because only a few parameters are optimized, the procedure is naturally compatible with limited label target data, reducing the risk of overfitting during adaptation while still capturing building-specific appliance characteristics. 
+
+D. Stage III: Inference in the Target Domain 
+
+In Stage III, RefQuery performs appliance disaggregation in the target building by reusing the reference embedding learned in Stage II. Let ˜e(k) 
+
+> r
+
+∈ RE denote the fixed target-domain reference embedding for appliance k. Given a sequence of successive query mains windows q ∈ RL extracted from the target aggregate signal, each window is encoded by the frozen feature extractor as eq = fθ (q), and the frozen head is condi-tioned on ˜e(k) 
+
+> r
+
+to produce the appliance-specific outputs. For every query window, the model hϕ(·, ·) returns the predicted activation state ˆs(k) and the predicted z-normalized power ˆy(k)
+
+of the appliance. Finally, ˆy(k) is mapped back to Watts by applying the inverse of the z-normalization parameters fitted in Stage I, yielding appliance-level power estimates. III. A RCHITECTURE 
+
+A. Lightweight convolutional encoder and embedding gener-ation 
+
+The RefQuery encoder fθ (·) is a compact 1-D CNN shared by both the reference and query branches, during the training phase in stage I, whose structure is selected to satisfy typical edge-device constraints on memory footprint, latency, and compute. In particular, we adopt a shallow stack of five convolutional layers with small kernels (k = 3), ReLU activations, and same padding, interleaved with max-pooling to progressively reduce the temporal resolution while increasing the number of channels. This configuration limits parameter count and intermediate activation sizes while retaining the ability to capture the local temporal motifs and step-like transitions that characterize appliance activations in aggregate power signals, consistent with established CNN-based NILM backbones [7], [23]. To reduce inference cost, downsampling is applied at the earliest stage of the encoder. The first convolutional layer uses a stride of 2 and is immediately followed by a stride-2 max-pooling layer, reducing the sequence length within the first block. This early temporal compression reduces the size of 5Block 1  
+
+> Conv1D (32) ReLU k=3 s=2
+> MaxPool s=2
+> Flatten
+> Dense Linear (E)
+> L2 Normalization
+> Embeding (E)
+> Input Signal (L, 1)
+> Block 2
+> Conv1D (32) ReLU k=3 s=1
+> MaxPool s=2
+> Block 3
+> Conv1D (64) ReLU k=3 s=1
+> MaxPool s=2
+> Block 4
+> Conv1D (64) ReLU k=3 s=1
+> MaxPool s=2
+> Block 5
+> Conv1D (128) ReLU k=3 s=1
+> MaxPool s=2
+> Fig. 2. Compact 1D CNN feature extractor for embedding generation.
+
+intermediate feature maps and limits memory movement, both of which significantly affect latency and energy consumption on resource-constrained hardware. After the last pooling stage, the features are flattened and linearly projected to an E-dimensional embedding. Finally, we apply L2 normalization to control embedding scale and improve the stability of the con-ditioning/matching operations used downstream, as commonly adopted in embedding-based formulations. The full encoder architecture is shown in Figure 2. 
+
+B. Multitask prediction head 
+
+Given the reference and query embeddings er , eq ∈ RE ,the head builds a fused matching representation by concate-nating the two embeddings with two lightweight interaction terms: the element-wise squared difference (eq − er )2 and the element-wise product eq ⊙ er . The squared-difference term emphasizes coordinate-wise mismatch, while the product high-lights shared patterns; both are commonly used in metric-based matching models to improve discrimination with minimal ad-ditional compute. The resulting 4E dimensional vector passes through two fully connected layers with RELU activation and width H, producing a shared latent representation that both tasks reuse. RefQuery operates in a seq2point setting, the head outputs a single prediction per input window. The activation branch predicts the on/off state via a sigmoid unit. The power branch predicts the z-normalized appliance power coupled to the activation output through a gating mechanism. To anchor the OFF operating point, we add a fixed bias corresponding to zero Watts in z-space (computed from the fitted normalizer) using a frozen linear layer with unit gain and constant bias. This design yields a physically consistent head in which the state output directly modulates the power output while keeping the OFF baseline stable. The full multitask head architecture is shown in Figure 3. IV. E XPERIMENTS 
+
+A. Experimental Setup 
+
+Datasets and domain split. We evaluate RefQuery on three widely used public NILM datasets: REDD [4], UK-DALE [5], and REFIT [6]. We consider REFIT as the source domain and REDD (Houses 1 and 3) and UK-DALE (Houses 1 and 2) as target domains. This choice follows established cross-dataset evaluation practices in NILM [21]. Training was performed on all 20 REFIT houses using a shared interval (2014-06-01–2014-07-01) because it provides a continuous one-month segment of available data across all buildings. 
+
+Appliances. We consider five target appliances: fridge (F), dishwasher (DW), washing machine (WM), kettle (K), and microwave (MW). These appliances are widely used in NILM benchmarks and transfer learning studies. They account for a substantial share of household electricity consumption in the considered datasets, making them practically relevant targets for disaggregation [6], [21]. As in the REDD dataset, the kettle is not present, we consider only F, DW, WM, and MW for this dataset. 
+
+Target-Domain Adaptation and Testing Split. We refer to UK-DALE House 1 and 2 as UKDALE-1 and UKDALE-2, and to REDD House 1 and 3 as REDD-1 and REDD-3. The target-domain time ranges are as follows: UKDALE-1 (2013-06-05 to 2013-07-05), UKDALE-2 (2013-06-02 to 2013-07-02), REDD-1 (2011-04-18 to 2011-05-25), and REDD-3 (2011-04-18 to 2011-05-25). For each case, we design two scenarios. In the first scenario, we use 7 days for adaptation and the remaining days for testing. In the second scenario, we simulate a limited data setting by using only 1 day for adaptation and the remaining days for testing. We select the time ranges to ensure that each scenario includes an interval in which all target appliances exhibit activations during both the adaptation and testing periods. 
+
+Sampling period and window length. All signals are processed at a sampling period of s = 8 s to match the native resolution of the source domain (REFIT) [6]. Since REDD and UK-DALE provide measurements at different native rates, resampling is required for both target datasets to obtain a consistent 8 s sampling period before adaptation [4], [5]. We use a fixed window length of L = 599 samples, consistent with seq2point-style configurations adopted in low-rate disaggregation and transfer settings [21]. Here, an odd length is selected to preserve symmetry around the central point. 
+
+Implementation Details. In Stage I, the 20 buildings are randomly split into training and validation sets using an 80/20 6                                       
+
+> Fig. 3. Multitask head architecture. Given the reference and query embeddings er,eq∈RE, the interaction module constructs a joint representation by concatenating [er,eq,(eq−er)2,eq⊙er], where ⊙denotes element-wise multiplication. The resulting 4E-dimensional vector is processed by two shared fully connected layers with ReLU activations and width Hto produce a shared representation. Two task-specific branches are then applied: a classification head (dense + sigmoid) predicts the state probability ˆystate ∈R, and a regression head (dense + ReLU) estimates a non-negative magnitude ∆z∈R. The final standardized power estimate is computed through a gated transformation ˆyz= ∆ zˆystate +boff , where boff =−μ/σ anchors the OFF operating point in
+> z-space.
+
+partition. In consequence, 16 buildings are used for training, while 4 different buildings are used for validation. The model is trained using the Adam optimizer with a learning rate of 
+
+10 −3 and a batch size of 1024. Early stopping is applied based on the validation loss, with a patience of 5 epochs. In Stage II, the target reference embedding is initialized randomly and optimized using Adam with a learning rate of 10 −2. This higher learning rate is suitable because adaptation involves updating only the E-dimensional embedding, while the rest of the network remains fixed, allowing for fast convergence. Early stopping is based on the training loss with a patience of 5 epochs, as adaptation is performed on limited target-domain data without a separate validation set. 
+
+Metrics. Let y(k)[t] and ˆy(k)[t] denote the ground-truth and predicted power (in Watts) of appliance k at sample t, over an evaluation interval of length T . We report: 
+
+Mean Absolute Error (MAE): 
+
+MAE (k) = 1
+
+T
+
+> T
+
+X
+
+> t=1
+
+y(k)[t] − ˆy(k)[t] . (4) 
+
+F-measure (F1) for activation detection: from the pre-dicted activation probability ˆs(k)[t] ∈ [0 , 1] , we obtain a binary prediction ˜s(k)[t] = ⊮{ˆs(k)[t] ≥ 0.5} and compute precision and recall from the resulting counts of TP , FP , and FN . The F1-score is 
+
+F1 (k) = 2 TP 2 TP + FP + FN . (5) Here, TP (true positive) denotes the number of instances in which an appliance is correctly detected as ON, FP (false positive) represents the number of instances in which an ap-pliance is incorrectly detected as ON, and FN (false negative) corresponds to the number of instances in which an appliance is incorrectly detected as OFF. 
+
+B. Baselines 
+
+We compare RefQuery against three transfer-oriented NILM baselines: 
+
+SA-S2P (D’Incecco et al.) [21]: a transfer-learning NILM baseline that follows the classical one-model-per-appliance paradigm based on a seq2point CNN. As proposed in [21], cross-domain transfer is performed by keeping the convolu-tional feature extractor fixed and fine-tuning only the final dense layers. This baseline provides a classic but strong single-appliance reference. 
+
+MA-CNN (Li et al.) [11]: a transfer-learning NILM frame-work that replaces the traditional one-model-per-appliance paradigm with a compact one-to-many CNN. As proposed in the paper, cross-domain adaptation is performed via supervised retraining of the top dense layers and subsequent fine-tuning of the shared CNN layers. The method is explicitly motivated by reduced storage and computation. 
+
+MA-TRF (Sun et al.) [12]: a recent multi-appliance transfer-learning NILM framework that combines attention mechanisms and Transformer blocks with a subtask-gated regression-classification design. As proposed in [12], trans-fer learning is performed by freezing the shared module and adapting to the target domain by fine-tuning only the appliance-specific layers. This baseline is designed to improve post-transfer accuracy, at the cost of higher model complexity than CNN-based alternatives. Since SA-S2P and MA-CNN do not include a state detection module, we determine appliance states by comparing the model output to an activation power threshold value. We compute a threshold for each appliance by selecting the value that maximizes the F1 score on the adaptation set. 
+
+C. Sensitivity analysis 
+
+We first study the sensitivity of RefQuery to the embed-ding dimension E and the width H of the shared MLP in the multitask head. These parameters directly control the representational capacity of the reference-query match-ing function and, at the same time, the computational and memory footprint of the model. We evaluate a logarithmic grid E, H ∈ { 32 , 64 , 128 , 256 }, spanning compact to higher-capacity configurations while keeping all other settings fixed. All configurations are trained in REFIT following Stage I. Adaptation is performed using one-week of REDD-1 data, and performance is evaluated on the remaining data of the same dataset. We select REDD-1 because it represents a more challenging transfer scenario, since REFIT is collected in the UK, whereas REDD is collected in the US, leading to a larger domain shift. Table I reports the top hyperparameter configurations ranked by average MAE. The best-performing setting is the balanced configuration (E, H ) = (128 , 128) , which reduces the average 7                                               
+
+> TABLE I TOP FIVE HYPERPARAMETER CONFIGURATIONS RANKED BY MEAN ABSOLUTE ERROR (MAE) AVERAGED ACROSS APPLIANCES .PER -APPLIANCE MAE IS ALSO REPORTED .Config MAE per appliance Rank EHFDW MW WM Avg. MAE 1128 128 20.05 7.08 15.26 18.33 15.18 264 256 19.01 10.53 14.35 19.56 15.86 3256 128 20.23 10.50 15.06 18.45 16.06 4256 32 19.56 9.40 15.33 20.09 16.09 5256 64 18.84 10.86 15.93 18.80 16.11
+
+MAE by about 4% relative to the second-ranked configuration. Table I further shows that enlarging the embedding to E = 256 
+
+does not improve the ranking among the top candidates. This pattern suggests diminishing returns from scaling the embed-ding under domain shift, where additional parameters may not translate into more transferable reference-query matching. At the appliance level, the ranking is primarily driven by DW and WM, whose errors vary more substantially across configurations than MW. Consequently, the (128 , 128) setting is adopted for the remaining experiments. 
+
+D. Comparison with the baselines 
+
+This section reports a comparison against the baselines for the first scenario, using seven days of data for adaptation. Table II shows that RefQuery obtains the best overall regres-sion performance on UKDALE-1, yielding the lowest average MAE and improving over the Transformer-based MA-TRF by approximately 2.5%. Moreover, RefQuery consistently outper-forms both SA-S2P and MA-CNN in this house, confirming that the proposed approach improves upon the classical single-appliance transfer pipeline as well as compact multi-appliance CNN transfer baselines. On UKDALE-2, Table II shows that RefQuery attains the second-best average MAE, with only a small gap to the top-performing MA-TRF, while clearly outperforming SA-S2P and MA-CNN. At the same time, RefQuery achieves the best average F1, improving over MA-TRF by roughly 4%. Con-sidering both houses, Table II suggests that RefQuery shows the most consistent gains on multi-state appliances (DW and WM), consistently ranking first, with only one isolated case in which it ranks second. Table II also reveals that RefQuery MW detection can be unstable in some settings, obtaining a low F1 despite a competitive MAE. This divergence is characteristic of sparse, short activations typical in MW, for which event-level metrics are highly sensitive. Table III reports the results on REDD. On REDD-1, Ref-Query achieves the best average F1. In terms of MAE, MA-TRF attains the lowest value, but RefQuery remains very close, trailing by only about 4–5%. The F1 improvement of RefQuery is mainly associated with multi-state appliances. For DW, RefQuery increases the F1 score over MA-TRF by approximately 6% while reducing the mean absolute error by nearly 19%. A similar pattern appears for WM, where RefQuery raises the F1 score by about 4% and results in only a modest mean absolute error increase of around 4%.                                                                                                             
+
+> TABLE II PERFORMANCE COMPARISON ON UK-DALE. Metric Method UK-DALE House FDW MW WM KAve MAE ↓
+> SA-S2P 15.54 4.41 7.49 8.21 5.58 8.25 1MA-CNN 21.15 4.83 7.25 8.35 8.50 10.01 MA-TRF 12.32 2.62 5.12 14.89 2.74 7.54 RefQuery 16.79 2.15 5.52 6.78 5.49 7.35
+> SA-S2P 9.57 9.45 5.56 8.08 6.32 7.80 2MA-CNN 10.62 11.39 10.91 12.25 10.95 11.22 MA-TRF 8.80 4.66 2.99 6.47 2.73 5.13
+> RefQuery 8.51 7.99 4.93 4.88 6.41 6.54 F1 ↑
+> SA-S2P 0.874 0.752 0.168 0.778 0.674 0.649 1MA-CNN 0.827 0.678 0.224 0.745 0.377 0.570 MA-TRF 0.896 0.830 0.383 0.559 0.921 0.718
+> RefQuery 0.880 0.904 0.010 0.866 0.753 0.682 SA-S2P 0.916 0.801 0.247 0.533 0.910 0.682 2MA-CNN 0.905 0.674 0.180 0.433 0.558 0.550 MA-TRF 0.915 0.781 0.292 0.588 0.973 0.710 RefQuery 0.939 0.844 0.204 0.836 0.868 0.738
+> TABLE III PERFORMANCE COMPARISON ON REDD.
+
+Metric Method REDD House F DW MW WM Ave MAE ↓
+
+SA-S2P 19.25 11.98 14.36 28.10 18.42 1MA-CNN 26.42 9.05 18.46 31.54 21.37 MA-TRF 17.57 8.70 13.33 17.53 14.28 
+
+RefQuery 19.53 7.08 14.95 18.20 14.94 SA-S2P 26.18 8.52 12.47 75.44 30.65 3MA-CNN 33.45 12.96 10.47 48.43 26.33 MA-TRF 22.62 7.48 9.10 14.91 13.53 
+
+RefQuery 22.31 6.55 9.09 70.86 27.20 F1 ↑
+
+SA-S2P 0.810 0.715 0.518 0.532 0.644 1MA-CNN 0.827 0.801 0.414 0.279 0.580 MA-TRF 0.869 0.818 0.224 0.661 0.643 RefQuery 0.866 0.869 0.182 0.688 0.651 
+
+SA-S2P 0.800 0.441 0.343 0.694 0.569 
+
+3MA-CNN 0.753 0.163 0.207 0.832 0.489 MA-TRF 0.825 0.000 0.423 0.929 0.544 RefQuery 0.843 0.080 0.080 0.670 0.418 
+
+On REDD-3, Table III shows that RefQuery obtains the lowest MAE on three appliances (F, DW, and MW). However, the average MAE is dominated by WM, where activations are unusually high (around 5 kW) in this house, so small relative mismatches translate into large absolute MAE, and MA-TRF is more stable on this appliance, which largely explains the gap in the overall average. In addition, DW and MW have a few activations in this house, making F1 highly sensitive and contributing to the lower detection scores on these appliances. 
+
+E. Performance in Limited Data Scenarios 
+
+In the following, we evaluate the methods under a limited data scenario in which only one day of data from each building is used for adaptation. This setting results in very 8  
+
+> TABLE IV PERFORMANCE COMPARISON ON UK-DALE L IMITED DATA .
+
+Metric Method UK-DALE House F DW MW WM K Ave MAE ↓
+
+SA-S2P 21.95 11.69 7.99 13.62 12.18 13.49 1MA-CNN 32.21 11.23 10.08 16.37 15.45 17.07 MA-TRF 13.28 4.05 5.32 19.42 4.41 9.30 RefQuery 20.50 2.54 5.45 7.84 6.31 8.53 
+
+F1 ↑
+
+SA-S2P 0.735 0.450 0.315 0.575 0.403 0.496 1MA-CNN 0.729 0.262 0.098 0.462 0.192 0.349 MA-TRF 0.881 0.453 0.509 0.333 0.875 0.610 RefQuery 0.814 0.898 0.016 0.821 0.736 0.657                                                                    
+
+> TABLE V RELATIVE CHANGES ON UK-DALE (L IMITED DATA VS . N ORMAL )FOR
+> HOUSE 1, IN %. P OSITIVE ∆MAE INDICATES WORSE ERROR ;NEGATIVE
+> ∆F1 INDICATES WORSE ACCURACY . B EST (PER APPLIANCE /COLUMN )IS IN BOLD .Metric Method UK-DALE (% change) FDW MW WM KAve
+> ∆MAE SA-S2P 41.2 165.1 6.7 65.9 118.3 63.5 MA-CNN 52.3 132.5 39.0 96.0 81.8 70.5 MA-TRF 7.8 54.6 3.9 30.4 60.9 23.3 RefQuery 22.1 18.1 -1.3 15.6 14.9 16.1
+> ∆F1 SA-S2P -15.9 -40.2 87.5 -26.1 -40.2 -23.6 MA-CNN -11.9 -61.4 -56.2 -38.0 -49.1 -38.8 MA-TRF -1.7 -45.4 32.9 -40.4 -5.0 -15.0 RefQuery -7.5 -0.7 60.0 -5.2 -2.3 -3.7
+
+few activations per appliance. For example, for DW and WM, only a single activation occurs within the adaptation period. Table IV shows the UKDALE-1 results. Under this constraint, RefQuery becomes the strongest overall method, improving the average MAE by about 8% relative to MA-TRF and widening its margin over SA-S2P and MA-CNN. In addition, RefQuery yields the highest average F1. The robustness of the methods is quantified in Table V, which reports relative degradations from 7-day to 1-day adap-tation data on UKDALE-1. RefQuery shows the smallest dete-rioration, reducing the MAE degradation by about 31% relative to MA-TRF, and shrinking the F1 drop by approximately 75% relative to MA-TRF. These relative improvements are particu-larly relevant for practical deployment, where adaptation data are typically scarce and costly to obtain. Table VI reports limited-data performance on REDD-1. Here, MA-TRF retains the best MAE, but RefQuery remains within a single-digit percentage increase in MAE while im-proving average F1 by roughly 20% relative to MA-TRF. This pattern is reinforced by Table VII, where RefQuery reduces the F1 degradation by about 70% compared with MA-TRF. Therefore, RefQuery consistently offers substantially higher stability in detection accuracy as supervision is reduced. 
+
+F. Computational Performance and Scalability 
+
+Table VIII compares storage, adaptation time, and inference time for single-appliance adaptation using 7 days of data followed by one-month inference. Computational performance   
+
+> TABLE VI PERFORMANCE COMPARISON ON REDD L IMITED DATA .
+
+Metric Method REDD House F DW MW WM Ave MAE ↓
+
+SA-S2P 25.16 17.65 16.16 30.44 22.35 1MA-CNN 33.43 18.44 31.25 29.00 28.03 MA-TRF 20.23 9.29 15.94 20.91 16.59 
+
+RefQuery 22.69 7.96 20.69 19.75 17.77 F1 ↑
+
+SA-S2P 0.750 0.627 0.426 0.262 0.516 1MA-CNN 0.757 0.624 0.268 0.192 0.460 MA-TRF 0.855 0.736 0.000 0.440 0.508 RefQuery 0.835 0.856 0.175 0.579 0.611                                                           
+
+> TABLE VII RELATIVE CHANGES ON REDD (L IMITED DATA VS . N ORMAL )FOR
+> HOUSE 1, IN %. P OSITIVE ∆MAE INDICATES WORSE ERROR ;NEGATIVE
+> ∆F1 INDICATES WORSE ACCURACY . B EST (PER APPLIANCE /COLUMN )IS IN BOLD .Metric Method REDD House 1 (% change) FDW MW WM Ave
+> ∆MAE SA-S2P 30.7 47.3 12.5 8.3 21.3 MA-CNN 26.5 103.8 69.3 -8.1 31.2 MA-TRF 15.1 6.8 19.6 19.3 16.2
+> RefQuery 16.2 12.4 38.4 8.5 18.9
+> ∆F1 SA-S2P -7.4 -12.3 -17.8 -50.8 -19.9 MA-CNN -8.5 -22.1 -35.3 -31.2 -20.7 MA-TRF -1.6 -10.0 -100.0 -33.4 -21.0 RefQuery -3.6 -1.5 -3.8 -15.8 -6.1
+
+was assessed under a CPU-only constrained execution regime, in which the benchmarking process was restricted to two CPU cores via process affinity, and thread-level parallelism was lim-ited to two threads. This configuration was adopted to provide a controlled, reproducible, and edge-oriented comparison of runtime performance. This comparative analysis emphasizes offline performance. Consequently, inference time depends on implementation choices, including batch size and whether a method uses a seq2seq or seq2point formulation. For example, MA-TRF employs a transformer architecture, which requires smaller batches to fit in memory. However, because it uses a seq2seq setup with a window stride of 120 [12], it evaluates fewer windows to cover one month of data compared to a seq2point method. Nevertheless, this analysis reflects how each method behaves under the optimal settings reported in its original paper. Here, RefQuery reduces storage by about 90% relative to MA-TRF, about 50% relative to MA-CNN, and by about 99.6% relative to SA-S2P. It also achieves dramatically faster adaptation, being about 70 × faster than MA-TRF, about 78 ×
+
+faster than MA-CNN, and about 85 × faster than SA-S2P. Inference is likewise consistently faster, with RefQuery being about 5.9 × faster than MA-TRF, about 2.7 × faster than MA-CNN, and about 9.2 × faster than SA-S2P. These results demonstrate the computational advantages of RefQuery over the baselines for offline applications, particularly in adaptation time. 9
+
+TABLE VIII COMPUTATIONAL COMPARISON OF THE METHODS FOR SINGLE -APPLIANCE ADAPTATION USING 7 DAYS OF DATA , FOLLOWED BY ONE -MONTH OFFLINE INFERENCE , EVALUATED UNDER A CPU-ONLY CONSTRAINED EXECUTION REGIME (PROCESS AFFINITY LIMITED TO TWO 
+
+CPU CORES AND THREAD -LEVEL PARALLELISM LIMITED TO TWO THREADS ). Method Storage (MB) ↓ Adaptation (s) ↓ Inference (s) ↓
+
+SA-S2P 334.50 5400.3 391.07 MA-CNN 2.38 4950.5 115.11 MA-TRF 11.81 4429.5 248.86 RefQuery 1.18 63.2 42.41 
+
+TABLE IX SCALABILITY WITH NUMBER OF APPLIANCES K. ∆W IS THE ADDITIONAL STORAGE PER ADDED APPLIANCE . “I NCREMENTAL ” MEANS ADDING AN APPLIANCE WITHOUT UPDATING SHARED PARAMETERS .INFERENCE SCALING IS REPORTED IN MFLOP S/( MAINS WINDOW ) AS 
+
+b + K · m, WHERE b IS THE K-INDEPENDENT COMPUTE (SHARED COST ) 
+
+> AND
+
+m IS THE ADDITIONAL MFLOP S PER ADDED APPLIANCE .Method ∆W (KB) ↓ Incremental? Inference scaling (MFLOPs) ↓
+
+SA-S2P 3.4 × 10 5 Yes a 0.000 + K · 101 .289 
+
+MA-CNN ≈ 1 No c 13 .295 + K · 0.000129 
+
+MA-TRF 4.6 × 10 3 Yes b 889 .560 + K · 1142 .726 
+
+RefQuery ≈ 1 Yes 4.145 + K · 0.165      
+
+> anew model per appliance; badd a Transformer head per appliance (backbone frozen); cupdate shared multi-output mapping.
+
+On the other hand, Table IX summarizes scalability with the number of appliances. This comparison focuses on the practical use of each method for real-time NILM on con-strained edge devices. We report inference scaling in terms of MFLOPs (million floating-point operations) per processed mains window, which aligns with sequential, window-by-window disaggregation. The table highlights that SA-S2P scales poorly because each new appliance requires an addi-tional full model, whereas MA-CNN, although memory-light per appliance, is not incremental in practice since extending the appliance set requires updating shared parameters and full retraining. MA-TRF, on the other hand, supports incremental extension via additional heads but incurs a substantially higher overhead, limiting its practical use in real-time applications. RefQuery achieves both minimal per-appliance overhead and incremental deployment. New appliances can be incorpo-rated without updating the network parameters, requiring only an appliance embedding. Inference scaling further supports the practicality of the proposed method. The computational overhead from the shared feature extractor is minimal. Simul-taneously, the low per-appliance cost, driven by calls to the multitask head, makes this approach well-suited for real-time, resource-constrained deployments. V. C ONCLUSION 
+
+This work proposed RefQuery, a transfer-oriented NILM framework designed for constrained edge deployment and scalable multi-appliance monitoring. By conditioning disag-gregation on compact appliance fingerprints, RefQuery departs from both one-model-per-appliance and fixed-set multi-output paradigms, enabling incremental extension of appliances with-out updating network parameters and with negligible per-appliance storage. A novel source-domain training strategy and target-domain adaptation mechanism are designed to obtain the appliance fingerprints through a lightweight training phase. Experiments on three public datasets demonstrate that RefQuery delivers a strong accuracy-efficiency trade-off against single-appliance and multi-appliance baselines, includ-ing modern Transformer-based methods. Under limited data supervision, RefQuery becomes consistently preferable to the baselines. It preserves a competitive mean absolute error while delivering substantially higher F1 stability. Finally, RefQuery provides decisive deployment benefits, reducing model size and adaptation time, and offering a practical path toward scalable real-time NILM on constrained edge devices. REFERENCES [1] D. Murray, L. Stankovic, V. Stankovic, S. Lulic, and S. Sladojevic, “Transferability of neural network approaches for low-rate energy disaggregation,” in ICASSP 2019 - 2019 IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP) . IEEE, May 2019. [Online]. Available: http://dx.doi.org/10.1109/ICASSP.2019. 8682486 [2] L. E. Garcia-Marrero, E. Monmasson, and G. Petrone, “Online real-time robust framework for non-intrusive load monitoring in constrained edge devices,” Applied Energy , vol. 378, p. 124814, Jan. 2025. [Online]. Available: http://dx.doi.org/10.1016/j.apenergy.2024.124814 [3] G. Tanoni, L. Stankovic, V. Stankovic, S. Squartini, and E. Principi, “Knowledge distillation for scalable nonintrusive load monitoring,” 
+
+IEEE Transactions on Industrial Informatics , vol. 20, no. 3, p. 4710–4721, Mar. 2024. [Online]. Available: http://dx.doi.org/10.1109/ TII.2023.3328436 [4] J. Z. Kolter and M. J. Johnson, “Redd: A public data set for energy disaggregation research,” in Workshop on data mining applications in sustainability (SIGKDD), San Diego, CA , vol. 25. Citeseer, 2011, pp. 59–62. [Online]. Available: https://zicokolter.com/publications/ kolter2011redd.pdf [5] J. Kelly and W. Knottenbelt, “The uk-dale dataset, domestic appliance-level electricity demand and whole-house demand from five uk homes,” Scientific Data , vol. 2, no. 1, Mar. 2015. [Online]. Available: http://dx.doi.org/10.1038/sdata.2015.7 [6] D. Murray, L. Stankovic, and V. Stankovic, “An electrical load measurements dataset of united kingdom households from a two-year longitudinal study,” Scientific Data , vol. 4, no. 1, Jan. 2017. [Online]. Available: http://dx.doi.org/10.1038/sdata.2016.122 [7] W. Kong, Z. Y. Dong, B. Wang, J. Zhao, and J. Huang, “A practical solution for non-intrusive type ii load monitoring based on deep learning and post-processing,” IEEE Transactions on Smart Grid , vol. 11, no. 1, p. 148–160, Jan. 2020. [Online]. Available: http://dx.doi.org/10.1109/TSG.2019.2918330 [8] Y. Liu, J. Qiu, and J. Ma, “Samnet: Toward latency-free non-intrusive load monitoring via multi-task deep learning,” IEEE Transactions on Smart Grid , vol. 13, no. 3, p. 2412–2424, May 2022. [Online]. Available: http://dx.doi.org/10.1109/TSG.2021.3139395 [9] J. Xiong, T. Hong, D. Zhao, and Y. Zhang, “Matnilm: Multi-appliance-task non-intrusive load monitoring with limited labeled data,” 
+
+IEEE Transactions on Industrial Informatics , vol. 20, no. 3, p. 3177–3187, Mar. 2024. [Online]. Available: http://dx.doi.org/10.1109/ TII.2023.3301026 [10] Q. Yang, H. Wu, H. Zhang, and Q. Ma, “Pssr-net: A pretraining network for nilm based on power sequence shift recognition,” IEEE Transactions on Instrumentation and Measurement , vol. 74, p. 1–11, 2025. [Online]. Available: http://dx.doi.org/10.1109/TIM.2025.3573381 [11] D. Li, J. Li, X. Zeng, V. Stankovic, L. Stankovic, C. Xiao, and Q. Shi, “Transfer learning for multi-objective non-intrusive load monitoring in smart building,” Applied Energy , vol. 329, p. 120223, Jan. 2023. [Online]. Available: http://dx.doi.org/10.1016/j.apenergy.2022.120223 [12] Y. Sun, J. Feng, L. Yuan, M. Su, and W. Luan, “Transfer learning for multiappliance-task nonintrusive load monitoring,” IEEE Transactions on Instrumentation and Measurement , vol. 74, p. 1–12, 2025. [Online]. Available: http://dx.doi.org/10.1109/TIM.2025.3541652 10 
+
+[13] D. Garc´ ıa, D. P´ erez, P. Papapetrou, I. D´ ıaz, A. A. Cuadrado, J. M. Enguita, and M. Dom´ ınguez, “Conditioned fully convolutional denoising autoencoder for multi-target nilm,” Neural Computing and Applications , vol. 37, no. 17, p. 10491–10505, Dec. 2024. [Online]. Available: http://dx.doi.org/10.1007/s00521-024-10552-0 [14] S. Yang, J. Jiang, Y. Zhang, Q. Kong, and Q. Cao, “Querynilm: Query based non-intrusive load monitoring with appliance embeddings,” in 
+
+2025 International Joint Conference on Neural Networks (IJCNN) .IEEE, Jun. 2025, p. 1–7. [Online]. Available: http://dx.doi.org/10.1109/ IJCNN64981.2025.11227967 [15] L. E. Garcia-Marrero, G. Petrone, and E. Monmasson, “Transfer capabilities of seq2seq and seq2point cnn architectures in non-intrusive load monitoring with unseen appliances,” Mathematics and Computers in Simulation , vol. 239, p. 211–222, Jan. 2026. [Online]. Available: http://dx.doi.org/10.1016/j.matcom.2025.05.021 [16] H. Rafiq, X. Shi, H. Zhang, H. Li, M. K. Ochani, and A. A. Shah, “Generalizability improvement of deep learning-based non-intrusive load monitoring system using data augmentation,” IEEE Transactions on Smart Grid , vol. 12, no. 4, p. 3265–3277, Jul. 2021. [Online]. Available: http://dx.doi.org/10.1109/TSG.2021.3082622 [17] Q. Luo, T. Yu, C. Lan, Y. Huang, Z. Wang, and Z. Pan, “A generalizable method for practical non-intrusive load monitoring via metric-based meta-learning,” IEEE Transactions on Smart Grid ,vol. 15, no. 1, p. 1103–1115, Jan. 2024. [Online]. Available: http://dx.doi.org/10.1109/TSG.2023.3263814 [18] Y. Liu, L. Bai, J. Ma, W. Wang, and W. Ouyang, “Self-supervised feature learning for appliance recognition in nonintrusive load monitoring,” IEEE Transactions on Industrial Informatics ,vol. 20, no. 2, p. 1698–1710, Feb. 2024. [Online]. Available: http://dx.doi.org/10.1109/TII.2023.3280445 [19] S. Chen, B. Zhao, M. Zhong, W. Luan, and Y. Yu, “Nonintrusive load monitoring based on self-supervised learning,” IEEE Transactions on Instrumentation and Measurement , vol. 72, p. 1–13, 2023. [Online]. Available: http://dx.doi.org/10.1109/TIM.2023.3246504 [20] J. Lin, J. Ma, J. Zhu, and H. Liang, “Deep domain adaptation for non-intrusive load monitoring based on a knowledge transfer learning network,” IEEE Transactions on Smart Grid , vol. 13, no. 1, p. 280–292, Jan. 2022. [Online]. Available: http://dx.doi.org/10.1109/TSG. 2021.3115910 [21] M. D’Incecco, S. Squartini, and M. Zhong, “Transfer learning for non-intrusive load monitoring,” IEEE Transactions on Smart Grid ,vol. 11, no. 2, p. 1419–1429, Mar. 2020. [Online]. Available: http://dx.doi.org/10.1109/TSG.2019.2938068 [22] L. Wang, S. Mao, B. M. Wilamowski, and R. M. Nelms, “Pre-trained models for non-intrusive appliance load monitoring,” 
+
+IEEE Transactions on Green Communications and Networking ,vol. 6, no. 1, p. 56–68, Mar. 2022. [Online]. Available: http: //dx.doi.org/10.1109/TGCN.2021.3087702 [23] K. Zhou, Z. Zhang, and X. Lu, “Non-intrusive load monitoring based on an efficient deep learning model with local feature extraction,” IEEE Transactions on Industrial Informatics , vol. 20, no. 7, p. 9497–9507, Jul. 2024. [Online]. Available: http://dx.doi.org/10.1109/TII.2024.3383521
