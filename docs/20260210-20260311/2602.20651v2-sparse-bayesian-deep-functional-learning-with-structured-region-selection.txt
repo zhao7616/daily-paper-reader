@@ -1,0 +1,2974 @@
+Title: Sparse Bayesian Deep Functional Learning with Structured Region Selection
+
+URL Source: https://arxiv.org/pdf/2602.20651v2
+
+Published Time: Tue, 03 Mar 2026 03:08:30 GMT
+
+Number of Pages: 26
+
+Markdown Content:
+# Sparse Bayesian Deep Functional Learning with Structured Region Selection 
+
+Xiaoxian Zhu 1 Yingmeng Li 1 Shuangge Ma 2 Mengyun Wu 1
+
+## Abstract 
+
+In modern applications such as ECG monitoring, neuroimaging, wearable sensing, and industrial equipment diagnostics, complex and continuously structured data are ubiquitous, presenting both challenges and opportunities for functional data analysis. However, existing methods face a criti-cal trade-off: conventional functional models are limited by linearity, whereas deep learning ap-proaches lack interpretable region selection for sparse effects. To bridge these gaps, we propose a sparse Bayesian functional deep neural network (sBayFDNN). It learns adaptive functional em-beddings through a deep Bayesian architecture to capture complex nonlinear relationships, while a structured prior enables interpretable, region-wise selection of influential domains with quanti-fied uncertainty. Theoretically, we establish rigor-ous approximation error bounds, posterior consis-tency, and region selection consistency. These results provide the first theoretical guarantees for a Bayesian deep functional model, ensuring its reliability and statistical rigor. Empirically, comprehensive simulations and real -world stud-ies confirm the effectiveness and superiority of sBayFDNN. Crucially, sBayFDNN excels in rec-ognizing intricate dependencies for accurate pre-dictions and more precisely identifies functionally meaningful regions, capabilities fundamentally beyond existing approaches. 
+
+## 1. Introduction 
+
+With rapid technological advances, diverse fields—from healthcare to neuroscience—are generating increasingly complex data that exhibit inherent structure and continuity over time or space. For instance, electrocardiogram (ECG) recordings are analyzed as functional curves to elucidate    
+
+> 1School of Statistics and Data Science, Shanghai University of Finance and Economics 2Department of Biostatistics, Yale School of Public Health. Correspondence to: Mengyun Wu
+> <wu.mengyun@mail.shufe.edu.cn >.
+
+cardiac morphology and identify pathological patterns, of-fering insights into cardiovascular health (Pang et al., 2023). Similarly, neuroimaging data are modeled as spatiotemporal fields to capture brain dynamics constrained by anatomical geometry, advancing the study of neural functions and dis-orders (Tsai et al., 2024). Such data are naturally viewed as realizations of underlying functions and are suited for analysis within functional data analysis (FDA), which uses their smoothness and structure to model temporal or spatial patterns. The analysis of these functional observations is important, particularly in human health studies, where inter-preting such signals can inform diagnosis, monitoring, and treatment. In FDA, supervised learning with functional predictors is fundamentally important yet faces two major challenges. First, the relationship between functional predictors and responses is often intrinsically complex and nonlinear. Ig-noring such nonlinearity risks significant model misspecifi-cation, potentially leading to poor predictive performance in real-world applications. Second, and more critically, many applications exhibit local sparsity or region-specific effects. This means the predictive relationship is not globally active across the entire function domain; instead, it is concentrated within one or a few specific, contiguous subregions (e.g., time intervals or wavelength bands) where the functional coefficient is nonzero, while being negligible or zero else-where. Failure to account for this structure may introduce substantial noise and degrade both interpretability and esti-mation efficiency. These two challenges are commonly intertwined in practice. For example, in bedside monitoring, physiological wave-forms such as ECG—driven by intricate and dynamic patho-physiological states—not only manifest highly complex and nonlinear patterns but also frequently exhibit local sparsity (Moor et al., 2023). Specifically, clinically actionable in-formation is not distributed uniformly but is concentrated within physiologically meaningful regions of the waveform, such as the QRS complex for arrhythmia analysis or the ST segment for ischemia detection. Signals from other inter-vals are often non-informative. This makes interpretable region selection a core enabling step, as it precisely targets the localized subdomains where complex nonlinear relation-ships are most active and meaningful, thereby forming the foundation for efficient and robust functional models. 1
+
+> arXiv:2602.20651v2 [cs.LG] 2 Mar 2026 Sparse Bayesian Deep Functional Learning with Structured Region Selection
+
+Supervised learning with functional data has been exten-sively studied. Classical functional linear regression (FLR) estimates smooth coefficient functions but lacks inherent region selection—a limitation partially mitigated by later sparse FLR variants, though linearity constraints remain. Nonlinear functional models offer flexibility yet often de-pend on prespecified structures, limiting their capacity to capture highly complex relationships. While deep neural networks (DNNs) provide strong approximation power and have been adapted to functional settings, existing DNN-based methods focus predominantly on prediction and do not incorporate interpretable, structured region selection on the functional domain. Moreover, common DNN feature selection techniques are designed for scalar inputs and fail to leverage the continuous nature of functional data. These gaps underscore the need for a DNN framework that jointly handles nonlinear complexity and performs interpretable region selection in functional settings. We propose a sparse Bayesian deep neural network (sBayFDNN) that integrates functional embedding learning with a Bayesian DNN architecture to perform interpretable region - wise selection for functional predictors. The model captures flexible nonlinear function - to - scalar relationships while providing posterior inference for uncertainty quantifi-cation. Our main contributions are: • A Bayesian Functional DNN Framework with Uncer-tainty Quantification: We introduce a model that em-beds functional predictors through a deep Bayesian net-work to capture complex nonlinear associations with scalar responses. The framework delivers not only point estimates but also posterior uncertainty, overcom-ing the rigidity of traditional functional regression. • Interpretable Region Selection via Structured Sparsity: A sparse prior is imposed on the first hidden layer to perform region-wise functional selection. This signifi-cantly enhances model interpretability while mitigating the black -box nature of conventional DNNs, yielding actionable insights into influential domains. • Theoretical Guarantees: We establish rigorous theo-retical results, including approximation error bounds, posterior consistency, and region selection consistency. These provide the first theoretical foundation for a Bayesian deep functional model, thereby opening a new venue for statistically rigorous and interpretable functional deep learning. • Empirical Validation: Comprehensive simulations and diverse real-world studies confirm that sBayFDNN out-performs existing methods in both prediction accuracy and region identification, especially in challenging sce-narios where conventional models are misspecified or inflexible, demonstrating its practical superiority. 
+
+## 2. Related Works 
+
+2.1. Classical functional regression methods 
+
+Classical functional regression methods, represented by the functional linear model and its extensions, establish rela-tionships between functional predictors and scalar responses using techniques such as B-splines (Cardot et al., 2003), re-producing kernel Hilbert spaces (Crambes et al., 2009), and smoothing regularization (Cai & Yuan, 2012). To enhance interpretability, sparse penalization methods have been intro-duced for local region selection, including sparse functional linear regression (Lee & Park, 2012), smooth locally sparse estimators (Lin et al., 2017; Belli, 2022), and their Bayesian counterparts (Zhu et al., 2025). To move beyond linearity, nonlinear methods such as functional single-index models have been proposed (Jiang et al., 2020), which can also achieve local sparsity via penalization (Nie et al., 2023). However, these approaches face key limitations: linear mod-els cannot adequately capture complex nonlinear relation-ships, while existing nonlinear methods rely on pre-defined kernels or bases, limiting their flexibility and capacity to model intricate dependencies directly from data. 
+
+2.2. Deep Learning for Functional Data 
+
+Deep learning for functional data has advanced in recent years, with methods primarily aimed at enhancing repre-sentation learning and predictive performance. Early ap-proaches introduced adaptive basis layers to learn data-driven functional representations within DNNs (Yao et al., 2021), and were followed by DNNs specifically designed for functional inputs (Thind et al., 2023) and classifiers built on functional principal components (Wang et al., 2023). Autoencoder architectures have also been adapted for func-tional latent representation learning (Wu et al., 2024). Despite their predictive power, these methods often operate as “black boxes”, lacking explicit mechanisms for region selection on the functional domain. This limits their utility in scientific applications where identifying which specific regions of the data drive predictions is essential. 
+
+2.3. Sparsity and Selection in Neural Networks 
+
+A parallel line of research incorporates sparsity into neural networks for vector-valued inputs. This includes frame-works performing variable selection via group sparsity penalties on the first hidden layer (Dinh & Ho, 2020; Chu et al., 2023; Luo & Halabi, 2025), architectures employing sparsity-inducing mechanisms on linear input layers (Chen et al., 2021; Atashgahi et al., 2023), and residual layers used to achieve feature-wise sparsity (Lemhadri et al., 2021; Fan & Waldmann, 2025). Furthermore, Sun et al. (2022) pro-posed a Bayesian framework to learn sparse DNNs through 2Sparse Bayesian Deep Functional Learning with Structured Region Selection )                        
+
+> supp 𝐵 1𝑡 supp 𝐵 𝐽 𝑛 𝑡 ⋯ ⋯
+> selected selected supp 𝐵 3𝑡 τ⋯𝐵 1𝑡 𝐵 2𝑡 𝐵 𝐽 𝑛 𝑡 𝐵 3𝑡 𝑞 1<𝜏 𝑞 2>𝜏 𝑞 𝐽 𝑛 >𝜏
+> Sparse Structured Prior Normal Prior
+
+Figure 1. Workflow of sBayFDNN. The functional predictor Xi(t) is projected onto locally supported B-spline bases to form spline features xi = ( xi1, . . . , x i,J n )⊤. A DNN with a spike-and-slab prior on the first-layer weight columns yields feature-wise posterior inclusion probabilities (PIPs) qj , which are thresholded to select spline features and mapped back to the function domain to produce an estimated active region bΩ.
+
+connection pruning, establishing posterior consistency but not traditional input-level variable selection. Beyond vari-able selection, similar sparse DNN techniques have also been developed for applications in other fields, such as bi-ological or social network reconstruction (Fan et al., 2025; Yang et al., 2026). While these techniques enhance interpretability for vector data, they are not designed to exploit the continuous, struc-tured nature of functional inputs. Consequently, a signifi-cant gap remains for a method that integrates nonlinear deep learning with structured, interpretable region selection and uncertainty quantification specifically for functional data. 
+
+## 3. Methodology 
+
+Let X1(t), . . . , X n(t) be n independent functional covari-ates defined on the closed interval T ⊂ R. For theoretical and computational purposes, T is standardized to [0 , 1] . Let 
+
+Yi denote a scalar response. We consider a functional single-index model (see Figure 1 for a schematic overview): 
+
+Yi = g∗
+
+Z 
+
+> T
+
+Xi(t) β(t) dt 
+
+
+
++ εi, (1) where εi ∼ N (0 , σ 2 
+
+> ε
+
+), β(·) is an unknown coefficient func-tion, and g∗(·) is an unknown nonlinear function. Without loss of generality, we assume the domain of g∗(·) is [0 , 1] ;this can be achieved by suitably rescaling R 
+
+> T
+
+Xi(t)β(t)dt 
+
+and absorbing the scaling into the definition of g∗. For notational simplicity, we retain the original notation in the subsequent exposition. The function g∗(·) allows for a flexible, potentially nonlinear relationship between the scalar response and the functional covariate through the single-index projection. Motivated by applications where the association is driven by only a few subregions of T (e.g., a small number of time intervals), we assume that β(·) is effectively localized and aim to identify the corresponding active regions. To circumvent the infinite-dimensionality of β(·), we ap-proximate it using a truncated B-spline basis expansion: 
+
+βJn (t) = 
+
+> Jn
+
+X
+
+> j=1
+
+wJn,j Bj (t), (2) which yields the following finite-dimensional representa-tion: 
+
+Yi ≈ g∗ η(Xi)⊤wJn
+
+ + εi = h∗ η(Xi) + εi. (3) by replacing β(·) with βJn (·), where R 
+
+> T
+
+Xi(t)βJn (t) dt =
+
+η(Xi)⊤wJn . Here, {Bj (·)}Jn 
+
+> j=1
+
+denotes a collec-tion of Jn B-spline basis functions, and wJn := 
+
+3Sparse Bayesian Deep Functional Learning with Structured Region Selection 
+
+(wJn,1, . . . , w Jn,J n )⊤ ∈ RJn is the corresponding vec-tor of coefficients. The spline features η(Xi) =(xi1, . . . , x iJ n )⊤ ∈ RJn , where xij := R 
+
+> T
+
+Xi(t) Bj (t) dt .We further introduce h∗(·), which absorbs the B-spline co-efficient vector wJn , thus reducing the problem to learning a finite-dimensional function. Next, we aim to estimate h∗(·) using a DNN Fθ that takes 
+
+η(Xi) ∈ RJn as input. The network can be written as 
+
+Fθ = AHn ◦ σ ◦ AHn−1 ◦ · · · ◦ σ ◦ A1. (4) Here, we consider a feedforward DNN with Hn − 1 hidden layers and width Lh at layer h, where L0 = Jn and LHn =1, with a common activation σ(·) in the hidden layers and a linear output layer. We consider the ReLU activation in our study. Let θ = {(Wh, bh)}Hn
+
+> h=1
+
+, where Wh ∈ RLh×Lh−1
+
+and bh ∈ RLh denote the weights and biases. The affine map is defined as Ah(u) := Whu + bh.In (3), since the B-spline basis is locally supported, the localization of β(·) over T is naturally reflected in the sparsity pattern of wJn in (2) . Therefore, we consider the setting where wJn is sparse, so that η(Xi)⊤wJn =
+
+ηSJn (Xi)⊤wSJn , where SJn ⊂ { 1, . . . , J n} denotes an unknown support set, ηSJn (Xi) and wSJn denote the corre-sponding subvectors. With (4), since wJn is absorbed into 
+
+h∗(·), the sparsity of wJn naturally translates into sparsity of the first - layer weight matrix W1 ∈ RL1×Jn . Specifically, denoting by W1,∗j ∈ RL1 the j-th column of W1, we have that if || W1,∗j || 2̸ = 0 , then j ∈ SJn .Based on (3) and (4), we propose a sparse Bayesian func-tional DNN (sBayFDNN) framework, employing the fol-lowing prior distributions for the model parameters: for j ∈ { 1, . . . , J n},
+
+W1,∗j | γj ∼
+
+h
+
+N (0 , σ 21,n I)
+
+iγj h
+
+N (0 , σ 20,n I)
+
+i1−γj
+
+,(5) 
+
+π(γj ) ∼ Bern( λn), (6) 
+
+Wh,ab ∼ N (0 , σ 2), ∀ h ∈ { 2, . . . , H n}, (7) 
+
+bh,a ∼ N (0 , σ 2), ∀ h ∈ { 1, . . . , H n}. (8) Here, N (c, d ) denotes the normal distribution with mean 
+
+c and variance (covariance) d, and Bern( λn) denotes the Bernoulli distribution with success probability λn ∈ (0 , 1) .The symbol I represents an identity matrix of appropriate dimensions. The entry Wh,ab corresponds to the (a, b )-th element of the matrix Wh, where a ∈ 1, . . . , L h and 
+
+b ∈ 1, . . . , L h−1. Each γj (for j ∈ 1, . . . , J n) is a binary indicator. We set σ21,n > σ 20,n > 0, with σ20,n taken to be a small positive value, and let σ2 > 0.As introduced above, distinct priors are specified for the first layer and the subsequent layers. To enable functional region selection in the spline - feature domain, we impose a group - wise continuous spike -and - slab prior on each W1,∗j
+
+for j = 1 , . . . , J n. When γj = 0 , the spike variance σ20,n 
+
+strongly shrinks all entries of W1,∗j toward zero with high probability; when γj = 1 , the slab variance σ21,n permits the entries to take appreciable nonzero values, thereby allowing the corresponding spline - basis feature to contribute to the functional representation. For the remaining layers, weights and biases are assigned entrywise independent Gaussian priors N (0 , σ 2), which preserves the flexibility needed in the hidden layers to learn complex, nonlinear patterns based on the features identified by the first hidden layer. 
+
+## 4. Optimization-based Bayesian Inference 
+
+The proposed Bayesian inference proceeds via three steps: (i) compute a (local) posterior mode (MAP) of the network parameters under the marginal prior; (ii) derive feature-level posterior inclusion probabilities from the first - layer; and (iii) map the selected spline features to an estimated active region. The detailed procedure is described below, and the hyperparameter settings are provided in the Appendix. 
+
+4.1. MAP fitting 
+
+For θ, we optimize the marginal posterior in which the inclusion indicators γ are integrated out, and denote the resulting marginal prior by π(θ). Then, we compute a MAP by minimizing the negative log-posterior objective 
+
+ˆθ ∈ arg min 
+
+> θ
+
+12σ2
+
+> εn
+
+X
+
+> i=1
+
+
+
+Yi − fθ (η(Xi)) 
+
+2
+
+− log π(θ),
+
+(9) where fθ is the Hn-layer feedforward network defined in (4). Optimization is carried out using stochastic gradient methods (see Appendix for the detailed algorithm). 
+
+4.2. MAP plug-in posterior inclusion probabilities 
+
+Denote A1,n = λn(σ21,n )−L1/2 and A0,n = (1 −
+
+λn)( σ20,n )−L1/2. Then, for each feature index j, apply-ing Bayes’ rule to (5) and (6) gives the conditional poste-rior inclusion probability (PIP): Pr( γj = 1 | W1,∗j ) =           
+
+> A1,n exp
+> 
+> −∥W1,∗j∥222σ21,n
+> 
+> A1,n exp
+> 
+> −∥W1,∗j∥222σ21,n
+> 
+> +A0,n exp
+> 
+> −∥W1,∗j∥222σ20,n
+> 
+
+.
+
+We compute plug - in PIP ˆqj := Pr( γj = 1 | ˆW1,∗j ) based on the MAP estimate ˆθ and select spline features by thresh-olding: bSτ := {j : ˆ qj > τ } with default τ = 1 /2. Since ˆqj
+
+is monotone in ∥ ˆW1,∗j ∥22, this rule is equivalent to thresh-olding the first-layer column norms. 
+
+4.3. Mapping selected features to an active region on T
+
+Given bSτ ⊂ { 1, . . . , J n}, we map the selected spline fea-tures back to the functional domain using the local support 4Sparse Bayesian Deep Functional Learning with Structured Region Selection 
+
+of B-splines. Let supp( Bj (t)) ⊂ T denote the support of the jth basis function. We define the estimated active region as bΩ := S  
+
+> j∈bSτ
+
+supp( Bj ), and represent bΩ as a union of disjoint subintervals by merging adjacent components. 
+
+## 5. Theoretical Properties 
+
+Let β∗ and β∗ 
+
+> Jn
+
+be the true coefficient function and its trun-cated counterpart, respectively. Let ω∗ 
+
+> Jn
+
+∈ RJn be the vec-tor of true basis coefficients for β∗ 
+
+> Jn
+
+, S∗ 
+
+> Jn
+
+= supp( ω∗ 
+
+> Jn
+
+)
+
+its support, and sn = |S∗ 
+
+> Jn
+
+| the sparsity level. Define 
+
+e∗ 
+
+> j
+
+= I(j ∈ S∗ 
+
+> Jn
+
+) as the true binary selection indicator and Ω∗ ⊂ T as the true non-zero region of β∗. Denote 
+
+Ω∗(κ) = {t ∈ T : |β∗(t)| > κ } as the strong-signal re-gion and Ω∗(κ)c as its complement. Denote an ≲ bn if 
+
+an ≤ Cb n for some constant C > 0, and an ≍ bn if 
+
+c b n ≤ an ≤ Cb n for constants 0 < c < C .Denote μ∗(X) = g∗  R  
+
+> T
+
+X(t)β∗(t)dt  as the true mean function and μθ (X) := Fθ (η(X)) as the network out-put defined in (4). Consider the class of fully-connected, 
+
+Jn-input ReLU networks, denoted by N N Jn (Hn, ¯L, E n),with depth Hn, constant maximum hidden width ¯L =max 2≤k≤Hn Lk, and parameter bound ∥θ∥∞ ≤ En. We define the column-wise support of the network parameters as supp col (θ) = {j ∈ { 1, · · · , J n} : ∥W1,∗j ∥2 > 0}. For any subset T ⊂ { 1, · · · , J n}, the associated column-sparse network class is defined as N N col  
+
+> Jn
+
+(T ; Hn, ¯L, E n) := Fθ ∈ N N Jn (Hn, ¯L, E n) : supp col (θ) = T .The following assumptions are imposed. 
+
+Assumption 5.1. sup 
+
+> Xi∈X
+
+R 
+
+> T
+
+|Xi(t)|dt ≤ CX , where X de-notes the function space to which Xi(t) belongs, and CX is a positive constant . 
+
+Assumption 5.2. β∗(t) ∈ H αβ ([0 , 1]) for some αβ > 0,where Hα(I) denotes the H ¨older space of functions on an interval I with smoothness order α. Ω∗ is a finite union of intervals and Ω∗(κJn )c → 0, as n → ∞ , with κJn =
+
+cκCβ J−αβ 
+
+> n
+
+, where cκ > 4 and Cβ are constants defined in Lemma B.1 (Appendix). Moreover, the strong-signal region has proportional size in the sense that |Ω∗(κJn )||Ω∗| ≥ cΩ for some constant cΩ ∈ (0 , 1] and all sufficiently large n.
+
+Assumption 5.3. g∗(·) ∈ H αg ([0 , 1]) for some constant 
+
+αg > 0.These are standard regularity conditions in functional data analysis (Cai & Yuan, 2012; Nie et al., 2023). Assumption 5.1 ensures the well-posedness of the problem by uniformly bounding the predictor trajectories. Assumption 5.2 imposes H ¨older smoothness on β∗, guaranteeing its accurate spline approximation. We further assume the active region Ω∗
+
+is not overly complex, which excludes highly fragmented supports and aligns with typical domain-selection interpre-tations. Crucially, we require that the strong-signal region essentially covers Ω∗ up to a negligible set; this acts as a minimum-signal condition in the functional setting, en-suring that the nonzero part of β∗ is detectable enough to translate basis selection into faithful support recovery on the domain. We further focus on the practically common proportional sparsity regime, where the strong-signal region retains a non-vanishing fraction of the active domain, which, under locally supported spline bases, implies that the num-ber of active groups scales as sn ≍ Jn. Assumption 5.3 similarly enforces smoothness on the nonparametric link function, thereby supporting stable estimation. 
+
+Theorem 5.4. Suppose that Assumptions 5.1–5.3 hold. Then: 
+
+(i) There exists a network parameter vector θ such that: 
+
+Fθ = F ∈ N N col  
+
+> Jn
+
+(S∗ 
+
+> Jn
+
+; Hn, ¯L, E n),
+
+(ii) With α1 = min( αg , 1) ,
+
+sup 
+
+> X∈X
+
+|μθ (X) − μ∗(X)| ≲ H−2α1 
+
+> n
+
++ J−αβ α1 
+
+> n
+
+.
+
+Theorem 5.4 establishes that the true sparse model structure is exactly representable within the proposed architecture (i) and provides a non-asymptotic error bound (ii). This bound guarantees that the approximation error decays to zero as the network depth Hn and the number of spline bases Jn
+
+grow, with the rates governed by the smoothness of both the functional coefficient β(t) and the link function g∗(·).
+
+Assumption 5.5. For some constants τ ′ > 0 and ασ > 0:
+
+λn ≲ 1
+
+> Jn
+
+(n ¯L)Hn (Jn+1) L1
+
+τ ′ , E2  
+
+> n
+> Hn(log n+log ¯L)
+
+≲ σ21,n ≲
+
+nασ , and E2  
+
+> n
+> Hn(log n+log ¯L)
+
+≲ σ2.
+
+Assumption 5.6. The DNN Fθ in (4) satisfies: ¯L ≍ L1 ≍ 1,
+
+Hn ≍ min  Jαβ /2 
+
+> n
+
+, s n with sn ≍ Jn, and ∥θ∥∞ ≤ En,where En = nc1 for some positive constant c1.Assumption 5.5 specifies the rates for key hyperparameters in the Bayesian framework, ensuring the prior is sufficiently diffuse to permit effective posterior contraction toward the true parameter, a standard requirement in Bayesian theory (Ghosal et al., 2000). Assumption 5.6 links the network depth Hn to the sparsity level sn so that architectural growth respects the intrinsic sparse structure. Similar conditions are commonly adopted in related theoretical analyses. Let Π( A | Dn) denote the posterior probability of an event A given the observed data Dn = {(Xi, Y i)}ni=1 . Let 
+
+pμ∗ (· | X) be the true conditional density of Y given X,
+
+pμθ (· | X) be the approximate density induced by the finite-dimensional representation (3) and the sparse DNN defined in (4), and d(·, ·) denote the Hellinger distance. 5Sparse Bayesian Deep Functional Learning with Structured Region Selection 
+
+Theorem 5.7. Suppose that Assumptions 5.1–5.6 hold and there exists an error sequence ε2 
+
+> n
+
+satisfying ε2 
+
+> n
+
+≲  
+
+> snlog( Jn/s n)
+> n
+
++ sn
+
+ Hn log n+log Jn
+
+ 
+
+> n
+
++
+
+
+
+H−2α1 
+
+> n
+
++J−αβ α1
+
+> n
+
+2
+
+such that σ20,n ≤ ˜Mn, 1(εn) and max {σ2, σ 20,n , σ 21,n } ≤ 
+
+˜Mn, 2(εn), where ˜Mn, 1(εn) and ˜Mn, 2(εn) are defined in (18) and (19) of Appendix. Then, for some constant c > 0,we have 
+
+P
+
+h
+
+Πd(pμθ , p μ∗ ) > 4εn | Dn ≥ 2 exp( −c n ε 2
+
+> n
+
+)
+
+i
+
+≤ 2 exp( −c n ε 2
+
+> n
+
+),
+
+and 
+
+E
+
+h
+
+Πd(pμθ , p μ∗ ) > 4εn | Dn
+
+i
+
+≤ 4 exp( −2c n ε 2
+
+> n
+
+).
+
+Theorem 5.7 establishes the posterior contraction rate εn
+
+of sBayFDNN. This result implies that, with high probabil-ity, the posterior distribution concentrates around the true data - generating process at rate εn. Specifically, if αβ ≤ 2,then Hn ≍ Jαβ /2 
+
+> n
+
+, setting Jn ≍   n 
+
+> log n
+
+ 11+ αβ /2+2 αβ α1
+
+yields ε2 
+
+> n
+
+≍   log nn
+
+ 2αβ α11+ αβ /2+2 αβ α1 . If αβ > 2, then Hn ≍
+
+sn, taking Jn ≍   n 
+
+> log n
+
+ 12+4 α1 leads to ε2 
+
+> n
+
+≍   log nn
+
+ 2α11+2 α1 .Further, define the structural difference as 
+
+ρn(εn) := max 
+
+> 1≤j≤Jn
+
+E
+
+h
+
+|γj − e∗ 
+
+> j
+
+| · I{θ /∈ An(εn)} Dn
+
+i
+
+,
+
+where E(·| Dn) is the conditional expectation, and 
+
+An(εn) = 
+
+n
+
+θ : d pμθ , p μ∗
+
+ ≥ εn
+
+o
+
+.
+
+Assumption 5.8. ρn(4 εn) → 0 as n → ∞ and εn → 0.Assumption 5.8 serves as an identifiability condition. It implies that as n → ∞ and εn → 0, any candidate model that is close to the true data-generating process in terms of Hellinger distance must asymptotically share the same underlying structure, thereby guaranteeing the consistent selection (Sun et al., 2022). 
+
+Theorem 5.9. Suppose Assumptions 5.1–5.8 hold. Then: 
+
+(i) max 1≤j≤Jn ˆqj − e∗
+
+> j
+> P
+
+−→ 0.
+
+(ii) P  S∗ 
+
+> Jn
+
+⊂ bSτ
+
+ → 1 for any prespecified τ ∈ (0 , 1) .
+
+(iii) P   bS1/2 = S∗
+
+> Jn
+
+ → 1.
+
+(iv) |bΩ∆Ω ∗| P
+
+−→ 0.
+
+Theorem 5.9 establishes the asymptotic consistency of spline feature selection based on MAP plug-in posterior probabilities, showing that the estimated selection probabil-ities converge to the true binary indicators. Furthermore, it guarantees the asymptotically exact recovery of the nonzero region in the continuous function domain from its discrete coefficient support, thereby achieving exact structural selec-tion for the functional effect. 
+
+## 6. Experiments 
+
+We evaluate sBayFDNN on synthetic and real-world func-tional data against five competitors: (1) FNN, a spline-feature-based feedforward network using truncated basis expansion (Thind et al., 2023); (2) AdaFNN, which learns adaptive basis functions via auxiliary networks (Yao et al., 2021); (3) cFuSIM, a functional single-index method with localized regularization (Nie et al., 2023); (4) BFRS, a Bayesian functional region selector with neighborhood structure (Zhu et al., 2025); and (5) SLoS, a functional lin-ear estimator with local sparsity via an fSCAD penalty (Lin et al., 2017). Predictive RMSE is reported for all methods; region-recovery metrics (Recall, Precision, F1) are provided only for sBayFDNN, cFuSIM, BFRS, and SLoS, as FNN and AdaFNN do not perform region selection. 
+
+6.1. Simulation Studies 
+
+Our simulation studies vary three key aspects: (1) the true coefficient function β∗(t), which spans a single interior bump (Simple), a boundary bump (Medium), and a pair of narrow oscillating peaks (Complex); (2) the link function g∗,taken as linear, logistic, sinusoidal, or a composite nonlinear form; and (3) the response signal -to -noise ratio (SNR), set to 5 or 10. Functional covariates are generated from a truncated cosine basis, observed on a discrete grid with added measurement noise (see Appendix for full details). Figure 2 summarizes region-recovery performance (F1 score) across all simulation scenarios (see Appendix for Recall and Precision). sBayFDNN consistently achieves high mean F1 with tight interquartile ranges, demonstrating robust and stable region identification across both linear and nonlinear regimes. Its advantage is more pronounced in more challenging scenarios with lower signal-to-noise ratios, as well as under harder localization regimes and complex nonlinear link functions g∗. By contrast, several baselines exhibit increased dispersion and more frequent low-F1 outcomes as moves away from central support or g∗
+
+departs from linearity. The distributions also suggest different selection behaviors across methods. For example, cFuSIM often returns broader active regions (capturing truly active intervals but at the cost of more false positives), whereas linear region-selection baselines deteriorate under strong nonlinearity due to model misspecification. In contrast, sBayFDNN maintains a better balance between recall and precision. Beyond aggregate metrics, we further evaluate uncertainty quantification. Tak-6Sparse Bayesian Deep Functional Learning with Structured Region Selection Linear Logic Sin Composite Low SNR High SNR Low SNR High SNR Low SNR High SNR Low SNR High SNR 
+
+> Simple  Medium  Complex sBayFDNN cFuSIM BFRS SLoS sBayFDNN cFuSIM BFRS SLoS sBayFDNN cFuSIM BFRS SLoS sBayFDNN cFuSIM BFRS SLoS sBayFDNN cFuSIM BFRS SLoS sBayFDNN cFuSIM BFRS SLoS sBayFDNN cFuSIM BFRS SLoS sBayFDNN cFuSIM BFRS SLoS 0.2 0.4 0.6 0.8 1.0 0.2 0.4 0.6 0.8 1.0 0.2 0.4 0.6 0.8 1.0 F1 score  sBayFDNN cFuSIM BFRS SLoS
+
+Figure 2. F1 scores across g functions, SNR settings, and β(t) scenarios. 
+
+ing the high-SNR, Medium-β, logistic-link scenario as an example, Figure 3 presents the posterior selection proba-bilities from sBayFDNN. These probabilities closely align with the true coefficient function, demonstrating the model’s capacity to effectively capture selection uncertainty. 0.0 0.2 0.4 0.6 0.8 1.0  
+
+> t
+> 0.0
+> 0.5
+> 1.0
+> PIP/Magnitude  Average PIP
+> shape of β(t)
+
+Figure 3. PIPs from sBayFDNN in the high-SNR, Medium-β,logistic-link scenario. 
+
+Figure 4 shows that sBayFDNN achieves the lowest or near-lowest mean RMSE in most scenarios, with concentrated distributions, indicating that region interpretability does not come at the cost of predictive performance. Its advantage is most evident under nonlinear links, where flexible function approximation is crucial. Here, sBayFDNN substantially outperforms the spline-based FNN, matches the accuracy of AdaFNN with greater stability, and surpasses cFuSIM when nonlinearity is pronounced. Linear methods (BFRS, SLoS) remain competitive only under nearly linear settings, with performance degrading sharply as nonlinearity increases. Together, these results affirm the sBayFDNN framework: structured sparsity in the first layer supports interpretable region identification with inherent uncertainty quantification, while subsequent deep layers furnish the flexibility needed for accurate nonlinear prediction. 
+
+6.2. Real data analysis 
+
+We evaluate our method on four benchmark datasets: ECG, Tecator, Bike rental, and IHPC, using their official train/validation/test splits throughout. In the ECG task, Lead - II signals are used as functional inputs to predict the QRS duration—a clinically informative measure of ventric-ular depolarization relevant for detecting conduction abnor-malities (Hummel et al., 2009; Kashani & Barold, 2005). For the Tecator dataset, near - infrared absorbance spectra of meat samples serve as functional inputs to predict water content (Thodberg, 2015). In the Bike rental forecasting task (Fanaee-T, 2013), the daily rental -demand profile (a 24 - point curve) is used to predict total rentals over the fol-lowing 7 days. For the IHPC dataset (Hebrail & Berard, 2006), daily minute -averaged active - power trajectories are taken as functional inputs to predict the next -day total energy usage. We report standard predictive metrics (RMSE/MAE) for all datasets. For ECG and Tecator, silver - standard re-gion annotations are available, allowing us to also evaluate region - identification metrics. Detailed data information are provided in the Appendix. As shown in Table 1 and 2, sBayFDNN delivers the strongest overall performance across all datasets. While all methods attain relatively low precision in region selection, sBayFDNN achieves substantially higher recall and F1. Fig-ure 5 plots the estimated PIPs on the original domains with sBayFDNN for ECG and Tecator. For ECG, sBayFDNN as-signs higher inclusion strength within and near the clinically motivated QRS interval (shaded), with PIP values approach-ing 1 close to the boundaries, consistent with the fact that duration is determined by onset/offset timing and thus end-point morphology is most informative. For Tecator, the PIP increases within the predefined water band (965–985 nm; shaded), while additional elevated PIP regions appear at earlier wavelengths (including ∼930 nm, often regarded as lipid/fat-associated in short-wave NIR), plausibly reflecting strong collinearity/compositional coupling between water and fat and other broad predictive structure. These results demonstrate that sBayFDNN can recover physically inter-pretable regions without sacrificing predictive accuracy. 7Sparse Bayesian Deep Functional Learning with Structured Region Selection Linear Logic Sin Composite        
+
+> Low SNR High SNR Low SNR High SNR Low SNR High SNR Low SNR High SNR
+> 1.0
+> 2.0
+> 3.0
+> 0.5
+> 1.0
+> 1.5
+> 0.2
+> 0.4
+> 0.6
+> 0.4
+> 0.6
+> 0.2
+> 0.4
+> 0.6
+> 0.5
+> 5.0
+> 10
+> 10
+> 15
+> 0.5
+> 1.0
+> 1.5
+> 0.5
+> 1.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 0.4
+> 0.6
+> 0.8
+> 0.2
+> 0.4
+> 0.5
+> 1.0
+> 5.0
+> 6.0
+> 7.0
+> 7.0
+> 8.0
+> 9.0
+> 10
+> sBayFDNN
+> FNN
+> AdaFNN
+> cFuSIM
+> BFRS
+> SLoS
+> sBayFDNN
+> FNN
+> AdaFNN
+> cFuSIM
+> BFRS
+> SLoS
+> sBayFDNN
+> FNN
+> AdaFNN
+> cFuSIM
+> BFRS
+> SLoS
+> sBayFDNN
+> FNN
+> AdaFNN
+> cFuSIM
+> BFRS
+> SLoS
+> sBayFDNN
+> FNN
+> AdaFNN
+> cFuSIM
+> BFRS
+> SLoS
+> sBayFDNN
+> FNN
+> AdaFNN
+> cFuSIM
+> BFRS
+> SLoS
+> sBayFDNN
+> FNN
+> AdaFNN
+> cFuSIM
+> BFRS
+> SLoS
+> sBayFDNN
+> FNN
+> AdaFNN
+> cFuSIM
+> BFRS
+> SLoS
+> 0.6
+> 0.8
+> 1.0
+> 1.2
+> 1.0
+> 1.5
+> 0.2
+> 0.4
+> 0.6
+> 0.3
+> 0.4
+> 0.5
+> 0.6
+> 0.1
+> 0.2
+> 0.3
+> 0.2
+> 0.3
+> 0.4
+> 1.5
+> 2.0
+> 2.0
+> 2.5
+> 3.0
+> Simple  Medium  Complex
+> sBayFDNN
+> FNN
+> AdaFNN
+> cFuSIM
+> BFRS
+> SLoS
+> RMSE
+
+Figure 4. RMSE across g functions, SNR settings, and β(t) scenarios. 
+
+Table 1. Performance on ECG and Tecator datasets. F1, Recall, and Precision are reported only for methods that output an estimated active region; otherwise shown as “–”. Best results within each dataset/metric are in bold. 
+
+ECG Tecator Method RMSE MAE F1 Recall Precision RMSE MAE F1 Recall Precision sBayFDNN 12.069 8.711 0.634 1.000 0.464 2.138 1.594 0.339 1.000 0.204 
+
+FNN 12.991 9.239 – – – 2.217 1.613 – – –AdaFNN 14.083 10.198 – – – 3.027 2.299 – – –cFuSIM 17.677 12.861 0.501 1.000 0.334 3.932 3.283 0.137 0.977 0.074 BFRS 16.297 11.805 0.396 0.784 0.265 2.691 2.250 0.211 0.714 0.124 SLoS 16.258 11.782 0.412 0.815 0.276 2.567 2.068 0.228 0.854 0.132 
+
+Table 2. Performance on Bike rental and IHPC datasets. 
+
+Bike IHPC Method RMSE MAE RMSE MAE sBayFDNN 0.618 0.497 0.536 0.409 
+
+FNN 0.699 0.535 0.549 0.409 AdaFNN 0.720 0.577 0.552 0.420 cFuSIM 0.693 0.539 0.548 0.411 BFRS 0.749 0.550 0.552 0.416 SLoS 0.684 0.506 0.549 0.411 
+
+## 7. Conclusion 
+
+We have presented a sparse Bayesian functional DNN frame-work that performs automatic region selection for nonlinear scalar - on -function regression. By integrating B -spline ex-pansions with a Bayesian neural network and imposing a structured spike - and - slab prior, our model captures complex nonlinear dependencies between functional predictors and scalar responses through data -driven functional represen-tations and a flexible deep architecture. The framework provides interpretable region-wise selection and principled uncertainty quantification, supported by theoretical guaran-tees. Simulations and experiments on multiple real -world datasets confirm its selection accuracy and competitive pre-dictive performance, demonstrating practical utility in iden-tifying region-specific functional effects. −300 −200 −100 0 100 200 300      
+
+> Time relative to R-peak (ms)
+> 0.00
+> 0.25
+> 0.50
+> 0.75
+> 1.00
+> Average PIP
+> ECG
+> 850 900 950 1000 1050
+> Wavelength (nm)
+> Tecator
+> Average PIP Silver interval
+
+Figure 5. PIPs from sBayFDNN for ECG and Tecator datasets. 
+
+Future work includes extending the framework to jointly model functional and discrete covariates, rather than pre -adjusting for confounders. The approach can also be generalized to handle multiple functional predictors with simultaneous variable and region selection. Replacing the 
+
+l2 loss with a more robust alternative may improve stabil-ity in noisy settings, while embedding the model within a generalized linear model would allow applications to binary, count, or survival outcomes, further broadening its utility in functional data analysis. 
+
+## Software and Data 
+
+The implementation code for sBayFDNN is available in the Supplementary Material, while the download link for the accompanying real dataset is provided in the Appendix. 8Sparse Bayesian Deep Functional Learning with Structured Region Selection 
+
+## Impact Statement 
+
+This work introduces a Bayesian deep learning framework for interpretable region selection in functional data. It ad-vances nonlinear function -to -scalar regression by integrat-ing structured sparsity with principled uncertainty quantifi-cation. The primary aim is to enhance machine learning methodology for functional and structured data. The pro-posed framework benefits domains where interpretability and reliability are essential, such as spectral chemometrics, neural signal analysis, and clinical monitoring. By enabling precise identification of informative functional subdomains, the method can support more accurate material composi-tion analysis, refined physiological signal interpretation, and more targeted diagnostic interventions. 
+
+## References 
+
+Atashgahi, Z., Zhang, X., Kichler, N., Liu, S., Yin, L., Pechenizkiy, M., Veldhuis, R., and Mocanu, D. C. Super-vised feature selection with neuron evolution in sparse neural networks. Transactions on Machine Learning Research , 2023. ISSN 2835-8856. URL https:// openreview.net/forum?id=GcO6ugrLKp . Fea-tured Certification. Belli, E. Smoothly adaptively centered ridge estimator. 
+
+Journal of Multivariate Analysis , 189:104882, 2022. Cai, T. T. and Yuan, M. Minimax and adaptive prediction for functional linear regression. Journal of the American Statistical Association , 107(499):1201–1216, 2012. Cardot, H., Ferraty, F., and Sarda, P. Spline estimators for the functional linear model. Statistica Sinica , pp. 571– 591, 2003. Chen, Y., Gao, Q., Liang, F., and Wang, X. Nonlinear variable selection via deep neural networks. Journal of Computational and Graphical Statistics , 30(2):484–492, 2021. Chu, Z., Claridy, M., Cordero, J., Li, S., and Rathbun, S. L. Estimating propensity scores with deep adaptive variable selection. In Proceedings of the 2023 SIAM International Conference on Data Mining (SDM) , pp. 730–738. SIAM, 2023. Crambes, C., Kneip, A., and Sarda, P. Smoothing splines estimators for functional linear regression. The Annals of Statistics , 37(1):35–72, 2009. Dinh, V. C. and Ho, L. S. Consistent feature selection for analytic deep neural networks. Advances in Neural Information Processing Systems , 33:2420–2431, 2020. Elias, P. and Finer, J. EchoNext: A Dataset for Detect-ing Echocardiogram-Confirmed Structural Heart Dis-ease from ECGs. PhysioNet , September 2025. doi: 10.13026/3ykd-bf14. URL https://doi.org/10. 13026/3ykd-bf14 . Version 1.1.0. Fan, J., Yang, J., Ma, S., and Wu, M. Bilevel network learning via hierarchically structured sparsity. In The Thirty-ninth Annual Conference on Neural Information Processing Systems , 2025. Fan, Y. and Waldmann, P. Multi-task genomic prediction using gated residual variable selection neural networks. 
+
+BMC Bioinformatics , 26(1):167, 2025. Fanaee-T, H. Bike Sharing. UCI Machine Learning Reposi-tory, 2013. DOI: https://doi.org/10.24432/C5W894. Ghosal, S., Ghosh, J. K., and Van Der Vaart, A. W. Con-vergence rates of posterior distributions. The Annals of Statistics , 28(2):500–531, 2000. Goldberger, A. L., Amaral, L. A., Glass, L., Hausdorff, J. M., Ivanov, P. C., Mark, R. G., Mietus, J. E., Moody, G. B., Peng, C.-K., and Stanley, H. E. Physiobank, physiotoolkit, and physionet: components of a new research resource for complex physiologic signals. Circulation , 101(23): e215–e220, 2000. Hebrail, G. and Berard, A. Individual Household Electric Power Consumption. UCI Machine Learning Repository, 2006. DOI: https://doi.org/10.24432/C58K54. Hummel, S. L., Skorcz, S., and Koelling, T. M. Prolonged electrocardiogram qrs duration independently predicts long-term mortality in patients hospitalized for heart fail-ure with preserved systolic function. Journal of Cardiac Failure , 15(7):553–560, 2009. Jiang, F., Baek, S., Cao, J., and Ma, Y. A functional single-index model. Statistica sinica , 30(1):303–324, 2020. Jiang, W. Bayesian variable selection for high dimensional generalized linear models: Convergence rates of the fitted densities. The Annals of Statistics , 35(4):1487–1511, 2007. Kachuee, M., Fazeli, S., and Sarrafzadeh, M. Ecg heart-beat classification: A deep transferable representation. In 2018 IEEE International Conference on Healthcare Informatics (ICHI) , pp. 443–444. IEEE, 2018. Kashani, A. and Barold, S. S. Significance of qrs com-plex duration in patients with heart failure. Journal of the American College of Cardiology , 46(12):2183–2192, 2005. 9Sparse Bayesian Deep Functional Learning with Structured Region Selection 
+
+Lee, E. R. and Park, B. U. Sparse estimation in functional linear regression. Journal of Multivariate Analysis , 105 (1):1–17, 2012. Lemhadri, I., Ruan, F., Abraham, L., and Tibshirani, R. Lassonet: A neural network with feature sparsity. Journal of Machine Learning Research , 22(127):1–29, 2021. Lin, Z., Cao, J., Wang, L., and Wang, H. Locally sparse estimator for functional linear regression models. Journal of Computational and Graphical Statistics , 26(2):306– 318, 2017. Luo, B. and Halabi, S. Sparse-input neural network using group concave regularization. Transactions on Machine Learning Research , 2025. ISSN 2835-8856. URL https://openreview.net/forum? id=m9UsLHZYeX . Featured Certification. Makowski, D., Pham, T., Lau, Z. J., Brammer, J. C., Lespinasse, F., Pham, H., Sch ¨olzel, C., and Chen, S. A. Neurokit2: A python toolbox for neurophysiological sig-nal processing. Behavior Research Methods , 53(4):1689– 1696, 2021. Moor, M., Banerjee, O., Abad, Z. S. H., Krumholz, H. M., Leskovec, J., Topol, E. J., and Rajpurkar, P. Founda-tion models for generalist medical artificial intelligence. 
+
+Nature , 616(7956):259–265, 2023. Nie, Y., Wang, L., and Cao, J. Estimating functional single index models with compact support. Environmetrics , 34 (2):e2784, 2023. Pang, J. C., Aquino, K. M., Oldehinkel, M., Robinson, P. A., Fulcher, B. D., Breakspear, M., and Fornito, A. Geometric constraints on human brain function. Nature ,618(7965):566–574, 2023. Sun, Y., Song, Q., and Liang, F. Consistent sparse deep learning: Theory and computation. Journal of the Ameri-can Statistical Association , 117(540):1981–1995, 2022. Thind, B., Multani, K., and Cao, J. Deep learning with func-tional inputs. Journal of Computational and Graphical Statistics , 32(1):171–180, 2023. Thodberg, H. H. Tecator meat sample dataset. StatLib Datasets Archive, 2015. http://lib.stat.cmu. edu/datasets/tecator .Tsai, K., Zhao, B., Koyejo, S., and Kolar, M. Latent mul-timodal functional graphical model estimation. Journal of the American Statistical Association , 119(547):2217– 2229, 2024. van Kollenburg, G. H., van Manen, H.-J., Admiraal, N., Gerretzen, J., and Jansen, J. J. Low-cost handheld nir spectroscopy for identification of organic solvents and low-level quantification of water contamination. Talanta ,223:121865, 2021. Wang, S., Cao, G., Shang, Z., and Initiative, A. D. N. Deep neural network classifier for multidimensional functional data. Scandinavian Journal of Statistics , 50(4):1667– 1686, 2023. Wu, S., Beaulac, C., and Cao, J. Functional autoencoder for smoothing and representation learning. Statistics and Computing , 34(6):203, 2024. Yang, J., Li, T., Wang, T., Ma, S., and Wu, M. Heteroge-neous gene network estimation for single-cell transcrip-tomic data via a joint regularized deep neural network. 
+
+Journal of the American Statistical Association , (just-accepted):1–16, 2026. Yao, J., Mueller, J., and Wang, J.-L. Deep learning for functional data analysis with adaptive basis layers. In In-ternational Conference on Machine Learning , pp. 11898– 11908. PMLR, 2021. Yarotsky, D. Optimal approximation of continuous func-tions by very deep relu networks. In Conference on Learn-ing Theory , pp. 639–649. PMLR, 2018. Yu, C., Lin, H., Zhang, Q., and Sanderson, J. High preva-lence of left ventricular systolic and diastolic asynchrony in patients with congestive heart failure and normal qrs duration. Heart , 89(1):54–60, 2003. Zhu, H., Sun, Y., and Lee, J. Bayesian functional region selection. Stat , 14(1):e70047, 2025. Zubkov, A. M. and Serov, A. A. A complete proof of universal inequalities for the distribution function of the binomial law. Theory of Probability & Its Applications ,57(3):539–544, 2013. 10 Sparse Bayesian Deep Functional Learning with Structured Region Selection 
+
+## A. Details for the posterior inference 
+
+A.1. Hyperparameter settings 
+
+All responses Y are standardized using training-set statistics; unless otherwise stated, all computations are carried out on this standardized scale and we set the noise variance to σ2 
+
+> ε
+
+= 1 . For non-sparsified network parameters, we use independent Gaussian priors with variance σ2 = 1 (numerically equal to σ2 
+
+> ε
+
+under standardization, but conceptually distinct). We use 
+
+R = 5 random restarts for each Jn.
+
+Simulation defaults. 
+
+• Basis: B-splines with degree 4 (unless otherwise stated). • Network: fully-connected ReLU, 64 –64 –64 –1; first-layer column-wise spike-and-slab selection. • Optimizer: mini-batch SGD, learning rate 10 −3, batch size 64, max 80,001 iterations, early stopping patience 3,000. • Spike-and-slab: (λn, σ 20,n , σ 21,n ) = (10 −5, 10 −5, 2 × 10 −3).We treat the projection truncation level Jn as a resolution hyperparameter and select it via restart-aggregated evidence in simulations or restart-aggregated validation loss when evidence computation is prohibitive. We use the candidate set 
+
+J = {55 , 60 , 70 , 80 } for Jn in simulations; for real datasets, J is chosen as a small neighborhood around a dataset-specific baseline resolution. We train with a small learning rate and a relatively large early-stopping patience to obtain stable solutions across restarts. The sparsification prior is intentionally strong in simulations; empirically, the same default sparsification hyperparameters remain effective on ECG ( n ≈ 2–3 × 10 4), consistent with increasingly data-dominated inference as n grows. For competing methods, we aim to ensure fair comparisons by using comparable model capacity whenever applicable (e.g., similar depth/width for neural-network baselines). Method-specific hyperparameters are taken from authors’ recommended defaults when available, and otherwise selected by cross-validation or validation loss on the same training/validation split. 
+
+A.2. Stochastic gradient algorithm (SGD) for the MAP fitting 
+
+We first provide the derivations on the marginal prior on θ. Denote K1n = ( Jn + 1) L1 + PHn
+
+> k=2
+
+(Lk−1 + 1) Lk as the dimension of θ and W ⊂ { 1, . . . , K 1n } as the set of indices in θ corresponding to the weights of the first-layer 
+
+{W1,hg }h≤L1, g ≤Jn , and let G := {1, . . . , K 1n } \ W . In addition, let ϕ(·; 0 , s 2) denote the N (0 , s 2) density. Based on the priors introduced in Section 3, we have 
+
+π(W1,∗j | γj ) = 
+
+> L1
+
+Y
+
+> h=1
+
+h
+
+ϕ(W1,hj ; 0 , σ 21,n )
+
+iγj h
+
+ϕ(W1,hj ; 0 , σ 20,n )
+
+i1−γj
+
+, ∀j ∈ { 1, . . . , J n};
+
+π(γj ) = λγj 
+
+> n
+
+(1 − λn)1−γj ;
+
+π(Wh,ab ) = ϕ(Wh,ab ; 0 , σ 2), ∀ h ∈ { 2, . . . , H n};
+
+and 
+
+π(bh,a ) = ϕ(bh,a ; 0 , σ 2), ∀ h ∈ { 1, . . . , H n}.
+
+Then, the marginal prior on θ is π(θ) = P 
+
+> γ
+
+π(θ, γ), where 
+
+π(θ, γ) = 
+
+> Jn
+
+Y
+
+> j=1
+
+[π(γj )π(W1,∗j | γj )] Y
+
+> j∈G
+
+ϕ(θj ; 0 , σ 2).
+
+Based on the marginal prior on θ, we develop the following SGD algorithm (Algorithm 1) for optimizing (9). After selecting J⋆, we form the final predictor by averaging the outputs of the R independently trained models at J⋆, i.e., 
+
+ˆy(x) = R−1 PRr=1 fbθJ⋆,r (ηJ⋆ (x)) . For interpretability metrics (e.g., feature masks/PIP), we report results from the single restart r⋆ with the smallest validation loss. 11 Sparse Bayesian Deep Functional Learning with Structured Region Selection 
+
+In Step 5 of Algorithm 1, we score each run by the Bayesian evidence using a Laplace approximation (see, e.g., MacKay, 1992; Liang et al., 2005). Let Ln,J (θ) denote the (negative) log-posterior objective used in MAP training under projection dimension J, and define hn,J (θ) := −L n,J (θ)/n tr . Let Hn,J (θ) := ∇2 
+
+> θ
+
+hn,J (θ). For evidence computation we evaluate 
+
+hn,J and Hn,J at the sparsified surrogate parameter bθ s 
+
+> J,r
+
+(constructed in Step 4), while predictive evaluations are based on the MAP estimate bθJ,r .Let IJ,r index the parameters retained for evidence computation (i.e., the free parameters under the sparsified surrogate), and let dJ,r := |I J,r |. Denote by Hn,J (θ)IJ,r ,IJ,r the corresponding principal submatrix. The Laplace-approximated log-evidence is 
+
+ℓJ,r := ntr hn,J 
+
+ bθ s
+
+> J,r
+
+
+
++ dJ,r 
+
+2 log(2 π) − dJ,r 
+
+2 log( ntr ) − 12 log det 
+
+
+
+−Hn,J 
+
+ bθ s
+
+> J,r
+
+ 
+
+> IJ,r ,IJ,r
+
+
+
+, (10) where −Hn,J ( bθ s 
+
+> J,r
+
+)IJ,r ,IJ,r is the negative Hessian at the mode restricted to the retained parameters. We compute the log-determinant term in (10) via eigenvalues of the restricted Hessian for numerical stability, and apply standard stabilization when needed (e.g., adding a small diagonal jitter). 
+
+## B. Proof of Statistical Properties 
+
+We divide the theoretical proof into four parts. First, we establish the theoretical foundation for finite-dimensional approximations of functional data, which lays the groundwork for the subsequent theorems. Then, in the second, third, and fourth parts, we provide proofs for the bound of the approximation error (Theorem 5.4), the posterior consistency (Theorem 5.7), and the selection consistency (Theorem 5.9), respectively. Prior to proving each theorem, we present necessary lemmas. Throughout, C, C ′, C 1, . . . denote generic positive constants whose values may change from line to line. 
+
+B.1. Finite-dimensional approximations 
+
+First, recall and introduce some notations. Let β∗ and β∗ 
+
+> Jn
+
+= PJn 
+
+> j=1
+
+ω∗ 
+
+> Jn,j
+
+Bj (t) denote the true coefficient function and its truncated counterpart, respectively, where ω∗ 
+
+> Jn
+
+= ( ω∗
+
+> Jn,1
+
+, · · · , ω ∗ 
+
+> Jn,J n
+
+)T is the vector of true basis coefficients for β∗ 
+
+> Jn
+
+.Denote S∗ 
+
+> Jn
+
+= supp( ω∗ 
+
+> Jn
+
+) and Ω∗ 
+
+> Jn
+
+= ∪j∈S∗ 
+
+> Jn
+
+Ij with Ij := supp( Bj ). In addition, let u∗(X) := ⟨X, β ∗⟩, μ ∗(X) := 
+
+g∗(u∗(X)) , u ∗ 
+
+> Jn
+
+(X) := ⟨X, β ∗ 
+
+> Jn
+
+⟩, and μ∗ 
+
+> Jn
+
+(X) := g∗(u∗ 
+
+> Jn
+
+(X)) . Moreover, for κ > 0, define the strong-signal region 
+
+Ω∗(κ) := {t ∈ [0 , 1] : |β∗(t)| > κ }. Define S∗ 
+
+> Jn
+
+(κ) := {j ∈ [Jn] : Ij ∩ Ω∗(κ)̸ = ∅} and Ω∗ 
+
+> Jn
+
+(κ) := S  
+
+> j∈S∗
+> Jn (κ)
+
+Ij .Let ∆Jn := max 1≤j≤Jn diam( Ij ) ≍ J−1 
+
+> n
+
+for fixed spline order. For a measurable set A ⊂ [0 , 1] and ∆ > 0, define its ∆-enlargement by A+∆ := {t ∈ [0 , 1] : dist( t, A ) ≤ ∆}. For the strong-signal cover Ω∗ 
+
+> Jn
+
+(κ), we will also use the enlarged cover Ω∗ 
+
+> Jn
+
+(κ)+cloc ∆Jn , where cloc ≥ 1 is an absolute constant depending only on the locality radius of the spline quasi-interpolant/projection used below. 
+
+Lemma B.1. Suppose Assumption 5.1–5.3 holds. Define κJn := cκ Cβ J−αβ 
+
+> n
+
+with cκ ≥ 4 and Cβ being some constant. Then for all sufficiently large n, we have 
+
+(i) Uniform approximation at resolution Jn:
+
+∥β∗ − β∗ 
+
+> Jn
+
+∥∞ ≤ C J −αβ 
+
+> n
+
+≲ κJn . (11) 
+
+Moreover, on the strong-signal set Ω∗(2 κJn ):
+
+∥β∗ − β∗ 
+
+> Jn
+
+∥L∞(Ω ∗(2 κJn )) ≤ Cβ J−αβ 
+
+> n
+
+≤ κJn /c κ, (12) 
+
+where ∥v(t)∥L∞(Ω ∗(2 κJn )) = sup t∈Ω∗(2 κJn ) |v(t)|.
+
+(ii) Localization to the strong-signal cover: There exists an absolute constant cloc ≥ 1 and ∆Jn ≍ J−1 
+
+> n
+
+such that, for all sufficiently large n,
+
+Ω∗ 
+
+> Jn
+
+⊆ Ω∗ 
+
+> Jn
+
+(κJn )+cloc ∆Jn . (13) (iii) Index and link truncation: letting α1 = min( αg , 1) ,
+
+sup 
+
+> X∈X
+
+|u∗ 
+
+> Jn
+
+(X) − u∗(X)| ≤ CX ∥β∗ 
+
+> Jn
+
+− β∗∥∞ ≲ J−αβ 
+
+> n
+
+, (14) 12 Sparse Bayesian Deep Functional Learning with Structured Region Selection 
+
+and 
+
+sup 
+
+> X∈X
+
+|μ∗ 
+
+> Jn
+
+(X) − μ∗(X)| = sup 
+
+> X∈X
+
+|g∗(u∗ 
+
+> Jn
+
+(X)) − g∗(u∗(X)) | ≤ Lg
+
+
+
+sup 
+
+> X∈X
+
+|u∗ 
+
+> Jn
+
+(X) − u∗(X)|
+
+α1
+
+≲ J−αβ α1 
+
+> n
+
+. (15) (iv) Strong-signal sandwich: 
+
+Ω∗(2 κJn ) ⊆ Ω∗ 
+
+> Jn
+
+⊆ Ω∗ 
+
+> Jn
+
+(κJn )+cloc ∆Jn . (16) (v) Gap decomposition (no extra structure assumed): 
+
+Ω∗ 
+
+> Jn
+
+∆ Ω ∗(2 κJn ) ≤ Ω∗(κJn ) \ Ω∗(2 κJn )
+
+| {z }
+
+> threshold band
+
++ Ω∗ 
+
+> Jn
+
+(κJn )+cloc ∆Jn \ Ω∗(κJn )
+
+| {z }
+
+> resolution boundary layer
+
+. (17) 
+
+Proof. Step 1 (spline approximation and the choice of QJn ). Fix a local B-spline basis {Bj }Jn 
+
+> j=1
+
+of fixed order on [0 , 1] with supports Ij and ∆Jn := max 1≤j≤Jn diam( Ij ) ≍ J−1 
+
+> n
+
+. Let QJn denote a local spline quasi-interpolant/projection onto the corresponding spline space (e.g., a standard quasi-interpolant associated with the B-spline partition). By standard L∞ spline approximation theory, for any β ∈ H αβ ([0 , 1]) ,
+
+∥β − QJn β∥∞ ≤ Cβ J−αβ 
+
+> n
+
+.
+
+In the sequel, we work with this fixed operator QJn .
+
+Step 2 (localization with an enlarged cover). Recall κJn = cκCβ J−αβ 
+
+> n
+
+. Construct a smooth cut-off function χJn : [0 , 1] →
+
+[0 , 1] such that 
+
+χJn (t) = 1 for t ∈ Ω∗(2 κJn ), χJn (t) = 0 for t ∈ Ω∗(κJn )c,
+
+and on the transition band Ω∗(κJn ) ∩ Ω∗(2 κJn )c, one has 0 < χ Jn (t) < 1 (with χJn chosen smooth across the boundaries of these sets). Define the truncated coefficient 
+
+βloc (t) := β∗(t)χJn (t).
+
+Then supp( βloc ) ⊆ Ω∗(κJn ) and, since 1 − χJn vanishes on Ω∗(2 κJn ) and is supported inside Ω∗(κJn )c ∪  Ω∗(κJn ) ∩
+
+Ω∗(2 κJn )c,
+
+∥β∗ − βloc ∥∞ = sup 
+
+> t∈[0 ,1]
+
+|β∗(t){1 − χJn (t)}| ≤ sup  
+
+> t∈Ω∗(κJn )c
+
+|β∗(t)| ≤ 2κJn .
+
+Moreover, βloc ∈ H αβ ([0 , 1]) with the same smoothness order, since β∗ ∈ H αβ and χJn is smooth and bounded. Now define 
+
+β∗ 
+
+> Jn
+
+:= QJn βloc .
+
+By the locality of QJn , there exists an absolute constant cloc ≥ 1 such that 
+
+supp( QJn f ) ⊆ supp( f )+cloc ∆Jn for all bounded f. 
+
+Therefore, 
+
+supp( β∗ 
+
+> Jn
+
+) ⊆ supp( βloc )+cloc ∆Jn ⊆ Ω∗(κJn )+cloc ∆Jn ⊆ Ω∗ 
+
+> Jn
+
+(κJn )+cloc ∆Jn ,
+
+where the last inclusion uses Ω∗(κJn ) ⊆ Ω∗ 
+
+> Jn
+
+(κJn ). Since Ω∗ 
+
+> Jn
+
+= supp( β∗ 
+
+> Jn
+
+) by local linear independence of the B-spline basis, we obtain Ω∗ 
+
+> Jn
+
+⊆ Ω∗ 
+
+> Jn
+
+(κJn )+cloc ∆Jn , which proves (13). For approximation, note that on Ω∗(2 κJn ), we have β∗loc = β∗, hence 
+
+∥β∗ − β∗ 
+
+> Jn
+
+∥L∞(Ω ∗(2 κJn )) = ∥β∗loc − QJn β∗loc ∥L∞(Ω ∗(2 κJn )) ≤ ∥ β∗loc − QJn β∗loc ∥∞ ≤ Cβ J−αβ 
+
+> n
+
+,
+
+which gives (12). Globally, 
+
+∥β∗ − β∗ 
+
+> Jn
+
+∥∞ ≤ ∥ β∗ − β∗loc ∥∞ + ∥β∗loc − QJn β∗loc ∥∞ ≤ 2κJn + Cβ J−αβ 
+
+> n
+
+≲ J−αβ 
+
+> n
+
+.
+
+This proves (11). 13 Sparse Bayesian Deep Functional Learning with Structured Region Selection 
+
+Step 3 (index and link truncation). By Assumption 5.1, 
+
+|u∗ 
+
+> Jn
+
+(X) − u∗(X)| =
+
+Z 10
+
+X(t) β∗ 
+
+> Jn
+
+(t) − β∗(t) dt ≤ ∥ X∥L1 ∥β∗ 
+
+> Jn
+
+− β∗∥∞ ≤ CX ∥β∗ 
+
+> Jn
+
+− β∗∥∞,
+
+and (14) follows from (11). The link bound (15) follows from H¨ older continuity of g∗.
+
+Step 4 (sandwich). Take t ∈ Ω∗(2 κJn ). Then |β∗(t)| > 2κJn and by (12), 
+
+|β∗ 
+
+> Jn
+
+(t)| ≥ | β∗(t)| − ∥ β∗ − β∗ 
+
+> Jn
+
+∥L∞(Ω ∗(2 κJn )) > 2κJn − κJn /c κ > 0
+
+since cκ ≥ 4. Hence t ∈ supp( β∗ 
+
+> Jn
+
+). For standard local B-spline bases (local linear independence), supp( β∗ 
+
+> Jn
+
+) = 
+
+∪j∈S∗ 
+
+> Jn
+
+Ij = Ω ∗ 
+
+> Jn
+
+, so Ω∗(2 κJn ) ⊆ Ω∗ 
+
+> Jn
+
+. The right inclusion Ω∗ 
+
+> Jn
+
+⊆ Ω∗ 
+
+> Jn
+
+(κJn )+cloc ∆Jn follows from (13) . This proves (16) .
+
+Step 5 (gap decomposition). By (16), 
+
+Ω∗ 
+
+> Jn
+
+∆Ω ∗(2 κJn ) ⊆ Ω∗ 
+
+> Jn
+
+(κJn )+cloc ∆Jn \ Ω∗(2 κJn ) =  Ω∗(κJn ) \ Ω∗(2 κJn ) ∪  Ω∗ 
+
+> Jn
+
+(κJn )+cloc ∆Jn \ Ω∗(κJn ),
+
+and (17) follows by subadditivity of Lebesgue measure. 
+
+B.2. Approximation error bounds (Theorem 5.4) Lemma B.2. Suppose Assumption 5.6 holds such that there exists Lg satisfy |g∗(u) − g∗(v)| ≤ Lg |u − v|α1 for all 
+
+u, v ∈ [0 , 1] with α1 = min( αg , 1) . Then for any integer depth Hn ≥ 2, there exists a univariate ReLU network fHn with constant width (at most a universal constant) and depth at most Hn such that 
+
+sup 
+
+> u∈[0 ,1]
+
+|fHn (u) − g∗(u)| ≲ H−2α1 
+
+> n
+
+.
+
+Proof. This result is a direct specialization of Theorem 2 in Yarotsky (2018) to the one–dimensional setting. Taking input dimension d = 1 and approximation accuracy ε ≍ H−2α1 
+
+> n
+
+in that theorem yields the stated rate with constant network width. B.2.1. P ROOF OF THEOREM 5.4 The proof is structured into three steps. First, for the unknown link function g∗(u), Lemma B.2 guarantees the existence of a one-dimensional neural network fHn−1 with constant width and depth Hn − 1 such that 
+
+sup 
+
+> u∈[0 ,1]
+
+|fHn−1 (u) − g∗(u)| ≲ H−2α1 
+
+> n
+
+.
+
+Furthermore, the network output fHn−1 (u∗ 
+
+> Jn
+
+(X)) , where u∗ 
+
+> Jn
+
+(X) = ( ω∗ 
+
+> Jn
+
+)⊤η(X), can be reinterpreted as an Hn-depth network Fθ with Jn-dimensional input η(X). To construct Fθ , we explicitly design its first hidden layer to satisfy the support condition supp col (θ) = S∗ 
+
+> Jn
+
+: we set the width of the first layer as L1 ≍ 1, the weights of the first neuron in the first hidden layer to be W1,1∗ = ( ω∗ 
+
+> Jn
+
+)⊤ and all other row weights W1,j ∗ = 0⊤ for j > 1. The remaining layers then implement fHn−1 acting on the computed scalar (ω∗ 
+
+> Jn
+
+)⊤η(X). This yields a DNN Fθ with depth at most Hn, constant width up to universal constants, and supp col (θ) = S∗ 
+
+> Jn
+
+, establishing (i). Finally, to prove (ii), we decompose the approximation error into a network approximation error and a functional truncation error. For any X ∈ X ,
+
+|μθ (X) − μ∗(X)| = |Fθ (η(X)) − g∗(u∗(X)) |
+
+= |fHn−1(u∗ 
+
+> Jn
+
+(X)) − g∗(u∗(X)) |≤ | fHn−1(u∗ 
+
+> Jn
+
+(X)) − g∗(u∗ 
+
+> Jn
+
+(X)) |
+
+| {z }
+
+> I
+
++ |g∗(u∗ 
+
+> Jn
+
+(X)) − g∗(u∗(X)) |
+
+| {z }
+
+> II
+
+.
+
+Term I is bounded directly by Lemma B.2, while term II is controlled via inequality (15) from Lemma B.1. Taking the supremum over X then yields the final convergence rate stated in (ii). 14 Sparse Bayesian Deep Functional Learning with Structured Region Selection 
+
+B.3. Posterior consistency (Theorem 5.7) 
+
+We first give a general posterior consistency result introduced in Jiang (2007). Specifically, let Dn = {(xi, Y i)}ni=1 denote the dataset, where (xi, Y i) are i.i.d. under the reference distribution p∗. Let P denote the space of probability densities under consideration. We consider a sequence of model classes (sieves) Pn ⊂ P , and write P cn = P \ Pn for their complements. We construct Pn through a parameter sieve Θn via 
+
+Pn := {pθ : θ ∈ Θn}.
+
+Let Π denote the prior measure on P (or on Θ via pθ ), and let Π( · | Dn) denote the corresponding posterior given the data 
+
+Dn. For each ε > 0, define the posterior probability 
+
+bΠ( ε) := Π  d(p, p ∗) > ε | Dn
+
+,
+
+where the metric d(·, ·) denotes the Hellinger distance, defined by d(p, q ) = 
+
+qR   √p − √q2. Let N (ε, P n, d ) denote the 
+
+ε-covering number of Pn with respect to the metric d.
+
+Lemma B.3. For a sequence εn → 0, if there exist constants 2 > b > 2b′ > 0 and t > 0 such that the following conditions hold for all sufficiently large n:(a) log N (εn, P n, d ) ≤ nε 2
+
+> n
+
+;(b) π(P cn) ≤ exp( −bnε 2
+
+> n
+
+);(c) π{p ∈ P : dt(p, p ∗) ≤ b′ε2
+
+> n
+
+} ≥ exp( −b′nε 2
+
+> n
+
+),where dt(p, p ∗) = 1
+
+> t
+
+R p∗(x)
+
+ p∗(x)
+
+> p(x)
+
+t
+
+dx − 1
+
+
+
+, then for any 2b′ < x < b , the posterior probability bΠ(4 εn) satisfies: (i) P
+
+hbΠ(4 εn) ≥ 2 exp  − 12 nε 2
+
+> n
+
+m(x)i
+
+≤ 2 exp  − 12 nε 2
+
+> n
+
+m(x),(ii) E
+
+hbΠ(4 εn)
+
+i
+
+≤ 4 exp  −nε 2
+
+> n
+
+m(x),where m(x) := min {1, 2 − x, b − x, t (x − 2b′)}.Proof. The proof follows from an argument analogous to that of Proposition 1 in Jiang (2007). 
+
+Lemma B.4. Fix any subset S ⊂ { 1, . . . , J n} with m := |S|. Consider the proposed DNN Fθ defined in (4) with input of dimension Jn. Let θ be a network parameter vector with ∥θ∥∞ ≤ En. Let ˜θ be another parameter vector such that 
+
+W1,hg − ˜W1,hg ≤
+
+(
+
+δ1, g ∈ S, δ2, g / ∈ S, 1 ≤ h ≤ L1, 1 ≤ g ≤ Jn,
+
+and for all deeper-layer coordinates G, including all biases and weights beyond the first layer, 
+
+max  
+
+> j∈G
+
+θj − ˜θj ≤ δ1.
+
+Then, for all x ∈ [−1, 1] Jn ,
+
+Fθ (x) − F ˜θ (x) ≤ (En + δ1)Hn−1h
+
+Hn (m + 1) L1
+
+> Hn
+
+Y
+
+> k=2
+
+(Lk−1 + 1) Lk δ1
+
++
+
+n
+
+(Jn − m)L1
+
+> Hn
+
+Y
+
+> k=2
+
+(Lk−1 + 1) Lk
+
+o
+
+δ2
+
+i
+
+.
+
+15 Sparse Bayesian Deep Functional Learning with Structured Region Selection 
+
+Proof. Consider the pre-activation at the first layer z1,h = PJn 
+
+> g=1
+
+W1,hg xg + b1,h . For any x ∈ [−1, 1] Jn , the difference satisfies: 
+
+|z1,h − ˜z1,h | ≤ X
+
+> g∈S
+
+δ1|xg | + X
+
+> g / ∈S
+
+δ2|xg | + δ1 ≤ (m + 1) δ1 + ( Jn − m)δ2.
+
+For k ≥ 2, let zk denote the pre-activation vector of layer k. Since ReLU is 1-Lipschitz, the error propagates as: 
+
+∥zk − ˜zk∥∞ ≤ ∥ Wk∥∞∥zk−1 − ˜zk−1∥∞ + ∥Wk − ˜Wk∥∞∥ ˜zk−1∥∞ + ∥bk − ˜bk∥∞.
+
+Note that ∥˜ak−1∥∞ ≤ (En + δ1)k−1. By induction over k = 2 , . . . , H n and accounting for the total number of parameters in each layer (width products Q Lk), the perturbations δ1 across Hn layers accumulate linearly. The initial perturbation from inactive columns (Jn − m)δ2 is magnified by the depth-induced factor (En + δ1)Hn−1. Summing these contributions yields the desired bound. B.3.1. D EFINITION OF ˜Mn, 1(εn) AND ˜Mn, 2(εn) IN THEOREM 5.7 • σ20,n ≤ ˜Mn, 1(εn);• max {σ2, σ 20,n , σ 21,n } ≤ ˜Mn, 2(εn).Here, 
+
+˜Mn, 1(εn) = min 
+
+ (δ′
+
+> n
+
+)2
+
+2τ A n + 2 log(4 JnL21) , (ω′
+
+> n
+
+)2
+
+2 log(4 JnL21)
+
+
+
+, (18) and 
+
+˜Mn, 2(εn) = M 2
+
+> n
+
+2
+
+h
+
+b1 nε 2 
+
+> n
+
++ log(2 Kn)
+
+i , (19) where An = Hn log n + Hn log ¯L + log {(Jn + 1) L1},
+
+δ′ 
+
+> n
+
+= c1εn
+
+Hn Jn L1 ( ¯L)2( Hn−1) (c0Mn)Hn−1 , (20) and 
+
+ω′ 
+
+> n
+
+= c1εn
+
+Jn L1 ( ¯L)2( Hn−1) (c0En)Hn−1 , (21) with c0 and c1 being some positive constants. In addition, Kn = ( Jn + 1) L1 + Hn ¯L2, log Mn = O(log n), and that for sufficiently large n, Mn ≥ En.B.3.2. P ROOF OF THEOREM 5.7 We consider the specific scenario developed in Section 3. The observed data is Dn = {(xi(t), Y i)}ni=1 .Throughout the posterior contraction analysis, we take the reference truth to be the original law 
+
+p∗ := pμ∗ ,
+
+where the model family is indexed by μθ (X) := Fθ (η(X)) and the true mean is μ∗(X) = g∗(⟨X, β ∗⟩). Here, pμ∗ (· | X)
+
+is the true conditional density of Y given X. Let Pn := {pμθ : θ ∈ Θn} ⊂ P be a sequence of model classes, where pμθ (· | X) is the approximate density induced by the finite-dimensional representation (3) and the sparse DNN defined in (4) and Θn := {θ : ∥θ∥∞ ≤ Mn, C (θ) ≤ k0sn} for a constant k0 ≥ 2. Here, C(θ) := |S(θ)| with 
+
+S(θ) := 
+
+n
+
+j ≤ Jn : max 1≤h≤L1 |W1,hj | ≥ δ′
+
+> n
+
+o
+
+.To prove Theorem 5.7, according to Lemma B.3, it suffices to verify that for a sequence ε2 
+
+> n
+
+≲ sn log( Jn/s n) 
+
+> n
+
++
+
+> sn
+
+ Hn log n+log Jn
+
+ 
+
+> n
+
++
+
+
+
+H−2α1 
+
+> n
+
++ J−αβ α1
+
+> n
+
+2
+
+, the following conditions hold for all sufficiently large n:(a) log N (εn, P n, d ) ≤ nε 2
+
+> n
+
+;(b) π(P cn) ≤ exp( −bnε 2
+
+> n
+
+);(c) π{pμθ ∈ P : dt(pμθ , p μ∗ ) ≤ b′ε2
+
+> n
+
+} ≥ exp( −b′nε 2
+
+> n
+
+).16 Sparse Bayesian Deep Functional Learning with Structured Region Selection 
+
+Verification of condition (a). Set 
+
+δ′ 
+
+> n
+
+= c1εn
+
+Hn Jn L1 ( ¯L)2( Hn−1) (c0Mn)Hn−1 .
+
+Fix θ ∈ Θn and let S := S(θ) with |S| ≤ k0sn. Define the truncated parameter θ(S) by zeroing out non-activated columns: 
+
+W (S)1,hg := W1,hg 1{g ∈ S}, 1 ≤ h ≤ L1, 1 ≤ g ≤ Jn,
+
+and keep all remaining coordinates unchanged: θ(S) 
+
+> j
+
+:= θj for j ∈ G (G includes all biases and weights beyond the first layer). Then for g / ∈ S,
+
+max 
+
+> h≤L1
+
+W1,hg − W (S)1,hg = max 
+
+> h≤L1
+
+|W1,hg | < δ ′
+
+> n
+
+.
+
+Applying Lemma B.4 with (δ1, δ 2) = (0 , δ ′
+
+> n
+
+) yields 
+
+sup 
+
+> x∈[−1,1] Jn
+
+|Fθ (x) − Fθ(S) (x)| ≤ C ε n, (22) with C being some constant. Now consider the truncated class 
+
+Θtrunc  
+
+> n
+
+(S) := 
+
+n
+
+θ : ∥θ∥∞ ≤ Mn, W1,∗g ≡ 0 for g / ∈ S
+
+o
+
+.
+
+Set 
+
+δ1,n := c2εn
+
+Hn (k0sn + 1) L1 ( ¯L)2( Hn−1) (c0Mn)Hn−1 , c2 ∈ (0 , 1) . (23) Let ˜θ ∈ Θtrunc  
+
+> n
+
+(S) satisfy the coordinate-wise bounds 
+
+max 
+
+> g∈S, h ≤L1
+
+|W (S)1,hg − ˜W1,hg | ≤ δ1,n , max  
+
+> j∈G
+
+|θ(S) 
+
+> j
+
+− ˜θj | ≤ δ1,n .
+
+For g / ∈ S, we have W (S)1,hg = ˜W1,hg = 0 , hence the same bound holds with δ2 = 0 ≤ δ′
+
+> n
+
+. Therefore Lemma B.4 (with 
+
+(δ1, δ 2) = ( δ1,n , δ ′
+
+> n
+
+)) and (23) give 
+
+sup 
+
+> x∈[−1,1] Jn
+
+|Fθ(S) (x) − F ˜θ (x)| ≤ C ε n. (24) Combining (22)–(24), 
+
+sup 
+
+> x∈[−1,1] Jn
+
+|Fθ (x) − F ˜θ (x)| ≤ C ε n.
+
+As μθ (X) = Fθ (x) with x = η(X), we further have 
+
+sup 
+
+> X∈X
+
+|μθ (X) − μ ˜θ (X)| ≤ C ε n.
+
+Next, since d2(p, q ) ≤ d0(p, q ), it suffices to control the Kullback–Leibler divergence. For the Gaussian regression case, the KL divergence is bounded by the squared difference of mean functions. Hence, 
+
+d0(pμθ , p μ ˜θ ) ≤ C EX
+
+μθ (X) − μ ˜θ (X)2 ≤ C′ε2
+
+> n
+
+,
+
+and therefore d(pθ , p ˜θ ) ≤ C′′ εn for all large n. Consequently, any coordinate-wise ℓ∞–net for Θtrunc  
+
+> n
+
+(S) induces a c ε n–net (for some constant c > 0) under d. Since N (ε; Pn, d ) is non-increasing in ε, it suffices to bound N (c ε n; Pn, d ), which is of the same order. Fix S ⊂ { 1, . . . , J n} with m := |S| ≤ k0sn and let Kdeep := |G| ≤ Hn ¯L2. Discretise (i) the mL 1 active first-layer weights and (ii) the Kdeep deep-layer coordinates on a uniform grid over [−Mn, M n] with mesh width δ1,n . Let Rn := 
+
+l 2Mn
+
+> δ1,n
+
+m
+
+. By product covering, there exists an cε n–net N (S) of {pθ : θ ∈ Θtrunc  
+
+> n
+
+(S)} under d such that |N (S)| ≤ RmL 1+Kdeep  
+
+> n
+
+.17 Sparse Bayesian Deep Functional Learning with Structured Region Selection 
+
+Since m ≤ k0sn, k0snX
+
+> m=0
+
+Jn
+
+m
+
+
+
+≤
+
+ eJ n
+
+k0sn
+
+k0sn
+
+.
+
+Let N := S 
+
+> |S|≤ k0sn
+
+N (S). For any θ ∈ Θn, letting S = S(θ), the truncation bridge and the net N (S) yield some 
+
+˜θ ∈ N (S) ⊂ N such that d(pθ , p ˜θ ) ≤ εn. Therefore, for the constant c > 0 above, 
+
+log N (cε n; Pn, d ) ≤ k0sn log eJ n
+
+k0sn
+
++  k0snL1 + Kdeep 
+
+ log Rn
+
+≤ k0sn log eJ n
+
+k0sn
+
++  k0snL1 + Hn ¯L2 log 2Mn
+
+δ1,n 
+
+.
+
+Since N (ε; Pn, d ) is non-increasing in ε, log N (εn; Pn, d ) ≤ log N (cε n; Pn, d ). By log Mn = O(log n) and log(1 /ε n) = 
+
+O(log n), and noting that k0 is fixed and k0sn ≤ Jn, we obtain 
+
+log N (εn; Pn, d ) ≲ sn log eJ n
+
+sn
+
++ snL1 + Hn ¯L2
+
+Hn log n + Hn log ¯L + log( JnL1)
+
+
+
+.
+
+By the rate condition of εn, the right-hand side is O(nε 2
+
+> n
+
+), hence log N (εn; Pn, d ) ≤ nε 2 
+
+> n
+
+for all large n, verifying condition (a). 
+
+Verification of condition (b). By the definition of Θn, we have 
+
+Π(Θ cn) ≤ T1,n + T2,n , T1,n := Π( ∥θ∥∞ > M n), T2,n := Π( C(θ) > k 0sn).
+
+Note that, under the induced prior on densities, 
+
+Π( P cn) = Π {θ /∈ Θn} = Π(Θ cn).
+
+Denote σ2max = max {σ2, σ 20,n , σ 21,n } and Kn = ( Jn + 1) L1 + Hn ¯L2. For every coordinate θj , Pr( |θj | > M n) ≤
+
+2 exp  −M 2
+
+> n
+
+/2σ2max 
+
+. With the condition (19) on σ2max and by the union bound, we have 
+
+T1,n ≤ 2Kn exp 
+
+
+
+− M 2
+
+> n
+
+2σ2max 
+
+
+
+≤ exp  −b1 nε 2
+
+> n
+
+.
+
+For each column g, define 
+
+Ig := 1
+
+n
+
+max 
+
+> 1≤h≤L1
+
+|W1,hg | ≥ δ′
+
+> n
+
+o
+
+, C(θ) = 
+
+> Jn
+
+X
+
+> g=1
+
+Ig .
+
+Under the specific prior, the indicators {Ig }Jn 
+
+> g=1
+
+are i.i.d. Bernoulli ( pn) with 
+
+pn := Pr( Ig = 1) = (1 − λn)p0,n + λnp1,n ≤ p0,n + λn, (25) where 
+
+p0,n := Pr 
+
+
+
+max 
+
+> 1≤h≤L1
+
+|Zh| ≥ δ′
+
+> n
+
+
+
+, Zh
+
+> i.i.d.
+
+∼ N (0 , σ 20,n ),p1,n := Pr 
+
+
+
+max 
+
+> 1≤h≤L1
+
+|Wh| ≥ δ′
+
+> n
+
+
+
+, Wh
+
+> i.i.d.
+
+∼ N (0 , σ 21,n ).
+
+By the union bound and Gaussian tails, 
+
+p0,n ≤ 2L1 exp 
+
+
+
+− (δ′
+
+> n
+
+)2
+
+2σ20,n 
+
+
+
+, p1,n ≤ 1.
+
+Under assumption (18) for σ20,n , we have 
+
+(δ′
+
+> n
+
+)2
+
+2σ20,n 
+
+≥ τ A n + log(4 JnL21),
+
+18 Sparse Bayesian Deep Functional Learning with Structured Region Selection 
+
+with An = Hn log n + Hn log ¯L + log {(Jn + 1) L1}, and hence 
+
+p0,n ≤ 2L1 exp 
+
+
+
+− (δ′
+
+> n
+
+)2
+
+2σ20,n 
+
+
+
+≤ 2L1 exp −τ A n − log(4 JnL21) = 12JnL1
+
+e−τ A n . (26) Therefore Jnp0,n ≤ 12L1 e−τ A n , which is o(sn) and in particular implies Jnp0,n ≤ 14 k0sn for all large n. Moreover, under Assumption 5.5, we have Jnλn ≲ (n ¯L)Hn (Jn + 1) L1
+
+−τ ′
+
+, so for all large n,
+
+Jnλn ≤ 14 k0sn.
+
+Combining the last two displays yields 
+
+Jnpn ≤ Jn(p0,n + λn) ≤ 12 k0sn.
+
+Let qn := k0sn/J n and assume qn ≤ 1/2 for all large n. Since {Ig }Jn 
+
+> g=1
+
+are i.i.d. Bernoulli (pn), we have 
+
+C(θ) = 
+
+> Jn
+
+X
+
+> g=1
+
+Ig ∼ Bin( Jn, p n).
+
+Under the above bounds, we have pn ≤ qn/2, hence qn > p n. Applying Zubkov & Serov (2013, Theorem 1) to 
+
+X ∼ Bin( Jn, p n) with k = ⌊Jnqn⌋ − 1 yields 
+
+Pr {C(θ) ≥ k0sn} ≤ 1 − Φ
+
+q 
+
+2Jn H pn, q n
+
+
+
+,
+
+where 
+
+H(pn, q n) = qn log qn
+
+pn
+
++ (1 − qn) log 1 − qn
+
+1 − pn
+
+= KL( qn∥pn).
+
+Using the standard Gaussian tail bound 1 − Φ( t) ≤ e−t2/2 for t > 0, we obtain 
+
+Pr {C(θ) ≥ k0sn} ≤ exp  − Jn KL( qn∥pn) .
+
+Moreover, since pn ≤ qn/2 and log( qn/p n) → ∞ in our regime, the negative term (1 − qn) log {(1 − qn)/(1 − pn)} is negligible compared to qn log( qn/p n), and in particular for all sufficiently large n,
+
+KL( qn∥pn) ≥ 12 qn log qn
+
+pn
+
+.
+
+Therefore, 
+
+Pr {C(θ) ≥ k0sn} ≤ exp 
+
+n
+
+− c k 0sn log qn
+
+pn
+
+o
+
+for some absolute constant c > 0.Moreover, under Assumption 5.5 and (25) and (26), we can ensure pn ≲ e−τ A n /J n for some τ > 0, so that 
+
+log qn
+
+pn
+
+≳ τ A n + log( k0sn) ≳ An for all large n. 
+
+Therefore, 
+
+− log Pr {C(θ) ≥ k0sn} ≳ k0sn An.
+
+Then, under Assumption 5.6, we have nε 2 
+
+> n
+
+≲ snAn, and thus for some b2 > 0,
+
+T2,n = Π {C(θ) > k 0sn} ≤ exp( −b2 nε 2
+
+> n
+
+),
+
+verifying condition (b). 19 Sparse Bayesian Deep Functional Learning with Structured Region Selection 
+
+Verification of condition (c). We check condition (c) for t = 1 . Consider the set 
+
+An =
+
+n
+
+θ : max 
+
+> g∈S∗
+> Jn
+
+max 
+
+> h≤L1
+
+|W1,hg − W ∗ 
+
+> 1,hg
+
+| ≤ ωn, max 
+
+> g / ∈S∗
+> Jn
+
+max 
+
+> h≤L1
+
+|W1,hg | ≤ ω′
+
+> n
+
+, ∥θG − θ∗G ∥∞ ≤ ωn
+
+o
+
+,
+
+where ωn = c1εn   
+
+> [Hn(sn+1) L1( ¯L)2( Hn −1) (c0En)Hn −1]
+
+and ω′ 
+
+> n
+
+are defined in (20) and (21), and θ∗ is the network parameter vector of the DNN Fθ∗ obtained in Theorem 5.4. If θ ∈ A n, then by Lemma B.4 we have 
+
+sup 
+
+> X∈X
+
+μθ (X) − μθ∗ (X) = sup 
+
+> x∈[−1,1] Jn
+
+Fθ (x) − Fθ∗ (x) ≤ 3c1εn,
+
+where x = η(X) and μθ (X) = Fθ (η(X)) . Define 
+
+˜ξn := inf   
+
+> θ: supp col (θ)= S∗
+> Jn ,∥θ∥∞≤En
+
+sup 
+
+> X∈X
+
+μθ (X) − μ∗(X) .
+
+Then, Theorem 5.4 gives ˜ξn ≲ H−2α1 
+
+> n
+
++ J−αβ α1 
+
+> n
+
+.Since 
+
+sup 
+
+> X∈X
+
+μθ∗ (X) − μ∗(X) ≤ ˜ξn,
+
+we have, 
+
+sup 
+
+> X∈X
+
+μθ (X) − μ∗(X) ≤ 3c1εn + ˜ξn.
+
+For normal models, we obtain 
+
+d1
+
+ pμθ , p μ∗
+
+ ≤ C (1 + o(1)) EX
+
+μθ (X) − μ∗(X)2 ≤ C (1 + o(1)) (3 c1εn + ˜ξn)2, if θ ∈ A n,
+
+for some constant C. Under Assumption 5.6, we have nε 2 
+
+> n
+
+≥ M0 n ˜ξ2 
+
+> n
+
+for large M0. Thus for any small b′ > 0, condition (c) holds as long as c1 is sufficiently small, and the prior satisfies − log Π( An) ≤ b′ nε 2
+
+> n
+
+.Let S∗ 
+
+> Jn
+
+⊂ { 1, . . . , J n} be the true active column set with |S∗ 
+
+> Jn
+
+| = sn, and define the configuration γ∗ by γ∗ 
+
+> g
+
+= 1{g ∈ S∗ 
+
+> Jn
+
+}.Write Kdeep := |G| ≤ Hn ¯L2.Since columns are independent under the hierarchical prior and (γg ) are i.i.d., 
+
+Π( An) ≥ Π( γ = γ∗) Π( An | γ = γ∗).
+
+To bound Π( An) from below, we consider the event where the selection indicators match the target indices exactly, i.e., 
+
+γg = 1 if g ∈ S∗ 
+
+> Jn
+
+and γg = 0 otherwise. 
+
+(i) Consider Π( γ = γ∗).
+
+Π( γ = γ∗) = λsn 
+
+> n
+
+(1 − λn)Jn−sn , ⇒ − log Π( γ = γ∗) ≤ sn log 1
+
+λn
+
++ ( Jn − sn)λn.
+
+Under Assumption 5.5, (Jn − sn)λn = o(nε 2
+
+> n
+
+) and sn log(1 /λ n) ≲ sn{Hn log n + Hn log ¯L + log( JnL1)}.
+
+(ii) Consider Π( An | γ = γ∗).
+
+For X ∼ N (0 , σ 2) and any |a| ≤ En,
+
+Pr( |X − a| ≤ ω) ≥ 2ω · inf  
+
+> |u−a|≤ ω
+
+ϕ(u; 0 , σ 2) ≥ c ωσ exp 
+
+
+
+− (En + ω)2
+
+2σ2
+
+
+
+,
+
+hence 
+
+− log Pr( |X − a| ≤ ω) ≲ log σω + (En + 1) 2
+
+2σ2 .
+
+20 Sparse Bayesian Deep Functional Learning with Structured Region Selection 
+
+Applying this bound to the active first-layer weights ( snL1 coordinates with slab variance σ21,n ) and to the deep parameters (Kdeep coordinates with variance σ2), we obtain 
+
+− log Π( An | γ = γ∗) ≤ C
+
+"
+
+snL1
+
+n
+
+log σ1,n 
+
+ωn
+
++ (En + 1) 2
+
+2σ21,n 
+
+o
+
++ Kdeep 
+
+n
+
+log σωn
+
++ (En + 1) 2
+
+2σ2
+
+o#
+
+− log Π 
+
+
+
+max 
+
+> g / ∈S∗
+> Jn
+
+max 
+
+> h≤L1
+
+|W1,hg | ≤ ω′ 
+
+> n
+
+γg = 0 ∀g / ∈ S∗
+
+> Jn
+
+
+
+.
+
+For the inactive part, by (19) and (21), we have 
+
+(ω′
+
+> n
+
+)2
+
+2σ20,n 
+
+≥ log(4 JnL21),
+
+so for Z ∼ N (0 , σ 20,n ),
+
+Pr( |Z| > ω ′
+
+> n
+
+) ≤ 2 exp 
+
+
+
+− (ω′
+
+> n
+
+)2
+
+2σ20,n 
+
+
+
+≤ 12JnL21
+
+.
+
+Hence, for each (g, h ) with g / ∈ S∗ 
+
+> Jn
+
+,
+
+Pr( |W1,hg | ≤ ω′ 
+
+> n
+
+| γg = 0) ≥ 1 − 12JnL21
+
+.
+
+By independence over (g, h ),
+
+Π
+
+
+
+max 
+
+> g / ∈S∗
+> Jn
+
+max 
+
+> h≤L1
+
+|W1,hg | ≤ ω′ 
+
+> n
+
+γg = 0 ∀g / ∈ S∗
+
+> Jn
+
+
+
+≥
+
+
+
+1 − 12JnL21
+
+(Jn−sn)L1
+
+≥ e−1
+
+for all large n.Combining the above bounds and using Kn ≤ Hn ¯L2 and log(1 /ω n) = O Hn log n + Hn log ¯L + log( snL1), we conclude that 
+
+− log Π( An) ≤ C′n
+
+sn log 1
+
+λn
+
++ snL1 + Hn ¯L2  Hn log n + Hn log ¯L + log( snL1)o
+
+≤ b′nε 2
+
+> n
+
+,
+
+where the last inequality follows from the rate condition and the hyper-parameter bounds in Assumption 5.5. Consequently, 
+
+Π( An) ≥ exp( −b′nε 2
+
+> n
+
+), verifying condition (c). 
+
+B.4. Selection consistency (Theorem 5.9) 
+
+Denote qj = Π( rj = 1 |Dn) = E(rj |Dn) and An(εn) = 
+
+n
+
+θ : d pμθ , p μ∗
+
+ ≥ εn
+
+o
+
+.B.4.1. P ROOF OF THEOREM 5.9 Fix j ∈ { 1, . . . , J n}. By the definition of qj , we have 
+
+|qj − e∗ 
+
+> j
+
+| = E(( γj − e∗ 
+
+> j
+
+)|Dn) ≤ E   |γj − e∗ 
+
+> j
+
+| Dn
+
+ .
+
+Split according to An(4 εn):
+
+E   |γj − e∗ 
+
+> j
+
+| Dn
+
+ ≤ E
+
+h
+
+|γj − e∗ 
+
+> j
+
+|1{θ / ∈ An(4 εn)} Dn
+
+i
+
++ E
+
+h
+
+|γj − e∗ 
+
+> j
+
+|1{θ ∈ An(4 εn) Dn}
+
+i
+
+.
+
+Since |γj − e∗ 
+
+> j
+
+| ≤ 1, the second term is bounded by Π An(4 εn) | Dn
+
+, while the first term is controlled by ρn(4 εn) in Assumption 5.8. Taking the maximum over j gives 
+
+max  
+
+> j
+
+|qj − e∗ 
+
+> j
+
+| ≤ ρn(4 εn) + Π  An(4 εn) | Dn
+
+ P
+
+−→ 0.
+
+21 Sparse Bayesian Deep Functional Learning with Structured Region Selection 
+
+Then based on Theorem 2.3 stated in Sun et al. (2022), with an appropriate choice of prior hyperparameters, the estimated 
+
+ˆqj = P r (rj = 1 | ˆθ) based on the MAP estimate ˆθ and qj are approximately the same as n → ∞ . Thus, ˆqj is also a consistent estimator of e∗ 
+
+> j
+
+, which proves (i). Parts (ii) and (iii) follow immediately from (i). To prove (iv), recall that the estimated active region on the original domain is bΩ := S  
+
+> j∈bS1/2
+
+Ij , and the population (truncated) active region at resolution Jn is Ω∗ 
+
+> Jn
+
+= S
+
+> j∈S∗
+> Jn
+
+Ij . By Parts (i)–(iii), Pr( bS1/2 = S∗ 
+
+> Jn
+
+) → 1, hence also Pr( bΩ = Ω ∗ 
+
+> Jn
+
+) → 1.Therefore, it suffices to show |Ω∗ 
+
+> Jn
+
+∆Ω ∗| → 0.By the triangle inequality for symmetric differences, 
+
+|Ω∗ 
+
+> Jn
+
+∆Ω ∗| ≤ | Ω∗ 
+
+> Jn
+
+∆Ω ∗(2 κJn )| + |Ω∗(2 κJn )∆Ω ∗|. (27) For the first term, Lemma B.1(v) gives 
+
+|Ω∗ 
+
+> Jn
+
+∆Ω ∗(2 κJn )| ≤ | Ω∗(κJn ) \ Ω∗(2 κJn )| + Ω∗ 
+
+> Jn
+
+(κJn )+cloc ∆Jn \ Ω∗(κJn ) .
+
+The first summand is controlled by Assumption 5.2, since Ω∗(κJn ) \ Ω∗(2 κJn ) ⊆ { t ∈ Ω∗ : |β∗(t)| ≤ 2κJn } and 2κJn ↓ 0,hence |Ω∗(κJn ) \ Ω∗(2 κJn )| ≤ |{ t ∈ Ω∗ : |β∗(t)| ≤ 2κJn }| → 0.For the second summand, we relate Ω∗ 
+
+> Jn
+
+(κ) to Ω∗(κ) via a ∆Jn -enlargement. Indeed, by definition Ω∗(κ) ⊆ Ω∗ 
+
+> Jn
+
+(κ);moreover, since each spline support interval Ij has diameter at most ∆Jn , if t ∈ Ij for some j with Ij ∩ Ω∗(κ)̸ = ∅, then there exists s ∈ Ij ∩ Ω∗(κ) such that |t − s| ≤ diam( Ij ) ≤ ∆Jn , implying Ω∗ 
+
+> Jn
+
+(κ) ⊆ Ω∗(κ)+∆ Jn . Consequently, 
+
+Ω∗ 
+
+> Jn
+
+(κ)+cloc ∆Jn ⊆  Ω∗(κ)+∆ Jn 
+
++cloc ∆Jn = Ω ∗(κ)+( cloc +1)∆ Jn ,
+
+and hence 
+
+Ω∗ 
+
+> Jn
+
+(κJn )+cloc ∆Jn \ Ω∗(κJn ) ≤ Ω∗(κJn )+( cloc +1)∆ Jn \ Ω∗(κJn ) .
+
+Since Ω∗(κJn ) is a finite union of intervals, its boundary has finite cardinality; therefore there exists C∂ > 0 such that for all δ > 0, Ω∗(κJn )+δ \ Ω∗(κJn ) ≤ C∂ δ. Taking δ = ( cloc + 1)∆ Jn and using ∆Jn ≍ J−1 
+
+> n
+
+→ 0 yields 
+
+Ω∗ 
+
+> Jn
+
+(κJn )+cloc ∆Jn \ Ω∗(κJn ) → 0. This shows |Ω∗ 
+
+> Jn
+
+∆Ω ∗(2 κJn )| → 0.For the second term in (27), note that Ω∗ \ Ω∗(2 κJn ) ⊆ { t ∈ Ω∗ : |β∗(t)| ≤ 2κJn }, and hence 
+
+|Ω∗(2 κJn )∆Ω ∗| = |Ω∗ \ Ω∗(2 κJn )| ≤ {t ∈ Ω∗ : |β∗(t)| ≤ 2κJn } → 0
+
+by Assumption 5.2. Combining the above bounds gives |Ω∗ 
+
+> Jn
+
+∆Ω ∗| → 0, and therefore 
+
+|bΩ∆Ω ∗| ≤ | bΩ∆Ω ∗ 
+
+> Jn
+
+| + |Ω∗ 
+
+> Jn
+
+∆Ω ∗| P
+
+−→ 0,
+
+which completes the proof of (iv). 
+
+## C. Detailed simulation settings and additional simulation results 
+
+Following the functional-covariate generation mechanism in AdaFNN, we generate Xi(·) from a truncated cosine expansion on T = [0 , 1] . Let ϕ1(t) ≡ 1 and ϕk(t) = √2 cos  (k − 1) πt  for k = 2 , . . . , K with K = 50 , and set Xi(t) = 
+
+PKk=1 cik ϕk(t). We draw cik = zkrik with rik 
+
+> i.i.d.
+
+∼ Unif( −√3, √3) and z1 = 20 , z2 = z3 = 15 , and zk = 1 for k ≥ 4.We observe each curve on a discrete grid over [0 , 1] .We consider three localized settings for β(·), which we label as Simple , Medium , and Complex according to increasing difficulty in region recovery. Let T (t; a, b ) := ( t − a)( b − t)1{t ∈ [a, b ]} and let ˜T (t; a, b ) denote its normalized version on [a, b ] (so that max t∈[a,b ] ˜T (t; a, b ) = 1 ). Thus, on each active interval, β(·) has a smooth quadratic bump that vanishes at the endpoints, and multiple active intervals are represented by sums over disjoint bumps. Specifically, we use: (i) ( Simple ) a single centered bump on [0 .4, 0.6] , β(t) = 5 ˜T (t; 0 .4, 0.6) ; (ii) ( Medium ) a single boundary-adjacent bump on [0 .1, 0.3] , β(t) = 5 ˜T (t; 0 .1, 0.3) ; and (iii) ( Complex ) two separated narrow bumps with within-region oscillation. Let W = [ a1, b 1] ∪ [a2, b 2] with (a1, b 1) = (0 .05 , 0.15) and (a2, b 2) = (0 .75 , 0.85) , and set β(t) = 2.5 P2 
+
+> m=1
+
+˜T (t; am, b m) sin  2π(t + 0 .1) . The shapes of the three β(t) types are illustrated in Figure 6. 22 Sparse Bayesian Deep Functional Learning with Structured Region Selection 0.0 0.2 0.4 0.6 0.8 1.0 
+
+t
+
+> 0
+> 1
+> 2
+> 3
+> 4
+> 5
+> (t)
+
+Simple      
+
+> 0.0 0.2 0.4 0.6 0.8 1.0
+
+t
+
+> 0
+> 1
+> 2
+> 3
+> 4
+> 5
+
+Medium      
+
+> 0.0 0.2 0.4 0.6 0.8 1.0
+
+t
+
+> 1
+> 0
+> 1
+> 2
+
+Complex 
+
+Figure 6. Illustration of the three types of coefficient functions β(t) used in simulations: Simple (single interior bump), Medium (single boundary bump), and Complex (two separated oscillating bumps). Linear Logic Sin Composite Low SNR High SNR Low SNR High SNR Low SNR High SNR Low SNR High SNR 
+
+> Simple  Medium  Complex sBayFDNN cFuSIM BFRS SLoS sBayFDNN cFuSIM BFRS SLoS sBayFDNN cFuSIM BFRS SLoS sBayFDNN cFuSIM BFRS SLoS sBayFDNN cFuSIM BFRS SLoS sBayFDNN cFuSIM BFRS SLoS sBayFDNN cFuSIM BFRS SLoS sBayFDNN cFuSIM BFRS SLoS 0.2 0.4 0.6 0.8 1.0 0.2 0.4 0.6 0.8 1.0 0.2 0.4 0.6 0.8 1.0 Recall  sBayFDNN cFuSIM BFRS SLoS
+
+Figure 7. Recall values across g functions, SNR settings, and β(t) scenarios. 
+
+To vary the nonlinearity of the response mechanism, we consider four choices of the link function g∗ with increasing complexity: (i) linear g∗(u) = u; (ii) logistic-type g∗(u) = {1 + exp( u)}−1; (iii) sinusoidal g∗(u) = sin( u); and (iv) a composite link g∗(u) = tanh( u) + sin(4 u) exp( −0.01 u2).Finally, given a draw of Xi(·) and a choice of (β, g ∗), we generate the response as 
+
+Yi = g∗
+
+Z 10
+
+Xi(t)β(t) dt 
+
+
+
++ εi, εi
+
+i.i.d. 
+
+∼ N (0 , σ 2
+
+ε ).
+
+To make noise levels comparable across settings, we calibrate additive Gaussian noise by a target signal-to-noise ratio, 
+
+SNR = Var( signal )/Var( noise ). In all simulations, the latent curves Xi(·) generate the responses above, but the learning algorithms observe only discretely sampled noisy curves obtained by adding i.i.d. Gaussian measurement noise at SNR = 10 
+
+on the observation grid. The response noise variance σ2
+
+ε is chosen so that the resulting responses attain the target response SNR (we consider SNR ∈ { 5, 10 }) in each scenario. When required, we apply a denoising step to the noisy curve observations before constructing spline features. For each scenario, we simulate 100 replicates and summarize the results in Figures 2, 4, 7, and 8. 23 Sparse Bayesian Deep Functional Learning with Structured Region Selection Linear Logic Sin Composite Low SNR High SNR Low SNR High SNR Low SNR High SNR Low SNR High SNR 
+
+> Simple  Medium  Complex sBayFDNN cFuSIM BFRS SLoS sBayFDNN cFuSIM BFRS SLoS sBayFDNN cFuSIM BFRS SLoS sBayFDNN cFuSIM BFRS SLoS sBayFDNN cFuSIM BFRS SLoS sBayFDNN cFuSIM BFRS SLoS sBayFDNN cFuSIM BFRS SLoS sBayFDNN cFuSIM BFRS SLoS 0.2 0.4 0.6 0.8 1.0 0.2 0.4 0.6 0.8 1.0 0.2 0.4 0.6 0.8 1.0 Precision  sBayFDNN cFuSIM BFRS SLoS
+
+Figure 8. Precision values across g functions, SNR settings, and β(t) scenarios. 
+
+## D. Details for the Real-world Datasets 
+
+Implementation details. Relative to the simulation defaults in Appendix A.1, we keep the same network architecture and use mini-batch size 32. For smaller-sample real datasets, we recommend a less aggressive first-layer sparsification prior to mitigate underfitting; accordingly, we use (λn, σ 20,n , σ 21,n ) = (10 −1, 10 −5, 5 × 10 −2) for Tecator, Bike, and IHPC. (Unless otherwise stated, other hyperparameters follow Appendix A.1.) 
+
+ECG. The ECG dataset is from the EchoNext dataset on PhysioNet (Elias & Finer, 2025; Goldberger et al., 2000) and downloaded from https://physionet.org/content/echonext/1.1.0/. To reduce phase variability, we detect R-peaks and align each waveform to the detected R-peak, extract a fixed-length beat-centered window, and resample it to a common grid of length L = 256 at 250 Hz, following standard ECG preprocessing practice (Kachuee et al., 2018; Makowski et al., 2021). To better approximate an i.i.d. sample, we remove repeated measurements from the same subject; after deduplication, the final sample sizes are 26,192/4,618/5,434 for train/validation/test, equal to the numbers of unique patients in each split. The window length is selected using the training split only by screening candidate pre/post windows and choosing the configuration that minimizes variability of the aligned R-peak location across subjects (trimmed standard deviation below 
+
+0.03 on the normalized phase), which yields a symmetric window of 0.3 s before and 0.3 s after the R-peak. To adjust for scalar covariates, we residualize the response by fitting an OLS regression on the training split (age, sex, acquisition year, location setting, and race/ethnicity) and applying the fitted adjustment to validation/test splits. For ECG, we use a higher-capacity network (7 hidden layers of width 512; total depth 8) trained with mini-batch size 512 and learning rate 
+
+5 × 10 −4; we consider J = {180 , 200 , 220 } and use B-splines of degree 8 to accommodate the larger sample size and sharply localized QRS morphology. To assess region identification, we define silver-standard intervals on the original domains and then map them to the normalized domain T = [0 , 1] induced by our fixed-window. For ECG, we use a 120 ms window (Yu et al., 2003; Hummel et al., 2009) centered at the R peak, i.e., [−0.06 , 0.06] seconds relative to the R peak, as a silver-standard proxy for the QRS complex extent. 
+
+Tecator. The Tecator dataset is downloaded from https://lib.stat.cmu.edu/datasets/tecator. It contains near-infrared ab-sorbance spectra of 240 meat samples measured on 100 wavelength channels ranging from 850 nm to 1,050 nm, together with moisture (water), fat and protein percentages determined by analytic chemistry. We use water as the response and follow the official split (129 training, 43 monitoring/validation, and 43 testing samples). Relative to the simulation defaults in Appendix A.1, we keep the same network architecture but use mini-batch size 32. We use J = {80 , 100 , 120 }. We use 24 Sparse Bayesian Deep Functional Learning with Structured Region Selection 
+
+the water-related absorption band around 970–980 nm(van Kollenburg et al., 2021) and define the silver-standard wavelength interval as [965 , 985] nm. The interval is then mapped to the normalized domain T = [0 , 1] via wavelength normalization. 
+
+Bike. We use the Bike Sharing dataset (Fanaee-T, 2013) in its hourly-resolution form and represent each day as a functional observation with T = 24 equally spaced time points on T = [0 , 1] . The dataset can be obtained from https://archive.ics.uci.edu/dataset/275/bike%2Bsharing%2Bdataset. We define the response as the total demand over the next 7 days and adopt a chronological train/validation/test split with sample sizes 453 /97 /98 (total N = 648 ), covering the date range 2011-01-16 to 2012-12-30 (train end: 2012-06-12; validation end: 2012-09-17). We use J = {8, 10 , 12 , 14 }.
+
+IHPC. We use the Individual Household Electric Power Consumption (IHPC) dataset from the UCI Machine Learning Repository https://archive.ics.uci.edu/dataset/235/individual+household+electric+power+consumption (Hebrail & Berard, 2006). We use the minute-averaged global active power trajectory as the functional input, yielding daily curves of length 
+
+T = 1440 on T = [0 , 1] . After restricting to complete days and constructing next-day prediction pairs, we obtain 
+
+N = 1290 samples and use a chronological train/validation/test split with sample sizes 672 /329 /289 , spanning 2006-12-17 to 2010-11-24.We use J = {15 , 20 , 30 , 40 }.25 Sparse Bayesian Deep Functional Learning with Structured Region Selection 
+
+Algorithm 1: Sparse DNN elicitation with projection-size selection 
+
+Input: Dtr = {(Xi, Y i)}ntr 
+
+> i=1
+
+, Dva = {(Xi, Y i)}nva 
+
+> i=1
+
+; candidate projection dimensions J = {J1, . . . , J M }; basis specification for {Bj (t)}j≥1; random restarts R; hyperparameters σ20,n , σ 21,n , σ 2, λ n; noise variance σ2 
+
+> ε
+
+;
+
+Crit ∈ { evidence , val }.
+
+Output: Selected projection dimension J⋆, final MAP parameter bθ, and selected feature mask bγ.
+
+foreach J ∈ J do Step 0 (projection). Construct {B1(t), . . . , B J (t)} and compute ηJ (X) for all (X, Y ) ∈ D tr ∪ D va .; 
+
+for r = 1 , . . . , R do Step 1 (initialize). Randomly initialize θ.; 
+
+Step 2 (MAP training). Obtain 
+
+bθJ,r ∈ arg min  
+
+> θ
+
+Ln,J (θ) = 12σ2
+
+> ε
+
+X
+
+> (Xi,Y i)∈D tr
+
+
+
+Yi − fθ (ηJ (Xi)) 
+
+2
+
+− log π(θ).
+
+Step 3 (validation score). Set vJ,r := MSE 
+
+ bθJ,r ; Dva 
+
+
+
+.; 
+
+Step 4 (feature mask and evidence surrogate). Let cW(1)  
+
+> J,r
+
+∈ Rw×J be the first-layer weight matrix in bθJ,r .For j = 1 , . . . , J , set 
+
+γJ,r,j = 1
+
+ cW(1)  
+
+> J,r, :,j
+> 22
+
+> τ n
+
+
+
+, τn := log  (1 − λn)/λ n
+
+ + w 
+
+> 2
+
+log( σ21,n /σ 20,n )
+
+> 12σ20,n
+
+− 12σ21,n 
+
+.
+
+Denote bγJ,r := ( γJ,r, 1, . . . , γ J,r,J )⊤ and construct the evidence surrogate bθ s 
+
+> J,r
+
+by replacing cW(1)  
+
+> J,r
+
+with 
+
+cW(1)  
+
+> J,r
+
+diag( bγJ,r ) (used only for evidence computation).; 
+
+Step 5 (evidence score; post-sparsification). Compute ℓJ,r := log Ev 
+
+ bθ s 
+
+> J,r
+
+; Dtr 
+
+
+
+.; 
+
+Step 6 (aggregate over restarts). Set ¯ℓJ := R−1 PRr=1 ℓJ,r and ¯vJ := R−1 PRr=1 vJ,r .; 
+
+Step 7 (select J). if Crit = evidence then 
+
+J⋆ ∈ arg max J∈J ¯ℓJ .; 
+
+else 
+
+J⋆ ∈ arg min J∈J ¯vJ .; 
+
+Step 8 (select final restart at bJ). r⋆ ∈ arg min r∈{ 1,...,R } vJ⋆,r ; bθ ← bθJ⋆,r ⋆ ,; 
+
+bγ ← bγJ⋆,r ⋆ .; 
+
+return (J⋆, bθ, bγ).26

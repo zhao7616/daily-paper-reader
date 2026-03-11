@@ -1,0 +1,975 @@
+Title: Prognostics of Multisensor Systems with Unknown and Unlabeled Failure Modes via Bayesian Nonparametric Process Mixtures
+
+URL Source: https://arxiv.org/pdf/2602.19263v1
+
+Published Time: Tue, 24 Feb 2026 02:05:01 GMT
+
+Number of Pages: 36
+
+Markdown Content:
+# Prognostics of Multisensor Systems with Unknown and Unlabeled Failure Modes via Bayesian Nonparametric Process Mixtures 
+
+Kani Fu a, Sanduni S Disanayaka Mudiyanselage b, Chunli Dai b and Minhee Kim a∗
+
+> a
+
+Department of Industrial and Systems Engineering, University of Florida, Gainesville, USA 
+
+> b
+
+School of Forest, Fisheries, and Geomatics Sciences, University of Florida, Gainesville, USA 
+
+Abstract 
+
+Modern manufacturing systems often experience multiple and unpredictable failure behav-iors, yet most existing prognostic models assume a fixed, known set of failure modes with labeled historical data. This assumption limits the use of digital twins for predictive maintenance, espe-cially in high-mix or adaptive production environments, where new failure modes may emerge, and the failure mode labels may be unavailable. To address these challenges, we propose a novel Bayesian nonparametric framework that unifies a Dirichlet process mixture module for unsupervised failure mode discovery with a neural network-based prognostic module. The key innovation lies in an iterative feedback mechanism to jointly learn two modules. These modules iteratively update one another to dynamically infer, expand, or merge failure modes as new data arrive while providing high prognostic accuracy. Experiments on both simulation and aircraft engine datasets show that the proposed ap-proach performs competitively with or significantly better than existing approaches. It also ex-hibits robust online adaptation capabilities, making it well-suited for digital-twin-based system health management in complex manufacturing environments. The code will be made publicly available on GitHub upon the publication of this paper. 
+
+Keywords: Failure mode identification; RUL prediction; Predictive maintenance; Digital twin. 
+
+# 1 Introduction 
+
+Unexpected failures in manufacturing systems can have significant consequences, including production downtime, safety hazards, and logistical disruptions. To reduce these risks, prognostics aims to accurately predict the remaining useful lifetime (RUL) of a given system based on its current and historical condition monitoring observations (Liu et al., 2013). Driven by advances in sensing technologies, modern manufacturing systems are increasingly equipped with multiple sensors to capture more comprehensive information about real-time system health status (Kim et al., 2021). Prognostics based on multisensor signals has been widely applied across various industries, such as aircraft engines (Saxena et al., 2008), batteries (Goebel et al., 2008), and electrical systems (Liu et al., 2018). Despite these advances, accurate prognostics remain challenging due to increasingly complex failure mechanisms and operating conditions. 1
+
+> arXiv:2602.19263v1 [stat.AP] 22 Feb 2026
+
+Traditional prognostic studies typically assume that systems operate under a single failure mode (Li et al., 2025; Kim et al., 2019). In reality, however, manufacturing systems frequently experience multiple failure modes, each originating from different physical degradation processes. For example, aircraft engines commonly experience separate failure modes related to different components, such as the high-pressure compressor and the fan (Saxena et al., 2008). Real-world applications indicate that these various failure modes significantly influence degradation trajectories and the lifespan of systems. As a result, prognostic models that assume a single failure mode may lack sufficient accuracy in such domains. Integrating failure mode identification with system prognostics is thus essential for comprehensive and effective health management. Motivated by these needs, recent literature has begun incorporating multi-failure-mode infor-mation into prognostics (Li et al., 2022; Wang et al., 2024a; Fu et al., 2025). While some existing approaches represent important advancements, they often rely on strong assumptions: (i) the num-ber of failure modes is fixed and known in advance, and (ii) the failure modes of historical (failed) systems are available. Both assumptions are often violated in non-stationary and complex systems. In high-mix, low-volume, or rapidly evolving manufacturing environments (Tomaˇ sevi´ c et al., 2021; Wan et al., 2020), new failure modes can emerge under unseen requirements, environments, or workloads. In this study, “evolving (emerging)” failure modes refer to the possibility that new failure modes may appear in the population over time, rather than an individual system switch-ing modes during its life. In addition, systems that fail in the field are often simply replaced or discarded without thorough failure analysis due to cost, time, or operational constraints, leaving failure modes (labels) unknown. These realities create a critical gap for failure mode identification and prognostics. To address these limitations that presuppose fixed and fully labeled failure modes, we develop a generalizable and adaptive failure mode identification and prognostics framework that is suited to multi-sensor systems operating in complex and non-stationary environments. The proposed framework jointly addresses failure mode identification and RUL prediction through an integrated modeling architecture. A Dirichlet Process Mixture Model (DPMM) performs unsupervised failure mode discovery, while a neural network-based prognostics module predicts RUL based on both diagnostic information and multi-sensor data. The key novelty lies in how these two components iteratively update and ‘mutually’ inform each other, continuously refining and improving the prog-nostic accuracy. The resulting model is capable of dynamically expanding to incorporate newly emerging failure modes or merging redundant ones. 2In summary, the main contributions of this study are as follows: 
+
+• We propose a novel Bayesian nonparametric methodology to integrate a DPMM for unsupervised failure mode identification with a neural network-based RUL prognostics in a unified manner. 
+
+• Our method establishes an iterative feedback mechanism between failure mode identification and prognostics. 
+
+• The proposed model is capable of inferring the number of failure modes from unlabeled historical (failed) systems and updating it online under non-stationary system dynamics. 
+
+• Unlike existing works, our proposed method does not assume knowledge of types and number of failure modes in advance, which provides a more general and practically applicable solution. 
+
+• Through comprehensive simulation and real-world case studies, we demonstrate the efficiency, flexibility, and robustness of the proposed framework in comparison with existing methods. The remainder of this paper is organized as follows: Section 2 reviews the existing literature in system prognostics with or without failure mode identification. Section 3 provides background knowledge. Section 4 introduces the proposed DPMM-RUL framework. Section 5 presents simu-lation studies to evaluate the accuracy, robustness, and sensitivity of the proposed method under various scenarios. Section 6 presents a case study of aircraft gas turbine engines to further val-idate the proposed method. Finally, Section 7 concludes this paper and outlines future research directions. 
+
+# 2 Literature Review 
+
+Research on system failure mode identification and prognostics has advanced substantially over the past decades. Early studies (Liu et al., 2013; Bian and Gebraeel, 2014) treated failure mode identification and prognostics as separate tasks, and most prognostics models were developed assuming a single failure mode. As manufacturing systems grew more complex, recent studies began to recognize multiple failure modes, each governed by distinct physical degradation processes. This has driven a significant methodological change toward more integrated failure mode identification-prognostics modeling. In the remainder of this section, we will review this evolution and highlight key milestones in failure mode identification and prognostics. 
+
+# 2.1 Prognostics without Failure Mode Identification 
+
+Prognostic models are generally divided into two main categories: physics-based and data-driven approaches. Physics-based approaches describe the degradation process of systems using 3mathematical models derived from physical laws. While theoretically grounded, these models often demand a deep understanding of system-specific degradation behaviors, which can be difficult to obtain for increasingly complex modern equipment. More detailed reviews of physics-based models can be found in Soleimani et al. (2021). In contrast, data-driven approaches learn patterns from historical and real-time sensor data to predict RUL. They often come with a low implementation cost, especially when detailed physical modeling is impractical or infeasible (Vachtsevanos et al., 2006). Among various data-driven methods, covariate-based hazard models, pioneered by Cox’s semi-nal work (Cox, 1972), have been widely applied for external failure factor analysis in various domains (Love and Guo, 1991; Jardine et al., 1997; Lugtigheid et al., 2008). For instance, Huh et al. (2024) proposed a joint framework that models multi-sensor degradation signals using functional principal component analysis (FPCA) and characterizes time-to-event data through a Bayesian Cox model. Recently, a variety of neural network architectures have been explored in prognostics, including feed-forward neural networks (FFNNs), dynamic wavelet neural networks (DWNNs), and self-organizing maps (SOMs). Among them, FFNN is the most widely used due to its simplicity. For example, Wu et al. (2007) implemented a one-hidden-layer FFNN trained via the Levenberg-Marquardt algorithm to predict the lifetime percentage of bearings using real-time condition mon-itoring data, which included moving average degradation signals and operational time under worn conditions. Qiu et al. (2006) employed wavelet filtering to denoise vibration signals and used SOMs to detect faults and estimate RUL. To better manage the high dimensionality and complexity of modern sensor data, deep learning techniques have been introduced to extract meaningful representations. For instance, Sateesh Babu et al. (2016) and Li et al. (2022) applied deep convolutional neural networks (CNNs) to extract temporal features from sequential sensor inputs. Furthermore, recurrent neural networks (RNNs) (Guo et al., 2017), including their advanced forms such as Long Short-Term Memory (LSTM) (Huang et al., 2019; Kim and Liu, 2020) and Gated Recurrent Units (GRU) (Ni et al., 2022), have been widely adopted to model temporal dependencies and enhance the accuracy of RUL predictions. 
+
+# 2.2 Prognostics with Failure Mode Identification 
+
+As both systems and their operating conditions become complicated, research specifically com-bining failure mode identification with prognostics has gained attention. In the literature, two dominant modeling paradigms have emerged based on the physical characteristics of the system. 4The first approach is the competing risks approach (Wang and Pham, 2012; Song et al., 2016; Jiang et al., 2015; Rafiee et al., 2014; Peng et al., 2011; Fan et al., 2019). In this approach, each system is subject to several potential failure processes operating in parallel. The system fails when the earliest of these processes reaches its failure threshold. This scenario corresponds to a serial system, where the failure of any component results in overall system failure. Under common assumptions (e.g., independent failure processes), system reliability can be derived from the individual reliabilities of each failure mode. The second approach involves mixture models, where each system corresponds to a specific failure mode (Chehade et al., 2018; Song et al., 2019; Wang et al., 2024a; Fu et al., 2025). These models represent the population or its degradation trajectories as a mixture of latent, failure mode-specific behaviors. Each system is governed by a single dominant failure mode (DFM) throughout its lifecycle. Rather than multiple mechanisms competing simultaneously, one mechanism dominates the degradation process from the outset. For example, in bearings, once a crack initiates, stress concentration at the crack tip accelerates propagation far faster than competing mechanisms like general corrosion. The crack becomes the DFM, while other processes remain secondary throughout the bearing’s life. The proposed method also belongs to this second approach. Within the mixture model framework, several methods have been developed. Chehade et al. (2018) developed a composite failure-mode index through multi-sensor data fusion, enabling online estimation of mode-specific probabilities and subsequent polynomial degradation modeling. Song et al. (2019) extended this approach by sequentially addressing failure mode identification and RUL prediction using separate neural network branches. Wang et al. (2024a) further improved this by simultaneously learning failure mode identification and RUL prediction through a joint deep learning model, significantly enhancing overall predictive accuracy. Fu et al. (2025) removed the requirement for failure mode labels, but still required knowing the exact and fixed number of failure modes to cluster degradation trajectories inferred from low-dimensional manifold representations. Despite these advances, current approaches are facing several limitations. First, many meth-ods separately handle failure mode identification and RUL prognostics, potentially missing shared information between these closely related tasks (Wang et al., 2024b; Chen et al., 2022; Ramasso and Saxena, 2014). Second, these methods often assume a fixed and known number of failure modes, which can limit their adaptability to non-stationary and evolving environments where new failure modes may continuously appear. Third, they typically presume that the failure modes of historical (failed) systems are known. However, in practice, failed systems are often discarded 5Figure 1: (a) Stick-breaking process. (b) A sample draw from a DP. 
+
+without identifying their primary failure mechanisms. These limitations highlight the need for more robust and adaptive approaches that can jointly learn failure mode and prognostic repre-sentations, autonomously uncover the underlying failure mechanisms, and dynamically adapt to emerging mechanisms in real-world manufacturing systems. 
+
+# 3 Preliminary - Dirichlet Process and Stick-Breaking 
+
+The Dirichlet process (DP) is a stochastic process over probability measures (Teh, 2017). It is parameterized by a concentration parameter α and a base distribution H. A random probability measure G is said to follow a DP, denoted as: 
+
+G ∼ DP( α, H ), (1) when for any finite measurable partition {A1, . . . , A k}, the random vector ( G(A1), . . . , G (Ak)) fol-lows a Dirichlet distribution with parameters ( αH (A1), . . . , αH (Ak)). Here, H(Ai) denotes the probability mass that base distribution H assigns to the measurable set Ai, and G(Ai) is the corresponding random probability mass assigned by the random measure G.For constructive purposes, the DP can be represented using the stick-breaking process, as illustrated in Figure 1. This process can be interpreted as sequentially breaking a unit-length stick into an infinite number of segments, where each segment k represents the weight πk assigned to component k. Specifically, for k ≥ 1, the mixture weights πk are defined as: 
+
+πk = βkk−1Y
+
+> i=1
+
+(1 − βi), with βk ∼ Beta(1 , α ). (2) As the process continues, the weights satisfy P∞ 
+
+> k=1
+
+πk = 1 and the resulting distribution over 6π = {πk}∞ 
+
+> k=1
+
+is known as the Griffiths-Engen-McCloskey (GEM) distribution: 
+
+π | α ∼ GEM( α). (3) To complete the construction of a random probability measure, atoms θk are drawn independently from the base distribution H. The random measure G is then expressed as a weighted sum of Dirac delta measures: 
+
+G(A) = 
+
+> ∞
+
+X
+
+> k=1
+
+πkδθk . (4) Figure 1 (b) shows a sample draw (a random distribution) from a DP with base distribution 
+
+H = N (0 , 1) and concentration parameter α = 5. The DP serves as a prior distribution in the DPMM, which will be further explained in Section 4.1. 
+
+# 4 Proposed Method 
+
+This section presents our proposed methodology for addressing the two main challenges of failure mode identification and prognostics in complex and dynamic environments. Specifically, we aim to (i) automatically infer latent failure modes from multi-sensor data, and (ii) accurately predict the RUL of the system. An overview of the proposed framework is provided in Figure 2. The proposed framework consists of two modules: a DPMM-based failure mode identification module and an RUL predic-tion module. Section 4.1 introduces the Bayesian nonparametric modeling of the failure mode identification module. Section 4.2 introduces the failure mode informed RUL prognostics module. Section 4.3 outlines the parameter inference and update of both modules. Section 4.4 discusses the iterative update between the two modules through the online variational inference. 
+
+# 4.1 Nonparametric Modeling of Degradation Data under Unknown and Unlabeled Failure Modes 
+
+We begin by formulating the failure mode identification problem. Consider N systems whose degradation behaviors are governed by multiple, distinct but unknown failure mechanisms. Each system is monitored by S sensors. The functional relationship between these multi-sensor signals and the system’s RUL is unknown and potentially nonlinear and varies depending on its failure mode. Neither the types nor the number of failure modes is known in advance, and thus a modeling framework is required to automatically discover and characterize these modes from data. 7Figure 2: Overview of the DPMM-RUL 
+
+For system n, let ln,s,t denote the reading of sensor s ∈ { 1, . . . , S } at time t. Since different systems operate for different durations, the total number of time steps (e.g., operating cycles) 
+
+Tn may vary across systems. To manage the varying operational durations Tn across systems, for each system n, its multi-sensor signals are converted to a representation with fixed-length ¯T . Multiple strategies have been proposed in literature to achieve this, including truncation and padding, temporal warping and summary feature extraction. For instance, truncation and padding set a reference length ¯T (e.g., the mean duration across systems ¯T = 1
+
+> N
+
+PNn=1 Tn). If Tn > ¯T , the sequence retains the last (most recent) ¯T cycles. If 
+
+Tn ≤ ¯T , the sequence is padded to length ¯T using the last observed sensor signals. This preserves the most recent degradation behavior prior to failure. The choice of preprocessing depends on domain knowledge and users’ needs, e.g., whether absolute time-to-failure or degradation trajectory shape plays a primary role in failure mode identification. In the numerical studies, we further investigate the effect of different preprocessing strategies on inferred failure modes and prognostic performance. The resulting complete dataset of the multivariate sensor signals is represented as: 
+
+l = {ln}Nn=1 ,
+
+where ln is signals from system n and can be flattened into a vector of fixed dimension D = S × ¯T .The goal of our failure mode identification module is to infer the latent failure mode from these 8collected sensor signals. A natural approach is to model the heterogeneous population as a finite mixture: 
+
+p(ln|θ, π ) = 
+
+> K
+
+X
+
+> k=1
+
+πkF (ln|θk), (5) where K is the number of failure modes, π = {π1, ..., π K } are mixture weights, θ = {θ1, ..., θ K }
+
+are failure mode-specific parameters, and F (·| θk) is the likelihood of sensor readings under failure mode k. In other words, each failure mode k is governed by parameters θk that determine the sensor data distribution. This mixture model, in fact, has been widely used in multi-failure mode prognostic studies (Jiang et al., 2016). However, a critical limitation is that the number of failure modes K must be fixed and spec-ified in advance. In real-world prognostic applications, where underlying failure mechanisms are uncertain or evolving, misspecifying K can lead to poor RUL predictions. It is therefore critical to treat K as an unknown quantity and infer it jointly with the model parameters from data. To overcome this limitation, we formulate a hierarchical Bayesian nonparametric model based on the DP prior. The DP prior naturally induces a countably infinite set of potential clusters (failure modes), thereby allowing the data to automatically determine how many failure modes are actually needed. This yields a flexible mixture model in which multiple systems can share the same cluster assignment, and new clusters can be created automatically if justified by the data. Building on the DP construction introduced in Section 3, let {θk}∞ 
+
+> k=1
+
+denote the infinite col-lection of potential failure mode-specific parameters generated from a base distribution H with hyperparameter λ. The infinite-dimensional mixture weight vector π is defined by stick-breaking variables {βk}∞ 
+
+> k=1
+
+with concentration parameter α.Each system n is assigned a latent failure mode indicator zn ∈ { 1, 2, ... } drawn from the weights 
+
+π. The observed sensor sequence ln for system n is then generated according to a likelihood model 
+
+F conditioned on the specific failure mode parameters θzn . The resulting hierarchical model is defined as follows: 
+
+θk | H ∼ H(λ),βk | α ∼ Beta(1 , α ),zn | { βk}∞ 
+
+> k=1
+
+∼ Cat( π(β)) , and 
+
+ln | θzn ∼ F (ln|θzn ).
+
+(6) The graphical model representation of the proposed hierarchical model is shown in Figure 3. The 9Figure 3: Graphical representation of the proposed framework. Shaded nodes indicate observed variables, while unshaded nodes indicate latent (unobserved) variables or parameters. 
+
+observed signals ln and underlying parameters θk are then embedded into a latent representation 
+
+xn. The prognostic module, which will be explained in the next subsection, maps this latent representation to the system’s RUL yn through a deep learning function ϕg.The probabilistic failure mode assignments inferred by the DPMM provide a cluster representa-tion. However, failure mode identification alone does not directly yield system prognostics such as RUL. In the next subsection, we introduce a neural network-based prognostics model that explicitly conditions RUL prediction on the inferred failure mode information. It is important to note that, unlike existing DPMM-based models that employ mixture compo-nents only to capture different contextual information (e.g., Kim and Kim (2023)), the proposed framework applies DPMM to jointly solve two main challenges in system prognostics simultane-ously. As a result, the role of the DPMM in our framework extends beyond density modeling. It serves as one component within a mutually informed learning architecture. 
+
+# 4.2 Failure Mode-Informed RUL Prognostics 
+
+Building on the failure modes inferred by the DPMM in Section 4.1, we design a RUL prognostic module that incorporates both the observable sensor signal and the latent failure modes. Rather than directly mapping sensor signals to RUL, the proposed module adaptively adjusts its predictions based on the inferred failure mode. Given the sensor signal data, training samples are constructed using a sliding window of length 
+
+ξ. Specifically, the ith window extracted from system n, denoted by ˆln,i ∈ RS×ξ, is defined as: ˆln,i = {ln,t }i+ξ−1 
+
+> t=i
+
+,
+
+10 Figure 4: Neural network structure of RUL prediction model 
+
+where ln,t = ( ln, 1,t , . . . , l n,S,t )⊤ ∈ RS and i ∈ { 1, ..., T n − ξ + 1 }. This results in a total of PNn=1 (Tn −
+
+ξ + 1) training samples. The RUL corresponding to the ith sample ˆln,i is then yn,i = Tn − (i + ξ − 1). The prognostic module processes each sample through three neural networks with distinct roles. The first is a signal encoding network ϕl : RS×ξ → Rdu , transforming the signal data ˆln,i into a latent signal embedding ϕl(ˆln,i ) ∈ Rdu . The second is a failure-mode context network ϕθ : Rdθ → Rdv that maps the failure mode parameter θzn ∈ Rdθ to a compact latent context embedding ϕθ(θzn ) ∈ Rdv .These two latent representations are concatenated to form a joint feature vector: 
+
+xn,i = [ ϕl(ˆln,i ); ϕθ(θzn )] , (7) which is then processed by a prediction network ϕg : Rdu+dv → R to estimate the RUL: ˆyn,i = ϕg(xn,i ).
+
+The proposed prognostic module implicitly adapts to different degradation behaviors under different failure modes. The proposed framework is not restricted to a specific network architecture. Various neural network structures capable of modeling temporal sensor data may be employed without altering the underlying formulation. In Sections 5 and 6, standard multilayer perceptrons (MLPs) are adopted for simplicity and efficiency as illustrated in Figure 4. The signal model ϕl is implemented 11 as a three-layer MLP yielding a 64-dimensional embedding ( du = 64). The context model ϕθ is a single-layer MLP yielding a 16-dimensional embedding ( dv = 16). These representations are concatenated into an 80-dimensional feature vector xn,i .Given the failure mode identification and prognostic modules, the next step is to estimate their parameters. In the following subsection, we describe the inference and update procedures for each module, which serve as the foundation for the iterative learning introduced in Section 4.4. 
+
+# 4.3 Inference and Parameter Estimation 
+
+This section describes the inference and parameter estimation procedures for the failure mode identification and prognostics modules. It is worth mentioning that, intuitively, we can model a joint distribution including all variables p(l, y, z, θ, β ) and conduct inference. However, the high-dimensional l overshadows the RUL score y, and this standard approach results in significantly high RUL prediction errors. This joint inference approach will be studied as a benchmark in Sections 5 and 6. To address this, we present the variational inference for the DPMM assuming fixed prognostic parameters, and the training of the prognostics model given fixed and updated failure mode assignments. 
+
+# 4.3.1 Variational Inference of Failure Mode Identification Module 
+
+The DPMM-based failure mode identification module updates the posterior over the latent failure mode assignments z = {zn}Nn=1 , the failure mode parameters θ = {θk}∞ 
+
+> k=1
+
+and the stick-breaking variables β = {βk}∞
+
+> k=1
+
+. As described in Section 4.1, sensor signals from each system are aligned to a fixed length ¯T , resulting in a fixed-dimensional observation ln ∈ RD. The joint distribution can be written as: 
+
+p(l, z, θ, β ) = 
+
+> N
+
+Y
+
+> n=1
+
+F (ln | θzn )Cat( zn | π)
+
+> ∞
+
+Y
+
+> k=1
+
+Beta( βk | 1, α )H(θk | λ), (8) where π is constructed via the stick-breaking process, i.e., πk = βk
+
+Qk−1 
+
+> j=1
+
+(1 − βj ). We assume that F is a multivariate Gaussian distribution and H is its conjugate Normal-Inverse-Wishart (NIW) distribution: 
+
+F (ln | θk) = N (ln | μθk , Σθk ), (9) 
+
+H(θk | λ) = N IW (μθk , Σθk | λ), (10) 12 where θk = {μθk , Σθk } denotes the mean vector and diagonal covariance matrix characterizing the 
+
+k-th failure mode and λ = {m0, κ 0, ν 0, Ψ0} are the hyperparameters of the base distribution. Since the exact posterior p(z, θ, β | l) is intractable, we resort to a mean-field variational in-ference by introducing a tractable variational distribution q(z, θ, β ) that is fully factorized across latent variables and parameters: 
+
+q(z, θ, β ) = 
+
+> N
+
+Y
+
+> n=1
+
+q(zn)
+
+> K−1
+
+Y
+
+> k=1
+
+q(πk)
+
+> K
+
+Y
+
+> k=1
+
+q(θk), (11) with: 
+
+q(zn) = Cat( zn | ˆrn1, . . . , ˆrnK ), (12) 
+
+q(βk) = Beta( βk | ˆα0,k , ˆα1,k ), (13) 
+
+q(θk) = N IW (θk | ˆλk). (14) where ˆ rn = {ˆrnk }Kk=1 is the parameter of a categorical distribution and represents the responsibility of failure modes for the n-th system, ˆ α0,k and ˆ α1,k are parameters for Beta distribution, and ˆλk is the variational posterior parameters for failure mode k, i.e., ˆλk = {mk, κ k, ν k, Ψk}.To ensure tractability, the variational distribution is truncated at a fixed level K. It is impor-tant to note that this truncation only applies to the variational approximation, not the underlying DP prior (Blei and Jordan, 2006). A sufficiently large K allows the variational posterior to cap-ture all necessary failure modes without fully utilizing all K components. The DP prior promotes sparsity by assigning negligible weights to redundant components. More importantly, the proposed method introduces a birth-merge mechanism (Section 4.4) to further enable the model to automat-ically increase or decrease the effective number of active failure modes during training. Under the truncation, the final mixture weight is set to ensure that the mixture weights sum to 1. Our goal is to minimize the Kullback-Leibler (KL) divergence to the true posterior: 
+
+q∗(z, θ, β ) = arg min  
+
+> q
+
+KL  q(z, θ, β ) | p(z, θ, β | l). (15) Instead of directly minimizing the KL divergence, we equivalently maximize the Evidence Lower 13 Bound (ELBO), which provides a tractable objective function for optimization: 
+
+LELBO (q) = E[log p(l, z, θ, β )] − E[log q(z, θ, β )] = E[log p(z, θ, β )] + E[log p(l | z, θ, β )] − E[log q(z, θ, β )] = E[log p(l | z, θ, β )] − KL  q(z, θ, β ) | p(z, θ, β ) (16) The first term, E[log p(l | z, θ, β )], represents the expected log-likelihood under the variational distribution, which encourages parameter configurations that accurately model the observed signal data. The remaining terms constitute the KL divergence KL( q(z, θ, β )|p(z, θ, β )), which regularizes the variational posterior toward the prior distributions, thereby preventing overfitting and ensuring proper Bayesian inference. Under the mean-field assumption, Equation (16) can be rewritten as: 
+
+LELBO (q) = Eq[log p(l | θ, z )] + Eq[log p(z | β)] + Eq[log p(β | α)] + Eq[log p(θ | λ)] 
+
+− Eq[log q(z)] − Eq[log q(β)] − Eq[log q(θ)] . (17) To optimize the ELBO in Equation (17), we adopt coordinate ascent variational inference (CAVI). For the jth factor q∗(ψj ), the optimal update is: 
+
+q∗(ψj ) ∝ exp  Eq−j [log p(ψj , ψ −j , l)]  , (18) where the logarithm is taken over the joint distribution of all latent variables and observations, and the expectation is taken over all latent variables except ψj . This allows for tractable updates when the joint distribution belongs to the exponential family, and the dependencies among latent vari-ables are simplified via the mean-field assumption. The full equations for updating the variational parameters in the algorithm are presented in the Appendices. 
+
+# 4.3.2 Training of Prognostics Module 
+
+We now describe the training procedure for the prognostics module. Given the current failure mode identification z and parameters θ, the failure mode context embedding ϕθ(θzn ) is fully de-termined for each system n. Together with the signal embedding ϕl(ˆln,i ), this defines the feature vector xn,i needed for RUL prediction. Let Φ denote the learnable parameters of the signal em-bedding, the failure-mode context embedding, and the fusion networks in the prognostics module. 14 The module is trained by minimizing the Root Mean Square Error (RMSE) between predicted and true RUL values: 
+
+LRUL (Φ) = 
+
+vuut 1
+
+PNn=1 (Tn − ξ + 1) 
+
+> N
+
+X
+
+> n=1
+> Tn−ξ+1
+
+X
+
+> i=1
+
+
+
+yn,i − ϕg([ ϕl(ˆln,i ); ϕθ(θzn )]) 
+
+2
+
+. (19) In practical deployment settings, data arrive sequentially and unobserved failure modes may appear. To accommodate such non-stationarity, the proposed learning procedure is therefore fully iterative, with model parameters updated continuously as new data become available. At the initial stage, all parameters are pretrained jointly for a limited number of epochs through gradient descent: Φ ← Φ − r∇ΦLRUL , (20) where r is the learning rate. After this initial pre-training phase, the parameters of the signal embedding network ϕl are fixed. Empirically, we observed that repeatedly updating these parameters in subsequent iterations yields little performance improvement while incurring unnecessary computational costs. In contrast, the failure mode context embedding network ϕθ and fusion network ϕg are updated continuously, as they must adapt to the constantly refined failure mode identification produced by the DPMM module. Accordingly, the iterative updates are given by 
+
+φθ ← φθ − r∇φθ LRUL and φg ← φg − r∇φg LRUL , (21) where φ· denotes the trainable parameters of network ϕ·.As the training proceeds, the number of inferred failure modes may change. Once the number of failure modes stabilizes over a sustained period, the model treats the current structure as locally converged. If a failure mode structure change is detected, such as the addition or removal of a failure mode, the signal embedding parameters φl are updated to accommodate such changes. This selective update strategy ensures the model preserves stable signal representations when the environment is stationary, while retaining flexibility to refine when the failure mode behaviors change. 15 4.4 Online Variational Inference for Interaction between Two Modules 
+
+We perform online learning by iteratively updating the failure-mode identification module and the prognostic module. Although traditional variational inference provides a principled approach for model updates, optimizing solely the ELBO can easily converge to locally optimal configurations due to the Dirichlet process “rich-get-richer” effect. To address these limitations, we propose an online variational inference framework that explic-itly incorporates prognostic feedback into the structural learning of failure modes. Specifically, we define a DPMM-RUL performance score, J , to guide these structural changes by coupling failure mode identification with prognostic accuracy. The DPMM-RUL performance score is defined as: 
+
+J (z, ϕ ) = Sil( z; l) − ω · L RUL (ϕ), (22) where Sil( z; l) is the Silhouette Index, serving as a geometric regularizer that encourages failure modes to be internally compact and externally well-separated in the signal space. LRUL (ϕ) is the RUL prediction loss, ensuring the failure mode identification is informed by the prognostic result, and ω > 0 is the trade-off coefficient tuned using K-fold cross-validation to balance failure mode identification performance against prediction accuracy. Under this framework, the proposed learning procedure seeks to increase J . After each round of updating the DPMM and RUL components, we apply birth and merge moves, which adaptively modify the number of active failure modes K during training, and make a structural change (i.e., a birth or merge move) if ∆ J ≥ 0. The efficiency of this score is further demonstrated in the ablation study in Section 5. 
+
+# 4.4.1 Birth Moves to Escape Local Optima 
+
+The birth move provides a mechanism for exploring new possible failure modes that may not be reachable through standard coordinate-ascent updates. We develop an online adaptation of the birth strategy inspired by Hughes and Sudderth (2013). For a selected failure mode k′, a subset of systems with responsibility ˆ rnk ′ ≥ rthreshold (e.g., rthreshold = 0 .1) are sampled. A separate DPMM with a small truncation level K′ is then fitted to this subset via variational inference for a limited number of iterations. From our simulation and case studies, we observed that the proposed method works well with a small value of K′ = 1 , 2, 3. The resulting local mixture components are tentatively added to the global mixture, expanding 16 the current mixture from truncation level K to K + K′. System-level failure mode assignments are recomputed based on the updated mixture model. At this stage, we do not evaluate the ELBO change associated with the new components. All births are initially accepted. Components that are empty, redundant, or overly similar to existing modes will be removed through the subsequent merge operation. 
+
+# 4.4.2 Merge Moves to Jointly Optimize Two Modules 
+
+The birth moves help the algorithm to escape from local optima. The merge move, on the other hand, serves as a mechanism by which prognostic feedback influences the failure mode structure. In the absence of prognostic information, the birth move might retain redundant failure modes that model noise rather than meaningful failure modes. To prevent this, we evaluate candidate pairs of failure modes for merging. Unlike standard approaches that rely solely on the ELBO (Hughes and Sudderth, 2013), we employ the joint per-formance criterion J to assess candidate merges. For each candidate pair, we simulate the merge, update the affected model components, and recompute J . A merge is accepted only if it leads to an improvement in the performance score. Intuitively, if distinguishing between two failure modes does not improve RUL prediction accuracy, treating them as separate modes is unnecessary. The birth and merge moves help further adjust the failure mode identification to ensure the final model structure is determined not just by sensor signal statistics as in approaches that identify fail-ure modes only based on sensor data (e.g., Fu et al. (2025)), but by the joint maximization of failure mode identification performance and RUL prediction accuracy without sacrificing interpretability. The complete birth-merge algorithm is summarized in Algorithm 1. 17 Algorithm 1 The birth and merge moves of DPMM-RUL 
+
+Require: Sensor signal dataset l, sample threshold rthreshold , current failure mode assignments zn,new truncation level K′
+
+Ensure: updated failure mode assignments z′ 
+
+> n
+> 1:
+
+Birth:  
+
+> 2:
+
+Randomly select a failure mode k′ 
+
+> 3:
+
+Sample a subset l′ ⊂ l by selecting systems whose responsibility ˆ rnk ′ ≥ rthreshold ; fit local DPMM with K′ initial failure modes  
+
+> 4:
+
+Tentatively add new failure modes to the global model  
+
+> 5:
+
+Reassign all z′ 
+
+> n
+
+over updated failure mode set  
+
+> 6:
+
+Merge:  
+
+> 7:
+
+For each failure mode pair ( ka, k b), where ka, k b ∈ { 1, ..., K } and ka̸ = kb, evaluate merge-candidate’s J 
+
+> 8:
+
+Reject the merge if ∆ J ≤ 0. Otherwise, accept the merge with the largest ∆ J 
+
+> 9:
+
+Reassign all z′ 
+
+> n
+
+over updated failure mode set The complete DPMM–RUL framework alternates between two stages. First, variational infer-ence is used as an inner optimization step to estimate latent failure mode assignments and param-eters for a fixed model structure. Second, birth and merge operations adapt the model structure using the RUL-informed performance score. The full procedure is summarized in Algorithm 2. 18 Algorithm 2 DPMM-RUL framework 
+
+Require: Original dataset D = {(ln, y n)}Nn=1 ; initial truncation level K; new truncation level K′;maximum iterations T
+
+Ensure: Learned number of failure modes, learned parameters of each DPMM failure mode 
+
+β1: K , μ θ1: K , Σθ1: K 
+
+> 1:
+
+Initialize the DPMM with K = 1, including variational parameters: ˆ rnk , μ λ1: K , Σλ1: K and Beta-distribution with α 
+
+> 2:
+
+Initialize RUL prediction network parameters  
+
+> 3:
+
+Initialize trained = False  
+
+> 4:
+
+repeat  
+
+> 5:
+
+DPMM Variational Inference:  
+
+> 6:
+
+Compute responsibilities ˆ rnk ∝ q(zn = k | ln, ˆθ, ˆβ) 
+
+> 7:
+
+Update {ˆθk, ˆβk} by maximizing the ELBO, obtaining LELBO  
+
+> 8:
+
+Assign failure mode labels zn = arg max k ˆrnk  
+
+> 9:
+
+Compute failure mode identification performance: Sil( {ln}, {zn}) 
+
+> 10:
+
+RUL Prediction Update:  
+
+> 11:
+
+for n = 1 , . . . , N do  
+
+> 12:
+
+for i = 1 , 2..., T n − ξ + 1 do  
+
+> 13:
+
+Mapping signals into embedding ϕl(ˆln,i ) 
+
+> 14:
+
+Mapping failure mode parameters into embedding ϕθ(θzn ) 
+
+> 15:
+
+Concatenate ϕl(ˆln,i ) and ϕθ(θzn ) into xn,i = [ ϕl(ˆln,i ); ϕθ(θzn ) ]  
+
+> 16:
+
+end for  
+
+> 17:
+
+end for  
+
+> 18:
+
+if trained == False then  
+
+> 19:
+
+Initial pretraining: Φ ← Φ − r∇ΦLRUL  
+
+> 20:
+
+trained = True  
+
+> 21:
+
+else  
+
+> 22:
+
+Freeze signal embedding parameters φl = φ(fixed)  
+
+> l
+> 23:
+
+Train using current failure mode labels zn: 
+
+> 24:
+
+φθ ← φθ − r∇φθ LRUL , φg ← φg − r∇ϕg LRUL  
+
+> 25:
+
+end if  
+
+> 26:
+
+Online variational inference (Birth and Merge):  
+
+> 27:
+
+if increment of the performance score ∆ J ≥ 0 then  
+
+> 28:
+
+Perform birth move  
+
+> 29:
+
+Perform merge move  
+
+> 30:
+
+Re-infer {zn} and recompute LRUL after accepted birth/merge moves  
+
+> 31:
+
+end if  
+
+> 32:
+
+until Number of failure modes converge or maximum iterations reached Note that the overall learning procedure is not purely derived from a posterior of a DPMM under a fixed prior and thus does not guarantee monotonic improvement of the ELBO. Instead, the inferred failure mode structure aims to balance statistical consistency in the sensor space (strict Bayesian optimality) with prognostic relevance for RUL prediction (practical usefulness). In the following sections, we compare the proposed method with a purely posterior-driven DPMM 19 Figure 5: Simulation sensor signal plots for the eight sensor signals of three systems (different shapes) per failure mode. 
+
+approach to highlight the impact of incorporating prognostic considerations into structural learning. 
+
+# 5 Simulation studies 
+
+To validate the proposed methodology and demonstrate its robustness across different condi-tions, we conduct a series of numerical experiments using simulated system degradation signals. Section 5.1 outlines the procedure for generating the degradation data. Section 5.2 evaluates the model’s performance under a four-mode scenario and investigates the impact of failure mode com-plexity and the sensitivity against hyperparameters in a stationary environment. Section 5.3 shows the model’s online learning capability under a non-stationary environment, i.e., where a new failure mode emerges. 
+
+# 5.1 Data Generation 
+
+We study a set of N systems, each of which contains eight sensors ( S = 8) and is governed by one of four possible failure modes, K = {A, B, C, D }. Figure 5 shows the degradation of sensor signals of three randomly selected systems per failure mode, i.e., a total of 12 systems. Following the widely-used general degradation path model (Lu and Meeker, 1993), the under-lying (noise-free) degradation trajectory of system n under failure mode zn = j is modeled as a random-effect linear process: 
+
+ηn,j (t) = Γ n,j, 0 + Γ n,j, 1t, j ∈ { A, B, C, D }, (23) where ηn,j (t) corresponds to the true degradation status of system n at time t and Γ n,j = (Γ n,j, 0, Γn,j, 1)⊤
+
+20 is a random effect vector drawn from a bivariate normal distribution that is specified for each failure mode j (Kim et al., 2019): 
+
+Γn,A, 0
+
+Γn,A, 1
+
+ ∼ N 2
+
+−1.52.5
+
+ ,
+
+120 22 0.4
+
+ ,
+
+Γn,B, 0
+
+Γn,B, 1
+
+ ∼ N 2
+
+−0.51.8
+
+ ,
+
+80 11 0.25 
+
+ ,
+
+Γn,C, 0
+
+Γn,C, 1
+
+ ∼ N 2
+
+−1.32.3
+
+ ,
+
+110 1.81.8 0.3
+
+ ,
+
+Γn,D, 0
+
+Γn,D, 1
+
+ ∼ N 2
+
+−0.82
+
+ ,
+
+90 11 0.4
+
+ .
+
+(24) To ensure realistic, monotonically increasing degradation, realizations with Γ n,j, 1 ≤ 0 are discarded and resampled. A failure threshold is set as L = 400, and the failure time for system n is defined as: 
+
+τn = inf {t : ηn,z n (t) ≥ L} = L − Γn,z n,0
+
+Γn,z n,1
+
+. (25) Sensor measurements are collected at integer time points t = 1 , 2, ..., ⌊τn⌋. During training the prognostic module, for the ith sample (window) from system n corresponding to measurements from time t = i to t = i + ξ − 1, its RUL label is defined as yn,i = τn − (i + ξ − 1). Each sensor signal is constructed as a nonlinear function of time, the latent degradation status, system-specific random effects, and noise: 
+
+ln,s,t = δ(1)  
+
+> s
+
+U (1)  
+
+> n,s
+
+tδ(2)  
+
+> s
+
++ δ(3)  
+
+> s
+
+U (2)  
+
+> n,s
+
+fs(t) + U (3)  
+
+> n,s
+
++ δ(4) 
+
+> zn,s
+
+ηn,z n (t) + εn,s (t), (26) where U (1)  
+
+> n,s
+
+, U (2)  
+
+> n,s
+
+, U (3)  
+
+> n,s
+
+∼ Uniform(0 , 30) introduce system-specific variability, εn,s (t) ∼ N (0 , 20 2)represents sensor noise, fs(t) is predefined temporal function (e.g., sine, cosine), δ(1)  
+
+> s
+
+, δ (2)  
+
+> s
+
+, δ (3)  
+
+> s
+
+control sensor-specific temporal behavior (Table 1), and δ(4)  
+
+> j,s
+
+∈ {− 1, 1} is a failure-mode-specific trend indicator to govern how degradation affects sensor s under failure mode j (Table 2). This data generation enables the simulation of heterogeneous degradation paths and sensor patterns for comprehensive validation of the DPMM-RUL framework. 
+
+# 5.2 Stationary Environment 
+
+# 5.2.1 Simulation Results 
+
+We evaluate the performance of the proposed DPMM-RUL framework in a stationary environ-ment with four failure modes. For each failure mode, 120 systems are included in the training set 21 Sensor s δ(1)  
+
+> s
+
+δ(2)  
+
+> s
+
+δ(3)  
+
+> s
+
+fs(t)1 1 0.5 0.9 sine(0.05t) 2 0.1 0.5 0.2 13 2 0.01 1 cosine(0.07t) 4 0.001 0.5 0 —5 0.05 0.5 1 sine(0.1t) 6 0.001 1.5 0.2 sine(0.01t) 7 0.02 1.2 1.4 cosine(0.1t) 8 0.01 0.5 0.14 1     
+
+> Table 1: Sensor-specific parameters δ(1)
+> s, δ (2)
+> s, δ (3)
+> sand temporal functions fs(t) used in the simulation data generation
+
+Failure mode j δ(4) 
+
+> j,s
+
+A [-1, -1, +1, +1, +1, +1, +1, +1] B [+1, +1, -1, -1, +1, +1, +1, +1] C [+1, +1, +1, +1, -1, -1, +1, +1] D [+1, +1, +1, +1, +1, +1, -1, -1]   
+
+> Table 2: Failure-mode-specific sign parameters δ(4)
+> j,s to control sensor trends under different failure modes
+
+and 30 in the testing set. The number of failure modes is inferred using DPMM module while the RUL prediction module is trained jointly. Truncation and padding are used as a preprocessing strategy for the DPMM module. Figure 6 presents the evolution of the inferred number of failure modes and the RUL prediction RMSE over training iterations. We observe that the RMSE for RUL prediction fluctuates when the inferred number of failure modes temporarily deviates from the true underlying number of failure modes. As learning progresses, the failure mode count stabilizes at four. At the same time, the stabilization of the failure mode identification leads to a consistent reduction in RUL prediction error. These results indicate that the mutual feedback between the DPMM and RUL modules allows the framework to converge to a coherent digital-twin representation of the system’s degradation dynamics. 
+
+# 5.2.2 Robustness Analysis 
+
+To systematically evaluate the robustness of the proposed method, we conduct experiments under varying (i) failure mode complexity, measured by the number of latent failure modes and (ii) similarity among degradation patterns. Specifically, we consider scenarios with two to four failure modes, and quantify their distinguishability using the average pairwise cosine similarity of the corresponding δ(4)  
+
+> j
+
+-vectors listed in Table 2: 22 Figure 6: RMSE of RUL prediction and inference number of failure modes over iterations in Simulation dataset 
+
+Similarity  δj (4) , δ j′ (4)  = δj (4) · δj′ (4) 
+
+∥δj (4) ∥2 ∥δj′ (4) ∥2
+
+. (27) Table 3 reports, for each scenario, the number of detected failure modes, normalized mutual information (NMI) between inferred and true mode assignments, and the resulting RUL predic-tion RMSE. NMI quantifies the statistical dependence between predicted and ground truth failure modes, with values ranging from 0 (no mutual information) to 1 (perfect correlation). Across all tested configurations, the proposed DPMM–RUL framework consistently identifies the correct number of failure modes and achieves perfect failure mode identification performance (NMI = 1.00), regardless of both the number of modes and their similarity level. Importantly, increasing failure-mode similarity or complexity is generally expected to exacerbate both diagnostic ambiguity and prognostic uncertainty. Nevertheless, the observed RMSE remains relatively stable across scenarios, indicating that accurate failure mode identification effectively mitigates the negative impact of mode overlap on RUL prediction. These results demonstrate that the proposed framework maintains robust diagnostic and prognostic performance even under highly challenging degradation conditions. To further understand the contribution of the proposed performance score J , Table 4 compares DPMM–RUL with three benchmark variants that differ in how the failure mode clustering structure is selected: (i) DPMM-joint fits a DP mixture model using a joint distribution p(l, y, z, θ, β ); (ii) DPMM–RUL (ELBO) selects the mixture structure solely by maximizing the ELBO; (iii) DPMM– RUL (RUL loss) fits the mixture model solely by minimizing the RUL prediction loss. 23 Table 3: RUL prediction performance under different failure mode complexity and cosine similarities 
+
+Failure Modes Similarity Level Modes Detected NMI RMSE 
+
+2-Modes Low ( −1.00) 2 modes 1.00 12.94 High (0 .75) 2 modes 1.00 16.87 3-Modes Low (0 .17) 3 modes 1.00 10.58 High (0 .33) 3 modes 1.00 11.07 4-Modes Low (0 .17) 4 modes 1.00 19.34 High (0 .33) 4 modes 1.00 21.53  
+
+> Cosine similarity is calculated as the average pairwise cosine similarity between all δ-vectors within each scenario.
+
+Table 4: RUL prediction performance comparison across different performance scores 
+
+Failure Modes Method Mode Detected NMI RMSE 
+
+2-Modes DPMM-joint 1 Mode 0.00 64.91 DPMM-RUL (ELBO) 1 Mode 0.00 15.50 DPMM-RUL (RUL loss) 3 Modes 0.82 14.92 
+
+DPMM-RUL ( J score) 2 Modes 1.00 12.94 
+
+3-Modes DPMM-joint 1 Mode 0.00 23.34 DPMM-RUL (ELBO) 1 Mode 0.00 15.69 DPMM-RUL (RUL loss) 4 Modes 0.90 14.25 
+
+DPMM-RUL ( J score) 3 Modes 1.00 11.07 
+
+4-Modes DPMM-joint 1 Mode 0.00 57.14 DPMM-RUL (ELBO) 1 Mode 0.00 18.56 DPMM-RUL (RUL loss) 5 Modes 0.94 19.56 
+
+DPMM-RUL ( J score) 4 Modes 1.00 19.34 
+
+> The terms in parentheses correspond to the focus of performance scores.
+
+As shown in Table 4, the proposed DPMM-RUL based on the defined J score consistently recovers the correct number of failure modes, achieves perfect clustering performance (NMI = 1.00), and yields the lowest RMSE across all tested complexities. These results highlight that neither distributional fit nor prognostic accuracy alone is sufficient for reliable failure mode discovery. Rather, robust performance emerges only when diagnostic structure learning explicitly improves RUL prediction accuracy, which is regulated by cluster quality. 
+
+# 5.2.3 Sensitivity Analysis 
+
+We next investigate the sensitivity of the proposed framework to the trade-off coefficient ω in the J score. Table 5 summarizes the impact of ω under both low- and high-similarity settings for 24 Table 5: Sensitivity analysis of the trade-off coefficient ω under varying failure mode complexities 
+
+Failure Modes ω Similarity Mode Detected NMI RMSE 
+
+3-Modes 1 × 10 −4 Low 3 modes 1.0 13.58 1 × 10 −3 Low 3 modes 1.0 11.07 1 × 10 −2 Low 3 modes 1.0 16.59 1 × 10 −1 Low 3 modes 1.0 11.46 3-Modes 1 × 10 −4 High 3 modes 1.0 11.52 1 × 10 −3 High 3 modes 1.0 10.58 1 × 10 −2 High 3 modes 1.0 10.41 1 × 10 −1 High 3 modes 1.0 12.59 the three-mode scenario. The sensitivity analysis demonstrates that the inferred number of failure modes and accuracy (NMI = 1.0) remain stable across varying ω and degradation similarity levels. In contrast, the RUL prediction error varies with respect to ω. In practice, ω can be tuned using K-fold cross-validation based on RMSE of RUL prediction. 
+
+# 5.3 Online Learning in Non-stationary Environment 
+
+To evaluate the adaptability of the proposed framework under evolving operational conditions (i.e., introduction of a new failure mode), we consider a non-stationary environment in which the system initially operates under two failure modes, and an additional mode emerges at a later stage, simulating a real manufacturing scenario where new degradation behaviors appear due to process drift, component redesigns, or changes in operational load. Figure 7 shows the evolution of the number of inferred failure modes over iterations. The DPMM successfully detects the emergence of the third failure mode shortly after the change occurs, and performs a series of birth and merge moves, which results in three failure modes. This confirms the ability of the proposed framework to autonomously restructure its internal representation of multiple failure modes in response to previously unseen degradation patterns. To show the predictive performance in a non-stationary environment, Table 6 compares the RUL RMSE of our method against several baselines that also study failure mode identification and system prognostics (Wang et al., 2024a; Li et al., 2023; Fu et al., 2025). To ensure reproducibility and a fair comparison, we include only methods for which we were able to obtain reproducible codes, either publicly released or provided directly by the original authors. These existing methods assume that there are two failure modes and cannot handle unseen failure modes. 25 Figure 7: Number of inferred failure modes over iterations. The black dotted line shows when the new failure mode appears. 
+
+The table summarizes these methods based on whether they assume knowledge of the failure types of historical systems (labels) and the number of failure modes. Wang et al. (2024a) and Li et al. (2023) rely on both known failure-mode labels and a fixed number of failure modes, while Fu et al. (2025) assumes the number of modes is known but must infer the latent modes of historical systems. In contrast, DPMM-RUL does not assume either the types or the number of failure modes a priori. The results present that our DPMM-RUL framework based on the J score achieves the lowest RMSE and significantly outperforms existing methods. These results highlight the risks of pre-maturely assuming fixed and known failure-mode structures and demonstrate that the proposed framework is well-suited for non-stationary manufacturing environments. 
+
+# 6 Case Study 
+
+# 6.1 Overview of Dataset 
+
+The dataset used in this section is based on the Commercial Modular Aerospace Propulsion System Simulation (C-MAPSS) developed by NASA (Frederick et al., 2007), which simulates the degradation of turbofan engines under realistic operating conditions. It includes sensor signals collected from aircraft engines over their operational life, which can be used to monitor engine health and identify failure modes. For our case study, we focus on FD003, a sub-dataset featuring two distinct failure modes: high-pressure compressor (HPC) failure and engine fan (FAN) failure. Each engine system in FD003 is equipped with 21 sensors and is observed across multiple 26 Table 6: RUL prediction performance under increasing uncertainty in failure-mode information when the number of modes changes from 2 to 3 
+
+Method Failure mode known NMI RMSE (after shift) Label Number 
+
+Li et al. (2023) ✓ ✓ 0.00 60.24 Wang et al. (2024a) ✓ ✓ 0.73 63.93 Fu et al. (2025) × ✓ – 18.02 DPMM-joint × × 0.00 19.82 DPMM-RUL (ELBO) × × 0.00 12.51 DPMM-RUL (RUL loss) × × 0.00 16.83 
+
+DPMM-RUL ( J score) × × 1.00 12.41      
+
+> ✓indicates that prior failure-mode information is assumed available, while ×indicates that no such information is assumed. −means the method does not identify failure modes. Rows are ordered from top to bottom by decreasing availability of prior information, corresponding to increasingly challenging settings.
+
+operating cycles. The dataset is divided into a training set and a test set, each containing 100 systems. In the training set, each engine is monitored until failure occurs, and the actual failure time is recorded. In contrast, sensor monitoring data from systems in the test set are truncated before failure, with ground-truth RUL values provided as labels. Sensor descriptions are listed in Table 7. To retain the original signal structure, no additional feature preprocessing is applied. We follow the method introduced in Chehade et al. (2018) to extract ground-truth failure mode labels, which are used to validate the accuracy of the failure mode identification module in our proposed algorithm. 
+
+# 6.2 Results 
+
+Figure 8 shows the inference and training dynamics of the proposed model on the FD003 sub-dataset of the C-MAPSS dataset. Similar to simulation studies, we observe that as train-ing progresses, the RUL prediction accuracy steadily increases as the failure mode identification stabilizes. Notably, when using truncation and padding as a preprocessing strategy (Figure 8 (a)), the number of active failure modes inferred by the model stabilizes at three, even though the true system contains only two (i.e., HPC and FAN). A more detailed look at the inferred failure mode structure, as shown in Figure 9, reveals that the proposed methodology further subdivides the HPC failure mode into two subgroups, corresponding to minor and severe HPC degradation patterns. When these two HPC-related failure modes are combined, the results align precisely with the true 27 Table 7: Detailed description of multiple sensors in CMAPSS dataset 
+
+Symbol Description Units 
+
+T2 Total temperature at fan inlet ◦RT24 Total temperature at LPC outlet ◦RT30 Total temperature at HPC outlet ◦RT50 T50 Total temperature at LPT outlet ◦RP2 Pressure at fan inlet psia P15 Total pressure in bypass-duct psia P30 Total pressure at HPC outlet psia Nf Physical fan speed rpm Nc Physical core speed rpm epr Engine pressure ratio (P50/P2) –Ps30 Static pressure at HPC outlet psia phi Ratio of fuel flow to Ps30 pps/psi NRf Corrected fan speed rpm NRc Corrected core speed rpm BPR Bypass Ratio –farB Burner fuel-air ratio –htBleed Bleed Enthalpy –Nf dmd Demanded fan speed rpm PCNfR dmd Demanded corrected fan speed rpm W31 HPT coolant bleed lbm/s W32 LPT coolant bleed lbm/s failure mode structure. One possible explanation for this additional subdivision is the fixed-length preprocessing strat-egy described in Section 4.1. Under truncation and padding, trajectories from systems that experi-ence earlier or more severe degradation contain longer padded segments. These segments may form an additional ‘statistical’ cluster. To further examine this, we conduct the same analysis using a temporal warping preprocessing strategy. Specifically, for each training system, we define a normal-ized time index ζ = tTn , ζ ∈ [0 , 1], and resample each multi-sensor trajectory using interpolation. Note that the predicted RUL is used for testing systems. This leads to the correct 2 failure modes as shown in Figure 8 (b). This highlights that the selection of preprocessing should be guided by domain knowledge and the specific diagnostic objective of the user. In particular, it determines whether absolute time-to-failure should influence failure mode identification. If failure mechanisms are primarily distinguished by degradation trajectory shape, time warping may be preferable. Conversely, if degradation speed or lifetime duration is itself characterized by different failure behaviors, retaining original structure through truncation and padding may provide more meaningful information. The proposed 28 Figure 8: RMSE of RUL prediction and inferred number of failure modes over iterations on FD0003 with (a) truncation and padding data preprocessing; and (b) temporal warping preprocessing. 
+
+> Figure 9: Comparison between inferred and true failure modes in three representative sensors
+
+DPMM–RUL framework accommodates either representation, while the semantic interpretation of inferred failure modes may differ accordingly. Table 8 compares the RUL prediction accuracy of the proposed DPMM-RUL framework with the benchmark methods using C-MAPSS dataset. Despite imposing the least restrictive assump-tions, our method significantly outperforms the benchmark that similarly lacks failure mode label information (Fu et al., 2025) and performs competitively even against methods with access to full failure mode information (Wang et al., 2024a; Li et al., 2023). These results show that the DPMM-RUL can effectively recover the underlying mode structure and deliver accurate prognostics even in settings where failure mode information is entirely unavailable. In terms of computational cost, the training time of the proposed DPMM-RUL ( J score) remains comparable to other benchmark approaches. Importantly, the testing time of DPMM-RUL 29 Table 8: RUL prediction performance comparison on C-MAPSS FD003 under different availability of failure-mode information 
+
+Method Failure mode known NMI RMSE Training time(s) Testing time(s) Label Number 
+
+Li et al. (2023) ✓ ✓ 0.66 17.67 947.35 2.88 Wang et al. (2024a) ✓ ✓ 0.80 19.80 1891.49 0.06 Fu et al. (2025) × ✓ - 24.19 6013.00 4.03 DPMM-joint × × 0.00 41.11 1335.41 0.73 DPMM-RUL (ELBO) × × 0.00 42.60 3789.42 0.06 DPMM-RUL (RUL Loss) × × 0.53 23.26 49703.73 0.07 
+
+DPMM-RUL ( J score) × × 0.82 18.56 5958.69 0.11      
+
+> ✓indicates that prior failure-mode information is assumed available, while ×indicates that no such information is assumed. −means the method does not predict the failure modes. Rows are ordered from top to bottom by decreasing availability of prior information, corresponding to increasingly challenging settings.
+
+is negligible and comparable to other methods, indicating that the additional structural learning complexity does not affect deployment efficiency. It is worth noting that the C-MAPSS dataset has a fixed and known number of failure modes, and thus does not fully stress the flexibility of our approach. As demonstrated in Section 5.3, the performance advantage of DPMM-RUL becomes more pronounced in scenarios where new or previously unseen failure modes emerge. 
+
+# 7 Conclusion and Future Study 
+
+This study presents a novel Bayesian nonparametric framework, DPMM-RUL, that jointly per-forms failure mode identification and RUL prognostics in multi-sensor systems without requiring prior knowledge of the type and number of failure modes. By integrating a DPMM-based fail-ure mode discovery module with a neural network-based RUL prediction module, the proposed approach overcomes critical limitations of existing methods that rely on fixed, predefined failure mode structures and fully labeled historical failures. Our framework enables adaptive identification of unknown and unseen failure modes while simultaneously predicting RULs. A key feature of DPMM-RUL is its iterative feedback mechanism. Failure mode identification informs RUL prediction, and the prognostic output in turn refines the inferred failure modes. Through this iterative feedback, the model adaptively infers and updates the number of failure modes as new systems are observed, enabling it to accommodate settings where the new failure mode may appear over time. Extensive numerical experiments on both simulated and the C-MAPSS datasets demonstrate the effectiveness of the proposed method in both accurate failure mode identification and RUL prog-30 nostics, particularly in scenarios involving unseen failure modes and incomplete prior knowledge. These findings suggest that the flexibility and adaptability of the proposed Bayesian nonparametric modeling offer substantial advantages for prognostics in complex manufacturing environments. Future work will explore several other directions. First, to further reduce computational training time, the proposed method can be extended to apply amortized variational inference that replaces per-system variational parameter optimization with a learned inference network. Second, adaptive model selection could be explored to determine the most effective model for different types of signal data. Another promising direction is to enhance the framework’s uncertainty quantification capability, providing more reliable confidence bounds for both failure mode identification and RUL prediction. This would further improve the interpretability and trustworthiness of the prognostic results in many applications. 
+
+# Data Availability Statement 
+
+The data that supports the findings of this study is openly available in NASA Prognostics Center of Excellence Data Set Repository at https://data.nasa.gov/dataset/cmapss-jet-engine-simulated-data. 
+
+# Funding 
+
+This work was supported by the National Science Foundation (NSF) grants 2530726 and 2450743. 
+
+# References 
+
+Bian, L. and Gebraeel, N. (2014). Stochastic modeling and real-time prognostics for multi-component systems with degradation rate interactions. Iie Transactions , 46(5):470–482. Blei, D. M. and Jordan, M. I. (2006). Variational inference for dirichlet process mixtures. Bayesian Analysis , 1(1):121–143. Chehade, A., Song, C., Liu, K., Saxena, A., and Zhang, X. (2018). A data-level fusion approach for degradation modeling and prognostic analysis under multiple failure modes. Journal of Quality Technology , 50(2):150–165. Chen, S., Zhang, Y., Hou, X., Shang, Y., and Yang, P. (2022). Wafer map failure pattern recognition based on deep convolutional neural network. Expert Systems with Applications , 209:118254. Cox, D. R. (1972). Regression models and life-tables. Journal of the Royal Statistical Society: Series B (Methodological) , 34(2):187–202. Fan, M., Zeng, Z., Zio, E., Kang, R., and Chen, Y. (2019). A sequential bayesian approach for remaining useful life prediction of dependent competing failure processes. IEEE transactions on reliability , 68:317–329. 31 Frederick, D. K., DeCastro, J. A., and Litt, J. S. (2007). User’s guide for the commercial modular aero-propulsion system simulation (c-mapss). Technical report. Fu, Y., Huh, Y. K., and Liu, K. (2025). Degradation modeling and prognostic analysis under unknown failure modes. IEEE Transactions on Automation Science and Engineering .Goebel, K., Saha, B., Saxena, A., Celaya, J. R., and Christophersen, J. P. (2008). Prognostics in battery health management. IEEE instrumentation & measurement magazine , 11(4):33–40. Guo, L., Li, N., Jia, F., Lei, Y., and Lin, J. (2017). A recurrent neural network based health indicator for remaining useful life prediction of bearings. Neurocomputing , 240:98–109. Huang, C.-G., Huang, H.-Z., and Li, Y.-F. (2019). A bidirectional lstm prognostics method under multiple operational conditions. IEEE Transactions on Industrial Electronics , 66(11):8792–8802. Hughes, M. C. and Sudderth, E. (2013). Memoized online variational inference for dirichlet process mixture models. Advances in neural information processing systems , 26. Huh, Y. K., Kim, M., Liu, K., and Zhou, S. (2024). An integrated uncertainty quantification model for longitudinal and time-to-event data. IEEE Transactions on Automation Science and Engineering .Jardine, A., Banjevic, D., and Makis, V. (1997). Optimal replacement policy and the structure of software for condition-based maintenance. Journal of Quality in Maintenance Engineering ,3(2):109–119. Jiang, L., Feng, Q., and Coit, D. W. (2015). Modeling zoned shock effects on stochastic degradation in dependent failure processes. IIE transactions: industrial engineering research & development ,47:460–470. Jiang, Q., Huang, B., and Yan, X. (2016). Gmm and optimal principal components-based bayesian method for multimode fault diagnosis. Computers & Chemical Engineering , 84:338–349. Kim, H. and Kim, H. (2023). Contextual anomaly detection for high-dimensional data using dirichlet process variational autoencoder. IISE Transactions , 55(5):433–451. Kim, M., Cheng, J.-R. C., and Liu, K. (2021). An adaptive sensor selection framework for multi-sensor prognostics. Journal of Quality Technology , 53(5):566–585. Kim, M. and Liu, K. (2020). A bayesian deep learning framework for interval estimation of re-maining useful life in complex systems by incorporating general degradation characteristics. IISE Transactions , 53(3):326–340. Kim, M., Song, C., and Liu, K. (2019). A generic health index approach for multisensor degradation modeling and sensor selection. IEEE Transactions on Automation Science and Engineering ,16(3):1426–1437. Li, Y., Chen, Y., Hu, Z., and Zhang, H. (2023). Remaining useful life prediction of aero-engine enabled by fusing knowledge and deep learning models. Reliability Engineering & System Safety ,229:108869. Li, Z., Deep, A., Lee, J., and Kim, M. (2025). A new view of neural network-based health index: Connecting prediction and operational decision-making to address underspecification. IEEE Transactions on Automation Science and Engineering , 22:23501–23512. 32 Li, Z., Li, Y., Yue, X., Zio, E., and Wu, J. (2022). A deep branched network for failure mode diagnostics and remaining useful life prediction. IEEE Transactions on Instrumentation and Measurement , 71:1–11. Liu, K., Gebraeel, N. Z., and Shi, J. (2013). A data-level fusion model for developing composite health indices for degradation modeling and prognostic analysis. IEEE Transactions on Automa-tion Science and Engineering , 10(3):652–664. Liu, Z., Jia, Z., Vong, C.-M., Han, J., Yan, C., and Pecht, M. (2018). A patent analysis of prognostics and health management (phm) innovations for electrical systems. IEEE Access ,6:18088–18107. Love, C. and Guo, R. (1991). Application of weibull proportional hazards modelling to bad-as-old failure data. Quality and reliability engineering international , 7(3):149–157. Lu, C. J. and Meeker, W. O. Q. (1993). Using degradation measures to estimate a time-to-failure distribution. Technometrics: a journal of statistics for the physical, chemical, and engineering sciences , 35:161–174. Lugtigheid, D., Jiang, X., and Jardine, A. K. (2008). A finite horizon model for repairable systems with repair restrictions. Journal of the Operational Research Society , 59(10):1321–1331. Murphy, K. P. (2012). Machine learning: a probabilistic perspective . MIT press. Ni, Q., Ji, J., and Feng, K. (2022). Data-driven prognostic scheme for bearings based on a novel health indicator and gated recurrent unit network. IEEE Transactions on Industrial Informatics ,19(2):1301–1311. Peng, H., Feng, Q., and Coit, D. W. (2011). Reliability and maintenance modeling for systems sub-ject to multiple dependent competing failure processes. IIE transactions: industrial engineering research & development , 43:12–22. Qiu, H., Lee, J., Lin, J., and Yu, G. (2006). Wavelet filter-based weak signature detection method and its application on rolling element bearing prognostics. Journal of sound and vibration , 289(4-5):1066–1090. Rafiee, K., Feng, Q., and Coit, D. W. (2014). Reliability modeling for dependent competing failure processes with changing degradation rate. IIE transactions: industrial engineering research & development , 46:483–496. Ramasso, E. and Saxena, A. (2014). Performance benchmarking and analysis of prognostic methods for cmapss datasets. International Journal of Prognostics and Health Management , 5(2):1–15. Sateesh Babu, G., Zhao, P., and Li, X.-L. (2016). Deep convolutional neural network based re-gression approach for estimation of remaining useful life. In Database systems for advanced applications: 21st international conference, DASFAA 2016, dallas, TX, USA, April 16-19, 2016, proceedings, part i 21 , pages 214–228. Springer. Saxena, A., Goebel, K., Simon, D., and Eklund, N. (2008). Damage propagation modeling for aircraft engine run-to-failure simulation. In 2008 international conference on prognostics and health management , pages 1–9. IEEE. 33 Soleimani, M., Campean, F., and Neagu, D. (2021). Diagnostics and prognostics for complex systems: A review of methods and challenges. Quality and Reliability Engineering International ,37(8):3746–3778. Song, L.-K., Bai, G.-C., and Fei, C.-W. (2019). Multi-failure probabilistic design for turbine bladed disks using neural network regression with distributed collaborative strategy. Aerospace Science and Technology , 92:464–477. Song, S., Coit, D. W., and Feng, Q. (2016). Reliability analysis of multiple-component series systems subject to hard and soft failures with dependent shock effects. IIE transactions: industrial engineering research & development , 48:720–735. Teh, Y. W. (2017). Dirichlet process. In Encyclopedia of machine learning and data mining , pages 361–370. Springer. Tomaˇ sevi´ c, I., Stojanovi´ c, D., Slovi´ c, D., Simeunovi´ c, B., and Jovanovi´ c, I. (2021). Lean in high-mix/low-volume industry: a systematic literature review. Production planning & control ,32(12):1004–1019. Vachtsevanos, G. J., Lewis, F., Roemer, M., Hess, A., and Wu, B. (2006). Intelligent fault diagnosis and prognosis for engineering systems , volume 456. Wiley Online Library. Wan, J., Li, X., Dai, H.-N., Kusiak, A., Martinez-Garcia, M., and Li, D. (2020). Artificial-intelligence-driven customized manufacturing factory: key technologies, applications, and chal-lenges. Proceedings of the IEEE , 109(4):377–398. Wang, D., Xian, X., and Song, C. (2024a). Joint learning of failure mode recognition and prog-nostics for degradation processes. IEEE Transactions on Automation Science and Engineering ,21(2):1421–1433. Wang, Y. and Pham, H. (2012). Modeling the dependent competing risks with multiple degradation processes and random shock using time-varying copulas. IEEE transactions on reliability , 61:13– 22. Wang, Y., Wang, A., Wang, D., and Wang, D. (2024b). Deep learning-based sensor selection for failure mode recognition and prognostics under time-varying operating conditions. IEEE Transactions on Automation Science and Engineering .Wu, S.-j., Gebraeel, N., Lawley, M. A., and Yih, Y. (2007). A neural network integrated decision support system for condition-based optimal predictive maintenance policy. IEEE Transactions on Systems, Man, and Cybernetics-Part A: Systems and Humans , 37(2):226–236. 
+
+# Appendices 
+
+# A Evidence lower bound (ELBO) under the stick-breaking DPMM 
+
+Recall that our ELBO is defined as 
+
+LELBO (q) = Eq[log p(l, z, θ, β )] − Eq[log q(z, θ, β )] = Eq[log F (l | θ, z )] + Eq[log p(z | π)] + Eq[log p(π | α)] + Eq[log p(θ | λ)] 
+
+− Eq[log q(z)] − Eq[log q(β)] − Eq[log q(θ)] . (28) In the following, the explicit expectations under the NIW prior follow results in Murphy (2012). 34 1. Eq [log p(l | θ, z )]: 
+
+Eq [log p(l | θ, z )] = − 12
+
+> N
+
+X
+
+> n=1
+> K
+
+X
+
+> k=1
+
+ˆrnk 
+
+
+
+Eq [log |Σθk |] + Eq
+
+h
+
+(ln − μθk )T Σ−1 
+
+> θk
+
+(ln − μθk )
+
+i
+
++ Constant 
+
+
+
+,
+
+(29) 2. Eq [log p(z | π)]: 
+
+Eq [log p(z | π)] = 
+
+> N
+
+X
+
+> n=1
+> K
+
+X
+
+> k=1
+
+ˆrnk Eq [log πk] , (30) where E[log πk] = E[log βk] + Pk−1 
+
+> j=1
+
+E[log(1 − βj )], E[log βk] = γ(ˆ α0,k ) − γ(ˆ α0,k + ˆ α1,k ), and 
+
+E[log(1 − βk)] = γ(ˆ α1,k ) − γ(ˆ α0,k + ˆ α1,k ). γ is a digamma function. 3. Eq [log p(β | α)]: 
+
+Eq [log p(β | α)] = 
+
+> K−1
+
+X
+
+> k=1
+
+(( α − 1) log(1 − βk) + log α) , (31) where log α = log Γ(1 + α) − log Γ( α) and Γ is a gamma function. 4. Eq [log p(θ|λ)]: 
+
+Eq [log p(θ | λ)] = 
+
+> K
+
+X
+
+> k=1
+
+ν0 + D + 2 2 E[log |Σ−1 
+
+> k
+
+|] − 12 Tr( Ψ0νkΨ−1 
+
+> k
+
+)
+
+− κ0
+
+2
+
+ Dκk
+
++ νk(mk − m0)T Ψ−1 
+
+> k
+
+(mk − m0)
+
+
+
++ Constant 
+
+!
+
+.
+
+(32) 5. Eq [log q(β)]: 
+
+Eq [log q(β)] = 
+
+> K−1
+
+X
+
+> k=1
+
+[(ˆ α0,k − 1)( γ(ˆ α0,k ) − γ(ˆ α0,k + ˆ α1,k )) + (ˆ α1,k − 1)( γ(ˆ α1,k ) − γ(ˆ α0,k + ˆ α1,k )) (33) + log Γ(ˆ α0,k + ˆ α1,k ) − log Γ(ˆ α0,k ) − log Γ(ˆ α1,k )] . (34) 6. Eq [log q(z)]: 
+
+Eq [log q(z)] = 
+
+> N
+
+X
+
+> n=1
+> K
+
+X
+
+> k=1
+
+ˆrnk log ˆ rnk . (35) 7. Eq [log q(θ)]: 
+
+Eq [log q(θ)] = 
+
+> K
+
+X
+
+> k=1
+
+Eq[log q(μθk | Σθk )] + 
+
+> K
+
+X
+
+> k=1
+
+Eq[log q(Σ θk )] . (36) 
+
+# B Update equations for variational parameters 
+
+Based on the explicit form of each expectation term derived in the variational inference frame-work, we present the update equations for the parameters ˆ α0,k , ˆ α1,k , ˆ rnk , and ˆλk.35 1. Stick-breaking Parameters: ˆα0,k = 1 + 
+
+> N
+
+X
+
+> n=1
+
+ˆrnk , (37) ˆα1,k = α +
+
+> N
+
+X
+
+> n=1
+> K
+
+X
+
+> j=k+1
+
+ˆrnj . (38) 2. Variational Responsibilities: ˆrnk ∝ exp {Eq[log F (ln | θk)] + Eq[log πk]} , (39) 3. Failure Mode-Specific Parameters: 
+
+κk = κ0 + Nk, (40) 
+
+νk = ν0 + Nk, (41) 
+
+mk = κ0m0 + Nk¯lk
+
+κ0 + Nk
+
+, (42) 
+
+Ψk = Ψ0 + Sk + κ0Nk
+
+κ0 + Nk
+
+(¯lk − m0)( ¯lk − m0)T , (43) where Nk = PNn=1 ˆrnk , ¯lk = 1
+
+> Nk
+
+PNn=1 ˆrnk ln, and Sk = PNn=1 ˆrnk (ln − ¯lk)( ln − ¯lk)T .36

@@ -1,0 +1,908 @@
+Title: Axle Sensor Fusion for Online Continual Wheel Fault Detection in Wayside Railway Monitoring
+
+URL Source: https://arxiv.org/pdf/2602.16101v1
+
+Published Time: Thu, 19 Feb 2026 01:21:03 GMT
+
+Number of Pages: 19
+
+Markdown Content:
+# Axle Sensor Fusion for Online Continual Wheel Fault Detection in Wayside Railway Monitoring 
+
+## Afonso Lourenço a,∗, Francisca Osório a,∗, Diogo Risca a and Goreti Marreiros a
+
+> a
+
+GECAD, ISEP, Polytechnic of Porto, Rua Dr. António Bernardino de Almeida, Porto, 4249-015, Portugal 
+
+A R T I C L E I N F O 
+
+Keywords :Railway systems Fault diagnosis Predictive maintenance Continual learning Data Fusion 
+
+A B S T R A C T 
+
+Reliable and cost-effective maintenance is essential for railway safety, particularly at the wheel–rail interface, which is prone to wear and failure. Predictive maintenance frameworks increasingly leverage sensor-generated time-series data, yet traditional methods require manual feature engineering, and deep learning models often degrade in online settings with evolving operational patterns. This work presents a semantic-aware, label-efficient continual learning framework for railway fault diagnostics. Accelerometer signals are encoded via a Variational AutoEncoder into latent representations capturing the normal operational structure in a fully unsupervised manner. Importantly, semantic metadata, including axle counts, wheel indexes, and strain-based deformations, is extracted via AI-driven peak detection on fiber Bragg grating sensors (resistant to electromagnetic interference) and fused with the VAE embeddings, enhancing anomaly detection under unknown operational conditions. A lightweight gradient boosting supervised classifier stabilizes anomaly scoring with minimal labels, while a replay-based continual learning strategy enables adaptation to evolving domains without catastrophic forgetting. Experiments show the model detects minor imperfections due to flats and polygonization, while adapting to evolving operational conditions, such as changes in train type, speed, load, and track profiles, captured using a single accelerometer and strain gauge in wayside monitoring. 
+
+## 1. Introduction 
+
+The railway sector relies on reliability and maintainabil-ity to ensure smooth and secure transport of passengers and freight [14, 67]. With trains designed to operate for decades and maintenance costs accounting for a significant portion of total expenditure, there is an urgent need to keep safety and service quality at an optimal level while minimizing operational costs [91, 102]. In particular, the wheel-track interface has received a lot of attention in the literature, as it incurs most of the cost of maintenance for both railway vehicles and infrastructure. These components are exposed to various environmental and operational conditions, which can induce corrosion, cracks, and other types of damage. In addition, surfaces of the wheel-track are subjected to high stick, sliding, and contact stresses in rolling contact. 
+
+Measurement systems. To address this, predictive main-tenance (PdM) strategies have emerged. Unlike traditional methods that involve scheduled checks and repairs, PdM leverages machine learning to predict potential equipment failures before they occur. This proactive approach not only enhances safety, but also optimizes maintenance resources by reducing unnecessary repairs and downtime, leading to significant cost reductions. Numerous measurement meth-ods are used, such as laser-based systems [43], ultrasonic devices [15, 26], axle box acceleration [78, 96], eddy current [26], fiber Bragg grating [51]. Among these, time series have been identified as the most common format for sensors installed on trains and tracks [67]. 
+
+> ∗
+
+Equal contribution  
+
+> fonso@isep.ipp.pt
+
+(A. Lourenço); mfsgs@isep.ipp.pt (F. Osório);  
+
+> difri@isep.ipp.pt
+
+(D. Risca); mgt@isep.ipp.pt (G. Marreiros) 
+
+> ORCID
+
+(s): 0000-0002-3465-3419 (A. Lourenço); 0009-0001-2019-9251 
+
+(F. Osório); 0009-0000-1495-0662 (D. Risca); 0000-0003-4417-8401 (G. Marreiros) y1  
+
+> x1
+> x2
+> x4
+> x3
+> y2
+> y3
+> y4
+> x4
+> y3y4y2y1
+> x3x2x1…
+> …
+
+X
+
+Y 
+
+> length( )
+
+Z X
+
+S
+
+# ε
+
+# ε
+
+## t
+
+PEAK DETECTION 
+
+> s1
+> sk
+> s2
+> …
+
+S ?
+
+X ?
+
+Y ?
+
+Z ?
+
+0/1 
+
+RECONSTRUCTION 
+
+CLASSIFICATION 
+
+REPLAY 
+
+Memory 
+
+Figure 1: (1) semantic extraction of temporal wheel indices (X ), strain-based deformation (Y ), and wheel count (Z )via peak detection; (2) VAE-based reconstruction of signal embeddings ( S); and (3) fault detection through data fusion of S, X, Y, and Z, and continual loss-based experience replay. 
+
+Signal processing. While these diverse measurement systems enable continuous monitoring of railway assets, the resulting raw signals are often high-dimensional, noise-contaminated, and heavily affected by operational variabil-ity, including traffic density, axle loads, and environmental 
+
+Lourenço et al. Page 1 of 19   
+
+> arXiv:2602.16101v1 [cs.LG] 18 Feb 2026 Axle Sensor Fusion for Online Continual Wheel Fault Detection in Wayside Railway Monitoring
+> (a) Sequential Training (b) Interleaved Training
+> Figure 2: Sequential training causes rapid forgetting of the first task, while interleaved training allows the model to retain both, indicating that forgetting arises from the training strategy rather than model capacity.
+
+conditions. Transforming such time series data into infor-mative representations suitable for predictive maintenance therefore constitutes a critical intermediate step. To address this challenge, early machine learning (ML)–driven sig-nal processing approaches largely adopted a task-specific paradigm, coupling carefully engineered signal processing techniques with ML models to isolate fault-related features. Representative methods include spectral kurtosis analysis [31, 82], Short-Time Fourier Transform (STFT) [70], Prin-cipal Component Analysis (PCA) [53, 97, 64], envelope spectrum analysis [27, 81], auto-regressive decomposition [76, 42], Hidden Markov Models [103, 4, 47], wavelet trans-form [77, 76], and bivariate Gamma processes [99]. 
+
+Learned features. However, as a substantial volume of data has been accumulated regarding the health status of machinery, diagnostic models should directly learn useful representations from raw data during deployment, regardless of the quality of training data. In this regard, the high degree of automation in data processing enabled by deep learning (DL) architectures, along with advances in model and dataset scalability, has marked a major leap forward, allowing models to handle extensive data features without requiring domain expertise. Additionally, it became evident that certain unstructured data types, such as time-series signals, could be effectively modeled by fine-tuning general-purpose DL models on specific datasets [66, 65]. As a result, research has increasingly shifted from manual fea-ture engineering and shallow ML algorithms to multi-scale hierarchical latent representations of DL architectures for bearing fault diagnosis, such as stacked sparse autoencoders [45], convolutional neural networks [16], Markov Chain Monte Carlo-based Bayesian learning [52], [17], deep belief network [111], and recurrent neural networks [108]. 
+
+Batch learning. Although such DL methods can handle the diversity of fault types in a static dataset, these models are typically trained once, under the assumption that all possible fault types of the target equipment are fully covered during the training phase. However, in a real-world online setup, data is no longer shuffled but instead follows a natural sequence [68, 83], reflecting the actual progression of the conditions over time. This exposes the model to complex and dynamic conditions, with new faults, continuous equipment upgrades, and varying operational states emerging through-out their lifecycle. This presents a challenge to the traditional learning paradigm, which assumes that the availability of all training data is upfront and that the model will always exclusively encounter data originating from the same data distribution as encountered during training. To address this, one approach is to completely retrain the DL model, but this strategy requires significant storage capacity and is time-consuming, thus increasing operational and maintenance costs. Alternatively, retraining the model only with new data could be considered. However, since a model in this case only has access to the current dataset during each phase of the learning cycle, it is susceptible to overfitting the new data. Moreover, this method leads to catastrophic forgetting, where the model is prone to overfitting on the currently available data and suffers from performance deterioration on previous data. Figure 2 illustrates this premise. 
+
+Continual learning. To address this, some continual learning (CL) techniques have been proposed for fault diag-nosis, such as an adaptive deep learning framework designed to detect defects in high-speed railway that uses latent space and actively selects and annotates samples to update the training set [25], a statistical monitoring system for railway with ongoing data collection and analysis, where the model continuously updates its parameters based on new data [39], a few-shot learning model that extracts features from input images and encodes them into a latent space and employs a double-loop continual learning method, which simulates working memory and long-term memory processes [57], a boosting-inspired online learning approach with transfer learning that adapts to evolving operational conditions such as changes in speed, load, and track irregularities while mit-igating catastrophic forgetting [93], or a model that utilizes a Transformer-based architecture with a graph encoder and temporal decoder to capture complex spatial and temporal dependencies and adapt to new speed patterns [60].        
+
+> Lourenço et al. Page 2 of 19 Axle Sensor Fusion for Online Continual Wheel Fault Detection in Wayside Railway Monitoring 2010 2015 2020 2025 Latent representations Hand-designed features [25] [39] [57] [60] [106] [24] [62] [100] [82] [45] [81] [103] [52] [17] [76] [96] [59] [15] [93] This work
+> Figure 3: Overview of related work: Offline/Batch processing (light blue), Online processing (blue), Offline Continual Learning (purple), Online Continual Learning (dark blue)
+
+Supervision dependence. While effective, most of these methods highly depend on external descriptions and heavy supervision assumptions, failing when there are unknowns in testing, i.e. the open world setting [12]. These methods are narrowly focused on trade-offs surrounding catastrophic forgetting, e.g. inclusion of memory footprint, computa-tional cost, cost of data storage, task sequence length and amount of training iterations, while disregarding the lack of supervision in a real-world online setting. In this regard, various online learning methods have been proposed for fault diagnosis, such as continual processing vibration sig-nals through wavelet packet analysis [106], parallelogram mechanisms for real-time monitoring [24], a FBG-based online monitoring system [62], an iterative search procedure for predicting flange contact points dynamically [100], or a query-by-content approach used to obtain predictions, with Dynamic Time Warping (DTW) scores ranking the most anomalous wheel passages [63]. However, these don’t rely on DL architectures, and thus don’t face the challenge of catastrophic forgetting. Figure 3 provides an overview. 
+
+Domain semantics. While it is important to develop methods that relax the supervision assumptions, in terms of both the definition of well defined boundaries and labeling of varying environmental and operational conditions, em-bedding the ability to leverage on such knowledge when its available can be extremely helpful. In this regard, railway monitoring systems present an excellent opportunity due to the wide practice of train detection signaling systems for proper railway traffic management [84]. Instead of devel-oping CL methods that rely on the availability of explicit domain boundaries, given in the form of external domain descriptors and hard-coded modular structures [95, 48], semantic information, such as train load, speed, and wheel configuration, can be used as a proxy of the variations in operating conditions [90, 1]. 
+
+Sensor-driven train characterization. Historically, train characterization/detection technologies have been predomi-nantly used in three main railway applications [37]. Firstly, to monitor the presence of trains in specific track sections, which is crucial for preventing collisions by maintaining safe distances between trains. Secondly, axle counters play a key role in infrastructure monitoring and anomaly detection, helping to detect irregularities such as unexpected stops or speed variations, which may indicate issues like track defects. Thirdly, when optimizing railway operations and traffic flow, axle counters provide real-time data on train positions, enabling efficient traffic management, reducing delays, and increasing network capacity. They also allow operators to make informed decisions regarding the reg-ulation of train speeds, train movements and scheduling. Figure 4 provides an overview. Across these applications, train detection has been driven by both track circuits and axle counters [23]. Track circuits operate as electrical systems with power sources and receivers placed along the track. These de-nergize when a train shunts the circuit, allowing for reliable detection of train presence. Axle counters, on the other hand, employ electromagnetic coils to detect wheels passing over the rail. By comparing the counts of axles entering and leaving a section of track, these systems provide accurate information on train presence and track occupancy. 
+
+Eletromagnetic interference. However, with the elec-trification of railways, electromagnetic interference (EMI) posed significant challenges. High-power electrical systems, such as traction drives, produce EMI that can disrupt the operation of track circuits and axle counters [74]. Moreover, while steps can been taken to separate the power sources for train detection systems and traction supplies, the difference in power levels might still lead to operational instability in highly electrified environments. To mitigate these chal-lenges, ensuring electromagnetic compatibility (EMC) has become critical for the reliability of train detection systems. Standardized methods have been developed to quantify the radiated EMI from rail vehicles and measure the intensity of magnetic fields that affect track circuits and axle counters [5]. These EMC standards and regulations can help ensure that systems can coexist without interference, however track circuits and axle counters are still prone to failure in hostile environments, such as those susceptible to flooding and high levels of EMI, driven by increasing train speeds and the higher power levels of modern propulsion systems [74]. 
+
+Data-driven train characterization To address these limitations, newer detection systems that are immune to EMI, such as laser-based sensors, have been introduced. These systems emit beams that are interrupted by passing                 
+
+> Lourenço et al. Page 3 of 19 Axle Sensor Fusion for Online Continual Wheel Fault Detection in Wayside Railway Monitoring 2007 2009 2011 2013 2015 2017 2019 2021 2023 2025 Optimizing Operations Detection/Occupancy Health Monitoring [23] [74] [37] [61] [41] [30] [71] [58] [85] [101] [106] [96] [18] [94] [59] [110] [73] [64] [38] [49] [105] [21] [109] [115] [76] [22] [55]
+> Figure 4: Related work: Traditional circuit detector (dark blue), Machine vision (purple), Vibration/optical fiber (light blue)
+
+train wheels, allowing for accurate axle counting without the risks posed by EMI. However, while effective, these systems are still being developed and implemented in limited railway networks. Alternatively, AI can also take a role in expanding the reliability of axle counting technologies for the optimiz-ing railway operations, detecting infrastructure anomalies, and enhancing safety and security protocols within urban rail systems [37]. Instead of specific sensors designed solely for train detection, AI allows to leverage general-purpose sensors to implicitly detect and count train axles, e.g. by machine vision paired with cameras to detect and analyze wheel patterns, such as flange height, flange thickness, and rim diameter, or vibration-based systems to monitor the forces exerted by train wheels on the track [113, 104, 7, 3]. 
+
+Fiber Bragg grating. For this purpose, Fiber Bragg Grating (FBG) sensors have proven successful across numer-ous applications, including measuring train speed, dynamic loads, and acceleration, as well as detecting derailment, rail cracks, and corrosion. FBG systems are immune to electro-magnetic interference, lightweight, durable and responsive, providing high signal fidelity for variations in stress and strain [85, 18, 19, 18, 94, 59], temperature fluctuations [22, 89], and pressure [55]. These systems demonstrate strong potential for continuous monitoring and real-time assess-ment of railway infrastructure [49]. It has even been shown that strain and stress signals from these sensors can be used directly for axle counting [56]. Moreover, while FBG sensors are often preferred due to their ability to multiplex multiple signals along a single fiber, other optical fiber technologies have also been explored as alternatives to FBG, such as Brillouin-based sensors [112, 75], intensity-based fiber optic sensors [13], and even basic optical fuses [40]. 
+
+Signal shape processing. With this technology, the complexity of the measurement system has shifted from the mechanics of sensor development to the peak detection process within the strain change signal as the weight of the train exerts significant force on the rail, in the vicinity of the measurement point. To capture this peak, various pre-processing techniques based on derivatives and correlation operations with a cut-off threshold have been proposed. For example, Weilai et al. introduced an FBG-based axle counter system, achieving 100% accuracy in axle counting during over 1,000 consecutive tests in an experimental setting [113]. Similarly, [104] developed the X-Crossing and D-Crossing algorithms to determine the number of axles passing through a measurement station by using a cut-off threshold followed by a derivative operation to extract the relevant peaks in the signal data. These systems have been thoroughly validated through field testing, with some expanded for use in real-time wheel defect detection [105]. Other implementations, such as [7]’s axle counting system, also rely on threshold and derivative-based operations, while [38] employed wavelet transforms to decompose signals into frequency bands, studying the spectral characteristics of the useful signals. [3] developed a correlation-based algorithm for estimating various parameters under different vehicle and track configurations. Furthermore, these FBG-based methods have been extensively tested in high-speed railway systems for real-time strain measurement, axle counting, and train identification [21, 109], and have even been adapted for wheel flat detection [20]. In light of these advancements, a self-checking system using FBG has also been proposed to detect sensor loosening. This system uses FBG to monitor the pre-tightening force of mounting bolts, detect the instal-lation status of rail-mounted devices, and send an alarm if looseness is detected [115]. 
+
+This work. Building on these advancements, this work presents a comprehensive study of the potential of semantic contextual information, via signal processing of vibration-based sensors, to enrich the latent representations of a con-tinual learning system. While the proposed CL method does not require knowledge of task identity and boundaries at any point, eliminating the dependency on an oracle for domain information to adapt their learning process, it can still lever-age on the semantic information to better handle the shifts in data distribution, as well as, better forward and backward transfer upon the repetitive reappearance of domains with similar environmental and operational conditions.  
+
+> Lourenço et al. Page 4 of 19 Axle Sensor Fusion for Online Continual Wheel Fault Detection in Wayside Railway Monitoring
+
+y1
+
+x1
+
+x2
+
+x4
+
+x3
+
+y2
+
+y3
+
+y4
+
+x4
+
+y3 y4y2y1
+
+x3x2x1 …
+
+…
+
+# X
+
+# Y
+
+length( )Z
+
+## S-WC: S + Z 
+
+## S-WI: S + X 
+
+## I-WI: X 
+
+## I-WD: Y 
+
+## S-WD: S + Y 
+
+# X
+
+s1
+
+sk
+
+s2
+
+…
+
+# S ?
+
+# X ?
+
+# Y ?
+
+# Z ?
+
+# S
+
+# 0/1                          
+
+> Figure 5: Semantics extraction of temporal wheel indices ( X), strain-based deformation ( Y), and wheel count ( Z) via peak detection, which are subsequently fused with VAE-based reconstruction of signal embeddings ( S), under an ablation of five different strategies: S-WC =S+Z,S-WI =S+X,I-WI =X,I-WD =Y, and S-WD =S+Y. Further details in Table 1.
+
+## 2. Methodology 
+
+The proposed fault diagnosis methodology encompasses three main components: (1) semantic extraction; (2) re-construction of signal embeddings; and (3) fault detection through data fusion, and continual loss-based experience replay. Figure 1 provides an overview. 
+
+FBG-driven train characterization. Leveraging on vibration-based sensors, such as FBG and strain gauges, allows to detect the strain changes in the rail as trains pass over specific measurement points. When a train traverses these points, the rail experiences momentary deformation, with the rail head undergoing compression and the rail foot experiencing tension, as illustrated in Figure 6. According to the literature, the maximum absolute value of the signal’s extension offers a more reliable and accurate criterion for detecting axles, rather than the signal length. By counting the number of peaks generated from each sensor, FBG sensors can effectively perform the axle counting function. With a single FBG sensor, the speed of the train can be accurately determined, assuming the train configuration is known. By positioning two sensors along the track, both the speed and direction of the train can be measured, assuming the distance between them is known. With four sensors strategically placed on the rail web, the system can also provide information about the axle load [50]. 
+
+Axle count semantics. Different experiments were per-formed, each one focusing on different levels of semantic information extracted from the axle count. S-WC relies solely on the number wheels counted, while S-WI incor-porates the precise temporal indexes of wheels in addition to their count. For ablation purposes, two experiments rely exclusively on the extracted semantics, ignoring correspond-ing VAE learned representation. I-WI uses only the timing and counting data from axle detections, while I-WD uses deformation values captured by strain sensors during each λ2FBG Sensor Strain Force   
+
+> (a) Positive λ1FBG Sensor Strain Force (b) Negative
+> Figure 6: Reflective wavelengths
+
+wheel passage. Finally, S-WD integrates strain signal defor-mations with semantic information about axle conditions. An overview of the experimental framework for semantics extraction is presented in Figure 5, with further details in Table 1. Beyond accelerometer signals, the model could also integrate semantic information, such as train load and speed, to enhance predictive performance [90, 1]. To study their impact, it is important to note that each of these experiments was conducted under two distinct scenarios. In Scenarios S-WC, S-WI, I-WI, I-WD, and S-WD, the models were trained using only the described setup. In contrast, Scenarios S-WC*, S-WI*, I-WI*, I-WD*, and S-WD* extended the model’s semantic understanding by incorporating additional context, specifically, information on train load and speed. 
+
+Signal shape processing. Naturally, these measurable reflective responses of strain and stress changes can be affected by the deterioration of wheel/rail contact condi-tions. Thus, to evaluate the extent to which FBG sensors can provide a reliable method for axle counting, train                    
+
+> Lourenço et al. Page 5 of 19 Axle Sensor Fusion for Online Continual Wheel Fault Detection in Wayside Railway Monitoring
+> Table 1
+> Anomaly detection (AD) experiments: semantic context, embedding use, and key focus
+> Code Semantic Signal Description S-WC Wheel count ✓Detects anomalies in wheel count using strain signals and embeddings. Flags missing wheels or signal degradation.
+> S-WI Wheel indexes ✓Adds temporal wheel indexes to detect spacing irregularities, misalignments, improper bogie assembly, or mechanical faults.
+> I-WI Wheel indexes ✗Uses only axle timing and counting to detect abnormal patterns, such as missing axles, or misalignments.
+> I-WD Axle deformations ✗Analyzes strain-based deformations, implicitly identifying uneven loading or undercar-riage faults.
+> S-WD Axle deformations ✓Combines axle deformation signals with semantic axle context to capture subtle, early-stage anomalies.
+
+speed, direction determination, axle load measurement, four different peak detection techniques were compared: 
+
+> detect_peaks_tony
+
+, peakdetect , detect_peaks , and find_peaks .These have the same working principle, by locating the local maxima in a one-dimensional signal array, which correspond to the positions where each wheel exerts maximum strain on the sensor, i.e. a peak is detected at position 𝑛 𝑖 if 𝑥 [𝑛 𝑖 ] >𝑥 [𝑛 𝑖 − 1] and 𝑥 [𝑛 𝑖 ] > 𝑥 [𝑛 𝑖 + 1] for a discrete signal 𝑥 [𝑛 ].Moreover, these functions can be configured to detect peaks that are higher than their immediate neighbors by a specified prominence. The prominence 𝑃 of a peak at position 𝑛 𝑖 mea-sures how much the peak stands out due to its intrinsic height and its location relative to other peaks, i.e., 𝑃 (𝑛 𝑖 ) = 𝑥 [𝑛 𝑖 ] − max (min( 𝑥 [𝐿 ], 𝑥 [𝑅 ])) , where 𝐿 and 𝑅 are the indices of the left and right bases of the peak, respectively. While similar in their purpose, these methods employ distinct computational strategies. The detect_peaks_tony algorithm normalizes the signal using the root mean square (RMS), computes peak-to-average power ratios, i.e., (signal [𝑖 ]) 2 ∕RMS, to enhance peak prominence, and applies logical conditions to identify points exceeding their neighbors and a specified threshold, returning the indices of these peaks. The peakdetect method identifies local maxima and minima by iteratively com-paring signal values within a defined lookahead distance, applying a delta threshold to confirm significant extrema, and producing lists of minima and maxima indices. The  
+
+> detect_peaks
+
+function analyzes the signal’s first-order dif-ferences to identify transitions indicative of peaks, applying a minimum amplitude threshold for filtering and outputting the corresponding indices. The find_peaks function, part of the scipy.signal library, utilizes a prominence metric to quantify how distinctly a peak stands out relative to its surroundings, filtering based on this criterion and returning indices of prominent peaks. 
+
+Signal compression. To encode accelerometer signals into compact latent representations that capture normal op-erational behavior in a fully unsupervised manner, a Vari-ational Autoencoder (VAE) is employed [72, 54, 44]. As a generative model, the VAE approximates the unknown data-generating distribution 𝑝 (𝑥 ) of an observed random vector 𝑥 
+
+by learning a structured latent space that preserves essen-tial signal characteristics while filtering noise, a property shown to be effective for subtle, context-dependent anomaly detection [107]. Assuming i.i.d. samples, the marginal log-likelihood of the dataset, ln 𝑝 (𝑥 1, … , 𝑥 𝑁 ), can be expressed as a sum over individual samples ∑𝑁 𝑖 =1 ln 𝑝 (𝑥 𝑖 ), the VAE introduces a latent variable 𝑧 ∈ ℝ𝑑 that serves as a latent representation of 𝑥 . The generative process is described by: 
+
+𝑝 𝜃 (𝑥 ) = ∫ℝ𝑑 
+
+𝑝 𝜃 (𝑥 ∣ 𝑧 )𝑝 𝑧 (𝑧 ) 𝑑𝑧, (1) where 𝑝 𝑧 (𝑧 ) is the prior distribution over the latent space 
+
+ℝ𝑑 , typically chosen as a multivariate standard Gaussian 
+
+ (0 , 𝐼 𝑑 ). The conditional distribution 𝑝 𝜃 (𝑥 ∣ 𝑧 ), referred to as the decoder, is parameterized by a neural network. Since the posterior 𝑝 𝜃 (𝑧 ∣ 𝑥 ) defined via Bayes’ rule as 𝑝 𝜃 (𝑧 ∣
+
+𝑥 ) = 𝑝 𝜃 (𝑥 ∣𝑧 )𝑝 𝑧 (𝑧 )  
+
+> 𝑝 𝜃 (𝑥 )
+
+is generally intractable, variational inference is needed [29]. To approximate the posterior, the VAE introduces an encoder network that models an approximate posterior 𝑞 𝜙 (𝑧 ∣ 𝑥 ), also parameterized by neural networks and typically modeled as 𝑞 𝜙 (𝑧 ∣ 𝑥 ) =  (𝑧 ; 𝜇 (𝑥 ), Σ( 𝑥 )) ,where 𝜇 (𝑥 ) and Σ( 𝑥 ) are outputs of the encoder network. Us-ing importance sampling with 𝑞 𝜙 (𝑧 |𝑥 ), an unbiased estimate ̂𝑝 𝜃 of the marginal likelihood 𝑝 𝜃 (𝑥 ) is given by: ̂𝑝 𝜃 (𝑥 ) = 𝑝 𝜃 (𝑥 ∣ 𝑧 )𝑝 𝑧 (𝑧 )
+
+𝑞 𝜙 (𝑧 ∣ 𝑥 ) , with 𝔼 𝑧 ∼𝑞 𝜙 
+
+[̂𝑝 𝜃 (𝑥 )] = 𝑝 𝜃 (𝑥 ).
+
+with 𝜙 and 𝜃 denoting the parameter sets modeled re-spectively by the decoder and encoder neural networks. Ap-plying Jensen’s inequality to the marginal likelihood results in the Evidence Lower Bound (ELBO): 
+
+ln 𝑝 𝜃 (𝑥 ) ≥ 𝔼 𝑧 ∼𝑞 𝜙 (𝑧 ∣𝑥 )
+
+[ln 𝑝 𝜃 (𝑥 ∣ 𝑧 )]−KL [𝑞 𝜙 (𝑧 ∣ 𝑥 )‖𝑝 𝑧 (𝑧 )] .
+
+(2) The ELBO serves as the loss function for training the VAE, consisting of two terms: the reconstruction loss and the regularization loss. The reconstruction loss maximizes the expectation of the log-likelihood ln 𝑝 𝜃 (𝑥 ∣ 𝑧 ) with respect to the approximate posterior 𝑞 𝜙 (𝑧 ∣ 𝑥 ), ensuring that the decoder accurately reconstructs the input 𝑥 . The regulariza-tion loss minimizes the Kullback-Leibler (KL) divergence  
+
+> Lourenço et al. Page 6 of 19 Axle Sensor Fusion for Online Continual Wheel Fault Detection in Wayside Railway Monitoring
+
+VAE 
+
+Classifier 
+
+Semantics 
+
+0
+
+1 A/N 
+
+Memory Buffer 
+
+Experience Replay 
+
+> Re -training
+
+… 
+
+> EOV 1
+> EOV 2
+> EOV M
+
+…
+
+Train  passages  
+
+> Figure 7: Fault detection through continual loss-based experience replay
+
+between the approximate posterior 𝑞 𝜙 (𝑧 ∣ 𝑥 ) and the prior 
+
+𝑝 𝑧 (𝑧 ), aligning the latent variable distribution with the prior, which is typically chosen as a simple isotropic Gaussian. Since the KL divergence is non-negative, optimizing the ELBO drives 𝑞 𝜙 (𝑧 ∣ 𝑥 ) closer to 𝑝 𝑧 (𝑧 ) while simultaneously improving reconstruction accuracy. 
+
+Continual learning. Building on recent findings that semi-supervised anomaly detection methods [86, 28] can outperform fully unsupervised approaches even when only 1% of anomalous instances are available [32, 87], the proposed framework avoids relying directly on reconstruc-tion errors, which are often overly sensitive to minor per-turbations in evolving operational conditions. Instead, a lightweight supervised classifier, i.e. XGBoost, is trained on the learned embeddings to provide a more stable and robust decision layer. Moreover, unlike traditional anomaly detection which is performed on a static dataset, continual anomaly detection with evolving domains needs to adapt across dynamically changing domains without forgetting [69]. The objective is to minimize the total risk across all domains, i.e., 𝐿 𝑡 (𝜃 ) + 𝐿 1∶ 𝑡 −1 (𝜃 ) = 𝔼 (𝑥,𝑦 )∼ 𝐷 𝑡 [𝓁 (𝑦, ℎ (𝑥 ; 𝜃 ))] + 
+
+∑𝑡 −1  
+
+> 𝑖 =1
+
+𝔼 (𝑥,𝑦 )∼ 𝐷 𝑖 [𝓁 (𝑦, ℎ (𝑥 ; 𝜃 ))] , where 𝐿 𝑡 calculates model 
+
+ℎ𝜃 ’s expected prediction error 𝓁 over the current domain’s data distribution 𝐷 𝑡 . 𝐿 1∶ 𝑡 −1 is the total error evaluated on the past 𝑡 −1 domains’ data distributions, i.e., {𝐷 𝑖 }𝑡 −1 
+
+> 𝑖 =1
+
+. The main challenge of continual learning comes from the practical memory constraint that no (or only very limited) access to the past domains’ data is allowed. Under such a constraint, it is difficult, if not impossible, to accurately estimate and optimize the past error 𝐿 1∶ 𝑡 −1 . Therefore, the main focus of recent domain incremental learning methods has been to develop effective surrogate learning objectives for 𝐿 1∶ 𝑡 −1 .Among these, replay-based methods, which reinforce the im-portance of old concepts interleaved in consecutive training, i.e. assuming stored exemplars are prototypes of the past data distributions, have been shown to perform extremely well [88]. By repeatedly sampling from this buffer, the model breaks the temporal correlation that characterizes streaming and sequential data and helps in stabilizing its understanding of normal behavior and improving the convergence of the model. Thus, correcting for the short-term bias towards recent data in the VAE objective function to the extent that the past is a good proxy for the future. 
+
+Experience replay. One typical example is Experience Replay (ER) [92], which stores a set of exemplars 𝑀 and uses a replay loss 𝐿 replay as the surrogate of 𝐿 1∶ 𝑡 −1 . In addition, a fixed, predetermined coefficient 𝛽 is used to balance current domain learning and past sample replay, represented as: 𝐿 𝑡 (𝜃 ) + 𝛽 ⋅ 𝐿 replay (𝜃 ) = 𝐿 𝑡 (𝜃 ) + 𝛽 ⋅
+
+𝔼 (𝑥 ′,𝑦 ′)∼ 𝑀 [𝓁 ′(𝑦 ′, ℎ (𝑥 ′; 𝜃 ))] . To minimize this gap between the surrogate loss ( 𝛽 ⋅𝐿 replay ) and the true objective ( 𝐿 1∶ 𝑡 −1 ), there are 3 key ER components that can be tuned: rehearsal representation, label strategy, and rehearsal policy. Figure 7 provides an overview of the complete system. 
+
+• rehearsal representation: one can store raw input data and latent features from hidden layers on a mem-ory buffer [34]. For instance, one can replay com-pressed representations of activations (network em-bedding) of the intermediate layers in addition to the input-output pairs [9]. Alternatively, leveraging on the ability to generate new data from the prior distribution of latent variables, one can also produce pasts instances synthetically. This pseudo-rehearsal based method allows to save old concepts in modeling parameters instead of a memory buffer for later re-hearsal [98]. In this work, we used latent embeddings as a more rich and informative sample of the signal’s underlying structure and characteristics, avoiding the cumbersome long raw signals. 
+
+• label strategy: the memory buffer can hold the true label, which is not always be feasible in real-time applications, or a predicted label by the model. For instance, one can use additional logits distillation, referred to as dark experience replay [8]. In this work, we adopted the fundamental memory-based domain  
+
+> Lourenço et al. Page 7 of 19
+
+Axle Sensor Fusion for Online Continual Wheel Fault Detection in Wayside Railway Monitoring Train speed Vv 
+
+Wheel rail contact model Matlab Track irregularities Matlab Left rail Right rail 
+
+> y
+> zx
+
+Track model 
+
+ANSYS 
+
+Vehicle model 
+
+ANSYS 
+
+> plane contact
+
+ANSYS 
+
+Defective wheel 
+
+> Fy
+> Fc
+> L
+> D
+
+Figure 8: Train-track dynamic interaction 
+
+incremental learning framework where the mini-batch of the memory is regularly replayed with the current domain data [92] as well as soft labels [8]. 
+
+• rehearsal policy: one can identify which stored sam-ples should be selected for rehearsal using a variety of sampling policies e.g., uniform balanced, min re-hearsal, max loss, min margin, min logit-distance, and min confidence [35, 11, 33, 88]. Alternatively, MIR make virtual updates using the incoming data to find the maximally interfered old samples for a loss-based policy [2]. In this work, both reservoir sampling and a loss-based approach were used. Reservoir sampling ensures that the buffer maintains a representative sub-set of the entire data distribution, where a new sample overwrites a randomly selected sample from the buffer once the buffer is full, where the probability that item 𝑚 remains after processing all 𝑛 items is given by the product (1 − 𝑘 ∕( 𝑚 + 1)) × (1 − 𝑘 ∕( 𝑚 + 2)) × 
+
+⋯ × (1 − 𝑘 ∕𝑛 )) , which simplifies to 𝑘 ∕𝑛 . Loss-based sampling strategy prioritizes the retention of informa-tive and challenging data points 𝐷 retain whose loss 
+
+𝓁 (𝑓 (𝑥 ; 𝜃 ), 𝑦 ) exceeds a threshold 𝜏 .
+
+## 3. Wheel-rail simulation 
+
+This section describes the modeling and simulation pro-cess of wheel-rail interaction across various operational scenarios, while inducing minor imperfections, such as poly-gonization and flats (Figure 9), captured with a single ac-celerometer and strain gauge positioned along the track. 
+
+Train-track dynamic interaction. To investigate train-track dynamic interaction, validated numerical simulations were employed. These simulations used VSI software, pre-viously described and validated by the authors in a previous publication [79]. The VSI model established a coupling between the train and track through a sophisticated 3D 1.970 1.975 1.980 1.985 1.990 
+
+> Time (s)
+> 200
+> 100
+> 0
+> 100
+> 200
+> Acceleration (m/s 2)
+> Undamaged wheel
+> L=14 mm
+> L=32 mm
+> L=61 mm
+
+Figure 9: Acceleration for different flat lengths 
+
+wheel-rail contact model (Figure 8). This model incorpo-rates Hertzian contact theory to compute normal contact forces, while the USETAB routine assesses tangential forces arising from rolling friction creep phenomena [36, 46]. Notably, the VSI software operates within the MATLAB ®
+
+environment, enabling the import of structural matrices from both the train and track structure. These structures were previously modeled independently using a finite element (FE) package. The track structure within the simulations was meticulously represented using beam elements for rails and sleepers. Additionally, spring-dashpot elements were employed to capture the behavior of flexible layers, such as ballast and fasteners/pads. Finally, mass point elements were included to account for the mass of the ballast. The train model, constructed within ANSYS ®, utilized a multibody formulation. This formulation incorporates spring-dashpot elements to simulate the flexibility of primary and secondary suspensions, rigid beams to represent the vehicle’s rigid body movements, and mass point elements positioned at the center of gravity of each body (carbody, bogies, and wheelsets) to capture their mass and inertial effects. 
+
+Lourenço et al. Page 8 of 19 Axle Sensor Fusion for Online Continual Wheel Fault Detection in Wayside Railway Monitoring                     
+
+> Table 2
+> EOVs for domain division
+> Baseline Flat Polygonized Train load 6 (full, half, empty, and 3 diff. unbalanced) 1 (full) 1 (full)
+> Irregularity profiles 96 24 24
+> Train speeds (km/h) 40-220 60-200 60-200
+> Defect locations -3rd wagon, 1st/3rd left 1st wagon, 1st right
+> Amplitude (mm) -10-20, 25-50, 40-100 .25-.35, 0.55-.75
+> Depth (mm) -.02-.06, .09-.16, .23-.36 6-8, 12-14, 17-20, 29-30
+
+# ε t
+
+# ε
+
+> (a) Laagrss vehicle
+
+# tε (b) Alfa vehicle  
+
+> Figure 10: Axle configurations across train types
+
+Numerical wayside modeling. An accelerometer and strain gauge are positioned along the rail for the out-of-roundness detection system, designed to capture wheel de-fects. To validate the methodology, comprehensive 3D sim-ulations based on train-track interaction were performed. Virtual simulations of both baseline and damaged wheels were conducted to validate the automatic out-of-roundness diagnosis. Once the system was validated, it demonstrated the potential to identify different types of trains and various wheel defects. It is also suitable for use with real-world data, where wheels often exhibit imperfections, such as flats or polygonal damage, that affect wheel-rail contact forces and cause vibrations in both the train and track components. Table 2 provides a detailed comparison between the baseline and damage domains, resulting from combinatorial explo-ration of the aforementioned EOVs and defect types. Two types were considered: wheel flats appear either on the 1st our 3rd left wheel of the 3rd wagon, while polygonization appears on the 1st right wheel on the 1st wagon. 
+
+Flats. For wheel flats, two flat length intervals ( 𝐿 𝑤 ) were considered, designated as L1 and L2. Figure 9 illustrates the effect of different severities of wheels flat. The uniform distributions U (25, 50) mm and U (50,100) mm define the lower and upper limits of the flat length of the wheel for each interval L1 and L2, respectively. The wheel flat depth ( 𝐷 𝑤 )is calculated on the basis of equation [114]: 𝐷 𝑤 = 𝐿 2
+
+> 𝑤
+> 16 𝑅 𝑤
+
+,in which 𝑅 𝑤 is the radius of the wheel. The vertical profile deviation of the wheel flat is defined as:             
+
+> −𝐷 𝑤
+> 2
+> (
+> 1 − cos 2𝜋𝑥 𝑤
+> 𝐿 𝑤
+> )
+> ⋅𝐻
+> (
+> 𝑥 𝑤 −(2𝜋𝑅 𝑤 −𝐿 𝑤
+> ))
+> ,0≤𝑥 ≤2𝜋𝑅
+
+(1) where 𝐻 represents the Heaviside function and 𝑥 𝑤 is the coordinate aligned with the longitudinal direction of the track. 
+
+Polygonization. For wheel polygonization, the periodic irregularity of the radial tread around the circumference of the wheel was considered by varying the wavelengths ( 𝜆 ) as a function of harmonic order ( 𝜃 ) and wheel radius. 
+
+𝜆 = 2𝜋𝑅 𝑤 
+
+𝜃 , 𝜃 = 1 , 2, 3 ⋯ , 𝑛 (2) The selected wheel profiles were characterized by the wavelengths in the first 20 harmonics, with the sixth to eighth harmonic orders being dominant, and different irreg-ularity wheel profiles generated based on the sum of sine functions ( 𝐻 = 20 ) as follows: 
+
+𝑤 (𝑥 𝑤 ) = 
+
+> 𝐻
+
+∑
+
+> 𝜃 =1
+
+𝐴 𝜃 sin 
+
+( 2𝜋 𝜆 𝑥 𝑤 + 𝜑 𝜃 
+
+)
+
+, (3) where 𝐴 𝜃 is the amplitude of the sine function for each wavelength, which is calculated by the function: 
+
+𝐴 𝜃 =
+
+√
+
+2 ⋅ 10 𝐿𝑤  
+
+> 20
+
+⋅ 𝑤 ref , (4) with 𝑤 𝑟𝑒𝑓 = 1 𝜇𝑚 . The levels of wheel irregularity ( 𝐿 𝑤 )were selected based on the irregularity spectrum in Fig-ure 12, produced with the measurement values of four wheels with polygonal damage [10]. Taking into account the phase angles to the sine functions that are uniformly and randomly distributed between 0 and 2𝜋 , several irregularity profiles of the wheel were generated to obtain different damage severities between 0.8 and 1.2 mm. 
+
+Train profile. Accurate identification of train types and their axle configurations is one of the most fundamental factors to effective axle counting and train detection systems (Figure 10). The way axles are arranged on a train depends largely on its design: whether it uses bogies, shared axles, or independent axle systems. The goal is to explore the key  
+
+> Lourenço et al. Page 9 of 19
+
+Axle Sensor Fusion for Online Continual Wheel Fault Detection in Wayside Railway Monitoring 
+
+(a) Empty 7. 5 tons  7. 5 to ns  (b) Half 15 tons  15 tons  (c) Full 15 tons 
+
+> 7.5 tons
+
+(d) Unbalance 1 15 tons   
+
+> 3tons
+
+(e) Unbalance 2 15 tons  (f) Unbalance 3 
+
+Figure 11: Load schemes 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 
+
+> Harmonic Order
+> 0
+> 10
+> 20
+> 30
+> 40
+> Irregularity Level [dB re 1 μm]
+
+Figure 12: Amplitude ( 𝐿 𝑤 ) and harmonic ( 𝜃 )
+
+distinctions between different types of trains, focusing on how their axle layouts impact the process of counting axles and identifying vehicles in a railway network. The primary difference between bogie-equipped vehicles and axle-only vehicles is how the wheels are supported and arranged. Bogie vehicles use swiveling assemblies called bogies that hold multiple wheels and allow the train to handle curves and uneven tracks with greater ease. In contrast, axle-only vehicles have fixed axles that are shared between adjacent carriages. Moreover, such a difference in design is directly related to the way the wheels are arranged between con-secutive carriages. Articulated trains have shared bogies for flexibility, conventional trains have independent bogies for stability, and regular trains have shared axles for simplicity. Each design serves specific purposes and is chosen based on the requirements of the rail system and the intended use of the train. However, such differing configurations of bogies and axles across articulated, conventional, and regular trains pose extreme environmental and operational variations that complicate pattern analysis for fault detection. To pertain such difficulties, the simulated data is comprised on a set of two types of trains: the Laagrss vehicle and the Alfa vehicle. 
+
+Train load. Figure 11 illustrates the various train load schemes considered. The configurations include: (a) an empty train, where there is no load; (b) a half-loaded train with an equal load distribution of 7.5 tons; and (c) a fully loaded train with equal load distribution, applying 15 tons. Furthermore, three unbalanced load configurations are depicted: (d) Unbalance 1, where one side carries 15 tons while the other side carries 7.5 tons, forcing more on one of the sides, increasing the stress on those wheels; (e) Unbalance 2, where one side carries 15 tons and the other side carries a smaller load of 3 tons; and (f) Unbalance 3, where the entire load of 15 tons is concentrated on one side. 
+
+Train speed. The Laagrss vehicle is designed for hauling freight, typically carrying heavier loads at slower speed. In contrast, the Alfa vehicle is a train built for passenger transport, prioritizing speed and lighter weight. For Laagrss, the configurations include passages in the range 40 to 120 km/h, and for Alfa in the range 40 to 220 km/h. 
+
+Track profile. In real circumstances, the rails will show small imperfections which affect the contact force values. Consequently, different irregularity profiles were generated for wavelengths between 1m and 30m, covering the D1 wavelength interval defined by the EN 13848-2 standard [6], with a sampling discretization of 1mm. The amplitude of the unevenness profile ranged from -2 mm to 2 mm, with a simulation length of 100 m. It is important to note that these wavelengths are significantly longer than those associated with wheel flat and polygonal damage. Consequently, the frequencies generated by track unevenness are much lower than those produced by defective wheels. More detailed descriptions of the unevenness profile generation process can be found in [80]. 
+
+Multi-domain data. Moreover, to truly integrate aspects of continual learning in real-world applications, the training procedure must reflect potential temporal evolutions that honor the natural-time sequence. Consequently, various sce-narios were created to represent possible temporal evolu-tions that respect the natural orderly sequence of time. These divisions are seasonal and recurrent, aimed at thoroughly testing the model’s ability to retain past knowledge and manage new information, and illustrated in Figure 13, are: (a) Peak : Comprise of higher speed trains, minimizing traffic disruptions during peak seasons; (b) Off peak : Features slower speed trains operating in a less congested railway 
+
+Lourenço et al. Page 10 of 19 Axle Sensor Fusion for Online Continual Wheel Fault Detection in Wayside Railway Monitoring 
+
+setting, typical of off-peak seasons; (c) Summer boom :High flow of commerce and transport, characterized by high-speed trains with fully loaded wagons; (d) Winter bust :Featuring the slowest speeds and never completely filled wagons, indicative of a slow flow of transport and goods; (e) Balanced : Operating at medium speeds, optimizing for fuel efficiency and travel time, mantaining a steady flow of traffic. Peak OffPeak Summer Winter Balanced 
+
+> 0
+> 25
+> 50
+> 75
+> 100
+> 125
+> 150
+> 175
+> 200
+> None
+> Laagrss
+> Alfa
+> Both
+
+(a) Speed (in km/h) Peak OffPeak Summer Winter Balanced 
+
+> 0
+> 20
+> 40
+> 60
+> 80
+> 100
+> Alfa
+> Laagrss
+
+(b) Train type Peak OffPeak Summer Winter Balanced 
+
+> 0
+> 20
+> 40
+> 60
+> 80
+> 100
+> Empty
+> Half
+> Unbalanced
+> Full
+
+(c) Cargo load 
+
+Figure 13: Distribution of EOVs across different train types 
+
+## 4. Experiments 
+
+To evaluate the effectiveness of the proposed methodol-ogy, two sets of quantitative experiments were performed. On one hand, investigating the representational quality of the VAE, and comparing how the semantic extraction and pre-processing strategies affect performance. For this purpose, a suite of batch evaluation metrics were consid-ered: accuracy, i.e. ratio of correctly predicted instances to the total instances, precision, i.e. ratio of true positive predictions, recall, i.e. ratio of true relevant predictions, F1 Score, i.e. the harmonic mean of precision and recall, 
+
+Table 3 
+
+Classification performance. 
+
+Model Accuracy Recall Precision F1 Score 
+
+Manual Features 72% 74% 72% 75% VAE 95% 94% 91% 95% + 1 Layer + 4% + 5% + 8% + 3% + 2 Layers + 0% + 0% + 0% + 1% 
+
+and AUC-ROC, i.e. the model’s discrimination capability at various threshold settings. On the other hand, evaluating the semantics-enriched model’s stability-plasticity trade-off in a continual learning setting, in terms of: forward transfer, intransigence, knowledge gain ratio, backward transfer, and forgetting. 
+
+Representational quality. The VAE was employed to generate a condensed, representative embedding of 20 points. This compressed representation aims to retain the signal’s most informative features, serving as input to the downstream anomaly classifier. The encoder architecture consists of a fully connected linear layer with a ReLU (Rectified Linear Unit) activation function and an output size of 256. This is followed by a final linear layer with an output dimension of 40 (twice the latent space size) encoding the mean and logarithm of the variance of the latent distribution. A hyperparameter optimization process was conducted to minimize reconstruction loss on a validation set comprising 20% of the data. Five parameters were explored across 50 trials: learning rate, latent space dimensionality, number of epochs, batch size, and KL divergence weight. The optimal configuration identified was a learning rate of 0.0005, latent dimension of 20, 150 epochs, batch size of 64, and KL divergence weight of 1.412. This configuration achieved a minimum validation loss of 683.01, in contrast to an average loss of 2702.43, corresponding to a 74.73% improvement. To further investigate the suitability of the VAE architecture, an additional experiment was conducted to evaluate how different model depths affect downstream classification performance. Three configurations were tested while keeping the optimized hyperparameters fixed: (i) VAE with two hidden layers (output dimensions: 256, 64, 40), (ii) VAE with one hidden layer (output dimensions: 256, 40), and (iii) VAE with no hidden layers (direct projection to 40 dimensions). To contextualize the benefits of learned embeddings, a baseline was introduced using handcrafted features derived from traditional statistical and spectral analyses. These included measures such as mean, stan-dard deviation, range, skewness, kurtosis, spectral energy, dominant frequencies, and Fast Fourier Transform (FFT) components. An optimized XGBoost classifier was used for all anomaly detection tasks. Table 3 presents the classifica-tion performance using features generated from each VAE configuration and the statistical baseline. The results clearly demonstrate the effectiveness of learned latent embeddings over handcrafted features. Among the tested architectures, the one-layer VAE offered the best compromise between 
+
+Lourenço et al. Page 11 of 19 Axle Sensor Fusion for Online Continual Wheel Fault Detection in Wayside Railway Monitoring 0.03 0.04 0.05 0.06 0.07 0.08 0.09 
+
+> Classes
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> Accuracy
+
+(a) TonyBeltramelli (TB) 0.00 0.02 0.04 0.06 0.08  
+
+> Classes
+
+(b) PeakDetect (PD) 0.00 0.02 0.04 0.06 0.08  
+
+> Classes
+
+(c) DetectPeak (DP) 0.20 0.25 0.30 0.35 0.40  
+
+> Classes
+> S-WC
+> S-WI
+> I-WI
+> I-WD
+> S-WD
+> Axle counting
+> 50% threshold
+> 80% threshold
+
+(d) ScipyDetect (SD) 
+
+Figure 14: Axle counting strategies. 
+
+Table 4 
+
+Confidence intervals for anomaly detection results by algorithm 
+
+TB PD DP SD 
+
+S-WC .70 ± .01 .71 ± .01 .71 ± .01 .76 ± .01 S-WC* .82 ± .01 .82 ± .01 .80 ± .01 .83 ± .01 S-WI .61 ± .01 .62 ± .01 .59 ± .01 .54 ± .01 S-WI* .72 ± .01 .72 ± .01 .70 ± .01 .69 ± .01 I-WI .76 ± .02 .78 ± .01 .76 ± .02 .84 ± .02 I-WI* .86 ± .01 .86 ± .01 .85 ± .02 .89 ± .02 I-WD .92 ± .01 .92 ± .01 .93 ± .01 .90 ± .02 I-WD* .93 ± .01 .93 ± .01 .94 ± .01 .93 ± .01 
+
+S-WD .88 ± .01 .89 ± .01 .86 ± .01 .87 ± .01 S-WD* .90 ± .01 .91 ± .01 .89 ± .01 .91 ± .01 
+
+model complexity and predictive performance. Based on these findings, the single-layer VAE was selected for the final model pipeline. This architecture was then used to generate a new dataset consisting of 40-dimensional embeddings per signal. For downstream tasks, these embeddings were concatenated with semantic features to further enrich the input representation. 
+
+Signal shape processing. Before employing the afore-mentioned anomaly detection strategies, it is important to assess the isolated performance of the different axle counting systems, as well as as their sensitivity to hyperparameter selection. The sensitivity parameter of the peak detection algorithm governs its ability to identify peaks within the data. An increase in sensitivity corresponds to a decrease in the detection threshold, resulting in the identification of a greater number of peaks. Conversely, reducing sensitivity raises the threshold, leading to fewer peaks being detected. However, to fully investigate the influence of varying the signal shape detection algorithm, not only the individual performance of axle counting was addressed, but also the five aforementioned anomaly detection strategies, detailed in Table 1. For the former, each train is annotated with its type, specifying axle layout, and evaluation performed by comparing detected peaks in strain gauge signals to the expected number and configuration of axles for each train passage. In particular, evaluation was performed on two levels: total axle count accuracy and axle grouping accuracy. For example, a Laagrss train can be expected to produce a signal reflecting 10 wheels: two isolated wheels at the beginning and end, with paired wheels in between. For the latter, the consequent impact on the anomaly de-tection performance was considered. As expected, Figure 14 reveal that the axle counting system performance was notably affected by variations in peak detection sensitivity. As the sensitivity decreased, leading to a higher detection threshold, the system’s accuracy showed a marked improve-ment. However, this performance enhancement reached a plateau, and in some cases a further reduction in sensitivity resulted in a slight decline in performance. This observation suggests the presence of an inflection point beyond which reducing sensitivity yields diminishing returns in terms of accuracy. In contrast, anomaly detection models exhibited an opposite trend, albeit with a more subtle effect. A decrease in sensitivity led to a decline in anomaly detection accuracy, with the most pronounced decrease observed in certain algorithms, such as Detectpeaks. Other algorithms displayed only minor fluctuations, indicating a differential sensitivity to the parameter changes. 
+
+Hyperparameter tuning. Table 4 present the confi-dence intervals of the registered accuracies for the four tested algorithms Tony Beltramelli ( TB ), Peakdetect ( PD ), Detectpeaks ( DP ), and Scipy ( SD ) across the five afore-mentioned AD strategies, and their five counterparts which include additional information on train load and train speed. The anomaly detection classifier was tuned in each itera-tion to identify the optimal configuration, using a random search approach. The parameter ranges employed for tuning are: alpha (0.01-0.1), colsample_bytree (0.5-1.0), subsam-ple (0.5-1.0), learning_rate (0.01-0.3), max_depth (3-10), min_child_weight (1-6), and n_estimators (50-200). The results from these iterations provided confidence intervals at a 95% confidence level, allowing us to account for variability in model outcomes across different parameter settings. To determine the optimal sensitivity threshold for peak detec-tion, two strategies were also employed. The first approach involved averaging the performance metrics of axle counting and anomaly detection, assigning equal weight to each task. The second approach put greater emphasis on anomaly de-tection by assigning it 80% of the weight in the performance calculation. In most cases, the sensitivity thresholds identi-fied through these two methods were consistent. However, when discrepancies appeared, the threshold that prioritized anomaly detection was selected. This approach ensured that the system’s anomaly detection capability was maximized while maintaining an acceptable level of accuracy for axle 
+
+Lourenço et al. Page 12 of 19 Axle Sensor Fusion for Online Continual Wheel Fault Detection in Wayside Railway Monitoring - F P FP 
+
+0.3 
+
+0.4 
+
+0.5 
+
+0.6 
+
+0.7 
+
+0.8 
+
+0.9 
+
+1.0 
+
+> Performance
+
+TB 
+
+PD 
+
+DP 
+
+SD 
+
+> (a) Anomaly Type
+
+0 1 2 3
+
+TB 
+
+PD 
+
+DP 
+
+SD (b) Anomaly Count           
+
+> Figure 15: Comparison of peak detection algorithms under different fault conditions
+> Table 5
+> Friedman test results (non-* / * values shown)
+> Test statistic p-value
+> TB 59.813 / 58.453 3.176e-12 / 6.129e-12 PD 59.253 / 57.333 4.163e-12 / 1.053e-11 DP 59.253 / 58.453 4.163e-12 / 6.129e-12 SD 53.920 / 51.706 5.470e-11 / 1.589e-10
+
+counting. With these settings, Figure 15 summarizes the performance of the four peak detection algorithms across different anomaly types and anomaly multiplicities. The SD 
+
+method remains robust under both wheel flats and poly-gonization, whereas TB , PD , and DP exhibit pronounced performance degradation for at least one of these fault types. Across all methods, a substantial loss in detection accuracy is observed when flats and polygonization co-occur within the same wheel passage. A closer analysis of the anomaly count suggests that this degradation is driven less by the specific fault morphology and more by the superposition of multiple anomalies, which distorts the signal shape and compromises the reliability of peak extraction. 
+
+Statistical confirmation. While such results may hint at a trend in performance, it is essential to substantiate this observation with formal statistical validation. For this pur-pose, both the Friedman and Shaffer tests were performed. The Friedman test is a non-parametric statistical test used to detect differences in treatments across multiple test attempts, which, unlike ANOVA, does not require the data to follow a specific distribution. The test evaluates if there are any sta-tistically significant differences between the rankings of the treatments. If the null hypothesis is rejected, it implies that at least one of the scenarios is statistically different from the others, which allows for further post-hoc analysis to identify the best-performing scenarios. The results are presented in                                            
+
+> Table 6
+> Shaffer pairwise test results (bold = p < 0.05; non-* / * values shown)
+> S-WI I-WI I-WD S-WD
+> TB S-WC 1/1 1/1 ,010/,010 ,036/,029
+> S-WI ,036/,022 ,010/,010 ,010/,010
+> I-WI ,027/,054 1/1 I-WD 1/1 PD S-WC 1/1 1/1 ,010/,010 ,022/,014
+> S-WI ,029/,044 ,010/,010 ,010/,010
+> I-WI ,036/,054 1/,727 I-WD 1/1 DP S-WC 1/1 1/1 ,010/,010 ,044/,054
+> S-WI ,044/,034 ,010/,010 ,010/,010
+> I-WI ,022/,034 1/1 I-WD 1/1 SD S-WC 1/1 ,727/,819 ,010/,010 ,019/,036
+> S-WI ,010/,010 ,010/,010 ,010/,010
+> I-WI ,544/,805 1/1 I-WD 1/1
+
+Table 5, which shows that there are statistically significant differences between the groups. The Friedman test statis-tics, which consistently range between 50 and 60, reflect a high degree of consistency in the ranking of scenarios across the different groups. This implies a robust distinction between the ranks of the experimental conditions, further supporting the conclusion that significant performance vari-ations exist among the scenarios.However, the presence of overall significance does not imply that all pairs of scenar-ios exhibit statistically significant differences. It is possible that some groups may show comparable performance. To further investigate and pinpoint which specific scenarios differ from one another, a pairwise comparison using the  
+
+> Lourenço et al. Page 13 of 19 Axle Sensor Fusion for Online Continual Wheel Fault Detection in Wayside Railway Monitoring
+
+P
+
+F
+
+FP 
+
+-
+
+0.82 0.71 0.88 0.92 0.88 
+
+0.73 0.62 0.76 0.96 0.92 
+
+0.87 0.70 0.90 0.95 0.94 
+
+0.87 0.76 0.90 0.95 0.93 
+
+TB 
+
+0.83 0.72 0.88 0.93 0.90 
+
+0.76 0.60 0.79 0.95 0.93 
+
+0.83 0.76 0.89 0.96 0.94 
+
+0.86 0.75 0.89 0.96 0.93 
+
+PD 
+
+S-WC S-WI I-WI I-WD S-WD 
+
+P
+
+F
+
+FP 
+
+-
+
+0.88 0.73 0.90 0.94 0.90 
+
+0.77 0.63 0.80 0.96 0.95 
+
+0.86 0.65 0.91 0.98 0.96 
+
+0.83 0.71 0.89 0.95 0.91 
+
+DP 
+
+S-WC S-WI I-WI I-WD S-WD 
+
+0.86 0.71 0.91 0.93 0.90 
+
+0.84 0.58 0.90 0.95 0.93 
+
+0.88 0.72 0.89 0.97 0.95 
+
+0.89 0.73 0.93 0.95 0.91 
+
+SD 
+
+0.60 
+
+0.65 
+
+0.70 
+
+0.75 
+
+0.80 
+
+0.85 
+
+0.90 
+
+0.95  
+
+> Figure 16: Anomaly detection performance across the different semantic extraction strategies
+
+Shaffer test was conducted, allowing one to simultaneously address the logical dependencies between the comparisons. Unlike the Nemenyi test, which assumes that all pairwise comparisons are independent, the Shaffer test adjusts for the number of comparisons to avoid overly conservative results. This makes the Shaffer test more powerful when comparing multiple groups, often leading to more significant findings when there are differences between scenarios. Its results are presented in Table 6. Notable significant differ-ences were found primarily between S-WC and I-WD/S-WD, as well as between S-WI and I-WD/S-WD, across all algorithms. These findings suggest that the inclusion of semantic information in experiments I-WD and S-WD has a substantial effect, compared to the earlier conditions that lack such data. The general trend is consistent: incorporating semantic information (as seen in I-WD and S-WD) leads to improved model performance, with significant differences from earlier configurations that rely more heavily on signal data alone. Moreover, the Friedman test was conducted to assess whether incorporating train load and speed data led to statistically significant performance improvements (also dis-played in Table 5). The results for all four algorithms yielded a Friedman test statistic of 0.000 and a p-value of 3.392e-06, which is well below the 0.05 significance threshold. Thus, confirming that additional semantic information consistently improves anomaly detection. 
+
+Anomaly detection. A correlation analysis was con-ducted to assess how the type and number of anomalies in each train passage influenced system performance. The correlation values were derived using the optimal threshold established in the hyperparameter tuning, ensuring that the analysis reflected the best conditions for both tasks. The analysis of the results reveals key patterns related to the impact of anomaly types: polygonization (P), flat wheels (F), multi-damage passages (F, P), and normal passages (-). The system performs best when either both types of anomalies are present or no anomalies are detected, suggesting that the system is more efficient in extreme cases, whether the signal is clear or severely disturbed. However, instances with a single anomaly, particularly flat wheels, show reduced performance, indicating that flat wheel anomalies are more difficult to detect. It is important to note that in Figure 15 we concluded that as signal complexity increases, particularly in multi-damage passages with high anomaly counts, the axle counting system’s accuracy declines. The additional anomalies introduce more noise and disruptions, impairing the system’s ability to detect and correctly identify axles. In contrast, anomaly detection benefits from more pronounced signal disturbances. While multi-damage trains are easier to detect for the anomaly detection system, these present significant challenges for axle counting, where precise struc-tural recognition is crucial. These results underscore the complexity of balancing both tasks, especially in noisy and anomalous environments. 
+
+Semantics interacting with AD. Figure 17 examines the effect of semantics on anomaly detection performance across different anomaly types and quantities. As with anomaly type, the system achieves higher accuracy with either normal or multi-anomaly passages. Multi-damage passages gener-ate more noise, enhancing anomaly detection. In contrast, single-anomaly passages produce subtler disturbances, re-ducing the system’s ability to differentiate and detect anoma-lies effectively. Across most strategies, we observe a sub-stantial positive effect of including contextual information          
+
+> Lourenço et al. Page 14 of 19 Axle Sensor Fusion for Online Continual Wheel Fault Detection in Wayside Railway Monitoring PFFP -
+> 0.4
+> 0.5
+> 0.6
+> 0.7
+> 0.8
+> 0.9
+> 1.0
+> Performance
+> (a) Anomaly Type 0123
+> S-WC
+> S-WI
+> I-WI
+> I-WD
+> S-WD (b) Anomaly Count
+> Figure 17: Impact of semantic enrichment on anomaly detection, averaged across the four peak detection algorithms. Colored markers correspond to semantic-augmented configurations (S-WC*, S-WI*, I-WI*, I-WD*, S-WD*), with contextual information on train load and speed. White markers denote baseline configurations (S-WC, S-WI, I-WI, I-WD, S-WD) described in Table 1.
+
+on train load and speed, with few exceptions, such as I-WD* and S-WD* in both ( F) and ( F, P ). 
+
+Continual learning. To counteract the stability-plasticity trade-off, four different experience replay strategies were considered and compared against the naive retraining from scratch using the entire dataset every time new data arrives. RS consists of a memory sampler with reservoir sampling, where samples are selected and stored based on their true labels. LB consists of a loss-based memory sampler, where samples are selected and stored based on its associated loss value when compared to the true labels. P-RS and P-LB also respectively rely on reservoir sampling and loss-sampling, but samples are selected and stored based on the predicted labels from the past model, instead of the true labels. Each one one of these strategies was assessed for memory sizes of 200 or 800. Throughout these scenarios and different iterations, four different metrics were computed for assessing the continual learning performance (Table 7): 
+
+• Forward transfer measures the influence of learning new tasks on the performance of previous tasks: FWT = 1
+
+> 𝑁 −1
+
+∑𝑁 −1 
+
+> 𝑖 =1
+
+(𝑅 0,𝑖 − 𝑅 𝑖,𝑖 
+
+),where 𝑅 0,𝑖 is the initial performance on task 𝑖 , and 
+
+𝑅 𝑖,𝑖 is the final performance on task 𝑖 . Higher FWT indicates new tasks positively impacted previous ones. 
+
+• Backward Transfer measures the influence of learning new tasks on the performance of old tasks: BWT = 1
+
+> 𝑁 (𝑁 −1)
+
+∑𝑁 −1 
+
+> 𝑖 =1
+
+∑𝑁 𝑗 =𝑖 +1 
+
+(𝑅 𝑗,𝑖 − 𝑅 𝑖,𝑖 
+
+),where 𝑅 𝑗,𝑖 is the performance on task 𝑖 after learning task 𝑗 , and 𝑅 𝑖,𝑖 is the initial performance on task 𝑖 .Positive BWT values indicate learning new tasks has improved the performance on previous tasks. 
+
+• Intransigence Measure evaluates the difficulty a model has in learning new tasks: IM = 1
+
+> 𝑁
+
+∑𝑁 𝑖 =1 
+
+(𝑅 joint ,𝑖 − 𝑅 continual ,𝑖 
+
+),where 𝑅 joint ,𝑖 is the performance of the model trained jointly on all tasks, and 𝑅 continual ,𝑖 is the performance of the model trained continually. Lower IM values indicate better performance in learning new tasks. 
+
+• Knowledge Gain Ratio measures the proportion of knowledge retained from initial training: KGR = 1
+
+> 𝑁
+
+∑𝑁 𝑖 =1 
+
+( 𝑅 continual ,𝑖 
+
+> 𝑅 initial ,𝑖
+
+)
+
+,where 𝑅 initial ,𝑖 is the initial performance on task 𝑖 ,and 𝑅 continual ,𝑖 is the final performance after continual learning on task 𝑖 . Higher KGR values indicate better retention and integration of knowledge. The findings indicate that while RS methods perfor-mance deteriorates with reduced memory size due to its non-selective sampling approach, LB methods outperform under similar conditions. LB methods effectively prioritize more informative samples, allowing the model to maintain performance even in resource-constrained environments. In particular, increasing memory size generally improves the model’s ability to transfer knowledge to new tasks while reducing the negative impact on previously learned tasks. Both P-RS and P-LB demonstrate strong forward learning, yet also reveal issues related to forgetting, suggesting the need for strategies that enhance retention. Among these, LB benefits the most from a larger memory buffer, indicating an optimal balance between learning and retention. 
+
+## 5. Conclusion 
+
+In this work, a label-efficient continual learning frame-work is proposed to jointly model the passage of train axles  
+
+> Lourenço et al. Page 15 of 19
+
+Axle Sensor Fusion for Online Continual Wheel Fault Detection in Wayside Railway Monitoring 
+
+Table 7 
+
+Experience Replay impact on model performance for memory sizes 200 and 800 
+
+Metric Baseline RS P-RS LB P-LB 200 800 200 800 200 800 200 800 200 800 Forward Transfer -0.0109 -0.0102 0.0934 0.0377 0.1882 0.0947 0.1492 0.2427 0.3122 0.1414 
+
+Backward Transfer -0.0117 -0.0038 -0.0129 -0.0219 -0.1170 -0.1136 -0.0077 -0.0018 -0.1164 -0.1240 
+
+Intransigence Measure 0.0104 0.0111 0.1086 0.0628 0.1990 0.1031 0.2192 0.3038 0.3637 0.1864 
+
+Knowledge Gain Ratio 3.1971 3.2005 2.8668 3.0277 2.5662 2.8927 2.4983 2.2169 2.0126 2.6144 
+
+using (1) learned latent representations from accelerometer data, which are highly sensitive to wheel–rail damage, and (2) real-time Fiber Bragg Grating (FBG) strain measure-ments, whose stable temporal structure helps mitigate the effects of non-linear operational and environmental vari-ability. A key practical advantage of the proposed predic-tive maintenance system is that both the wayside sensors and the connecting optical fibers are passive and inherently immune to electromagnetic interference (EMI), requiring no electrical power along the trackside up to the head-end interrogation unit, which may be located tens of kilometers from the measurement points. This property is particularly advantageous in modern electrified railway systems, where EMI severely impacts legacy sensing solutions. By combin-ing data-driven fault sensitivity with EMI-resilient semantic axle characterization, the proposed approach offers a robust alternative to traditional axle counters, reducing the need for additional trackside equipment, maintenance operations, and dedicated data processing infrastructure. 
+
+Extensive ablations. The experimental results demon-strated the robustness of the Scipy ( SD ) peak detection algorithm, which achieved consistently high axle count-ing accuracy across different train types, reaching up to 93% in scenarios enriched with semantic information (S-WD* and I-WD*). This highlights that FBG sensors pro-vide a non-intrusive and reliable means of detecting train axles and monitoring wheel conditions, even in EMI-prone electrified environments. Furthermore, the combination of accelerometer-derived latent embeddings with strain gauge-based semantic features substantially improved anomaly de-tection performance. Across all tested algorithms, semantic enrichment increased detection accuracy by 5–12 percentage points on average, with the highest gains observed for multi-anomaly passages. In continual learning scenarios, replay-based strategies, particularly loss-based memory sampling (LB) with larger memory buffers (800 samples), achieved forward transfer values of 0.24–0.31 and reduced forgetting compared to naive replay, confirming that the integration of both data modalities allows the system to maintain high predictive performance while adapting to new data. 
+
+Future work. While the results are promising, this pre-liminary study is not yet sufficient to guarantee the relia-bility of the proposed FBG-based axle-counting system in real-world railway environments. Further on-track testing and extensive measurements are necessary to mature this technology for practical adoption in the highly conservative railway industry. Future research should focus on: (i) devel-oping more intelligent peak detection algorithms to improve accuracy and robustness, (ii) implementing redundant FBG sensors at each measurement point to increase availability and reliability, and (iii) investigating the sensitivity of FBG sensors to thermal expansion and environmental variations. Additionally, broader studies encompassing diverse opera-tional and environmental conditions are needed to refine domain-specific strategies, optimize sensor placement, and enhance data acquisition. Integration with other railway sensing applications could further leverage the semantic-enriched continual learning framework, potentially provid-ing richer operational insights at a relatively low cost com-pared with conventional axle-counting technologies. 
+
+## Acknowledgments 
+
+Funded by Portuguese Foundation for Science and Tech-nology under Ph.D. scholarship PRT/BD/154713/2023 and project doi.org/10.54499/UID/00760/2025. 
+
+## References              
+
+> [1] Ahmed, F., Courville, A., 2020. Detecting semantic anomalies. Proceedings of the AAAI Conference on Artificial Intelligence 34, 3154â €“3162. [2] Aljundi, R., Belilovsky, E., Tuytelaars, T., Charlin, L., Caccia, M., Lin, M., Page-Caccia, L., 2019. Online continual learning with maximal interfered retrieval, in: Advances in Neural Information Processing Systems, pp. 11849–11860. [3] Allotta, B., Dâ €™ Adamio, P., Innocenti, A., Meli, E., Pugi, L., 2015. An innovative algorithm for train detection, in: 2015 IEEE Inter-national Instrumentation and Measurement Technology Conference (I2MTC) Proceedings, IEEE. doi: 10.1109/i2mtc.2015.7151417 .[4] Bai, L., Liu, R., Sun, Q., Wang, F., Xu, P., 2015. Markov-based model for the prediction of railway track irregularities. Proceedings of the Institution of Mechanical Engineers, Part F: Journal of Rail and Rapid Transit 229, 150–159. doi: 10.1177/0954409713503460 .[5] Bloomfield, R., 2006. Fundamentals of european rail traffic man-agement system - ertms, in: 11th IET Professional Development Course on Railway Signalling and Control Systems, Institution of Engineering and Technology. doi: 10.1049/ic.2006.0684 .[6] British Standards Institution, 2003. Railway Applications — Track: Track Geometry Quality. Standard 13841–13848. BS EN. [7] Buggy, S., Carroll, R., Jaiswal, J., Farrington, D., Kitson, P., James, S., Tatam, R., 2011. Continuous monitoring of points in a tram net-work using optical fibre grating sensors, in: 5th IET Conference on Railway Condition Monitoring and Non-Destructive Testing (RCM 2011), IET. pp. 2B2–2B2. doi: 10.1049/cp.2011.0585 .[8] Buzzega, P., Boschini, M., Porrello, A., Abati, D., Calderara, S., 2020. Dark experience for general continual learning: a strong,
+
+Lourenço et al. Page 16 of 19 Axle Sensor Fusion for Online Continual Wheel Fault Detection in Wayside Railway Monitoring 
+
+simple baseline. Advances in neural information processing systems 33, 15920–15930. [9] Caccia, M., Belilovsky, E., Caccia, M., Pineau, J., 2022. New in-sights on reducing abrupt representation change in online continual learning. arXiv preprint arXiv:2203.06389 . [10] Cai, W., Chi, M., Tao, G., Wu, X., Wen, Z., 2019. Experimental and numerical investigation into formation of metro wheel polygonalization. Shock and Vibration 2019, 1538273. doi: https://doi.org/10.1155/2019/1538273 ,
+
+> arXiv:https://onlinelibrary.wiley.com/doi/pdf/10.1155/2019/1538273
+
+.[11] Chaudhry, A., Ranzato, M., Rohrbach, M., Elhoseiny, M., 2018. Efficient lifelong learning with a-gem, in: International Conference on Learning Representations. [12] Chen, Z., Liu, B., 2018. Lifelong machine learning. Synthesis Lectures on Artificial Intelligence and Machine Learning 12, 1–207. [13] Chong, L., Jiahong, W., Zhixin, Z., Junsheng, L., Tongqun, R., Hongquan, X., 2014. Design and evaluation of a remote mea-surement system for the online monitoring of rail vibration signals. Proceedings of the Institution of Mechanical Engineers, Part F: Journal of Rail and Rapid Transit 230, 724â €“733. doi: 10.1177/ 0954409714560421 .[14] Davari, N., Veloso, B., Ribeiro, R.P., Pereira, P.M., Gama, J., 2021. Predictive maintenance based on anomaly detection using deep learning for air production unit in the railway industry, in: 2021 IEEE 8th International Conference on Data Science and Advanced Analytics (DSAA), IEEE. pp. 1–10. [15] Dwyer-Joyce, R., Yao, C., Lewis, R., Brunskill, H., 2013. An ultrasonic sensor for monitoring wheel flange/rail gauge corner contact. Proceedings of the Institution of Mechanical Engineers, Part F: Journal of Rail and Rapid Transit 227, 188–195. doi: 10. 1177/0954409712460986 .[16] Faghih-Roohi, S., Hajizadeh, S., Núñez, A., Babuska, R., De Schut-ter, B., 2016. Deep convolutional neural networks for detection of rail surface defects, in: 2016 International joint conference on neural networks (IJCNN), IEEE. pp. 2584–2589. [17] Falamarzi, A., Moridpour, S., Nazem, M., 2019a. Development of a tram track degradation prediction model based on the acceleration data. Structure and Infrastructure Engineering 15. [18] Falamarzi, A., Moridpour, S., Nazem, M., Cheraghi, S., 2019b. Prediction of tram track gauge deviation using artificial neural network and support vector regression. Australian Journal of Civil Engineering 17, 63â €“71. doi: 10.1080/14488353.2019.1616357 .[19] Falamarzi, A., Moridpour, S., Nazem, M., Hesami, R., 2018. Rail degradation prediction models for tram system: Melbourne case study. Journal of Advanced Transportation 2018, 1â €“8. doi: 10. 1155/2018/6340504 .[20] Filograno, M.L., Corredera, P., Rodriguez-Plaza, M., Andres-Alguacil, A., Gonzalez-Herraez, M., 2013. Wheel flat detection in high-speed railway systems using fiber bragg gratings. IEEE Sensors Journal 13, 4808â €“4816. doi: 10.1109/jsen.2013.2274008 .[21] Filograno, M.L., Corredera Guillen, P., Rodriguez-Barrios, A., Martin-Lopez, S., Rodriguez-Plaza, M., Andres-Alguacil, A., Gonzalez-Herraez, M., 2012. Real-time monitoring of railway traffic using fiber bragg grating sensors. IEEE Sensors Journal 12, 85â €“92. doi: 10.1109/jsen.2011.2135848 .[22] Fumeo, E., Oneto, L., Anguita, D., 2015. Condition based mainte-nance in railway transportation systems based on big data streaming analysis. Procedia Computer Science 53, 437â €“446. doi: 10.1016/ j.procs.2015.07.321 .[23] Gajda, J., Piwowar, P., Sroka, R., Stencel, M., Zeglen, T., 2012. Application of inductive loops as wheel detectors. Transportation Research Part C: Emerging Technologies 21, 57â €“66. doi: 10.1016/ j.trc.2011.08.010 .[24] Gao, R., He, Q., Feng, Q., 2019. Railway wheel flat detection system based on a parallelogram mechanism. Sensors 19. doi: 10.3390/ s19163614 .[25] Gao, S., Kang, G., Yu, L., Zhang, D., Wei, X., Zhan, D., 2022. Adaptive deep learning for high-speed railway catenary swivel clevis defects detection. IEEE Transactions on Intelligent Transportation Systems 23, 1299–1310. doi: 10.1109/TITS.2020.3024216 .[26] Gao, S., Szugs, T., Ahlbrink, R., 2018. Use of combined railway in-spection data sources for characterization of rolling contact fatigue, in: 12th ECNDT Conf. [27] Gonçalves, V., Mosleh, A., Vale, C., Montenegro, P.A., 2023. Wheel out-of-roundness detection using an envelope spectrum analysis. Sensors 23. doi: 10.3390/s23042138 .[28] Goyal, S., Raghunathan, A., Jain, M., Simhadri, H.V., Jain, P., 2020. Drocc: Deep robust one-class classification, in: International conference on machine learning, PMLR. pp. 3711–3721. [29] Graves, A., 2011. Practical variational inference for neural networks. Advances in neural information processing systems 24. [30] GÃ ³mez, M., Corral, E., CastejÃ ³n, C., GarcÃa-Prada, J., 2018. Effective crack detection in railway axles using vibration signals and wpt energy. Sensors 18, 1603. doi: 10.3390/s18051603 .[31] Gómez, M.J., Corral, E., Castejón, C., García-Prada, J.C., 2018. Effective crack detection in railway axles using vibration signals and wpt energy. Sensors 18. doi: 10.3390/s18051603 .[32] Han, S., Hu, X., Huang, H., Jiang, M., Zhao, Y., 2022. Adbench: Anomaly detection benchmark. Advances in Neural Information Processing Systems 35, 32142–32159. [33] Harun, N., Aljundi, R., Steunebrink, B., Tuytelaars, T., 2022. Online continual learning with maximal interfered retrieval. Advances in Neural Information Processing Systems 35, 23842–23855. [34] Hayes, T.L., Kafle, K., Shrestha, R., Acharya, M., Kanan, C., 2020. Remind your neural network to prevent catastrophic forgetting. European Conference on Computer Vision , 466–483. [35] Hayes, T.L., Krishnan, G.P., Bazhenov, M., Siegelmann, H.T., Mc-Clelland, J.L., Kanan, C., 2021. Replay in deep learning: Current approaches and missing biological elements. Neural Networks 144, 576–593. [36] Hertz, H., 1882. Journal für die reine und angewandte Mathematik 1882, 156–171. doi: doi:10.1515/crll.1882.92.156 .[37] Hidirov, S., Guler, H., 2019. Reliability, availability and maintain-ability analyses for railway infrastructure management. Structure and Infrastructure Engineering 15, 1221â €“1233. doi: 10.1080/ 15732479.2019.1615964 .[38] Ho, T.K., Liu, S.Y., Lee, K.Y., HO, Y.T., Ho, K.H., Mccusker, A., Kam, J., Tam, H.Y., Ho, S.L., 2009. An investigation of rail condition monitoring by fibre bragg grating sensors. HKIE Transactions 16, 9â €“15. doi: 10.1080/1023697x.2009.10668153 .[39] Hofer, V., Bach, H., 2015. Statistical monitoring for continual quality control of railway ballast. Expert Systems with Applications 42, 8557–8572. doi: https://doi.org/10.1016/j.eswa.2015.07.011 .[40] Hopkins, B.M., Taheri, S., 2011. Broken rail prediction and detec-tion using wavelets and artificial neural networks, in: 2011 Joint Rail Conference, ASMEDC. p. 77â €“84. doi: 10.1115/jrc2011-56026 .[41] Hu, H., Tang, B., Gong, X., Wei, W., Wang, H., 2017. Intelligent fault diagnosis of the high-speed train with big data based on deep neural networks. IEEE Transactions on Industrial Informatics 13, 2106â €“2116. doi: 10.1109/tii.2017.2683528 .[42] J. N. Costa, J. Ambrósio, D.F., Andrade, A.R., 2022. A multivariate statistical representation of railway track irregularities using arma models. Vehicle System Dynamics 60, 2494–2510. [43] Jiang, Y., Wang, H., Tian, G., Yi, Q., Zhao, J., Zhen, K., 2019. Fast classification for rail defect depths using a hybrid intelligent method. Optik 180, 455–468. [44] Jiang, Z., Zheng, Y., Tan, H., Tang, B., Zhou, H., 2017. Variational deep embedding: An unsupervised and generative approach to clus-tering, in: Proceedings of the Twenty-Sixth International Joint Con-ference on Artificial Intelligence, International Joint Conferences on Artificial Intelligence Organization. p. 1965â €“1972. [45] Jorge, T., Magalhães, J., Silva, R., Guedes, A., Ribeiro, D., Vale, C., Meixedo, A., Mosleh, A., Montenegro, P., Cury, A., 2024. Early identification of out-of-roundness damage wheels in railway freight vehicles using a wayside system and a stacked sparse autoencoder. Vehicle System Dynamics 0, 1–26. doi: 10.1080/00423114.2024. 
+
+Lourenço et al. Page 17 of 19 Axle Sensor Fusion for Online Continual Wheel Fault Detection in Wayside Railway Monitoring 
+
+> 2333771
+
+.[46] Kalker, J., 1996. Book of tables for the Hertzian creep-force law. Faculty of Technical Mathematics and Informatics, Delft University of Technology. [47] Kamlu, S., Laxmi, V., 2019. Condition-based maintenance strategy for vehicles using hidden markov models. Advances in Mechanical Engineering 11, 1687814018806380. doi: 10.1177/1687814018806380 ,
+
+> arXiv:https://doi.org/10.1177/1687814018806380
+
+.[48] Kim, G., Esmaeilpour, S., Xiao, C., Liu, B., 2023. Open-world con-tinual learning: Unifying novelty detection and continual learning. arXiv preprint arXiv:2304.10038 . [49] Kinet, D., MÃ ©gret, P., Goossen, K., Qiu, L., Heider, D., Caucheteur, C., 2014. Fiber bragg grating sensors toward structural health monitoring in composite materials: Challenges and solutions. Sensors 14, 7394â €“7419. doi: 10.3390/s140407394 .[50] Kouroussis, G., Kinet, D., Moeyaert, V., Dupuy, J., Caucheteur, C., 2016. Railway structure monitoring solutions using fibre bragg grating sensors. International Journal of Rail Transportation 4, 135â €“150. doi: 10.1080/23248378.2016.1184598 .[51] Lai, C.C., Kam, J.C.P., Leung, D.C.C., Lee, T.K.Y., Tam, A.Y.M., Ho, S.L., Tam, H.Y., Liu, M.S.Y., 2012. Development of a fiber-optic sensing system for train vibration and train weight measurements in hong kong. Journal of Sensors 2012, 1â €“7. doi: 10.1155/2012/ 365165 .[52] Lam, H.F., Yang, J.H., hu, Q., Ng, C.T., 2017. Railway ballast damage detection by markov chain monte carlo-based bayesian method. Structural Health Monitoring: An International Journal 17, 147592171771710. doi: 10.1177/1475921717717106 .[53] Lasisi, A., Attoh-Okine, N., 2018. Principal components analysis and track quality index: A machine learning approach. Transporta-tion Research Part C: Emerging Technologies 91, 230–248. [54] Lee, S.K., Kim, J.H., 2019. Bald-vae: Generative active learning based on the uncertainties of both labeled and unlabeled data, in: 2019 7th International Conference on Robot Intelligence Technol-ogy and Applications (RiTA), IEEE. p. 6â €“11. doi: 10.1109/ritapp. 2019.8932813 .[55] Li, H., Parikh, D., He, Q., Qian, B., Li, Z., Fang, D., Hampapur, A., 2014. Improving rail network velocity: A machine learning approach to predictive maintenance. Transportation Research Part C: Emerging Technologies 45, 17â €“26. doi: 10.1016/j.trc.2014.04. 013 .[56] Li, W., Jiang, N., Liu, J., Zhang, Y., 2008. Train axle counters by bragg and chirped grating techniques, in: Sampson, D.D. (Ed.), 19th International Conference on Optical Fibre Sensors, SPIE. p. 70045J. doi: 10.1117/12.786519 .[57] Li, Z., Shang, D., Ma, Z., Liu, Y., Lu, Y., 2023. Memory mechanisms based few-shot continual learning railway obstacle detection, in: 2023 China Automation Congress (CAC), pp. 9372–9377. doi: 10. 1109/CAC59555.2023.10452127 .[58] Liang, B., Iwnicki, S., Ball, A., Young, A., 2015. Adaptive noise cancelling and timeâ €“frequency techniques for rail surface defect detection. Mechanical Systems and Signal Processing 54â €“55, 41â €“51. doi: 10.1016/j.ymssp.2014.06.012 .[59] Liang, B., Iwnicki, S., Zhao, Y., Crosbee, D., 2013. Rail-way wheel-flat and rail surface defect modelling and analysis by timeâ €“frequency techniques. Vehicle System Dynamics 51. doi: 10. 1080/00423114.2013.804192 .[60] Liu, C., He, S., Liu, H., Chen, J., Dong, H., 2024. Windtrans: Transformer-based wind speed forecasting method for high-speed railway. IEEE Transactions on Intelligent Transportation Systems 25, 4947–4963. doi: 10.1109/TITS.2023.3337150 .[61] Liu, S., Wang, Q., Luo, Y., 2019. A review of applications of visual inspection technology based on image processing in the railway industry. Transportation Safety and Environment 1, 185â €“204. [62] Liu, X.Z., Ni, Y.Q., 2018. J-2018-sss-wheel tread defect detection for high-speed trains using fbg-based online monitoring techniques. Smart Structures and Systems 21, 687–694. doi: 10.12989/sss.2018. 21.5.687 .[63] Lourenço, A., Meira, J., Marreiros, G., 2023. Online adaptive learning for out-of-round railway wheels detection, in: Proceedings of the 38th ACM/SIGAPP Symposium on Applied Computing, Association for Computing Machinery, New York, NY, USA. p. 418–421. doi: 10.1145/3555776.3577860 .[64] Lourenço, A., Ferraz, C., Ribeiro, D., Mosleh, A., Montenegro, P., Vale, C., Meixedo, A., Marreiros, G., 2023. Adaptive time series representation for out-of-round railway wheels fault diagnosis in wayside monitoring. Engineering Failure Analysis 152, 107433. doi: https://doi.org/10.1016/j.engfailanal.2023.107433 .[65] Lourenço, A., Gama, J., Xing, E.P., Marreiros, G., 2025a. Bridging streaming continual learning via in-context large tabular models. arXiv preprint arXiv:2512.11668 . [66] Lourenço, A., Gama, J., Xing, E.P., Marreiros, G., 2025b. In-context learning of evolving data streams with tabular foundational models. arXiv preprint arXiv:2502.16840 . [67] Lourenço, A., Ribeiro, D., Fernandes, M., Marreiros, G., 2024. Time series data mining for railway wheel and track monitoring: a survey. Neural Computing and Applications 36, 16707–16725. [68] Lourenço, A., Rodrigo, J., Gama, J., Marreiros, G., 2025c. Dfdt: Dynamic fast decision tree for iot data stream mining on edge devices. arXiv preprint arXiv:2502.14011 . [69] Lourenço, A., Rodrigo, J., Gama, J., Marreiros, G., 2025d. On-device edge learning for iot data streams: a survey. arXiv preprint arXiv:2502.17788 . [70] Lourenço, A., Ferraz, C., Meira, J., Marreiros, G., Bolón-Canedo, V., Alonso-Betanzos, A., 2023. Automated green machine learning for condition-based maintenance, pp. 291–296. doi: 10.14428/esann/ 2023.ES2023-85 .[71] Luo, H., Bo, L., Peng, C., Hou, D., 2020. Fault diagnosis for high-speed train axle-box bearing using simplified shallow information fusion convolutional neural network. Sensors 20, 4930. doi: 10.3390/ s20174930 .[72] Ma, P., Hu, X., 2020. A variational autoencoder with deep em-bedding model for generalized zero-shot learning. Proceedings of the AAAI Conference on Artificial Intelligence 34, 11733â €“11740. doi: 10.1609/aaai.v34i07.6844 .[73] Meixedo, A., Santos, J., Ribeiro, D., CalÃ§ada, R., Todd, M., 2021. Damage detection in railway bridges using traffic-induced dynamic responses. Engineering Structures 238, 112189. doi: 10.1016/j. engstruct.2021.112189 .[74] Midya, S., Thottappillil, R., 2008. An overview of electromagnetic compatibility challenges in european rail traffic management sys-tem. Transportation Research Part C: Emerging Technologies 16, 515â €“534. doi: 10.1016/j.trc.2007.11.001 .[75] Minardo, A., Porcaro, G., Giannetta, D., Bernini, R., Zeni, L., 2013. Real-time monitoring of railway traffic using slope-assisted brillouin distributed sensors. Applied Optics 52, 3770. doi: 10.1364/ao.52. 003770 .[76] Mohammadi, M., Mosleh, A., Vale, C., Ribeiro, D., Montenegro, P., Meixedo, A., 2023. An unsupervised learning approach for wayside train wheel flat detection. Sensors 23. doi: 10.3390/s23041910 .[77] Molodova, M., Li, Z., Núñez, A., Dollevoet, R., 2014. Automatic detection of squats in railway infrastructure. IEEE Transactions on Intelligent Transportation Systems 15, 1980–1990. doi: 10.1109/ TITS.2014.2307955 .[78] Molodova, M., Oregui, M., Núñez, A., Li, Z., Dollevoet, R., 2016. Health condition monitoring of insulated joints based on axle box acceleration measurements. Engineering Structures 123, 225–235. doi: https://doi.org/10.1016/j.engstruct.2016.05.018 .[79] Montenegro, P., Neves, S., Calçada, R., Tanabe, M., Sogabe, M., 2015. Wheel-rail contact formulation for analyzing the lateral trainâ €“structure dynamic interaction. Computers & Structures 152, 200–214. doi: https://doi.org/10.1016/j.compstruc.2015.01.004 .[80] Mosleh, A., Costa, P.A., Calçada, R., 2020a. A new strategy to estimate static loads for the dynamic weighing in motion of railway vehicles. Proceedings of the Institution of Mechanical Engineers, Part F: Journal of Rail and Rapid Transit 234, 183–200. doi: 10. 
+
+Lourenço et al. Page 18 of 19 Axle Sensor Fusion for Online Continual Wheel Fault Detection in Wayside Railway Monitoring 
+
+> 1177/0954409719838115
+
+.[81] Mosleh, A., Montenegro, P.A., Alves Costa, P., Calçada, R., 2020b. An approach for wheel flat detection of railway train wheels using envelope spectrum analysis. Structure and Infrastructure Engineer-ing doi: 10.1080/15732479.2020.1832536 .[82] Mosleh, A., Montenegro, P.A., Costa, P.A., Calçada, R., 2021. Rail-way vehicle wheel flat detection with multiple records using spectral kurtosis analysis. Applied Sciences (Switzerland) 11. doi: 10.3390/ app11094002 .[83] Neves, L., Lourenço, A., Cano, A., Marreiros, G., 2025. Online hierarchical partitioning of the output space in extreme multi-label data stream. arXiv preprint arXiv:2507.20894 . [84] Palmer, J., 2010. The need for train detection, in: IET Professional Development Course on Railway Signalling and Control Systems (RSCS 2010), IET. p. 52â €“64. doi: 10.1049/ic.2010.0088 .[85] Palo, M., Galar, D., Nordmark, T., Asplund, M., Larsson, D., 2014. Condition monitoring at the wheel/rail interface for decision-making support. Proceedings of the Institution of Mechanical Engineers, Part F: Journal of Rail and Rapid Transit 228, 705â €“715. doi: 10. 1177/0954409714526164 .[86] Pang, G., Shen, C., Van Den Hengel, A., 2019. Deep anomaly detection with deviation networks, in: Proceedings of the 25th ACM SIGKDD international conference on knowledge discovery & data mining, pp. 353–362. [87] Paupério, A.R., Risca, Diogo Lourenço, A., Marreiros, G., Martins, R., 2025. Explainable anomaly detection for industrial iot data streams. arXiv preprint arXiv:2512.08885 . [88] Prabhu, A., Torr, P.H., Dokania, P.K., 2020. Gdumb: A simple approach that questions our progress in continual learning, in: Euro-pean Conference on Computer Vision, Springer. pp. 524–540. [89] Rabatel, J., Bringay, S., Poncelet, P., 2011. Anomaly detection in monitoring sensor data for preventive maintenance. Expert Systems with Applications 38, 7003â €“7015. doi: 10.1016/j.eswa.2010.12. 014 .[90] Raz, O., Koopman, P., Shaw, M., . Semantic anomaly detection in online data sources, in: Proceedings of the 24th International Conference on Software Engineering. ICSE 2002, ACM. doi: 10. 1109/icse.2002.1007977 .[91] Ribeiro, R.P., Pereira, P., Gama, J., 2016. Sequential anomalies: a study in the railway industry. Machine Learning 105, 127–153. [92] Riemer, M., Cases, I., Ajemian, R., Liu, M., Rish, I., Tu, Y., Tesauro, G., 2019. Learning to learn without forgetting by maximizing transfer and minimizing interference, in: International Conference on Learning Representations. [93] Risca, D., Lourenço, A., Marreiros, G., 2025. Boosting-inspired online learning with transfer for railway maintenance. arXiv preprint arXiv:2504.08554 . [94] Sadeghi, J., Askarinejad, H., 2012. Application of neural net-works in evaluation of railway track quality condition. Journal of Mechanical Science and Technology 26, 113â €“122. doi: 10.1007/ s12206-011-1016-5 .[95] Salehi, M., Sadjadi, N., Baghshah, S., Rabiee, H.R., Rohban, M.H., 2021. A unified survey on anomaly, novelty, open-set, and out-of-distribution detection: Solutions and future challenges. arXiv preprint arXiv:2110.14051 . [96] Salvador, P., Naranjo, V., Insa, R., Teixeira, P., 2016. Axlebox accelerations: Their acquisition and time-frequency characterisation for railway track monitoring purposes. Measurement 82, 301–312. doi: https://doi.org/10.1016/j.measurement.2016.01.012 .[97] Sharma, S., Cui, Y., He, Q., Mohammadi, R., Li, Z., 2018. Data-driven optimization of railway maintenance for track geometry. Transportation Research Part C: Emerging Technologies 90, 34–58. doi: https://doi.org/10.1016/j.trc.2018.02.019 .[98] Shin, H., Lee, J.K., Kim, J., Kim, J., 2017. Continual learning with deep generative replay. arXiv:1705.08690 .[99] Sophie Mercier, C.M.H., Roussignol, M., 2012. Bivariate gamma wear processes for track geometry modelling, with ap-plication to intervention scheduling. Structure and Infrastruc-ture Engineering 8, 357–366. doi: 10.1080/15732479.2011.563090 ,
+
+> arXiv:https://doi.org/10.1080/15732479.2011.563090
+
+.[100] Sugiyama, H., Araki, K., Suda, Y., 2009. On-line and off-line wheel/rail contact algorithm in the analysis of multibody railroad vehicle systems. Journal of Mechanical Science and Technology 23, 991–996. doi: 10.1007/s12206-009-0327-2 .[101] Sun, Y., Liu, Y., Yang, C., 2019. Railway joint detection using deep convolutional neural networks, in: 2019 IEEE 15th International Conference on Automation Science and Engineering (CASE), IEEE. doi: 10.1109/coase.2019.8843245 .[102] Veloso, B., Ribeiro, R.P., Gama, J., Pereira, P.M., 2022. The metropt dataset for predictive maintenance. Scientific Data 9, 764. [103] Vrignat, P., Avila, M., Duculty, F., Kratz, F., 2015. Failure event pre-diction using hidden markov model approaches. IEEE Transactions on Reliability 64, 1038–1048. doi: 10.1109/TR.2015.2423191 .[104] liang Wei, C., cheung Lai, C., yee Liu, S., Chung, W.H., Ho, T.K., yaw Tam, H., Ho, S.L., McCusker, A., Kam, J., Lee, K.Y., 2010. A fiber bragg grating sensor system for train axle counting. IEEE Sensors Journal 10, 1905â €“1912. doi: 10.1109/jsen.2010.2049199 .[105] Wei, C., Xin, Q., Chung, W.H., Liu, S.y., Tam, H.y., Ho, S.L., 2011. Real-time train wheel condition monitoring by fiber bragg grating sensors. International Journal of Distributed Sensor Networks 8, 409048. doi: 10.1155/2012/409048 .[106] Wei, J., Liu, C., Ren, T., Liu, H., Zhou, W., 2017. Online condition monitoring of a rail fastening system on high-speed railways based on wavelet packet analysis. Sensors 17. doi: 10.3390/s17020318 .[107] Wiewel, F., Yang, B., 2019. Continual learning for anomaly detec-tion with variational autoencoder, in: ICASSP 2019 - 2019 IEEE In-ternational Conference on Acoustics, Speech and Signal Processing (ICASSP), pp. 3837–3841. doi: 10.1109/ICASSP.2019.8682702 .[108] Xu, Q., Zhao, Q., Yu, G., Wang, L., Shen, T., 2020. Rail defect detection method based on recurrent neural network, in: 2020 39th Chinese Control Conference (CCC), IEEE. pp. 6486–6490. [109] Yan, L., Zhang, Z., Wang, P., Pan, W., Guo, L., Luo, B., Wen, K., Wang, S., Zhao, G., 2011. Fiber sensors for strain measurements and axle counting in high-speed railway applications. IEEE Sensors Journal 11, 1587â €“1594. doi: 10.1109/jsen.2010.2086058 .[110] Ye, X.W., Su, Y.H., Han, J.P., 2014. Structural health monitoring of civil infrastructure using optical fiber sensing technology: A comprehensive review. The Scientific World Journal 2014, 1â €“11. doi: 10.1155/2014/652329 .[111] Yin, J., Zhao, W., 2016. Fault diagnosis network design for ve-hicle on-board equipments of high-speed railway: A deep learning approach. Engineering Applications of Artificial Intelligence 56, 250–259. [112] Yoon, H.J., Song, K.Y., Kim, J.S., Kim, D.S., 2011. Longitudinal strain monitoring of rail using a distributed fiber sensor based on brillouin optical correlation domain analysis. E International 44, 637â €“644. doi: 10.1016/j.ndteint.2011.07.004 .[113] YÃ ¼ksel, K., Kinet, D., Moeyaert, V., Kouroussis, G., Caucheteur, C., 2018. A trackside sensor system for train axle counting by fiber bragg grating accelerometer, in: 26th International Conference on Optical Fiber Sensors, OSA. p. TuE40. doi: 10.1364/ofs.2018.tue40 .[114] Zhai, W., Wang, Q., Lu, Z., Wu, X., 2001. Dynamic effects of vehicles on tracks in the case of raising train speeds. Proceedings of The Institution of Mechanical Engineers Part F-journal of Rail and Rapid Transit - PROC INST MECH ENG F-J RAIL R 215, 125–135. doi: 10.1243/0954409011531459 .[115] Zhang, L., Wang, Z., Yan, Q., Lin, J., Wu, C., 2020. A loose self-checking method based on fbg for axle counting sensor. IOP Conference Series: Materials Science and Engineering 892, 012032. doi: 10.1088/1757-899x/892/1/012032 .
+
+Lourenço et al. Page 19 of 19

@@ -1,0 +1,886 @@
+Title: Adaptive Active Learning for Online Reliability Prediction of Satellite Electronics
+
+URL Source: https://arxiv.org/pdf/2603.09058v1
+
+Published Time: Wed, 11 Mar 2026 00:22:57 GMT
+
+Number of Pages: 33
+
+Markdown Content:
+# Adaptive Active Learning for Online Reliability Prediction of Satellite Electronics 
+
+## Shixiang Li 1
+
+## ZJUI Institute, Zhejiang University Yubin Tian 1
+
+## Faculty of Computational Mathematics and Cybernetics, Shenzhen MSU-BIT University Dianpeng Wang 2∗
+
+## The School of Mathematics and Statistics, Beijing Institute of Technology Piao Chen 3
+
+## ZJUI Institute, Zhejiang University and Mengying Ren 4
+
+## The School of Mathematics and Statistics, Beijing Institute of Technology March 11, 2026 
+
+Abstract 
+
+Accurate on-orbit reliability prediction for satellite electronics is often hindered by limited data availability, varying operational conditions, and considerable unit-to-unit variability. To overcome these obstacles, this paper proposes a novel integrated online reliability prediction framework. The main contributions are twofold. First, a Wiener process-based degradation model is developed, incorporating a generalized Arrhenius link function, individual random effects, and spatial correlations among adjacent units. A customized maximum likelihood estimation method is further devised to facilitate efficient and accurate parameter inference. Second, a two-stage active learning sampling scheme is designed to adaptively enhance prediction accuracy. This strategy initially selects representative units based on spatial configuration, and subsequently determines optimal sampling times using a comprehensive criterion that balances unit-specific information, model uncertainty, and degradation dynamics. Numerical experiments and a practical case study from the Tiangong space station demonstrate that the proposed method markedly improves reliability prediction accuracy while significantly reducing data requirements, offering an efficient solution for the prognostic and health management of complex satellite electronic systems. 
+
+> ∗
+
+wdp@bit.edu.cn 
+
+1
+
+> arXiv:2603.09058v1 [stat.ME] 10 Mar 2026
+
+Keywords: D-optimal, lifetime, optimized sampling, reliability analysis, Wiener process 21 Introduction 
+
+Reliability assessment is indispensable for ensuring the safety and function of complex engineering systems (Wang et al. 2025). Modern systems are increasingly designed with high reliability and extended service lifespans to maximize mission value. Therefore, corresponding failure events are extremely rare within feasible observation windows (Ye & Xie 2015), posing a fundamental challenge to traditional reliability analysis based on failure data and lifetime models (Zhang et al. 2022). Meanwhile, with the rapid development of online monitoring technologies, various sensors can be used to record the health status (Wang & Wang 2015). Thus, degradation modeling has been studied as an alternative, which leverages continuous performance data to infer the true current degradation state (Zhu et al. 2026). In the degradation analysis framework, the health status of a unit is characterized by a measurable performance characteristic X(t) that degrades over time (Zhai et al. 2025). A unit is considered to experience a failure when X(t) first crosses a predefined critical threshold (Li et al. 2025). By utilizing degradation data, it is possible to predict the reliability, promoting preventive maintenance, repair, or replacement to avoid the transition from potential defects to actual failures (Si et al. 2013, Yang et al. 2018, Wang, Zhai & Shen 2023). Existing literature broadly classifies degradation modeling into general path approaches and stochastic process models. General path models utilize regression frameworks under known physical knowledge and have wide applications, including (Lu et al. 2021, Wang et al. 2024, Ye et al. 2024). On the other hand, stochastic process models, using independent increments, naturally capture the temporal variation (Kang et al. 2023). The Wiener process, in particular, stands out as a popular choice among alternatives like Gamma (Chen & Ye 2018) or Inverse Gaussian processes (Xu, Wang, Tang & Chen 2025). Its suitability is based on the Central Limit Theorem, which suggests that degradation increments, representing the 3cumulative sum of numerous micro-level influences, tend to be normally distributed (Wang et al. 2013, Zhang et al. 2022). However, while such methods have been widely applied (Zhang et al. 2018, Fang & Pan 2024, Chen & Hao 2025), their direct implementation on long-endurance aerospace assets poses different challenges, as exemplified by the China Tiangong Space Station (CTSS). The space station, a strategic asset designed for long-term on-orbit research (Wang, Zhang & Wang 2023, Yin et al. 2023), exemplifies the complexity of reliability analysis. This study targets the core switching components within the space station’s power distribution units (PDUs), specifically the Metal-Oxide-Semiconductor Field-Effect Transistors (MOSFETs), which are responsible for dynamic unit regulation and voltage conversion (Zarghany et al. 2016) under high-stakes operational constraints. As noted by (Xu et al. 2023) and (Zeng et al. 2023), such units are crucial subsystems in satellites. Accurately predicting the reliability of these critical components throughout their extended lifecycles presents several unique challenges that necessitate advanced modeling frameworks. However, a critical review of the literature reveals two significant gaps that motivate this work. The first gap lies in degradation modeling under the unique conditions of a space station. The operating environment is complex and highly dynamic. Unlike short-term missions, the space station experiences continuous alternating orbital cycles, which induce fluctuations in junction temperature (Xu, Tian, Wang & Shi 2025). Coupled with varying electrical stresses from shifting payload operations (Musallam et al. 2014), these factors introduce significant nonlinearity into degradation trajectories, rendering commonly used constant-stress models ineffective. Furthermore, the system exhibits inherent unit-wise heterogeneity due to manufacturing tolerances. While recent studies have begun to address such complexities by incorporating environmental covariates (Zhang et al. 2018) and random effects to capture parameter variability (Pennell et al. 2010, Xu et al. 2016, Duan & Wang 42018), they overlook a critical aspect: the spatial dependence among units. Due to the compact spatial topology of the Power Distribution Unit (PDU), adjacent units exhibit strong coupling effects, where the operation of one unit inevitably influences its spatial neighbors. Existing models neglect this inherent spatial dependence structure, which, as will be demonstrated, can lead to misleading reliability predictions. The second gap pertains to data acquisition. Strictly limited data transmission resources make high-frequency, full-scale monitoring infeasible, necessitating a focused active learning strategy to capture the most valuable data. While the literature on general sampling design is extensive (Lee et al. 2022, Sun & Tang 2023, Li et al. 2023, Tai et al. 2025), only a subset addresses the optimization of observation epochs for degradation prediction (Wang & Tian 2018, Wang et al. 2022, Ren et al. 2025). Some research focuses predominantly on step-stress accelerated degradation test plans rather than observation time (Tseng et al. 2009, Tsai et al. 2012, Cheng & Peng 2024). Critically, these time-focused approaches neglect the spatial dimension and fail to select informative units based on environmental and spatial contexts. In our study, simultaneous observation of all units is unnecessary, creating a dual optimization problem: identifying the most informative units according to the unit topology (spatial selection) while concurrently determining the optimal observation times (temporal scheduling). Given the high stakes, where any unexpected failure could lead to severe economic losses or compromise living conditions, accurate reliability prediction is essential. To bridge these gaps, this article proposes an integrated online reliability prediction method for satellite electronics. The main contributions are twofold: (1) a degradation model that jointly incorporates individual heterogeneity and spatial dependence, which is an aspect rarely considered in existing literature; and (2) a new spatiotemporal active learning sampling strategy that optimizes data acquisition across both units and observation epochs, a challenge 5unique to the space station context. The remainder of this paper is organized as follows. Section 2 establishes the Wiener-based degradation model considering time-varying stresses, unit-wise heterogeneity, and spatial correlations. Section 3 details the efficient parameter estimation method. Section 4 presents the two-stage spatiotemporal active learning sampling strategy. Sections 5 demonstrate the effectiveness of the proposed method through numerical simulations and a practical application involving the Tiangong space station. Finally, Section 6 concludes the paper. 
+
+# 2 A Hierarchical Spatiotemporal Degradation Model 
+
+Satellite electronics operate under conditions that challenge conventional degradation models: environments are dynamic, units exhibit pronounced heterogeneity, and compact physical layouts induce spatial dependence among adjacent components. This section develops a novel degradation framework that simultaneously captures all three features. We first formulate the degradation process for a single unit, incorporating time -varying covariates and random effects. The model is then extended to the entire system by explicitly integrating a spatial correlation structure, linking physically adjacent units through their random coefficients. Let Xi(t) denote the performance characteristic of the ith unit ( i = 1 , 2, . . . , L ) at time t.We adopt a Wiener process with a time-scale transformation, 
+
+Xi(t) = Xi, 0 + βi(t)Λ( t) + σBi(Λ( t)) , (1) where Xi, 0 is the initial degradation level (set to 0 without loss of generality), βi(t) is a cumulative degradation coefficient that accumulates damage under dynamic environments, 
+
+Λ( t) = tα (α > 0) is a continuous non -decreasing function representing the intrinsic nonlinear degradation path, σ > 0 is the diffusion coefficient, and Bi(·) denotes standard Brownian motion, independent across units. 6Given the dynamic operating environment, both junction temperature Si, 1(t) and electrical stress Si, 2(t) fluctuate according to known orbital and operational patterns. To capture their impact on degradation, we adopt an approach analogous to the proportional hazards framework, modeling the degradation rate as an exponential function of dynamic covariates, which is given by 
+
+βi(t) = ai exp [
+
+γ1Zi, 1(t) + γ2Zi, 2(t)]
+
+,Zi, 1(t) = 1000 
+
+Si, 1(t) + 273 .15 , Zi, 2(t) = ln Si, 2(t),
+
+where γ1 and γ2 are acceleration coefficients. The unit -specific random coefficient ai ∼
+
+N (μa, τ 2 
+
+> a
+
+) captures unobserved individual differences arising from manufacturing tolerances. Consequently, the degradation rate follows a time -dependent normal distribution given by 
+
+βi(t) ∼ N (
+
+μi,b (t), τ 2
+
+> i,b
+
+(t))
+
+,
+
+with mean μi,b (t) = μaλi(t), variance τ 2
+
+> i,b
+
+(t) = τ 2 
+
+> a
+
+λ2 
+
+> i
+
+(t), and λi(t) = exp [
+
+γ1Zi, 1(t) + γ2Zi, 2(t)]
+
+encapsulating the environmental effects. From the model (1), Xi(t) is normally distributed with moments 
+
+E[Xi(t)] = μaλi(t)Λ( t),
+
+Var [Xi(t)] = τ 2 
+
+> a
+
+[λi(t)Λ( t)] 2 + σ2Λ( t),
+
+Cov [Xi(t), X i(s)] = τ 2 
+
+> a
+
+[λi(t)Λ( t)][ λi(s)Λ( s)] + σ2Λ( t ∧ s),
+
+where t ∧ s = min (t, s ). These expressions reveal two distinct sources of variability: the random drift term τ 2 
+
+> a
+
+captures persistent unit -specific deviations, while the diffusion term 
+
+σ2 accounts for transient fluctuations. A key innovation of this work is the explicit modeling of spatial dependencies. In the space station layout, adjacent units share similar thermal and electrical microenvironments. Suppose the units are arranged on a one -dimensional spatial domain and indexed by location 7i. We assume that the Brownian motions are independent across units, but the inherent degradation rates are correlated. The covariance between the random coefficients ai and aj
+
+is modeled as 
+
+Cov (ai, a j ) = 
+
+> 
+
+τ 2 
+
+> a
+
+, i = j, τ 2 
+
+> a
+
+ρ, |i − j| = 1 (adjacent) ,
+
+0, otherwise ,
+
+where ρ ∈ (−1, 1) quantifies the spatial correlation strength. This first -order autoregressive structure is both parsimonious and physically motivated: correlation decays with distance and vanishes beyond immediate neighbors, reflecting the localized nature of thermal and electrical coupling. Let Y = (
+
+X1(t1), X 2(t2), . . . , X L(tL))⊤
+
+denote the column vector of observations from all units, where ti represents the observation time for unit i. The joint distribution of Y is multivariate normal, with mean vector (
+
+μaλ1(t1)Λ( t1), . . . , μ aλL(tL)Λ( tL))⊤
+
+and covariance matrix Ψ. Its (i, j )th element, representing the covariance between units i and j, is 
+
+Ψi,j = Cov (ai, a j ) λi(ti)Λ( ti) λj (tj )Λ( tj ) + δij σ2Λ( ti ∧ tj ), (2) where δij is the Kronecker delta ( δij = 1 if i = j, and 0 otherwise). Equation (2) decom-poses system variability into three physically interpretable components: spatial correlation governed by ρ, temporal fluctuations governed by σ2, and unit -wise heterogeneity governed by τ 2 
+
+> a
+
+.For reliability prediction, we focus on individual units. The lifetime Ti of unit i is defined as the first hitting time of a critical failure threshold ξ, namely 
+
+Ti = inf {t ≥ 0 : Xi(t) ≥ ξ}.
+
+Because βi(t) is time -varying, a closed -form expression for the distribution of Ti is mathe-matically intractable. We therefore employ Monte Carlo simulation for lifetime estimation 8in subsequent sections. Note that the proposed framework generalizes several existing models. For instance, setting 
+
+ρ = 0 simplifies the framework to a collection of independent units with random effects. When τ 2 
+
+> a
+
+= 0 , it becomes a fixed -effects model with spatial independence. Furthermore, under constant environmental covariates, λi(t) reduces to a constant, recovering traditional Wiener process models. This nested structure facilitates model comparison and hypothesis testing. 
+
+# 3 Efficient Profile Likelihood Inference 
+
+Estimating the parameters of a spatiotemporal degradation model poses considerable challenges: the likelihood involves high -dimensional covariance matrices, and the number of parameters is large. In this section, we develop an efficient estimation procedure that exploits the separable structure of the model to reduce the dimensionality of numerical optimization. The key idea is to concentrate out the scale parameters analytically, leaving only a low-dimensional profile likelihood to be maximized. Consider degradation data from L spatially dependent units observed over the time interval 
+
+[0 , T ]. Measurements are taken at time points ti = {ti, 1, . . . , t i,m i } for unit i (i = 1 , . . . , L ), yielding observations xi,j = Xi(ti,j ), j = 1 , . . . , m i. The complete dataset is denoted 
+
+D = {(ti,j , x i,j ) : i = 1 , . . . , L, j = 1 , . . . , m i}.Let xi = ( xi, 1, . . . , x i,m i )⊤ be the observation vector for unit i. Stacking all observations gives the system -level vector y = ( x⊤ 
+
+> 1
+
+, x⊤ 
+
+> 2
+
+, . . . , x⊤ 
+
+> L
+
+)⊤ ∈ RM , where M = ∑Li=1 mi is the total number of measurements. From the model, E[xi] = μaΞi, with Ξ(j) 
+
+> i
+
+= λi(ti,j )Λ( ti,j ). Hence, 
+
+E[y] = μaΞ, where Ξ = ( Ξ⊤ 
+
+> 1
+
+, Ξ⊤ 
+
+> 2
+
+, . . . , Ξ⊤ 
+
+> L
+
+)⊤. According to the dependence structure derived in Section 2, the global covariance matrix Ψ ∈ RM ×M consists of L × L block matrices. 9Because Brownian motions are independent across units, the temporal variability term appears only in the diagonal blocks. Conversely, spatial correlation, governed by the random drift coefficients, affects both diagonal and off -diagonal blocks. Thus, the (i, j )th block matrix Ψi,j is 
+
+Ψi,j =
+
+> 
+
+τ 2
+
+> a
+> (
+
+ΞiΞ⊤ 
+
+> i
+
++ κ2Qi
+
+> )
+
+, i = j, τ 2 
+
+> a
+
+ρ ΞiΞ⊤ 
+
+> j
+
+, |i − j| = 1 ,
+
+0, otherwise ,
+
+where κ = σ/τ a is a reparameterized diffusion coefficient, and Qi represents the Brownian motion covariance structure for unit i, with entries Q(l,k ) 
+
+> i
+
+= min {Λ( ti,l ), Λ( ti,k )}.For mathematical convenience, we factor the covariance matrix as Ψ = τ 2 
+
+> a˜
+
+Ψ, where the scaled matrix ˜Ψ is defined blockwise. 
+
+> ˜
+
+Ψi,j =
+
+> 
+
+ΞiΞ⊤ 
+
+> i
+
++ κ2Qi, i = j, ρ ΞiΞ⊤ 
+
+> j
+
+, |i − j| = 1 ,
+
+0, otherwise .
+
+Let θ = ( α, μ a, τ 2 
+
+> a
+
+, κ, γ 1, γ 2, ρ )⊤ denote the complete parameter vector. The log -likelihood function for θ given D is 
+
+l(θ | D ) ∝ − M
+
+2 ln τ 2 
+
+> a
+
+− 12 ln |˜Ψ| − 12τ 2
+
+> a
+
+(y − μaΞ)⊤˜Ψ−1
+
+(y − μaΞ). (3) Direct maximization over the full parameter space can be computationally unstable due to high dimensionality. However, the optimization problem exhibits a separable structure: for any fixed set of structural parameters θ1 = ( α, κ, γ 1, γ 2, ρ )⊤, the maximum likelihood estimates of μa and τ 2 
+
+> a
+
+can be derived analytically. Exploiting this property, we employ the profile likelihood method (Murphy & Van der Vaart 2000) to concentrate out μa and τ 2 
+
+> a
+
+,thereby reducing the dimensionality of numerical optimization. 10 Given θ1, the closed-form estimates are ̂
+
+μa(θ1) = Ξ⊤˜Ψ−1
+
+y
+
+Ξ⊤˜Ψ−1
+
+Ξ, (4) ̂
+
+τ 2 
+
+> a
+
+(θ1) = 1
+
+M (y −̂ μa(θ1)Ξ)⊤˜Ψ−1
+
+(y −̂ μa(θ1)Ξ). (5) Substituting these into (3) yields the profile log -likelihood function, which depends solely on θ1.
+
+lp(θ1 | y) ∝ − M
+
+2 ln ̂ τ 2 
+
+> a
+
+(θ1) − 12 ln |˜Ψ|. (6) Estimation of θ1 proceeds by maximizing (6) . This is a constrained nonlinear optimization problem, with κ > 0 and ρ ∈ [−1, 1] . To ensure numerical stability and computational efficiency, especially for the log -determinant ln |˜Ψ| involving large matrices, we employ the Cholesky decomposition of ˜Ψ. The optimization is performed using numerical methods with a multi -start strategy to mitigate the risk of converging to local optima. Once ̂ θ1 is obtained, the estimates for μa and τ 2 
+
+> a
+
+are recovered from (4) and (5). 
+
+# 4 Optimal Spatiotemporal Data Acquisition via Active Learning 
+
+On -orbit satellite data are severely constrained by limited transmission bandwidth. Conse-quently, an efficient active learning sampling strategy is essential for monitoring degradation and predicting reliability. This section addresses two intertwined problems: spatial sampling which selects a representative subset of units to observe at each epoch and sequential temporal sampling involving determining the optimal time for the next observation of a given unit. The process iterates, updating parameter estimates and sampling plans as data accumulate, until the design life is reached. 11 4.1 Spatial Active Learning: Uniform Coverage via Space-Filling Design 
+
+Due to resource constraints, only c out of L units can be monitored at each of o epochs. Let W be an L × o observation matrix, where Wj,k = 1 indicates that unit j is observed at epoch k, and 0 otherwise. We aim to select the observed units such that the sampling elements of W satisfy space-filling properties. This problem can be transformed into selecting points in the normalized domain [0 , 1] 2. The candidate set is defined as 
+
+G =
+
+> {
+
+(uk, v j ) : uk = k − 0.5
+
+o , v j = j − 0.5
+
+L , k = 1 , . . . , o, j = 1 , . . . , L 
+
+> }
+
+,
+
+where uk represents normalized time and vj normalized unit index. For any point s =(s1, s 2) ∈ S , where S ⊂ G is a subset, we set Wj,k = 1 with j = ⌈s2L⌉ and k = ⌈s1o⌉. Our objective is to select S of cardinality |S| = oc , subject to the constraint that each column of W sums to exactly c (i.e., exactly c units are observed at each epoch). To evaluate design uniformity, we adopt the wrap -around L2 discrepancy (WD) (Fang & Ma 2001) as the optimality criterion. Compared to other discrepancy measures, WD is particularly suitable for this spatial sampling problem. It possesses translation invariance, effectively treating the domain as a torus without physical boundaries, thereby eliminating boundary effects and ensuring that sampling points near the edges are weighted equally. Moreover, WD has a simple closed-form expression that is computationally tractable. For a design S = {s1, . . . , sn} with n = oc and sp = ( sp, 1, s p, 2), the squared WD is 
+
+[WD( S)] 2 = −16 9 + 1
+
+n2
+
+> n∑
+> p=1
+> n∑
+> q=1 2∏
+> d=1
+
+ϕ(sp,d , s q,d ),
+
+where ϕ(x, y ) = 32 − | x − y| + |x − y|2. Let G⋆ denote the set of all valid subsets satisfying 12 the column constraint. The optimal design for unit selection is found by 
+
+S⋆ = arg min 
+
+> S⊂G ⋆
+
+[WD( S)] 2.
+
+Optimization algorithms such as threshold accepting or random swap are employed to search for S⋆. Once S⋆ is obtained, it yields the corresponding observation matrix W⋆.Figure 1 illustrates a toy example with L = 8 , o = 10 , and c = 5 . The selected units are uniformly distributed throughout the domain. Vertically, the design strictly adheres to the resource constraint, with exactly c = 5 units selected at each epoch. Horizontally, the observation frequency is balanced among the L = 8 units, ensuring that no single unit is neglected or over -sampled. The proposed criterion successfully avoids clustering and edge effects, thereby guaranteeing high-quality data under limited resources. 12345678910               
+
+> 12345678
+> Unit
+> Time
+> Threshold accepting
+> 12345678910
+> 12345678
+> Unit
+> Time
+> Random swap
+
+Figure 1: Illustration of the proposed spatial active learning via threshold accepting (left) and random swap algorithms (right) for a toy example with L = 8 , o = 10 , and c = 5 . Red points denote selected units. 13 4.2 Sequential Temporal Active Learning: A Balanced Informa-tion Criterion 
+
+During the early orbital phase, degradation trends are often subtle, so sampling is typically performed at regular intervals (e.g., every six months). After the initial monitoring phase, engineers may wish to optimize the time of the next observation tm+1 given m observations for a unit. For simplicity, we drop the subscript i in this section, as the method is identical for all units. Let x⋆ = ( x⊤, X (tm+1 )) ⊤ denote the augmented observation vector including the potential future observation, and let starred quantities denote those based on X(tm+1 ). Accurate reliability prediction requires precise estimation of the key parameters ζ = ( α, γ 1, γ 2)⊤. This leads to a sequential D -optimal design problem: choose tm+1 to maximize the determinant of the Fisher information matrix (FIM) for ζ.The log-likelihood function for the augmented vector is 
+
+l⋆(θ | x⋆) ∝ − ln τa − 12 ln | ˜Σ⋆| − 12τ 2
+
+> a
+
+(x⋆ − μaΞ⋆)⊤ ˜Σ−1 
+
+> ⋆
+
+(x⋆ − μaΞ⋆) ,
+
+with a m⋆ × m⋆ matrix ˜Σ⋆ = Σ⋆/τ 2 
+
+> a
+
+= Ξ⋆Ξ⊤ 
+
+> ⋆
+
++ κ2Q⋆. To compute the FIM, we require the first-order gradient of the log-likelihood with respect to ζ.
+
+4.2.1 Gradient with Respect to γ = ( γ1, γ 2)⊤
+
+Since γ affects the likelihood only through Ξ⋆, we first derive gradients with respect to elements of Ξ⋆. Without loss of generality, we analyze the first element η1 = λ(t1)Λ( t1).Gradients for the remaining elements are analogous. Using the decomposition from Peng & Tseng (2009), 
+
+| ˜Σ⋆| = |κ2Q⋆|(
+
+1 + Ξ⊤ 
+
+> ⋆
+
+(κ2Q⋆)−1Ξ⋆
+
+> )
+
+,
+
+14 and 
+
+˜Σ−1 
+
+> ⋆
+
+= ˜Q−1 
+
+> ⋆
+
+−
+
+˜Q−1 
+
+> ⋆
+
+Ξ⋆Ξ⊤ 
+
+> ⋆
+
+˜Q−1
+
+> ⋆
+
+1 + Ξ⊤ 
+
+> ⋆
+
+˜Q−1 
+
+> ⋆
+
+Ξ⋆
+
+,
+
+where ˜Q⋆ = κ2Q⋆. Define B⋆ = 1 + Ξ⊤ 
+
+> ⋆
+
+˜Q−1 
+
+> ⋆
+
+Ξ⋆ and A⋆ = ˜Q−1 
+
+> ⋆
+
+Ξ⋆Ξ⊤ 
+
+> ⋆
+
+˜Q−1 
+
+> ⋆
+
+. The required derivatives are then 
+
+∂ ln | ˜Σ⋆|
+
+∂η 1
+
+= 2e⊤ 
+
+> 1
+
+˜Q−1 
+
+> ⋆
+
+Ξ⋆
+
+B⋆
+
+,∂ ˜Σ−1
+
+> ⋆
+
+∂η 1
+
+= 2( e⊤ 
+
+> 1
+
+˜Q−1 
+
+> ⋆
+
+Ξ⋆)A⋆
+
+B2
+
+> ⋆
+
+−
+
+˜Q−1 
+
+> ⋆
+
+(e1Ξ⊤ 
+
+> ⋆
+
++ Ξ⋆e⊤ 
+
+> 1
+
+)˜Q−1
+
+> ⋆
+
+B⋆
+
+,∂D ⋆
+
+∂η 1
+
+= −2μae⊤ 
+
+> 1
+
+˜Σ−1 
+
+> ⋆
+
+(x⋆ − μaΞ⋆) + ( x⋆ − μaΞ⋆)⊤ ∂ ˜Σ−1
+
+> ⋆
+
+∂η 1
+
+(x⋆ − μaΞ⋆),
+
+where e1 is a column vector with the first element being 1 and the remaining elements being 0, D⋆ is the quadratic form in the likelihood. Combining these, 
+
+∂l ⋆
+
+∂η 1
+
+= −12
+
+∂ ln | ˜Σ⋆|
+
+∂η 1
+
+− 12τ 2
+
+> a
+
+∂D ⋆
+
+∂η 1
+
+.
+
+The chain rule then gives ∂l ⋆/∂ γ via 
+
+∂Ξ⋆
+
+∂γ⊤ = diag (
+
+λ(t1)Λ( t1), . . . , λ (tm+1 )Λ( tm+1 ))
+
+z1(t1) z2(t1)
+
+... ...
+
+z1(tm+1 ) z2(tm+1 )
+
+
+
+.
+
+4.2.2 Gradient with Respect to α
+
+For α, we again use the decomposition ln | ˜Σ⋆| = ln |˜Q⋆| + ln B⋆ and ˜Σ−1 
+
+> ⋆
+
+= ˜Q−1 
+
+> ⋆
+
+− A⋆/B ⋆.The determinant of ˜Q⋆ has the closed form 
+
+|˜Q⋆| = κ2( m+1) 
+
+> m+1
+
+∏
+
+> k=1
+
+(tαk − tαk−1), t0 = 0 .
+
+Thus, 
+
+∂|˜Q⋆|
+
+∂α = |˜Q⋆|
+
+ln t1 +
+
+> m+1
+
+∑
+
+> k=2
+
+tαk ln tk − tαk−1 ln tk−1
+
+tαk − tαk−1
+
+.
+
+15 The inverse ˜Q−1 
+
+> ⋆
+
+is tridiagonal with entries expressed in terms of dk = tαk −tαk−1. Its derivative 
+
+∂˜Q−1 
+
+> ⋆
+
+/∂α is obtained by differentiating each entry, using d′ 
+
+> k
+
+= tαk ln tk − tαk−1 ln tk−1. The derivatives of B⋆, A⋆, and ultimately ˜Σ−1 
+
+> ⋆
+
+follow from these building blocks. In particular, 
+
+∂B ⋆
+
+∂α = 2 ∂Ξ⊤
+
+> ⋆
+
+∂α 
+
+> ˜
+
+Q−1 
+
+> ⋆
+
+Ξ⋆ + Ξ⊤
+
+> ⋆
+
+∂˜Q−1
+
+> ⋆
+
+∂α Ξ⋆,
+
+and 
+
+∂D ⋆
+
+∂α = −2μa
+
+∂Ξ⊤
+
+> ⋆
+
+∂α 
+
+> ˜
+
+Σ−1 
+
+> ⋆
+
+(x⋆ − μaΞ⋆) + ( x⋆ − μaΞ⋆)⊤ ∂ ˜Σ−1
+
+> ⋆
+
+∂α (x⋆ − μaΞ⋆).
+
+Finally, 
+
+∂l ⋆
+
+∂α = −12
+
+∂ ln | ˜Σ⋆|
+
+∂α − 12τ 2
+
+> a
+
+∂D ⋆
+
+∂α .
+
+4.2.3 The Proposed Criterion 
+
+Under standard regularity conditions, the FIM I(ζ | x⋆) for ζ = ( α, γ 1, γ 2)⊤ can be derived. Its (l, k )th element is 
+
+Il,k = 
+
+> ∫
+
+∂l ⋆(̂θ | x⋆)
+
+∂ζ l
+
+∂l ⋆(̂θ | x⋆)
+
+∂ζ k
+
+f (
+
+X(tm+1 ) | x)
+
+dX (tm+1 ).
+
+The degradation path follows a power law Λ( t) = tα. For α > 1, the trajectory exhibits a slow initial phase followed by rapid acceleration. A pure D -optimal design, which maximizes 
+
+det I, would favor sampling at the boundaries, i.e., the end -of -life phase, where the signal is strongest. This risks clustering all observations in the final stages and missing the onset of acceleration. To obtain robust estimates of the curvature parameter α, we introduce a penalty term that encourages exploration of the transition phase. Let Λ′(t) = αt α−1 be the instantaneous degradation rate. The term 1/Λ′(t) is largest early in life, providing an exploration bonus for interior points. The proposed comprehensive criterion is 
+
+Γ( tm+1 ) = ω1
+
+> ∣∣∣∣∣
+
+ln det I(ζ | x⋆)ln det I(̂ζ | x⋆) 
+
+> ∣∣∣∣∣
+
++ ω2
+
+Λ′(tm+1 |̂ α), (7) where ̂ ζ denotes current estimates, and ω1, ω 2 ≥ 0, ω1 + ω2 = 1 , balance information gain versus exploration. For 0 < α < 1, the second term is replaced by ω2Λ′(tm+1 |̂ α) to favor 16 sampling during periods of increasing degradation rate. The optimal future sampling time is 
+
+t⋆m+1 = arg max 
+
+> tm+1 >t m
+
+Γ( tm+1 ).
+
+# 5 Illustrative Examples 
+
+## 5.1 Artificial Example 
+
+In this subsection, we conduct a series of artificial experiments to evaluate the performance of the proposed degradation modeling framework based on spatiotemporal active learning. The simulation procedure mimics the lifecycle of electronic units of satellites under the varying working environment. Synthetic degradation paths are generated based on the proposed model (1) with the true parameters. The simulation considers L = 5 units with 
+
+c = 3 units to observe every time. The true model parameters are set to μa = 1 , τa = 0 .1,
+
+κ = 1 , ρ = 0 .5, γ1 = 0 .1, and γ2 = 0 .2, leading to the designed lifespans of 10 years. The iterative simulation process is structured as follows. First, initial data from the early orbital phase are generated. Specifically, since the reliability of such electronic devices operating over long periods remains stable during the initial years (Wang et al. 2022), frequent monitoring of their degradation is not necessary. Combined with engineering experience, we generate one observation every half a year during the first 5 years. Based on this dataset, the model parameters are estimated, which subsequently drive the active learning strategy. Given the optimized subset of units and the next sampling time, new observations are generated from the conditional multivariate normal distribution, preserving the spatiotemporal dependence structure. This cycle of estimation, active learning, and data generation is iterated until the design life (namely, 10 years) is reached. Finally, the reliability over 11-12 years of each unit is assessed using the Monte Carlo method, which 17 is of intrinsic interest to the engineers. The whole simulation procedure is replicated 1000 times. To ensure a thorough evaluation, we employ four experimental settings as follows. 1. Degradation path shape ( S1): α ∈ { 0.5, 1.2}, representing concave ( S1 = 0 ) and convex ( S1 = 1 ) degradation trends, respectively. 2. Initial unit selection ( S2): Whether the proposed unit selection is applied during the initial data collection phase, e.g., the first 5 years. ( S2 = 1 denotes implementation; 
+
+S2 = 0 denotes otherwise). 3. Sampling plan ( S3): Whether the sampling time is unconstrained ( S3 = 0 ) or restricted ( S3 = 1 ) to a selection scheme that contains consecutive non-overlapping intervals with the length ∆t that are predetermined by engineering experience. In this study, engineering experience suggests that observations are scheduled semi-annually from years 5 to 8 ( ∆t = 0 .5), and quarterly from years 8 to 10 ( ∆t = 0 .25 ), resulting in a total of 14 time points. 4. Parameter uncertainty ( S4): Whether the shape parameter α is treated as known (S4 = 1 ) or not ( S4 = 0 ). For detailed denotations for all scenario configurations, please refer to the Appendix. We denote the proposed model via our spatiotemporal active learning strategy as M0.Given an existing observation plan, M0 selects the most suitable sampling time within each prescribed interval ( S3 = 0 ); otherwise, it determines sampling times for the years 5-10. Two methods are further applied as competitors. The first one incorporates the proposed model with a traditional uniform temporal sampling strategy, denoted by M1. Where a predetermined selection scheme exists, it selects the right endpoint of each given interval, according to traditional engineering sampling methods. For an unconstrained sampling 18 plan, the number of observations is kept similar to M0 to ensure a fair comparison between 
+
+M0 and M1. This strategy serves as a comparative baseline to evaluate the efficiency of the proposed temporal active learning framework, especially when there is no prior knowledge about the sampling. The other one is the traditional method, denoted as M2. It assumes independence among units, monitors all units ( c = L), and employs temporal sampling via the traditional engineering sampling plan (e.g., every half a year over 5-10 years). First, we conduct a quantitative comparison between the proposed spatiotemporal active learning strategy ( M0) and the uniform strategy ( M1), which are both based on our model, to demonstrate the efficiency of the temporal active learning criterion. The performance is evaluated by calculating the mean relative error between the predicted reliability and the true values, which is computed across all 5 units. We begin by analyzing two scenarios where (S1, S 2, S 3, S 4) is (1 , 0, 1, 0) or (0 , 0, 1, 0) . Specif-ically, observation intervals are predetermined, and the proposed unit selection is applied only during 5-10 years, with α = 1 .2 or 0.5. These scenarios are designed to evaluate how the methods perform under the actual engineering strategies employed. As shown in Table 1, even under these strict constraints with different values of α, M0 demonstrates superior performance. For instance, M0 achieves a remarkably low initial relative error of 0.057%, compared to 0.060% for M1. This indicates that even when sampling windows are fixed (e.g, two methods use the same number of observations), optimizing the specific time within those intervals based on model information yields benefits over uniformly sampling, which is commonly used in real cases. Subsequently, for high-reliability electronic devices, in fact, a more effective approach does not require observing all units during the initial stage. Therefore, we consider scenarios with predetermined observation intervals and apply the proposed unit selection strategy over the entire 0 -10 - year lifecycle, specifically with (S1, S 2, S 3, S 4) = (1 , 1, 1, 1) or (0 , 1, 1, 1) .19 Table 1: Average relative errors over 1000 replications ( %) with (S1, S 2, S 3, S 4) = (1 , 0, 1, 0) 
+
+and (0 , 0, 1, 0) .
+
+(1 , 0, 1, 0) (0 , 0, 1, 0) 
+
+Time M0 M1 M0 M1
+
+10.125 0.057031 0.060101 0.831476 0.990044 10.25 0.106216 0.116602 1.160813 1.351985 10.375 0.193282 0.217947 1.604081 1.841957 10.5 0.32953 0.378337 2.131811 2.424643 10.625 0.881492 1.034227 2.825481 3.174507 10.75 1.374355 1.605227 3.653572 4.034231 10.875 2.059839 2.395623 4.681642 5.110656 11 2.947713 3.415247 5.754727 6.229326 11.125 5.428949 6.210558 6.984299 7.514318 11.25 6.980237 7.950766 8.297449 8.841914 11.375 8.869664 9.980824 9.702549 10.28248 11.5 10.89951 12.19788 11.02037 11.61823 11.625 15.41957 17.03213 12.40448 13.05386 11.75 18.02554 19.79833 13.89518 14.51982 11.875 20.65199 22.58804 15.19242 15.85698 12 23.32317 25.38593 16.48186 17.13989 20 Table 2 summarizes the average relative errors of M0 and M1 across 1000 replications. The results demonstrate that M0 outperforms M1 throughout most of the degradation process. For example, for 10 .75 years, M0 achieves a relative error of 1.508%, whereas M1 yields 1.690%. Notably, during the final stage of the lifecycle, the performance of the two models becomes comparable. For 11 .75 years, the average relative error of M1 (22.058%) is slightly higher than the value of M0 (21.930%), and this trend continues for 12 .0 years, where M1
+
+records 29.821% against M0, which yields 30.006%. Then, we examine the scenario in which observation intervals are not predetermined, and the value of α is unknown, applying the proposed spatial active learning strategy throughout the full lifecycle (0-10 years). This scenario is intended to emulate real-world conditions, particularly those in which data transmission is limited, and engineers are uncertain about the appropriate selection scheme. Consequently, either non -informative approaches (e.g., uniform sampling) or sampling based on model uncertainty and the rate of degradation (i.e., the derivative of the degradation function) can be employed. (S1, S 2, S 3, S 4) is (1 , 1, 0, 0) 
+
+and (0 , 1, 0, 0) , respectively. Despite these complexities, M0 maintains superior accuracy, reducing the final-stage error from 30.108% ( M1) to 29.132% ( M1). Results under other scenarios shown in the Appendix also present that M0 is comparable or even better than 
+
+M1. This result highlights the core advantage of the proposed method: by leveraging the dynamic rule of degradation and model accuracy to maximize information gain, it can achieve higher prediction accuracy with no prior knowledge about the sample plan, while reducing the data size by selecting representative units. In addition, we evaluate the impact of spatial dependence and assess the validity of the proposed degradation model. We compare models M0 and M1, both of which adopt our degradation model, against M2, which assumes unit independence and strictly adheres to the preset observation schedule. Specifically, M2 observes all units at each time point, with 21 Table 2: Average relative errors over 1000 replications ( %) with (S1, S 2, S 3, S 4) = (1 , 1, 1, 1) 
+
+and (1 , 0, 1, 1) .
+
+(1 , 1, 1, 1) (1 , 0, 1, 1) 
+
+Time M0 M1 M0 M1
+
+10.125 0.054293 0.067368 0.545085 0.630219 10.250 0.121192 0.146095 0.823907 0.923724 10.375 0.241093 0.286382 1.162903 1.280622 10.500 0.472905 0.548444 1.606356 1.741849 10.625 0.881574 1.005022 2.183721 2.336306 10.750 1.508154 1.689699 2.972111 3.136299 10.875 2.562045 2.827282 3.973253 4.128645 11.000 3.935440 4.273591 5.071165 5.210964 11.125 5.912405 6.299959 6.317419 6.432001 11.250 8.329783 8.733579 7.765005 7.865554 11.375 11.241422 11.634243 9.281586 9.343763 11.500 14.429876 14.786094 10.772534 10.804214 11.625 17.998704 18.243628 12.344846 12.346398 11.750 21.930173 22.058294 14.129067 14.080957 
+
+11.875 26.055526 26.033486 15.649668 15.579246 
+
+12.000 30.006021 29.821432 17.188731 17.115164 
+
+22 Table 3: Average relative errors over 1000 replications ( %) with (S1, S 2, S 3, S 4) = (1 , 1, 0, 0) 
+
+and (0 , 1, 0, 0) .
+
+(1 , 1, 0, 0) (0 , 1, 0, 0) 
+
+Time M0 M1 M0 M1
+
+10.125 0.043734 0.058246 0.577743 0.662222 10.250 0.104091 0.126442 0.861629 0.969886 10.375 0.213826 0.247743 1.208568 1.348249 10.500 0.436478 0.482058 1.660435 1.833644 10.625 0.829029 0.899187 2.248105 2.462118 10.750 1.439813 1.530540 3.041877 3.297767 10.875 2.473795 2.583003 4.051456 4.356582 11.000 3.807664 3.951631 5.139391 5.496345 11.125 5.686434 5.918260 6.376490 6.793698 11.250 8.022159 8.332700 7.825340 8.296817 11.375 10.850785 11.284752 9.362042 9.883849 11.500 13.970714 14.540027 10.861963 11.402644 11.625 17.400912 18.160114 12.441025 13.025153 11.750 21.250674 22.103612 14.214697 14.838724 11.875 25.236935 26.246048 15.773258 16.405416 12.000 29.132435 30.107902 17.343956 18.004287 23 semi-annual sampling ( ∆t = 0 .5) from year 0 to 8 and quarterly sampling ( ∆t = 0 .25 )from year 8 to 10, yielding a total of 24 observations. To quantify the efficiency of the proposed model, we analyze four scenarios corresponding to (S1, S 2, S 3, S 4) set as (1 , 1, 1, 0) ,
+
+(0 , 1, 1, 0) , (1 , 1, 0, 0) , and (0 , 1, 0, 0) , respectively. These scenarios account for two distinct degradation curve shapes and whether the sampling plan is predetermined, with unknown α.To further demonstrate the novelty of our approach, we apply unit selection across the entire observation period when implementing M0 and M1, resulting in fewer required samples than 
+
+M2. The average reliability is computed across 5 units per replication, and the mean over 1000 such replications, alongside the true reliability values, is shown in Figure 2. As seen, 
+
+M2, despite utilizing data from all units at all planned epochs (namely 120 observations), yields suboptimal reliability predictions. Conversely, both the proposed method M0 and the proposed model with the traditional uniform sampling strategy M1 provide trajectories that closely track the true reliability. This comparison underscores that reliability predictions solely on independent units (as in M2) are insufficient and can lead to misleading prognostic results. It is also worth noting that, while maintaining prediction accuracy, the proposed active learning strategy reduces the overall number of required observations to about 52, thereby significantly lowering data acquisition costs. 
+
+## 5.2 Real Case Study 
+
+This subsection presents a practical application of MOSFET devices, which are critical switching components in satellite PDUs. To validate the proposed framework under realistic on-orbit conditions, an emulator was developed by Beijing Spacecrafts based on extensive historical data (Wang et al. 2022). The system comprises L = 12 spatially correlated units. The model parameters are set as μa = 4 .661 , τa = 0 .405 , κ = 1 .841 (corresponding to 
+
+σ = 0 .735 ), ρ = 0 .5, γ1 = 0 .1, and γ2 = 0 .2. According to the working conditions involved, the corresponding observing times are selected until the next observing time is larger than 24 True M0 M1 M 2
+
+0.7 0.8 0.9 1.0 
+
+10.5 11.0 11.5 12.0 
+
+Time 
+
+> Reliability
+
+0.80 0.85 0.90 0.95 1.00 
+
+10.5 11.0 11.5 12.0 
+
+Time 
+
+> Reliability
+
+0.7 0.8 0.9 1.0 
+
+10.5 11.0 11.5 12.0 
+
+Time 
+
+> Reliability
+
+0.80 0.85 0.90 0.95 1.00 
+
+10.5 11.0 11.5 12.0 
+
+Time 
+
+> Reliability
+
+Figure 2: Average reliability prediction results over 1000 replications when (S1, S 2, S 3, S 4) is 
+
+(1 , 1, 1, 0) , (0 , 1, 1, 0) , (1 , 1, 0, 0) , and (0 , 1, 0, 0) .25 10 years. The reliability prediction focuses on the 10-12 years. To reflect the constraints of satellite data transmission, the maximum allowable observations per epoch are restricted to c = 4 during the initial phase (0-5 years) and c = 6 during the later phase (5-10 years). Data is sampled semi-annually during the first 5 years. Similar to the artificial examples, M2 monitors all L = 12 units according to a fixed schedule (semi-annually from years 5-8, quarterly from years 8-10) and assumes statistical independence among units. Both M0 and M1 incorporate the proposed model and select a representative unit subset over the full lifecycle, with semi-annual sampling from years 0 to 5. The key distinction is that M0 adaptively identifies optimal sampling times, while M1 collects samples annually from years 5 to 10, achieving the same number of observations as M0 for a fair comparison. The reliability prediction results are illustrated in Fig. 3, revealing a significant difference in predictive performance. M2, despite utilizing data from all 12 units and a total of 190 samples, yields a substantial underestimation of system reliability (predicting about 0.4
+
+versus the true value of around 1.0 for the year 10.5). This bias arises because M2 neglects the spatial thermal coupling; by treating correlated units as independent, it fails to account for the synchronized degradation trends induced by the location topology, leading to overly conservative estimates. In contrast, M0 and M1, each utilizing 70 samples, demonstrate superior predictive fidelity, producing reliability trajectories that closely align with the true values. Particularly, M0 outperforms M1, as it effectively leverages the incorporated model information. This result confirms that the proposed model and spatiotemporal active learning strategy effectively capture the system’s health status with minimal data consumption, offering a robust solution for resource-constrained satellite monitoring. 26 0.4 0.6 0.8 1.0    
+
+> 10.5 11.0 11.5 12.0
+
+Time       
+
+> Reliability
+> True M0M1M2
+
+Figure 3: Average reliability predictions over 12 devices during 10-12 years. 27 6 Conclusion 
+
+This article has addressed the fundamental challenge of online reliability prediction for satellite electronics under severe data constraints, dynamic environments, and spatial depen-dence, advancing the state of the art through three integrated contributions: a hierarchical Wiener process model that simultaneously captures time-varying environmental covariates, unit-to-unit heterogeneity, and spatial correlation among adjacent units via correlated random coefficients; an efficient profile likelihood estimation procedure that concentrates out scale parameters analytically to reduce computational dimensionality; and most critically, a two-stage active learning strategy that optimizes both spatial selection—using wrap-around 
+
+L2 discrepancy to ensure uniform coverage across units—and temporal scheduling—via a balanced information criterion that explicitly trades off D -optimal information gain against exploration of the critical degradation transition phase, overcoming a fundamental limitation of pure boundary-favoring designs. A series of artificial examples and the application to the PDUs demonstrate the efficiency and practical utility of this framework, making it a promising solution for the prognostic and health management of high-value, long-endurance aerospace electronic equipment. Future research directions may include extending this framework to more complex spatial layouts, multiple dependent performance characteristics with competing failure modes, or exploring a more efficient model, such as physics-informed neural networks, to further enhance degradation trend capture. 
+
+# Disclosure statement 
+
+No potential conflict of interest was reported by the authors. 28 References 
+
+Chen, P. & Ye, Z.-S. (2018), ‘Uncertainty quantification for monotone stochastic degradation models’, Journal of Quality Technology 50 (2), 207–219. Chen, W. & Hao, S. (2025), ‘Condition-based operation and maintenance strategy for load-sharing systems based on wiener process’, IEEE Transactions on Reliability .Cheng, Y.-S. & Peng, C.-Y. (2024), ‘Optimal test planning for heterogeneous wiener processes’, Naval Research Logistics (NRL) 71 (4), 509–520. Duan, F. & Wang, G. (2018), ‘Exponential-dispersion degradation process models with random effects and covariates’, IEEE Transactions on Reliability 67 (3), 1128–1142. Fang, G. & Pan, R. (2024), ‘A class of hierarchical multivariate wiener processes for modeling dependent degradation data’, Technometrics 66 (2), 141–156. Fang, K.-T. & Ma, C.-X. (2001), ‘Wrap-around l2-discrepancy of random sampling, latin hypercube and uniform designs’, Journal of complexity 17 (4), 608–624. Kang, W., Tian, Y., Xu, H., Wang, D., Zheng, H., Zhang, M. & Mu, H. (2023), ‘Reliability analysis based on the Wiener process integrated with historical degradation data’, Quality and Reliability Engineering International 39 (4), 1376–1395. Lee, C., Wang, X., Wu, J. & Yue, X. (2022), ‘Failure-averse active learning for physics-constrained systems’, IEEE Transactions on Automation Science and Engineering 
+
+20 (4), 2215–2226. Li, S., Tian, Y. & Wang, D. (2023), ‘Parallel efficient global optimization by using the mini-mum energy criterion’, Journal of Statistical Computation and Simulation 93 (17), 3104– 3125. 29 Li, X., Wang, D. & Chen, P. (2025), ‘Remaining useful life prediction of lithium-ion batteries using monotone decomposition’, Technometrics pp. 1–16. Lu, L., Wang, B., Hong, Y. & Ye, Z. (2021), ‘General path models for degradation data with multiple characteristics and covariates’, Technometrics 63 (3), 354–369. Murphy, S. A. & Van der Vaart, A. W. (2000), ‘On profile likelihood’, Journal of the American Statistical Association 95 (450), 449–465. Musallam, M., Yin, C., Bailey, C. & Johnson, M. (2014), ‘Mission profile-based reliability design and real-time life consumption estimation in power electronics’, IEEE Transactions on Power Electronics 30 (5), 2601–2613. Peng, C.-Y. & Tseng, S.-T. (2009), ‘Mis-specification analysis of linear degradation models’, 
+
+IEEE Transactions on Reliability 58 (3), 444–455. Pennell, M. L., Whitmore, G. & Ting Lee, M.-L. (2010), ‘Bayesian random-effects threshold regression with application to survival data with nonproportional hazards’, Biostatistics 
+
+11 (1), 111–126. Ren, M., Tian, Y., Liu, X. & Guo, F. (2025), ‘A sequential-interval optimal sampling strategy based on reliability prediction under wiener process’, Mathematics 13 (11), 1817. Si, X.-S., Wang, W., Hu, C.-H., Chen, M.-Y. & Zhou, D.-H. (2013), ‘A wiener-process-based degradation model with a recursive filter algorithm for remaining useful life estimation’, 
+
+Mechanical Systems and Signal Processing 35 (1-2), 219–237. Sun, C.-Y. & Tang, B. (2023), ‘Uniform projection designs and strong orthogonal arrays’, 
+
+Journal of the American Statistical Association 118 (541), 417–423. Tai, C.-Y., Fan, T.-H. & Peng, C.-Y. (2025), ‘ d-optimal sample allocation of the accelerated 30 life tests under weibull series systems with type-i censoring scheme’, IEEE Transactions on Reliability 74 (4), 5335–5346. Tsai, C.-C., Tseng, S.-T. & Balakrishnan, N. (2012), ‘Optimal design for degradation tests based on gamma processes with random effects’, IEEE Transactions on Reliability 
+
+61 (2), 604–613. Tseng, S.-T., Balakrishnan, N. & Tsai, C.-C. (2009), ‘Optimal step-stress accelerated degradation test plan for gamma degradation processes’, IEEE Transactions on Reliability 
+
+58 (4), 611–618. Wang, D., Wang, A. & Song, C. (2024), ‘Flexible degradation modeling via the integration of local models and importance sampling’, IEEE Transactions on Instrumentation and Measurement 73 , 1–12. Wang, J. & Tian, Y. (2018), ‘An adaptive reliability prediction method for the intelligent satellite power distribution system’, IEEE Access 6, 58719–58727. Wang, J., Wang, D. & Tian, Y. (2022), ‘Adaptive bayesian prediction of reliability based on degradation process’, Communications in Statistics-Simulation and Computation 
+
+51 (8), 4788–4798. Wang, W. & Wang, H. (2015), ‘Preventive replacement for systems with condition monitoring and additional manual inspections’, European Journal of Operational Research 247 (2), 459– 471. Wang, X., Zhang, Q. & Wang, W. (2023), ‘Design and application prospect of china’s tiangong space station’, Space: science & technology 3, 0035. Wang, Y., Chen, Y., Li, Y. & Kang, R. (2025), ‘Reliability modeling analysis and uncertainty quantification method for electronic systems with multireliability dependency’, IEEE Transactions on Reliability .31 Wang, Y., Ye, Z.-S. & Tsui, K.-L. (2013), ‘Stochastic evaluation of magnetic head wears in hard disk drives’, IEEE Transactions on Magnetics 50 (5), 1–7. Wang, Z., Zhai, Q. & Shen, L. (2023), ‘Degradation modeling and rul prediction in dynamic environments using a wiener process with an autoregressive rate’, IEEE Transactions on Reliability 73 (2), 912–921. Xu, A., Wang, J., Tang, Y. & Chen, P. (2025), ‘Efficient online estimation and remaining useful life prediction based on the inverse gaussian process’, Naval Research Logistics (NRL) 72 (3), 319–336. Xu, D., Tian, Y., Shi, J., Wang, D., Zhang, M. & Li, H. (2023), ‘Reliability analysis and optimal redundancy for a satellite power supply system based on a new dynamic k-out-of-n: G model’, Reliability Engineering & System Safety 236 , 109317. Xu, D., Tian, Y., Wang, D. & Shi, J. (2025), ‘Reliability analysis for a dynamic k-out-of-n system with thermal balance control’, Reliability Engineering & System Safety p. 111163. Xu, Z., Hong, Y. & Jin, R. (2016), ‘Nonlinear general path models for degradation data with dynamic covariates’, Applied Stochastic Models in Business and Industry 32 (2), 153–167. Yang, L., Zhao, Y., Peng, R. & Ma, X. (2018), ‘Hybrid preventive maintenance of competing failures under random environment’, Reliability Engineering & System Safety 174 , 130– 140. Ye, X., Sun, Q., Zhang, R., Hu, Y., Chen, C., Xie, M. & Zhai, G. (2024), ‘A path dependence identification method for power mosfets degradation due to bias temperature instability’, 
+
+IEEE Transactions on Power Electronics 39 (10), 12470–12477. Ye, Z.-S. & Xie, M. (2015), ‘Stochastic modelling and analysis of degradation for highly reliable products’, Applied Stochastic Models in Business and Industry 31 (1), 16–32. 32 Yin, Z., Zhu, Z., Guo, P., Wang, Z., Yang, J. & Song, Y. (2023), ‘On-orbit space technology experiment and verification project outlook of china’s tiangong space station’, Space: Science & Technology 3, 0061. Zarghany, M., Parvari, R. & Kaboli, S. (2016), ‘Fault-tolerant dc power distribution unit based on nonexclusive redundant modules’, IEEE Transactions on Industrial Electronics 
+
+63 (11), 6801–6811. Zeng, Y., Huang, T., Li, Y.-F. & Huang, H.-Z. (2023), ‘Reliability modeling for power converter in satellite considering periodic phased mission’, Reliability Engineering & System Safety 232 , 109039. Zhai, Q., Li, Y. & Chen, P. (2025), ‘Modeling product degradation with heterogeneity: A general random-effects wiener process approach’, IISE Transactions 57 (12), 1422–1435. Zhang, S., Zhai, Q., Shi, X. & Liu, X. (2022), ‘A wiener process model with dynamic covariate for degradation modeling and remaining useful life prediction’, IEEE Transactions on Reliability 72 (1), 214–223. Zhang, Z., Si, X., Hu, C. & Lei, Y. (2018), ‘Degradation data analysis and remaining useful life estimation: A review on Wiener-process-based methods’, European Journal of Operational Research 271 (3), 775–796. Zhu, D., Xu, A., Chen, Z., Ding, S. & Fang, G. (2026), ‘An online bayesian framework for identifying latent system degradation states’, IEEE Transactions on Reliability 75 , 542– 554. 33

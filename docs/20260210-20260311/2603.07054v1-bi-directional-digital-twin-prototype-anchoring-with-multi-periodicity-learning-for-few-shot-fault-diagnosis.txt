@@ -1,0 +1,631 @@
+Title: Bi-directional digital twin prototype anchoring with multi-periodicity learning for few-shot fault diagnosis
+
+URL Source: https://arxiv.org/pdf/2603.07054v1
+
+Published Time: Tue, 10 Mar 2026 00:31:36 GMT
+
+Number of Pages: 19
+
+Markdown Content:
+# Bi-directional digital twin prototype anchoring with multi-periodicity learning for few-shot fault diagnosis 
+
+Pengcheng Xia a, Zhichao Dong a, Yixiang Huang a,∗, Chengjin Qin a, Qun Chao a and Chengliang Liu a
+
+> aState Key Laboratory of Mechanical System and Vibration, Shanghai Jiao Tong University, Shanghai 200240, PR China
+
+A R T I C L E I N F O 
+
+> Keywords :Fault diagnosis Digital twin Few-shot learning Meta-learning Multi-periodicity
+
+A B S T R A C T Intelligent fault diagnosis (IFD) has emerged as a powerful paradigm for ensuring the safety and reliability of industrial machinery. However, traditional IFD methods rely heavily on abundant labeled data for training, which is often difficult to obtain in practical industrial environments. Constructing a digital twin (DT) of the physical asset to obtain simulation data has therefore become a promising alternative. Nevertheless, existing DT-assisted diagnosis methods mainly transfer diagnostic knowledge through domain adaptation techniques, which still require a considerable amount of unlabeled data from the target asset. To address the challenges in few-shot scenarios where only extremely limited samples are available, a bi-directional DT prototype anchoring method with multi-periodicity learning is proposed. Specifically, a framework involving meta-training in the DT virtual space and test-time adaptation in the physical space is constructed for reliable few-shot model adaptation for the target asset. A bi-directional twin-domain prototype anchoring strategy with covariance-guided augmentation for adaptation is further developed to improve the robustness of prototype estimation. In addition, a multi-periodicity feature learning module is designed to capture the intrinsic periodic characteristics within current signals. A DT of an asynchronous motor is built based on finite element method, and experiments are conducted under multiple few-shot settings and three working conditions. Comparative and ablation studies demonstrate the superiority and effectiveness of the proposed method for few-shot fault diagnosis. 
+
+1. Introduction 
+
+Fault diagnosis plays a critical role in guaranteeing the reliability, safety, and availability of industrial machinery, directly influencing production efficiency and operational sustainability [1]. Consequently, developing advanced and reliable fault diagnosis methods to accurately identify faults from monitoring signals has become an urgent and indispensable task in modern industrial systems [2]. In recent years, driven by the rapid advancement of artificial intelligence, intelligent fault diagnosis (IFD) has emerged as a powerful paradigm and achieved substantial breakthroughs [3]. In contrast to traditional fault diagnosis    
+
+> *Corresponding authors.
+> Email address: huang.yixiang@sjtu.edu.cn (Y. Huang)
+> Xia P. et al. Page 1 of 19
+> arXiv:2603.07054v1 [cs.AI] 7 Mar 2026
+
+approaches that rely heavily on expert knowledge and handcrafted feature engineering, IFD methods are capable of automatically learning discriminative fault-related representations directly from raw monitoring signals [4]. Owing to their strong representation learning capability, convolutional neural networks (CNNs) have been extensively employed to extract hierarchical features from vibration, current, and other sensory data. For example, one-dimensional CNN (1D-CNN) could achieve satisfactory bearing fault diagnosis results using segmented vibration signals [5]. 1D-CNN with residual connections and global context module was developed to diagnose motor faults with monitoring vibration signals [6]. In addition, Transformer-based architectures have attracted considerable attention owing to their superior capability in modeling long-range dependencies and their remarkable success across various domains. For instance, Li et al. [7] proposed a convolutional Transformer framework to directly process raw vibration signals for bearing fault diagnosis. Furthermore, some studies transformed 1D signals into 2D time-frequency representations and employed the Vision Transformer (ViT) model to extract high-level features for diagnostic purposes [8]. Despite the impressive performance achieved by existing IFD approaches, them rely on the availability of abundant labeled data for model training. However, in practical industrial scenarios, collecting large-scale fault samples for a machine is often challenging. Consequently, the contradiction has become a critical bottleneck for the practical deployment of IFD methods [9]. Although data augmentation [10, 11] can increase data volume, limited additional information is introduced, restricting model robustness. Training a diagnostic model using data collected from other machines or operating conditions has emerged as a practical solution to alleviate the data scarcity issue. Transfer learning (TL) has demonstrated promising performance by reducing the distribution discrepancies between source and target domains [12]. In particular, domain adaptation (DA) techniques aim to align data distributions across different machines or working conditions, enabling knowledge transfer with improved reliability [13]. Among various DA strategies, discrepancy-based methods explicitly minimize statistical distribution differences using metrics such as maximum mean discrepancy (MMD) [14] and local MMD (LMMD) [15], thereby enhancing cross-domain diagnostic performance. Alternatively, adversarial learning-based approaches employ domain adversarial training to implicitly learn domain-invariant feature representations for robust model transfer [16]. In addition, meta-learning-based approaches have also been explored, aiming to train models with the ability to rapidly adapt to new diagnostic tasks using only a few labeled samples [17]. For instance, a triplet relation network was proposed to enable few-shot fault diagnosis across different machines [18], while prototypical networks have been introduced to tackle few-shot diagnosis under previously unseen working conditions [19]. Nevertheless, several challenges still hinder the practical applications of IFD methods based on transfer learning or meta-learning frameworks. First, collecting a large amount of labeled training data from the source domain that comprehensively covers various fault categories is both time-consuming and resource-intensive. In addition, if the source-domain data exhibit substantial distribution discrepancies from the target domain, negative transfer may occur, leading to performance degradation [20]. With the rapid development of digital twin (DT) technology, virtual models that accurately replicate the physical behavior of machinery have provided a promising alternative for data acquisition with lower cost and potentially improved similarity [21]. As digital representations of physical machinery, discrepancies inevitably exist between DT-generated data and real-world measurements. Therefore, TL plays a crucial role in bridging the gap between virtual and physical domains to ensure reliable performance on actual assets [22]. For example, Liu et al. [23] employed an unsupervised domain adaptation framework based on adversarial learning to transfer diagnostic knowledge from simulated bearing signals to real measurements. Zhang et al. [24] proposed a partial domain adaptation network to facilitate knowledge transfer from dynamics-based DT data of bearings. Xia et al. [25] constructed a motor DT model using the finite element method (FEM) and developed a semi-supervised framework to enhance cross-domain knowledge transfer. Beyond conventional TL strategies, Lu et al. [26] introduced a source-free adaptation approach that enabled diagnostic knowledge transfer from DT models without direct access to simulation data during the adaptation stage. Additionally, Xia et al. [27] proposed a  
+
+> Xia P. et al. Page 2 of 19
+
+knowledge distillation framework from a motor DT to the physical asset with improved interpretability. Ma et al. [28] integrated meta-learning and TL to overcome discrepancies between simulation and measurement data. Collectively, these studies have partially alleviated the dependency on source-domain data availability. However, it should be noted that these DT-driven approaches still rely on the availability of a considerable amount of unlabeled target-domain samples for DA or knowledge transfer. In practical industrial environments, collecting sufficient target-domain data that comprehensively cover various fault categories is often infeasible. A more realistic scenario is that only a very limited number of samples can be acquired and annotated before system shutdown. Under such circumstances, few-shot fault diagnosis [17] represents a more practical yet significantly more challenging setting. Nevertheless, how to effectively leverage DT data to support few-shot learning in the physical domain has received limited attention. Some existing studies directly fine-tune pre-trained models using a few measured samples [29], while they may fail to ensure stable performance. Therefore, developing a few-shot fault diagnosis framework that fully exploits DT knowledge remains an open and critical research problem. Furthermore, most existing DTs generate vibration signals of rotating machinery. As for electromechanical machines such motors, current signals can be simulated with higher fidelity, as they are less susceptible to interference from external mechanical components and environmental disturbances. Compared with vibration signals, current signals typically exhibit strong inherent periodicity, which may limit the effectiveness of feature extraction of CNNs due to their limited receptive fields, especially under few-shot conditions. Consequently, how to directly process the 1D current signals and cope with the strong periodicity using convolution-based networks remains to be explored. To address the aforementioned challenges, this paper proposes a bi-directional DT prototype anchoring method with multi-periodicity learning for few-shot fault diagnosis. First, a framework involving meta-training in the virtual space and test-time adaptation in the physical space is proposed, enabling few-shot adaptation to the target machine. Second, a bi-directional prototype anchoring strategy is developed to overcome the data discrepancies between DT domains and achieve mutual aligned feature consistency, and a covariance-guided augmentation mechanism is also introduced for enhanced robustness. Furthermore, a multi-periodicity feature learning module is designed to capture temporal variations within and across multiple periodic cycles of current signals inspired by the TimesNet structure [30]. We used an asynchronous motor as a case study and constructed its DT model through FEM and electromagnetic simulations. Few-shot diagnosis experiments under three different rotating speeds verified the effectiveness of the proposed method and its superiority compared to other advanced approaches. The main contributions of this paper are summarized as follows. (1) A digital twin-assisted few-shot fault diagnosis framework based on meta-learning and test-time adaptation is proposed. (2) To mitigate data discrepancies between digital and physical domains, a bi-directional twin-domain prototype anchoring strategy is developed for few-shot adaptation. (3) A multi-periodicity learning module is introduced for efficient representation learning within and across periods from current signals. The rest of the paper is organized as follows. Section 2 gives the detailed description of the DT model of the asynchronous motor. Section 3 presents the proposed method, and Section 4 describes the experiments and results. Finally, Section 5 concludes the paper. 
+
+2. Digital Twin Modeling 
+
+In this paper, an electromagnetic DT model of the asynchronous motor was established based on the FEM for high-fidelity data generation. A three-phase squirrel-cage induction motor was selected as the physical prototype for                         
+
+> Xia P. et al. Page 3 of 19 Test Motor
+> Current Sensors Motor Controller
+> Gearbox
+> Transmission
+> Electromagnetic
+> Load Fig. 1. Experimental platform of the physical asset.
+> Table 1
+> Primary geometric and electrical parameters of the physical motor. Parameter Value Parameter Value Stator outer diameter 160.0 mm Rated power 2.2 kW Stator inner diameter 81.3 mm Rated speed 3450 RPM Rotor outer diameter 80.2 mm Winding connection Y-type Rotor inner diameter 30.2 mm Pole pairs 1Stator slot number 24 Turns per stator winding slot 92 Rotor slot number 34 Parallel branch number 4
+
+study. 
+
+2.1. Physical Asset 
+
+Fig 1 presents the experimental platform of the physical motor. The platform is a Drivetrain Dynamics Simulator (DDS) platform, which primarily consists of the test motor and its controller, the gearbox transmission system, and the electromagnetic load attached to the gearbox. Three current sensors are mounted to collect the three-phase stator current signals of the test motor. The rotating speed and the load of the motor are controlled by the controller and electromagnetic load, respectively. The essential geometric dimensions and electrical parameters were carefully identified to ensure consistency of DT model, as shown in Table 1. In experiments, we fixed the load applied to the motor as 2.4 𝑁 ⋅ 𝑚 . Experiments were conducted under three different rotating speeds of 1200 r/min, 2400 r/min, and 2700 r/min. 
+
+2.2. Virtual DT model 
+
+The DT was constructed by reconstructing the motor’s geometric configuration according to its structural specifications, where some simplifications of mechanical structures with negligible influence on electromagnetic fields are applied to reduce computational complexity while preserving the fidelity of current signal simulation. The disassembled view of the geometric model is illustrated in Fig. 2. Considering the relatively small axial variation of the electromagnetic field and the substantial computational burden associated with full three-dimensional simulations, a 2D FEM scheme was adopted [31]. The cross-sectional plane perpendicular to the motor shaft was extracted to represent the electromagnetic domain. The rotor region was assigned as a rotating domain to capture electromechanical interactions. To emulate realistic operating conditions, the electromagnetic field model was coupled with an external circuit representing the power supply. A balanced    
+
+> Xia P. et al. Page 4 of 19 Fig. 2. The disassembled view of the motor geometric model.
+> Fig. 3. Mesh quality of the motor.
+
+three-phase voltage source was imposed, and stator windings were formulated within the circuit-field coupling framework to enable dynamic interaction between electrical excitation and magnetic response. After motor startup, a constant mechanical load torque of 2.4 𝑁 ⋅ 𝑚 was applied to the shaft to simulate steady-state operation consistent with the physical experiment. Mesh discretization was carefully designed to balance accuracy and efficiency. Regions with strong electromagnetic gradients, such as rotor bars and the air gap, were refined with dense triangular meshes with the maximum mesh sizes of 0.5 mm and 0.25 mm, respectively, whereas coarser meshes were employed in the rest magnetically less sensitive areas. The quality of the generated meth model is depicted in Fig. 3. Time-domain simulations were conducted using a transient solver, and the stator current was sampled with a sufficiently small time step of 1/10240 second to ensure high-resolution temporal signals suitable for subsequent fault diagnosis analysis. Three steady operating speeds corresponding to the physical experiments were considered for simulation, including 1200 r/min, 2400 r/min, 2700 r/min. Simulations were first performed under the healthy normal state (N) to establish baseline electromagnetic behavior. Fig. 4 illustrates the magnetic flux density and magnetic potential distributions of the normal motor during running at the rotating speed of 2700 r/min. Subsequently, representative motor faults were introduced by modifying structural or electrical parameters in the model, enabling the generation of simulated current signals under multiple faulty scenarios. Three representative fault types commonly observed in induction motors were      
+
+> Xia P. et al. Page 5 of 19 (a) (b)
+> Fig. 4. (a) The magnetic flux density distribution and (b) the magnetic potential distribution of the normal motor.
+> (a) (b)
+> Fig. 5. (a) The magnetic potential distribution and (b) the current density distribution of the BRB motor.
+
+incorporated into the DT model: (1) Broken Rotor Bar (BRB) : Rotor bar breakage was emulated by altering the electrical conductivity of selected rotor bars. Instead of completely removing the bars from the geometry, their conductivity was drastically reduced to a near-insulating level (1 S/m), thereby suppressing current conduction while preserving structural continuity. Fig. 5 depicts the magnetic potential distribution and the current density in rotor bars of the BRB motor. It can be observed that nearly no magnetic potential existed within the broken rotor bars, and the affected bars exhibited negligible current density, whereas adjacent bars carried redistributed currents due to electromagnetic coupling effects. (2) Stator Winding Fault (SWF) : An inter-turn short-circuit fault was modeled by modifying the electrical parameters of one phase winding. Specifically, the resistance of a selected winding in phase A was reduced by 5%, representing partial insulation degradation. (3) Misaligned Rotor Fault (MRF) : Rotor misalignment was simulated through geometric perturbation. A radial displacement of 0.01 inches was imposed on the rotor, creating a non-uniform air-gap distribution as shown in Fig. 6. Following fault injection, three-phase stator currents were extracted from the coupled circuit-field model. The simulated current signals under each health state at the rotating speed of 2700 r/min are depicted as Fig. 7. The healthy motor exhibits balanced sinusoidal currents with consistent amplitudes across phases. In contrast, the SWF  
+
+> Xia P. et al. Page 6 of 19
+
+Fig. 6. Geometry illustration of MRF motor.         
+
+> 
+> 
+> 
+> 
+>      
+>  
+>  
+>  
+
+(a)          
+
+> 
+> 
+> 
+> 
+>      
+>  
+>  
+>  
+
+(b)          
+
+> 
+> 
+> 
+> 
+>      
+>  
+>  
+>  
+
+(c)          
+
+> 
+> 
+> 
+> 
+>      
+>  
+>  
+>  
+
+(d) 
+
+Fig. 7. Sections of simulated signals of motors under each health state. (a) N. (b) BRB. (c) SWF. (d) MRF. 
+
+state produces pronounced phase imbalance, while the BRB fault introduces mild waveform distortion. For the MRF case, waveform differences are relatively inconspicuous in the time domain. 
+
+3. Methodology 
+
+3.1. Problem Formulation and Method Overview 
+
+In this paper, a few-shot fault diagnosis problem is investigated, which means only a few labeled samples from each health state of the target asset can be accessible to obtain a reliable diagnosis model. Let 𝑡 denotes the target domain consisting of real measured signals from the target machine, which provides only a few labeled samples for each class. Specifically, the support set is defined as 
+
+ = {( 𝐱 𝑖 , 𝑦 𝑖 )} 𝑁 ×𝐾 𝑖 =1 , (1) where 𝑁 represents the number of classes and 𝐾 denotes the number of labeled samples per class, formulating an 𝑁 -way 𝐾 -shot problem. The support set of the target domain therefore contains 𝑁 × 𝐾 labeled samples. The objective of the model 𝑓 (⋅) is to diagnose the fault categories of a query set  = {( 𝐱 𝑗 , 𝑦 𝑗 )} 𝑀 𝑗 =1 with only access to the support set. In this paper, the DT of the physical asset is built and simulation data under each health state are generated, constructing a source domain with 𝐾 𝑠 labeled samples: 
+
+𝑠 = {( 𝐱 𝑠 𝑘 , 𝑦 𝑠 𝑘 )} 𝐾 𝑠 
+
+𝑘 =1 . (2) It should be noted that all the health states in the target domain need to be simulated, resulting in a shared label space of both domains, i.e., 𝑠 = 𝑡 = {1 , 2, … , 𝑁 }. However, data distributions of two domains are different due to modeling 
+
+Xia P. et al. Page 7 of 19 … …  
+
+> MSConv
+> MSConv
+> MSConv
+> ResBlock
+> ResBlock
+> ResBlock
+> 2D Space 1D Space Representations
+> Physical Space
+> Virtual Space
+> Current Signal
+> GAP
+
+Virtual Space Meta -Train 
+
+> S
+> Q
+> Meta -Task 1
+> S
+> Q
+> S
+> Q
+
+…
+
+Test -Time Twin -Domain Bi -Directional Anchoring  
+
+> Covariance -
+> Guided
+> Augmentation
+> Meta -Task 2 Meta -Task T
+> Diagnosis Results
+
+3 4
+
+1 2
+
+Digital Twin Modeling  Multi -Periodicity Feature Learning Fig. 8. Framework illustration of the proposed method. 
+
+inaccuracies and measurement noise, i.e., 𝑃 𝑠 (𝑋 ) ≠ 𝑃 𝑡 (𝑋 ). Consequently, the objective of this paper is to exploit the DT source domain data to assist the model training. To address this challenge, a DT-assisted test-time bi-directional adaptation framework is proposed, as illustrated in Fig. 8. The proposed framework consists of four stages. First, a DT of the physical asset is constructed, through which simulated three-phase current signals are generated in the virtual space. Second, a multi-periodicity feature learning network with residual blocks is designed to extract discriminative representations from the current signals. Subsequently, meta-training is conducted using the simulated source-domain data generated in the virtual space to obtain a pre-trained diagnostic model. Finally, to adapt the model to the target domain with limited samples, a covariance-guided augmentation strategy is applied to the query-set data to increase data diversity. Based on the augmented data, a twin-domain bi-directional prototype anchoring process is further performed to adapt the model at test time, after which the final diagnostic decisions are made for the query samples. 
+
+3.2. Multi-periodicity Learning 
+
+The stator current signals of electromechanical systems typically exhibit strong periodic characteristics determined by the electrical frequency and its harmonics. Effectively capturing such periodic structures is essential for extracting discriminative fault-related features. Therefore, inspired by the temporal processing paradigm in the TimesNet [30], a  
+
+> Xia P. et al. Page 8 of 19 … …
+> 1×1
+
+2D Space  1D Space      
+
+> Current Signal
+> FFT
+> Frequency Spectrum
+> Period 1
+> Period 2
+> Period 3
+> 3×35×5
+> Reshape
+> 1×13×35×5
+> Reshape
+> 1×13×35×5
+> Reshape
+
+Input 1D Space Fig. 9. Network structure of the multi-periodicity learning module. 
+
+multi-periodicity feature learning module is designed to explicitly model temporal variations within and across different periods. The structure of the multi-periodicity learning module is illustrated in Fig. 9. Specifically, the input consists of three-phase stator current signals 𝐱 ∈ ℝ𝐿 ×3 , where 𝐿 denotes the signal length. First, the time-series signals are transformed into multiple 2D spaces according to their dominant periods. Instead of processing each phase independently, the frequency spectra of the three phases are first computed and then averaged to obtain a unified spectral representation as follows. 
+
+𝐴 = 13
+
+> 3
+
+∑
+
+> 𝑐 =1
+
+‖‖FFT (𝐱 𝐜 )‖‖ , (3) where 𝐱 𝐜 represents the 𝑐 -th channel of the current signals, and FFT denotes the single-sided frequency spectrum obtained by Fast Fourier Transform (FFT). Based on this averaged spectrum, the 𝑘 dominant frequency components are identified by selecting the frequencies with top-𝑘 amplitudes, from which a set of candidate periods is determined: 
+
+𝑝 𝑖 = ⌈ 𝐿 𝑓 𝑖 
+
+⌉, (4) where 𝑓 𝑖 is the 𝑖 th dominant frequency. Taking the simulated current signals of the normal motor at the rotating speed of 2700 r/min as an example, Fig. 10 depicts the obtained spectrum and the top-5 dominant frequencies. It can be observed that the main dominant frequency is 45 Hz, corresponding to the rotating speed. The second and third dominant frequencies are 225 Hz and 315 Hz, which are the 5 times and 7 times of the rotating frequency, respectively. If we take 0.2 s as the time duration of samples, i.e., 𝐿 = 2048 , the first three dominant periods are 46, 10, and 7, respectively. For each selected period, the current signals are reshaped into a 2D representation according to the corresponding periodic structure. This transformation converts long temporal dependencies into local spatial correlations, enabling convolutional operations to effectively capture both intra-period and inter-period patterns. Subsequently, a multiscale                    
+
+> Xia P. et al. Page 9 of 19           
+> 
+> 
+> 
+> 
+>  
+>           
+
+Fig. 10. The frequency spectrum of the normal motor current signals and the top-5 dominant frequencies. 
+
+CNN (MSCNN) layer is designed to process the 2D representations from 𝑘 2D spaces with multiple receptive fields. Three scales of 1 × 1 , 3 × 3 , and 5 × 5 are employed to extract features simultaneously and then aggregate them with average operation. This network allows adaptive feature extraction for the 2D representations with various periods. Subsequently, the obtained features of each period by the MSCNN layer are reshaped back into 1D spaces, respectively, leading to representations ̃ 𝐱 𝑘 ∈ ℝ𝐿 ×𝑑 , where 𝑑 denotes the channels of MSCNN. Residual connection is also designed to the original 1D signals, formulated as ̂
+
+𝐱 𝑘 =̃ 𝐱 𝑘 + 𝐱 , (5) Afterward, features learned under multiple candidate periods are aggregated by the average operation, i.e., ̂
+
+𝐱 = 1
+
+> 𝑘
+
+∑𝑘 𝑖 =1 ̂ 𝐱 𝑘 . Through this process, the proposed module is able to capture diverse periodic patterns embedded in the current signals, thereby improving the robustness of feature extraction for fault diagnosis under limited data conditions. Subsequently, several residual blocks adopted from ResNet [32] are stacked to further learn high-level representations from ̂ 𝐱 . Finally, a global average pooling (GAP) layer is applied to aggregate the feature maps and produce the final feature representation. 
+
+3.3. Meta-training in Virtual Space 
+
+After constructing the representation extraction network, meta-training is performed in the virtual space using the simulated data generated by the DT. The goal of this stage is to learn a transferable model that can rapidly adapt to the physical target domain with limited labeled samples. Following the standard few-shot learning paradigm, the meta-training process is conducted in an episodic manner. Specifically, multiple meta-tasks are firstly designed, where each training episode mimics a few-shot fault diagnosis task and consists of a support set and a query set both sampled from the source domain. An 𝑁 -way 𝐾 -shot task is constructed consistent with the data settings in the target domain, while the query set includes additional 𝑀 samples used for evaluation within the episode. In each episode, feature representations are first extracted from the input signals through the proposed multi-periodicity feature learning network. Subsequently, the class prototype for each fault category is computed by calculated the average feature vector of all the support samples adopted from the Prototypical Network (ProtoNet) [33]: 
+
+𝐩 𝑛 = 1
+
+𝐾 
+
+∑
+
+> (𝐱 𝑘 ,𝑦 𝑘 )∈ 𝑠 𝑡 𝑦 𝑘 =𝑛
+
+𝑓 (𝐱 𝑘 ), (6)  
+
+> Xia P. et al. Page 10 of 19
+
+where 𝑠 𝑡 denotes the support set in the 𝑡 th meta-task, 𝑓 (⋅) ∶ ℝ𝐿 ×𝐶 → ℝ𝑤 represents the representation extraction network, and 𝐩 𝑛 is the prototype of class 𝑛 . For a query sample 𝐱 𝑞 , its feature representation 𝑓 (𝐱 𝑞 ) is compared with each class prototype using a distance metric 𝑑 (⋅, ⋅), which is chosen as Euclidean distance in this paper. The probability that the query sample belongs to class 𝑛 is calculated as 
+
+𝑝 (𝑦 𝑞 = 𝑛 |𝐱 𝑞 ) = exp [−𝑑 (𝑓 (𝐱 𝑞 ), 𝐩 𝑛 )]∑𝑛 ′ exp [−𝑑 (𝑓 (𝐱 𝑞 ), 𝐩 𝑛 ′ )] . (7) The model parameters are optimized by minimizing the negative log-probability of the real class over the query samples in each episode: 
+
+𝑠 = 1
+
+𝑀 
+
+> 𝑁
+
+∑
+
+> 𝑛 =1
+
+∑  
+
+> (𝐱 𝑞 ,𝑦 𝑞 )∈ 𝑠 𝑡,𝑛
+
+[
+
+𝑑 (𝑓 (𝐱 𝑞 ), 𝐩 𝑛 ) + log ∑
+
+> 𝑛 ′
+
+exp (−𝑑 (𝑓 (𝐱 𝑞 ), 𝐩 𝑛 ′ ))]
+
+, (8) where 𝑠 𝑡,𝑛 denotes the subset with category 𝑛 of the query set in the 𝑡 th meta-task. Through episodic meta-training on abundant DT-generated data, the model learns a discriminative feature space in which samples belonging to the same fault category are clustered around their corresponding prototypes. This provides a strong initialization for subsequent test-time adaptation in the physical space with limited real-world samples. 
+
+3.4. Test-time Twin-domain Model Adaptation 
+
+Although meta-training in the virtual space enables the model to learn transferable representations, discrepancies inevitably exist between the simulated data and the measurements collected from the physical machine. In the few-shot diagnosis stage, a small support set  from the target machine is available, and traditional few-shot methods such as ProtoNet utilize the support set for query sample recognition with the well-trained model. However, the discrepancies may cause a shift in feature distributions, which degrades the reliability of the new prototypes when applied directly to the target domain. To address this issue, a test-time adaptation strategy is adopted using the small support set before model inference. As the number of labeled samples in the target domain is extremely limited, an augmentation process is first conducted to alleviate the instability caused by few-shot observations. Instead of applying random perturbations, a covariance-guided augmentation strategy inspired by Stochastic Feature Augmentation in [34] is adopted to generate more informative feature variations while preserving the intrinsic structure of each fault category. Specifically, given the extracted feature vectors 𝐳 ∈ ℝ𝑤 from the support samples, the features belonging to the same class are first grouped together. For each fault category 𝑛 , the statistical distribution of the features is estimated by computing the covariance matrix based on the available samples. Let 𝐳 𝑛 𝑖 denotes the feature vector of the 𝑖 th sample in class 𝑛 . The covariance matrix 𝚺 𝑛 is obtained as 
+
+𝚺 𝑛 = Cov (𝐳 𝑛 𝑖 
+
+) , (9) which captures the variation patterns of the features within that class. It should be noted that the covariance matrix is assigned as an identity matrix in 1-shot scenario. Based on the estimated covariance matrix, Gaussian perturbations are generated to create additional feature samples. For each original feature vector 𝐳 with category 𝑛 , 𝐾 𝐴 augmented samples are generated by ̃
+
+𝐳 = 𝐳 + 𝜖, 𝜖 ∼  (0 , 𝚺 𝑛 ), (10) where ̃ 𝐳 denotes the augmented feature and 𝜖 represents the class-dependent noise. In this way, the generated samples  
+
+> Xia P. et al. Page 11 of 19
+
+follow the statistical structure of the original features rather than arbitrary random noise, and additional feature samples with plausible intra-class variations can be obtained. As discrepancies between data from two domains are inevitable, the prototypes of two domains are bound to be mismatched. Directly relying on either of the two prototypes may lead to suboptimal performance. On one hand, source-domain prototypes contain rich prior knowledge but may suffer from domain shift. On the other hand, target-domain prototypes better reflect the characteristics of the physical machine but are estimated from very limited samples and may be unstable. Consequently, inspired by the feature alignment in unsupervised domain adaptation [35], a bi-directional prototype anchoring mechanism is proposed to align the representations of the virtual and physical domains during the adaptation. Specifically, the source-domain prototypes firstly serve as knowledge anchors to regularize the target domain samples along with the augmented feature. This process can train the model to exploit the knowledge from DT model and prevent excessive deviation of target domain representations due to limited samples. First, class prototypes of the source domain are computed with source-domain samples as Equation 6. For each fault category 𝑛 , the source prototype is denoted as 𝐩 𝑠 𝑛 , which preserves the diagnostic knowledge learned from the DT during meta-training. Subsequently, the samples from the target domain are projected into the feature space and combined with the augmented features. The similarity between the target domain feature and each prototype 𝐩 𝑠 𝑛 is measured using the Euclidean distance, and the target-to-source anchoring loss can be defined with the negative log-probability of the similarity with the corresponding prototype: 
+
+𝑎𝑛𝑐 1 = 1
+
+𝑁 × 𝐾 
+
+> 𝑁
+
+∑
+
+> 𝑛 =1
+
+∑
+
+> (𝐱 𝑖 ,𝑦 𝑖 )∈ 𝑛
+
+[
+
+𝑑 (𝑓 (𝐱 𝑖 ), 𝐩 𝑠 𝑛 ) + log ∑
+
+> 𝑛 ′
+
+exp (−𝑑 (𝑓 (𝐱 𝑖 ), 𝐩 𝑠 𝑛 ′ ))]
+
++ 1
+
+𝑁 × 𝐾 × 𝐾 𝐴 𝑁 ∑
+
+> 𝑛 =1
+
+∑̃
+
+> 𝐳 𝑖 ∈̃𝑛
+
+[
+
+𝑑 (̃𝐳 𝑖 , 𝐩 𝑠 𝑛 ) + log ∑
+
+> 𝑛 ′
+
+exp (−𝑑 (̃ 𝐳 𝑖 , 𝐩 𝑠 𝑛 ′ ))]
+
+,
+
+(11) where ̃ 𝑛 represents the augmented feature subset with category 𝑛 and contains samples of 𝐾 𝐴 times those in the support set. To further encourage confident predictions and more compact feature clustering, an entropy regularization term is further introduced. This term minimizes the entropy of the predicted class distribution as follows: 
+
+𝑒𝑛𝑡 1 = 𝔼 
+
+⎡⎢⎢⎢⎣
+
+𝐻 
+
+⎡⎢⎢⎢⎣
+
+exp [−𝑑 (𝑓 (𝐱 ), 𝐩 𝑠 𝑛 )]∑𝑛 ′ exp 
+
+[
+
+−𝑑 (𝑓 (𝐱 ), 𝐩 𝑠 𝑛 ′ )
+
+]⎤⎥⎥⎥⎦
+
++ 𝐻 
+
+⎡⎢⎢⎢⎣
+
+exp [−𝑑 (̃𝐳 𝑖 , 𝐩 𝑠 𝑛 )]∑𝑛 ′ exp 
+
+[
+
+−𝑑 (̃ 𝐳 𝑖 , 𝐩 𝑠 𝑛 ′ )
+
+]⎤⎥⎥⎥⎦⎤⎥⎥⎥⎦
+
+, (12) where 𝐻 (⋅) denotes the entropy of class distribution. The overall target-to-source adaptation loss is formulated as 
+
+𝑡𝑠 = 𝑎𝑛𝑐 1 + 𝑒𝑛𝑡 1. (13) Conversely, the target-domain prototypes provide adaptation anchors that guide the representations from simulation data toward the distribution of real measurements. Similarity, the prototypes of all the target domain samples and the augmented features are firstly calculated, formulated as 𝐩 𝑡 𝑛 . Subsequently, the source-to-target anchoring loss is  
+
+> Xia P. et al. Page 12 of 19
+
+computed as follows: 
+
+𝑎𝑛𝑐 2 = 1
+
+𝐾 𝑠 𝑁 ∑
+
+> 𝑛 =1
+
+∑
+
+> (𝐱 𝑖 ,𝑦 𝑖 )∈ 𝑠 𝑛
+
+[
+
+𝑑 (𝑓 (𝐱 𝑖 ), 𝐩 𝑡 𝑛 ) + log ∑
+
+> 𝑛 ′
+
+exp (−𝑑 (𝑓 (𝐱 𝑖 ), 𝐩 𝑡 𝑛 ′ ))]
+
+, (14) where 𝑠 𝑛 is the subset of source domain with sample category 𝑛 . Subsequently, an entropy regularization term 𝑒𝑛𝑡 2
+
+is similarly obtained as Equation 12. The overall source-to-target adaptation loss can be presented as 
+
+𝑠𝑡 = 𝑎𝑛𝑐 2 + 𝑒𝑛𝑡 2. (15) The overall test-time adaptation loss can be expressed as 
+
+𝑡 = 𝑡𝑠 + 𝑠𝑡 . (16) Through minimization of this loss, the model is updated, and the feature space is gradually adjusted to reduce the domain gap while preserving the discriminative structure learned in the virtual space. After prototype anchoring, the query samples from the target domain are projected into the adapted feature space, and their class probabilities are computed based on the distances to the new prototypes of the target domain. 
+
+4. Experimental Verification 
+
+4.1. Experiment Setup 
+
+In the experiment, current signals of the physical motor are collected with a sampling frequency of 5120 Hz. Since the sampling frequency of the simulated signals is twice that of the measured signals, the simulated data were downsampled by a factor of two to ensure consistency between the two domains. For sample construction, segments with a duration of 0.2 s were extracted to form individual samples for fault diagnosis, resulting in the sample length of 1024. To evaluate the few-shot fault diagnosis capability of the proposed method, four few-shot scenarios, namely 1-shot, 3-shot, 5-shot, and 10-shot, were designed for each working condition. In each task, 15 query samples per class were used to evaluate the model performance. To obtain reliable results, 20 randomly generated tasks were constructed for each scenario, and the average diagnostic accuracy was reported. Furthermore, all experiments were repeated five times with different random seeds to mitigate the influence of randomness. For the model configuration, the kernel channel number in the MSCNN module was set to 32, and the top-5 dominant periods were selected for multi-periodicity modeling. Three ResBlocks with channel sizes of 64, 128, and 256 were employed, and each block contained two residual blocks. During the meta-training stage, the model was trained for 200 iterations with a learning rate of 0.001. In the test-time adaptation stage, a batch of 40 source-domain samples was used for adaptation, and the adaptation process was conducted for 10 epochs in each task. The feature augmentation factor was set to 3, meaning that three additional augmented samples were generated for each support feature. All hyperparameters and experimental settings were kept consistent across different few-shot scenarios and working conditions. 
+
+4.2. Comparative Study 
+
+Five representative few-shot learning methods were introduced for comparison to comprehensively verify the proposed method: (1) Siamese [36]: The Siamese Network is a classical metric-learning-based framework that learns a similarity function between pairs of samples through twin networks with shared parameters.      
+
+> Xia P. et al. Page 13 of 19 #!$ #!$ #!$ #!$ #
+> 
+> 
+> 
+> 
+> 
+> 
+>  %"& 
+>  #
+> 
+> 
+> 
+> 
+> %"#
+
+(a) $"% $"% $"% $"% $  
+
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+>  &#' 
+> !$
+> 
+> 
+> 
+> 
+> &#$
+
+(b) #!$ #!$ #!$ #!$ #  
+
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+>  %"& 
+>  #
+> 
+> 
+> 
+> 
+> %"#
+
+(c) 
+
+Fig. 11. Diagnosis accuracy of different methods in various few-shot settings. (a) 1200 r/min. (b) 2400 r/min. (c) 2700 r/min. 
+
+(2) QCDM [37]: It introduces a query-centric distance modulation (QCDM) strategy, which dynamically adjusts the distances between query samples and class prototypes. (3) CAM [38]: It focuses on reducing the distribution discrepancy between different classes by introducing a category alignment mechanism (CAM). (4) RRPN [39]: The reweighted regularized ProtoNet (RRPN) extends the ProtoNet by introducing prototype reweighting and regularization strategies to assign adaptive weights to prototypes. (5) FSM3 [40]: It is a feature-space metric-based meta-learning (FSM3) framework tailored for fault diagnosis tasks by constructing a more discriminative feature embedding space. All the methods were trained using the DT simulated data and verified with the few-shot measurement samples. As illustrated in Fig. 11, the diagnosis accuracy of different methods under various few-shot settings and working conditions is presented. Overall, the proposed method achieves the best performance in most scenarios, demonstrating its effectiveness in leveraging DT knowledge for few-shot fault diagnosis. For the 1200 r/min condition shown in Fig. 11(a), most methods exhibit improved performance as the number of labeled samples increases. The proposed method achieves the highest results even in the extremely limited 1-shot scenario, while the advantages are not obvious in the rest scenarios. QCDM, CAM, and FSM3 exhibit obviously lower and unstable results. For the 2400 r/min condition shown in Fig. 11(b), the superiority of the proposed method becomes evident. The comparative methods suffer from significant performance degradation in the few-shot scenarios, especially QCDM and FSM3. In contrast, the proposed method maintains high diagnostic accuracy across all tasks, 
+
+Xia P. et al. Page 14 of 19 Table 2                                                                                                              
+
+> Accuracy of ablation study in different scenarios (%). 𝐾 s denotes 𝐾 -shot. Method 1200 r/min 2400 r/min 2700 r/min 1s 3s 5s 10s Average 1s 3s 5s 10s Average 1s 3s 5s 10s Average
+> Baseline 55.42 75.83 78.43 82.83 73.13 31.18 37.00 39.87 42.02 37.52 77.38 82.35 87.90 86.85 83.62
+> w/o MPL 68.27 77.08 74.45 79.87 74.92 51.93 54.02 58.77 64.28 57.25 79.02 83.17 83.42 86.72 83.08
+> MSCNN 73.47 81.15 78.77 79.90 78.32 54.75 56.17 60.48 65.65 59.26 78.03 85.05 86.48 86.82 84.10
+> w/o TTA 73.90 78.83 80.98 86.72 80.11 79.45 89.85 89.73 85.80 86.21 82.55 86.90 87.08 87.23 85.94
+> w/o CGA 73.28 73.47 83.55 85.38 78.92 79.27 90.42 92.77 89.20 87.91 82.62 85.37 89.07 87.28 86.08
+> Proposed 75.37 76.65 83.82 86.63 80.62 78.72 91.05 92.37 88.37 87.62 82.13 86.70 88.85 87.38 86.27
+
+exceeding the other methods by a considerable margin. For the 2700 r/min condition shown in Fig. 11(c), the proposed method also maintains stable and high diagnostic performance across all few-shot settings. In particular, it outperforms all the comparative methods in the 1-shot, 3-shot, and 5-shot scenarios, indicating its strong capability to generalize from extremely limited labeled samples. Within the comparative methods, most metric-learning approaches rely heavily on reliable target support samples to provide fault information of the target asset. Some methods such as RRPN and FSM3 rely heavily on sufficient labeled samples to construct reliable similarity measurements. However, discrepancies between two domains and the extremely limited support samples, especially 1-shot, 3-shot, and 5-shot scenarios for QCDM, CAM, and FSM3, will lead to unstable performance. In contrast, the proposed framework benefits from the bi-directional prototype anchoring mechanism in test time, which effectively transfers diagnostic knowledge from the virtual domain to the physical domain by model adaptation. As a result, the model can maintain high diagnostic accuracy and strong robustness even under severe few-shot constraints. 
+
+4.3. Ablation Study 
+
+To validate the effectiveness of each component in the proposed method, several methods were designed by removing a specific component for ablation study. The w/o TTA represents the method, in which test-time adaptation is not conducted. In the w/o CGA , the covariance-guided augmentation process is removed while the adaptation process is kept. The w/o MPL represents a method, in which the multi-periodicity learning module is removed and a simple 1D convolutional layer is utilized, to verify the effectiveness of multi-periodicity learning. At the meantime, the MSCNN is designed by replacing the multi-periodicity module with 1D MSCNN instead of the 2D MSCNN in our network. The Baseline method further removes the test-time adaption process from w/o MPL .The ablation results under various working conditions and few-shot settings are summarized in Table 2. Overall, the proposed method achieves the highest or highly competitive accuracy across most scenarios and obtains the best average results in two conditions, indicating that each designed component contributes to the overall performance improvement. First, the effectiveness of the multi-periodicity learning module can be verified by comparing the proposed method and the w/o MPL method. The w/o MPL method achieves relatively limited diagnostic accuracy, particularly under the 2400 r/min condition where the average accuracy is only 57.25% and around 30% accuracy degradation is observed. Accuracy drops of w/o MPL occur in almost all the scenarios, demonstrating that explicitly modeling the multi-periodic characteristics of current signals can enhance the discriminative ability of extracted features. Although MSCNN achieves noticeable improvements compared with the Baseline and w/o MPL , its performance is        
+
+> Xia P. et al. Page 15 of 19    
+> 
+> 
+> 
+>   
+>           
+> 
+>     
+
+(a)           
+
+> 
+> 
+> 
+>  
+>  
+>      
+> 
+>    
+>  
+>    
+> 
+
+(b)             
+
+> 
+> 
+> 
+>   
+> 
+>    
+> 
+>    
+>  
+>    
+>  
+
+(c)          
+
+> 
+> 
+> 
+>  
+>  
+>     
+> 
+>    
+>  
+>    
+>  
+
+(d)        
+
+> 
+> 
+> 
+>  
+> 
+>    
+>  
+>    
+>  
+>     
+
+(e)          
+
+> 
+> 
+> 
+>  
+>  
+>    
+> 
+>    
+>  
+>       
+
+(f)           
+
+> 
+> 
+> 
+>   
+>  
+>    
+>  
+>     
+> 
+>    
+>  
+
+(g)          
+
+> 
+> 
+> 
+>  
+>  
+>    
+>  
+>    
+>  
+>    
+> 
+
+(h) 
+
+Fig. 12. Confusion matrices of the Baseline method (a)-(d) and the proposed method (e)-(h) in scenarios from 1-shot to 10-shot under the condition of 1200 r/min 
+
+still inferior to the proposed method in most cases. This observation suggests that simple multiscale convolution is insufficient to capture the intrinsic periodic structures of current signals, whereas the proposed multi-periodicity learning can result in significant performance improvements. The effectiveness of the test-time adaptation strategy can be observed by comparing w/o TTA and the proposed method. Without the adaptation process, the model already achieves relatively strong performance in most scenarios. However, after introducing the complete adaptation mechanism in the proposed method, the diagnostic performance becomes more stable across various few-shot tasks, and average accuracy improvements are achieved under all the three working conditions. This indicates that the adaptation process helps mitigate the distribution discrepancy between virtual and physical domains, thereby improving the few-shot performance on the target asset. Furthermore, the comparison between w/o CGA and the proposed method verifies the contribution of the covariance-guided augmentation strategy. Removing the augmentation process leads to a slight decrease in diagnostic accuracy in most tasks. This result suggests that the strategy enables the model to construct more reliable class prototypes under limited labeled samples and results in more robust performance. 
+
+4.4. Discussion 
+
+To analyze the diagnosis results more intuitively, the confusion matrices of the Baseline and the proposed method under the first working condition are depicted in Fig. 12. It can be observed that the overall diagnosis accuracy for each category of both methods increase with the addition of support samples. The proposed method consistently outperforms the Baseline method for all the categories in almost all the few-shot settings. Both methods can recognize the SWF state well due to the obvious imbalance in three-phase signals in time domain. Although the proposed method achieves better performance, it struggles to recognize the MRF state, which is difficult to identify from the time-domain signals as well. As the number of dominant periods in the multi-periodicity learning module is a critical hyperparameter, experiments were conducted to investigate its influence on the model performance. Specifically, the model performance with and without test-time adaptation was evaluated under different top-𝑘 settings ranging from 1 to 7 
+
+Xia P. et al. Page 16 of 19  
+
+> 
+> 
+> 
+> 
+> 
+> 
+>  
+>   
+>   
+
+Fig. 13. Model accuracy with different top-𝑘 values under the condition of 1200 r/min. 
+
+under the first working condition. As illustrated in Fig. 13, both methods exhibit a similar performance trend as the value of 𝑘 varies. When the number of dominant periods increases from 1 to 2, the diagnostic accuracy drops significantly. This phenomenon can be attributed to the fact that introducing a small number of additional frequency components may incorporate non-dominant or noisy periodic components, which weakens the discriminative characteristics of the reconstructed signals. As the value further increases from 2 to 5, the diagnostic accuracy gradually improves. The best performance for both methods is achieved when 𝑘 = 5 , suggesting that five dominant periods provide a suitable balance between capturing sufficient periodic information and avoiding excessive redundant components. When 𝑘 continues to increase beyond this value, the performance no longer improves and even shows a slight decline. Therefore, these results demonstrate that an appropriate selection of dominant periods is essential for effectively modeling the intrinsic multi-periodic characteristics of current signals. 
+
+5. Conclusion 
+
+In this paper, a DT-assisted few-shot fault diagnosis framework is proposed to address the challenge of insufficient measurement data in practical industrial scenarios. Through DT modelling and simulated data generation, a framework involving meta-training in the virtual space and test-time adaptation in the physical space is proposed. In the adaptation stage, a twin-domain bi-directional prototype anchoring strategy is developed to update the model to alleviate data discrepancies between two domains. In addition, a covariance-guide augmentation mechanism is introduced to increase data diversity for target samples. Furthermore, a multi-periodicity feature learning module is designed to model the intrinsic periodic characteristics of current signals. Experimental results under multiple few-shot settings and working conditions demonstrate that the proposed method outperforms several representative few-shot fault diagnosis approaches. Ablation studies further validate the effectiveness of each proposed component. Overall, the proposed framework provides an effective solution for DT-to-measurement knowledge transfer in few-shot fault diagnosis tasks. Future work will focus on exploring the model’s robustness on more fault types and variable working conditions.  
+
+> Xia P. et al. Page 17 of 19
+
+Acknowledgements 
+
+This research was supported by the National Natural Science Foundation of China (No. 52405122 and No. 52375109), the National Key Research and Development Program of China (No. 2023YFB3408502), and the China Postdoctoral Science Foundation (No. 2025M771378). 
+
+References 
+
+[1] Y. Hu, X. Miao, Y. Si, E. Pan, E. Zio, Prognostics and health management: A review from the perspectives of design, development and decision, Reliability Engineering & System Safety 217 (2022) 108063. [2] P. Vrignat, F. Kratz, M. Avila, Sustainable manufacturing, maintenance policies, prognostics and health management: A literature review, Reliability Engineering & System Safety 218 (2022) 108140. [3] Y. Lei, B. Yang, X. Jiang, F. Jia, N. Li, A. K. Nandi, Applications of machine learning to machine fault diagnosis: A review and roadmap, Mechanical Systems and Signal Processing 138 (2020) 106587. [4] R. Zhao, R. Yan, Z. Chen, K. Mao, P. Wang, R. X. Gao, Deep learning and its applications to machine health monitoring, Mechanical Systems and Signal Processing 115 (2019) 213–237. [5] J. Hendriks, P. Dumond, D. A. Knox, Towards better benchmarking using the cwru bearing fault dataset, Mechanical Systems and Signal Processing 169 (2022) 108732. [6] Y. Xu, X. Yan, B. Sun, Z. Liu, Global contextual residual convolutional neural networks for motor fault diagnosis under variable-speed conditions, Reliability Engineering & System Safety 225 (2022) 108618. [7] S. Li, J. C. Ji, Y. Xu, K. Feng, K. Zhang, J. Feng, M. Beer, Q. Ni, Y. Wang, Dconformer: A denoising convolutional transformer with joint learning strategy for intelligent diagnosis of bearing faults, Mechanical Systems and Signal Processing 210 (2024) 111142. [8] Y. Huang, Y. Ma, Y. Pu, C. Wang, Y. Wang, P. Xia, C. Qin, C. Liu, Self-distillation-based domain weighted generalization method for fault diagnosis under actual unseen working conditions, IEEE Transactions on Instrumentation and Measurement 75 (2026) 1–13. [9] T. Zhang, J. Chen, F. Li, K. Zhang, H. Lv, S. He, E. Xu, Intelligent fault diagnosis of machines with small & imbalanced data: A state-of-the-art review and possible extensions, ISA Transactions 119 (2022) 152–171. [10] K. Yu, T. R. Lin, H. Ma, X. Li, X. Li, A multi-stage semi-supervised learning approach for intelligent fault diagnosis of rolling bearing using data augmentation and metric learning, Mechanical Systems and Signal Processing 146 (2021) 107043. [11] H. Yu, Y. Bo, Q. Liu, X. Yang, S. Xu, X. Huang, Monthly advance rate estimation of hard rock tunnel boring machine based on rock mass classification and data augmentation, Underground Space 23 (2025) 175–192. [12] W. Li, R. Huang, J. Li, Y. Liao, Z. Chen, G. He, R. Yan, K. Gryllias, A perspective survey on deep transfer learning for fault diagnosis in industrial scenarios: Theories, applications and challenges, Mechanical Systems and Signal Processing 167 (2022) 108487. [13] R. Yan, F. Shen, C. Sun, X. Chen, Knowledge transfer for rotary machine fault diagnosis, IEEE Sensors Journal 20 (2020) 8374–8393. [14] L. Guo, Y. Lei, S. Xing, T. Yan, N. Li, Deep convolutional transfer learning network: A new method for intelligent fault diagnosis of machines with unlabeled data, IEEE Transactions on Industrial Electronics 66 (2019) 7316–7325. [15] J. Liu, L. Wan, F. Xie, Y. Sun, X. Wang, D. Li, S. Wu, Cross-machine deep subdomain adaptation network for wind turbines fault diagnosis, Mechanical Systems and Signal Processing 210 (2024) 111151. [16] X. Li, W. Zhang, N.-X. Xu, Q. Ding, Deep learning-based machinery fault diagnostics with domain adaptation across sensors at different places, IEEE Transactions on Industrial Electronics 67 (2020) 6785–6794. [17] Y. Feng, J. Chen, J. Xie, T. Zhang, H. Lv, T. Pan, Meta-learning as a promising approach for few-shot cross-domain fault diagnosis: Algorithms, applications, and prospects, Knowledge-Based Systems 235 (2022) 107646. [18] M. Luo, J. Xu, Y. Fan, J. Zhang, Trnet: A cross-component few-shot mechanical fault diagnosis, IEEE Transactions on Industrial Informatics 19 (2023) 6883–6894. [19] P. Xia, Y. Huang, C. Liu, J. Liu, Learn to supervise: Deep reinforcement learning-based prototype refinement for few-shot motor fault diagnosis, IEEE Transactions on Neural Networks and Learning Systems 36 (2025) 11428–11442. [20] R. Yan, F. Shen, C. Sun, X. Chen, Knowledge transfer for rotary machine fault diagnosis, IEEE Sensors Journal 20 (2020) 8374–8393. [21] W. Booyse, D. N. Wilke, S. Heyns, Deep digital twins for detection, diagnostics and prognostics, Mechanical Systems and Signal Processing 140 (2020) 106612. [22] H. Ma, C. Fan, Y. Zhang, Q. Wang, K. Yu, Z. Ma, Digital twin-inspired methods for rotating machinery intelligent fault diagnosis and remaining useful life prediction: A state-of-the-art review and future challenges, Mechanical Systems and Signal Processing 232 (2025) 112770. [23] C. Liu, K. Gryllias, Simulation-driven domain adaptation for rolling element bearing fault diagnosis, IEEE Transactions on Industrial Informatics 18 (2022) 5760–5770. 
+
+Xia P. et al. Page 18 of 19 [24] Y. Zhang, J. C. Ji, Z. Ren, Q. Ni, F. Gu, K. Feng, K. Yu, J. Ge, Z. Lei, Z. Liu, Digital twin-driven partial domain adaptation network for intelligent fault diagnosis of rolling bearing, Reliability Engineering & System Safety 234 (2023) 109186. [25] P. Xia, Y. Huang, Z. Tao, C. Liu, J. Liu, A digital twin-enhanced semi-supervised framework for motor fault diagnosis based on phase-contrastive current dot pattern, Reliability Engineering & System Safety 235 (2023) 109256. [26] X. Lu, J. Jiao, J. Lin, Z. Liu, H. Liu, B. Zhang, Digital twin-driven source-free adaptation diagnosis for rolling element bearing under data privacy, Reliability Engineering & System Safety 264 (2025) 111454. [27] P. Xia, C. Qin, Q. Chao, Y. Huang, C. Liu, Knowledge distillation from electromagnetic simulation for asynchronous motor fault diagnosis with small labeled samples, IEEE Transactions on Transportation Electrification (2026) 1–1. [28] L. Ma, B. Jiang, L. Xiao, N. Lu, Digital twin-assisted enhanced meta-transfer learning for rolling bearing fault diagnosis, Mechanical Systems and Signal Processing 200 (2023) 110490. [29] M. Xia, H. Shao, D. Williams, S. Lu, L. Shu, C. W. de Silva, Intelligent fault diagnosis of machinery using digital twin-assisted deep transfer learning, Reliability Engineering & System Safety 215 (2021) 107938. [30] H. Wu, T. Hu, Y. Liu, H. Zhou, J. Wang, M. Long, Timesnet: Temporal 2d-variation modeling for general time series analysis, arXiv preprint arXiv:2210.02186 (2022). [31] J.-H. Lee, Y.-C. Kwon, S.-K. Sul, High-fidelity induction motor simulation model based on finite element analysis, IEEE Transactions on Industrial Electronics 69 (2022) 9872–9883. [32] K. He, X. Zhang, S. Ren, J. Sun, Deep residual learning for image recognition, in: Proceedings of the IEEE conference on computer vision and pattern recognition, 2016, pp. 770–778. [33] J. Snell, K. Swersky, R. Zemel, Prototypical networks for few-shot learning, Advances in neural information processing systems 30 (2017). [34] P. Li, D. Li, W. Li, S. Gong, Y. Fu, T. M. Hospedales, A simple feature augmentation for domain generalization, in: Proceedings of the IEEE/CVF international conference on computer vision, 2021, pp. 8886–8895. [35] X. Yue, Z. Zheng, S. Zhang, Y. Gao, T. Darrell, K. Keutzer, A. S. Vincentelli, Prototypical cross-domain self-supervised learning for few-shot unsupervised domain adaptation, in: Proceedings of the IEEE/CVF conference on computer vision and pattern recognition, 2021, pp. 13834–13844. [36] X. Zhou, W. Liang, S. Shimizu, J. Ma, Q. Jin, Siamese neural network based few-shot learning for anomaly detection in industrial cyber-physical systems, IEEE Transactions on Industrial Informatics 17 (2021) 5790–5798. [37] W. Wu, Y. Shao, C. Gao, J.-H. Xue, N. Sang, Query-centric distance modulator for few-shot classification, Pattern Recognition 151 (2024) 110380. [38] Z. Zhou, L. Luo, T. Liu, Q. Liao, X. Liu, E. Zhu, Category alignment mechanism for few-shot image classification, IEEE Transactions on Neural Networks and Learning Systems 36 (2025) 7725–7738. [39] K. Li, C. Shang, H. Ye, Reweighted regularized prototypical network for few-shot fault diagnosis, IEEE Transactions on Neural Networks and Learning Systems 35 (2024) 6206–6217. [40] D. Wang, M. Zhang, Y. C. Xu, W. N. Lu, J. Yang, T. Zhang, Metric-based meta-learning model for few-shot fault diagnosis under multiple limited data conditions, Mechanical Systems and Signal Processing 155 (2021) 107510. 
+
+Xia P. et al. Page 19 of 19

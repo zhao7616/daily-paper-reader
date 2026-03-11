@@ -1,0 +1,1624 @@
+Title: A multi-step attack-correlation method with privacy protection
+
+URL Source: https://arxiv.org/pdf/2603.04146v1
+
+Published Time: Thu, 05 Mar 2026 02:10:45 GMT
+
+Number of Pages: 14
+
+Markdown Content:
+The 3rd Future Industrial Internet Symposium 
+
+# Research paper 
+
+# LISTA -Transformer Model Based on 
+
+# Sparse Coding and Attention Mechanism 
+
+# and Its Application in Fault Diagnosis 
+
+# Shuang Liu 1 , Lina Zhao 2,* , Tian Wang 3，Huaqing Wang 4
+
+# 1, 2, 3, The College of Mathematics and Physics, 
+
+# Beijing University of Chemical Technology, China 
+
+# 4, The College of mechanical and electrical engineering ,
+
+# Beijing University of Chemical Technology, China 
+
+# zhaoln@ mail. buct.edu.cn 
+
+Abstract —Driven by the continuous development of 
+
+models such as Multi -Layer Perceptron, Convolutional 
+
+Neural Network (CNN), and Transformer, deep 
+
+learning has made breakthrough progress in fields 
+
+such as computer vision and natural language 
+
+processing, and has been successfully applied in 
+
+practical scena rios such as image classification and 
+
+industrial fault diagnosis. However, existing models 
+
+still have certain limitations in local feature modeling 
+
+and global dependency capture. Specifically, CNN is 
+
+limited by local receptive fields, while Transformer has 
+
+shortcomings in effectively modeling local structures, 
+
+and both face challenges of high model complexity and 
+
+insufficient interpretability. In response to the above 
+
+issues, this article proposes the following innovative 
+
+work: A sparse Transformer based on Learnable 
+
+Iterative Shrinkage Threshold Algorithm (LISTA -
+
+Transformer) was designed, which deeply integrates 
+
+LISTA sparse encoding with visual Transformer to 
+
+construct a model architecture with adaptive local and 
+
+global featur e collaboration mechanism. 
+
+This method utilizes continuous wavelet transform to 
+
+convert vibration signals into time -frequency maps and 
+
+inputs them into LISTA -Transformer for more 
+
+effective feature extraction. On the CWRU dataset, the 
+
+fault recognition rat e of our method reached 98.5%, 
+
+which is 3.3% higher than traditional methods and 
+
+exhibits certain superiority over existing Transformer -
+
+based approaches .
+
+Keywords —Visual Transformer , LISTA, Time -
+
+frequency diagram , intelligent fault diagnosis of 
+
+rolling bearings 
+
+# 1 Introduction 
+
+As the core component of industrial equipment, the 
+
+running state of rolling bearing directly determines the 
+
+performance and safety factor of the equipment. Statistics 
+
+show that about one -third of the faults of mechanical 
+
+equipment are caused by the failure of rolling bearings. 
+
+Therefore, it is of great engineering significance to carry 
+
+out efficient bearing fault diagnosis research to ensure the 
+
+stable operation of equipment, reduce maintenance costs 
+
+and reduce shutdown losses. With the iteration of industr ial 
+
+technology and the vigorous development of Internet and 
+
+machine learning technology, the importance of bearing 
+
+fault diagnosis has become increasingly prominent. Neural The 3rd Future Industrial Internet Symposium 
+
+network -based methods show strong ability in feature 
+
+extraction and fault recogniti on , which has brought new 
+
+opportunities to this field. However, most traditional deep 
+
+learning methods remain inefficient at extracting long -
+
+distance dependent features. Transformer model initially 
+
+achieved a major breakthrough in the field of natural 
+
+lang uage processing. With its excellent ability to capture 
+
+temporal features, it has become an ideal scheme for 
+
+processing sequential data. After it is introduced into the 
+
+field of bearing fault diagnosis, it can effectively analyze 
+
+the long -distance dependenc e in the vibration signal, and 
+
+then accurately extract the fault characteristics, providing 
+
+a new technical path for bearing state recognition under 
+
+complex working conditions. However , the transformer 
+
+neural network (VSTNN [1]) based on vibration signals 
+
+improves the accuracy and efficiency of fault diagnosis 
+
+through the new vibration signal marking strategy and 
+
+multi head attention mechanism, but its computational 
+
+complexity is high, and there is a risk of over fitting under 
+
+uneven samples. 
+
+Therefore, in order to ensure the stable operation of 
+
+mechanical equipment, reduce maintenance costs and 
+
+downtime, effective fault diagnosis of rolling bearings is 
+
+of great significance. With the continuous development of 
+
+industrial technology, the importance of bearing fault 
+
+diagnosis has become increasingly prominent in the 
+
+context of Internet and machine learning. At present, the 
+
+main research methods of intelligent fault diagnosis are: 
+
+The conventional fault diagnosis method based on 
+
+signal processing is mainly to di agnose the equipment fault 
+
+by analyzing the characteristics of the signal extracted. 
+
+These methods have been developed in the field of signal 
+
+processing for decades, with mature technology and wide 
+
+applications. Representative methods include envelope 
+
+anal ysis, cepstrum analysis, principal component analysis, 
+
+wavelet transform [ 2], Fourier transform, empirical mode 
+
+decomposition [ 3], support vector machine [ 4] and blind 
+
+source separation technology [ 5]. 
+
+In the process of bearing compound fault diagnosis 
+
+bas ed on machine learning, the training set data is used to 
+
+train the machine learning model. Traditional diagnosis 
+
+methods mainly rely on artificial experience, signal 
+
+processing technology and simple machine learning 
+
+algorithm. However, these methods have g reat limitations 
+
+in the case of less sample data, and the generalization 
+
+ability and diagnostic accuracy of the model are limited. 
+
+Taking random forest [ 6] (RF) as an example, machine 
+
+learning can select different classification algorithms or 
+
+regression pr ediction models according to different fault 
+
+types. In the training process, in order to achieve the 
+
+optimal performance, the parameters of the model need to 
+
+be adjusted accordingly. ABBASION and other [7]
+
+researchers used wavelet analysis and support vect or 
+
+machine (SVM) to optimize the signal decomposition level 
+
+and classify various faults of bearings. Yin et al. [ 8]
+
+reviewed the research and development of fault diagnosis 
+
+based on support vector machine (SVM). Widodo et al. [ 9]
+
+introduced the method of u sing support vector machine 
+
+(SVM) to monitor the state of the machine in real time and 
+
+the fault. 
+
+In the field of bearing fault diagnosis, deep learning (DL) 
+
+has attracted much attention. [ 10 ] proposed a new fault 
+
+diagnosis method based on the sliding wind ow processing 
+
+and CNN -LSTM model combined with convolutional 
+
+neural network (CNN) and short -term memory network 
+
+(LSTM); Chen et al. [ 11 ] proposed an automatic learning 
+
+feature neural network using one -dimensional time 
+
+sequence signal as input. After obtain ing the feature, the 
+
+short -term and long -term memory network was used for 
+
+fault classification; Gu et al. [ 12 ] proposed a hybrid fault 
+
+diagnosis method suitable for small sample processing, 
+
+which combines techniques such as variational mode 
+
+decomposition (VMD), continuous wavelet transform 
+
+(CWT) and support vector machine (SVM); Wen et al. [ 13 ]
+
+proposed a new convolutional neural network for fault 
+
+diagnosis, which is based on lenet -5 structure. This method 
+
+transforms one -dimensional time -freq uency signal into 
+
+two -dimensional (2 -D) time -frequency image, and extracts LISTA -Transformer Model Based on Sparse Coding and Attention Mechanism and Its Application in Fault Diagnosis 
+
+the features of the converted two -dimensional image, so as 
+
+to eliminate the influence of manual features. 
+
+Traditional fault diagnosis methods mainly rely on 
+
+artificial experience, s ignal processing technology and 
+
+simple machine learning algorithms, such as support 
+
+vector machine (SVM). However, when dealing with 
+
+complex nonlinear fault signals, these methods have 
+
+certain limitations, especially when the sample data is 
+
+small, the gene ralization ability and diagnosis accuracy of 
+
+the model are limited. In the field of fault diagnosis, in -
+
+depth learning technology has been widely used in recent 
+
+years. Convolutional neural network and cyclic neural 
+
+network are used to extract fault feature s, and good results 
+
+are achieved. However, CNN has limitations in capturing 
+
+the overall information, and RNN is prone to gradient 
+
+disappearance or gradient burst when processing long 
+
+series of data. The emergence of transformer architecture 
+
+provides a new way to solve these problems, and its self -
+
+care mechanism can effectively capture the overall 
+
+dependence in the data. 
+
+In this chapter, a cross mod al compression method of 
+
+vibration signal time -frequency diagram based on LISTA -
+
+Tran sformer is proposed, which reduces the input 
+
+redundancy in the CWRU data set while retaining the 
+
+impact characteristics of key faults. The continuous 
+
+wavelet transform method is used to preprocess the data on 
+
+the original vibration signal, convert it into a two -
+
+dimensional time -fre quency image, and input this image 
+
+into the LISTA transformer model architecture for training. 
+
+The model combines the advantages of sparse coding and 
+
+transformer architecture, and can simultaneously extract 
+
+the local features and global dependencies in the time -
+
+frequency image, so as to improve the performance of fault 
+
+diagnosis. 
+
+The rest of this paper is organized as follows: Section 2 
+
+will introduce the prior knowledge ; Section 3 details our 
+
+approach; Section 4 will show the results and analysis of 
+
+bearin g fault diagnosis experiment; Finally, section 5
+
+summarizes this chapter .
+
+# 2 Prior knowledge 
+
+2.1 Time frequency map transformation method 
+
+Signal processing is an important field in modern 
+
+science and engineering. The time domain information of 
+
+signal represent s the relationship between signal amplitude 
+
+and time, and the frequency domain information of signal 
+
+reveals the relationship between signal frequency and 
+
+energy. When dealing with non -stationary signals, the 
+
+traditional time -domain and frequency -domain an alysis 
+
+methods are often insufficient to provide sufficient 
+
+information. By providing time and frequency information 
+
+at the same time, time -frequency analysis method can 
+
+better deal with such signals. Transforming signals into 
+
+time -frequency maps is an imp ortant task in signal 
+
+processing, which can help us better understand the 
+
+changes of signals in time and frequency domain. The 
+
+following describes four methods for converting the 
+
+original signal into time -frequency map: short time Fourier 
+
+transform (STFT), continuous wavelet transform (CWT), 
+
+Wigner Ville distribution (Wigner Ville), Hilbert Huang 
+
+transform (HHT). 
+
+A segment of fault data at the drive end is randomly 
+
+selected from the CWRU rolling bearing dataset. The 
+
+following is the time domain diagram, fre quency domain 
+
+diagram and the time -frequency diagram converted by four 
+
+methods: The 3rd Future Industrial Internet Symposium 
+
+Figure 1 Time domain plots of a randomly selected 
+
+segment of drive end fault data in the rolling bearing dataset 
+
+of Case Western Reserve University (CWRU) 
+
+Figure 2 Frequency domain plots of a randomly 
+
+selected segment of drive end fault data in the rolling bearing 
+
+dataset of Case Western Reserve University (CWRU) 
+
+(1) STFT 
+
+Figure 3 STFT time -frequency plot of a randomly 
+
+selected segment of drive end fault data in the CWRU rolling 
+
+bearing datase t
+
+For stationary signals, Fourier transform (FT) is an 
+
+important method of analysis and processing. However, for 
+
+the non -stationary signals widely existing in nature, 
+
+Fourier transform can only obtain the global spectrum 
+
+information, while the frequency change information is 
+
+lost in local time, so it can not accurately characterize the 
+
+characteristics of non -stationary signals. The Fourier 
+
+transform of continuous time signal is defined as follows: ( ) ( ) j t
+
+# F f t e dt 
+
+> 
+
+#  
+
+> −−
+
+# = 
+
+(1)
+
+Where, ( )F
+
+#  is the frequency domain representation, 
+
+is the angular frequency. 
+
+STFT of continuous time signal is defined as follows: { ( )}( , ) ( ) ( ) j
+
+# STFT f t f t e d
+
+> 
+
+#      
+
+> −−
+
+# = −
+
+(2)
+
+Where: ( ) f t  is the one -dimensional time domain 
+
+signal to be analyzed; ( ) t
+
+#  is a window function 
+
+used to limit the time range of analysis; t is a time 
+
+variable, indicating the center position of the window 
+
+function;  is the angular frequency, indicating the 
+
+frequency component of the signal. When the central LISTA -Transformer Model Based on Sparse Coding and Attention Mechanism and Its Application in Fault Diagnosis 
+
+time t is selected, the window functi on is ( )h t
+
+# − ,
+
+and the short -time Fourier transform acts on the 
+
+window function. 
+
+(2) CWT   
+
+> Figure 4 CWT time -frequency plot of a randomly
+> selected segment of drive end fault data in the CWRU rolling
+> bearing dataset
+
+Continuous wavelet transform (CWT) inherits and 
+
+develops the idea of local segmentation adopted by short -
+
+time Fourier for non -stationary signal processing. At the 
+
+same time, it overcomes the shortcoming of fixed width of 
+
+short -time Fourier window function, and provides a time 
+
+window that changes with frequency for signal time -
+
+frequency transformation. The continuous wavelet 
+
+transform of a signal is defined as the convolution integral 
+
+of a signal ( ) f t  and a wavelet function ( ) t
+
+#  :*1( , ) ( ) ( )| |
+
+> f
+
+# t bCWT a b f t dt aa
+
+# 
+
+> −
+
+# −= 
+
+(3)
+
+Where, a is the scale parameter, which controls the 
+
+broadening or compression of the wavelet function in time 
+
+and frequency, and the larger a represents the lower 
+
+frequency (corresponding to the lower time resolution); b
+
+is the displacement parameter, indica ting the position 
+
+of wavelet along the time axis. ( ) t
+
+#  is the mother 
+
+wavelet, *
+
+#  is the complex conjugate of wavelet function. 1/ | |a
+
+is a normalization factor introduced to keep the 
+
+energy constant. 
+
+(3)Wigner -Ville   
+
+> Figure 5 Wigner -Ville time -frequency plot of a
+> randomly selected segment of drive end fault data in
+> the CWRU rolling bearing dataset
+
+The American physicist Eugene Wigner first proposed 
+
+the concept of Wigner Ville distribution (WVD) in 1932. 
+
+Later, Ville applied this distribut ion to the field of signal 
+
+processing in 1948. The expression of the instantaneous 
+
+autocorrelation function of the signal is as follows: *
+
+# ( , ) ( ) ( )2 2
+
+> s
+
+# r t s t s t
+
+#  = + −
+
+(4) 
+
+The definition of WVD is as follows: *
+
+# ( , ) ( ) ( )2 2
+
+> j
+
+# WVD t s t s t e d
+
+> 
+
+#   
+
+> −−
+
+# = + −
+
+(5) 
+
+The Wigner Ville distribution of signal has high time 
+
+resolution and frequency resolution, and has good time -
+
+frequency aggregation, which overcomes the shortcomings 
+
+of STFT and is suitable for analyzing unstable random 
+
+signals. 
+
+(4) HHT The 3rd Future Industrial Internet Symposium 
+
+Figure 6 HHT time -frequency plot of a randomly 
+
+selected segment of drive end fault data in the CWRU 
+
+rolling bearing dataset 
+
+For the signal ( ) s t  to be analyzed, all local maximum 
+
+and minimum points are determined first. Then, these 
+
+maximum points and minimum points are fitted 
+
+respectively to generate the corresponding maximum 
+
+envelope and minimum envelope, and the average value of 
+
+the two envelope is calculated. max min 1
+
+# ( ) ( ) 2
+
+# e t e tm +=
+
+(6) 1 1( ) ( ) y t s t m= −
+
+(7) 
+
+The signal satisfying the intrinsic mode function 
+
+condition is the first intrinsic mode function component of 
+
+the original signal, which is marked as 1 1( ) ( ) y t c t=
+
+satisfying the condition, then 1 ( ) c t is the first intrinsic 
+
+mode function component of the signal ( ) s t  .1
+
+## ( ) ( ) ( )  
+
+> nini
+
+## s t c t c t
+
+> =
+
+## = −
+
+(8) 
+
+Perform Hilbert transform on the natural mode function 
+
+components of each order: 1 ( ) [ ( )] sH c t PV dt
+
+#  
+
+> −
+
+# = −
+
+(9) ( ) [arctan( )] ( ) ( ) 
+
+# s t d s t t dt 
+
+# =
+
+(10) 
+
+The original signal can be represented as: ( ) ( ) 1 1
+
+## ( ) Re( ( ) ) Re( ( ) )      
+
+> ii
+> nnjt dt jtiiii
+
+## s t a t e a t e  
+
+> ==
+
+## = = 
+
+(11) 
+
+After unfolding, it becomes the Hilbert spectrum, which 
+
+can be written as: ( ) 1
+
+## ( , ) Re( ( ) )i  
+
+> njt dt ii
+
+## H t a t e 
+
+> 
+
+# 
+
+> =
+
+## = 
+
+(12) 
+
+Hilbert spectrum is a joint spectrum with complete time, 
+
+frequency, and energy, in which the frequency changes in 
+
+different time periods and the energy changes with time 
+
+and frequency can be observed simultaneously. 
+
+2.2 LISTA 
+
+A basic linear inverse problem: dX W Z w= +
+
+(13) 
+
+where, m
+
+X R is the measurement value, m n dW R 
+
+
+
+is the measurement matrix and is unknown, w is the 
+
+unknown noise, and Z is the s parse signal that needs to 
+
+be reconstructed. 
+
+The classic method for solving equation ( 13 ) is the least 
+
+squares (LS) method: 22arg min || || LS dZ
+
+# Z W Z X= −
+
+(14) 
+
+The LASSO problem can be expressed as: 22 1arg min || || || || dZ
+
+# Z W Z X Z
+
+# = − +
+
+(15) 
+
+where, 0
+
+#  is regularization parameters. 
+
+The ISTA algorithm updates Z through a soft threshold 
+
+operation in each iteration, and its specific iteration format 
+
+is as follows: LISTA -Transformer Model Based on Sparse Coding and Attention Mechanism and Its Application in Fault Diagnosis /
+
+# 1( 1) ( ( ) ( ( ) )) TL d dZ k h Z k W W Z k XL
+
+> 
+
+# + = − −
+
+(16) 
+
+After expanding and merging similar items, the 
+
+following result is obtained: ( 1) ( ( )) (0) 0eZ k h W X SZ k Z
+
+> 
+
+# + = + =
+
+(17) 
+
+where, Filter matrix: 1 Te dW WL
+
+# = ,
+
+Mutual inhibition matrix: 1 Td dS I W W L
+
+# = − ,
+
+Soft threshold shrinkage function: [ ( )] ( )(| | )i i i ih V sign V V
+
+> 
+
+# 
+
+> +
+
+# = −
+
+The bloc k diagram of ISTA method is as follows:  
+
+> Figure 7 Block diagram of the ISTA algorithm for
+> sparse coding
+
+LISTA is typically implemented as a recurrent neural 
+
+network (RNN) with a single hidden layer. The network 
+
+takes the current estimate and measurement matrix of 
+
+sparse signals as inputs and outputs the next estimate. It 
+
+learns all the sums in the process and then uses these 
+
+parameters to solve sparse encoding. As it is a learning 
+
+algorithm, it naturally involves the processes of forward 
+
+reaso ning and backpropagation. The architecture of the 
+
+encoder will be represented as, where represents all 
+
+trainable parameters in the encoder. The training encoder 
+
+uses stochastic gradient descent to minimize the loss 
+
+function. The definition of the loss func tion is: ( 1) 0* 2
+
+# 1( ) ( , )1( , ) ( , )2  
+
+> PPpPPPe
+
+# L W L W X with PL W X Z f W X 
+
+> −=
+
+# == −
+
+# 
+
+（18 ）   
+
+> Figure 8Block diagram of the LISTA algorithm for
+> sparse coding
+
+2.3 Vision Transformer    
+
+> Figure 9Model overview of ViT
+
+Patch Embedding As one of the core steps of Vit, this 
+
+process realizes the transformation of image from two -
+
+dimensional representation to one -dimensional sequence 
+
+representation. The operation of embedding image blocks 
+
+is essentially the process of mapping each image block to a 
+
+vector representation, so as to complete the above k ey 
+
+serialization conversion. Each image block is embedded 
+
+through a linear layer, which maps it from the pixel space 
+
+to a higher dimensional feature space. This embedding 
+
+process not only provides rich feature representation for the 
+
+model, but also retains the spatial structure information of 
+
+each image block. 1 20 [ ; ; ; ; ]Nclass p p p pos z x x E x E x E E= +L
+
+(19) 
+
+Where ,H W C
+
+# x R  
+
+#  is the original image, 2   
+
+> ()NPCp
+
+## x R  
+
+## 
+
+is a 2D image block sequence , (,H W  )is The 3rd Future Industrial Internet Symposium 
+
+the resolution of the original image, C is the number of 
+
+channels of the original image , P i s the size of the image 
+
+block .
+
+Transformer Enco der 
+
+[𝑞 , 𝑘 , 𝑣 ] = 𝑧 𝑈 𝑞𝑘𝑣  𝑈 𝑞𝑘𝑣  ∈ ℝ𝐷 ×3𝐷 ℎ
+
+𝐴 = 𝑠𝑜𝑓𝑡 𝑚𝑎𝑥 ( 𝑞 𝑘 𝑇 /√𝑑 𝑘 ) 𝐴  ∈ ℝ𝑁 ×𝑁 
+
+𝑆𝐴 (𝑧 ) = 𝐴𝑣 
+
+𝑀𝑆𝐴 (𝑧 ) = [𝑆 𝐴 1(𝑧 ); 𝑆 𝐴 2(𝑧 ); ⋯ ; 𝑆 𝐴 𝑘 (𝑧 )]𝑈 𝑚𝑠𝑎 
+
+𝑈 𝑚𝑠𝑎  ∈ ℝ𝑘 ⋅𝐷 ℎ×𝐷 
+
+𝑧 𝑙  
+
+> ′
+
+= 𝑀𝑆𝐴 (𝐿𝑁 (𝑧 𝑙 −1)) + 𝑧 𝑙 −1
+
+𝑧 𝑙 = 𝑀𝐿𝑃 (𝐿 𝑁 (𝑧 𝑙  
+
+> ′
+
+)) + 𝑧 𝑙 
+
+> ′
+
+(20) 
+
+where , ,q k v  is the query vector with dimension kd ,
+
+the key vector and a dimension is the vd value vector .
+
+These three vectors are created by multiplying the word 
+
+embedding and the weight matrix qkv U . The multi head 
+
+attention function combines the outputs of k attention 
+
+mechanisms and multiplies them with the projection matrix msa U
+
+to obtain the output of the multi head attention 
+
+mechanism. 
+
+# 3. Sparse Transformer Based on LISTA 
+
+Local features and global representation in computer 
+
+vision and machine learning are two complementary 
+
+methods for understanding and processing images or data. 
+
+Local features focus on feature extraction of information 
+
+contained in small regions or patches in the image; On the 
+
+other hand, the global representation aims to capture the 
+
+overall structure and content of the image. In many 
+
+applications, it is beneficial to combine local features with 
+
+global representation to take advantage of these two 
+
+methods. F or example, in object recognition tasks, local 
+
+features can help identify specific attributes of objects, 
+
+while global representation provides context and overall 
+
+scene understanding. Deep learning models, especially 
+
+those using convolution layer and full connection layer, are 
+
+particularly good at this combination because they can 
+
+capture local patterns and integrate them into a
+
+comprehensive global representation. This synergy allows 
+
+a more robust and accurate model that can handle changes 
+
+in scale, direct ion, and partial occlusion while still 
+
+understanding the broad background of the image. 
+
+The deep integration of LISTA and Vit aims to combine 
+
+their advantages to improve the performance of image 
+
+processing tasks. Lista focuses on sparse signal recovery 
+
+and local feature extraction, while vit performs well in 
+
+capturing the global dependencies of images. The 
+
+combination of these two methods can give full play to 
+
+their respective advantages, so as to improve the local and 
+
+global characteristics of the model. I n LISTA transformer, 
+
+we feed the global context of transformer block into LISTA 
+
+to enhance the global awareness of LISTA branches. 
+
+Similarly, the local features of the LISTA block are 
+
+gradually input into the transformer block to enrich the 
+
+local details o f the transformer branch. Such a process 
+
+constitutes interaction. 
+
+Lista is sparse in nature. By using the iterative threshold 
+
+shrinkage method, in the learning process of LISTA , the 
+
+model can automatically select some important features or 
+
+connections acco rding to the threshold, and make the 
+
+weight of unimportant features or connections zero or very 
+
+small, so that the model can automatically select important 
+
+features or connections in the learning process, and will be 
+
+or close to zero. Adding LISTA to the b ack of the self 
+
+attention mechanism block will sparse constrain and 
+
+optimize the attention weights generated by the self 
+
+attention mechanism, and only the attention weights 
+
+between key positions will be retained, making the 
+
+attention weight matrix sparse. 
+
+Although the self attention mechanism can capture the 
+
+global dependencies in the sequence, its attention weight 
+
+matrix may be dense. However, LISTA can filter and 
+
+sparse the weight matrix, so that each step of the model 
+
+only focuses on a small amount of im portant information, 
+
+so the model can focus more on the main part during 
+
+feature extraction and information transmission, increasing 
+
+the sparsity of the model; On the other hand, because the 
+
+sparsity of the model is improved, the operation of the 
+
+model is more concise, which will also save part of the 
+
+calculation. LISTA -Transformer Model Based on Sparse Coding and Attention Mechanism and Its Application in Fault Diagnosis 
+
+Lista has a clear mathematical theoretical basis. And i ts 
+
+core idea is to solve the sparse coding problem through 
+
+iterative optimization. Each iteration is the product of the 
+
+weight matrix and the input data, and then the nonlinear 
+
+threshold contraction function is applied. These operations 
+
+have a clear definition and explanation in mathematics. For 
+
+example, the weight matrix can be regarded as the basis 
+
+vector in dictionary learning, and the threshold shrinkag e
+
+function realizes the sparse processing of features. When 
+
+LISTA is integrated into the DeiT model, its mathematical 
+
+principle is still applicable, which makes the whole model 
+
+training and reasoning process have a clearer mathematical 
+
+explanation. This co mbination can be seen mathematically 
+
+as the constraint optimization of the original self attention 
+
+mechanism. By sparsely constraining the weights, the 
+
+model can more effectively focus on the key information, 
+
+reduce unnecessary calculation and interference , and make 
+
+the distribution of attention weights more reasonable and 
+
+interpretable. 
+
+Specifically, LISTA transformer is composed of 
+
+backbone module, two branches, weighted average 
+
+connecting two branches, and classifier. Lista module, a 7 -
+
+layer iterative la yer, extracts the initial local features (such 
+
+as edge and texture information), and then provides the 
+
+features to two branches. The overall architecture is 
+
+composed of LISTA branch and transformer branch, as 
+
+shown in Figure 10 . This parallel structure rep resents that 
+
+the two branches can retain local features and global 
+
+representation to the greatest extent. 
+
+In the training process, the cross entropy loss function is 
+
+used to supervise the classifier. 
+
+Transformer branch: this branch cascades N transformer 
+
+blocks after image block embedding and position 
+
+embedding. 
+
+Given the input, the forward process of the 1st block in 
+
+the 
+
+transformer branch can be expressed as equations (2 0). 
+
+LISTA branch: this branch cascades N LISTA 
+
+transformer blocks after image block em bedding and 
+
+position embedding (one LISTA block is deeply fused after 
+
+each transformer block). 
+
+The forward process of a LISTA block can be expressed 
+
+as: '
+
+> '1
+
+# ( )( )  
+
+> lllel
+
+# z LISTA z h W z Sz 
+
+> −
+
+# == +
+
+(21) 
+
+MLP blocks can be represented as: '1 ( )l l lz MLP z z
+
+#   
+
+> +
+
+# = +
+
+(22)     
+
+> Figure 10 Model architectur e: add LISTA blocks to the network framework after each Transformer Block
+> Fig ure 11 Structure of model based on time -frequency diagram and LISTA -Transformer
+
+The 3rd Future Industrial Internet Symposium 
+
+As shown in Figure 11 , the overall architecture of rolling 
+
+bearing fault diagnosis model based on time -frequency 
+
+diagram and LISTA transformer includes data 
+
+preprocessing, LISTA transformer architecture and 
+
+classifier. The specific steps are as follows: firstly, the 
+
+vibration signal is transformed from one -dimensional 
+
+time -series data to two -dimensional time -frequency image 
+
+using continuous wavelet transform method; Secondly, the 
+
+obtained time -frequency map is flattened through the 
+
+linear layer and combined with the position coding, and 
+
+then input into the LISTA transformer model architecture. 
+
+In this process, the transformer's multi head attention 
+
+mechanism plays a major role. It can capture the feature 
+
+vector of more comprehensive fault diagnosis information, 
+
+and extract the local features of fault diagnosis through the 
+
+local focus ability of LISTA iteration; Finally, the training 
+
+results are output through multi -layer perceptron and 
+
+classification layer. 
+
+# 4. Experiment 
+
+4.1 Experimental Setup     
+
+> Figure 12 Bearing Fault Experimental Platform
+> Figure 13 Bearing structure
+
+The test platform [ 14] is shown in Figure 12 . The 
+
+CWRU bearing test platform consists of a 1.5KW (2 
+
+horsepower) motor (left side of the figure); A torque 
+
+sensor/decoder (at the middle connection in the figure); A 
+
+power tester (right side of the figure); Electronic controller 
+
+(not shown). The bearing structure to be tested is shown in 
+
+Figure 13 .
+
+The damage points of the outer ring of the bearing at 
+
+the drive end and the fan end were placed at three different 
+
+positions at 3 o'clock, 6 o'clock and 12 o'clock respectively. 
+
+It is obtained by collecting vibration signals with 16 
+
+channel data recorder. By placing the accelerometer on the 
+
+drive end of the motor housing, the fan end and the base 
+
+(normal data), the vibration data of three different positions 
+
+can be obtained. The difference of these data is that the 
+
+physical phenomena and characteristics ref lected by the 
+
+measured vibration signals are different, which provides 
+
+different data for fault diagnosis and monitoring. The 
+
+power and speed are measured by the torque 
+
+sensor/decoder. Under the load conditions of 0, 1, 2 and 3 
+
+horsepower motors, the machi ned fault bearings were 
+
+reinstalled into the test motor, and the vibration 
+
+acceleration signal data were recorded in the experiment. 
+
+Data set the bearing data set of Western Reserve 
+
+University provides the experimental data under different 
+
+working conditio ns, including different speed, load and 
+
+other parameters. Each failure mode has multiple samples 
+
+under different working conditions. In this chapter, the 
+
+accelerometer data of the drive end of the 0.007 inch inner 
+
+ring fault bearing under normal working co nditions and 0 
+
+horsepower load are selected as the real data samples for 
+
+the test. 
+
+4.2 Data Preprocessing 
+
+The data set was divided into training set (70%), 
+
+validation set (20%) and test set (10%). During each 
+
+training and testing, the data set is divided rando mly. 
+
+The continuous wavelet transform is used to obtain the 
+
+two -dimensional time -frequency diagram. After 
+
+processing, the time -frequency diagram of the signals of LISTA -Transformer Model Based on Sparse Coding and Attention Mechanism and Its Application in Fault Diagnosis 
+
+rolling element fault (b), inner ring fault (IR), outer ring 
+
+fault (or) and normal under the load condition of 0
+
+horsepower is shown in Figure 14 .
+
+In the fault diagnosis model based on visual 
+
+transformer (V iT), the configuration parameters of 
+
+network architecture directly affect the training efficiency 
+
+and classification performance of the model. By exploring 
+
+the quantitative impact of key structural parameters on the 
+
+performance of the model, this chapter determines the 
+
+optimal combination of parameters:  
+
+> Figure 14 Signal time -frequency diagrams of rolling
+> element fault (B), inner ring fault (I R), outer ring fault (OR),
+> and normal under load condition of 0 horsepower
+
+(1) the trade -off between input resolution and 
+
+computational efficiency. Improving the size of the input 
+
+time -frequency map can retain more details in theory, but 
+
+in the test, it i s found that the training time is significantly 
+
+increased after the resolution exceeds 32 × 32, while the 
+
+classification accuracy is only improved by less than 0.5%. 
+
+Therefore, 32 × 32 is selected as the optimal parameter to 
+
+balance computing resources and diagnostic accuracy. (2) 
+
+During the parameter configuration of embedded 
+
+dimension and hidden dimension, it is found that when the 
+
+embedded dimension is set to 64 and the hidden dimension 
+
+is set to 128, the accuracy of the test set is the highest and 
+
+the t raining time is moderate. (3) When the parameters of 
+
+transformer coding layer are increased from 2 layers to 6 
+
+layers, the accuracy of verification set shows a trend of first 
+
+increasing and then decreasing. Although the deep network 
+
+can extract more comple x fault features, the over fitting 
+
+phenomenon intensifies after more than four layers. Finally, 
+
+two -layer structure is selected to balance the model 
+
+complexity and generalization performance. (4) Compared 
+
+with other parameters, the number of attention head s has 
+
+less effect on the experiment, and the number of attention 
+
+heads is set to 2. 
+
+4.3 Result Analysis 
+
+In order to evaluate the performance of the proposed 
+
+model, we conducted detailed experiments on the CWRU 
+
+dataset. The experimental results show that the pr oposed 
+
+fault diagnosis model based on time -frequency map and 
+
+lista transformer achieves significant fault diagnosis 
+
+accuracy on the CWRU data set. Compared with the 
+
+traditional methods based on CNN and SVM and 
+
+Transformer -based fault diagnosis methods , this model has 
+
+obvious advantages in diagnosis accuracy and diagnosis 
+
+time. 
+
+Table 1 shows the fault diagnosis accuracy of 
+
+different models on the CWRU dataset. It can be seen 
+
+from the table that the accuracy of the proposed model 
+
+based on time -frequency map and lista transformer on 
+
+the test set is 98.5%, which is significantly hig her than 
+
+the traditional methods based on CNN and SVM. 
+
+Transformer -based techniques consistently outperform 
+
+conventional models, with the lowest -performing 
+
+transformer (97.8%) exceeding the best traditional 
+
+method. This validates the effectiveness of atten tion 
+
+mechanisms in capturing complex temporal patterns in 
+
+vibration signals. Also, our model's 0.7% improvement 
+
+over the baseline transformer indicates that the proposed The 3rd Future Industrial Internet Symposium 
+
+LISTA mechanism effectively strengthens temporal 
+
+feature extraction. 
+
+# 5. Conclusion and Future Work 
+
+In this paper, the sparse transformer based on the 
+
+learnable iterative threshold shrinkage algorithm is applied 
+
+to the rolling bearing fault diagnosis, and a rolling bearing 
+
+fault diagnosis model based on time -freque ncy map and 
+
+LISTA -Transformer is proposed. By combining the 
+
+advantages of time -frequency analysis and deep learning, 
+
+the characteristic information in the rolling bearing 
+
+vibration signal can be effectively extracted, and the cross 
+
+modal diagnosis framewor k is further constructed to 
+
+improve the performance of fault diagnosis.               
+
+> Table 1The accuracy of fault diagnosis using different methods on the CWRU dataset
+> Method Accuracy （%）
+> Traditional
+> Diagnostic
+> Methods
+> SVM 95.2
+> CNN 96.8
+> LSTM 97.2
+> Spark -RFA [15] 96.51
+> Spark -IRFA [15] 97.22
+> Transformer -
+> based Fault
+> Diagnosis
+> Methods
+> 1D -ViT -1Depth [16] 98.07
+> Swin Transformer -GAMCNN 97.54
+> Swin Transformer -ResNet 98.45
+> SSA -SL Transformer [17 ]95.54
+> Transformer 97.8
+> LISTA -Transformer （ours ）98.5
+
+LISTA -Transformer Model Based on Sparse Coding and Attention Mechanism and Its Application in Fault Diagnosis   
+
+> Acknowledgements This work is supported by the National Natural
+> Science Foundation of China (Research on general time series data
+> generation method for industrial Internet, Project No. 92367111).
+
+# References 
+
+[1] Li S, Li Q, Li K, et al. Intelligent Rolling Bearing Fault 
+
+Diagnosis Based on Vibration Signal Transformer Neural 
+
+Network[C]. Department of Automation, China University 
+
+of Petroleum Beijing, 2024. 
+
+[2] Den gsheng Zhang. Fundamentals of image data mining: 
+
+Analysis, Features, Classification and Retrieval[M]. 
+
+Springer Publishing Company, Incorporated, 2019. 
+
+[3] Rilling G, Flandrin P, Goncalves P. On empirical mode 
+
+decomposition and its algorithms[C]. IEEE -EURASIP 
+
+workshop on nonlinear signal and image processing. Grado: 
+
+IEEE, 2003, 3(3): 8 -11. 
+
+[4] Choi S, Cichocki A, Park H M, et al. Blind source 
+
+separation and independent component analysis: A
+
+review[J]. Neural Information Processing -Letters and 
+
+Reviews, 2005, 6(1): 1 -57. 
+
+[5] Suthaharan S. Machine learning models and algorithms for 
+
+big data classification: thinking with examples for effective 
+
+learning[M]. Springer Publishing Company, Incorporated, 
+
+2016. 
+
+[6] Rigatti S J. Random forest[J]. Journal of Insurance 
+
+Medicine, 2017, 47( 1): 31 -39. 
+
+[7] Abbasion S, Rafsanjani A, Farshidianfar A, et al. Rolling 
+
+element bearings multi -fault classification based on the 
+
+wavelet denoising and support vector machine[J]. 
+
+Mechanical systems and signal processing, 2007, 21(7): 
+
+2933 -2945. 
+
+[8] Yin Z, Hou J. R ecent advances on SVM based fault 
+
+diagnosis and process monitoring in complicated industrial 
+
+processes[J]. Neurocomputing, 2016, 174: 643 -650. 
+
+[9] Widodo A, Yang B S. Support vector machine in machine 
+
+condition monitoring and fault diagnosis[J]. Mechanical 
+
+sys tems and signal processing, 2007, 21(6): 2560 -2574. 
+
+[10] Huang T, Zhang Q, Tang X, et al. A novel fault diagnosis 
+
+method based on CNN and LSTM and its application in 
+
+fault diagnosis for complex systems[J]. Artificial 
+
+Intelligence Review, 2022, 55(2): 1289 -1315. 
+
+[11] Chen X, Zhang B, Gao D. Bearing fault diagnosis base on 
+
+multi -scale CNN and LSTM model[J]. Journal of 
+
+Intelligent Manufacturing, 2021, 32(4): 971 -987. 
+
+[12] Gu J, Peng Y, Lu H, et al. A novel fault diagnosis method 
+
+of rotating machinery via VMD, CWT and improve d
+
+CNN[J]. Measurement, 2022, 200: 111635. 
+
+[13] Wen L, Li X, Gao L, et al. A new convolutional neural 
+
+network -based data -driven fault diagnosis method[J]. 
+
+IEEE Transactions on Industrial Electronics, 2017, 65(7): 
+
+5990 -5998. 
+
+[14] Smith W A, Randall R B. Rolling eleme nt bearing 
+
+diagnostics using the Case Western Reserve University 
+
+data: A benchmark study[J]. Mechanical systems and 
+
+signal processing, 2015, 64: 100 -131. 
+
+[15] Wan L, Gong K, Zhang G, et al. An efficient rolling bearing 
+
+fault diagnosis method based on spark and improved 
+
+random forest algorithm[J]. IEEE Access, 2021, 9: 37866 -
+
+37882. 
+
+[16] Xu P, Zhang L. A fault diagnosis method for rolling 
+
+bearing based on 1D -ViT model[J]. IEEE Access, 2023, 11: 
+
+39664 -39674. 
+
+[17] Lee S, Jeong J. SSA -SL Transfor mer for Bearing Fault 
+
+Diagnosis under Noisy Factory Environments. Electronics. 
+
+2022; 11(9):1504 
+
+# About the authors 
+
+Shuang Liu received h er master's degree from 
+
+Beijing University of chemical technology. Her 
+
+research focuses on deep learning, sparse low 
+
+rank model and bearing fault diagnosis. 
+
+Lina Zhao received the Ph.D. degree 
+
+in applied mathematics from the 
+
+Chinese Academy of Sciences, 
+
+Be ijing, China, in 2004. She is 
+
+currently a Professor with the 
+
+Beijing University of Chemical 
+
+Technology, Beijing, China. Her 
+
+research interests include 
+
+computational and applied 
+
+mathematics, which includes 
+
+geometric problems in computer 
+
+vision, image proce ssing, and 
+
+information mining from 3 -D Big Journal of Communications and Information Networks

@@ -1,0 +1,679 @@
+{
+  "mode": "skims",
+  "generated_at": "2026-03-11T08:05:44.526962+00:00",
+  "stats": {
+    "mode": "skims",
+    "forced_all_quick": true,
+    "min_score": 8.0,
+    "deep_divecandidates": 18,
+    "deep_cap": null,
+    "deep_selected": 0,
+    "quick_candidates": 18,
+    "quick_skim_target": null,
+    "quick_selected": 18
+  },
+  "deep_dive": [],
+  "quick_skim": [
+    {
+      "id": "2602.19263v1",
+      "title": "Prognostics of Multisensor Systems with Unknown and Unlabeled Failure Modes via Bayesian Nonparametric Process Mixtures",
+      "abstract": "Modern manufacturing systems often experience multiple and unpredictable failure behaviors, yet most existing prognostic models assume a fixed, known set of failure modes with labeled historical data. This assumption limits the use of digital twins for predictive maintenance, especially in high-mix or adaptive production environments, where new failure modes may emerge, and the failure mode labels may be unavailable.   To address these challenges, we propose a novel Bayesian nonparametric framework that unifies a Dirichlet process mixture module for unsupervised failure mode discovery with a neural network-based prognostic module. The key innovation lies in an iterative feedback mechanism to jointly learn two modules. These modules iteratively update one another to dynamically infer, expand, or merge failure modes as new data arrive while providing high prognostic accuracy.   Experiments on both simulation and aircraft engine datasets show that the proposed approach performs competitively with or significantly better than existing approaches. It also exhibits robust online adaptation capabilities, making it well-suited for digital-twin-based system health management in complex manufacturing environments.",
+      "authors": [
+        "Kani Fu",
+        "Sanduni S Disanayaka Mudiyanselage",
+        "Chunli Dai",
+        "Minhee Kim"
+      ],
+      "primary_category": "stat.AP",
+      "categories": [
+        "stat.AP",
+        "cs.LG"
+      ],
+      "published": "2026-02-22T16:26:51+00:00",
+      "link": "https://arxiv.org/pdf/2602.19263v1",
+      "tags": [
+        "keyword:RUL DT",
+        "query:RUL DT"
+      ],
+      "llm_score": 10.0,
+      "llm_evidence_en": "Prognostics for multisensor systems using digital twins for predictive maintenance",
+      "llm_evidence_cn": "利用数字孪生进行多传感器系统的预测性维护预后",
+      "llm_evidence": "利用数字孪生进行多传感器系统的预测性维护预后",
+      "canonical_evidence": "利用数字孪生进行多传感器系统的预测性维护预后",
+      "llm_tldr_en": "A Bayesian framework for unsupervised failure mode discovery and neural-based prognostics in digital twins.",
+      "llm_tldr_cn": "一种用于数字孪生中无监督故障模式发现和神经预后的贝叶斯框架。",
+      "llm_tldr": "一种用于数字孪生中无监督故障模式发现和神经预后的贝叶斯框架。",
+      "llm_tags": [
+        "query:rul-dt:composite"
+      ],
+      "matched_query_tag": "query:rul-dt:composite",
+      "matched_query_text": "Papers central to 旋转设备数字孪生、故障诊断与剩余寿命预测研究, especially work that connects or combines: prognostics and health management; remaining useful life; digital twin based life prediction and health management; digital twin framework for rotating machinery remaining useful life prediction; integrated approach for fault diagnosis and RUL estimation; hybrid modeling for digital twin based life prediction; multi task learning for equipment diagnosis and prognosis; real time health assessment of rotating equipment using digital twins.",
+      "matched_requirement_id": "req-composite-rul-dt",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.00745v1",
+      "title": "Bi-cLSTM: Residual-Corrected Bidirectional LSTM for Aero-Engine RUL Estimation",
+      "abstract": "Accurate Remaining Useful Life (RUL) prediction is a key requirement for effective Prognostics and Health Management (PHM) in safety-critical systems such as aero-engines. Existing deep learning approaches, particularly LSTM-based models, often struggle to generalize across varying operating conditions and are sensitive to noise in multivariate sensor data. To address these challenges, we propose a novel Bidirectional Residual Corrected LSTM (Bi-cLSTM) model for robust RUL estimation. The proposed architecture combines bidirectional temporal modeling with an adaptive residual correction mechanism to iteratively refine sequence representations. In addition, we introduce a condition-aware preprocessing pipeline incorporating regime-based normalization, feature selection, and exponential smoothing to improve robustness under complex operating environments. Extensive experiments on all four subsets of the NASA C-MAPSS dataset demonstrate that the proposed Bi-cLSTM consistently outperforms LSTM-based baselines and achieves competitive state-of-the-art performance, particularly in challenging multi-condition scenarios. These results highlight the effectiveness of combining bidirectional temporal learning with residual correction for reliable RUL prediction.",
+      "authors": [
+        "Rafi Hassan Chowdhury",
+        "Nabil Daiyan",
+        "Faria Ahmed",
+        "Md Redwan Iqbal",
+        "Morsalin Sheikh"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-02-28T17:44:06+00:00",
+      "link": "https://arxiv.org/pdf/2603.00745v1",
+      "tags": [
+        "keyword:RUL DT",
+        "query:RUL DT"
+      ],
+      "llm_score": 10.0,
+      "llm_evidence_en": "aero-engine RUL estimation and PHM",
+      "llm_evidence_cn": "航空发动机剩余寿命预测与健康管理",
+      "llm_evidence": "航空发动机剩余寿命预测与健康管理",
+      "canonical_evidence": "航空发动机剩余寿命预测与健康管理",
+      "llm_tldr_en": "Proposes Bi-cLSTM for robust aero-engine RUL estimation using residual correction and temporal modeling.",
+      "llm_tldr_cn": "提出Bi-cLSTM模型，通过残差修正和双向时间建模实现鲁棒的发动机寿命预测。",
+      "llm_tldr": "提出Bi-cLSTM模型，通过残差修正和双向时间建模实现鲁棒的发动机寿命预测。",
+      "llm_tags": [
+        "query:rul-dt"
+      ],
+      "matched_query_tag": "query:rul-dt",
+      "matched_query_text": "remaining useful life",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.07054v1",
+      "title": "Bi-directional digital twin prototype anchoring with multi-periodicity learning for few-shot fault diagnosis",
+      "abstract": "Intelligent fault diagnosis (IFD) has emerged as a powerful paradigm for ensuring the safety and reliability of industrial machinery. However, traditional IFD methods rely heavily on abundant labeled data for training, which is often difficult to obtain in practical industrial environments. Constructing a digital twin (DT) of the physical asset to obtain simulation data has therefore become a promising alternative. Nevertheless, existing DT-assisted diagnosis methods mainly transfer diagnostic knowledge through domain adaptation techniques, which still require a considerable amount of unlabeled data from the target asset. To address the challenges in few-shot scenarios where only extremely limited samples are available, a bi-directional DT prototype anchoring method with multi-periodicity learning is proposed. Specifically, a framework involving meta-training in the DT virtual space and test-time adaptation in the physical space is constructed for reliable few-shot model adaptation for the target asset. A bi-directional twin-domain prototype anchoring strategy with covariance-guided augmentation for adaptation is further developed to improve the robustness of prototype estimation. In addition, a multi-periodicity feature learning module is designed to capture the intrinsic periodic characteristics within current signals. A DT of an asynchronous motor is built based on finite element method, and experiments are conducted under multiple few-shot settings and three working conditions. Comparative and ablation studies demonstrate the superiority and effectiveness of the proposed method for few-shot fault diagnosis.",
+      "authors": [
+        "Pengcheng Xia",
+        "Zhichao Dong",
+        "Yixiang Huang",
+        "Chengjin Qin",
+        "Qun Chao",
+        "Chengliang Liu"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "eess.SP"
+      ],
+      "published": "2026-03-07T06:20:45+00:00",
+      "link": "https://arxiv.org/pdf/2603.07054v1",
+      "tags": [
+        "query:RUL DT"
+      ],
+      "llm_score": 10.0,
+      "llm_evidence_en": "digital twin prototype anchoring for few-shot fault diagnosis of industrial machinery",
+      "llm_evidence_cn": "用于工业机械小样本故障诊断的数字孪生原型锚定",
+      "llm_evidence": "用于工业机械小样本故障诊断的数字孪生原型锚定",
+      "canonical_evidence": "用于工业机械小样本故障诊断的数字孪生原型锚定",
+      "llm_tldr_en": "Proposes a bi-directional digital twin framework for intelligent fault diagnosis in data-scarce industrial settings.",
+      "llm_tldr_cn": "提出一种双向数字孪生框架，用于数据匮乏工业环境下的智能故障诊断。",
+      "llm_tldr": "提出一种双向数字孪生框架，用于数据匮乏工业环境下的智能故障诊断。",
+      "llm_tags": [
+        "query:rul-dt:composite"
+      ],
+      "matched_query_tag": "query:rul-dt:composite",
+      "matched_query_text": "Papers central to 旋转设备数字孪生、故障诊断与剩余寿命预测研究, especially work that connects or combines: prognostics and health management; remaining useful life; digital twin based life prediction and health management; digital twin framework for rotating machinery remaining useful life prediction; integrated approach for fault diagnosis and RUL estimation; hybrid modeling for digital twin based life prediction; multi task learning for equipment diagnosis and prognosis; real time health assessment of rotating equipment using digital twins.",
+      "matched_requirement_id": "req-composite-rul-dt",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2602.16101v1",
+      "title": "Axle Sensor Fusion for Online Continual Wheel Fault Detection in Wayside Railway Monitoring",
+      "abstract": "Reliable and cost-effective maintenance is essential for railway safety, particularly at the wheel-rail interface, which is prone to wear and failure. Predictive maintenance frameworks increasingly leverage sensor-generated time-series data, yet traditional methods require manual feature engineering, and deep learning models often degrade in online settings with evolving operational patterns. This work presents a semantic-aware, label-efficient continual learning framework for railway fault diagnostics. Accelerometer signals are encoded via a Variational AutoEncoder into latent representations capturing the normal operational structure in a fully unsupervised manner. Importantly, semantic metadata, including axle counts, wheel indexes, and strain-based deformations, is extracted via AI-driven peak detection on fiber Bragg grating sensors (resistant to electromagnetic interference) and fused with the VAE embeddings, enhancing anomaly detection under unknown operational conditions. A lightweight gradient boosting supervised classifier stabilizes anomaly scoring with minimal labels, while a replay-based continual learning strategy enables adaptation to evolving domains without catastrophic forgetting. Experiments show the model detects minor imperfections due to flats and polygonization, while adapting to evolving operational conditions, such as changes in train type, speed, load, and track profiles, captured using a single accelerometer and strain gauge in wayside monitoring.",
+      "authors": [
+        "Afonso Lourenço",
+        "Francisca Osório",
+        "Diogo Risca",
+        "Goreti Marreiros"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-02-18T00:14:18+00:00",
+      "link": "https://arxiv.org/pdf/2602.16101v1",
+      "tags": [
+        "query:RUL DT"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "predictive maintenance and fault diagnostics for railway",
+      "llm_evidence_cn": "铁路预测性维护与故障诊断",
+      "llm_evidence": "铁路预测性维护与故障诊断",
+      "canonical_evidence": "铁路预测性维护与故障诊断",
+      "llm_tldr_en": "A continual learning framework for unsupervised railway wheel fault detection using sensor fusion.",
+      "llm_tldr_cn": "一种用于铁路车轮故障检测的持续学习框架，支持无监督特征提取与传感器融合。",
+      "llm_tldr": "一种用于铁路车轮故障检测的持续学习框架，支持无监督特征提取与传感器融合。",
+      "llm_tags": [
+        "query:rul-dt:composite"
+      ],
+      "matched_query_tag": "query:rul-dt:composite",
+      "matched_query_text": "Papers central to 旋转设备数字孪生、故障诊断与剩余寿命预测研究, especially work that connects or combines: prognostics and health management; remaining useful life; digital twin based life prediction and health management; digital twin framework for rotating machinery remaining useful life prediction; integrated approach for fault diagnosis and RUL estimation; hybrid modeling for digital twin based life prediction; multi task learning for equipment diagnosis and prognosis; real time health assessment of rotating equipment using digital twins.",
+      "matched_requirement_id": "req-composite-rul-dt",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2602.22267v1",
+      "title": "Data-Driven Supervision of a Thermal-Hydraulic Process Towards a Physics-Based Digital Twin",
+      "abstract": "The real-time supervision of production processes is a common challenge across several industries. It targets process component monitoring and its predictive maintenance in order to ensure safety, uninterrupted production and maintain high efficiency level. The rise of advanced tools for the simulation of physical systems in addition to data-driven machine learning models offers the possibility to design numerical tools dedicated to efficient system monitoring. In that respect, the digital twin concept presents an adequate framework that proffers solution to these challenges. The main purpose of this paper is to develop such a digital twin dedicated to fault detection and diagnosis in the context of a thermal-hydraulic process supervision. Based on a numerical simulation of the system, in addition to machine learning methods, we propose different modules dedicated to process parameter change detection and their on-line estimation. The proposed fault detection and diagnosis algorithm is validated on a specific test scenario, with single one-off parameter change occurrences in the system. The numerical results show good accuracy in terms of parameter variation localization and the update of their values.",
+      "authors": [
+        "Osimone Imhogiemhe",
+        "Yoann Jus",
+        "Hubert Lejeune",
+        "Saïd Moussaoui"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-02-25T07:09:39+00:00",
+      "link": "https://arxiv.org/pdf/2602.22267v1",
+      "tags": [
+        "keyword:RUL DT",
+        "query:RUL DT"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "digital twin for fault detection and diagnosis",
+      "llm_evidence_cn": "用于故障检测与诊断的数字孪生",
+      "llm_evidence": "用于故障检测与诊断的数字孪生",
+      "canonical_evidence": "用于故障检测与诊断的数字孪生",
+      "llm_tldr_en": "Develops a digital twin framework for real-time supervision and fault diagnosis in thermal-hydraulic processes.",
+      "llm_tldr_cn": "开发了一个用于热液过程实时监控和故障诊断的数字孪生框架。",
+      "llm_tldr": "开发了一个用于热液过程实时监控和故障诊断的数字孪生框架。",
+      "llm_tags": [
+        "query:rul-dt"
+      ],
+      "matched_query_tag": "query:rul-dt",
+      "matched_query_text": "digital twin based life prediction and health management",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.07572v1",
+      "title": "TS-MLLM: A Multi-Modal Large Language Model-based Framework for Industrial Time-Series Big Data Analysis",
+      "abstract": "Accurate analysis of industrial time-series big data is critical for the Prognostics and Health Management (PHM) of industrial equipment. While recent advancements in Large Language Models (LLMs) have shown promise in time-series analysis, existing methods typically focus on single-modality adaptations, failing to exploit the complementary nature of temporal signals, frequency-domain visual representations, and textual knowledge information. In this paper, we propose TS-MLLM, a unified multi-modal large language model framework designed to jointly model temporal signals, frequency-domain images, and textual domain knowledge. Specifically, we first develop an Industrial time-series Patch Modeling branch to capture long-range temporal dynamics. To integrate cross-modal priors, we introduce a Spectrum-aware Vision-Language Model Adaptation (SVLMA) mechanism that enables the model to internalize frequency-domain patterns and semantic context. Furthermore, a Temporal-centric Multi-modal Attention Fusion (TMAF) mechanism is designed to actively retrieve relevant visual and textual cues using temporal features as queries, ensuring deep cross-modal alignment. Extensive experiments on multiple industrial benchmarks demonstrate that TS-MLLM significantly outperforms state-of-the-art methods, particularly in few-shot and complex scenarios. The results validate our framework's superior robustness, efficiency, and generalization capabilities for industrial time-series prediction.",
+      "authors": [
+        "Haiteng Wang",
+        "Yikang Li",
+        "Yunfei Zhu",
+        "Jingheng Yan",
+        "Lei Ren",
+        "Laurence T. Yang"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-03-08T10:14:09+00:00",
+      "link": "https://arxiv.org/pdf/2603.07572v1",
+      "tags": [
+        "keyword:RUL DT",
+        "query:RUL DT"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Multi-modal large language model for industrial time-series PHM",
+      "llm_evidence_cn": "用于工业时间序列预测与健康管理的多模态大语言模型",
+      "llm_evidence": "用于工业时间序列预测与健康管理的多模态大语言模型",
+      "canonical_evidence": "用于工业时间序列预测与健康管理的多模态大语言模型",
+      "llm_tldr_en": "Proposes a multi-modal LLM framework for industrial equipment prognostics and health management.",
+      "llm_tldr_cn": "提出一种多模态大语言模型框架，用于工业设备的预测与健康管理。",
+      "llm_tldr": "提出一种多模态大语言模型框架，用于工业设备的预测与健康管理。",
+      "llm_tags": [
+        "query:rul-dt"
+      ],
+      "matched_query_tag": "query:rul-dt",
+      "matched_query_text": "prognostics and health management",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.08130v1",
+      "title": "Explainable Condition Monitoring via Probabilistic Anomaly Detection Applied to Helicopter Transmissions",
+      "abstract": "We present a novel Explainable methodology for Condition Monitoring, relying on healthy data only. Since faults are rare events, we propose to focus on learning the probability distribution of healthy observations only, and detect Anomalies at runtime. This objective is achieved via the definition of probabilistic measures of deviation from nominality, which allow to detect and anticipate faults. The Bayesian perspective underpinning our approach allows us to perform Uncertainty Quantification to inform decisions. At the same time, we provide descriptive tools to enhance the interpretability of the results, supporting the deployment of the proposed strategy also in safety-critical applications. The methodology is validated experimentally on two use cases: a publicly available benchmark for Predictive Maintenance, and a real-world Helicopter Transmission dataset collected over multiple years. In both applications, the method achieves competitive detection performance with respect to state-of-the-art anomaly detection methods.",
+      "authors": [
+        "Aurelio Raffa Ugolini",
+        "Jessica Leoni",
+        "Valentina Breschi",
+        "Damiano Paniccia",
+        "Francesco Aldo Tucci",
+        "Luigi Capone",
+        "Mara Tanelli"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "stat.ML"
+      ],
+      "published": "2026-03-09T09:09:01+00:00",
+      "link": "https://arxiv.org/pdf/2603.08130v1",
+      "tags": [
+        "query:RUL DT"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "condition monitoring and anomaly detection for helicopter transmissions",
+      "llm_evidence_cn": "直升机传动系统的状态监测与异常检测",
+      "llm_evidence": "直升机传动系统的状态监测与异常检测",
+      "canonical_evidence": "直升机传动系统的状态监测与异常检测",
+      "llm_tldr_en": "An explainable probabilistic anomaly detection method for condition monitoring of rotating machinery.",
+      "llm_tldr_cn": "一种用于旋转机械状态监测的可解释概率异常检测方法。",
+      "llm_tldr": "一种用于旋转机械状态监测的可解释概率异常检测方法。",
+      "llm_tags": [
+        "query:rul-dt"
+      ],
+      "matched_query_tag": "query:rul-dt",
+      "matched_query_text": "real time health assessment of rotating equipment using digital twins",
+      "matched_requirement_id": "req-8",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.09058v1",
+      "title": "Adaptive Active Learning for Online Reliability Prediction of Satellite Electronics",
+      "abstract": "Accurate on-orbit reliability prediction for satellite electronics is often hindered by limited data availability, varying operational conditions, and considerable unit-to-unit variability. To overcome these obstacles, this paper proposes a novel integrated online reliability prediction framework. The main contributions are twofold. First, a Wiener process-based degradation model is developed, incorporating a generalized Arrhenius link function, individual random effects, and spatial correlations among adjacent units. A customized maximum likelihood estimation method is further devised to facilitate efficient and accurate parameter inference. Second, a two-stage active learning sampling scheme is designed to adaptively enhance prediction accuracy. This strategy initially selects representative units based on spatial configuration, and subsequently determines optimal sampling times using a comprehensive criterion that balances unit-specific information, model uncertainty, and degradation dynamics. Numerical experiments and a practical case study from the Tiangong space station demonstrate that the proposed method markedly improves reliability prediction accuracy while significantly reducing data requirements, offering an efficient solution for the prognostic and health management of complex satellite electronic systems.",
+      "authors": [
+        "Shixiang Li",
+        "Yubin Tian",
+        "Dianpeng Wang",
+        "Piao Chen",
+        "Mengying Ren"
+      ],
+      "primary_category": "stat.ME",
+      "categories": [
+        "stat.ME",
+        "cs.LG"
+      ],
+      "published": "2026-03-10T01:04:22+00:00",
+      "link": "https://arxiv.org/pdf/2603.09058v1",
+      "tags": [
+        "keyword:RUL DT",
+        "query:RUL DT"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "online reliability prediction and degradation modeling",
+      "llm_evidence_cn": "在线可靠性预测与退化建模",
+      "llm_evidence": "在线可靠性预测与退化建模",
+      "canonical_evidence": "在线可靠性预测与退化建模",
+      "llm_tldr_en": "Develops a Wiener process-based degradation model and active learning for satellite electronics reliability.",
+      "llm_tldr_cn": "开发了基于维纳过程的退化模型和主动学习方法，用于卫星电子设备的可靠性预测。",
+      "llm_tldr": "开发了基于维纳过程的退化模型和主动学习方法，用于卫星电子设备的可靠性预测。",
+      "llm_tags": [
+        "query:rul-dt"
+      ],
+      "matched_query_tag": "query:rul-dt",
+      "matched_query_text": "remaining useful life",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2602.09699v1",
+      "title": "Rolling Element Bearing Fault Detection and Diagnosis with One-Dimensional Convolutional Neural Network",
+      "abstract": "Rolling element bearings are critical components in rotating machinery, and their condition significantly influences system performance, reliability, and operational lifespan. Timely and accurate fault detection is essential to prevent unexpected failures and reduce maintenance costs. Traditional diagnostic methods often rely on manual feature extraction and shallow classifiers, which may be inadequate for capturing the complex patterns embedded in raw vibration signals. In this study, a compact one-dimensional convolutional neural network (1D CNN) is developed for automated bearing fault diagnosis using raw time-domain vibration data, eliminating the need for manual feature engineering. The model is trained and evaluated on two established benchmark datasets: the Case Western Reserve University (CWRU) dataset and the Paderborn University (PU) dataset. The CWRU data were segmented based on four distinct motor load conditions (0 HP to 3 HP), with each load scenario trained and tested independently to ensure strict separation and prevent data leakage. The CNN achieved high average test accuracies of 99.14%, 98.85%, 97.42%, and 95.14% for 0 HP, 1 HP, 2 HP, and 3 HP, respectively. On the PU dataset, known for its naturally induced faults and greater operational variability the model achieved a robust average testing accuracy of 95.63%. These results affirm the model ability to generalize across datasets and varying operating conditions. Further improvements were observed through hyperparameter tuning, particularly window length and training epochs, underscoring the importance of tailored configurations for specific datasets and load conditions. Overall, the proposed method demonstrates the effectiveness and scalability of 1D CNNs for real-time, data-driven bearing fault diagnosis, offering a reliable foundation for condition monitoring in industrial applications.",
+      "authors": [
+        "Barathan Pubalan",
+        "Muhammad Arif Aiman Jidin",
+        "Mohd Syahril Ramadhan Mohd Saufi",
+        "Mohd Salman Leong",
+        "Muhammad Danial bin Abu Hasan"
+      ],
+      "primary_category": "eess.SP",
+      "categories": [
+        "eess.SP"
+      ],
+      "published": "2026-02-10T11:53:21+00:00",
+      "link": "https://arxiv.org/pdf/2602.09699v1",
+      "tags": [
+        "query:RUL DT"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "bearing fault diagnosis in rotating machinery",
+      "llm_evidence_cn": "旋转机械轴承故障诊断",
+      "llm_evidence": "旋转机械轴承故障诊断",
+      "canonical_evidence": "旋转机械轴承故障诊断",
+      "llm_tldr_en": "Uses 1D CNN for automated fault diagnosis of rolling element bearings in rotating machinery.",
+      "llm_tldr_cn": "使用一维卷积神经网络对旋转机械中的滚动轴承进行自动故障诊断。",
+      "llm_tldr": "使用一维卷积神经网络对旋转机械中的滚动轴承进行自动故障诊断。",
+      "llm_tags": [
+        "query:rul-dt:composite"
+      ],
+      "matched_query_tag": "query:rul-dt:composite",
+      "matched_query_text": "Papers central to 旋转设备数字孪生、故障诊断与剩余寿命预测研究, especially work that connects or combines: prognostics and health management; remaining useful life; digital twin based life prediction and health management; digital twin framework for rotating machinery remaining useful life prediction; integrated approach for fault diagnosis and RUL estimation; hybrid modeling for digital twin based life prediction; multi task learning for equipment diagnosis and prognosis; real time health assessment of rotating equipment using digital twins.",
+      "matched_requirement_id": "req-composite-rul-dt",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2602.10432v1",
+      "title": "A Dual-Stream Physics-Augmented Unsupervised Architecture for Runtime Embedded Vehicle Health Monitoring",
+      "abstract": "Runtime quantification of vehicle operational intensity is essential for predictive maintenance and condition monitoring in commercial and heavy-duty fleets. Traditional metrics like mileage fail to capture mechanical burden, while unsupervised deep learning models detect statistical anomalies, typically transient surface shocks, but often conflate statistical stability with mechanical rest. We identify this as a critical blind spot: high-load steady states, such as hill climbing with heavy payloads, appear statistically normal yet impose significant drivetrain fatigue. To resolve this, we propose a Dual-Stream Architecture that fuses unsupervised learning for surface anomaly detection with macroscopic physics proxies for cumulative load estimation. This approach leverages low-frequency sensor data to generate a multi-dimensional health vector, distinguishing between dynamic hazards and sustained mechanical effort. Validated on a RISC-V embedded platform, the architecture demonstrates low computational overhead, enabling comprehensive, edge-based health monitoring on resource-constrained ECUs without the latency or bandwidth costs of cloud-based monitoring.",
+      "authors": [
+        "Enzo Nicolas Spotorno",
+        "Antonio Augusto Medeiros Frohlich"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "published": "2026-02-11T02:19:22+00:00",
+      "link": "https://arxiv.org/pdf/2602.10432v1",
+      "tags": [
+        "query:RUL DT"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Physics-augmented unsupervised architecture for vehicle health monitoring and fatigue detection",
+      "llm_evidence_cn": "用于车辆健康监测和疲劳检测的物理增强无监督架构",
+      "llm_evidence": "用于车辆健康监测和疲劳检测的物理增强无监督架构",
+      "canonical_evidence": "用于车辆健康监测和疲劳检测的物理增强无监督架构",
+      "llm_tldr_en": "Fuses unsupervised learning with physics proxies for runtime vehicle drivetrain health monitoring.",
+      "llm_tldr_cn": "融合无监督学习与物理代理，用于车辆传动系统的实时运行健康监测。",
+      "llm_tldr": "融合无监督学习与物理代理，用于车辆传动系统的实时运行健康监测。",
+      "llm_tags": [
+        "query:rul-dt"
+      ],
+      "matched_query_tag": "query:rul-dt",
+      "matched_query_text": "prognostics and health management",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2602.16738v1",
+      "title": "Self-Evolving Multi-Agent Network for Industrial IoT Predictive Maintenance",
+      "abstract": "Industrial IoT predictive maintenance requires systems capable of real-time anomaly detection without sacrificing interpretability or demanding excessive computational resources. Traditional approaches rely on static, offline-trained models that cannot adapt to evolving operational conditions, while LLM-based monolithic systems demand prohibitive memory and latency, rendering them impractical for on-site edge deployment. We introduce SEMAS, a self-evolving hierarchical multi-agent system that distributes specialized agents across Edge, Fog, and Cloud computational tiers. Edge agents perform lightweight feature extraction and pre-filtering; Fog agents execute diversified ensemble detection with dynamic consensus voting; and Cloud agents continuously optimize system policies via Proximal Policy Optimization (PPO) while maintaining asynchronous, non-blocking inference. The framework incorporates LLM-based response generation for explainability and federated knowledge aggregation for adaptive policy distribution. This architecture enables resource-aware specialization without sacrificing real-time performance or model interpretability. Empirical evaluation on two industrial benchmarks (Boiler Emulator and Wind Turbine) demonstrates that SEMAS achieves superior anomaly detection performance with exceptional stability under adaptation, sustains prediction accuracy across evolving operational contexts, and delivers substantial latency improvements enabling genuine real-time deployment. Ablation studies confirm that PPO-driven policy evolution, consensus voting, and federated aggregation each contribute materially to system effectiveness. These findings indicate that resource-aware, self-evolving 1multi-agent coordination is essential for production-ready industrial IoT predictive maintenance under strict latency and explainability constraints.",
+      "authors": [
+        "Rebin Saleh",
+        "Khanh Pham Dinh",
+        "Balázs Villányi",
+        "Truong-Son Hy"
+      ],
+      "primary_category": "cs.MA",
+      "categories": [
+        "cs.MA",
+        "cs.LG"
+      ],
+      "published": "2026-02-17T22:45:43+00:00",
+      "link": "https://arxiv.org/pdf/2602.16738v1",
+      "tags": [
+        "query:RUL DT"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "multi-agent system for industrial IoT predictive maintenance",
+      "llm_evidence_cn": "工业物联网预测性维护的多智能体系统",
+      "llm_evidence": "工业物联网预测性维护的多智能体系统",
+      "canonical_evidence": "工业物联网预测性维护的多智能体系统",
+      "llm_tldr_en": "Introduces a hierarchical multi-agent system for real-time anomaly detection in industrial IoT maintenance.",
+      "llm_tldr_cn": "引入一种分层多智能体系统，用于工业物联网维护中的实时异常检测。",
+      "llm_tldr": "引入一种分层多智能体系统，用于工业物联网维护中的实时异常检测。",
+      "llm_tags": [
+        "query:rul-dt"
+      ],
+      "matched_query_tag": "query:rul-dt",
+      "matched_query_text": "prognostics and health management",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2602.18042v1",
+      "title": "PINEAPPLE: Physics-Informed Neuro-Evolution Algorithm for Prognostic Parameter Inference in Lithium-Ion Battery Electrodes",
+      "abstract": "Accurate, real-time, yet non-destructive estimation of internal states in lithium-ion batteries is critical for predicting degradation, optimizing usage strategies, and extending operational lifespan. Here, we introduce PINEAPPLE (Physics-Informed Neuro-Evolution Algorithm for Prognostic Parameter inference in Lithium-ion battery Electrodes), a novel framework that integrates physics-informed neural networks (PINNs) with an evolutionary search algorithm to enable rapid, scalable, and interpretable parameter inference with potential for application to next-generation batteries. The meta-learned PINN utilizes fundamental physics principles to achieve accurate zero-shot prediction of electrode behavior with test errors below 0.1$\\%$ while maintaining an order-of-magnitude speed-up over conventional solvers. PINEAPPLE demonstrates robust parameter inference solely from voltage-time discharge curves across multiple batteries from the open-source CALCE repository, recovering the evolution of key internal state parameters such as Li-ion diffusion coefficients across usage cycles. Notably, the inferred cycle-dependent evolution of these parameters exhibit consistent trends across different batteries without any customized degradation physics-embedded heuristic, highlighting the effective regularizing effect and robustness that can be conferred through incorporation of fundamental physics in PINEAPPLE. By enabling computationally efficient, real-time parameter estimation, PINEAPPLE offers a promising route towards the non-destructive, physics-based characterization of inter-cell and intra-cell variability of battery modules and battery packs, thereby unlocking new opportunities for downstream on-the-fly needs in next-generation battery management systems such as individual cell-scale state-of-health diagnostics.",
+      "authors": [
+        "Karkulali Pugalenthi",
+        "Jian Cheng Wong",
+        "Qizheng Yang",
+        "Pao-Hsiung Chiu",
+        "My Ha Dao",
+        "Nagarajan Raghavan",
+        "Chinchun Ooi"
+      ],
+      "primary_category": "cs.CE",
+      "categories": [
+        "cs.CE",
+        "cs.NE",
+        "physics.comp-ph"
+      ],
+      "published": "2026-02-20T07:51:59+00:00",
+      "link": "https://arxiv.org/pdf/2602.18042v1",
+      "tags": [
+        "keyword:RUL DT",
+        "query:RUL DT"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "prognostic parameter inference for predicting degradation and lifespan",
+      "llm_evidence_cn": "用于预测退化和寿命的预测性参数推断",
+      "llm_evidence": "用于预测退化和寿命的预测性参数推断",
+      "canonical_evidence": "用于预测退化和寿命的预测性参数推断",
+      "llm_tldr_en": "A physics-informed neuro-evolution algorithm for battery degradation prediction and health management.",
+      "llm_tldr_cn": "一种物理信息神经进化算法，用于电池退化预测和健康管理。",
+      "llm_tldr": "一种物理信息神经进化算法，用于电池退化预测和健康管理。",
+      "llm_tags": [
+        "query:rul-dt"
+      ],
+      "matched_query_tag": "query:rul-dt",
+      "matched_query_text": "prognostics and health management",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2602.19390v1",
+      "title": "Artificial Intelligence for Modeling & Simulation in Digital Twins",
+      "abstract": "The convergence of modeling & simulation (M&S) and artificial intelligence (AI) is leaving its marks on advanced digital technology. Pertinent examples are digital twins (DTs) - high-fidelity, live representations of physical assets, and frequent enablers of corporate digital maturation and transformation. Often seen as technological platforms that integrate an array of services, DTs have the potential to bring AI-enabled M&S closer to end-users. It is, therefore, paramount to understand the role of M&S in DTs, and the role of digital twins in enabling the convergence of AI and M&S. To this end, this chapter provides a comprehensive exploration of the complementary relationship between these three. We begin by establishing a foundational understanding of DTs by detailing their key components, architectural layers, and their various roles across business, development, and operations. We then examine the central role of M&S in DTs and provide an overview of key modeling techniques from physics-based and discrete-event simulation to hybrid approaches. Subsequently, we investigate the bidirectional role of AI: first, how AI enhances DTs through advanced analytics, predictive capabilities, and autonomous decision-making, and second, how DTs serve as valuable platforms for training, validating, and deploying AI models. The chapter concludes by identifying key challenges and future research directions for creating more integrated and intelligent systems.",
+      "authors": [
+        "Philipp Zech",
+        "Istvan David"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-02-22T23:47:43+00:00",
+      "link": "https://arxiv.org/pdf/2602.19390v1",
+      "tags": [
+        "keyword:RUL DT",
+        "query:RUL DT"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "convergence of AI and modeling & simulation in digital twins",
+      "llm_evidence_cn": "数字孪生中人工智能与建模仿真的融合",
+      "llm_evidence": "数字孪生中人工智能与建模仿真的融合",
+      "canonical_evidence": "数字孪生中人工智能与建模仿真的融合",
+      "llm_tldr_en": "Explores the integration of AI and modeling & simulation as key enablers for high-fidelity digital twins.",
+      "llm_tldr_cn": "探讨了人工智能与建模仿真的集成，将其作为高保真数字孪生的关键赋能技术。",
+      "llm_tldr": "探讨了人工智能与建模仿真的集成，将其作为高保真数字孪生的关键赋能技术。",
+      "llm_tags": [
+        "query:rul-dt:composite"
+      ],
+      "matched_query_tag": "query:rul-dt:composite",
+      "matched_query_text": "Papers central to 旋转设备数字孪生、故障诊断与剩余寿命预测研究, especially work that connects or combines: prognostics and health management; remaining useful life; digital twin based life prediction and health management; digital twin framework for rotating machinery remaining useful life prediction; integrated approach for fault diagnosis and RUL estimation; hybrid modeling for digital twin based life prediction; multi task learning for equipment diagnosis and prognosis; real time health assessment of rotating equipment using digital twins.",
+      "matched_requirement_id": "req-composite-rul-dt",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2602.20651v2",
+      "title": "Sparse Bayesian Deep Functional Learning with Structured Region Selection",
+      "abstract": "In modern applications such as ECG monitoring, neuroimaging, wearable sensing, and industrial equipment diagnostics, complex and continuously structured data are ubiquitous, presenting both challenges and opportunities for functional data analysis. However, existing methods face a critical trade-off: conventional functional models are limited by linearity, whereas deep learning approaches lack interpretable region selection for sparse effects. To bridge these gaps, we propose a sparse Bayesian functional deep neural network (sBayFDNN). It learns adaptive functional embeddings through a deep Bayesian architecture to capture complex nonlinear relationships, while a structured prior enables interpretable, region-wise selection of influential domains with quantified uncertainty. Theoretically, we establish rigorous approximation error bounds, posterior consistency, and region selection consistency. These results provide the first theoretical guarantees for a Bayesian deep functional model, ensuring its reliability and statistical rigor. Empirically, comprehensive simulations and real-world studies confirm the effectiveness and superiority of sBayFDNN. Crucially, sBayFDNN excels in recognizing intricate dependencies for accurate predictions and more precisely identifies functionally meaningful regions, capabilities fundamentally beyond existing approaches.",
+      "authors": [
+        "Xiaoxian Zhu",
+        "Yingmeng Li",
+        "Shuangge Ma",
+        "Mengyun Wu"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "stat.AP",
+        "stat.ML"
+      ],
+      "published": "2026-02-24T07:53:59+00:00",
+      "link": "https://arxiv.org/pdf/2602.20651v2",
+      "tags": [
+        "query:RUL DT"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "interpretable region selection for industrial equipment diagnostics",
+      "llm_evidence_cn": "工业设备诊断的可解释区域选择",
+      "llm_evidence": "工业设备诊断的可解释区域选择",
+      "canonical_evidence": "工业设备诊断的可解释区域选择",
+      "llm_tldr_en": "A sparse Bayesian functional deep neural network for interpretable diagnostics in industrial equipment.",
+      "llm_tldr_cn": "一种用于工业设备可解释诊断的稀疏贝叶斯功能深度神经网络。",
+      "llm_tldr": "一种用于工业设备可解释诊断的稀疏贝叶斯功能深度神经网络。",
+      "llm_tags": [
+        "query:rul-dt:composite"
+      ],
+      "matched_query_tag": "query:rul-dt:composite",
+      "matched_query_text": "Papers central to 旋转设备数字孪生、故障诊断与剩余寿命预测研究, especially work that connects or combines: prognostics and health management; remaining useful life; digital twin based life prediction and health management; digital twin framework for rotating machinery remaining useful life prediction; integrated approach for fault diagnosis and RUL estimation; hybrid modeling for digital twin based life prediction; multi task learning for equipment diagnosis and prognosis; real time health assessment of rotating equipment using digital twins.",
+      "matched_requirement_id": "req-composite-rul-dt",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2602.22297v1",
+      "title": "Learning Rewards, Not Labels: Adversarial Inverse Reinforcement Learning for Machinery Fault Detection",
+      "abstract": "Reinforcement learning (RL) offers significant promise for machinery fault detection (MFD). However, most existing RL-based MFD approaches do not fully exploit RL's sequential decision-making strengths, often treating MFD as a simple guessing game (Contextual Bandits). To bridge this gap, we formulate MFD as an offline inverse reinforcement learning problem, where the agent learns the reward dynamics directly from healthy operational sequences, thereby bypassing the need for manual reward engineering and fault labels. Our framework employs Adversarial Inverse Reinforcement Learning to train a discriminator that distinguishes between normal (expert) and policy-generated transitions. The discriminator's learned reward serves as an anomaly score, indicating deviations from normal operating behaviour. When evaluated on three run-to-failure benchmark datasets (HUMS2023, IMS, and XJTU-SY), the model consistently assigns low anomaly scores to normal samples and high scores to faulty ones, enabling early and robust fault detection. By aligning RL's sequential reasoning with MFD's temporal structure, this work opens a path toward RL-based diagnostics in data-driven industrial settings.",
+      "authors": [
+        "Dhiraj Neupane",
+        "Richard Dazeley",
+        "Mohamed Reda Bouadjenek",
+        "Sunil Aryal"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "published": "2026-02-25T15:34:19+00:00",
+      "link": "https://arxiv.org/pdf/2602.22297v1",
+      "tags": [
+        "query:RUL DT"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "machinery fault detection using inverse reinforcement learning",
+      "llm_evidence_cn": "基于逆强化学习的机械故障检测",
+      "llm_evidence": "基于逆强化学习的机械故障检测",
+      "canonical_evidence": "基于逆强化学习的机械故障检测",
+      "llm_tldr_en": "Formulates machinery fault detection as inverse reinforcement learning to learn from healthy operational sequences.",
+      "llm_tldr_cn": "将机械故障检测建模为逆强化学习问题，通过健康运行序列学习奖励动力学。",
+      "llm_tldr": "将机械故障检测建模为逆强化学习问题，通过健康运行序列学习奖励动力学。",
+      "llm_tags": [
+        "query:rul-dt"
+      ],
+      "matched_query_tag": "query:rul-dt",
+      "matched_query_text": "integrated approach for fault diagnosis and RUL estimation",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.04146v1",
+      "title": "LISTA-Transformer Model Based on Sparse Coding and Attention Mechanism and Its Application in Fault Diagnosis",
+      "abstract": "Driven by the continuous development of models such as Multi-Layer Perceptron, Convolutional Neural Network (CNN), and Transformer, deep learning has made breakthrough progress in fields such as computer vision and natural language processing, and has been successfully applied in practical scenarios such as image classification and industrial fault diagnosis. However, existing models still have certain limitations in local feature modeling and global dependency capture. Specifically, CNN is limited by local receptive fields, while Transformer has shortcomings in effectively modeling local structures, and both face challenges of high model complexity and insufficient interpretability. In response to the above issues, we proposes the following innovative work: A sparse Transformer based on Learnable Iterative Shrinkage Threshold Algorithm (LISTA-Transformer) was designed, which deeply integrates LISTA sparse encoding with visual Transformer to construct a model architecture with adaptive local and global feature collaboration mechanism. This method utilizes continuous wavelet transform to convert vibration signals into time-frequency maps and inputs them into LISTA-Transformer for more effective feature extraction. On the CWRU dataset, the fault recognition rate of our method reached 98.5%, which is 3.3% higher than traditional methods and exhibits certain superiority over existing Transformer-based approaches.",
+      "authors": [
+        "Shuang Liu",
+        "Lina Zhao",
+        "Tian Wang",
+        "Huaqing Wang"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-03-04T15:00:07+00:00",
+      "link": "https://arxiv.org/pdf/2603.04146v1",
+      "tags": [
+        "query:RUL DT"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Transformer model applied in industrial fault diagnosis",
+      "llm_evidence_cn": "应用于工业故障诊断的Transformer模型",
+      "llm_evidence": "应用于工业故障诊断的Transformer模型",
+      "canonical_evidence": "应用于工业故障诊断的Transformer模型",
+      "llm_tldr_en": "Develops a LISTA-Transformer model to improve feature modeling and interpretability in fault diagnosis.",
+      "llm_tldr_cn": "开发LISTA-Transformer模型，提升工业故障诊断中的特征建模能力与可解释性。",
+      "llm_tldr": "开发LISTA-Transformer模型，提升工业故障诊断中的特征建模能力与可解释性。",
+      "llm_tags": [
+        "query:rul-dt"
+      ],
+      "matched_query_tag": "query:rul-dt",
+      "matched_query_text": "integrated approach for fault diagnosis and RUL estimation",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.07130v1",
+      "title": "Toward Multimodal Industrial Fault Analysis: A Single-Speed Chain Conveyor Dataset with Audio and Vibration Signals",
+      "abstract": "We introduce a multimodal industrial fault analysis dataset collected from a single-speed chain conveyor (SSCC) system, targeting system-level fault detection in production lines. The dataset consists of multimodal signals, including three audio and four vibration channels. It covers normal operation and four representative fault types under multiple speeds, loads, and both clean and realistic factory-noise conditions reproduced on-site. It is explicitly designed to support channel-wise analysis and multimodal fusion research. We establish standardized evaluation protocols for unsupervised fault detection with normal-only training and supervised fault classification with balanced dataset splits across different operating conditions and fault types. A unified channel-wise kNN baseline is provided to enable fair comparison of representation quality without task-specific training. The dataset offers a practical and extensible benchmark for robust multimodal industrial fault analysis.",
+      "authors": [
+        "Zhang Chen",
+        "Yucong Zhang",
+        "Xiaoxiao Miao",
+        "Ming Li"
+      ],
+      "primary_category": "cs.SD",
+      "categories": [
+        "cs.SD",
+        "eess.AS"
+      ],
+      "published": "2026-03-07T09:38:52+00:00",
+      "link": "https://arxiv.org/pdf/2603.07130v1",
+      "tags": [
+        "query:RUL DT"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "industrial fault analysis dataset for conveyor systems",
+      "llm_evidence_cn": "输送机系统的工业故障分析数据集",
+      "llm_evidence": "输送机系统的工业故障分析数据集",
+      "canonical_evidence": "输送机系统的工业故障分析数据集",
+      "llm_tldr_en": "Provides a multimodal dataset for industrial fault detection and classification in chain conveyors.",
+      "llm_tldr_cn": "提供一个用于链式输送机工业故障检测和分类的多模态数据集。",
+      "llm_tldr": "提供一个用于链式输送机工业故障检测和分类的多模态数据集。",
+      "llm_tags": [
+        "query:rul-dt:composite"
+      ],
+      "matched_query_tag": "query:rul-dt:composite",
+      "matched_query_text": "Papers central to 旋转设备数字孪生、故障诊断与剩余寿命预测研究, especially work that connects or combines: prognostics and health management; remaining useful life; digital twin based life prediction and health management; digital twin framework for rotating machinery remaining useful life prediction; integrated approach for fault diagnosis and RUL estimation; hybrid modeling for digital twin based life prediction; multi task learning for equipment diagnosis and prognosis; real time health assessment of rotating equipment using digital twins.",
+      "matched_requirement_id": "req-composite-rul-dt",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.08171v1",
+      "title": "Evidence-Driven Reasoning for Industrial Maintenance Using Heterogeneous Data",
+      "abstract": "Industrial maintenance platforms contain rich but fragmented evidence, including free-text work orders, heterogeneous operational sensors or indicators, and structured failure knowledge. These sources are often analyzed in isolation, producing alerts or forecasts that do not support conditional decision-making: given this asset history and behavior, what is happening and what action is warranted? We present Condition Insight Agent, a deployed decision-support framework that integrates maintenance language, behavioral abstractions of operational data, and engineering failure semantics to produce evidence-grounded explanations and advisory actions. The system constrains reasoning through deterministic evidence construction and structured failure knowledge, and applies a rule-based verification loop to suppress unsupported conclusions. Case studies from production CMMS deployments show that this verification-first design operates reliably under heterogeneous and incomplete data while preserving human oversight. Our results demonstrate how constrained LLM-based reasoning can function as a governed decision-support layer for industrial maintenance.",
+      "authors": [
+        "Fearghal O'Donncha",
+        "Nianjun Zhou",
+        "Natalia Martinez",
+        "James T Rayfield",
+        "Fenno F. Heath",
+        "Abigail Langbridge",
+        "Roman Vaculin"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-03-09T09:51:50+00:00",
+      "link": "https://arxiv.org/pdf/2603.08171v1",
+      "tags": [
+        "query:RUL DT"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "industrial maintenance reasoning using heterogeneous data",
+      "llm_evidence_cn": "基于异构数据的工业维护推理",
+      "llm_evidence": "基于异构数据的工业维护推理",
+      "canonical_evidence": "基于异构数据的工业维护推理",
+      "llm_tldr_en": "Integrates sensor data and failure semantics for evidence-grounded industrial maintenance decision support.",
+      "llm_tldr_cn": "整合传感器数据和故障语义，为工业维护提供基于证据的决策支持。",
+      "llm_tldr": "整合传感器数据和故障语义，为工业维护提供基于证据的决策支持。",
+      "llm_tags": [
+        "query:rul-dt:composite"
+      ],
+      "matched_query_tag": "query:rul-dt:composite",
+      "matched_query_text": "Papers central to 旋转设备数字孪生、故障诊断与剩余寿命预测研究, especially work that connects or combines: prognostics and health management; remaining useful life; digital twin based life prediction and health management; digital twin framework for rotating machinery remaining useful life prediction; integrated approach for fault diagnosis and RUL estimation; hybrid modeling for digital twin based life prediction; multi task learning for equipment diagnosis and prognosis; real time health assessment of rotating equipment using digital twins.",
+      "matched_requirement_id": "req-composite-rul-dt",
+      "selection_source": "fresh_fetch"
+    }
+  ]
+}
