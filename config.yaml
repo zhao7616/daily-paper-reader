@@ -25,3 +25,44 @@ subscriptions:
     stage: A
     diff_threshold_pct: 15
   keyword_recall_mode: or
+  intent_profiles:
+    - tag: RUL DT
+      description: 旋转设备数字孪生、故障诊断与剩余寿命预测研究
+      enabled: true
+      keywords:
+        - keyword: prognostics and health management
+          keyword_cn: ''
+          query: prognostics and health management
+        - keyword: remaining useful life
+          keyword_cn: ''
+          query: remaining useful life
+        - keyword: digital twin
+          keyword_cn: 数字孪生
+          query: digital twin based life prediction and health management
+      intent_queries:
+        - query: digital twin framework for rotating machinery remaining useful life prediction
+          query_cn: 用于旋转机械剩余寿命预测的数字孪生框架
+          enabled: true
+          source: manual
+          note: ''
+        - query: integrated approach for fault diagnosis and RUL estimation
+          query_cn: 故障诊断与剩余寿命估计的集成方法
+          enabled: true
+          source: manual
+          note: ''
+        - query: hybrid modeling for digital twin based life prediction
+          query_cn: 基于数字孪生寿命预测的混合建模
+          enabled: true
+          source: manual
+          note: ''
+        - query: multi task learning for equipment diagnosis and prognosis
+          query_cn: 设备诊断与预测的多任务学习
+          enabled: true
+          source: manual
+          note: ''
+        - query: real time health assessment of rotating equipment using digital twins
+          query_cn: 利用数字孪生进行旋转设备实时健康评估
+          enabled: true
+          source: manual
+          note: ''
+      updated_at: '2026-03-11T07:59:54.628Z'
