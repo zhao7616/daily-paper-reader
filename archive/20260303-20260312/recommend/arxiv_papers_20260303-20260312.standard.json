@@ -1,0 +1,53 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-03-12T07:47:56.153753+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 0,
+    "deep_cap": 6,
+    "deep_selected": 0,
+    "quick_candidates": 1,
+    "quick_skim_target": 11,
+    "quick_selected": 1
+  },
+  "deep_dive": [],
+  "quick_skim": [
+    {
+      "id": "2603.09235v1",
+      "title": "HelixTrack: Event-Based Tracking and RPM Estimation of Propeller-like Objects",
+      "abstract": "Safety-critical perception for unmanned aerial vehicles and rotating machinery requires microsecond-latency tracking of fast, periodic motion under egomotion and strong distractors. Frame-based and event-based trackers drift or break on propellers because periodic signatures violate their smooth-motion assumptions. We tackle this gap with HelixTrack, a fully event-driven method that jointly tracks propeller-like objects and estimates their rotations per minute (RPM). Incoming events are back-warped from the image plane into the rotor plane via a homography estimated on the fly. A Kalman Filter maintains instantaneous estimates of phase. Batched iterative updates refine the object pose by coupling phase residuals to geometry. To our knowledge, no public dataset targets joint tracking and RPM estimation of propeller-like objects. We therefore introduce the Timestamped Quadcopter with Egomotion (TQE) dataset with 13 high-resolution event sequences, containing 52 rotating objects in total, captured at distances of 2 m / 4 m, with increasing egomotion and microsecond RPM ground truth. On TQE, HelixTrack processes full-rate events (approx. 11.8x real time) faster than real time and microsecond latency. It consistently outperforms per-event and aggregation-based baselines adapted for RPM estimation.",
+      "authors": [
+        "Radim Spetlik",
+        "Michal Pliska",
+        "Vojtěch Vrba",
+        "Jiri Matas"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-03-10T06:12:26+00:00",
+      "link": "https://arxiv.org/pdf/2603.09235v1",
+      "tags": [
+        "keyword:RUL预测"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Real-time tracking and RPM estimation for rotating machinery",
+      "llm_evidence_cn": "旋转机械的实时跟踪和转速估计",
+      "llm_evidence": "旋转机械的实时跟踪和转速估计",
+      "canonical_evidence": "旋转机械的实时跟踪和转速估计",
+      "llm_tldr_en": "HelixTrack provides event-based tracking and RPM estimation for rotating objects like propellers.",
+      "llm_tldr_cn": "HelixTrack 实现了螺旋桨等旋转物体的基于事件的跟踪和转速估计。",
+      "llm_tldr": "HelixTrack 实现了螺旋桨等旋转物体的基于事件的跟踪和转速估计。",
+      "llm_tags": [
+        "query:rul"
+      ],
+      "matched_query_tag": "query:rul",
+      "matched_query_text": "Real time health assessment and RUL forecasting for rotating components",
+      "matched_requirement_id": "req-8",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    }
+  ]
+}

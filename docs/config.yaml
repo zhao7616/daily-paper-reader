@@ -26,43 +26,41 @@ subscriptions:
     diff_threshold_pct: 15
   keyword_recall_mode: or
   intent_profiles:
-    - tag: RUL DT
-      description: 旋转设备数字孪生、故障诊断与剩余寿命预测研究
+    - tag: RUL预测
+      description: 剩余寿命预测和旋转机械设备剩余寿命预测
       enabled: true
       keywords:
-        - keyword: prognostics and health management
-          keyword_cn: ''
-          query: prognostics and health management
-        - keyword: remaining useful life
-          keyword_cn: ''
-          query: remaining useful life
-        - keyword: digital twin
-          keyword_cn: 数字孪生
-          query: digital twin based life prediction and health management
+        - keyword: Remaining Useful Life
+          keyword_cn: 剩余寿命
+          query: Remaining Useful Life (RUL) prediction methods
+        - keyword: Rotating Machinery
+          keyword_cn: 旋转机械
+          query: Health monitoring and RUL for rotating machinery
+        - keyword: Bearing RUL
+          keyword_cn: 轴承剩余寿命
+          query: Remaining useful life prediction for rolling element bearings
+        - keyword: Deep Learning RUL
+          keyword_cn: 深度学习剩余寿命预测
+          query: Deep learning architectures for RUL estimation
       intent_queries:
-        - query: digital twin framework for rotating machinery remaining useful life prediction
-          query_cn: 用于旋转机械剩余寿命预测的数字孪生框架
+        - query: State of the art methods for remaining useful life prediction of rotating machinery
+          query_cn: 旋转机械剩余寿命预测的最前沿方法
           enabled: true
           source: manual
           note: ''
-        - query: integrated approach for fault diagnosis and RUL estimation
-          query_cn: 故障诊断与剩余寿命估计的集成方法
+        - query: Deep learning based RUL estimation for industrial bearings and motors
+          query_cn: 基于深度学习的工业轴承与电机剩余寿命估计
           enabled: true
           source: manual
           note: ''
-        - query: hybrid modeling for digital twin based life prediction
-          query_cn: 基于数字孪生寿命预测的混合建模
+        - query: Data driven vs physics informed models for RUL prediction
+          query_cn: 数据驱动与物理信息融合的剩余寿命预测模型对比
           enabled: true
           source: manual
           note: ''
-        - query: multi task learning for equipment diagnosis and prognosis
-          query_cn: 设备诊断与预测的多任务学习
+        - query: Real time health assessment and RUL forecasting for rotating components
+          query_cn: 旋转部件的实时健康评估与剩余寿命预报
           enabled: true
           source: manual
           note: ''
-        - query: real time health assessment of rotating equipment using digital twins
-          query_cn: 利用数字孪生进行旋转设备实时健康评估
-          enabled: true
-          source: manual
-          note: ''
-      updated_at: '2026-03-11T07:59:54.628Z'
+      updated_at: '2026-03-12T07:45:18.667Z'

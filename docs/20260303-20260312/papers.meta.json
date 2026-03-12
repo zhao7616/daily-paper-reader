@@ -1,0 +1,23 @@
+{
+  "label": "2026-03-03 ~ 2026-03-12",
+  "date": "2026-03-03 ~ 2026-03-12",
+  "generated_at": "2026-03-12T07:48:22",
+  "count": 1,
+  "papers": [
+    {
+      "paper_id": "20260303-20260312/2603.09235v1-helixtrack-event-based-tracking-and-rpm-estimation-of-propeller-like-objects",
+      "section": "quick",
+      "title_en": "HelixTrack: Event-Based Tracking and RPM Estimation of Propeller-like Objects",
+      "authors": "Radim Spetlik, Michal Pliska, Vojtěch Vrba, Jiri Matas",
+      "date": "2026-03-10",
+      "pdf": "https://arxiv.org/pdf/2603.09235v1",
+      "score": "7.0",
+      "evidence": "旋转机械的实时跟踪和转速估计",
+      "tldr": "针对无人机和旋转机械中快速周期性运动跟踪的挑战，本文提出HelixTrack，一种全事件驱动的螺旋桨类物体跟踪与转速（RPM）估计方法。该方法通过单应性变换将事件反向映射到转子平面，利用卡尔曼滤波维护相位，并通过耦合相位残差与几何信息优化位姿。此外，研究者发布了TQE数据集。实验表明，该方法在保持微秒级延迟的同时，处理速度达到实时性的11.8倍，性能显著优于现有基准。",
+      "tags": "query:rul",
+      "abstract_en": "Safety-critical perception for unmanned aerial vehicles and rotating machinery requires microsecond-latency tracking of fast, periodic motion under egomotion and strong distractors. Frame-based and event-based trackers drift or break on propellers because periodic signatures violate their smooth-motion assumptions. We tackle this gap with HelixTrack, a fully event-driven method that jointly tracks propeller-like objects and estimates their rotations per minute (RPM). Incoming events are back-warped from the image plane into the rotor plane via a homography estimated on the fly. A Kalman Filter maintains instantaneous estimates of phase. Batched iterative updates refine the object pose by coupling phase residuals to geometry. To our knowledge, no public dataset targets joint tracking and RPM estimation of propeller-like objects. We therefore introduce the Timestamped Quadcopter with Egomotion (TQE) dataset with 13 high-resolution event sequences, containing 52 rotating objects in total, captured at distances of 2 m / 4 m, with increasing egomotion and microsecond RPM ground truth. On TQE, HelixTrack processes full-rate events (approx. 11.8x real time) faster than real time and microsecond latency. It consistently outperforms per-event and aggregation-based baselines adapted for RPM estimation.",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}

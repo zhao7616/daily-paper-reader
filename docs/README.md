@@ -6,55 +6,26 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-03-11
-- 运行时间：2026-03-11 20:05:53 UTC
+- 最新运行日期：2026-03-03 ~ 2026-03-12
+- 运行时间：2026-03-12 07:48:13 UTC
 - 运行状态：成功
-- 本次总论文数：11
-- 精读区：2
-- 速读区：9
+- 本次总论文数：1
+- 精读区：0
+- 速读区：1
 
 ### 今日简报（AI）
-今日精选 11 篇时间序列前沿论文，深度聚焦工业故障诊断的可解释性与航空数据多维整合。
-重点推荐 S2S-FDD 结合自然语言实现的零样本故障诊断，以及 Aura 针对航空场景的通用外生数据集成方案。
-建议关注大模型合成数据与图神经网络在异常检测中的最新评测，探索跨模态技术在工业场景的落地。
-- 详情：[/202603/11/README](/202603/11/README)
+今日聚焦基于事件相机的螺旋桨类物体追踪与转速估计技术。
+论文提出的 HelixTrack 实现了对高速旋转物体的精准追踪与 RPM 实时估算。
+推荐关注事件相机在无人机监测及高速工业检测场景中的落地应用。
+- 详情：[/20260303-20260312/README](/20260303-20260312/README)
 
 ### 精读区论文标签
-1. [S2S-FDD: Bridging Industrial Time Series and Natural Language for Explainable Zero-shot Fault Diagnosis](/202603/11/2603.08048v1-s2s-fdd-bridging-industrial-time-series-and-natural-language-for-explainable-zero-shot-fault-diagnosis)  
-   标签：评分：9.0/10、query:rul-dt
-   evidence：工业系统可解释零样本故障诊断
-2. [Aura: Universal Multi-dimensional Exogenous Integration for Aviation Time Series](/202603/11/2603.05092v1-aura-universal-multi-dimensional-exogenous-integration-for-aviation-time-series)  
-   标签：评分：8.0/10、query:rul-dt
-   evidence：考虑外部因素的航空维修时间序列预测
+- 本次无精读推荐。
 
 ### 速读区论文标签
-1. [Improving Anomaly Detection with Foundation-Model Synthesis and Wavelet-Domain Attention](/202603/11/2603.02964v1-improving-anomaly-detection-with-foundation-model-synthesis-and-wavelet-domain-attention)  
-   标签：评分：7.0/10、query:rul-dt
-   evidence：利用频域特征进行工业异常检测
-2. [Temporal-Conditioned Normalizing Flows for Multivariate Time Series Anomaly Detection](/202603/11/2603.09490v1-temporal-conditioned-normalizing-flows-for-multivariate-time-series-anomaly-detection)  
-   标签：评分：7.0/10、query:rul-dt
-   evidence：用于健康管理的多变量时间序列异常检测
-3. [GNNs for Time Series Anomaly Detection: An Open-Source Framework and a Critical Evaluation](/202603/11/2603.09675v1-gnns-for-time-series-anomaly-detection-an-open-source-framework-and-a-critical-evaluation)  
-   标签：评分：7.0/10、query:rul-dt
-   evidence：用于多变量时间序列异常检测和健康监测的图神经网络框架
-4. [Towards an Incremental Unified Multimodal Anomaly Detection: Augmenting Multimodal Denoising From an Information Bottleneck Perspective](/202603/11/2603.02629v1-towards-an-incremental-unified-multimodal-anomaly-detection-augmenting-multimodal-denoising-from-an-information-bottleneck-perspective)  
-   标签：评分：6.0/10、query:rul-dt
-   evidence：用于故障诊断的增量统一多模态异常检测
-5. [Trade-offs in Ensembling, Merging and Routing Among Parameter-Efficient Experts](/202603/11/2603.03535v1-trade-offs-in-ensembling-merging-and-routing-among-parameter-efficient-experts)  
-   标签：评分：6.0/10、query:rul-dt
-   evidence：参数高效专家的多任务学习策略
-6. [BD-Merging: Bias-Aware Dynamic Model Merging with Evidence-Guided Contrastive Learning](/202603/11/2603.03920v1-bd-merging-bias-aware-dynamic-model-merging-with-evidence-guided-contrastive-learning)  
-   标签：评分：6.0/10、query:rul-dt
-   evidence：用于自适应可靠性的多任务学习框架
-7. [Lightweight and Scalable Transfer Learning Framework for Load Disaggregation](/202603/11/2603.04998v1-lightweight-and-scalable-transfer-learning-framework-for-load-disaggregation)  
-   标签：评分：6.0/10、query:rul-dt
-   evidence：用于负荷监测和信号分解的多任务迁移学习
-8. [Interpretable Maximum Margin Deep Anomaly Detection](/202603/11/2603.07073v1-interpretable-maximum-margin-deep-anomaly-detection)  
-   标签：评分：6.0/10、query:rul-dt
-   evidence：用于故障诊断应用的深度异常检测
-9. [FreqCycle: A Multi-Scale Time-Frequency Analysis Method for Time Series Forecasting](/202603/11/2603.09661v1-freqcycle-a-multi-scale-time-frequency-analysis-method-for-time-series-forecasting)  
-   标签：评分：6.0/10、query:rul-dt
-   evidence：用于时间序列预测的时频分析方法
+1. [HelixTrack: Event-Based Tracking and RPM Estimation of Propeller-like Objects](/20260303-20260312/2603.09235v1-helixtrack-event-based-tracking-and-rpm-estimation-of-propeller-like-objects)  
+   标签：评分：7.0/10、query:rul
+   evidence：旋转机械的实时跟踪和转速估计
 
 
 <div class="dpr-home-promo-card">

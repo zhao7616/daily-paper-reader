@@ -1,6 +1,9 @@
 * <a class="dpr-sidebar-root-link" href="#/">首页</a>
 * <a class="dpr-sidebar-root-link dpr-sidebar-noactive-link" href="javascript:void(0)" data-dpr-hash="#/tutorial/README">使用教程</a>
 * Daily Papers
+  * 2026-03-03 ~ 2026-03-12 <!--dpr-date:20260303-20260312-->
+    * 速读区
+      * <a class="dpr-sidebar-item-link dpr-sidebar-item-structured" href="#/20260303-20260312/2603.09235v1-helixtrack-event-based-tracking-and-rpm-estimation-of-propeller-like-objects" data-sidebar-item="{&quot;title&quot;: &quot;HelixTrack: Event-Based Tracking and RPM Estimation of Propeller-like Objects&quot;, &quot;link&quot;: &quot;https://arxiv.org/abs/2603.09235v1-helixtrack-event-based-tracking-and-rpm-estimation-of-propeller-like-objects&quot;, &quot;score&quot;: &quot;7.0&quot;, &quot;tags&quot;: [{&quot;kind&quot;: &quot;query&quot;, &quot;label&quot;: &quot;rul&quot;}], &quot;evidence&quot;: &quot;旋转机械的实时跟踪和转速估计&quot;}">HelixTrack: Event-Based Tracking and RPM Estimation of Propeller-like Objects</a>
   * 2026-03-11 <!--dpr-date:20260311-->
     * 精读区
       * <a class="dpr-sidebar-item-link dpr-sidebar-item-structured" href="#/202603/11/2603.08048v1-s2s-fdd-bridging-industrial-time-series-and-natural-language-for-explainable-zero-shot-fault-diagnosis" data-sidebar-item="{&quot;title&quot;: &quot;S2S-FDD: Bridging Industrial Time Series and Natural Language for Explainable Zero-shot Fault Diagnosis&quot;, &quot;link&quot;: &quot;https://arxiv.org/abs/2603.08048v1-s2s-fdd-bridging-industrial-time-series-and-natural-language-for-explainable-zero-shot-fault-diagnosis&quot;, &quot;score&quot;: &quot;9.0&quot;, &quot;tags&quot;: [{&quot;kind&quot;: &quot;query&quot;, &quot;label&quot;: &quot;rul-dt&quot;}], &quot;evidence&quot;: &quot;工业系统可解释零样本故障诊断&quot;}">S2S-FDD: Bridging Industrial Time Series and Natural Language for Explainable Zero-shot Fault Diagnosis</a>
