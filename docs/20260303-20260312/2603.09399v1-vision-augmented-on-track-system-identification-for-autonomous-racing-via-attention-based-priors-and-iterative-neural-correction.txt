@@ -1,0 +1,216 @@
+Title: Vision-Augmented On-Track System Identification for Autonomous Racing via Attention-Based Priors and Iterative Neural Correction
+
+URL Source: https://arxiv.org/pdf/2603.09399v1
+
+Published Time: Wed, 11 Mar 2026 00:54:27 GMT
+
+Number of Pages: 8
+
+Markdown Content:
+# Vision-Augmented On-Track System Identification for Autonomous Racing via Attention-Based Priors and Iterative Neural Correction 
+
+Zhiping Wu *, Cheng Hu *, Yiqin Wang, Lei Xie †, and Hongye Su 
+
+Fig. 1. The proposed vision-augmented, iterative closed-loop system identification framework. A MobileNetV3-based vision module provides a heuristic friction prior to warm-start the physical model’s peak friction parameter ( D). Concurrently, the Structured State Space Sequence (S4) network captures high-frequency dynamic residuals by learning long-range dependencies from the state and input data. Finally, the derivative-free Nelder-Mead algorithm extracts physically bounded tire parameters ( Φp) via hybrid virtual simulation, enabling continuous iterative refinement of the nominal model. 
+
+Abstract — Operating autonomous vehicles at the absolute limits of handling requires precise, real-time identification of highly non-linear tire dynamics. However, traditional online optimization methods suffer from “cold-start” initialization failures and struggle to model high-frequency transient dynam-ics. To address these bottlenecks, this paper proposes a novel vision-augmented, iterative system identification framework. First, a lightweight Convolutional Neural Network (CNN) (MobileNetV3) translates visual road textures into a continuous heuristic friction prior, providing a robust ”warm-start” for parameter optimization. Next, a S4 model captures complex temporal dynamic residuals, circumventing the memory and latency limitations of traditional MLPs and RNNs. Finally, a derivative-free Nelder-Mead algorithm iteratively extracts physically interpretable Pacejka tire parameters via a hybrid virtual simulation. Co-simulation in CarSim demonstrates that the lightweight vision backbone reduces friction estimation error by 76.1% using 85% fewer FLOPs, accelerating cold-start convergence by 71.4%. Furthermore, the S4-augmented frame-work improves parameter extraction accuracy and decreases lateral force RMSE by over 60% by effectively capturing complex vehicle dynamics, demonstrating superior performance compared to conventional neural architectures. 
+
+I. I NTRODUCTION 
+
+Operating autonomous vehicles at the limits of han-dling such as in autonomous racing or emergency collision  
+
+> *These authors contributed equally to this work.
+> †The corresponding author of this paper. Zhiping Wu, Cheng Hu, Yiqin Wang, Lei Xie, and Hongye Su are with the State Key Laboratory of Industrial, Zhejiang University, Hangzhou 310027, China. Emails: {wuzhiping, 22032081, yiqinwang }@zju.edu.cn;
+> {leix, hysu }@iipc.zju.edu.cn.
+
+avoidance requires high-fidelity models of vehicle and tire dynamics. Since the highly non-linear tire-road interface fundamentally defines the physical boundaries of vehicle maneuverability, the precise identification of tire parameters and road friction coefficients becomes a critical prerequisite for effective motion planning and robust Model Predictive Control (MPC) [1]–[3]. Traditionally, system identification for complex tire mod-els relies on offline, steady-state maneuvers [4]. While these methods yield high-fidelity baseline models, they lack the agility to adapt to dynamic environmental stochasticity, such as sudden friction transitions. To bridge this gap, online iden-tification frameworks leverage real-time vehicle telemetry. However, classical optimization-based solvers often struggle in high-transient racing cenarios. Due to the highly non-convex landscape of empirical tire models, these techniques exhibit extreme sensitivity to parameter initialization. A sub-optimal initial estimate frequently results in ill-conditioned Jacobian matrices and numerical instability, leading to ex-cessive iterations that compromise real-time computational tractability. Furthermore, even when optimization solvers converge on nominal physical parameters, purely physics-based models often fail to capture high-frequency unmodeled transients. While recent research [5] has pivoted toward data-driven residual learning to bridge these structural mismatches, stan-dard architectures exhibit inherent limitations. Multi-Layer Perceptrons (MLP) lack the capacity to account for temporal 
+
+> arXiv:2603.09399v1 [cs.RO] 10 Mar 2026
+
+dependencies and underlying physics [6], whereas Recurrent Neural Network (RNN) frequently encounter vanishing or exploding gradient issues [7], hindering their ability to model long-term dynamic sequences in high-speed racing. This paper proposes a vision-augmented, iterative frame-work for system identification (Fig. 1). The approach utilizes a ’warm-start’ mechanism to constrain the parameter search space, followed by a S4 model to capture high-frequency residuals. The process concludes by extracting Pacejka pa-rameters via the Nelder-Mead simplex algorithm within a hybrid virtual simulation, ensuring physical consistency. The main contributions of this paper are summarized as follows:  
+
+> •
+
+Vision-Accelerated Parameter Initialization: Amethodology is introduced to map categorical visual road classifications into continuous heuristic friction priors via probabilistic mapping. This warm-start mechanism effectively eliminates transient convergence delays.  
+
+> •
+
+High-Frequency Residual Modeling via S4: This work employs the S4 architecture for vehicle dynamic residual learning, leveraging global convolutions to model long-term inertial dependencies while circum-venting the sequence degradation inherent in recurrent models.  
+
+> •
+
+Iterative Derivative-Free Parameter Extraction: An iterative closed-loop framework is proposed, utilizing the Nelder-Mead algorithm on hybrid virtual simulation data. This approach ensures that the identified tire mod-els remain physically interpretable and strictly bounded. II. R ELATED WORK 
+
+A. Predictive vs. Reactive Friction Estimation 
+
+Accurate estimation of the tire-road friction coefficient (TRFC) is a critical prerequisite for limit-handling control, as it defines the tractable regions of the tire friction cir-cle. In autonomous racing, TRFC overestimation triggers excessive slip or instability, while underestimation yields overly conservative trajectories that compromise lap time [4]. Traditional model-based observers, such as the Extended or Cubature Kalman Filters, are fundamentally reactive, identi-fying friction variations only post-facto—after the vehicle’s dynamic state has deviated [8]. This inherent response lag severely jeopardizes tracking stability during abrupt surface transitions at high velocities. To mitigate this, cameras offer a crucial ”look-ahead” hori-zon. Extracting predictive features from this visual stream traditionally relies on standard deep CNN like ResNet [9] and EfficientNet [10]. However, their substantial computational footprint induces inference latency that fundamentally under-mines the predictive advantage required for autonomous rac-ing. Beyond the need for highly efficient backbones, standard image classification yields discrete labels incompatible with continuous controllers. Without physical constraints, these data-driven models are vulnerable to the sim-to-real gap and ”physical hallucinations” under unfamiliar conditions [11]. Consequently, our approach treats lightweight visual classi-fication as a statistical preview rather than an absolute sensor. By mapping categorical probabilities to friction expectations via physical basis vectors, we extract a robust heuristic prior to ”warm-start” the identification loop, effectively decoupling visual uncertainty from the final vehicle dynamic boundaries. 
+
+B. On-Track System Identification at the Limits 
+
+Accurately modeling highly non-linear tire dynamics is fundamental to autonomous racing. Traditional offline iden-tification relies on structured experiments and optimiza-tion techniques like Non-Linear Least Squares (NLS) [12], which inherently fail to adapt to mid-race environmental changes. While online on-track identification [13] leverages continuous telemetry to dynamically update parameters, an inaccurate initial guess renders the optimization landscape ill-conditioned, leading to severe convergence delays. Our approach circumvents this algorithmic brittleness by cou-pling the proposed visual warm-start with the derivative-free Nelder-Mead simplex algorithm, ensuring robust and rapid parameter convergence. 
+
+C. Hybrid Dynamics and Sequence-Based Residual Model-ing 
+
+The integration of machine learning with first-principles physics has gained significant traction for capturing com-plex vehicle dynamics at the edge of handling. A com-mon paradigm utilizes a nominal physical model to cap-ture baseline behavior, while a neural network learns the high-frequency unmodeled residual dynamics [14], [15]. Previous frameworks have utilized MLPs and RNNs for this task. However, MLPs process telemetry independently, entirely disregarding the temporal ”memory” of the vehicle’s inertial physics. Conversely, RNNs suffer from vanishing gradients and high computational latency due to sequential inefficiencies. Recently, S4 [16] models have emerged as an efficient alternative, handling long-range dependencies mathematically and empirically. Rooted in continuous-time linear systems, S4 explicitly models continuous dynamics while scaling efficiently via global convolutions. III. M ETHODOLOGY 
+
+A. Nominal Vehicle and Tire Dynamics 
+
+The vehicle dynamics are represented by the dynamic single-track model (Fig. 2). This model is widely utilized in autonomous racing research as it effectively captures critical tire-road interactions during both steady-state and transient cornering, while maintaining computational efficiency by decoupling longitudinal and lateral dynamics. Under the assumption of a sufficiently low Center of Gravity (CoG), the influences of longitudinal and lateral load transfers are treated as negligible. The lateral and yaw dynamics are governed by the follow-ing equations of motion: 
+
+˙vy = 1
+
+m (Fyr + Fyf cos δ − mv xω) (1) Fig. 2. Schematic representation of the dynamic single-track model. 
+
+˙ω = 1
+
+Iz
+
+(Fyf lf cos δ − Fyr lr ) (2) where m is the vehicle mass and Iz is the yaw moment of inertia. The state variables vx, vy , and ω denote longi-tudinal velocity, lateral velocity, and yaw rate, respectively. Geometric parameters lf and lr represent the distances from the CoG to the front and rear axles. The control input is the steering angle δ, while Fyf and Fyr are the lateral tire forces. These lateral forces are functions of the tire slip angles, 
+
+αf and αr , kinematically derived as: 
+
+αf = δ − arctan 
+
+ vy + lf ωvx
+
+
+
+(3) 
+
+αr = − arctan 
+
+ vy − lr ωvx
+
+
+
+(4) To model highly non-linear interactions at the handling limits, the Pacejka Magic Formula is employed: 
+
+Fyi = Di sin 
+
+
+
+Ci arctan  Biαi−Ei(Biαi−arctan( Biαi)) 
+
+(5) for i ∈ { f, r }. The empirical tire behavior is defined by the parameter vector Φp,i = [ Bi, C i, D i, E i], representing stiffness, shape, peak friction, and curvature, respectively. A major challenge in real-time identification of Eq. (5) is its sensitivity to initialization. To mitigate the risk of local minima, our framework introduces a coupling mechanism: the peak friction parameter D is initialized using a vision-based heuristic prior ( μprior ), the derivation of which is detailed in the following section. 
+
+B. Vision-Based Friction Initialization 1) Dataset Foundation and Preprocessing: To establish a reliable visual foundation for friction estimation, we leverage the Road Surface Condition Dataset (RSCD) [17]. Span-ning approximately 700 km across diverse environments, the RSCD encompasses over 1 million image samples with high-fidelity labels for friction levels, surface unevenness, and material properties. This extensive scale is instrumental in ensuring robust generalization across the intricate visual textures encountered in autonomous racing. To bridge the gap between categorical deep learning outputs and continuous physical control variables, we adopt a probabilistic mapping framework to translate high-dimensional visual features into numerical friction coeffi-cients [18]. Given the distinct physical characteristics of racing tracks, we define a set of N macro-classes, formally associated with a predefined physical friction basis vector 
+
+B ∈ RN :
+
+B = [ μ1, μ 2, . . . , μ N ]T (6) where each element μi corresponds to the nominal friction coefficient associated with the i-th surface category. During the forward pass, the CNN backbone extracts features to generate a raw logit vector z ∈ RN . This vector is transformed into a categorical probability distribution p
+
+via the Softmax function: 
+
+pi = exp( zi)
+
+PNj=1 exp( zj ) (7) The estimated friction coefficient ˆμ is then derived as the weighted expectation over the physical bases: 
+
+ˆμ =
+
+> N
+
+X
+
+> i=1
+
+pi · μi = pT B (8) This formulation yields a differentiable mapping that smooths transitions between discrete surface states. By con-verting categorical confidence into a continuous prior, the framework provides numerically stable inputs for subsequent online system identification, enabling the vehicle to adapt its internal dynamic models in real-time. 
+
+2) CNN Backbone: To meet the rigorous real-time constraints of high-speed autonomous racing, we employ MobileNetV3-Small [19] as the vision backbone (Fig. 3). This selection is motivated by the requirement for deter-ministic, low-latency feature extraction, ensuring that visual priors remain synchronized with the vehicle’s high-frequency control loop and the subsequent system identification stage. The efficiency of MobileNetV3-Small stems from its In-verted Residual Block structure. Unlike conventional residual blocks, this architecture employs a 1 × 1 expansion layer to project input features into a high-dimensional latent space, followed by a depthwise convolution for spatial feature extraction. To preserve feature integrity within the high-dimensional embedding, a 1 × 1 linear bottleneck projects the features back to a lower-dimensional space without non-linear activation. To enhance sensitivity to subtle road textures—such as moisture patterns or grain variations—the deeper stages integrate the SE attention mechanism. By dynamically re-calibrating channel-wise responses through global context modeling, the SE module enables the network to prioritize salient surface reflections while suppressing environmental noise. This lightweight, attention-augmented configuration ensures robust prior generation within a millisecond-scale inference window, satisfying the stringent constraints of edge deployment. Fig. 3. Architecture of the vision-based friction estimation module. The system utilizes a MobileNetV3-Small backbone across four hierarchical stages for efficient feature extraction. The Inverted Residual Block topology incorporates a Squeeze-and-Excitation (SE) attention mechanism for texture recalibration. The Probabilistic Friction Mapper executes a classification-to-regression mapping, weighting the Softmax distribution p by the physical basis vector B to derive the continuous expected friction coefficient ˆμ.
+
+3) Heuristic Friction Mapping and the ”Cold Start” Solu-tion: A primary challenge in real-time system identification is the ”cold-start” problem, where suboptimal tire parameter initialization frequently leads to numerical divergence or entrapment in local minima. To bridge the gap between visual perception and continuous vehicle dynamics, the proposed vision module incorporates a heuristic friction mapping layer. This layer translates the CNN output into a nominal friction value, μprior , based on standardized physical bench-marks. This vision-derived prior directly serves as the initial-ization seed for the peak friction parameter D in the Pacejka Magic Form 
+
+Dinitial = ˆ μ = pT B (9) By ”warm-starting” the identification process with this visual prior, the parameter search space is significantly constrained. This strategy accelerates the convergence rate of subsequent optimization stages and enhances algorithmic robustness under extreme racing conditions. However, while this vision-augmented initialization ef-fectively identifies nominal physical parameters, unmodeled high-frequency transients and complex residuals inevitably persist at the absolute handling limits. To compensate for these non-linear discrepancies, a sequence-based neural cor-rection mechanism is introduced in the following subsection. 
+
+C. S4-Based Dynamic Residual Error Modeling 1) Mathematical Formulation of the S4 Model: The foun-dation of the S4 model is rooted in continuous-time linear time-invariant (LTI) state-space representations. It contin-uously maps a 1-D input signal u(t) ∈ R to an output signal y(t) ∈ R via an implicit N -dimensional latent state 
+
+h(t) ∈ RN :
+
+˙h(t) = Ah(t) + Bu(t), y(t) = Ch(t) + Du(t) (10) To process discrete vehicle telemetry sampled at intervals 
+
+Ts, the continuous parameters (A, B) are discretized using a learnable step size ∆. Under the Zero-Order Hold (ZOH) assumption, the continuous system is transformed into a discrete representation where the state transition is governed by exp(∆ A). To maintain the physical integrity of the mapping during kernel construction, the output matrix C is scaled to account for the integration of the state over the discrete interval: 
+
+¯C = C(exp(∆ A) − I)A−1 (11) Consequently, the discrete linear recurrence can be ex-pressed as: 
+
+hk = ¯Ahk−1 + ¯Buk, yk = ¯Chk + Duk (12) where ¯A = exp(∆ A). Unlike RNN that suffer from sequential bottlenecks and vanishing gradients, the S4 model mathematically unrolls this recurrence into a global discrete convolution. For a sequence of length L, the output is computed with high parallel efficiency via the Fast Fourier Transform (FFT) utilizing a structured convolutional kernel 
+
+¯K:
+
+y = ¯K ∗ u, where ¯Kk = ¯C exp(∆ A)kB (13) The critical innovation of the S4 architecture lies in the specific parameterization of the state transition matrix A. To effectively capture long-term historical dependencies—such as tire relaxation lengths and transient load transfers— A is structured as a diagonal matrix with complex eigenvalues and initialized utilizing the High-order Polynomial Projec-tion Operator (HiPPO) framework. The real components of these eigenvalues govern the exponential decay of past state memory, while the imaginary components characterize the oscillatory modes of the vehicle dynamics. This formulation provides a physically intuitive and mathematically rigorous mechanism for modeling the frequency-rich, non-linear tran-sients inherent in autonomous racing. 
+
+2) Network Architecture: The architecture of the S4-based residual network is illustrated in Fig. 4. The S4-based resid-ual network is architected to balance representational capac-ity with computational tractability, ensuring compliance with the real-time constraints of onboard inference. The input vec-tor, comprising state-action pairs uk = [ vx,k , v y,k , ω k, δ k]T ,is initially projected into a high-dimensional latent space 
+
+dmodel via a linear encoding layer. This latent sequence is subsequently processed by the S4 kernel through global con-volutions, which extract temporal dependencies and dynamic cross-correlations across the entire time horizon L without the overhead of sequential recurrence. To ensure robust generalization on sparse on-track datasets, the S4 layer output is regularized using a Gaussian Error Linear Unit (GELU) activation and a dropout layer. Finally, a decoding module maps the latent representations back to the dynamic residual space ek = [∆ vy , ∆ω]T . By in-tegrating this memory-augmented architecture, the proposed methodology overcomes the temporal amnesia typical of traditional MLPs, effectively filtering measurement noise and capturing the high-frequency transients essential for handling at the vehicle’s physical limits. 
+
+Fig. 4. Architecture of the S4 model. The diagram illustrates the transition from HiPPO-initialized continuous state-space to a discrete convolutional representation, enabling paral-lelized computation of vehicle dynamic residuals. 
+
+D. Parameter Identification with the S4-Corrected Vehicle Model 
+
+Dynamic track conditions inevitably induce a model mis-match ( ek) between the vehicle’s true state xk+1 and the nominal prediction ˆxk+1 . To capture these unmodeled transients, we construct a ”Corrected Vehicle Model” that augments the nominal physics with the S4-derived residual sequence( useq ):
+
+xk+1 = fmodel (xk, u k, Φp) + fS4(useq ) (14) Within this virtual environment, the vehicle is simulated at a constant average longitudinal velocity, and a linear steering sweep maneuver is applied. This controlled, virtual maneuver safely forces the tires into their non-linear saturation regions. Assuming quasi-steady-state conditions ( ˙vy ≈ 0, ˙ω ≈ 0), the true lateral tire forces can be analytically derived from the corrected states: 
+
+Fyr = ml f
+
+lf + lr
+
+vxω, Fyf = ml r
+
+lf + lr
+
+vxω
+
+cos( δ) (15) To fit the Pacejka Magic Formula to this synthesized 
+
+(Fy , α ) dataset, we employ the derivative-free Nelder-Mead algorithm. Unlike gradient-based solvers (e.g., NLS) that often diverge due to ill-conditioned Jacobian matrices in non-convex landscapes, Nelder-Mead ensures robust convergence within strict physical bounds. Finally, since the initial model mismatch can be signif-icant, a single extraction step is insufficient. We therefore propose a closed-loop iterative framework, where the iden-tified Pacejka parameters Φp update the nominal baseline, and the S4 network is retrained on the progressively reduced residuals. This cycle (Residual Learning → Virtual Simula-tion → Parameter Extraction) is repeated until convergence, as illustrated in Fig. 5. By jointly evolving the physical parameters and the neural network, the framework mitigates overfitting and yields a robust tire model. 
+
+Fig. 5. Iterative framework for tire model identification. IV. S IMULATION RESULTS 
+
+The entire experiment is conducted on a joint co-simulation platform using MATLAB-R2023b and the high-fidelity vehicle simulation software CarSim-2019. The sim-ulation is executed on an Intel Xeon Platinum processor and an NVIDIA RTX 4090 GPU, where the GPU is used to accelerate neural network inference. 
+
+A. Simulation Setup 
+
+To evaluate the performance of the proposed algorithm, simulation experiments are conducted in CarSim, a high-fidelity vehicle dynamics simulator designed to minimize the sim-to-real gap. A key advantage of the CarSim environment is the ability to define custom road surfaces with specific friction coefficients ( μ), allowing for rigorous testing across diverse track conditions.Prior to the dynamic simulations, the lightweight MobileNetV3 vision backbone is trained offline using a predefined dataset of diverse road surface images. The data collection and processing workflow is organized into two distinct phases: first, 30 seconds of telemetry data 
+
+[vx, v y , ω, δ ] is collected as the vehicle follows a predefined trajectory using a Pure Pursuit controller [20] to train the S4 residual network ; subsequently, an online system iden-tification process is triggered to rapidly update the Pacejka tire parameters ( Φp) through a closed-loop iterative process, ensuring the nominal model matches the refined dynamics captured by the S4-corrected model. 
+
+Fig. 6. Visualization of the data acquisition phase in the CarSim environment. 
+
+B. Results 
+
+The vision backbone is first evaluated for friction estima-tion, followed by an analysis of its role in cold-start iden-tification. The impact of network architecture on parameter extraction is then examined. 
+
+1) Vision Backbone Evaluation: Prior to evaluating the closed-loop vehicle dynamics, we benchmark the perfor-mance of the vision-based friction estimation module. We compare three prominent architectures—MobileNetV3-Small, ResNet-18, and EfficientNet-B0—as detailed in Ta-ble I. To ensure a fair and comprehensive evaluation, all three vision backbones were trained under identical experimental conditions. The input images were resized to 224 × 224 
+
+pixels and normalized using standard ImageNet statistics. To enhance model robustness and mitigate overfitting, we applied a series of data augmentation techniques during the training phase, including random horizontal flipping, color jittering, and random rotations between −4◦ and 4◦.The networks were trained for 40 epochs with a batch size of 256, utilizing the Stochastic Gradient Descent (SGD) optimizer. We set the momentum to 0.9, weight decay to 0.0001, and an initial learning rate of 0.05. A step learning rate scheduler was employed, decaying the learning rate by a factor of 0.1 every 15 epochs. During inference, the final friction coefficient is calculated as defined in Equation 8. MobileNetV3 achieves the lowest RMSE of 0.102, sig-nificantly outperforming ResNet-18 and EfficientNet-B0. Specifically, compared to ResNet-18, MobileNetV3 re-duces the RMSE by 0.325 (76.1%), demonstrating substan-tially improved friction estimation accuracy. Compared to EfficientNet-B0, MobileNetV3 achieves a reduction of 0.208 (67.1%). In addition to its superior accuracy, MobileNetV3 TABLE I Quantitative comparison of candidate vision backbones.                   
+
+> Metric MobileNetV3 (ours) ResNet-18 [9] EfficientNet [19] Params (M) 1.52 11.18 4.01 FLOPs (G) 0.12 3.65 0.83 RMSE 0.102 0.427 0.310 Latency (ms) 5.91 5.33 8.35
+> Note: Params (M) denotes the number of trainable parameters in mil-lions. FLOPs (G) represents the number of floating-point operations in billions for a single forward pass. Accuracy (%) denotes the percentage of predictions within a predefined friction coefficient error threshold. RMSE represents the root mean square error of the estimated friction coefficient, respectively. Latency (ms) denotes the average inference time per sample.
+
+is also considerably more efficient, requiring 86.4% fewer parameters and 96.7% fewer FLOPs than ResNet-18, and 62.1% fewer parameters and 85.5% fewer FLOPs than EfficientNet-B0. Although ResNet-18 has slightly lower latency (5.33 ms vs. 5.91 ms), its significantly higher RMSE makes it unsuitable for accurate friction estimation. EfficientNet-B0, while more accurate than ResNet-18, suffers from both higher latency and substantially higher RMSE compared to MobileNetV3. Therefore, MobileNetV3 pro-vides the best balance between accuracy and efficiency, delivering reliable millisecond-scale inference performance for autonomous racing applications. 
+
+2) Impact of Vision Prior on Cold-Start Identification: 
+
+In practical autonomous racing, vehicles frequently enter an unseen circuit where the global TRFC is not accurately known a priori. Traditional online parameter identification algorithms must rely on a default, hardcoded initial guess (μ0). If this initialization heavily deviates from the actual surface conditions, the optimization solver requires extensive closed-loop iterations to converge, leading to initial erratic control behavior and compromised trajectory tracking. To quantify the benefits of integrating a visual prior, we established an initial maneuvering experiment on a uni-form yet unknown surface. To construct this experimental setup, high-resolution road texture images—corresponding to specific, known friction coefficients—were first mapped onto the Carsim simulated road. Subsequently, prior to data acquisition, the physical tire-road friction coefficient ( μ)defined within the CarSim environment was strictly aligned with the inherent friction value represented by the visual texture, thereby guaranteeing visual-physical consistency. We triggered the online system identification during the vehicle’s initial acceleration phase to benchmark two distinct pipelines: a standard optimization process operating without visual context, and our proposed vision-augmented frame-work. In the latter pipeline, the rendered road texture im-ages are directly processed by the lightweight MobileNetV3 backbone to instantly yield a heuristic friction expectation ˆμ.The quantitative advantages of this framework are detailed in Table II. Both pipelines start with a severely mismatched default initial friction guess of μ0 = 0 .51 . In the vision-augmented pipeline, the network immediately extracts aheuristic prior of ˆμ = 0.80 from the simulated visual TABLE II Effect of Vision Prior on Identification Initialization                   
+
+> Metric No Vision Vision
+> Init. Friction μ00.51 0.51 Vision Friction ˆμ–0.80
+> Fyf /F zf RMSE 0.219 0.076
+> Fyr /F zr RMSE 0.073 0.046
+> Iter. 72
+> (a) Without the visual prior
+> (b) With the visual prior
+
+Fig. 7. Comparison of identified tire force curves with and without the vision prior. The vision prior significantly improves the initial parameter accuracy. textures. This ”warm-start” fundamentally transforms the optimization landscape. Most notably, it accelerates solver convergence by reducing the required Nelder-Mead iterations from 7 down to just 2—a 71.4% reduction in initial setup time. Furthermore, the vision prior drastically improves the parameter extraction accuracy. Compared to the baseline, the vision-augmented approach reduces the Fyf /F zf RMSE by 0.143 (a 65.3% improvement) and the Fyr /F zr RMSE by 0.027 (a 37.0% improvement). The physical fidelity of this initialization is further cor-roborated by the identified tire force curves in Fig. 7. Without the visual prior (Fig. 7a), the substantial initial parameter mismatch causes the solver to struggle through a prolonged search space, resulting in noticeable deviations in the estimated non-linear handling regions. Conversely, by conditioning the solver with the vision-derived expectation (Fig. 7b), the framework effectively places the initial simplex directly in the vicinity of the global minimum. This capabil-ity ensures that the vehicle acquires a highly accurate and stable dynamic model almost instantly upon race initiation, effectively preventing cold-start instability. 
+
+3) Impact of Network Architecture on Parameter Extrac-tion: To isolate the architectural impact on physical param-eter extraction, we benchmark the proposed S4 framework against a memoryless Multi-Layer Perceptron (MLP) and a RNN. The fidelity of the extracted Pacejka models funda-mentally depends on how accurately the network captures unmodeled transient dynamics during the virtual steady-state simulation. TABLE III Performance Metrics of Different Residual Architectures for Parameter Extraction                 
+
+> Architecture Fyf /F zf RMSE Fyr /F zr RMSE Time [s]
+> MLP 0.234 0.071 5.3
+> RNN 0.097 0.084 12.9
+> S4 (Ours) 0.051 0.033 12.2
+
+As summarized in Table III, the S4 framework achieves the lowest RMSE for both front and rear normalized lateral forces, significantly outperforming the MLP and RNN ar-chitectures. Specifically, compared to the MLP, S4 reduces the Fyf /F zf RMSE by 0.183 (a 78.2% improvement) and the Fyr /F zr RMSE by 0.038 (53.5%), demonstrating asubstantially improved ability to capture unmodeled transient dynamics. When compared to the RNN, S4 achieves a reduc-tion of 0.046 (47.4%) in Fyf /F zf RMSE and 0.051 (60.7%) in Fyr /F zr RMSE. Although the memoryless MLP offers the lowest computational time (5.3 s vs. 12.2 s), its significantly higher RMSE indicates a fundamental failure to account for the vehicle’s temporal inertia. The RNN, while more accurate than the MLP for the front tire, suffers from sequential execution bottlenecks resulting in the highest computational time (12.9 s) alongside worse rear tire estimation. Therefore, the S4 framework provides the optimal balance between precision and efficiency, yielding highly reliable sequence-level accuracy necessary for high-fidelity Pacejka parameter identification. Beyond scalar metrics, the qualitative physical fidelity of the architectures is visualized in Fig. 8, which illustrates the identified lateral force curves ( Fy vs. α). The S4 model leverages global convolutions and the HiPPO framework to rigorously capture both high-frequency transients and long-term inertial dependencies. This sequence-level accuracy ensures high-fidelity synthetic data generation, enabling the Nelder-Mead optimizer to precisely and reliably resolve tire saturation limits. Conversely, the MLP and RNN models exhibit visible deviations and underestimations in the critical non-linear handling regions. V. C ONCLUSION 
+
+In this paper, a vision-accelerated, sequence-based frame-work for online system identification in high-speed au-tonomous racing was presented. By utilizing a MobileNetV3 (a) MLP (b) RNN (c) S4 (Ours) 
+
+Fig. 8. Comparison of identified Pacejka tire force curves using different neural architectures. The proposed S4 model achieves the highest identification accuracy and best alignment with the ground truth. backbone to generate a probabilistic friction prior, the pro-posed method effectively mitigates the cold-start initializa-tion issue and significantly reduces parameter convergence time. To capture unmodeled transient dynamics, the S4 architecture was integrated, demonstrating superior identi-fication accuracy compared to conventional MLP and RNN architectures. Combined with a derivative-free Nelder–Mead optimizer in a virtual steady-state environment, physically interpretable Pacejka tire parameters were reliably extracted. Extensive co-simulation results demonstrate the frame-work’s effectiveness. The lightweight vision backbone re-duces friction estimation error by 76.1% using 85% fewer FLOPs, which directly accelerates cold-start convergence by reducing optimization iterations by 71.4%. Furthermore, by capturing transient dynamics, the S4 residual model decreases lateral force RMSE by 78.2% compared to con-ventional architectures. The resulting framework enables accurate and efficient tire model identification, providing a practical and interpretable solution for real-time autonomous racing applications. REFERENCES [1] Yonghao Fu, Cheng Hu, Haokun Xiong, Zhanpeng Bao, Wenyuan Du, Edoardo Ghignone, Michele Magno, Lei Xie, and Hongye Su. Residual koopman model predictive control for enhanced vehicle dynamics with small on-track data input. In 28th International Conference on Intelligent Transportation Systems (ITSC 2025) , 2025. [2] Ugo Rosolia and Francesco Borrelli. Learning model predictive control for iterative tasks. a data-driven control framework. IEEE Transactions on Automatic Control , 63(7):1883–1896, 2017. [3] Zhouheng Li, Lei Xie, Cheng Hu, and Hongye Su. Reduce lap time for autonomous racing with curvature-integrated mpcc local trajectory planning method. In 2024 IEEE 27th International Conference on Intelligent Transportation Systems (ITSC) , pages 1066–1073. IEEE, 2024. [4] Hans Pacejka. Tire and vehicle dynamics . Elsevier, 2005. [5] Kyeong Hyeon Kim, Cheolmin Jeong, Junghyun Kim, Sanghyuk Lee, and Chang Mook Kang. Data-driven lstm model and predictive control for vehicle lateral motion. Journal of Electrical Engineering & Technology , 19(6):3635–3644, 2024. [6] Navid Mohammadi Foumani, Lynn Miller, Chang Wei Tan, Geoffrey I Webb, Germain Forestier, and Mahsa Salehi. Deep learning for time series classification and extrinsic regression: A current survey. ACM Computing Surveys , 56(9):1–45, 2024. [7] Athanasios Tsiligkaridis, Jing Zhang, Hiroshi Taguchi, and Daniel Nikovski. Personalized destination prediction using transformers in a contextless data setting. In 2020 International Joint Conference on Neural Networks (IJCNN) , pages 1–7. IEEE, 2020. [8] Yan Wang, Guodong Yin, and Haoxuan Dong. A novel approach for tire-road friction coefficient estimation using adaptive cubature kalman filter. In 2020 4th CAA International Conference on Vehicular Control and Intelligence (CVCI) , pages 30–34. IEEE, 2020. [9] Kaiming He, Xiangyu Zhang, Shaoqing Ren, and Jian Sun. Deep residual learning for image recognition. In Proceedings of the IEEE conference on computer vision and pattern recognition , pages 770– 778, 2016. [10] Mingxing Tan and Quoc Le. Efficientnet: Rethinking model scaling for convolutional neural networks. In International conference on machine learning , pages 6105–6114. PMLR, 2019. [11] Jingtao Ding, Yunke Zhang, Yu Shang, Yuheng Zhang, Zefang Zong, Jie Feng, Yuan Yuan, Hongyuan Su, Nian Li, Nicholas Sukiennik, et al. Understanding world or predicting future? a comprehensive survey of world models. ACM Computing Surveys , 58(3):1–38, 2025. [12] Maximilian Brunner, Ugo Rosolia, Jon Gonzales, and Francesco Borrelli. Repetitive learning model predictive control: An autonomous racing example. In 2017 IEEE 56th annual conference on decision and control (CDC) , pages 2545–2550. IEEE, 2017. [13] Onur Dikici, Edoardo Ghignone, Cheng Hu, Nicolas Baumann, Lei Xie, Andrea Carron, Michele Magno, and Matteo Corno. Learning-based on-track system identification for scaled autonomous racing in under a minute. IEEE Robotics and Automation Letters , 10(2):1984– 1991, 2025. [14] Anurag Ajay, Maria Bauza, Jiajun Wu, Nima Fazeli, Joshua BTenenbaum, Alberto Rodriguez, and Leslie P Kaelbling. Combining physical simulators and object-based networks for control. In 2019 International Conference on Robotics and Automation (ICRA) , pages 3217–3223. IEEE, 2019. [15] Ruxandra Barbulescu, Gabriela Ciuprina, Anton Duca, Paulo Machado, and L Miguel Silveira. Physics-informed neural networks for a highly nonlinear dynamic system. Journal of Mathematics in Industry , 15(1):7, 2025. [16] Albert Gu, Karan Goel, and Christopher R´ e. Efficiently model-ing long sequences with structured state spaces. arXiv preprint arXiv:2111.00396 , 2021. [17] Tong Zhao, Junxiang He, Jingcheng Lv, Delei Min, and Yintao Wei. A comprehensive implementation of road surface classification for vehicle driving assistance: Dataset, models, and deployment. IEEE Transactions on Intelligent Transportation Systems , 24(8):8361–8370, 2023. [18] Mohammad Otoofi, William JB Midgley, Leo Laine, Henderson Leon, Laura Justham, and James Fleming. Estimating friction coefficient using generative modelling. In 2023 IEEE International Conference on Mechatronics (ICM) , pages 1–6. IEEE, 2023. [19] Andrew Howard, Mark Sandler, Grace Chu, Liang-Chieh Chen, Bo Chen, Mingxing Tan, Weijun Wang, Yukun Zhu, Ruoming Pang, Vijay Vasudevan, et al. Searching for mobilenetv3. In Proceedings of the IEEE/CVF international conference on computer vision , pages 1314–1324, 2019. [20] Johannes Betz, Hongrui Zheng, Alexander Liniger, Ugo Rosolia, Phillip Karle, Madhur Behl, Venkat Krovi, and Rahul Mangharam. Autonomous vehicles on the edge: A survey on autonomous vehicle racing. IEEE Open Journal of Intelligent Transportation Systems ,3:458–488, 2022.

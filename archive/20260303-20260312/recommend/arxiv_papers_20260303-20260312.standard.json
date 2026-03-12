@@ -1,15 +1,15 @@
 {
   "mode": "standard",
-  "generated_at": "2026-03-12T07:47:56.153753+00:00",
+  "generated_at": "2026-03-12T07:50:35.426527+00:00",
   "stats": {
     "mode": "standard",
     "tag_count": 1,
     "deep_divecandidates": 0,
     "deep_cap": 6,
     "deep_selected": 0,
-    "quick_candidates": 1,
+    "quick_candidates": 3,
     "quick_skim_target": 11,
-    "quick_selected": 1
+    "quick_selected": 3
   },
   "deep_dive": [],
   "quick_skim": [
@@ -33,13 +33,13 @@
         "keyword:RUL预测"
       ],
       "llm_score": 7.0,
-      "llm_evidence_en": "Real-time tracking and RPM estimation for rotating machinery",
-      "llm_evidence_cn": "旋转机械的实时跟踪和转速估计",
-      "llm_evidence": "旋转机械的实时跟踪和转速估计",
-      "canonical_evidence": "旋转机械的实时跟踪和转速估计",
-      "llm_tldr_en": "HelixTrack provides event-based tracking and RPM estimation for rotating objects like propellers.",
-      "llm_tldr_cn": "HelixTrack 实现了螺旋桨等旋转物体的基于事件的跟踪和转速估计。",
-      "llm_tldr": "HelixTrack 实现了螺旋桨等旋转物体的基于事件的跟踪和转速估计。",
+      "llm_evidence_en": "tracking and RPM estimation of rotating machinery with microsecond latency",
+      "llm_evidence_cn": "旋转机械的微秒级延迟跟踪与转速估计",
+      "llm_evidence": "旋转机械的微秒级延迟跟踪与转速估计",
+      "canonical_evidence": "旋转机械的微秒级延迟跟踪与转速估计",
+      "llm_tldr_en": "Introduces HelixTrack for event-based tracking and RPM estimation of fast rotating objects like propellers.",
+      "llm_tldr_cn": "介绍了HelixTrack，用于螺旋桨等快速旋转物体的基于事件的跟踪和转速估计。",
+      "llm_tldr": "介绍了HelixTrack，用于螺旋桨等快速旋转物体的基于事件的跟踪和转速估计。",
       "llm_tags": [
         "query:rul"
       ],
@@ -48,6 +48,84 @@
       "matched_requirement_id": "req-8",
       "selection_source": "fresh_fetch",
       "quick_tier": "7"
+    },
+    {
+      "id": "2603.07542v1",
+      "title": "Defect Detection in Magnetic Systems Using U-Net and Statistical Measures",
+      "abstract": "Local material inhomogeneities can strongly influence magnetization dynamics and macroscopic magnetic properties, yet detecting such defects from magnetic imaging data remains challenging when thermal fluctuations and experimental noise obscure static contrast. Here, we investigate defect detection in strongly fluctuating magnetization regimes where signatures of inhomogeneities largely average out in time-resolved measurements. Using finite-temperature micromagnetic simulations with randomly distributed defects and material parameters representative of \\ce{Ni80Fe20}, we compute per-pixel temporal mean, temporal standard deviation, and latent entropy and use them as inputs for U-Net-based semantic segmentation models. We find that the most effective descriptor depends on the noise level and, importantly, that robust detection requires training data that reflect the expected noise statistics. These results provide practical guidance for designing noise-robust defect-detection workflows in magnetic imaging.",
+      "authors": [
+        "Ross Knapman",
+        "Atreya Majumdar",
+        "Nasim Bazazzadeh",
+        "Kübra Kalkan",
+        "Katharina Ollefs",
+        "Oliver Gutfleisch",
+        "Karin Everschor-Sitte"
+      ],
+      "primary_category": "cond-mat.mtrl-sci",
+      "categories": [
+        "cond-mat.mtrl-sci",
+        "physics.ins-det"
+      ],
+      "published": "2026-03-08T09:04:34+00:00",
+      "link": "https://arxiv.org/pdf/2603.07542v1",
+      "tags": [
+        "keyword:RUL预测",
+        "query:RUL预测"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "U-Net based semantic segmentation for defect detection in fluctuating systems",
+      "llm_evidence_cn": "基于U-Net的语义分割用于波动系统中的缺陷检测",
+      "llm_evidence": "基于U-Net的语义分割用于波动系统中的缺陷检测",
+      "canonical_evidence": "基于U-Net的语义分割用于波动系统中的缺陷检测",
+      "llm_tldr_en": "Uses deep learning (U-Net) and statistical measures to detect material defects in fluctuating magnetic systems.",
+      "llm_tldr_cn": "利用深度学习（U-Net）和统计指标检测波动磁系统中的材料缺陷。",
+      "llm_tldr": "利用深度学习（U-Net）和统计指标检测波动磁系统中的材料缺陷。",
+      "llm_tags": [
+        "query:rul"
+      ],
+      "matched_query_tag": "query:rul",
+      "matched_query_text": "Deep learning based RUL estimation for industrial bearings and motors",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.09399v1",
+      "title": "Vision-Augmented On-Track System Identification for Autonomous Racing via Attention-Based Priors and Iterative Neural Correction",
+      "abstract": "Operating autonomous vehicles at the absolute limits of handling requires precise, real-time identification of highly non-linear tire dynamics. However, traditional online optimization methods suffer from \"cold-start\" initialization failures and struggle to model high-frequency transient dynamics. To address these bottlenecks, this paper proposes a novel vision-augmented, iterative system identification framework. First, a lightweight CNN (MobileNetV3) translates visual road textures into a continuous heuristic friction prior, providing a robust \"warm-start\" for parameter optimization. Next, a S4 model captures complex temporal dynamic residuals, circumventing the memory and latency limitations of traditional MLPs and RNNs. Finally, a derivative-free Nelder-Mead algorithm iteratively extracts physically interpretable Pacejka tire parameters via a hybrid virtual simulation. Co-simulation in CarSim demonstrates that the lightweight vision backbone reduces friction estimation error by 76.1 using 85 fewer FLOPs, accelerating cold-start convergence by 71.4. Furthermore, the S4-augmented framework improves parameter extraction accuracy and decreases lateral force RMSE by over 60 by effectively capturing complex vehicle dynamics, demonstrating superior performance compared to conventional neural architectures.",
+      "authors": [
+        "Zhiping Wu",
+        "Cheng Hu",
+        "Yiqin Wang",
+        "Lei Xie",
+        "Hongye Su"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO"
+      ],
+      "published": "2026-03-10T09:12:16+00:00",
+      "link": "https://arxiv.org/pdf/2603.09399v1",
+      "tags": [
+        "query:RUL预测"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "real-time identification of non-linear dynamics and iterative neural correction",
+      "llm_evidence_cn": "非线性动力学的实时识别与迭代神经校正",
+      "llm_evidence": "非线性动力学的实时识别与迭代神经校正",
+      "canonical_evidence": "非线性动力学的实时识别与迭代神经校正",
+      "llm_tldr_en": "Proposes a vision-augmented framework for real-time system identification of non-linear vehicle dynamics.",
+      "llm_tldr_cn": "提出了一种视觉增强框架，用于自动驾驶赛车非线性动力学的实时系统辨识。",
+      "llm_tldr": "提出了一种视觉增强框架，用于自动驾驶赛车非线性动力学的实时系统辨识。",
+      "llm_tags": [
+        "query:rul"
+      ],
+      "matched_query_tag": "query:rul",
+      "matched_query_text": "Real time health assessment and RUL forecasting for rotating components",
+      "matched_requirement_id": "req-8",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
     }
   ]
 }
