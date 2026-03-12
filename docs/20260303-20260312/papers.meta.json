@@ -1,8 +1,8 @@
 {
   "label": "2026-03-03 ~ 2026-03-12",
   "date": "2026-03-03 ~ 2026-03-12",
-  "generated_at": "2026-03-12T08:48:17",
-  "count": 1,
+  "generated_at": "2026-03-12T08:51:12",
+  "count": 2,
   "papers": [
     {
       "paper_id": "20260303-20260312/2603.09235v1-helixtrack-event-based-tracking-and-rpm-estimation-of-propeller-like-objects",
@@ -16,6 +16,20 @@
       "tldr": "针对无人机和旋转机械中快速周期性运动跟踪的挑战，本文提出HelixTrack，一种全事件驱动的螺旋桨类物体跟踪与转速（RPM）估计方法。该方法通过单应性变换将事件反向映射到转子平面，利用卡尔曼滤波维护相位，并通过耦合相位残差与几何信息优化位姿。此外，研究者发布了TQE数据集。实验表明，该方法在保持微秒级延迟的同时，处理速度达到实时性的11.8倍，性能显著优于现有基准。",
       "tags": "query:rul",
       "abstract_en": "Safety-critical perception for unmanned aerial vehicles and rotating machinery requires microsecond-latency tracking of fast, periodic motion under egomotion and strong distractors. Frame-based and event-based trackers drift or break on propellers because periodic signatures violate their smooth-motion assumptions. We tackle this gap with HelixTrack, a fully event-driven method that jointly tracks propeller-like objects and estimates their rotations per minute (RPM). Incoming events are back-warped from the image plane into the rotor plane via a homography estimated on the fly. A Kalman Filter maintains instantaneous estimates of phase. Batched iterative updates refine the object pose by coupling phase residuals to geometry. To our knowledge, no public dataset targets joint tracking and RPM estimation of propeller-like objects. We therefore introduce the Timestamped Quadcopter with Egomotion (TQE) dataset with 13 high-resolution event sequences, containing 52 rotating objects in total, captured at distances of 2 m / 4 m, with increasing egomotion and microsecond RPM ground truth. On TQE, HelixTrack processes full-rate events (approx. 11.8x real time) faster than real time and microsecond latency. It consistently outperforms per-event and aggregation-based baselines adapted for RPM estimation.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "20260303-20260312/2603.07542v1-defect-detection-in-magnetic-systems-using-u-net-and-statistical-measures",
+      "section": "quick",
+      "title_en": "Defect Detection in Magnetic Systems Using U-Net and Statistical Measures",
+      "authors": "Ross Knapman, Atreya Majumdar, Nasim Bazazzadeh, Kübra Kalkan, Katharina Ollefs, Oliver Gutfleisch, Karin Everschor-Sitte",
+      "date": "2026-03-08",
+      "pdf": "https://arxiv.org/pdf/2603.07542v1",
+      "score": "6.0",
+      "evidence": "基于U-Net的语义分割用于波动系统中的缺陷检测",
+      "tldr": "本研究针对热波动和实验噪声干扰下磁性系统缺陷检测难的问题，利用微磁模拟生成类Ni80Fe20材料数据，通过计算像素级时间平均值、标准差和潜在熵作为特征，结合U-Net深度学习模型进行语义分割。研究揭示了不同描述符在不同噪声水平下的有效性差异，并证明了包含噪声统计特性的训练数据对提升检测鲁棒性的关键作用，为磁成像缺陷检测提供了重要指导。",
+      "tags": "query:rul",
+      "abstract_en": "Local material inhomogeneities can strongly influence magnetization dynamics and macroscopic magnetic properties, yet detecting such defects from magnetic imaging data remains challenging when thermal fluctuations and experimental noise obscure static contrast. Here, we investigate defect detection in strongly fluctuating magnetization regimes where signatures of inhomogeneities largely average out in time-resolved measurements. Using finite-temperature micromagnetic simulations with randomly distributed defects and material parameters representative of \\ce{Ni80Fe20}, we compute per-pixel temporal mean, temporal standard deviation, and latent entropy and use them as inputs for U-Net-based semantic segmentation models. We find that the most effective descriptor depends on the noise level and, importantly, that robust detection requires training data that reflect the expected noise statistics. These results provide practical guidance for designing noise-robust defect-detection workflows in magnetic imaging.",
       "selection_source": "fresh_fetch"
     }
   ],
