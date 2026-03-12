@@ -6,29 +6,26 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-03-03 ~ 2026-03-12
-- 运行时间：2026-03-12 08:51:02 UTC
+- 最新运行日期：2026-03-12
+- 运行时间：2026-03-12 20:10:58 UTC
 - 运行状态：成功
-- 本次总论文数：2
+- 本次总论文数：1
 - 精读区：0
-- 速读区：2
+- 速读区：1
 
 ### 今日简报（AI）
-今日聚焦事件相机对螺旋桨的高频追踪及磁性系统缺陷检测的深度学习应用。
-重点关注 HelixTrack 如何利用事件相机实现螺旋桨转速精准估算，以及 U-Net 在磁性系统工业质检中的统计学优化。
-建议关注事件相机在高速运动物体监测中的潜力，并探索深度学习与传统统计结合的质检方案
-- 详情：[/20260303-20260312/README](/20260303-20260312/README)
+今日聚焦无人驾驶赛车系统辨识，探索视觉增强与神经修正的深度融合。
+该研究通过注意力机制先验与迭代神经修正，实现了赛道环境下更精准的车辆动力学实时建模。
+推荐关注视觉感知如何辅助物理模型，以提升极端驾驶场景下的系统控制鲁棒性。
+- 详情：[/202603/12/README](/202603/12/README)
 
 ### 精读区论文标签
 - 本次无精读推荐。
 
 ### 速读区论文标签
-1. [HelixTrack: Event-Based Tracking and RPM Estimation of Propeller-like Objects](/20260303-20260312/2603.09235v1-helixtrack-event-based-tracking-and-rpm-estimation-of-propeller-like-objects)  
-   标签：评分：7.0/10、query:rul
-   evidence：旋转机械的实时转速估计与健康监测
-2. [Defect Detection in Magnetic Systems Using U-Net and Statistical Measures](/20260303-20260312/2603.07542v1-defect-detection-in-magnetic-systems-using-u-net-and-statistical-measures)  
+1. [Vision-Augmented On-Track System Identification for Autonomous Racing via Attention-Based Priors and Iterative Neural Correction](/202603/12/2603.09399v1-vision-augmented-on-track-system-identification-for-autonomous-racing-via-attention-based-priors-and-iterative-neural-correction)  
    标签：评分：6.0/10、query:rul
-   evidence：基于U-Net语义分割的材料缺陷检测
+   evidence：用于非线性动力学实时识别的深度学习
 
 
 <div class="dpr-home-promo-card">

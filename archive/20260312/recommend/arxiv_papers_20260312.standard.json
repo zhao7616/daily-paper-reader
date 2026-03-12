@@ -1,0 +1,54 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-03-12T20:10:40.703049+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 0,
+    "deep_cap": 6,
+    "deep_selected": 0,
+    "quick_candidates": 1,
+    "quick_skim_target": 11,
+    "quick_selected": 1
+  },
+  "deep_dive": [],
+  "quick_skim": [
+    {
+      "id": "2603.09399v1",
+      "title": "Vision-Augmented On-Track System Identification for Autonomous Racing via Attention-Based Priors and Iterative Neural Correction",
+      "abstract": "Operating autonomous vehicles at the absolute limits of handling requires precise, real-time identification of highly non-linear tire dynamics. However, traditional online optimization methods suffer from \"cold-start\" initialization failures and struggle to model high-frequency transient dynamics. To address these bottlenecks, this paper proposes a novel vision-augmented, iterative system identification framework. First, a lightweight CNN (MobileNetV3) translates visual road textures into a continuous heuristic friction prior, providing a robust \"warm-start\" for parameter optimization. Next, a S4 model captures complex temporal dynamic residuals, circumventing the memory and latency limitations of traditional MLPs and RNNs. Finally, a derivative-free Nelder-Mead algorithm iteratively extracts physically interpretable Pacejka tire parameters via a hybrid virtual simulation. Co-simulation in CarSim demonstrates that the lightweight vision backbone reduces friction estimation error by 76.1 using 85 fewer FLOPs, accelerating cold-start convergence by 71.4. Furthermore, the S4-augmented framework improves parameter extraction accuracy and decreases lateral force RMSE by over 60 by effectively capturing complex vehicle dynamics, demonstrating superior performance compared to conventional neural architectures.",
+      "authors": [
+        "Zhiping Wu",
+        "Cheng Hu",
+        "Yiqin Wang",
+        "Lei Xie",
+        "Hongye Su"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO"
+      ],
+      "published": "2026-03-10T09:12:16+00:00",
+      "link": "https://arxiv.org/pdf/2603.09399v1",
+      "tags": [
+        "query:RUL预测"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "deep learning for real-time identification of non-linear dynamics",
+      "llm_evidence_cn": "用于非线性动力学实时识别的深度学习",
+      "llm_evidence": "用于非线性动力学实时识别的深度学习",
+      "canonical_evidence": "用于非线性动力学实时识别的深度学习",
+      "llm_tldr_en": "Proposes a CNN and S4-based framework for real-time system identification of vehicle tire dynamics.",
+      "llm_tldr_cn": "提出了一种基于CNN和S4的框架，用于车辆轮胎动力学的实时系统辨识。",
+      "llm_tldr": "提出了一种基于CNN和S4的框架，用于车辆轮胎动力学的实时系统辨识。",
+      "llm_tags": [
+        "query:rul"
+      ],
+      "matched_query_tag": "query:rul",
+      "matched_query_text": "Deep learning architectures for RUL estimation",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}

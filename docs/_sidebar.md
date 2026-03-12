@@ -1,6 +1,9 @@
 * <a class="dpr-sidebar-root-link" href="#/">首页</a>
 * <a class="dpr-sidebar-root-link dpr-sidebar-noactive-link" href="javascript:void(0)" data-dpr-hash="#/tutorial/README">使用教程</a>
 * Daily Papers
+  * 2026-03-12 <!--dpr-date:20260312-->
+    * 速读区
+      * <a class="dpr-sidebar-item-link dpr-sidebar-item-structured" href="#/202603/12/2603.09399v1-vision-augmented-on-track-system-identification-for-autonomous-racing-via-attention-based-priors-and-iterative-neural-correction" data-sidebar-item="{&quot;title&quot;: &quot;Vision-Augmented On-Track System Identification for Autonomous Racing via Attention-Based Priors and Iterative Neural Correction&quot;, &quot;link&quot;: &quot;https://arxiv.org/abs/2603.09399v1-vision-augmented-on-track-system-identification-for-autonomous-racing-via-attention-based-priors-and-iterative-neural-correction&quot;, &quot;score&quot;: &quot;6.0&quot;, &quot;tags&quot;: [{&quot;kind&quot;: &quot;query&quot;, &quot;label&quot;: &quot;rul&quot;}], &quot;evidence&quot;: &quot;用于非线性动力学实时识别的深度学习&quot;}">Vision-Augmented On-Track System Identification for Autonomous Racing via Attention-Based Priors and Iterative Neural Correction</a>
   * 2026-03-03 ~ 2026-03-12 <!--dpr-date:20260303-20260312-->
     * 速读区
       * <a class="dpr-sidebar-item-link dpr-sidebar-item-structured" href="#/20260303-20260312/2603.09235v1-helixtrack-event-based-tracking-and-rpm-estimation-of-propeller-like-objects" data-sidebar-item="{&quot;title&quot;: &quot;HelixTrack: Event-Based Tracking and RPM Estimation of Propeller-like Objects&quot;, &quot;link&quot;: &quot;https://arxiv.org/abs/2603.09235v1-helixtrack-event-based-tracking-and-rpm-estimation-of-propeller-like-objects&quot;, &quot;score&quot;: &quot;7.0&quot;, &quot;tags&quot;: [{&quot;kind&quot;: &quot;query&quot;, &quot;label&quot;: &quot;rul&quot;}], &quot;evidence&quot;: &quot;旋转机械的实时转速估计与健康监测&quot;}">HelixTrack: Event-Based Tracking and RPM Estimation of Propeller-like Objects</a>

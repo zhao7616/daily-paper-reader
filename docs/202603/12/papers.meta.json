@@ -1,0 +1,23 @@
+{
+  "label": "2026-03-12",
+  "date": "2026-03-12",
+  "generated_at": "2026-03-12T20:11:07",
+  "count": 1,
+  "papers": [
+    {
+      "paper_id": "202603/12/2603.09399v1-vision-augmented-on-track-system-identification-for-autonomous-racing-via-attention-based-priors-and-iterative-neural-correction",
+      "section": "quick",
+      "title_en": "Vision-Augmented On-Track System Identification for Autonomous Racing via Attention-Based Priors and Iterative Neural Correction",
+      "authors": "Zhiping Wu, Cheng Hu, Yiqin Wang, Lei Xie, Hongye Su",
+      "date": "2026-03-10",
+      "pdf": "https://arxiv.org/pdf/2603.09399v1",
+      "score": "6.0",
+      "evidence": "用于非线性动力学实时识别的深度学习",
+      "tldr": "针对自动驾驶赛车在极限操控下非线性轮胎动力学辨识难的问题，本文提出一种视觉增强的迭代系统辨识框架。该框架利用轻量化CNN从路面纹理提取摩擦力先验以解决冷启动问题，并结合S4模型捕捉时序动态残差，最后通过Nelder-Mead算法提取物理参数。实验表明，该方法显著提升了辨识精度和收敛速度，大幅降低了侧向力误差。",
+      "tags": "query:rul",
+      "abstract_en": "Operating autonomous vehicles at the absolute limits of handling requires precise, real-time identification of highly non-linear tire dynamics. However, traditional online optimization methods suffer from \"cold-start\" initialization failures and struggle to model high-frequency transient dynamics. To address these bottlenecks, this paper proposes a novel vision-augmented, iterative system identification framework. First, a lightweight CNN (MobileNetV3) translates visual road textures into a continuous heuristic friction prior, providing a robust \"warm-start\" for parameter optimization. Next, a S4 model captures complex temporal dynamic residuals, circumventing the memory and latency limitations of traditional MLPs and RNNs. Finally, a derivative-free Nelder-Mead algorithm iteratively extracts physically interpretable Pacejka tire parameters via a hybrid virtual simulation. Co-simulation in CarSim demonstrates that the lightweight vision backbone reduces friction estimation error by 76.1 using 85 fewer FLOPs, accelerating cold-start convergence by 71.4. Furthermore, the S4-augmented framework improves parameter extraction accuracy and decreases lateral force RMSE by over 60 by effectively capturing complex vehicle dynamics, demonstrating superior performance compared to conventional neural architectures.",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}
