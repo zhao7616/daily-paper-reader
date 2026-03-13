@@ -1,0 +1,53 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-03-13T19:45:34.399776+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 0,
+    "deep_cap": 6,
+    "deep_selected": 0,
+    "quick_candidates": 1,
+    "quick_skim_target": 11,
+    "quick_selected": 1
+  },
+  "deep_dive": [],
+  "quick_skim": [
+    {
+      "id": "2603.11544v1",
+      "title": "Deep Ritz Physics-Informed Neural Network Method for Solving the Variational Inequality",
+      "abstract": "Variational inequalities are widely applied in mechanical engineering, fluid penetration, transportation, and other fields. In this paper, a Deep Ritz method based on Physics-Informed Neural Networks (PINNs) is proposed to enhance the accuracy and efficiency of solving elliptic variational inequalities. The Ritz variational method is firstly utilized to transform the variational inequality problem into an optimization problem. Then Bayesian optimization is employed to tune the weights of the loss function, and a residual-based adaptive dataset update strategy is introduced to improve the convergence and accuracy of the model. Numerical experiments show that the proposed method can effectively approximate the analytical solution.",
+      "authors": [
+        "Qijia Zhou",
+        "Yiyang Wang",
+        "Shengyuan Deng",
+        "Chenliang Li"
+      ],
+      "primary_category": "math.NA",
+      "categories": [
+        "math.NA"
+      ],
+      "published": "2026-03-12T05:00:25+00:00",
+      "link": "https://arxiv.org/pdf/2603.11544v1",
+      "tags": [
+        "query:RUL预测"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Physics-Informed Neural Network for mechanical engineering problems",
+      "llm_evidence_cn": "用于机械工程问题的物理信息神经网络",
+      "llm_evidence": "用于机械工程问题的物理信息神经网络",
+      "canonical_evidence": "用于机械工程问题的物理信息神经网络",
+      "llm_tldr_en": "Proposes a Deep Ritz PINN method to solve variational inequalities in mechanical engineering and other fields.",
+      "llm_tldr_cn": "提出一种基于物理信息神经网络的Deep Ritz方法，用于解决机械工程等领域的变分不等式问题。",
+      "llm_tldr": "提出一种基于物理信息神经网络的Deep Ritz方法，用于解决机械工程等领域的变分不等式问题。",
+      "llm_tags": [
+        "query:rul"
+      ],
+      "matched_query_tag": "query:rul",
+      "matched_query_text": "Data driven vs physics informed models for RUL prediction",
+      "matched_requirement_id": "req-7",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}
