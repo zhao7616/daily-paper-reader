@@ -1,0 +1,1301 @@
+Title: Multi-Condition Digital Twin Calibration for Axial Piston Pumps : Compound Fault Simulation
+
+URL Source: https://arxiv.org/pdf/2603.00199v1
+
+Published Time: Tue, 03 Mar 2026 01:12:23 GMT
+
+Number of Pages: 44
+
+Markdown Content:
+# Multi-Condition Digital Twin Calibration for Axial Piston Pumps : Compound Fault Simulation 
+
+Chang Dong a, Jianfeng Tao a, ∗, Chengliang Liu a
+
+> aState Key Laboratory of Mechanical System and Vibration, Shanghai Jiao Tong University, Shanghai 200240, China
+
+Abstract 
+
+Axial piston pumps are indispensable power sources in high-stakes fluid power systems, including aerospace, marine, and heavy machinery applications. Their operational reliability is frequently compromised by com-pound faults that simultaneously a ff ect multiple friction pairs. Conventional data-driven diagnosis methods su ff er from severe data scarcity for compound faults and poor generalization across varying operating condi-tions. This paper proposes a novel multi-condition physics-data coupled digital twin calibration framework that explicitly resolves the fundamental uncertainty of pump outlet flow ripple. The framework comprises three synergistic stages: in-situ virtual high-frequency flow sensing on a dedicated rigid metallic segment, surrogate model-assisted calibration of the 3D CFD source model using physically estimated ripple am-plitudes, and multi-objective inverse transient analysis for viscoelastic unsteady-friction pipeline parameter identification. Comprehensive experiments on a test rig demonstrate that the calibrated digital twin accurately reproduces both single-fault and two representative compound-fault, achieving Theil’s Inequality Coe ffi cients consistently below 0.235. These results establish a high-fidelity synthetic fault-generation capability that directly enables robust zero-shot fault diagnosis under previously unseen operating regimes and fault combi-nations, thereby advancing predictive maintenance in complex hydraulic systems. 
+
+Keywords: Axial piston pump; Digital twin; Multi-condition calibration; Compound fault simulation; Pressure ripple; Virtual flow sensing. 
+
+1. Introduction 
+
+Axial piston pumps constitute the core power-conversion units in modern fluid power transmission systems and are widely deployed in safety-critical domains such as aerospace flight control, marine propulsion, o ff -shore drilling, and heavy construction machinery. Their operational reliability directly determines the safety, effi ciency, and availability of the host systems[1]. Internally, the reciprocating motion of pistons within a rotating cylinder block subjects the key friction pairs—slipper /swashplate and piston /cylinder interfaces. Me-  
+
+> ∗Corresponding author
+> Email address: chdong_sjtu@163.com (Jianfeng Tao)
+> arXiv:2603.00199v1 [physics.flu-dyn] 27 Feb 2026
+
+chanical wear, cavitation erosion, and progressive leakage in these pairs frequently evolve into compound faults, where multiple degradation mechanisms occur concurrently rather than in isolation. Such compound faults produce highly nonlinear and operating-condition-dependent pressure-ripple signatures that are partic-ularly challenging to diagnose, especially when training data for every possible fault combination and load level are unavailable. Fault diagnosis approaches for axial piston pumps are broadly categorized into model-based and data-driven paradigms[1]. Data-driven methods, particularly deep learning techniques such as convolutional neural networks [2] have achieved high classification accuracy in controlled laboratory environments. However, these approaches su ff er from a fundamental dilemma: they require extensive labeled fault datasets, which are prohibitively expensive and hazardous to acquire—especially for compound faults under varying oper-ating conditions. Although transfer learning and simulation-to-reality strategies have been explored to mit-igate data scarcity [3], most still necessitate at least few-shot experimental fault samples for e ff ective do-main adaptation, rendering them unsuitable for true zero-shot scenarios where only healthy-state data are available[4]. Consequently, accurate physics-based modeling remains indispensable for generating reliable synthetic fault data and ensuring physical interpretability. High-fidelity models can capture the underlying degradation mechanisms and fluid-structure interactions without relying on scarce fault samples. Neverthe-less, when fault signatures are observed through pressure ripples—the most accessible and sensitive indicator in hydraulic systems—existing multi-condition approaches still face significant limitations. Existing studies perform single-condition calibration or treat the pump source flow ripple as a fixed boundary, ignoring its strong nonlinear dependence on e ff ective bulk modulus, aeration level, temperature, and load pressure[5]. This source-side uncertainty leads to degraded fidelity of synthetic compound-fault signals across the operat-ing envelope. To overcome these challenges, this paper proposes a novel multi-condition physics-data coupled digital twin calibration framework that explicitly resolves pump-source flow-ripple uncertainty across the multiple conditions. The framework integrates three synergistic stages: (i) in-situ virtual high-frequency flow sensing on a dedicated rigid metallic segment, (ii) surrogate model-assisted calibration of the 3D CFD source model using physically estimated ripple amplitudes as robust macroscopic constraints, and (iii) multi-sensor, multi-objective inverse transient analysis for pipeline parameters. By anchoring the source dynamics under multiple load conditions, the calibrated digital twin accurately reproduces both single faults and two representative compound-fault configurations (adjacent and opposite relative angular positions of faulty components). This high-fidelity synthetic fault-generation capability, derived solely from healthy-state data, establishes a solid foundation for robust zero-shot fault diagnosis under previously unseen operating regimes and fault combina-tions. 2The remainder of this paper is organized as follows. Section 2 presents the theoretical background on one-dimensional unsteady viscoelastic flow modeling with unsteady friction. Section 3 analyzes the physical mechanisms and uncertainty of axial piston pump outlet flow ripple through 3D CFD parametric studies, motivating the proposed multi-condition digital twin calibration. Section 4 details the physics-data coupled calibration framework, which comprises three stages: in-situ virtual high-frequency flow sensing, POD-GPR surrogate-assisted source model calibration, and multi-objective inverse transient analysis for viscoelastic pipeline parameters. Section 5 reports experimental validation on a Rexroth A10VO71 test rig, including virtual flow sensing, multi-condition calibration, and high-fidelity simulation of single and compound faults. Finally, Section 6 summarizes the key findings, discusses practical implications, and outlines directions for future research. 
+
+2. Theoretical background 
+
+2.1. One-Dimensional Unsteady Flow Modeling with Viscoelasticity and Unsteady Friction 
+
+The transient flow in viscoelastic pipelines is described by the one-dimensional continuity and momentum equations, modified to account for pipe-wall viscoelastic creep and unsteady wall shear stress, which are defined as follows[6–10]: 
+
+∂p
+
+∂x + ρ
+
+A
+
+∂Q
+
+∂t + f (Q) = 0, (1) 
+
+∂p
+
+∂t + ρa2
+
+A
+
+∂Q
+
+∂x + 2(1 − ν2)ρa2 ∂ε r
+
+∂t = 0, (2) 
+
+a =
+
+pK/ρ 
+
+√1 + (KD L/ELe)C1
+
+(3) where p(x, t) represents the pressure, Q(x, t) represents the flow rate, f (Q) represents the friction term, A is the pipe cross-sectional area, ρ is the density, a represents the speed of sound, ν is Poisson’s ratio, and εr is the retarded circumferential strain in the pipe wall. For the scenario of steady laminar flow, the friction term 
+
+f (Q) can be approximated as[6]: 
+
+f (Q) = 32 ρν 
+
+D2
+
+QA (4) where ν is the kinematic viscosity, D is the pipe diameter. For unsteady flow scenarios, the friction term 
+
+f (Q) includes steady-state friction, representing losses under steady conditions, and unsteady-state friction, or frequency-dependent friction, arising from wall shear stress. The unsteady friction depends on the instanta-neous velocity and weighted past velocity changes, capturing additional dissipation during transient flow. This is essential for modeling phenomena like water hammer, where traveling waves are distorted by frequency-3dependent e ff ects. These components can be estimated using the following equations[11, 12]: 
+
+f (Q) = 32 ρν 
+
+D2
+
+QA + 16 ρν 
+
+D2
+
+> N
+
+X
+
+> i=1
+
+Yi, (5) with the weighting functions Yi updated recursively at each time step: 
+
+Yi(t) = Yi(t − ∆t) e−ni(4 ν/ D2)∆t + mi e−ni(2 ν/ D2)∆t Q(t) − Q(t − ∆t)
+
+A , (6) where mi, ni are calibrated unsteady friction coe ffi cients. For viscoelastic materials, the total circumferential strain ϵ(t) decomposes into an instantaneous-elastic component ϵe(t) and a retarded component ϵr(t) [8–10]: 
+
+ϵ(t) = ϵe(t) + ϵr(t), (7) with 
+
+ϵe(t) = J0σ(t), (8) 
+
+ϵr(t) =
+
+Z t
+
+> 0
+
+σ(t − s) dJ (s)
+
+ds ds , (9) where σ(t) is the dynamic hoop stress, J0 = 1/E0 is the instantaneous creep compliance, E0 is the instanta-neous elastic modulus, and J(t) is the creep function. Considering force balance in the pipe wall and the fluid pressure[9], 
+
+σ(t) = D
+
+2e p(t), (10) where e is the wall thickness. Substituting yields the viscoelastic contribution in the continuity equation as: 
+
+∂p
+
+∂t + ρa2
+
+A
+
+∂Q
+
+∂x + (1 − ν2) Dρa2
+
+e
+
+∂∂t
+
+Z t
+
+> 0
+
+p(t − s) dJ (s)
+
+ds ds 
+
+!
+
+= 0. (11) Direct evaluation of the convolution is computationally prohibitive for long simulations due to the required storage and summation of pressure history. To enable e ffi cient time-domain solution (e.g., via the method of characteristics), the creep function is approximated by a generalized Kelvin–Voigt(K-V) model with a finite number of elements: 
+
+J(t) = J0 +
+
+> Nkv
+
+X
+
+> k=1
+
+Jk
+
+1 − e−t/τ k
+
+ , (12) where Jk are creep coe ffi cients and τk are retardation times. Substitution yields an alternative form of the 4continuity equation retaining convolutional terms for each K-V element[8]: 
+
+∂p
+
+∂t + ρa2
+
+A
+
+∂Q
+
+∂x + (1 − ν2) Dρa2
+
+e
+
+> Nkv
+
+X
+
+> k=1
+
+Jk
+
+τk
+
+∂∂t
+
+Z t
+
+> 0
+
+p(t − s)e−t/τ k ds = 0. (13) If viscoelasticity is not considered in the model, the corresponding term 2(1 − ν2)ρa2( ∂ε r 
+
+> ∂t
+
+) is omitted from Eq.(2). The Method of Characteristics (MOC) is employed to solve the governing di ff erential equations by trans-forming them into ordinary di ff erential equations along characteristic lines. Using an iterative feature mesh, the pressure and flow characteristics are propagated along specified characteristic paths. 
+
+
+
+C+ : dp dx + ρaAdQ dt + 2(1 − ν2)ρa2 ∂ε r
+
+∂t
+
+!
+
++ a f (Q) = 0, dx dt = + aC− : dp dx − ρaAdQ dt + 2(1 − ν2)ρa2 ∂ε r
+
+∂t
+
+!
+
+− a f (Q) = 0, dx dt = −a
+
+(14) The simplified characteristic equations can be e ff ectively solved using the following numerical scheme[13, 14]: [pP − pA/B] ± ρaA [QP − QA/B] + 2(1 − ν2)ρa2 ∂ε r
+
+∂t
+
+!
+
+± a∆t f (QP) = 0 (15) In pump-pipe-valve configurations, the upstream boundary is typically the pump (reached via the C− charac-teristic), while the downstream boundary is the valve (reached via the C+ characteristic). These boundaries are defined by device-specific algebraic relations and integrated with the incoming characteristic compatibility equations, which are defined as follows[5]: 
+
+QL = Qs(t) (16) 
+
+QR = Cd( πD2
+
+> o
+
+4 ) p2( pR − p0) (17) where Qs(t) represents the instantaneous discharge supplied by the pump, Cd is the discharge coe ffi cient, Do
+
+is the e ff ective valve opening diameter, and p0 is the downstream pressure (typically atmospheric). By coupling these boundary conditions with the aforementioned compatibility equations along the incom-ing characteristics, the unknown pressure and flow rate at the boundaries can be solved explicitly at each time step. This approach ensures accurate representation of wave propagation in viscoelastic PPV systems. 53. Mechanisms and Uncertainty of Pump Outlet Flow Ripple: Motivation for Multi-Condition Digital Twin Calibration 
+
+In our prior studies, we established a digital twin framework for axial piston pumps by integrating a 3D computational fluid dynamics (CFD) model with a one-dimensional unsteady pipeline model, initially vali-dated under single operating conditions[5, 15]. These methodologies successfully leveraged pressure ripple measurements from healthy operations to calibrate complex pipeline parameters, enabling the generation of high-fidelity synthetic datasets for fault diagnosis where experimental fault data is scarce[16]. However, the Inverse Transient Analysis (ITA) employed in these approaches relies on iterative forward simulations. Due to the prohibitive computational cost of full-order 3D CFD (often requiring hours per op-erating point), the pump outlet flow ripple Qs(t) was pre-computed via CFD and treated as a fixed upstream boundary condition for the 1D pipeline model[5]. While e ff ective for single-point calibration, this decoupling strategy exposes significant limitations when extending the digital twin across multiple operating regimes, primarily due to the complex nonlinear behavior of the pump source flow. 
+
+3.1. Pump Outlet Flow ripple 
+
+The pump flow ripple can be theoretically decomposed using the control volume approach applied to the piston chamber: dp
+
+dt = Ke
+
+V
+
+X
+
+Qin −
+
+X
+
+Qout − dV
+
+dt
+
+!
+
+, (18) where V denotes the control volume, Ke is the e ff ective bulk modulus, and P Qin and P Qout represent the aggregate inflow and outflow rates. For an individual piston chamber, this expands to: 
+
+dp piston 
+
+dt = Ke
+
+Vpc 
+
+
+
+− dV pc 
+
+dt | {z }
+
+> geometric flow ripple
+
+−Qop 
+
+|{z} 
+
+> backflow
+
+−(Qlpc + Qlss + Qlcv )
+
+| {z }
+
+> leakage flow ripple
+
+
+
+(19) Here, Vpc is the instantaneous piston chamber volume, Qop is the flow through the valve plate port (positive for discharge, negative for backflow), and Qlpc , Qlss , Qlcv denote leakage flows across the cylinder block /valve plate, piston /cylinder bore, and slipper /swashplate pairs, respectively. The kinematic ripple term arises from piston motion. For swashplate angle γ and piston pitch radius R,the axial displacement s and velocity v of a single piston are: 
+
+s = R(1 − cos α) tan γ (20) 
+
+v = ds
+
+dt = Rω sin α tan γ (21) 6Valve plate cylinder    
+
+> ω
+> shaft slipper Piston Spring R
+> αh
+> γ
+> Qlpc Qlss Qlcv
+> Slipper/swash plate interface
+> Cylinder block/valve plate interface
+> Piston/cylinder block interface
+> Bearing Swash plate
+> Suction port
+> Delivery port
+> Vpc Figure 1: Schematic diagram of a swashplate axial piston pump.
+
+where ω is rotational speed and α angular position. The instantaneous kinematic contribution from the i-th piston (diameter D) is: 
+
+Qi = dVpc 
+
+dt = πD2
+
+4 vi = πD2
+
+4 Rω tan γ sin αi. (22) With Z equally spaced pistons ( θ = 2π/ Z), aggregate kinematic ripple is: 
+
+Qgeom =
+
+> Z
+
+X
+
+> i=1
+
+Qi = πD2
+
+4 Rω tan γ
+
+> Z
+
+X
+
+> i=1
+
+sin [ α + (i − 1) θ] . (23) Leakage flows, governed by Poiseuille–Couette mechanisms in friction pair gaps, remain minor under healthy conditions. The instantaneous port flow Qop (the backflow term in Equation (19)) is conventionally modeled as orifice flow: 
+
+Qop = Cd Ai
+
+s
+
+2|ppiston − pd|
+
+ρ sgn( ppiston − pd), (24) where Cd is the discharge coe ffi cient, Ai the time-varying port overlap area (dependent on angular position 
+
+αi;), pd the discharge pressure, ρ fluid density, and sgn( ·) the sign function enforcing directional consistency. Rapid pressure gradients in transition regions can reduce localized pressures below air separation thresh-olds, triggering cavitation and air release[17]. These processes introduce gaseous phases that substantially lower the local density and e ff ective bulk modulus Ke, amplifying compressibility-driven backflow far be-yond single-phase predictions[3, 18]. Existing literature confirms the dominance of compressibility backflow. Vacca et al.[17] demonstrated that considering air release and vapor formation is crucial for accurate pressure transient prediction. Zhang et al.[18] employed an enhanced CFD model with a compressible hydraulic oil formulation, reporting that compressibility backflow contributes up to 88% of the total ripple amplitude(with kinematic and leakage terms at 8% and 4%) under 30 MPa (Fig. 2), with simulation results closely matching ISO measurements. These studies collectively demonstrate that cavitation-driven phase changes manifest as changes in fluid 7(a) (b) Figure 2: Flow ripple analysis results under 30MPa from Zhang et al.[18] (a) Quantitative decomposition of total flow ripple, showing compressible ripple (88%), geometrical ripple (8%), and leakage ripple (4%); (b) Comparison between CFD simulation using the compressible fluid model and experimental measurements("SS" ISO method), with simulated flow ripple amplitude(14.2 L /min) closely matching the experimental value(14.9 L /min). 
+
+compressibility, thereby dominating flow ripple amplitude. Kim and Murrenho ff [19] provided direct experi-mental substantiation through measurements of e ff ective bulk modulus of hydraulic oils, verifying theoretical equations accounting for entrained air release and polytropic gas behavior. Their results showed substantial 
+
+Ke variability with air content, temperature, and pressure /volume change rate, confirming that air separation at low pressures significantly lowers Ke compared to pure-liquid values, amplifying compressibility e ff ects in real systems. This pronounced influence of fluid compressibility on pump flow ripple—coupled with its inherent vari-ability arising from temperature fluctuations, entrained air fraction, pressure-dependent gas dissolution, and dynamic volume change rates [20, 21]—introduces considerable uncertainty in pump outlet flow ripple Qs(t)predictions across operating conditions. In the context of ITA, relying on a nominal, pre-computed Ke fails to account for these real-time variations, potentially degrading calibration accuracy and the fidelity of the resulting digital twin. 
+
+3.2. Analysis of the results from the 3D CFD model 
+
+To quantitatively assess the impact of e ff ective bulk modulus and operating conditions on pump flow ripple 
+
+Qs(t) within the previously established 3D CFD model in the proposed ITA-based method, parametric simu-lations were performed under varying operating conditions and Ke values. The fluid domain encompasses the piston chambers, valve plate ports (including kidney slots and damping grooves), inlet /outlet manifolds, and thin oil films at the three primary friction pairs to capture leakage contributions (Fig. 3). Computations were performed using the commercial software PumpLinx, which employs a finite-volume scheme with adaptive binary-tree meshes. Sub-domains are connected via mismatched grid interfaces (MGI) to e ffi ciently han-dle relative motion. An interface at the pump outlet monitors aggregate flow ripple Qs(t), while dedicated interfaces at each piston bore outlet—aligned with the valve plate kidney ports—enable monitoring of the 8instantaneous port flow rate for individual piston chambers. The working fluid in cavitating flows is modeled as a mixture of liquid, vapor, and non-condensable gases. Hydraulic oils typically contain dissolved non-condensable gases (primarily air) and are susceptible to vapor formation at low pressures. Under normal conditions, air remains dissolved in the liquid phase. As pressure decreases below the saturation threshold, dissolved air is released, forming free (entrained) gas bubbles. Further pressure reduction below the vapor pressure leads to liquid phase change, generating vapor cavities. These multiphase transitions—air release (gas cavitation) and vapor cavitation—dramatically alter fluid compressibility, particularly in piston pump transition regions where rapid pressure drops occur. 
+
+> Figure 3: Fluid domain and interface of the 3D CFD model
+
+In this work, the full gas model is selected as the cavitation model, which combines the dissolved gas model and variable gas mass fraction model. For cavitating flows, the e ff ective bulk modulus Ke is derived from the mixture density of liquid, vapor, and non-condensable gases: 
+
+Ke = ρ dp
+
+dρ (25) with the derivative expressed as: 
+
+dρ
+
+dp = ρ2
+
+( 1
+
+p
+
+" fv
+
+ρv
+
++ fg
+
+ρg
+
+#
+
++ 1
+
+Bl
+
+1 − fg − fv
+
+ρl
+
+)
+
+(26) 9and the e ff ective (mixture) fluid density ρ calculated as: 1
+
+ρ = 1 − fv − fg
+
+ρl
+
++ fv
+
+ρv
+
++ fg
+
+ρg
+
+(27) where subscripts l, v, and g denote liquid, vapor, and non-condensable gas phases, respectively; fv and fg
+
+are the corresponding mass fractions (solved via transport equations); p represents local flow pressure; and 
+
+Bl is the pure-liquid bulk modulus. The model also includes a turbulence model. For the specific transport equations and other detail of model, please refer to [12-14].                          
+
+> Table 1: Key parameters of the 3D CFD model
+> Parameter Value Swash plate angle γ18° Nominal displacement 71 mL /rNumber of pistons Z9Rotational speed ω1000 r /min Pipeline length 5 m Pipeline diameter 25 mm Pure-liquid density ρl870 kg /m³ Dynamic viscosity μ0.025248 Pa·s Pure-liquid bulk modulus Bl900–1500 MPa (parametric) Saturation pressure 0.02 MPa Dissolved gas mass fraction 9×10 −5
+> Dissolved gas reference pressure 0.1 MPa Discharge coe ffi cient Cd(outlet port) 0.6 Orifice diameter (outlet port) 3.2–4.1 mm (corresponding to 10–25 MPa load)
+
+Simulation results at 25 MPa ( Bl = 1500 MPa) reveal a stark contrast between geometric theory and CFD reality. According to Eq.(23), the Qgeom has an approximate amplitude of 1.185 L /min. However, the CFD-simulated outlet flow ripple amplitude reaches approximately 11.78 L /min (Fig. 4(a)). The aggregate leakage ripple across all friction pairs is only 0.17 L /min (Fig. 4(g)). Subtracting kinematic and leakage contributions yields a compressibility backflow amplitude of approximately 10.425 L /min, accounting for 88.4% of total ripple—highly consistent with the 88% reported by Zhang et al.[18]. However, a detailed comparative analysis of the flow rate of a single piston chamber, as presented in Fig. 4(b), elucidates the fundamental mechanism underlying these statistics. Fig. 4(b) superimposes the the-oretical geometric flow with the CFD-simulated flow rate of a single piston chamber. The geometric flow (dashed line), derived via Eq. (19), exhibits a standard half-wave rectified sinusoidal profile governed strictly by kinematics. In contrast, the CFD simulation (solid line), representing flow through the valve plate inter-face, reveals a pronounced deviation: distinct fluid backflow occurs precisely as the piston transitions into the discharge region, followed by transient oscillation and overshoot. This phenomenon induces severe distortion 10 in the single-piston flow waveform. To further investigate the fluid properties during this transition, Fig. 4(e) contrasts the volumetric flux and mass flux of an individual piston chamber, where the upper and lower limits of the left and right axes are aligned based on standard density conversion. In the initial interval of flow backflow, a clear inconsistency emerges: the volumetric flux exhibits significantly more drastic fluctuations compared to the mass flux. Since the ratio of mass flux to volumetric flux represents the average fluid density within the piston chamber, this divergence confirms the occurrence of cavitation (a density drop). In the subsequent stages, the ratio be-tween the two quantities remains virtually unchanged, indicating that the fluid density stabilizes and remains constant. 0 20 40 60 80 100 120 140 160 180 shaft angle α (°) 60 65 70 75 Flow (L/min) 0 20 40 60 80 100 120 140 160 180 -15 -10 -5 05Flow (L/min) shaft angle α (°) 
+
+Interval without Backflow Influence Interval with Backflow Influence 
+
+0 20 40 60 80 100 120 140 160 180 -20 -10 010 20 30 Piston Flow (L/min) shaft angle α (°) Difference between the dashed and solid lines in Fig. (b) (i.e., flow rate difference between geometric flow and CFD-simulated individual piston chamber) (a) (b) Comparison of CFD-simulated flow rate and kinematic contribution Q i(t) for a single piston chamber 10.2 L/min 1.34L/min A’ B’ 13.89 L/min 1.5 L/min ABflow back up flow oscillation shaft angle α (°) 90 Flow rate at interface between valve plate and outlet passage Comparison of Qs(t) and Qgeom (t)(c) Difference between kinematic flow and CFD-simulated flow for a single piston chamber (d) Comparison of Qs(t) and flow rate at valve plate outlet (e) Comparison of Volumetric and mass Flux of An individual Piston Chamber “backflow valley” “backflow peak” Pump Outlet Flow Rate Q s(t)(3D CFD) Kinematic Ripple Qgeom (t) -1.85L/min (Eq.(23)) 0 20 40 60 80 00.2 0.4 0.6 0.8 1Flow (L/min) shaft angle α (°) (g) Leakage flow rate of the friction pair Slipper pair Piston pair Valve plate pair Sum 0 20 40 60 80 -10 010 20 Volumetric Flux [L/min] -0.2 00.2 0.4 Mass Flux [kg/s] shaft angle α (°) 0 20 40 60 80 60 65 70 75 Flow (L/min) Volumetric Flux of An Individual Piston Chamber (3D CFD) Kinematic Contribution Qgeom (t) From the i-th Piston (Eq.(22)) Mass Flux of An Individual Piston Chamber (3D CFD) Density change 
+
+Figure 4: The simulated results of pump flow ripple(25MPa, Bl=1500MPa) 
+
+11 To isolate this compressibility e ff ect, Fig. 4(c) plots the di ff erential curve between the CFD and geometric results. The critical extrema in this di ff erence curve—specifically the valley at point A (-13.89 L /min) and the peak at point B (1.34 L /min)—correspond directly to the global minimum A′ ("backflow valley") and maximum B′ ("backflow peak") of the aggregate pump flow ripple shown in Fig. 4(a). This correspondence indicates that the aggregate ripple morphology is dominated by this backflow dynamic during specific 20 ◦
+
+intervals. Conversely, during the remaining 20 ◦ of the 40 ◦ cycle (360 ◦/Z), the CFD-simulated ripple aligns closely with the theoretical kinematic ripple Qgeom (Eq. 23). Consequently, compressibility-induced backflow e ff ectively dictates the peaks and valleys of the wave-form, thereby governing the overall flow ripple characteristics. This implies that conventional decomposition based solely on statistical amplitudes is insu ffi cient. Although backflow acts intermittently, its contribution is decisive: by exclusively defining the waveform extrema, it shapes the global ripple profile. Furthermore, a minor attenuation is observed between the local amplitudes at points A /B and the aggregate amplitudes at 
+
+A′/B′. This is attributed to the fluid mixing process within the outlet manifold (Fig. 4(d)), which exerts a hydrodynamic damping e ff ect, slightly smoothing the instantaneous flow intensity as it propagates from the valve plate interface to the pump outlet. 
+
+3.3. Uncertainty Propagation and Calibration Challenges 
+
+Based on the mechanism analysis above, compressibility-induced backflow is the dominant factor shaping the pump outlet flow ripple. Given that backflow is driven by the pressure di ff erential and fluid compressibil-ity, the flow ripple Qs(t) exhibits high sensitivity to two critical variables: the e ff ective bulk modulus Ke
+
+(dependent on temperature, aeration, and pressure) and the operating load pressure. Fig. 5(a) illustrates the flow ripple evolution under varying load pressures (10–25 MPa) with a constant pure-liquid bulk modulus Bl
+
+of 1500 MPa. As load pressure increases, the intensified pressure di ff erential across the valve plate drives a surge in backflow velocity and volume. Simulation results confirm that the flow ripple amplitude grows non-linearly with pressure; specifically, the "backflow valley" becomes significantly deeper under high-load conditions (Fig. 5(a) and (c)). While the mean flow rate decreases slightly due to increased leakage at higher pressures, leakage acts primarily as a quasi-static component (DC o ff set) and does not significantly alter the high-frequency waveform or peak-to-peak amplitude. Fig. 5(b) depicts the sensitivity of the flow ripple to the pure-liquid bulk modulus Bl, varying from 900 MPa to 1500 MPa under a fixed load of 25 MPa. The results indicate that Bl significantly impacts the flow dynamics. A lower Bl implies reduced fluid sti ff ness (a "softer" fluid). Consequently, during the transition from the low-pressure suction port to the high-pressure discharge port, a larger volume of fluid must flow back into the piston chamber to achieve the necessary pre-compression for pressure equalization. This mechanism not only deepens the flow ripple trough (increasing the peak-to-peak amplitude) but also induces a temporal 12 0 20 40 60 80 60 65 70 75 Outlet Flow (L/min) (a) Flow Ripple under Varying Load 25 MPa 20 MPa 15 MPa 10 MPa 0 20 40 60 80 -20 -10 010 20 30 Piston Flow (L/min) (c) Piston Flow under Varying Load 0 20 455 60 65 70 75 Outlet Flow (L/min) (b) Flow Ripple under Varying Bulk Modulus(25MPa) 0 20 4-20 -10 010 20 30 Piston Flow (L/min) (d) Piston Flow under Varying Bulk Modulus shaft angle α (°) shaft angle α (°) shaft angle α (°) shaft angle α (°) 80 60 80 60 00
+
+Deeper valley with ↑ Load Deeper and wider valley with ↓ Bl
+
+Increase peak Figure 5: The simulated results of pump flow ripple(25MPa, Bl=1500MPa) 
+
+shift. Due to the reduced modulus, the wave speed a reduces. This physical delay manifests as a temporal expansion of the backflow interval, causing the "backflow valley" to shift visibly to the right (phase lag), exacerbating the impact on the flow pulsation waveform. Furthermore, it is evident that variations in load pressure and bulk modulus exert negligible influence on the flow ripple during the kinematic-dominated phase (the geometric flow range) subsequent to the backflow event. 
+
+3.4. Motivation 
+
+The parametric analysis demonstrates that Qs(t) is not a static boundary condition but a dynamic variable highly dependent on the uncertain parameter Ke and the operating pressure. This creates a fundamental dilemma for single-condition ITA calibration. Relying on a deterministically pre-computed Qs(t)—derived from a nominal estimate of Ke—imposes a "hard" boundary condition that frequently deviates from physical reality, leading to an over- or under-estimation of the flow ripple amplitude. During the calibration process, the optimization algorithm attempts to compensate for this source-side mismatch. This may results in two detrimental outcomes: 1. Parameter Distortion: The algorithm forces pipeline parameters (e.g., wave speed, friction) to con-verge to incorrect, physically implausible values to achieve a superficial fit for a specific dataset. 13 2. Fundamental Mismatch: In cases where the source deviation is significant, the pipeline model may fail to match the experimental waveforms altogether, leaving large residual errors that cannot be eliminated by parameter tuning. Both scenarios severely compromise the model’s physical fidelity and generalizability. As emphasized in our previous research, establishing a high-fidelity physical model is the critical prerequisite for enabling robust zero-shot fault diagnosis within a digital twin framework. Without an accurate representation of the source dynamics, the synthetic fault data generated by the model would be unreliable, rendering the diagnosis ine ff ective. Consequently, a paradigm shift in the calibration strategy is imperative. To construct a robust digital twin capable of generalizing across the entire operating envelope, calibrating pipeline parameters in isolation is insu ffi cient. Instead, a novel multi-condition physics-data coupled framework is essential. The core philosophy of this framework is to explicitly address the source-side uncertainty by leveraging the intrinsic physical correlation between the backflow dynamics and the flow ripple amplitude. Specifically, as elucidated in the sensitivity analysis (Section 2.3), the reduction of the e ff ective bulk modulus Ke directly precipitates a deeper backflow trough and an amplified peak-to-peak flow ripple. This distinct physical correlation implies that the amplitude of the pump outlet flow ripple serves as a unique "fingerprint" for the fluid properties. By acquiring this amplitude information—potentially via virtual sensing techniques or model-based flow rate sensor—it becomes possible to impose a robust physical constraint that "pins down" the uncertainty. This step eff ectively decouples the identification of source fluid properties from the pipeline parameter estimation. With the source-side uncertainty eliminated, the subsequent calibration of pipeline parameters can proceed without interference, ensuring that the identified parameters reflect the true physical characteristics of the system rather than mere mathematical compensation. 
+
+4. Methodology: A Physics-Data Coupled Multi-Condition Calibration Framework 
+
+To overcome the dilemma of pump source-pipeline coupling and parameter uncertainty discussed in Sec-tion 3, this paper proposes a novel multi-condition calibration framework. The core philosophy is to utilize the flow ripple amplitude—which is physically governed by the e ff ective bulk modulus—as a bridge. By first pinpointing the source characteristics using virtual sensing, we eliminate the source-side uncertainty before calibrating the pipeline system. The framework is structured into three progressive stages, as illustrated in Fig. 6: 1. Stage I: In-situ Flow Sensing via Rigid Segment. Two high-frequency pressure sensors are installed on a dedicated rigid metallic pipe segment near the pump outlet. A physics-based wave propagation model is employed to reconstruct the in-situ flow ripple, to estimate the amplitude of flow ripple. 14 Complex and uncertain pipeline system Axial piston pump  
+
+> A short machined pipe segement
+> Pipeline model Flow rate calculation
+> Model-Based Flow Rate Sensor 1Source calibration 2Pipeline model calibration 3
+
+Valve Uncertain flow ripple amplitude  
+
+> Boundary condition Measured pressure ripple
+> Simulated pressure ripple MOO-based calibration algorithm Calibrated parameter of pipeline system
+> High-fidelity digital twin model
+> Fault simulation/ Digital twin-driven zero shot diagnosis
+> 4Verification:
+> 1D unsteady flow model
+
+High-Frequency Pressure Sensor In a healthy state B’ A’ Figure 6: Flowchart of the proposed physics-data coupled calibration framework. 
+
+2. Stage II: Source Model Calibration. Using the estimated flow amplitude as a robust physical con-straint, the e ff ective bulk modulus Bl in the 3D CFD model is optimized. This generates a high-fidelity, pressure-dependent mapping of the source flow boundary condition Qs(t, Pload ). 3. Stage III: Pipeline Model Calibration. With the source boundary accurately locked, Inverse Transient Analysis (ITA) is performed to identify the complex viscoelastic and unsteady friction parameters of the downstream pipeline system. 
+
+4.1. Stage I: In-situ Virtual High-frequency Flow Sensing via Rigid Sensing Segment 
+
+To accurately estimate the pump outlet flow ripple Qs(t), establishing a physically determinate sensing environment is a fundamental prerequisite. In industrial applications such as heavy-duty excavators, pumps are typically connected directly to flexible hoses. While theoretical models for viscoelastic pipelines exist (e.g., the generalized Kelvin-Voigt model), identifying their parameters in situ is notoriously di ffi cult due to pronounced viscoelastic behavior and complex geometric deformations under high pressure. Consequently, methodologies relying on sensors distributed across long hose sections [8] are ill-suited for this framework due to the excessive epistemic uncertainty introduced by hose dynamics. To mitigate these uncertainties, we propose an instrumentation strategy utilizing a dedicated rigid metal-lic sensing segment inserted immediately downstream of the pump discharge port, as shown in Fig.6. This machined rigid segment, with known geometry and material properties, serves as a standardized "clean" do-main for wave propagation. Furthermore, its proximity to the pump minimizes propagation distance, thereby mitigating the attenuation of high-frequency harmonics and preventing the accumulation of modeling errors typical of long-distance transmission. 15 Based on the synchronous pressure history p1(t) and p2(t) measured by two high-frequency sensors on this segment, the unsteady flow rate is reconstructed using hydraulic pipeline wave propagation models. Based on our literature review,existing reconstruction strategies generally fall into three categories: Space-Averaged Flow Rate (SGA), Method of Characteristics (MOC), and Domain Extrapolation, as illustrated in Fig. 7. The specific formulations and applicability of these methods are detailed below. Pipeline model Flow rate calculation 
+
+> Model-Based
+> Flow Rate Sensor 1
+
+## p1 (t) p2 (t)
+
+> SGA:
+
+## Q1 (t)
+
+## Qs (t)
+
+> MOC:
+> Core mathematical operators
+> Domain Extrapolation: MOC
+> Figure 7: Model-based flow rate sensor
+
+4.1.1. Space-Averaged Flow Rate (SGA) 
+
+The first category of reconstruction methods is often referred to as the "Flotec" flow meter principle, as characterized by Ferrari et al. [22, 23]. This approach is based on integrating the momentum equation over a rigid sensing section, utilizing the spatially averaged flow rate as an estimate for the high-frequency dynamic flow ripple. Consider a fluid control volume within a rigid segment bounded by Sensor 1 ( x1) and Sensor 2 ( x2), separated by a distance L. Building upon the 1D momentum equation (Eq. 1), the core assumption of SGA is that the spatial gradient of the flow rate, ∂Q/∂ x, is negligible over this short interval. Consequently, the instantaneous flow rate Q(x, t) is approximated by its spatial average Q(t): 
+
+Q(t) = 1
+
+L
+
+Z x2
+
+> x1
+
+Q(x, t)dx ≈ Q(x, t) (28) By integrating the momentum equation from x1 to x2, the partial derivative ∂p/∂ x is replaced by the boundary pressure di ff erence, transforming the PDE into the following Ordinary Di ff erential Equation (ODE): 
+
+Z x2
+
+> x1
+
+∂p
+
+∂x + ρ
+
+A
+
+∂Q
+
+∂t + f (Q)
+
+!
+
+dx = 0 =⇒ ρLAdQ dt + R f (Q) = p(x1, t) − p(x2, t) (29) where R f (Q) represents the total frictional pressure loss. To solve Eq.(29), the flow is decomposed into a mean component ⟨Q⟩ and a fluctuating component ∆Q(t). For the mean component of flow rate ⟨Q⟩, the inertial term vanishes. However, it is crucial to consider 16 the hardware limitations: high-frequency piezoelectric pressure sensors typically exhibit an accuracy range of 
+
+±0.5% to ±1% FS. In high-pressure hydraulic systems, this uncertainty can result in static errors of several bars, which may exceed the small mean pressure drop ⟨p1 − p2⟩ across the short sensing segment. This renders the calculation of the absolute mean flow ⟨Q⟩ unreliable. To circumvent this, this paper focuses on the fluctuating component ∆Q(t). For high-frequency dynamics, the inertial term dominates, allowing the friction term to be neglected or linearized. The alternating pressure di ff erence, ∆pac (t), is extracted by removing the unreliable DC bias from the measured signals. Assuming ∆pac (t) can be represented by a Fourier series: 
+
+∆pac (t) = (p1(t) − p2(t)) − ⟨ p1 − p2⟩ =
+
+> N
+
+X
+
+> k=1
+
+[ak cos( ωkt) + bk sin( ωkt)] (30) The flow ripple is then derived by time-integrating the inertial term: 
+
+∆Q(t) ≈ A
+
+ρL
+
+Z
+
+∆pac (t)dt = A
+
+ρL
+
+> N
+
+X
+
+> k=1
+
+" ak
+
+ωk
+
+sin( ωkt) − bk
+
+ωk
+
+cos( ωkt)
+
+#
+
+(31) In summary, the SGA method is fundamentally constrained by its underlying assumptions. By relying on spatial averaging and (typically) steady-state friction models, it inherently neglects frequency-dependent wall shear stress. Consequently, its accuracy degrades significantly when unsteady friction dynamics or significant spatial flow gradients ( ∂Q/∂ x) are present. 
+
+4.1.2. Method of Characteristics (MOC) 
+
+The second category employs a distributed parameter model solved via the Method of Characteristics (MOC). Unlike conventional forward simulations that rely on assumed pump or valve boundary conditions, this specific implementation utilizes the synchronous pressure measurements p1(t) and p2(t) as exact Dirichlet boundary conditions at the inlet and outlet of the sensing segment. By constructing a characteristic grid, the pressure and flow rate at all internal nodes within the sensor span are resolved. Consequently, the flow rate 
+
+Q1(t) at the inlet boundary (left side) is extracted to represent the high-frequency flow pulsations entering the segment. 
+
+4.1.3. Domain Extrapolation 
+
+The third category, Domain Extrapolation, advances beyond spatial averaging or restricted internal node calculation by implicitly recovering the unknown source boundary condition. This study adopts the Temporal-Spatial Method of Characteristics (TSMOC) [24, 25] due to its superior computational e ffi ciency and deter-ministic nature compared to data-driven approaches like PINNs. The reconstruction process is twofold: first, the internal pressure and flow fields are analytically resolved using synchronous measurements p1 and p2;17 subsequently, the pump source flow Qs(t) is extrapolated by projecting the negative characteristic line ( C−)upstream from the inlet boundary, thereby reconstructing the source dynamics with high fidelity. Finally, the peak-to-peak amplitude Aest is extracted from the estimated flow ripple ˆ Q(t). This amplitude serves as a physical constraint for the subsequent calibration stage. It is worth emphasizing that this instrumen-tation strategy o ff ers superior practicality for engineering equipment compared to standard ISO fluid-borne noise measurement methods. Traditional techniques, such as the "Secondary Source" (SS) method or the "2 Pressure /2 System" (2P2S) method, often require substantial modifications to the original hydraulic system (e.g., auxiliary pumps or blocking valves). In contrast, this strategy involves less intrusion, requiring only the installation of a short, passive metallic pipe. Physically, this setup constitutes a "virtual high-frequency flow meter" without disrupting the primary function or layout of the hydraulic circuit. 
+
+4.2. Stage II: Source Calibration via POD-GPR Surrogate model 
+
+The primary objective of Stage II is to construct a high-fidelity source boundary condition that accurately reproduces the pump’s boundary dynamics under varying operating conditions. As established in the theoret-ical analysis (Section 3.3), the pump outlet flow ripple Qs(t) is an uncertain variable heavily coupled with the system pressure and fluid properties. Calibrating the flow ripple amplitude presents a significant challenge due to the complexity of the underlying physical factors. The ripple amplitude is dominated by compressibility backflow, which is theoretically governed by the instantaneous e ff ective bulk modulus, Ke. However, Ke is a highly nonlinear function of multiple uncertain variables, including entrained air content, fluid temperature, and etc. In industrial environments, precise real-time measurement of these parameters is practically im-possible. Furthermore, existing mathematical models for Ke often contain significant epistemic uncertainties regarding air release /absorption rates during rapid transients. For instance, commercial CFD software such as PumpLinx o ff ers multiple distinct cavitation models, each yielding di ff erent sti ff ness characteristics. To circumvent this parameter identifiability issue, we propose a calibration strategy utilizing a Macro-scopic Proxy Parameter. Despite the stochastic nature of Ke, our sensitivity analysis (Fig. 5) reveals that its macroscopic impact is concentrated in the peak-to-peak amplitude of the flow ripple. Consequently, we select the pure-liquid bulk modulus, Bl, within the CFD model as the key proxy calibration parameter. By calibrat-ing Bl, we can e ff ectively "anchor" the source dynamics, ensuring that the CFD-predicted amplitude aligns with the experimentally estimated value, Aest . Mathematically, this calibration represents an inverse problem requiring iterative evaluations of the forward model. Given that a single high-fidelity 3D CFD simulation for an axial piston pump typically requires hours of wall-clock time, embedding the solver directly within an iterative optimization loop is computationally intractable. To address this, we introduce a Reduced Order Model (ROM) that combines Proper Orthogonal Decom-position (POD) for dimensionality reduction with Gaussian Process Regression (GPR) for nonlinear mapping. 18 This approach reduces the inference time from hours to milliseconds while retaining physical fidelity. The surrogate model is applied across multiple operating conditions (10, 15, 20, and 25 MPa). In the 3D CFD sim-ulations, the downstream load is defined by an orifice boundary condition rather than a fixed pressure value. Since the relationship between the orifice diameter ( Deq ) and the mean load pressure is influenced by volu-metric e ffi ciency and leakage, it is not explicitly analytical. Consequently, the calibration involves two targets: the flow ripple amplitude, which is primarily a ff ected by the fluid bulk modulus Bl, and the mean operating pressure, which is determined by Deq . The surrogate model maps the input vector x = [Deq , Bl] to the system response. This formulation establishes a dual-objective optimization problem to identify the parameter pair (Deq , Bl) that minimizes the errors in both mean pressure and flow amplitude for each operating condition. 
+
+4.2.1. Surrogate Model Construction 
+
+To facilitate rapid calibration without the computational burden of iterative CFD, a data-driven Reduced Order Model (ROM) is constructed via an o ffl ine training strategy. The procedure comprises three sequential steps: 1. Data Sampling and Snapshot Generation: The parametric input space is defined by the equivalent orifice diameter Deq and the pure-liquid bulk modulus Bl. Latin Hypercube Sampling(LHS) is employed to generate Ns sample points that uniformly cover this space. For each sample i, a high-fidelity 3D CFD simulation is performed to obtain the time-resolved outlet pressure pi(t) and flow rate Qi(t). These dynamic responses are aggregated into snapshot matrices P
+
+and Q:
+
+P = [p1(t), . . . , pNs (t)] , Q = [Q1(t), . . . , QNs (t)] (32) 2. Dimensionality Reduction via POD: Next, Proper Orthogonal Decomposition(POD) is applied to these high-dimensional snapshots to extract the dominant coherent structures. The pressure and flow fields are decomposed as follows: 
+
+p(t; Deq , Bl) ≈ ¯p(t) +
+
+> Kp
+
+X
+
+> j=1
+
+β j(Deq , Bl)ψ j(t)
+
+Q(t; Deq , Bl) ≈ ¯Q(t) +
+
+> Kq
+
+X
+
+> k=1
+
+αk(Deq , Bl)ϕk(t)(33) where ¯ p(t) and ¯Q(t) denote the temporal mean waveforms, while ψ j(t) and ϕk(t) represent the orthogonal basis functions (modes). Consequently, the high-dimensional system dynamics are compressed into low-dimensional coe ffi cient vectors β and α.3. Regression via GPR: 19 Finally, Gaussian Process Regression (GPR) models are trained to map the input parameters ( Deq , Bl) to the POD coe ffi cients ( β j, α k). By establishing this non-linear mapping, the surrogate model can reconstruct full-field pressure and flow waveforms for any query point within the parameter space with millisecond-level inference time. 
+
+4.2.2. Dual-Objective Parameter Estimation 
+
+With the established surrogate model, parameter calibration for each target operating condition (e.g., 
+
+Ptarget ∈ { 10 , 15 , 20 , 25 } MPa) allows for the simultaneous identification of the load boundary and fluid prop-erties. The optimization problem is formulated as follows: Find the optimal vector x∗ = [D∗
+
+> eq
+
+, B∗ 
+
+> l
+
+] that minimizes the residuals in both mean pressure and flow amplitude: 
+
+x∗ = arg min 
+
+> Deq ,Bl
+
+w1 · mean( ppred ) − Ptarget 
+
+| {z }
+
+> Mean Pressure Error
+
++w2 · amp( Qpred ) − Aest 
+
+| {z }
+
+> Flow Amplitude Error
+
+ (34) where ppred and Qpred are the waveforms predicted by the surrogate model, Aest is the in-situ flow amplitude estimated in Stage I, and amp( ·) denotes the peak-to-peak amplitude operator. Solving this optimization for each discrete working condition yields a set of experimentally calibrated Bl.These are fed back into the 3D CFD model to generate the final, high-fidelity source boundary conditions 
+
+Qs(t, Bl, Pload ) used for the pipeline parameter identification in Stage III. 
+
+4.3. Stage III: Pipeline Parameter Identification via Inverse Transient Analysis 
+
+Building upon the source decoupling achieved in stage II, the stage III employs ITA to identify the physi-cal parameters of the downstream pipeline. In our previous work[5], the ITA framework was established based on a pipeline model with steady friction. While e ff ective for rigid pipes, that approach has limitations when applied to complex industrial systems containing hydraulic hoses, which exhibit pronounced viscoelastic be-havior and frequency-dependent friction e ff ects. Therefore, this study extends the ITA framework by adopting the generalized Kelvin-Voigt viscoelastic model and the weighting function-based unsteady friction model described in Section 2.1. The calibration process is designed to be robust against uncertainties(including measurement uncertainties), employing a multi-sensor, multi-condition optimization strategy. 
+
+4.3.1. Extended Parameter Vector and Load Boundary Strategy 
+
+Unlike the simplified model, the high-fidelity forward model requires a comprehensive set of physical parameters. The vector of unknown parameters θ to be identified is defined as: 20 θ =
+
+ ai, Di, Li, x j
+
+| {z }
+
+> Geometry & Wave Speed
+
+, ν|{z} 
+
+> Fluid Viscosity
+
+, {Jk,i, τ k,i}Nkv 
+
+> k=1
+
+| {z }
+
+> Viscoelasticity
+
+, Pset 
+
+|{z} 
+
+> Load Parameter
+
+, δp
+
+|{z} 
+
+> Sensor Drift
+
+ (35) where: 
+
+• ai, Di, Li are the wave speed, diameter, and length of the i-th pipe segment, and x j represents the precise location of the j-th sensor (where j = 1, 2, 3). 
+
+• ν is the e ff ective kinematic viscosity of the oil, which determines the unsteady friction weighting func-tions W(τ). 
+
+• Jk,i and τk,i are the creep compliance and retardation time for the viscoelastic hose segments. 
+
+• Pset is the equivalent orifice diameter of the loading valve under a specific reference operating condition. 
+
+• δp represents the pressure drift of the sensors, introduced to compensate for mean pressure deviations. Calibrating independent load parameters for every operating condition could e ff ectively match the mean pressure but would drastically increase the dimensionality of the optimization problem. Unlike previous single-condition studies where the valve boundary was easily calibrated, estimating operating parameters for each condition in a multi-condition framework is computationally expensive. Moreover, the accuracy of such all condition calibration is fundamentally compromised by sensor characteristics. The manual adjustment of load valves introduces uncertainty, and more critically, the pressure sensors themselves exhibit inherent uncertainty. Table 2 presents the factory inspection records for the sensors used in this study. The data reveals significant condition-dependent nonlinearity (up to 0.95% FS), implying that static errors vary unpredictably across di ff erent pressure levels and may worsen with aging or environmental changes. Consequently, the measured mean pressure carries inherent uncertainty. Although performing sensitivity calibration for each sensor at every condition could be a potential workaround, it fails to account for real-time drift or internal hardware degradation. However, the excellent repeatability (0.04% FS) indicates that the sensors capture dynamic pressure fluctuations with high reliability, as the pressure pulsation remains relatively stable over short periods. Critically, the fluid viscosity ν—which governs steady-state pressure loss—requires an accurate verifica-tion of the mean pressure drop. If the mean pressure is unreliable due to sensor nonlinearity, the viscosity cannot be correctly identified. Therefore, we propose a strategy that calibrates the load parameter Pset and a sensor drift parameter δp exclusively at a single reference condition (e.g., 10 MPa). This parameter δp is designed to absorb the static bias caused by sensor nonlinearity, ensuring it is not wrongly attributed to fluid properties. Specifically, the strategy is as follows: 21 Table 2: Static calibration data of two identical pressure sensors (Model: CYG1401, Range: 0-40 MPa) over 5 independent trials.                                                                    
+
+> Pressure Sensor No.1 Sensor No.2
+> (MPa) Test 1 (V) Test 2 (V) Test 3 (V) Test 4 (V) Test 5 (V) Test 1 (V) Test 2 (V) Test 3 (V) Test 4 (V) Test 5 (V) 00.083 0.083 0.084 0.083 0.083 0.105 0.105 0.106 0.105 0.105 81.046 1.046 1.046 1.046 1.046 1.060 1.060 1.060 1.060 1.060 16 2.016 2.016 2.016 2.016 2.016 2.026 2.026 2.026 2.026 2.026 24 2.993 2.993 2.993 2.993 2.993 3.006 3.006 3.006 3.006 3.006 32 3.978 3.977 3.978 3.977 3.978 4.000 4.000 4.000 4.000 4.000 40 4.969 4.969 4.969 4.969 4.969 5.004 5.005 5.004 5.004 5.004
+> Nonlinearity (%FS) 0.95 0.69 Repeatability (%FS) 0.04 0.01
+
+1. Reference Condition Anchor: The load parameter Pset and the sensor drift parameter δp are calibrated exclusively at a single reference condition (e.g., 10 MPa). The parameter δp is designed to absorb the specific static bias at this condition, ensuring that the pressure drop used to identify ν is physically valid. 2. Dynamic Ripple Matching: For all remaining operating conditions, no additional load parameters are introduced. Instead, the simulation targets theoretical integer pressures, and the optimization objec-tive focuses exclusively on matching the zero-mean of the pressure ripple. This leverages the sensor’s high dynamic repeatability to robustly identify wave propagation parameters without being misled by variable static errors. 
+
+4.3.2. Multi-Objective Optimization Formulation 
+
+The calibration is formulated as a Multi-Objective Optimization (MOO) problem minimizing the discrep-ancy across three sensors ( N = 3) averaged over multiple operating conditions ( K conditions). The objective function vector F(θ) = [ f1, f2, f3]T is defined as: 
+
+f j(θ) = 1
+
+K
+
+> K
+
+X
+
+> k=1
+
+E j,k(θ) (36) where E j,k is the matching error for the j-th sensor under the k-th condition. Incorporating the phase-insensitive strategy and the zero-mean strategy described above, the error metric is: 
+
+E j,k(θ) = min 
+
+> δ
+
+vut 1
+
+M
+
+> M
+
+X
+
+> m=1
+
+ ˜P(k)
+
+> exp
+
+(tm) − ˜P(k)
+
+> sim
+
+(tm + δ; θ)2 (37) Here, ˜ P denotes the centered signal (pressure ripple with mean value removed): ˜ P(t) = P(t) − mean( P(t)). 
+
+δ represents the phase shift variable used to eliminate synchronization errors between the virtual shaft angle and data acquisition trigger. 22 The formulated MOO problem is implemented using PlatEMO, a comprehensive MATLAB-based evolu-tionary computation platform that provides a suite of advanced MOO algorithms. Since the MOO algorithm yields a set of non-dominated Pareto optimal solutions rather than a single global optimum, a decision-making strategy is used to extract the definitive parameter set. To ensure a balanced fitting accuracy across the entire spatial span of the pipeline, the final calibrated vector θ∗ is selected from the Pareto Front ( PF ) by minimizing the aggregate error of all three sensors. The selection criterion is defined as: 
+
+θ∗ = arg min 
+
+> θ∈PF
+> 3
+
+X
+
+> j=1
+
+f j(θ) (38) where f j(θ) represents the phase-insensitive, zero-mean matching error for the j-th sensor, averaged over all operating conditions. 
+
+5. Results and discussion 
+
+5.1. Experimental Platform and Data Acquisition 
+
+A hydraulic test rig was used to validate the proposed methodology. Fig.8 illustrates the physical layout of the experimental system. The pump tested is a variable displacement axial piston pump (Rexroth A10VO71), driven by a motor operating at a constant speed of 1000 r /min. The system utilizes ISO VG 46 hydraulic oil as the working medium, with the temperature maintained at approximately 40 ◦C. It is worth noting a specific configuration change compared to our previous work[5]. As depicted in Fig.8, the current study utilizes the pipeline system situated on the left-hand side of the test rig, whereas prior investigations employed the right-side circuit. This layout reconfiguration was necessitated by spatial constraints: the installation of the dedicated rigid metallic sensing segment (introduced in Stage I) at the pump discharge port that was incompatible with the original right-side arrangement. Compared to our previous work[5], which utilized two measurement points (at the pump discharge and pipeline midpoint), the current platform is instrumented with a five high-frequency pressure sensors (Model CYG401, Range 0–40 MPa, Bandwidth 20 kHz) and a sampling frequency of 51200 Hz(Data Acquisition Device DH5902N). To capture the propagation of pressure waves across the transmission line, three sensors are distributed along the main flow path. Sensors No.1 and No.2 are positioned at the pump discharge port and downstream of the first hose section, respectively, in locations similar to those in the previous study. Ad-ditionally, compared with previous studies, a new monitoring point, Sensor No.3, is installed at the pipeline terminus immediately upstream of the loading valve. This expansion of physical measurement points was deemed necessary to address the increased complexity associated with calibrating multiple operating condi-tions and identifying a larger set of pipeline parameters. Simultaneously, to predict the flow ripple at the pump 23 Figure 8: Experimental Platform 
+
+outlet (Stage I), a specialized sensing cluster is established on the rigid metallic pipe at the pump outlet. With Sensor No.1 serving as the reference point, Sensors No.4 and No.5 are installed at distances of 100 mm and 200 mm downstream, respectively. Fig.9 illustrates the raw pressure ripples captured under healthy steady-state conditions at discharge pres-sures of 10, 15, 20, and 25 MPa. Specifically, Fig.9(a) displays the pressure signals from Sensors No. 1, 2, and 3 at 10 MPa, where the spatial propagation of the pressure waves along the pipeline is clearly observable. It should be noted that the mean values recorded by these sensors exhibit a certain degree of measurement uncertainty, likely due to the static o ff set characteristics of the high-frequency sensors. Fig.9(b) compares the waveforms of Sensor No. 1 across di ff erent operating loads. The results show that the pressure ripple amplitude increases significantly with the load. This phenomenon validates the theoretical analysis in Section 2: a higher discharge pressure exacerbates the compressibility-induced backflow, which in turn intensifies the source-side flow and pressure pulsations. Finally, Fig.9(c) provides a comparison between Sensors No. 1, 4, and 5 at 10 MPa, which serve as the sensing cluster for virtual flow sensing. Due to their spatial proximity, the three sensors capture highly similar ripple shapes. However, a noticeable discrepancy exists in their mean levels; specifically, the mean pressure of Sensor No. 5 is significantly lower than that of Sensors No. 1 and 24 0 0.01 0.02 0.03 0.04 0.05 0.06 
+
+t (s) 9.6 9.8 10 10.2 10.4 Pressure(MPa) No.1 Pressure Sensor No.2 Pressure Sensor No.3 Pressure Sensor 0 0.005 0.01 0.015 0.02 -0.8 -0.6 -0.4 -0.2 00.2 0.4 0.6 Pressure (zero-mean)(MPa) 0 0.005 0.01 0.015 0.02 9.6 9.7 9.8 9.9 10 10.1 10.2 10.3 Pressure(MPa) (a) Pressure ripple signal at Sensor No.1,2,3(10MPa) (b) Pressure ripple at Sensor No.1(10,15,20,25MPa) (c) Pressure ripple at Sensor No.1,4,5 (10MPa) 10MPa 15MPa 20MPa 25MPa 
+
+t (s) t (s) Sensor No .1 Sensor No .4 Sensor No.5 Figure 9: Pressure ripple collected under healthy conditions 
+
+4. This further substantiates the aforementioned uncertainty in static pressure measurement for this pressure sensor. 
+
+5.2. Results of Virtual high-frequency flow ripple sensing 
+
+Fig. 10 presents the results of the virtual high-frequency flow ripple sensing described in Stage I. It compares the reconstructed flow ripple waveforms obtained using three di ff erent methods—Flotec (space-averaged), MOC ( Q1(t)), and TSMOC—for two sensor configurations (Sensors 1&4 and Sensors 1&5) under varying load pressures (10–25 MPa). Fig.10(a) presents the estimated flow ripple waveforms at 25MPa ob-tained by the three reconstruction methods. The Flotec method yields a result that closely resembles the average of the inlet and outlet flow rates, Q1(t) and Q2(t), computed by the MOC. In contrast, the TSMOC method produces the smallest amplitude among the three. This is because TSMOC extrapolates the flow at a location upstream of the first sensor, essentially reconstructing the source flow after it has propagated through a short pipe segment. Figure 10(b) displays the flow ripple waveforms predicted by the TSMOC method under load pressures 25 0 0.005 0.01 -10 -5 0510 L/min 0 0.005 0.01 -10 -5 0510 L/min 0 0.005 0.01 -10 -5 0510 L/min (a) FLOTEC(1&4) MOC Q 1 (t)(1&4) TSMOC(1&4) (c) (e) (d) 0 0.005 0.01 
+
+t(s) -20 -15 -10 -5 0510 L/min TSMOC(25MPa) MOC(Q 1( t))   
+
+> MOC(Q 2(t)) FLOTEC
+
+0 0.005 0.01 -10 -5 0510 L/min (b) TSMOC(25MPa) TSMOC(20MPa) TSMOC(10MPa) TSMOC(15MPa) 
+
+t(s) 
+
+t(s) t(s) t(s) Figure 10: Comparison of flow ripple waveforms reconstructed by Flotec, MOC, and TSMOC methods using pressure measurements from Sensors 1&4 and Sensors 1&5 at 10–25 MPa. 
+
+of 10, 15, 20, and 25 MPa. As expected from the theoretical analysis, the estimated flow ripple amplitude increases progressively with the load pressure. 
+
+> Table 3: Comparison of Flow Ripple Amplitudes for TSMOC, MOC, and Flotec under Various Load and Sensor Configurations
+
+Data Source Method Flow Ripple Amplitude [L /min] 
+
+25 MPa 20 MPa 15 MPa 10 MPa Sensors 1 & 4 Flotec 20.98 16.78 13.90 10.28 MOC Q1(t) 19.14 15.15 12.73 9.425 TSMOC 16.25 12.97 10.92 8.446 Sensors 1 & 5 Flotec 22.93 19.05 15.40 11.86 MOC Q1(t) 20.23 16.57 13.51 10.39 TSMOC 17.08 14.03 11.39 9.112 
+
+Fig. 10(c), (d), and (e) compare the flow ripple reconstructions obtained using the Flotec, MOC ( Q1(t)), and TSMOC methods, respectively, for two di ff erent sensor configurations: Sensors 1&4 and Sensors 1&5. 26 For all three methods, the waveforms computed from the two sensor pairs are in close agreement, demon-strating the consistency of the reconstruction approach. The corresponding amplitude values are summarized in Table 3. The flow amplitudes predicted by the TSMOC method using Sensors 1&5 are selected as the estimated values Aest for the subsequent source calibration in Stage II. 
+
+5.3. Results of Source Calibration via POD-GPR Surrogate model 
+
+Following the virtual flow sensing in Stage I, the estimated flow ripple amplitudes Aest are used as physical constraints to calibrate the source model parameters—specifically, the pure-liquid bulk modulus Bl and the equivalent orifice diameter Deq —for each target load pressure. To circumvent the prohibitive computational cost of iterative 3D CFD simulations, the POD-GPR surrogate model constructed in Section 3.2 is employed to perform optimization described by Eq.(34).                                           
+
+> Table 4: Surrogate Model Validation: Comparison of CFD Actual and Predicted Data
+> Load (MPa) Parameters Aest [L /min] Press. Mean [MPa] Aest [L /min]
+> Bl(MPa) Deq (mm) CFD Predicted CFD Predicted Bl=1500 MPa 25 1011.3 3.213 17.45 17.03 24.96 25.02 11.79 20 1126.8 3.423 13.69 13.84 20.01 20.01 10.77 15 1301.1 3.708 11.56 11.45 14.96 14.96 9.800 10 1389.2 4.124 9.445 9.444 9.982 9.991 8.660
+
+Table 4 summarizes the optimal parameter pairs ( D∗
+
+> eq
+
+, B∗ 
+
+> l
+
+) identified by the POD-GPR surrogate model for each target load condition, along with a comparison of the flow ripple amplitudes Aest and mean pressures predicted by the surrogate model versus those obtained from the actual CFD simulations using the same opti-mized parameters. Fig ?? presents the corresponding pressure and flow waveforms predicted by the surrogate model, demonstrating excellent agreement with the full-order CFD results. The surrogate model exhibits remarkable predictive accuracy. Across all operating conditions, the dis-crepancies between the POD-GPR predicted and CFD-computed flow ripple amplitudes are consistently be-low 0.5L /min, with the largest deviation being only 0.42L /min at 25MPa. Similarly, the mean pressure errors are within 0.06MPa, with the 25MPa condition showing a minimal o ff set of 0.06MPa. Furthermore, it is ob-served that the flow ripple amplitude remains relatively stable around a given mean pressure, indicating that the surrogate model has successfully captured the dominant physical relationships. This high fidelity validates the e ff ectiveness of combining POD for dimensionality reduction with GPR for nonlinear mapping, demon-strating that the surrogate model can reliably emulate the computationally expensive 3D CFD simulations and enable rapid parameter estimation. This trend o ff ers a compelling explanation for the relative success of our earlier work, which calibrated pipeline parameters exclusively at 10 MPa. At this low pressure, the error introduced by neglecting source-side 27 0 0.002 0.004 0.006 0.008 0.01 0.012 
+
+## t (s) 55 60 65 70 75 80 L/min 25MPa 20MPa 15MPa 10MPa 
+
+t (s) 24.6 24.8 25 25.2 25.4 MPa 
+
+t (s) 19.8 20 20.2 
+
+t (s) 14.6 14.8 15 15.2 
+
+t (s) 9.7 9.8 9.9 10 10.1 10.2 10 -3 0 510 -3 0 5 10 -3 0 5 10 -3 0 5(a) (b) (c) (d) (e) Figure 11: POD-GPR surrogate model predictions versus CFD results: (a) flow ripple waveform; (b)–(e) pressure waveforms at 25, 20, 15, and 10 MPa, respectively. Dashed lines: surrogate model predictions; solid lines: CFD simulations. 
+
+calibration was comparatively small, and the pipeline parameter identification could still achieve reasonable alignment with experimental pressure ripples. However, as the present study extends to multiple operating conditions, particularly high-pressure regimes, such errors become substantial and can no longer be ignored. The pronounced deviation at 25 MPa would inevitably propagate into the subsequent pipeline calibration, forcing the optimization algorithm to compensate for the source mismatch by distorting pipeline parame-ters—thereby compromising the physical fidelity and generalizability of the digital twin. These results underscore the fundamental motivation of this work: while single-condition calibration at low pressures may tolerate uncalibrated source assumptions, a robust multi-condition framework demands ex-plicit treatment of pump source uncertainty. By leveraging the TSMOC-estimated amplitudes Aest as physical constraints, the proposed calibration framework ensures that the source boundary conditions accurately reflect the real pump dynamics across the entire operating envelope, laying a solid foundation for the subsequent pipeline parameter identification and, ultimately, for reliable zero-shot fault diagnosis. 28 5.4. Results of pipeline parameter via ITA 
+
+After the pump source boundary is accurately calibrated in Stage II, Stage III proceeds to identify the physical parameters of the downstream pipeline system using ITA. The extended parameter vector θ includes geometric dimensions, wave speeds, fluid viscosity, viscoelastic creep coe ffi cients, relaxation times, and sen-sor drift parameters, as shown in Fig.12. As illustrated in Fig.8, the pipeline system of the test rig consists of a short pipe, followed by a machined rigid section instrumented with three high-frequency pressure sensors, followed by a flexible hydraulic hose, then a second, larger-diameter hose, and finally a rigid metal pipe. To accurately capture the wave propagation dynamics, the pipeline system is modeled as five distinct segments. Segments 3 and 4 are flexible hoses and are therefore described by the viscoelastic model with unsteady fric-tion presented in Section 2.1. In contrast to our previous work, which employed a steady-friction assumption, the present model incorporates frequency-dependent wall shear stress via the weighting-function approach. The pump source, calibrated through the POD-GPR surrogate model, provides the upstream boundary condi-tion. Pump Load 
+
+## RF
+
+## C+
+
+C+ C-Series pipe 
+
+1D 2U  
+
+> x1x2
+
+p 1D= p 2U, Q1D= Q2U Valve 350mm 
+
+D0
+
+a0 22mm a1 a2 a3
+
+D1 D2 D3
+
+x1 x2
+
+> x3
+
+L1 L2 L3
+
+## Pressure sensor 
+
+## Hydraulic hose 
+
+VEPs: [ J1 , J2 , J3 , J4 , J5, ]EL C-
+
+## xt Oil viscosity   
+
+> Figure 12: Parameter vector θfor ITA Table 5: Ranges of Uncertain Parameters
+
+Minimum Maximum 
+
+ai [m /s] 900 1250 
+
+Di [mm] [15, 24, 31, 23] [17, 26, 33, 25] 
+
+Li [m] [1.9, 1.2, 1.3] [2.4, 1.8, 1.6] 
+
+xi [m] [0.2, 1,5, 0] [0.5, 3, 0.2] 
+
+ν [Pa ·s] 0.015 0.12 
+
+J [10 −10 Pa −1] [0.05, 0.05, 0.05, 0.05, 0.05] [1.00, 1.00, 0.50, 0.50, 0.50] 
+
+τ [10 −2s] [0.04, 0.10, 0.20, 0.40, 1.00] [0.10, 0.20, 0.40, 1.00, 100] 
+
+Pset [MPa] 9 11 
+
+δpi [MPa] -0.1 0.1 29 For comparison, we consider three baseline strategies that omit one or more of the key components of the proposed framework: 
+
+• Baseline I : Viscoelastic pipeline model with unsteady friction, but without source calibration (i.e., using a fixed pump boundary obtained from pre-computed CFD with Bl = 1500 MPa). 
+
+• Baseline II : Non-viscoelastic pipeline model (rigid pipe assumption) with unsteady friction, but with source calibration. 
+
+• Baseline III : Non-viscoelastic pipeline model with steady friction only, but with source calibration. As noted in our previous work, the choice of multi-objective optimization (MOO) algorithm significantly influences the quality of the identified parameters. Here we compare three algorithms: ToP, ANSGA-III, and ICMA. All algorithms were run for 1000 generations using the PlatEMO platform. Fig.13(a) shows the evolu-tion of the HV indicator, which measures the convergence and diversity of the Pareto front. Fig.13(b) presents the final Pareto fronts obtained by the three algorithms. ToP and ANSGA-III exhibit similar performance, consistent with our earlier observations, but ANSGA-III achieves slightly better diversity in this application. However, ICMA clearly outperforms both, attaining a significantly higher HV value. Therefore, ICMA is adopted for all subsequent calibrations. 200 400 600 800 1000 Generation 
+
+0.25 0.3 0.35 0.4 0.45 0.5 Hypervolume (HV) 
+
+(a) Convergence Process  
+
+> ICMA
+> ANSGA-III
+> ToP
+
+1
+
+0.4 
+
+0
+
+(b) Pareto Front Comparison 
+
+0.6 
+
+0.5 
+
+0.8 
+
+0.5 
+
+1
+
+1 01.5 
+
+> ICMA
+> ANSGA-III
+> ToP
+> Figure 13: Performance comparison of ToP, ANSGA-III, and ICMA: HV convergence and Pareto fronts.
+
+The final calibrated parameters, selected according to the criterion of minimizing the aggregate error across all three sensors(1&4&5), are reported in Table 6. Fig. 14 compares the Pareto fronts obtained for the proposed method and the three baseline strategies. Among the three strategies that include source calibra-tion—namely the proposed method (viscoelastic with unsteady friction), Baseline II (non-viscoelastic with unsteady friction), and Baseline III (non-viscoelastic with steady friction)—the proposed method achieves a 30 Table 6: Calibrated parameter values. 
+
+Parameter Calibrated Value Wave speed, ai (m /s) 1224.4, 1249.9, 1105.3, 901.2 Pipe diameter, Di (mm) [17.0, 24.0, 32.9, 24.5] Pipe length, Li (m) [2.55, 1.30, 1.59] Position, xi (m) [0.440, 2.778, 0.1974] Fluid viscosity, ν (Pa s) 0.1193 Creep compliance, J (10 −10 Pa −1) [0.06, 0.68, 0.49, 0.25, 0.05] Relaxation time, τ (10 −2 s) [0.085, 0.19, 0.29, 0.52, 56.5] Set pressure, Pset (MPa) 9.92 Pressure deviation, δp,i (MPa) [0.09, 0.085] substantially higher HV than both Baseline II and Baseline III. This clearly demonstrates that neglecting vis-coelasticity, even with an accurately calibrated source boundary, prevents the model from faithfully capturing the true physical behavior of the flexible hoses, leading to an inferior Pareto front and, as the TIC values later confirm, poorer time-domain predictions. Interestingly, Baseline I (viscoelastic with unsteady friction but without source calibration) appears to achieve an even higher HV than the proposed method. This might suggest, from a purely Pareto-optimal perspective, that the model without source calibration o ff ers greater flexibility in fitting the three sensor errors. However, as we demonstrate below through time-domain valida-tion and the TIC metric, a higher HV does not guarantee better agreement with experimental data—it merely indicates that the algorithm found a set of trade-o ff s between the three sensor errors, but those errors are com-puted using an incorrect source boundary. The proposed method, by anchoring the source with the physically estimated amplitudes Aest , yields parameters that are not only optimal in the Pareto sense but also physically consistent. 200 400 600 800 1000 Generation 
+
+> 00.1 0.2 0.3 0.4 0.5 0.6 Hypervolume (HV)
+
+(a) HV Convergence Curve 
+
+> Visco
+> Unsteady
+> Steady
+> Visco-No source calibrated
+> 1.5
+> 10
+> 0
+
+(b) Pareto Front Comparison   
+
+> 0.5
+> 0.5 0.5
+> 1
+> 101.5
+> 1.5
+> Visco
+> Unsteady
+> Steady
+> Visco-No source calibrated
+> Figure 14: Comparison between the proposed method and three baseline strategies.
+
+To quantitatively assess the accuracy of the calibrated pipeline model, this study adopts Theil’s Inequality 31 Coe ffi cient (TIC) as the primary evaluation metric. TIC is a normalized statistic widely used in model val-idation to measure the overall agreement between simulated and measured signals. Compared to traditional metrics such as Root Mean Square Error (RMSE), TIC provides a robust assessment of a model’s ability to replicate system dynamics, with good adaptability to signals of di ff erent magnitudes. For the pressure ripple at the j-th sensor under the k-th operating condition, let the measured pressure ripple (with mean removed) be ˜pexp j,k (t) and the simulated pressure ripple be ˜ psim j,k (t). The TIC coe ffi cient is defined as: TIC j,k =
+
+r
+
+> 1
+> M
+
+PMm=1
+
+ ˜pexp j,k (tm) − ˜psim j,k (tm)2
+
+r
+
+> 1
+> M
+
+PMm=1
+
+ ˜pexp j,k (tm)2 +
+
+r
+
+> 1
+> M
+
+PMm=1
+
+ ˜psim j,k (tm)2
+
+(39) where M is the number of sampling points per pulsation cycle. TIC ranges from [0 , 1], with values closer to zero indicating better agreement. 
+
+> Table 7: Quantitative comparison of TIC under the health condition.
+
+Model Strategy Sensor Load Pressure (TIC) Maximum Avg. Max. 10 MPa 15 MPa 20 MPa 25 MPa 
+
+Baseline I (Visco w /o source cal.) No.1 0.149 0.162 0.202 0.250 0.250 0.183 No.2 0.146 0.116 0.093 0.117 0.146 No.3 0.153 0.113 0.073 0.097 0.153 Baseline II (Unsteady Friction) No.1 0.190 0.172 0.205 0.270 0.270 0.284 No.2 0.108 0.100 0.153 0.242 0.242 No.3 0.273 0.227 0.283 0.342 0.342 Baseline III (Steady Friction) No.1 0.207 0.213 0.251 0.344 0.344 0.367 No.2 0.101 0.127 0.208 0.301 0.301 No.3 0.339 0.345 0.398 0.455 0.455 
+
+Proposed Method 
+
+No.1 0.165 0.161 0.124 0.126 0.165 
+
+0.178 No.2 0.134 0.106 0.089 0.177 0.177 No.3 0.186 0.125 0.111 0.193 0.193 
+
+To quantitatively assess model fidelity, TIC is computed for the zero-mean pressure-ripple signals across all sensors and operating conditions. The results are summarized in Table 7. The proposed method attains the lowest average-of-maximum TIC value (0.178), with individual sensor maxima remaining below 0.193 even at 25 MPa. In contrast, Baseline I (viscoelastic pipeline with unsteady friction but without source calibration) yields a comparable overall average (0.183) yet exhibits markedly elevated TIC at high loads: 0.202 at 20 MPa and 0.250 at 25 MPa for Sensor No.1 (underlined entries). Baseline II (non-viscoelastic with unsteady friction) 32 and Baseline III (non-viscoelastic with steady friction only) degrade further, reaching average-of-maximum TIC values of 0.284 and 0.367, respectively. The time-domain validation is illustrated in Figs. 15–17. Figure 15 (proposed viscoelastic unsteady-friction model with source calibration) demonstrates excellent waveform agreement with experimental data across all three sensors and the full pressure range (10–25 MPa). Both amplitude envelopes and phase relation-ships are faithfully reproduced, confirming that the calibrated parameters accurately capture wave propagation, attenuation, and viscoelastic damping. Figure 17 (Baseline III) exhibits the largest discrepancies even at moderate pressures, underscoring that steady-friction and rigid-pipe assumptions are inadequate for industrial systems containing flexible hoses. Collectively, these comparisons demonstrate that neglecting multi-condition source calibration leads to pa-rameter distortion that manifests most severely under high-load regimes, where source uncertainty dominates. By explicitly anchoring the upstream flow boundary through the physics-data coupled Stages I–II, the pro-posed framework yields pipeline parameters of genuine physical fidelity, thereby establishing a robust digital twin foundation for subsequent fault simulation and zero-shot diagnosis. 
+
+5.5. Results of Fault simulation 
+
+To demonstrate the e ff ectiveness of the calibrated multi-condition digital twin in generating high-fidelity synthetic fault data—a prerequisite for zero-shot fault diagnosis—physics-based fault injection simulations were performed and rigorously validated against experimental measurements. Four representative fault sce-narios were examined: (i) single slipper wear, (ii) single cylinder wear (increased piston /cylinder clearance), and (iii–iv) two distinct compound faults (Comp. I and Comp. II) that combine slipper wear and cylinder wear. In Comp. I, the faulty piston-slipper assembly is located in the plunger hole immediately adjacent to the leakage path introduced by the cylinder fault; in Comp. II, it occupies the diametrically opposite plunger hole. Compound-fault studies are essential for two reasons: first, they reflect realistic industrial degradation, where multiple friction pairs typically deteriorate concurrently rather than in isolation; second, they provide a stringent test of the digital twin’s ability to capture nonlinear interactions among leakage paths under complex conditions. Similar to previous work, faults are injected into the digital twin model by introducing new fluid do-mains caused by the faults in the 3D CFD model. All previously calibrated source boundary conditions (Qs(t, B∗ 
+
+> l
+
+, Pload )) and pipe parameters remain unchanged. Figures 19 and 20 compare the simulated pump-outlet flow ripples under the slipper-wear fault. Consistent with healthy-condition behavior, the calibrated model produces larger single-piston flow-pulse amplitudes than the uncalibrated baseline because the calibrated B∗ 
+
+> l
+
+correctly preserves the physically estimated ripple magnitude. In both models, flow-ripple amplitude increases and mean flow decreases with rising load pressure 33 19.4 19.6 19.8 20 20.2 20.4 Pressure (MPa) No.1 (Meas) No.1 (Simu) No.2 (Meas) No.2 (Simu) No.3 (Meas) No.3 (Simu) 19.5 20 MPa     
+
+> No.1
+> 19.6 19.8 20 MPa
+> No.2
+> 00.005 0.01 0.015 0.02
+
+t (s) 19.5 20 MPa     
+
+> No.3
+> 24.4 24.6 24.8 25 25.2 25.4 25.6 Pressure (MPa) 24.5 25 25.5 MPa
+> No.1
+> 24.8 25 25.2 MPa
+> No.2
+> 00.005 0.01 0.015 0.02
+
+t (s) 24.5 25 MPa     
+
+> No.3
+> 9.6 9.8 10 10.2 10.4 Pressure (MPa) 9.8 10 10.2 MPa
+> No.1
+> 9.8 9.9 10 MPa
+> No.2
+> 00.005 0.01 0.015 0.02
+
+t (s) 9.8 10 MPa     
+
+> No.3
+> 14.6 14.8 15 15.2 15.4 15.6 Pressure (MPa) 14.8 15 15.2 15.4 MPa
+> No.1
+> 14.8 15 15.2 MPa
+> No.2
+> 00.005 0.01 0.015 0.02
+
+t (s) 14.8 15 15.2 MPa 
+
+> No.3
+
+(a) 25MPa (b) 20MPa (c) 15MPa (d) 10MPa Figure 15: Comparison of measured (solid) and simulated (dashed) zero-mean pressure ripples obtained with the proposed multi-condition calibrated digital twin (viscoelastic unsteady friction with source calibration). 
+
+owing to elevated leakage. For single faults, the slipper-wear case exhibits a characteristic half-cycle flow drop, while cylinder wear produces two distinct drops per revolution. In the compound cases, the combined eff ects appear simultaneously, but the resulting waveform morphology di ff ers markedly depending on the 34 14.8 15 15.2 15.4 MPa     
+
+> No.1
+> 14.8 15 15.2 MPa
+> No.2
+> 00.005 0.01 0.015 0.02
+
+t (s) 14.6 14.8 15 15.2 MPa     
+
+> No.3
+> 19.5 20 MPa
+> No.1
+> 19.6 19.8 20 MPa
+> No.2
+> 00.005 0.01 0.015 0.02
+
+t (s) 19.5 20 MPa     
+
+> No.3
+> 24.6 24.8 25 25.2 25.4 25.6 MPa
+> No.1
+> 24.8 25 25.2 MPa
+> No.2
+> 00.005 0.01 0.015 0.02
+
+t (s) 24.6 24.8 25 25.2 MPa     
+
+> No.3
+> 9.8 10 10.2 MPa
+> No.1
+> 9.8 9.9 10 MPa
+> No.2
+> 00.005 0.01 0.015 0.02
+
+t (s) 9.6 9.8 10 MPa 
+
+> No.3
+
+(a) 25MPa (b) 20MPa (c) 15MPa (d) 10MPa No.1 (Meas) No.1 (Simu) No.2 (Meas) No.2 (Simu) No.3 (Meas) No.3 (Simu) Predicted amplitude is too small Figure 16: Comparison of measured (solid) and simulated (dashed) zero-mean pressure ripples for Baseline I (viscoelastic unsteady friction without source calibration). 
+
+relative angular position of the faulty components—detailed leakage-flow decomposition is provided later. Quantitative fidelity is assessed via TIC across all fault scenarios, sensors, and operating conditions (Ta-ble 8). The proposed method consistently achieves the lowest average TIC values. It maintains superior accuracy even for the more challenging compound-fault cases (0.281 for Comp. I and 0.235 for Comp. II), whereas baselines lacking source calibration or viscoelastic unsteady-friction modeling exhibit substantial degradation, particularly under combined fault mechanisms. Time-domain pressure-ripple validation for the single slipper fault is shown in Figs. 21 and 22. The baseline model (without source calibration) exhibits pronounced amplitude under-prediction, most evident at Sensor No. 1 under 25 MPa and 20 MPa. This discrepancy originates from the inaccurate flow-ripple amplitude estimation at high loads, as discussed in Section 2. Although the baseline can still reproduce the periodic flow-drop signature, it cannot accurately predict ripple magnitudes across the full operating envelope. In contrast, the proposed method achieves excellent waveform agreement across all three sensors and all load pressures, underscoring the critical necessity of accurate source anchoring and virtual flow sensing for reliable 35 24.6 24.8 25 25.2 25.4 25.6 MPa     
+
+> No.1
+> 24.8 25 25.2 25.4 MPa
+> No.2
+> 00.005 0.01 0.015 0.02
+
+t (s) 24.5 25 25.5 MPa     
+
+> No.3
+> 19.5 20 MPa
+> No.1
+> 19.6 19.8 20 MPa
+> No.2
+> 00.005 0.01 0.015 0.02
+
+t (s) 19.2 19.4 19.6 19.8 20 20.2 20.4 MPa     
+
+> No.3
+> 14.8 15 15.2 15.4 MPa
+> No.1
+> 14.8 15 15.2 MPa
+> No.2
+> 00.005 0.01 0.015 0.02
+
+t (s) 14.4 14.6 14.8 15 15.2 15.4 MPa     
+
+> No.3
+> 9.8 10 10.2 MPa
+> No.1
+> 9.8 10 MPa
+> No.2
+> 00.005 0.01 0.015 0.02
+
+t (s) 9.5 10 MPa 
+
+> No.3
+
+(a) 25MPa (b) 20MPa (c) 15MPa (d) 10MPa No.1 (Meas) No.1 (Simu) No.2 (Meas) No.2 (Simu) No.3 (Meas) No.3 (Simu) Figure 17: Comparison of measured (solid) and simulated (dashed) zero-mean pressure ripples for Baseline III (non-viscoelastic steady-friction model with source calibration). 
+
+Figure 18: Experimental injection failure. 
+
+fault simulation. The two compound-fault cases are analyzed in detail in Figs. 23–25 using 15 MPa as a representative condition. Figures 23 and 24 present the individual leakage flows from the faulty slipper and faulty cylinder (extracted from the additional fluid domains in the 3D CFD model) together with the total leakage (green solid line). The relative angular positions produce distinctly di ff erent total-leakage waveforms: in Comp. I 36 0 0.01 0.02 0.03 0.04 0.05 0.06 
+
+t (s) 55 60 65 70 75 Flow (L/min) 0 0.01 0.02 0.03 0.04 0.05 0.06 
+
+t (s) 60 65 70 75 Flow (L/min) 0 0.01 0.02 0.03 0.04 0.05 0.06 
+
+t (s) 55 60 65 70 75 Flow (L/min) 0 0.01 0.02 0.03 0.04 0.05 0.06 
+
+t (s) 55 60 65 70 75 Flow (L/min) (a) Slipper (b) Cylinder (c) Comp I. (d) Comp II. 25MPa 20MPa 15MPa 10MPa Figure 19: Simulated pump-outlet flow ripples under slipper fault using Baseline I (without source calibration). 0 0.01 0.02 0.03 0.04 0.05 0.06 
+
+t (s) 50 55 60 65 70 75 80 Flow (L/min) 0 0.01 0.02 0.03 0.04 0.05 0.06 
+
+t (s) 50 55 60 65 70 75 80 Flow (L/min) 0 0.01 0.02 0.03 0.04 0.05 0.06 
+
+t (s) 45 50 55 60 65 70 75 Flow (L/min) 0 0.01 0.02 0.03 0.04 0.05 0.06 
+
+t (s) 45 50 55 60 65 70 75 Flow (L/min) (a) Slipper (b) Cylinder (c) Comp I. (d) Comp II. 25MPa 20MPa 15MPa 10MPa 
+
+Figure 20: Simulated pump-outlet flow ripples under slipper fault using the proposed multi-condition calibrated digital twin. 
+
+the cylinder-leakage pulse fully coincides with the slipper-leakage pulse, resulting in a single, very small-amplitude flow pulse; in Comp. II the overlap is partial, yielding a waveform closer to that of pure slipper wear. The corresponding pressure-ripple responses at Sensors No. 1 and No. 3 are compared in Fig. 25. Excellent 37 Table 8: Comparison of TIC under faulty conditions.                                                                    
+
+> Fault Scenario Sensor Model Strategy Baseline I
+> (w /o source cal.)
+> Baseline II
+> (Steady)
+> Baseline III
+> (Unsteady) Proposed Slipper
+> No.1 0.307 0.434 0.362 0.232 No.2 0.170 0.294 0.236 0.181 No.3 0.189 0.440 0.335 0.201
+> Average 0.222 0.389 0.311 0.205 Cylinder
+> No.1 0.322 0.540 0.431 0.230 No.2 0.205 0.345 0.271 0.217 No.3 0.202 0.468 0.362 0.226
+> Average 0.243 0.451 0.355 0.224 Comp. I
+> No.1 0.380 0.520 0.448 0.328 No.2 0.217 0.346 0.250 0.227 No.3 0.269 0.495 0.397 0.288
+> Average 0.289 0.454 0.365 0.281 Comp. II
+> No.1 0.299 0.466 0.354 0.267 No.2 0.192 0.330 0.263 0.215 No.3 0.181 0.468 0.351 0.224
+> Average 0.224 0.421 0.323 0.235
+
+visual agreement between simulation and experiment is observed. Because Comp. I produces a smaller flow-pulse amplitude than pure cylinder wear, it also generates a correspondingly smaller pressure ripple; Comp. II produces a larger pressure ripple at the same location. Both compound cases exhibit the periodic half-cycle pressure drops characteristic of the additional slipper fault. Furthermore, the pressure recovery after the cylinder-induced drop occurs earlier in Comp. II than in Comp. I—consistent with the shorter total-leakage duration revealed by the flow-ripple analysis. These subtle yet physically consistent di ff erences confirm that the digital twin accurately captures the nonlinear interaction between multiple leakage mechanisms. A comprehensive validation of all fault scenarios at 15 MPa is provided in Fig. 26. The simulated wave-forms (dashed) closely match the experimental measurements (solid) across every sensor and fault type, fully consistent with the low TIC values reported in Table 8. These results collectively demonstrate that the physics-data coupled multi-condition calibration frame-work yields a digital twin of genuine physical fidelity, capable of simulating both single and compound faults with high accuracy. By generating reliable synthetic fault datasets that faithfully reproduce real-world mea-surements—including the intricate interactions unique to compound faults—the proposed approach estab-lishes a solid foundation for robust zero-shot fault diagnosis under previously unseen operating conditions and fault combinations. 38 24.5 25 25.5 MPa       
+
+> No.1
+> 24.5 25 25.5 MPa
+> No.2
+> 00.01 0.02 0.03 0.04 0.05 0.06
+
+t (s) 24.5 25 25.5 MPa                   
+
+> No.3
+> 19.5 20 20.5 MPa
+> No.1
+> 19.4 19.6 19.8 20 20.2 MPa
+> No.2
+> 00.01 0.02 0.03 0.04 0.05 0.06 19.2 19.4 19.6 19.8 20 20.2 MPa
+> No.3
+> 14.5 15 15.5 MPa
+> No.1
+> 14.6 14.8 15 15.2 MPa
+> No.2
+> 00.01 0.02 0.03 0.04 0.05 0.06 14.4 14.6 14.8 15 15.2 15.4 MPa
+> No.3
+> 9.6 9.8 10 10.2 10.4 MPa
+> No.1
+> 9.6 9.8 10 10.2 MPa
+> No.2
+> 00.01 0.02 0.03 0.04 0.05 0.06
+
+t (s) 9.4 9.6 9.8 10 10.2 MPa 
+
+> No.3
+
+(a) 25MPa (b) 20MPa (c) 15MPa (d) 10MPa 
+
+t (s) 
+
+t (s) No.1 (Meas) No.2 (Meas) No.3 (Meas) No.1/2/3 (Simu) Predicted amplitude is too small Figure 21: Comparison of measured (solid) and simulated (dashed) zero-mean pressure ripples under slipper fault for Baseline I. 
+
+6. Conclusion 
+
+This paper has presented a novel multi-condition physics-data coupled digital twin calibration framework for axial piston pumps that e ff ectively resolves the long-standing challenge of pump-source flow-ripple uncer-tainty across varying operating regimes. By integrating in-situ virtual high-frequency flow sensing, POD-GPR surrogate-assisted source calibration, and multi-objective viscoelastic unsteady-friction ITA, the framework constructs a high-fidelity digital twin capable of accurately simulating both single and compound faults with-out requiring any faulty training data. Experimental validation on a Rexroth A10VO71 test rig demonstrated excellent agreement between simulated and measured pressure ripples for slipper wear, cylinder wear, and two representative compound-fault configurations (adjacent and opposite angular positions) across the full 39 t (s) (a) 25MPa (b) 20MPa (c) 15MPa (d) 10MPa 
+
+t (s) No.1 (Meas) No.2 (Meas) No.3 (Meas) No.1/2/3 (Simu) 24.5 25 25.5 MPa                         
+
+> No.1
+> 24.5 25 25.5 MPa
+> No.2
+> 00.01 0.02 0.03 0.04 0.05 0.06 24.5 25 25.5 MPa
+> No.3
+> 19.5 20 20.5 MPa
+> No.1
+> 19.4 19.6 19.8 20 20.2 MPa
+> No.2
+> 00.01 0.02 0.03 0.04 0.05 0.06 19.2 19.4 19.6 19.8 20 20.2 MPa
+> No.3
+> 14.5 15 15.5 MPa
+> No.1
+> 14.6 14.8 15 15.2 MPa
+> No.2
+> 00.01 0.02 0.03 0.04 0.05 0.06 14.6 14.8 15 15.2 15.4 MPa
+> No.3
+> 9.6 9.8 10 10.2 10.4 MPa
+> No.1
+> 9.6 9.8 10 10.2 MPa
+> No.2
+> 00.01 0.02 0.03 0.04 0.05 0.06 9.6 9.8 10 10.2 MPa
+> No.3
+
+t (s) t (s) Figure 22: Comparison of measured (solid) and simulated (dashed) zero-mean pressure ripples under slipper fault for the proposed method. 
+
+10–25 MPa range, with Theil’s Inequality Coe ffi cients consistently below 0.235 even under complex leakage interactions. The results confirm that explicit anchoring of the source boundary through physically estimated ripple amplitudes is indispensable for maintaining model fidelity at high loads and for correctly propagating compound-fault e ff ects through the pipeline. The calibrated digital twin therefore provides a reliable plat-form for generating abundant synthetic fault datasets, directly enabling robust zero-shot fault diagnosis under previously unseen operating conditions and fault combinations. Future work will focus on extending the framework to on-line adaptive calibration, incorporating real-time fluid property estimation, and integrating the digital twin with deep-learning classifiers to achieve fully autonomous compound-fault diagnosis in indus-40 Time (s)       
+
+> 0123456
+> L/min
+> 00.01 0.02 0.03 0.04 0.05 0.06
+
+Time (s)        
+
+> 60 65 70 75
+> Flow ripple(L/min)
+> 02468
+> Leakage(L/min)
+> 00.01 0.02 0.03 0.04 0.05 0.06
+> Leakage from faulty slipper Leakage from faulty cylinder
+
+Figure 23: Simulated pump-outlet flow ripple and leakage under Compound Fault I. Time (s)        
+
+> 0246
+> L/min
+> Leakage from faulty slipper Leakage from faulty cylinder
+> 00.01 0.02 0.03 0.04 0.05 0.06
+
+Time (s)       
+
+> 60 65 70 75
+> Flow ripple(L/min)
+> -2 02468
+> Leakage(L/min)
+> 00.01 0.02 0.03 0.04 0.05 0.06
+
+Figure 24: Simulated pump-outlet flow ripple and leakage under Compound Fault II. 
+
+trial hydraulic systems. The proposed methodology o ff ers a practical and scalable pathway toward predictive maintenance and enhanced reliability of critical fluid power equipment. 
+
+Acknowledgements 
+
+This work was supported by the National Key R&D Program of China under Grant 2023YFB3406705. 41 0 0.01 0.02 0.03 0.04 0.05 0.06 14.5 15 15.5 MPa (a) No.1 Pressue Sensor(Simulation) 0 0.01 0.02 0.03 0.04 0.05 0.06 14.5 15 15.5 MPa (c) No.1 Pressue Sensor(Experiment) 0 0.01 0.02 0.03 0.04 0.05 0.06 14.4 14.6 14.8 15 15.2 15.4 MPa (b) No.3 Pressue Sensor(Simulation) 0 0.01 0.02 0.03 0.04 0.05 0.06 14.5 15 15.5 MPa (d) No.3 Pressue Sensor(Experiment) 
+
+> t(s)
+
+t(s) t(s)   
+
+> t(s)
+> Faulty cylinder Compound Fault I Compound Fault II Figure 25: Measured and simulated zero-mean pressure ripples at Sensors No. 1 and No. 3 under cylinder wear and the two compound faults at 15 MPa (proposed method).
+
+References 
+
+[1] C. Dong, J. Tao, Q. Chao, H. Yu, C. Liu, Subsequence time series clustering-based unsupervised approach for anomaly detection of axial piston pumps, IEEE Transactions on Instrumentation and Measurement 72 (2023) 1– 12. [2] S. Tang, Y. Zhu, S. Yuan, An improved convolutional neural network with an adaptable learning rate towards multi-signal fault diagnosis of hydraulic piston pump, Advanced Engineering Informatics 50 (2021) 101406. [3] W. Wang, Q. Chao, J. Shi, C. Liu, Condition monitoring of axial piston pumps based on machine learning-driven real-time cfd simulation, Engineering Applications of Computational Fluid Mechanics 19 (1) (2025) 2474676. [4] C. Dong, J. Tao, C. Liu, Digital twin-driven zero-shot fault diagnosis of axial piston pumps using fluid-borne noise signals, arXiv preprint arXiv:2512.19280 (2025). [5] C. Dong, J. Tao, H. Sun, Q. Chao, C. Liu, Inverse transient analysis based calibration of surrogate pipeline model for fault simulation of axial piston pumps, Mechanical Systems and Signal Processing 205 (2023) 110829. [6] Y. CAI, Fluid Transmission Pipeline Dynamics, Zhenjiang University Press, 1990. [7] J.-H. Shin, Computational study on dynamic pressure in a swash-plate axial piston pump connected to a hydraulic line with an end resistance, Journal of Mechanical Science and Technology 29 (6) (2015) 2381 – 2390. [8] X. Wang, Uncertainty quantification and global sensitivity analysis for transient wave propagation in pressurized pipes, Water Resources Research 57 (4) (2021) e2020WR028975. [9] X. Wang, J. Lin, A. Keramat, M. S. Ghidaoui, S. Meniconi, B. Brunone, Matched-field processing for leak lo-calization in a viscoelastic pipe: An experimental study, Mechanical Systems and Signal Processing 124 (2019) 459–478. 
+
+42 14.5 15 15.5 MPa       
+
+> No.1
+> 14.6 14.8 15 15.2 MPa
+> No.2
+> 00.01 0.02 0.03 0.04 0.05 0.06
+
+t (s) 14.6 14.8 15 15.2 15.4 MPa                   
+
+> No.3
+> 14.5 15 15.5 MPa
+> No.1
+> 14.8 15 15.2 MPa
+> No.2
+> 00.01 0.02 0.03 0.04 0.05 0.06 14.6 14.8 15 15.2 MPa
+> No.3
+> 14.5 15 15.5 MPa
+> No.1
+> 14.6 14.8 15 15.2 MPa
+> No.2
+> 00.01 0.02 0.03 0.04 0.05 0.06 14.4 14.6 14.8 15 15.2 15.4 MPa
+> No.3
+> 14.5 15 15.5 MPa
+> No.1
+> 14.6 14.8 15 15.2 15.4 MPa
+> No.2
+> 00.01 0.02 0.03 0.04 0.05 0.06 14.6 14.8 15 15.2 15.4 MPa
+> No.3
+
+t (s) 
+
+t (s) t (s) (a)Slipper (b)Cylinder (c)Comp I. (d)Comp II. No.1 (Meas) No.2 (Meas) No.3 (Meas) No.1/2/3 (Simu) Figure 26: Comprehensive comparison of simulated (dashed) versus measured (solid) zero-mean pressure ripples for all fault scenarios at 15 MPa using the proposed digital twin. 
+
+[10] D. Covas, I. Stoianov, H. Ramos, N. Graham, C. Maksimovic, The dynamic e ff ect of pipe-wall viscoelasticity in hydraulic transients. part i—experimental analysis and creep characterization, Journal of Hydraulic Research 42 (5) (2004) 517–532. [11] W. Zielke, Frequency-Dependent Friction in Transient Pipe Flow, Journal of Basic Engineering 90 (1) (1968) 109–115. [12] N. Johnston, M. Pan, S. Kudzma, P. Wang, Use of pipeline wave propagation model for measuring unsteady flow rate, Journal of Fluids Engineering 136 (3) (2014) 031203. 
+
+43 [13] A. Keramat, A. Tijsseling, Q. Hou, A. Ahmadi, Fluid–structure interaction with pipe-wall viscoelasticity during water hammer, Journal of Fluids and Structures 28 (2012) 434–455. [14] D. Covas, I. Stoianov, J. F. Mano, H. Ramos, N. Graham, C. Maksimovic, The dynamic e ff ect of pipe-wall vis-coelasticity in hydraulic transients. part ii—model development, calibration and verification, Journal of Hydraulic Research 43 (1) (2005) 56–70. [15] C. Dong, J. Tao, H. Sun, Q. Wei, H. Tan, C. Liu, Innovative fault diagnosis for axial piston pumps: A physics-informed neural network framework predicting pump flow ripple, Mechanical Systems and Signal Processing 225 (2025) 112274. [16] C. Dong, J. Tao, C. Liu, Digital twin-driven zero-shot fault diagnosis of axial piston pumps using fluid-borne noise signals (2025). arXiv:2512.19280 .[17] A. Vacca, R. Klop, M. Ivantysynova, A numerical approach for the evaluation of the e ff ects of air release and vapour cavitation on e ff ective flow rate of axial piston machines, International journal of fluid power 11 (1) (2010) 33–45. [18] B. Zhang, J. Ma, H. Hong, H. Yang, Y. Fang, Analysis of the flow dynamics characteristics of an axial piston pump based on the computational fluid dynamics method, Engineering Applications of Computational Fluid Mechanics 11 (1) (2017) 86–95. [19] S. Kim, H. Murrenho ff , Measurement of e ff ective bulk modulus for hydraulic oil at low pressure (2012). [20] Y. Jinghong, C. Zhaoneng, L. Yuanzhang, The variation of oil e ff ective bulk modulus with pressure in hydraulic systems (1994). [21] Q. Chao, Z. Xu, J. Tao, C. Liu, Capped piston: A promising design to reduce compressibility e ff ects, pressure ripple and cavitation for high-speed and high-pressure axial piston pumps, Alexandria Engineering Journal 62 (2023) 509–521. [22] A. Ferrari, P. Fresia, M. Rundo, O. Vento, P. Pizzo, Experimental measurement and numerical validation of the flow ripple in internal gear pumps, Energies 15 (24) (2022) 9607. [23] A. Catania, A. Ferrari, Development and assessment of a new operating principle for the measurement of unsteady flow rates in high-pressure pipelines, Flow Measurement and Instrumentation 20 (6) (2009) 230–240. [24] R. Wang, Y. Xu, W. Mu, Y. Chen, Z. Jiao, Cavitation intensity recognition for axial piston pump based on transient flow rate measurement and improved transfer learning method, Mechanical Systems and Signal Processing 232 (2025) 112667. [25] B. Pan, A. Keramat, Y. She, H.-F. Duan, A novel leak localization method using forward and backward transient characteristics, Measurement 194 (2022) 111065. 
+
+44

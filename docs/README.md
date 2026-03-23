@@ -6,67 +6,67 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-03-14 ~ 2026-03-23
-- 运行时间：2026-03-23 01:04:57 UTC
+- 最新运行日期：2026-02-22 ~ 2026-03-23
+- 运行时间：2026-03-23 01:17:58 UTC
 - 运行状态：成功
 - 本次总论文数：15
 - 精读区：4
 - 速读区：11
 
 ### 今日简报（AI）
-深度研读 15 篇前沿文献，聚焦不完整退化数据下的寿命预测与可解释性故障诊断。
-重点关注证据域自适应在 RUL 预测中的突破，以及贝叶斯特征排序为电机诊断带来的高可解释性。
-建议探索物理信息神经网络（PINN）与硬件加速的结合，以应对复杂工业环境下的实时监测挑战。
-- 详情：[/20260314-20260323/README](/20260314-20260323/README)
+深度研读 15 篇工业智能运维论文，聚焦跨域健康指标学习与数字孪生精准校准。
+核心突破在于利用同步采样与自编码器解决退化监测难题，并实现了柱塞泵复杂工况下的故障仿真。
+建议关注物理残差学习与世界模型在电池及船舶动力系统中的跨界应用。
+- 详情：[/20260222-20260323/README](/20260222-20260323/README)
 
 ### 精读区论文标签
-1. [Evidential Domain Adaptation for Remaining Useful Life Prediction with Incomplete Degradation](/20260314-20260323/2603.15687v1-evidential-domain-adaptation-for-remaining-useful-life-prediction-with-incomplete-degradation)  
-   标签：评分：10.0/10、query:rul
-   evidence：不完整数据下的剩余寿命预测领域自适应
-2. [Bayesian and Classical Feature Ranking for Interpretable BLDC Fault Diagnosis](/20260314-20260323/2603.14509v1-bayesian-and-classical-feature-ranking-for-interpretable-bldc-fault-diagnosis)  
+1. [Domain-Adaptive Health Indicator Learning with Degradation-Stage Synchronized Sampling and Cross-Domain Autoencoder](/20260222-20260323/2603.10430v1-domain-adaptive-health-indicator-learning-with-degradation-stage-synchronized-sampling-and-cross-domain-autoencoder)  
+   标签：评分：9.0/10、query:rul
+   evidence：用于预测与健康管理的健康指标学习
+2. [Multi-Condition Digital Twin Calibration for Axial Piston Pumps : Compound Fault Simulation](/20260222-20260323/2603.00199v1-multi-condition-digital-twin-calibration-for-axial-piston-pumps--compound-fault-simulation)  
    标签：评分：8.0/10、query:rul
-   evidence：无刷直流电机的可解释故障诊断
-3. [On the evaluation of time-to-event, survival time and first passage time forecasts](/20260314-20260323/2603.14835v1-on-the-evaluation-of-time-to-event-survival-time-and-first-passage-time-forecasts)  
+   evidence：轴向柱塞泵的数字孪生校准与故障模拟
+3. [Battery Lifetime Prediction using Data-driven Modeling Approaches](/20260222-20260323/2603.00875v1-battery-lifetime-prediction-using-data-driven-modeling-approaches)  
    标签：评分：8.0/10、query:rul
-   evidence：事件发生时间和生存时间预测的评估
-4. [Early Prediction of Creep Failure via Bayesian Inference of Evolving Barriers](/20260314-20260323/2603.16419v1-early-prediction-of-creep-failure-via-bayesian-inference-of-evolving-barriers)  
+   evidence：数据驱动建模用于电池寿命预测
+4. [Retrieval-Augmented Generation with Covariate Time Series](/20260222-20260323/2603.04951v1-retrieval-augmented-generation-with-covariate-time-series)  
    标签：评分：8.0/10、query:rul
-   evidence：使用贝叶斯推断进行寿命预测和故障时间预测
+   evidence：工业阀门预测性维护的时间序列RAG框架
 
 ### 速读区论文标签
-1. [Manifold-Orthogonal Dual-spectrum Extrapolation for Parameterized Physics-Informed Neural Networks](/20260314-20260323/2603.13751v1-manifold-orthogonal-dual-spectrum-extrapolation-for-parameterized-physics-informed-neural-networks)  
+1. [Battery Discharge Modeling for Electric Vehicles: A Hybrid Physics-based Residual Learning Approach](/20260222-20260323/2603.01587v1-battery-discharge-modeling-for-electric-vehicles-a-hybrid-physics-based-residual-learning-approach)  
    标签：评分：7.0/10、query:rul
-   evidence：参数化物理信息神经网络
-2. [SAGE: Synthetic Aging for a Grid Environment](/20260314-20260323/2603.13976v1-sage-synthetic-aging-for-a-grid-environment)  
+   evidence：基于物理与数据驱动残差学习的混合电池状态估计
+2. [World Model for Battery Degradation Prediction Under Non-Stationary Aging](/20260222-20260323/2603.10527v1-world-model-for-battery-degradation-prediction-under-non-stationary-aging)  
    标签：评分：7.0/10、query:rul
-   evidence：电池退化轨迹的物理信息仿真
-3. [Exploiting temporal parallelism for LSTM Autoencoder acceleration on FPGA](/20260314-20260323/2603.13982v1-exploiting-temporal-parallelism-for-lstm-autoencoder-acceleration-on-fpga)  
+   evidence：结合物理约束的世界模型进行退化预测
+3. [On Using Machine Learning to Early Detect Catastrophic Failures in Marine Diesel Engines](/20260222-20260323/2603.12733v1-on-using-machine-learning-to-early-detect-catastrophic-failures-in-marine-diesel-engines)  
    标签：评分：7.0/10、query:rul
-   evidence：用于FPGA异常检测的LSTM自编码器
-4. [Low-Data Predictive Maintenance of Railway Station Doors and Elevators Using Bayesian Proxy Flow Modeling](/20260314-20260323/2603.14384v1-low-data-predictive-maintenance-of-railway-station-doors-and-elevators-using-bayesian-proxy-flow-modeling)  
+   evidence：船用柴油机灾难性故障的早期检测
+4. [Motion-Specific Battery Health Assessment for Quadrotors Using High-Fidelity Battery Models](/20260222-20260323/2603.12791v1-motion-specific-battery-health-assessment-for-quadrotors-using-high-fidelity-battery-models)  
    标签：评分：7.0/10、query:rul
-   evidence：使用运行周期负荷的资产预测性维护框架
-5. [Scientific Machine Learning-assisted Model Discovery from Telemetry Data](/20260314-20260323/2603.15943v1-scientific-machine-learning-assisted-model-discovery-from-telemetry-data)  
+   evidence：电池健康评估与退化建模
+5. [Learning to Predict, Discover, and Reason in High-Dimensional Discrete Event Sequences](/20260222-20260323/2603.16313v1-learning-to-predict-discover-and-reason-in-high-dimensional-discrete-event-sequences)  
    标签：评分：7.0/10、query:rul
-   evidence：利用数据驱动的符号表达式增强物理方程
-6. [On the cumulative residual interval entropy of doubly truncated random variables](/20260314-20260323/2603.16037v1-on-the-cumulative-residual-interval-entropy-of-doubly-truncated-random-variables)  
+   evidence：利用诊断故障代码序列进行车辆健康监测
+6. [Learning to Predict, Discover, and Reason in High-Dimensional Event Sequences](/20260222-20260323/2603.16313v2-learning-to-predict-discover-and-reason-in-high-dimensional-event-sequences)  
    标签：评分：7.0/10、query:rul
-   evidence：双截断平均剩余寿命和可靠性指标
-7. [Traffic and weather driven hybrid digital twin for bridge monitoring](/20260314-20260323/2603.14028v1-traffic-and-weather-driven-hybrid-digital-twin-for-bridge-monitoring)  
+   evidence：预测车辆子系统的健康演变
+7. [A data-driven model-free physical-informed deep operator network for solving nonlinear dynamic system](/20260222-20260323/2602.19262v1-a-data-driven-model-free-physical-informed-deep-operator-network-for-solving-nonlinear-dynamic-system)  
    标签：评分：6.0/10、query:rul
-   evidence：桥梁状态监测与疲劳累积检测
-8. [Energy-Aware Integrated Proactive Maintenance Planning and Production Scheduling](/20260314-20260323/2603.14060v1-energy-aware-integrated-proactive-maintenance-planning-and-production-scheduling)  
+   evidence：用于非线性动力系统的数据驱动物理信息DeepOnet
+8. [Spectral bias in physics-informed and operator learning: Analysis and mitigation guidelines](/20260222-20260323/2602.19265v1-spectral-bias-in-physics-informed-and-operator-learning-analysis-and-mitigation-guidelines)  
    标签：评分：6.0/10、query:rul
-   evidence：考虑机器退化的主动维护规划
-9. [Predicting Stress-strain Behaviors of Additively Manufactured Materials via Loss-based and Activation-based Physics-informed Machine Learning](/20260314-20260323/2603.14489v1-predicting-stress-strain-behaviors-of-additively-manufactured-materials-via-loss-based-and-activation-based-physics-informed-machine-learning)  
+   evidence：物理信息神经网络中的谱偏差
+9. [Scalable multitask Gaussian processes for complex mechanical systems with functional covariates](/20260222-20260323/2602.20640v1-scalable-multitask-gaussian-processes-for-complex-mechanical-systems-with-functional-covariates)  
    标签：评分：6.0/10、query:rul
-   evidence：用于材料行为预测的物理告知机器学习
-10. [Cross-RAG: Zero-Shot Retrieval-Augmented Time Series Forecasting via Cross-Attention](/20260314-20260323/2603.14709v1-cross-rag-zero-shot-retrieval-augmented-time-series-forecasting-via-cross-attention)  
+   evidence：机械系统的多任务高斯过程
+10. [Physics-Informed Machine Learning for Vessel Shaft Power and Fuel Consumption Prediction: Interpretable KAN-based Approach](/20260222-20260323/2602.22055v1-physics-informed-machine-learning-for-vessel-shaft-power-and-fuel-consumption-prediction-interpretable-kan-based-approach)  
    标签：评分：6.0/10、query:rul
-   evidence：检索增强的时间序列预测
-11. [Multi-turn Physics-informed Vision-language Model for Physics-grounded Anomaly Detection](/20260314-20260323/2603.15237v1-multi-turn-physics-informed-vision-language-model-for-physics-grounded-anomaly-detection)  
+   evidence：物理信息机器学习用于转轴功率预测
+11. [TEFL: Prediction-Residual-Guided Rolling Forecasting for Multi-Horizon Time Series](/20260222-20260323/2602.22520v1-tefl-prediction-residual-guided-rolling-forecasting-for-multi-horizon-time-series)  
    标签：评分：6.0/10、query:rul
-   evidence：针对异常旋转或机械运动违规的异常检测
+   evidence：多步时间序列的滚动预测框架
 
 
 <div class="dpr-home-promo-card">

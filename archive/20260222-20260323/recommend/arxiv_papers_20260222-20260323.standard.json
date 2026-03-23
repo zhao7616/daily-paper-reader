@@ -1,0 +1,569 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-03-23T01:15:31.693552+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 4,
+    "deep_cap": 6,
+    "deep_selected": 4,
+    "quick_candidates": 37,
+    "quick_skim_target": 11,
+    "quick_selected": 11
+  },
+  "deep_dive": [
+    {
+      "id": "2603.10430v1",
+      "title": "Domain-Adaptive Health Indicator Learning with Degradation-Stage Synchronized Sampling and Cross-Domain Autoencoder",
+      "abstract": "The construction of high quality health indicators (HIs) is crucial for effective prognostics and health management. Although deep learning has significantly advanced HI modeling, existing approaches often struggle with distribution mismatches resulting from varying operating conditions. Although domain adaptation is typically employed to mitigate these shifts, two critical challenges remain: (1) the misalignment of degradation stages during random mini-batch sampling, resulting in misleading discrepancy losses, and (2) the structural limitations of small-kernel 1D-CNNs in capturing long-range temporal dependencies within complex vibration signals. To address these issues, we propose a domain-adaptive framework comprising degradation stage synchronized batch sampling (DSSBS) and the cross-domain aligned fusion large autoencoder (CAFLAE). DSSBS utilizes kernel change-point detection to segment degradation stages, ensuring that source and target mini-batches are synchronized by their failure phases during alignment. Complementing this, CAFLAE integrates large-kernel temporal feature extraction with cross-attention mechanisms to learn superior domain-invariant representations. The proposed framework was rigorously validated on a Korean defense system dataset and the XJTU-SY bearing dataset, achieving an average performance enhancement of 24.1% over state-of-the-art methods. These results demonstrate that DSSBS improves cross-domain alignment through stage-consistent sampling, whereas CAFLAE offers a high-performance backbone for long-term industrial condition monitoring.",
+      "authors": [
+        "Jungho Choo",
+        "Hanbyeol Park",
+        "Gawon Lee",
+        "Yunkyung Park",
+        "Hyerim Bae"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "published": "2026-03-11T05:24:18+00:00",
+      "link": "https://arxiv.org/pdf/2603.10430v1",
+      "tags": [
+        "keyword:RUL预测",
+        "query:RUL预测"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Health indicator learning for prognostics and health management",
+      "llm_evidence_cn": "用于预测与健康管理的健康指标学习",
+      "llm_evidence": "用于预测与健康管理的健康指标学习",
+      "canonical_evidence": "用于预测与健康管理的健康指标学习",
+      "llm_tldr_en": "Proposes a domain-adaptive framework for learning health indicators from complex vibration signals.",
+      "llm_tldr_cn": "提出了一种从复杂振动信号中学习健康指标的领域自适应框架。",
+      "llm_tldr": "提出了一种从复杂振动信号中学习健康指标的领域自适应框架。",
+      "llm_tags": [
+        "query:rul:composite"
+      ],
+      "matched_query_tag": "query:rul:composite",
+      "matched_query_text": "Papers central to 剩余寿命预测和旋转机械设备剩余寿命预测, especially work that connects or combines: Remaining Useful Life (RUL) prediction methods; Health monitoring and RUL for rotating machinery; Remaining useful life prediction for rolling element bearings; Deep learning architectures for RUL estimation; State of the art methods for remaining useful life prediction of rotating machinery; Deep learning based RUL estimation for industrial bearings and motors; Data driven vs physics informed models for RUL prediction; Real time health assessment and RUL forecasting for rotating components.",
+      "matched_requirement_id": "req-composite-rul",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.00199v1",
+      "title": "Multi-Condition Digital Twin Calibration for Axial Piston Pumps : Compound Fault Simulation",
+      "abstract": "Axial piston pumps are indispensable power sources in high-stakes fluid power systems, including aerospace, marine, and heavy machinery applications. Their operational reliability is frequently compromised by compound faults that simultaneously affect multiple friction pairs. Conventional data-driven diagnosis methods suffer from severe data scarcity for compound faults and poor generalization across varying operating conditions. This paper proposes a novel multi-condition physics-data coupled digital twin calibration framework that explicitly resolves the fundamental uncertainty of pump outlet flow ripple. The framework comprises three synergistic stages: in-situ virtual high-frequency flow sensing on a dedicated rigid metallic segment, surrogate model-assisted calibration of the 3D CFD source model using physically estimated ripple amplitudes, and multi-objective inverse transient analysis for viscoelastic unsteady-friction pipeline parameter identification. Comprehensive experiments on a test rig demonstrate that the calibrated digital twin accurately reproduces both single-fault and two representative compound-fault. These results establish a high-fidelity synthetic fault-generation capability that directly enables robust zero-shot fault diagnosis under previously unseen operating regimes and fault combinations, thereby advancing predictive maintenance in complex hydraulic systems.",
+      "authors": [
+        "Chang Dong",
+        "Jianfeng Tao",
+        "Chengliang Liu"
+      ],
+      "primary_category": "physics.flu-dyn",
+      "categories": [
+        "physics.flu-dyn",
+        "cs.AI",
+        "math.NA"
+      ],
+      "published": "2026-02-27T08:20:35+00:00",
+      "link": "https://arxiv.org/pdf/2603.00199v1",
+      "tags": [
+        "keyword:RUL预测",
+        "query:RUL预测"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Digital twin calibration for axial piston pumps and fault simulation",
+      "llm_evidence_cn": "轴向柱塞泵的数字孪生校准与故障模拟",
+      "llm_evidence": "轴向柱塞泵的数字孪生校准与故障模拟",
+      "canonical_evidence": "轴向柱塞泵的数字孪生校准与故障模拟",
+      "llm_tldr_en": "Proposes a physics-data coupled digital twin for fault diagnosis in high-stakes rotating machinery.",
+      "llm_tldr_cn": "为高风险旋转机械的故障诊断提出了一种物理-数据耦合的数字孪生框架。",
+      "llm_tldr": "为高风险旋转机械的故障诊断提出了一种物理-数据耦合的数字孪生框架。",
+      "llm_tags": [
+        "query:rul"
+      ],
+      "matched_query_tag": "query:rul",
+      "matched_query_text": "State of the art methods for remaining useful life prediction of rotating machinery",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.04951v1",
+      "title": "Retrieval-Augmented Generation with Covariate Time Series",
+      "abstract": "While RAG has greatly enhanced LLMs, extending this paradigm to Time-Series Foundation Models (TSFMs) remains a challenge. This is exemplified in the Predictive Maintenance of the Pressure Regulating and Shut-Off Valve (PRSOV), a high-stakes industrial scenario characterized by (1) data scarcity, (2) short transient sequences, and (3) covariate coupled dynamics. Unfortunately, existing time-series RAG approaches predominantly rely on generated static vector embeddings and learnable context augmenters, which may fail to distinguish similar regimes in such scarce, transient, and covariate coupled scenarios. To address these limitations, we propose RAG4CTS, a regime-aware, training-free RAG framework for Covariate Time-Series. Specifically, we construct a hierarchal time-series native knowledge base to enable lossless storage and physics-informed retrieval of raw historical regimes. We design a two-stage bi-weighted retrieval mechanism that aligns historical trends through point-wise and multivariate similarities. For context augmentation, we introduce an agent-driven strategy to dynamically optimize context in a self-supervised manner. Extensive experiments on PRSOV demonstrate that our framework significantly outperforms state-of-the-art baselines in prediction accuracy. The proposed system is deployed in Apache IoTDB within China Southern Airlines. Since deployment, our method has successfully identified one PRSOV fault in two months with zero false alarm.",
+      "authors": [
+        "Kenny Ye Liang",
+        "Zhongyi Pei",
+        "Huan Zhang",
+        "Yuhui Liu",
+        "Shaoxu Song",
+        "Jianmin Wang"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-03-05T08:45:24+00:00",
+      "link": "https://arxiv.org/pdf/2603.04951v1",
+      "tags": [
+        "keyword:RUL预测",
+        "query:RUL预测"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "predictive maintenance for industrial valves using time-series RAG",
+      "llm_evidence_cn": "工业阀门预测性维护的时间序列RAG框架",
+      "llm_evidence": "工业阀门预测性维护的时间序列RAG框架",
+      "canonical_evidence": "工业阀门预测性维护的时间序列RAG框架",
+      "llm_tldr_en": "Introduces RAG4CTS for predictive maintenance in industrial scenarios with scarce time-series data.",
+      "llm_tldr_cn": "引入RAG4CTS框架，用于工业场景下稀缺时间序列数据的预测性维护。",
+      "llm_tldr": "引入RAG4CTS框架，用于工业场景下稀缺时间序列数据的预测性维护。",
+      "llm_tags": [
+        "query:rul:composite"
+      ],
+      "matched_query_tag": "query:rul:composite",
+      "matched_query_text": "Papers central to 剩余寿命预测和旋转机械设备剩余寿命预测, especially work that connects or combines: Remaining Useful Life (RUL) prediction methods; Health monitoring and RUL for rotating machinery; Remaining useful life prediction for rolling element bearings; Deep learning architectures for RUL estimation; State of the art methods for remaining useful life prediction of rotating machinery; Deep learning based RUL estimation for industrial bearings and motors; Data driven vs physics informed models for RUL prediction; Real time health assessment and RUL forecasting for rotating components.",
+      "matched_requirement_id": "req-composite-rul",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.00875v1",
+      "title": "Battery Lifetime Prediction using Data-driven Modeling Approaches",
+      "abstract": "Batteries are ubiquitous today, with applications ranging from smartphones, watches, and laptops to electric cars, drones, and electric aircraft. Lithium-ion batteries are widely used in these applications due to their high energy density, rechargeability, and low lifecycle cost. Understanding the lifetime of lithium-ion batteries is essential for their effective utilization across many domains. In this study, data-driven modeling approaches are explored to predict the lifetime of lithium-ion batteries using various measurable battery parameters. A battery dataset from NASA's electric aircraft experiments was used, which included 17 predictor variables and remaining flight time as the response variable representing battery lifetime. The dataset contained more than 4,000,000 rows. However, the original dataset provided limited directly useful information about battery utilization over time; therefore, feature engineering was performed to generate more informative variables. Additionally, dimensionality reduction using principal component analysis (PCA) was applied to reduce computational cost and model complexity by selecting a smaller number of principal components as predictors for model development. Random forest and neural network models were explored for battery lifetime prediction using the engineered features. Multiple neural network configurations were evaluated, including single- and double-hidden-layer architectures with varying numbers of nodes. Mean squared error (MSE) on the test dataset was used as the performance metric for model comparison. The results indicate that data-driven modeling approaches are effective for battery lifetime prediction, with neural network models outperforming other models based on the MSE metric. Furthermore, neural networks demonstrate robustness in handling high-dimensional battery data.",
+      "authors": [
+        "Vikram C Patil"
+      ],
+      "primary_category": "cs.CE",
+      "categories": [
+        "cs.CE",
+        "eess.SY",
+        "stat.AP"
+      ],
+      "published": "2026-03-01T02:35:41+00:00",
+      "link": "https://arxiv.org/pdf/2603.00875v1",
+      "tags": [
+        "keyword:RUL预测",
+        "query:RUL预测"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Data-driven modeling for battery lifetime prediction",
+      "llm_evidence_cn": "数据驱动建模用于电池寿命预测",
+      "llm_evidence": "数据驱动建模用于电池寿命预测",
+      "canonical_evidence": "数据驱动建模用于电池寿命预测",
+      "llm_tldr_en": "Explores data-driven approaches to predict the remaining flight time and lifetime of batteries.",
+      "llm_tldr_cn": "探索了预测电池剩余飞行时间和寿命的数据驱动方法。",
+      "llm_tldr": "探索了预测电池剩余飞行时间和寿命的数据驱动方法。",
+      "llm_tags": [
+        "query:rul"
+      ],
+      "matched_query_tag": "query:rul",
+      "matched_query_text": "Remaining Useful Life (RUL) prediction methods",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2603.01587v1",
+      "title": "Battery Discharge Modeling for Electric Vehicles: A Hybrid Physics-based Residual Learning Approach",
+      "abstract": "The growing integration of electric vehicle (EV) fleets into transportation services and energy systems requires accurate modeling of battery discharge and state-of-charge (SoC) evolution to ensure reliable vehicle operation and grid coordination. Existing approaches face a trade-off between interpretable but simplified physics-based models and data-driven methods that demand large datasets and may lack physical consistency. In this paper, we propose a hybrid physics-based residual learning framework for EV battery discharge modeling. A vehicle dynamics model based on force-balance equations provides an interpretable baseline estimate of energy consumption and SoC evolution, capturing aerodynamic drag, rolling resistance, and regenerative braking. A neural network residual learner then corrects discrepancies caused by complex factors such as traffic conditions and driver behavior. Experimental results on $1,500$ trip scenarios demonstrate that the proposed approach reduces the mean absolute percentage error to approximately $0.8\\%$, significantly outperforming physics-only models while preserving physical interpretability and computational efficiency.",
+      "authors": [
+        "Praharshitha Aryasomayajula",
+        "Ting Bai",
+        "Andreas A. Malikopoulos"
+      ],
+      "primary_category": "eess.SY",
+      "categories": [
+        "eess.SY"
+      ],
+      "published": "2026-03-02T08:14:15+00:00",
+      "link": "https://arxiv.org/pdf/2603.01587v1",
+      "tags": [
+        "keyword:RUL预测",
+        "query:RUL预测"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Hybrid physics-based and data-driven residual learning for battery state estimation",
+      "llm_evidence_cn": "基于物理与数据驱动残差学习的混合电池状态估计",
+      "llm_evidence": "基于物理与数据驱动残差学习的混合电池状态估计",
+      "canonical_evidence": "基于物理与数据驱动残差学习的混合电池状态估计",
+      "llm_tldr_en": "Combines physics-based models with data-driven residual learning for accurate battery discharge modeling.",
+      "llm_tldr_cn": "结合物理模型与数据驱动残差学习，实现精确的电池放电建模。",
+      "llm_tldr": "结合物理模型与数据驱动残差学习，实现精确的电池放电建模。",
+      "llm_tags": [
+        "query:rul"
+      ],
+      "matched_query_tag": "query:rul",
+      "matched_query_text": "Data driven vs physics informed models for RUL prediction",
+      "matched_requirement_id": "req-7",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2602.19262v1",
+      "title": "A data-driven model-free physical-informed deep operator network for solving nonlinear dynamic system",
+      "abstract": "The existing physical-informed Deep Operator Networks are mostly based on either the well-known mathematical formula of the system or huge amounts of data for different scenarios. However, in some cases, it is difficult to get the exact mathematical formula and vast amounts of data in some dynamic systems, we can only get a few experimental data or limited mathematical information. To address the cases, we propose a data-driven model-free physical-informed Deep Operator Network (DeepOnet) framework to learn the nonlinear dynamic systems from few available data. We first explore the short-term dependence of the available data and use a surrogate machine learning model to extract the short-term dependence. Then, the surrogate machine learning model is incorporated into the DeepOnet as the physical information part. Then, the constructed DeepOnet is trained to simulate the system's dynamic response for given control inputs and initial conditions. Numerical experiments on different systems confirm that our DeepOnet framework learns to approximate the dynamic response of some nonlinear dynamic systems effectively.",
+      "authors": [
+        "Jieming Sun",
+        "Lichun Li"
+      ],
+      "primary_category": "eess.SP",
+      "categories": [
+        "eess.SP"
+      ],
+      "published": "2026-02-22T16:25:43+00:00",
+      "link": "https://arxiv.org/pdf/2602.19262v1",
+      "tags": [
+        "keyword:RUL预测",
+        "query:RUL预测"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Data-driven physics-informed DeepOnet for nonlinear dynamic systems",
+      "llm_evidence_cn": "用于非线性动力系统的数据驱动物理信息DeepOnet",
+      "llm_evidence": "用于非线性动力系统的数据驱动物理信息DeepOnet",
+      "canonical_evidence": "用于非线性动力系统的数据驱动物理信息DeepOnet",
+      "llm_tldr_en": "Proposes a physics-informed DeepOnet to learn nonlinear dynamics from limited experimental data.",
+      "llm_tldr_cn": "提出了一种物理信息DeepOnet，用于从有限的实验数据中学习非线性动力学。",
+      "llm_tldr": "提出了一种物理信息DeepOnet，用于从有限的实验数据中学习非线性动力学。",
+      "llm_tags": [
+        "query:rul"
+      ],
+      "matched_query_tag": "query:rul",
+      "matched_query_text": "Data driven vs physics informed models for RUL prediction",
+      "matched_requirement_id": "req-7",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.10527v1",
+      "title": "World Model for Battery Degradation Prediction Under Non-Stationary Aging",
+      "abstract": "Degradation prognosis for lithium-ion cells requires forecasting the state-of-health (SOH) trajectory over future cycles. Existing data-driven approaches can produce trajectory outputs through direct regression, but lack a mechanism to propagate degradation dynamics forward in time. This paper formulates battery degradation prognosis as a world model problem, encoding raw voltage, current, and temperature time-series from each cycle into a latent state and propagating it forward via a learned dynamics transition to produce a future trajectory spanning 80 cycles. To investigate whether electrochemical knowledge improves the learned dynamics, a Single Particle Model (SPM) constraint is incorporated into the training loss. Three configurations are evaluated on the Severson LiFePO4 (LFP) dataset of 138 cells. Iterative rollout halves the trajectory forecast error compared to direct regression from the same encoder. The SPM constraint improves prediction at the degradation knee where the resistance to SOH relationship is most applicable, without changing aggregate accuracy.",
+      "authors": [
+        "Kai Chin Lim",
+        "Khay Wai See"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "eess.SY"
+      ],
+      "published": "2026-03-11T08:30:15+00:00",
+      "link": "https://arxiv.org/pdf/2603.10527v1",
+      "tags": [
+        "keyword:RUL预测",
+        "query:RUL预测"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "degradation prognosis with physics-informed world model",
+      "llm_evidence_cn": "结合物理约束的世界模型进行退化预测",
+      "llm_evidence": "结合物理约束的世界模型进行退化预测",
+      "canonical_evidence": "结合物理约束的世界模型进行退化预测",
+      "llm_tldr_en": "Predicts battery degradation trajectories using a world model with electrochemical constraints.",
+      "llm_tldr_cn": "利用带有电化学约束的世界模型预测电池退化轨迹，实现动态传播预测。",
+      "llm_tldr": "利用带有电化学约束的世界模型预测电池退化轨迹，实现动态传播预测。",
+      "llm_tags": [
+        "query:rul"
+      ],
+      "matched_query_tag": "query:rul",
+      "matched_query_text": "Data driven vs physics informed models for RUL prediction",
+      "matched_requirement_id": "req-7",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2602.19265v1",
+      "title": "Spectral bias in physics-informed and operator learning: Analysis and mitigation guidelines",
+      "abstract": "Solving partial differential equations (PDEs) by neural networks as well as Kolmogorov-Arnold Networks (KANs), including physics-informed neural networks (PINNs), physics-informed KANs (PIKANs), and neural operators, are known to exhibit spectral bias, whereby low-frequency components of the solution are learned significantly faster than high-frequency modes. While spectral bias is often treated as an intrinsic representational limitation of neural architectures, its interaction with optimization dynamics and physics-based loss formulations remains poorly understood. In this work, we provide a systematic investigation of spectral bias in physics-informed and operator learning frameworks, with emphasis on the coupled roles of network architecture, activation functions, loss design, and optimization strategy. We quantify spectral bias through frequency-resolved error metrics, Barron-norm diagnostics, and higher-order statistical moments, enabling a unified analysis across elliptic, hyperbolic, and dispersive PDEs. Through diverse benchmark problems, including the Korteweg-de Vries, wave and steady-state diffusion-reaction equations, turbulent flow reconstruction, and earthquake dynamics, we demonstrate that spectral bias is not simply representational but fundamentally dynamical. In particular, second-order optimization methods substantially alter the spectral learning order, enabling earlier and more accurate recovery of high-frequency modes for all PDE types. For neural operators, we further show that spectral bias is dependent on the neural operator architecture and can also be effectively mitigated through spectral-aware loss formulations without increasing the inference cost.",
+      "authors": [
+        "Siavash Khodakarami",
+        "Vivek Oommen",
+        "Nazanin Ahmadi Daryakenari",
+        "Maxim Beekenkamp",
+        "George Em Karniadakis"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-02-22T16:29:18+00:00",
+      "link": "https://arxiv.org/pdf/2602.19265v1",
+      "tags": [
+        "query:RUL预测"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "spectral bias in physics-informed neural networks",
+      "llm_evidence_cn": "物理信息神经网络中的谱偏差",
+      "llm_evidence": "物理信息神经网络中的谱偏差",
+      "canonical_evidence": "物理信息神经网络中的谱偏差",
+      "llm_tldr_en": "Investigates spectral bias in physics-informed learning to improve the training of PDE-based models.",
+      "llm_tldr_cn": "研究物理信息学习中的谱偏差，以改进基于偏微分方程模型的训练。",
+      "llm_tldr": "研究物理信息学习中的谱偏差，以改进基于偏微分方程模型的训练。",
+      "llm_tags": [
+        "query:rul"
+      ],
+      "matched_query_tag": "query:rul",
+      "matched_query_text": "Data driven vs physics informed models for RUL prediction",
+      "matched_requirement_id": "req-7",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.12733v1",
+      "title": "On Using Machine Learning to Early Detect Catastrophic Failures in Marine Diesel Engines",
+      "abstract": "Catastrophic failures of marine engines imply severe loss of functionality and destroy or damage the systems irreversibly. Being sudden and often unpredictable events, they pose a severe threat to navigation, crew, and passengers. The abrupt nature makes early detection the only effective countermeasure. However, research has concentrated on modeling the gradual degradation of components, with limited attention to sudden and anomalous phenomena. This work proposes a new method for early detection of catastrophic failures. Based on real data from a failed engine, the approach evaluates the derivatives of the deviation between actual sensor readings and expected values of engine variables. Predictions are obtained by a Random Forest, which is the most suitable Machine Learning algorithm among the tested ones. Traditional methods focus on deviations of monitored signals, whereas the proposed approach employs the derivatives of the deviations to provide earlier indications of abnormal dynamics, and to alert that a rapid and dangerous event is breaking out within the system. The method allows the detection of anomalies before measurements reach critical thresholds and alarms are triggered, which is the common method in industry. Consequently, operators can be warned in advance and shut down the engine, then prevent damage and unexpected power loss. Moreover, they have the time to safely change the ship route and avoid potential obstacles. Simulation results conf irm the effectiveness of the proposed approach in anticipating occurrence of catastrophic failures. Validation on real-world data further reinforces the robustness and practical applicability of the method. It is worth noting that data acquisition to train the predictive algorithm is not a problem, since a Deep Learning-based data augmentation procedure is used.",
+      "authors": [
+        "Francesco Maione",
+        "Paolo Lino",
+        "Giuseppe Giannino",
+        "Guido Maione"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-03-13T07:24:06+00:00",
+      "link": "https://arxiv.org/pdf/2603.12733v1",
+      "tags": [
+        "keyword:RUL预测",
+        "query:RUL预测"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Early detection of catastrophic failures in marine diesel engines",
+      "llm_evidence_cn": "船用柴油机灾难性故障的早期检测",
+      "llm_evidence": "船用柴油机灾难性故障的早期检测",
+      "canonical_evidence": "船用柴油机灾难性故障的早期检测",
+      "llm_tldr_en": "Uses Random Forest to detect sudden failures in marine engines by evaluating sensor reading deviations.",
+      "llm_tldr_cn": "利用随机森林通过评估传感器读数偏差来检测船用发动机的突发故障。",
+      "llm_tldr": "利用随机森林通过评估传感器读数偏差来检测船用发动机的突发故障。",
+      "llm_tags": [
+        "query:rul"
+      ],
+      "matched_query_tag": "query:rul",
+      "matched_query_text": "Health monitoring and RUL for rotating machinery",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2602.20640v1",
+      "title": "Scalable multitask Gaussian processes for complex mechanical systems with functional covariates",
+      "abstract": "Functional covariates arise in many scientific and engineering applications when model inputs take the form of time-dependent or spatially distributed profiles, such as varying boundary conditions or changing material behaviours. In addition, new practices in digital simulation require predictions accompanied by confidence intervals. Models based on Gaussian processes (GPs) provide principled uncertainty quantification. However, GPs capable of jointly handling functional covariates and multiple correlated functional tasks remain largely under-explored. In this work, we extend the framework of GPs with functional covariates to multitask problems by introducing a fully separable kernel structure that captures dependencies across tasks and functional inputs. By taking advantage of the Kronecker structure of the covariance matrix, the model is made scalable. The proposed model is validated on a synthetic benchmark and applied to a realistic structure, a riveted assembly with functional descriptions of the material behaviour and response forces. The proposed functional multitask GP significantly improves over single task GPs. For the riveted assembly, it requires less than 100 samples to produce an accurate mean and confidence interval prediction. Despite its larger number of parameters, the multitask GP is computationally easier to learn than its single task pendant.",
+      "authors": [
+        "Razak Christophe Sabi Gninkou",
+        "Andrés F. López-Lopera",
+        "Franck Massa",
+        "Rodolphe Le Riche"
+      ],
+      "primary_category": "math.ST",
+      "categories": [
+        "math.ST",
+        "stat.ML"
+      ],
+      "published": "2026-02-24T07:40:20+00:00",
+      "link": "https://arxiv.org/pdf/2602.20640v1",
+      "tags": [
+        "keyword:RUL预测",
+        "query:RUL预测"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "multitask Gaussian processes for mechanical systems",
+      "llm_evidence_cn": "机械系统的多任务高斯过程",
+      "llm_evidence": "机械系统的多任务高斯过程",
+      "canonical_evidence": "机械系统的多任务高斯过程",
+      "llm_tldr_en": "Extends Gaussian processes to handle functional covariates and correlated tasks in mechanical systems.",
+      "llm_tldr_cn": "扩展了高斯过程以处理机械系统中的函数协变量和相关任务。",
+      "llm_tldr": "扩展了高斯过程以处理机械系统中的函数协变量和相关任务。",
+      "llm_tags": [
+        "query:rul"
+      ],
+      "matched_query_tag": "query:rul",
+      "matched_query_text": "Real time health assessment and RUL forecasting for rotating components",
+      "matched_requirement_id": "req-8",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.12791v1",
+      "title": "Motion-Specific Battery Health Assessment for Quadrotors Using High-Fidelity Battery Models",
+      "abstract": "Quadrotor endurance is ultimately limited by battery behavior, yet most energy aware planning treats the battery as a simple energy reservoir and overlooks how flight motions induce dynamic current loads that accelerate battery degradation. This work presents an end to end framework for motion aware battery health assessment in quadrotors. We first design a wide range current sensing module to capture motion specific current profiles during real flights, preserving transient features. In parallel, a high fidelity battery model is calibrated using reference performance tests and a metaheuristic based on a degradation coupled electrochemical model.By simulating measured flight loads in the calibrated model, we systematically resolve how different flight motions translate into degradation modes loss of lithium inventory and loss of active material as well as internal side reactions. The results demonstrate that even when two flight profiles consume the same average energy, their transient load structures can drive different degradation pathways, emphasizing the need for motion-aware battery management that balances efficiency with battery degradation.",
+      "authors": [
+        "Joonhee Kim",
+        "Sanghyun Park",
+        "Donghyeong Kim",
+        "Eunseon Choi",
+        "Soohee Han"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO"
+      ],
+      "published": "2026-03-13T08:52:51+00:00",
+      "link": "https://arxiv.org/pdf/2603.12791v1",
+      "tags": [
+        "keyword:RUL预测",
+        "query:RUL预测"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "battery health assessment and degradation modeling",
+      "llm_evidence_cn": "电池健康评估与退化建模",
+      "llm_evidence": "电池健康评估与退化建模",
+      "canonical_evidence": "电池健康评估与退化建模",
+      "llm_tldr_en": "Proposes a framework for quadrotor battery health assessment using degradation-coupled electrochemical models.",
+      "llm_tldr_cn": "提出了一种利用退化耦合电化学模型进行四旋翼无人机电池健康评估的框架。",
+      "llm_tldr": "提出了一种利用退化耦合电化学模型进行四旋翼无人机电池健康评估的框架。",
+      "llm_tags": [
+        "query:rul"
+      ],
+      "matched_query_tag": "query:rul",
+      "matched_query_text": "Remaining Useful Life (RUL) prediction methods",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2602.22055v1",
+      "title": "Physics-Informed Machine Learning for Vessel Shaft Power and Fuel Consumption Prediction: Interpretable KAN-based Approach",
+      "abstract": "Accurate prediction of shaft rotational speed, shaft power, and fuel consumption is crucial for enhancing operational efficiency and sustainability in maritime transportation. Conventional physics-based models provide interpretability but struggle with real-world variability, while purely data-driven approaches achieve accuracy at the expense of physical plausibility. This paper introduces a Physics-Informed Kolmogorov-Arnold Network (PI-KAN), a hybrid method that integrates interpretable univariate feature transformations with a physics-informed loss function and a leakage-free chained prediction pipeline. Using operational and environmental data from five cargo vessels, PI-KAN consistently outperforms the traditional polynomial method and neural network baselines. The model achieves the lowest mean absolute error (MAE) and root mean squared error (RMSE), and the highest coefficient of determination (R^2) for shaft power and fuel consumption across all vessels, while maintaining physically consistent behavior. Interpretability analysis reveals rediscovery of domain-consistent dependencies, such as cubic-like speed-power relationships and cosine-like wave and wind effects. These results demonstrate that PI-KAN achieves both predictive accuracy and interpretability, offering a robust tool for vessel performance monitoring and decision support in operational settings.",
+      "authors": [
+        "Hamza Haruna Mohammed",
+        "Dusica Marijan",
+        "Arnbjørn Maressa"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "published": "2026-02-25T16:06:28+00:00",
+      "link": "https://arxiv.org/pdf/2602.22055v1",
+      "tags": [
+        "keyword:RUL预测",
+        "query:RUL预测"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "physics-informed machine learning for rotating shaft power prediction",
+      "llm_evidence_cn": "物理信息机器学习用于转轴功率预测",
+      "llm_evidence": "物理信息机器学习用于转轴功率预测",
+      "canonical_evidence": "物理信息机器学习用于转轴功率预测",
+      "llm_tldr_en": "Combines physics-informed loss with KAN for accurate vessel shaft power and speed prediction.",
+      "llm_tldr_cn": "结合物理信息损失函数与 KAN，实现船舶轴功率和转速的精确预测。",
+      "llm_tldr": "结合物理信息损失函数与 KAN，实现船舶轴功率和转速的精确预测。",
+      "llm_tags": [
+        "query:rul"
+      ],
+      "matched_query_tag": "query:rul",
+      "matched_query_text": "Data driven vs physics informed models for RUL prediction",
+      "matched_requirement_id": "req-7",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.16313v1",
+      "title": "Learning to Predict, Discover, and Reason in High-Dimensional Discrete Event Sequences",
+      "abstract": "Electronic control units (ECUs) embedded within modern vehicles generate a large number of asynchronous events known as diagnostic trouble codes (DTCs). These discrete events form complex temporal sequences that reflect the evolving health of the vehicle's subsystems. In the automotive industry, domain experts manually group these codes into higher-level error patterns (EPs) using Boolean rules to characterize system faults and ensure safety. However, as vehicle complexity grows, this manual process becomes increasingly costly, error-prone, and difficult to scale. Notably, the number of unique DTCs in a modern vehicle is on the same order of magnitude as the vocabulary of a natural language, often numbering in the tens of thousands. This observation motivates a paradigm shift: treating diagnostic sequences as a language that can be modeled, predicted, and ultimately explained. Traditional statistical approaches fail to capture the rich dependencies and do not scale to high-dimensional datasets characterized by thousands of nodes, large sample sizes, and long sequence lengths. Specifically, the high cardinality of categorical event spaces in industrial logs poses a significant challenge, necessitating new machine learning architectures tailored to such event-driven systems. This thesis addresses automated fault diagnostics by unifying event sequence modeling, causal discovery, and large language models (LLMs) into a coherent framework for high-dimensional event streams. It is structured in three parts, reflecting a progressive transition from prediction to causal understanding and finally to reasoning for vehicle diagnostics. Consequently, we introduce several Transformer-based architectures for predictive maintenance, scalable sample- and population-level causal discovery frameworks and a multi-agent system that automates the synthesis of Boolean EP rules.",
+      "authors": [
+        "Hugo Math"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.LG"
+      ],
+      "published": "2026-03-17T09:45:01+00:00",
+      "link": "https://arxiv.org/pdf/2603.16313v1",
+      "tags": [
+        "keyword:RUL预测",
+        "query:RUL预测"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Vehicle health monitoring using diagnostic trouble code sequences",
+      "llm_evidence_cn": "利用诊断故障代码序列进行车辆健康监测",
+      "llm_evidence": "利用诊断故障代码序列进行车辆健康监测",
+      "canonical_evidence": "利用诊断故障代码序列进行车辆健康监测",
+      "llm_tldr_en": "Analyzes discrete event sequences from vehicle ECUs to characterize system faults and monitor subsystem health.",
+      "llm_tldr_cn": "分析车辆控制单元的离散事件序列，以表征系统故障并监测子系统健康状况。",
+      "llm_tldr": "分析车辆控制单元的离散事件序列，以表征系统故障并监测子系统健康状况。",
+      "llm_tags": [
+        "query:rul"
+      ],
+      "matched_query_tag": "query:rul",
+      "matched_query_text": "Real time health assessment and RUL forecasting for rotating components",
+      "matched_requirement_id": "req-8",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2602.22520v1",
+      "title": "TEFL: Prediction-Residual-Guided Rolling Forecasting for Multi-Horizon Time Series",
+      "abstract": "Time series forecasting plays a critical role in domains such as transportation, energy, and meteorology. Despite their success, modern deep forecasting models are typically trained to minimize point-wise prediction loss without leveraging the rich information contained in past prediction residuals from rolling forecasts - residuals that reflect persistent biases, unmodeled patterns, or evolving dynamics. We propose TEFL (Temporal Error Feedback Learning), a unified learning framework that explicitly incorporates these historical residuals into the forecasting pipeline during both training and evaluation. To make this practical in deep multi-step settings, we address three key challenges: (1) selecting observable multi-step residuals under the partial observability of rolling forecasts, (2) integrating them through a lightweight low-rank adapter to preserve efficiency and prevent overfitting, and (3) designing a two-stage training procedure that jointly optimizes the base forecaster and error module. Extensive experiments across 10 real-world datasets and 5 backbone architectures show that TEFL consistently improves accuracy, reducing MAE by 5-10% on average. Moreover, it demonstrates strong robustness under abrupt changes and distribution shifts, with error reductions exceeding 10% (up to 19.5%) in challenging scenarios. By embedding residual-based feedback directly into the learning process, TEFL offers a simple, general, and effective enhancement to modern deep forecasting systems.",
+      "authors": [
+        "Xiannan Huang",
+        "Shen Fang",
+        "Shuhan Qiu",
+        "Chengcheng Yu",
+        "Jiayuan Du",
+        "Chao Yang"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-02-26T01:31:58+00:00",
+      "link": "https://arxiv.org/pdf/2602.22520v1",
+      "tags": [
+        "keyword:RUL预测",
+        "query:RUL预测"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "rolling forecasting framework for multi-horizon time series",
+      "llm_evidence_cn": "多步时间序列的滚动预测框架",
+      "llm_evidence": "多步时间序列的滚动预测框架",
+      "canonical_evidence": "多步时间序列的滚动预测框架",
+      "llm_tldr_en": "Introduces TEFL to improve multi-step time series forecasting by leveraging historical prediction residuals.",
+      "llm_tldr_cn": "引入 TEFL 框架，通过利用历史预测残差来改进多步时间序列预测。",
+      "llm_tldr": "引入 TEFL 框架，通过利用历史预测残差来改进多步时间序列预测。",
+      "llm_tags": [
+        "query:rul"
+      ],
+      "matched_query_tag": "query:rul",
+      "matched_query_text": "Remaining Useful Life (RUL) prediction methods",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.16313v2",
+      "title": "Learning to Predict, Discover, and Reason in High-Dimensional Event Sequences",
+      "abstract": "Electronic control units (ECUs) embedded within modern vehicles generate a large number of asynchronous events known as diagnostic trouble codes (DTCs). These discrete events form complex temporal sequences that reflect the evolving health of the vehicle's subsystems. In the automotive industry, domain experts manually group these codes into higher-level error patterns (EPs) using Boolean rules to characterize system faults and ensure safety. However, as vehicle complexity grows, this manual process becomes increasingly costly, error-prone, and difficult to scale. Notably, the number of unique DTCs in a modern vehicle is on the same order of magnitude as the vocabulary of a natural language, often numbering in the tens of thousands. This observation motivates a paradigm shift: treating diagnostic sequences as a language that can be modeled, predicted, and ultimately explained. Traditional statistical approaches fail to capture the rich dependencies and do not scale to high-dimensional datasets characterized by thousands of nodes, large sample sizes, and long sequence lengths. Specifically, the high cardinality of categorical event spaces in industrial logs poses a significant challenge, necessitating new machine learning architectures tailored to such event-driven systems. This thesis addresses automated fault diagnostics by unifying event sequence modeling, causal discovery, and large language models (LLMs) into a coherent framework for high-dimensional event streams. It is structured in three parts, reflecting a progressive transition from prediction to causal understanding and finally to reasoning for vehicle diagnostics. Consequently, we introduce several Transformer-based architectures for predictive maintenance, scalable sample- and population-level causal discovery frameworks and a multi-agent system that automates the synthesis of Boolean EP rules.",
+      "authors": [
+        "Hugo Math"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.LG"
+      ],
+      "published": "2026-03-17T09:45:01+00:00",
+      "link": "https://arxiv.org/pdf/2603.16313v2",
+      "tags": [
+        "keyword:RUL预测",
+        "query:RUL预测"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "predicting evolving health of vehicle subsystems",
+      "llm_evidence_cn": "预测车辆子系统的健康演变",
+      "llm_evidence": "预测车辆子系统的健康演变",
+      "canonical_evidence": "预测车辆子系统的健康演变",
+      "llm_tldr_en": "Uses event sequences from vehicle ECUs to characterize system faults and monitor subsystem health.",
+      "llm_tldr_cn": "利用车辆ECU事件序列来表征系统故障并监测子系统健康状况。",
+      "llm_tldr": "利用车辆ECU事件序列来表征系统故障并监测子系统健康状况。",
+      "llm_tags": [
+        "query:rul"
+      ],
+      "matched_query_tag": "query:rul",
+      "matched_query_text": "Real time health assessment and RUL forecasting for rotating components",
+      "matched_requirement_id": "req-8",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    }
+  ]
+}
