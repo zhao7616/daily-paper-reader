@@ -1,0 +1,419 @@
+Title: Early Prediction of Creep Failure via Bayesian Inference of Evolving Barriers
+
+URL Source: https://arxiv.org/pdf/2603.16419v1
+
+Published Time: Wed, 18 Mar 2026 01:05:25 GMT
+
+Number of Pages: 7
+
+Markdown Content:
+## Early Prediction of Creep Failure via Bayesian Inference of Evolving Barriers 
+
+Juan Carlos Verano-Espitia, 1, 2, ∗ Tero M¨ akinen, 1 Mikko J. Alava, 1 and J´ erˆ ome Weiss 2
+
+> 1
+
+Department of Applied Physics, Aalto University, P.O. Box 15600, 00076 Aalto, Espoo, Finland 
+
+> 2
+
+Univ. Grenoble Alpes, Univ. Savoie Mont Blanc, CNRS, IRD, Univ. Gustave Eiffel, ISTerre, 38000 Grenoble, France 
+
+(Dated: March 18, 2026) Creep under a sustained load can persist for long times yet culminate in abrupt yielding or rupture, implying a finite lifetime even when the material appears solid. Here, we formulate lifetime prediction as Bayesian inference over an evolving activation-energy landscape. A time-dependent distribution of activation barriers controls deformation: stress lowers barriers, while irreversible rearrangements deplete the weakest sites and reshape the low-barrier tail. Using early-time acoustic emission data, Bayesian inference estimates the evolving barrier statistics in each sample and yields posterior predictive distributions for the time-to-failure. This approach provides uncertainty-aware lifetime forecasts that link microscopic barrier evolution to macroscopic creep dynamics. 
+
+Creep—time-dependent deformation under a sustained load—often exhibits long-lived, apparently stable re-sponse followed by rapid acceleration to yielding or fail-ure, thereby defining a finite lifetime at fixed loading [1– 3]. Early prediction of this lifetime is difficult because the dynamics preceding failure is slow and history de-pendent [4–8]. Recent work [9–12] has emphasized that barrier statistics on an energy landscape that evolves in time governs creep. In disordered systems, creep is dom-inated by the extremal low-barrier tail, and aging under load can correspond to a slowly evolving cutoff or gap in the density of available barriers [10, 13]. Such evolving barrier statistics naturally convert early slow creep into late-stage acceleration when depletion and facilitation re-shape the active tail [1, 2]. Here, we formulate creep lifetime prediction as aBayesian inference problem on this evolving landscape. We treat key descriptors of the barrier distribution (e.g., low-barrier weight, effective cutoff/gap, or an effective-temperature-like parameter) as latent, time-dependent variables and infer their posterior from early-time creep observations of Acoustic Emission (AE) [14]. Bayesian inference yields posterior predictive distributions for future creep evolution and for the time-to-failure, includ-ing credible intervals that quantify forecast uncertainty [14]. The key step is using the Bayesian framework to search for unique trajectories in the AE timings, which exploit the non-Markovian memory encoded in the disorder or the barrier distribution. This Bayesian landscape-inference framework provides a quantitatively testable bridge from microscopic barrier evolution to macroscopic lifetime statistics [15]. It en-ables (i) principled comparison of competing landscape-evolution hypotheses, (ii) uncertainty-aware lifetime fore-casts from short-time data, and (iii) a clear set of early-time diagnostics for impending finite-time instability [1, 8, 10].  
+
+> ∗juan-carlos.verano-espitia@univ-grenoble-alpes.fr
+
+As a baseline, we also apply a similar Bayesian ap-proach to the creep-rate data of each sample. Creep de-formation is classically described through three macro-scopic regimes: primary, secondary, and tertiary creep. In primary creep, the strain rate decreases in time (typ-ically as a power-law), secondary creep corresponds to a near-constant rate (or an inflection point), and ter-tiary creep shows an accelerating strain rate (typically a power-law increase towards a finite-time singularity) culminating in final failure. In many brittle and quasi-brittle materials, these regimes collapse onto a master curve when properly rescaled [4–6] and suggests classi-cal empirical relations such as the Monkman–Grant re-lation [16], which connects the minimum strain rate to the failure time, as well as related relations between the time of the strain-rate minimum and the final rupture time [5, 17]. From a statistical-physics perspective, creep fail-ure can be viewed as a finite-time singularity in the activity (strain rate), arising from damage localiza-tion driven by stress redistribution after local failure events [17–19]. The macroscopic acceleration toward failure thus emerges from the collective interaction of many localized damage events. This singularity and its prediction are immensely important in many fields, notably including geophysical systems, such as landslides and slope creep [20–22], rockfalls [23, 24], serac collapses [25–27], and volcanic eruptions [28, 29]. The fundamental challenge for failure prediction is that early-time observations can carry information about the failure time but are associated with large uncertainties, while accurate predictions typically become possible only close to failure, when intervention is no longer feasible. A key microscopic concept underlying creep behavior is the distribution of barriers to failure, i.e., the dis-tribution of local distances to instability in activation energy or stress. Creep dynamics during primary creep correspond to a progressive exploration and depletion of this barrier landscape, leading to history-dependent be-havior: once the weakest sites have failed, the remaining 
+
+> arXiv:2603.16419v1 [cond-mat.mtrl-sci] 17 Mar 2026
+
+2population is statistically stronger. It generates intrinsic memory effects in the disorder [30], distinguishing creep from standard Markovian depinning models (even those with history-dependent driving [31]) and implying that different samples follow distinct trajectories through the barrier landscape. Significant progress in modeling transient creep and aging effects has been made in recent work [9–12]. Comparatively less attention has been paid to the accelerating regime preceding failure and to the origin of the finite-time singularity itself. AE measurements provide a route to such a microscopic description. AE bursts correspond to individual mi-crocracking or damage events in brittle materials, and the timings of such events have been shown to directly probe the evolving barrier distribution [32] during creep. It opens the possibility of using AE activity to in-fer the state of the system and predict the time-to-failure. In this Letter, we develop a Bayesian inference framework that exploits the statistical structure of AE activity to perform early prediction of creep fail-ure with quantified uncertainties. We obtain good predictions well before the predictability implied by the master curve behavior, i.e., the strain-rate minimum. 
+
+Methods —Experimental data comes from Ref. [32], as the result of 39 tensile creep experiments on sheets of paper (height 100 mm, width 50 mm). The creep load varies between 220 and 280 N. The collected data in-cludes force and displacement data (used to compute the engineering strain, ϵ), as well as a continuous AE signal. A catalog of AE events was obtained from the continu-ous signal using standard thresholding methods, yielding event times tj .We perform Bayesian inference using Markov chain Monte Carlo (MCMC) methods in the PyMC li-brary [33], specifically the no-U-turn sampler (NUTS). The inference is performed using four independent chains, each with 5000 samples, and a target acceptance rate of 0.9. 
+
+Master curve behavior —For brittle creep, the mas-ter curve, onto which all individual creep curves can be scaled, consists of a power-law decrease of the strain rate in primary creep, an inflection point (secondary creep), and a power-law increase in the strain rate towards a finite-time singularity (see top panel of Fig. 1). This master curve summarizes as a model for the strain rate ˙εm = A
+
+ ttf
+
+−p
+
++ B
+
+ tf − ttf
+
+−γ
+
+(1) where A is a constant prefactor for the primary creep behavior, t the time, tf the failure time, p the primary creep exponent, B a constant prefactor for the tertiary creep, and γ is the tertiary creep exponent. To reproduce the known relation [5, 17] between the time of the strain rate minimum and the failure time, B is fixed so that the strain rate minimum occurs at t = kt f for some constant 10 -2                  
+
+> 10 -1
+> 10 0
+> 10 1
+> ˙ε [arb. units]
+> 0
+> 20
+> 40
+> 60
+> 80
+> Events  j
+> tftobs tobs
+> 0.000
+> 0.001
+> p(θ)
+> Prior
+> 10 010 110 210 3
+> t[arb. units]
+> 0.0
+> 0.1
+> p(θ | D )
+> Posterior
+> FIG. 1. A schematic description of the prediction process, where the top panel shows the continuous strain rate ˙ ε(blue) and the discrete accumulated number of events (red dots) as a function of time t. The data Dconsist of the strain data (blue) and discrete event times (red) read up to a time tobs , and based on this data, one tries to predict the failure time tf. For Bayesian inference, one needs a prior distribution p(θ), e.g., for the failure time (middle panel). By conditioning on the data D, one obtains a posterior distribution p(θ| D ) (bottom panel), which provides an estimate of the failure time and its associated uncertainty for each Bayesian inference approach.
+
+k. In our material and geometry, we know that k ≈
+
+0.83 [5]. The master curve behavior provides a way to predict the sample’s failure from the minimum strain rate. From the primary creep behavior, A and p can be inferred, and if one observes an inflection point in the strain rate, the Monkman–Grant then allows one to estimate the fail-ure time. In practice, determining the inflection point in a noisy strain-rate signal during an experiment is a formidable task, with significant uncertainty. Due to this need for uncertainty quantification, Bayesian inference is a natural tool for this task. It is based on the Bayes formula 
+
+p(θ | D ) = p(D | θ)p(θ)
+
+R p(D | θ)p(θ) d θ , (2) where θ (here meaning the set {A, p, k, γ, t f }) denotes the parameters of the model, D the observed data (for example the observed strain or strain rate data), p(θ)is the prior distribution of the parameters, p(D | θ) the likelihood, p(θ | D ) the posterior distribution of the pa-rameters, and the integral is taken over all the possible parameter values. The core idea is to start with estimates of the parameter distributions (priors) and arrive at the parameter distributions conditional on the observed data (posteriors). This idea, applied to creep failure predic-tion, is illustrated in Fig. 1. To utilize this framework in creep prediction consists of taking a timeseries of strain data up to time tobs , us-3ing this as data D for the Bayesian inference, and seeing what the posterior prediction for the failure time tf is (see Fig. 2a). For this, the model of Eq. 1 is used, by integrating it up to time tobs (as εm = ε0m + R tobs  
+
+> t0
+
+˙εm(t) d t
+
+where ε0m is the strain at the starting point t0). Gaus-sian variability (with standard deviation σϵ) around this model is allowed by choosing the likelihood 
+
+p (D | θ) = 
+
+> jobs
+
+Y
+
+> k=1
+
+1
+
+p2πσ 2
+
+> ε
+
+exp 
+
+
+
+− 12σ2
+
+> ε
+
+
+
+εk −
+
+Z tk
+
+> 0
+
+˙εm(t) d t
+
+ 
+
+where the index k runs through all the discrete ( tk, ε k)datapoints and jobs is the last index satisfying tjobs ≤
+
+tobs . It essentially means that the inference aims to min-imize the variability of σε while still accounting for the observed data. As the integral in Eq. 2 is not analytically tractable in the general case, sampling from the posterior distribution is done using MCMC methods. For priors we chose uniform distributions for the exponents, p ∈ [ 12 , 1] and γ ∈  45 , 2, and lognormal distribution for the prefac-tor A (same value for the mean and the standard devia-tion, 10 −3), common range of values for p, γ and A in the studied material [5, 6]. As we know that failure occurs at time tf > t obs and additionally wanted the inference to be set up to catch the earliest signs of tertiary creep on-set, we chose a lognormal prior for t − tobs , with a mean assuming that we exactly at the strain rate minimum, and a standard deviation equal to the mean. Each sample from the posterior distributions of the pa-rameters produces a full strain rate curve (Fig. 2a). Amore useful metric is the behavior of the prior and poste-rior distribution (Fig. 2b shows the means and standard deviations of both for one representative experiment) as a function of tobs . The prior is always centered just after 
+
+tobs . Initially, when there is no sign of an inflection point in the strain rate, the posterior mean is much higher than the prior, and the distribution is wider. However, when the inflection point is reached, the posterior as-sumes a narrower shape and converges to the real tf .Looking at this over all the experiments, we can define a precision metric, δt pred  
+
+> f
+
+/t true  
+
+> f
+
+, and an accuracy metric as 
+
+∥ttrue  
+
+> f
+
+− tpred  
+
+> f
+
+∥/t true  
+
+> f
+
+and consider a prediction successful if the accuracy is below a given tolerance. δt pred  
+
+> f
+
+/t true 
+
+> f
+
+describes how narrow the posterior distribution is, and 
+
+∥ttrue  
+
+> f
+
+− tpred  
+
+> f
+
+∥/t true  
+
+> f
+
+how far from the true value is the predicted value. By varying the tolerance (Fig. 2c) for a constant precision (set as 10 %), we see that indeed pre-dictability arises only after the strain-rate minimum. For this material, this means the method can predict failure when about 10 % of the lifetime remains. However, it is useful as a baseline prediction, which will be compared with a self-consistent Bayesian inference method based on the non-Markovian rank-persistence of a catalog of AE event times tj [32]. We will show that it is possi-ble to get a creep lifetime prediction already during the primary creep stage. 
+
+Acoustic Emission correlations —Instead of the strain tobs /t true 
+
+> f
+> 10 -1
+> 10 0
+> tpred
+> f /t true
+> f
+
+b)    
+
+> ttrue
+> f
+> tobs
+> Prior
+> Posterior
+> 0.6 0.7 0.8 0.9
+> tobs /t true
+> f
+> 0.0
+> 0.1
+> 0.2
+> Tolerance
+
+c)    
+
+> 0.1
+> 0.2
+> 0.3
+> 0.4
+> 0.5
+> 0.6
+> 0.7
+> 0.8
+> 0.9
+> 10 010 110 2
+> t[s]
+> 10 -4
+> 10 -2
+> 10 0
+> ˙ε [1/s]
+
+a) Posterior  
+
+> Full experiment
+> Data D
+> Prior
+> tobs
+
+FIG. 2. a) An example of the failure time prediction from the strain rate signal (Top panel). b) The evolution of the posterior distribution of the failure time (blue) as one changes the time tobs (blue dashed line) for a representative example. The green symbols show the prior distributions for the failure time for comparison. c) The proportion of predicted experi-ments for a given tolerance and prediction time tobs , with a zoomed-in view below. Here a 10 % precision is chosen. 
+
+data, one can also observe the AE events. In Ref. [32] a power-law correlation between the failure time and the time of the jth event was found 
+
+tf = eCj tθj 
+
+> j
+
+(3) which held starting from the first js. From the rank-persistence and lognormal nature of the event occurrence time distributions, the relations θj = δ ln tf /δ ln tj and 
+
+Cj = ⟨ln tf ⟩ − ⟨ ln tj ⟩ θj were derived. These depend on the population averages (denoted ⟨·⟩ ) and standard devi-ations (defined as δx = p⟨(x − ⟨ x⟩)2⟩), which one natu-rally does not know when considering single experiments. This correlation was explained [32] by invoking a mul-tiplicative process 
+
+tj+1 = t1
+
+> j
+
+Y
+
+> k=1
+
+(1 + rk) (4) where rk is called the multiplier. From the observed primary creep evolution of the multiplier rk = R0/k ,where R0 is a constant containing the sample-to-sample variability. One can derive estimates of the population means and standard deviations for some quantities (see End Matter for the full derivation). With these, one arrives at functions θj (N, δR 0, δ ln t1), where N
+
+roughly corresponds to the total number of events in the experiment and Cj (⟨ln t1⟩, ⟨R0⟩, N, θ j ) which only depend on the distribution of three quantities: N , R0,and t1 (see End Matter for details and exact functional forms). 4
+
+Barrier landscape trajectories and non-Markovian variability —The multiplicative process of Eq. 4 provides a direct connection between AE event timings and the underlying barrier landscape [32]. In this picture, the multipliers rk encode the successive exploration of local failure thresholds: early events correspond to the activa-tion of the weakest sites, while later events probe pro-gressively higher barriers. The parameter R0 controls the rate of this exploration and therefore contains the intrinsic sample-to-sample variability. A key point is that this variability resides in the bar-rier distribution itself, not only in stochastic realizations drawn from a fixed distribution. Each sample thus pos-sesses its own disorder ensemble, characterized by its own 
+
+{R0, t 1, N }, and therefore follows a distinct trajectory through the barrier landscape. It leads to a ranked, per-sistent ordering of event sequences across samples, which underlies the empirical correlation (Eq. 3). As a consequence, creep dynamics are intrinsically non-Markovian: the statistics of future events depend on which parts of the barrier distribution have already been depleted and on the particular disorder ensemble realized in the sample, and instead reflects a progressive selection within a sample-specific population of failure thresholds. The correlation of Eq. 3 can thus be viewed as a projec-tion of these sample-specific trajectories onto the ( tj , t f )plane, where the coefficients ( θj , C j ) are determined by the population-level statistics of {R0, t 1, N }. While these population quantities are not known for a single experi-ment, the observed AE sequence constrains the admissi-ble region of this parameter space, allowing the trajectory of an individual sample to be inferred. In practice, however, these trajectories are not directly visible in macroscopic observables such as strain: differ-ent realizations with distinct {R0, t 1, N } can produce very similar strain histories until late times. It explains why the master-curve-based prediction becomes accurate only after the strain-rate minimum. The AE signal, by contrast, probes microscopic dynamics and therefore contains information about the trajectory from early times onward. 
+
+Self-consistent Bayesian inference —To apply these ideas to actual prediction, we again set up a Bayesian inference-based prediction scheme. The key step here is to treat these population statistics {R0, t 1, N } as la-tent parameters and infer them from the AE timing data. Taking a logarithm of Eq. 3, and remembering that the event occurrence times follows a universal lognormal dis-tribution [32], this idea of a self-consistent prediction is easily formalized by the Gaussian likelihood for ln tf
+
+p (D | θ) = 
+
+> jobs
+
+Y
+
+> j=1
+
+exp 
+
+
+
+− ⟨ln tf ⟩− Cj −θj ln tj 
+
+> 2σ2ln tf
+
+q
+
+2πσ 2ln tf
+
+(5) where D now corresponds to the observed tj for j ≤ jobs .This likelihood essentially tries to minimize the scatter in 10 0 
+
+> 10 1
+> tpred
+> f /t true
+> f
+> ttrue
+> f= 61 .32s
+
+a)  
+
+> Strain
+> AE
+> 0.5 1.0
+> tobs /t true
+> f
+> 10 -2
+> 10 -1
+> 10 0
+> CRPS log
+
+b)  
+
+> Strain (mean)
+> AE (mean)
+> 0.5
+> 1.0
+> 1.5
+> 2.0
+> θj tobs /t true
+> f0.9
+
+c)       
+
+> AE (mean)
+> 050 100 150 200
+> Event j
+> 0
+> 2
+> 4
+> 6
+> Cj tobs /t true
+> f0.9
+
+d) 
+
+> AE (mean)
+
+FIG. 3. a) Comparison of the evolution of the posterior dis-tribution of the failure time as one changes the prediction time tobs for one single experiment using either the master curve approach (blue) or the AE correlations (red). The gray dashed line corresponds to tobs b) Comparison of the predic-tion score (CRPS log ) for all the experiments using either the master curve approach (blue) or the AE correlations (red), where the blue dots and the red diamonds represent their mean value. Evolution of the power–law exponent c) θj , and the prefactor d) Cj for all the experiments taking just times at 
+
+tobs /t true  
+
+> f
+
+≤ 0.9, where the red diamonds represent the mean value. 
+
+the predictions for ln tf , denoted as σln tf , over all the jsup to jobs . The difference to the earlier strain-based pre-diction is that we are not trying to fit the model (Eq. 3) as well as possible (with the given θj and Cj functions), but are just trying to have self-consistent failure time predictions. We could have a rough idea of these variables, specifically of ln t1, if we imagine that the AE sensor records the first events at times around one second, i.e. ⟨ln t1⟩ ≈ 0. For the combined quantity δR 0/δ ln t1,we could assume that δ ln t1 ∼ δR 0, in the case in which the variability of the first event time has some knowledge of the sample-to-sample variation. Then, in what follows, here the priors are set so that ln t1
+
+naturally has a Gaussian distribution (mean 0, standard deviation 0.5), the combined quantity δR 0/δ ln t1 has a Gaussian distribution (mean 1, standard deviation 0.2), and finally N has a lognormal distribution (mean 250, standard deviation 50). Here, N is the most important value to take care at the moment of defining the prior distributions, as this term depends on the AE signal and the thresholding made to such a signal, i.e. is dependent on the piezoelectric transducer and parameters used to obtain the AE signal. 
+
+Early creep failure prediction —Using this self-consistent Bayesian inference, we can achieve much bet-ter early-failure-time predictions (see Fig. 3a for a repre-5sentative experiment). The posterior distribution for tf
+
+already roughly matches the real failure time at around 10% of lifetime, i.e., significantly before the minimum strain rate that occurs after 80% of lifetime (for this ma-terial), far surpassing the predictive capabilities based on the strain signal. To quantify the distance between the true failure time and the posterior distribution from the Bayesian inference, we compute the continuous ranked probability score (CRPS) [34] in log-space as CRPS log =
+
+Z ∞
+
+> 0
+
+[P (tpred ) − H(ln tpred − ln tf )] 2
+
+tpred 
+
+dtpred 
+
+(6) where P is the (empirical) cumulative distribution func-tion of the posterior, chosen to be a lognormal [32], and H
+
+is the Heaviside step function. This metric shows that the self-consistent Bayesian inference presents a better score CRPS log from much earlier stages (red lines in Fig. 3b) than the strain-based prediction (blue lines in Fig. 3b), whereas the strain-based prediction attains a better score only after the strain-rate minimum is reached, i.e. when approaching failure. The individual trajectories for each sample can directly be seen by plotting the evolution of inferred θj
+
+(Fig. 3c) and Cj (Fig. 3d) for each experiment, based on the posterior means obtained at tobs ≤ 0.9ttrue  
+
+> f
+
+. Even though they are based on population-level correlations, interpretation using our Bayesian inference scheme yields a unique trajectory for each experiment in these quantities. A similar pattern describes each one of the trajectories for θj and is in the same range of values given in Ref. [32], i.e. a maximum value around 1.5 at early events and the decrease converging to one as the number of events increases. 
+
+Conclusions —We have presented a Bayesian inference method for predicting creep rupture from microscopic information carried by Acoustic Emission event tim-ing. The predictability arises from the intrinsically non-Markovian creep dynamics, in which the statistics of future events depend on both the depletion of weak barriers and the sample-specific disorder ensemble. This implies that the samples follow individual ranked trajectories. We exploit this structure by inferring the latent parameters of the barrier landscape (encoded in the evolution of Cj and θj ) through a self-consistent Bayesian scheme that minimizes the dispersion of tf
+
+predictions across events. AE does not merely provide empirical precursors of failure, but constitutes an indi-rect probe of the evolving barrier landscape governing creep rupture. The early predictability demonstrated here indicates that the relevant barrier-landscape in-formation is already encoded in the earliest stages of damage accumulation. By treating the population-level quantities determin-ing the creep lifetime as latent variables and inferring them self-consistently from partial AE sequences, our Bayesian scheme converts early microscopic activity into a posterior distribution for the failure time with quanti-fied uncertainty. The resulting predictions become accu-rate well before the predictability implied by the master curve behavior of the strain signal, demonstrating that the time-to-failure is already encoded in the earliest dam-age events through the sample’s position in the barrier landscape. More broadly, the approach provides a route to early failure forecasting in systems governed by collective damage dynamics and finite-time singularities, where macroscopic observables are late and noisy but event-level activity retains microscopic information about the evolving disorder. This trajectory-based inference perspective should be applicable beyond laboratory creep, including geophysical rupture phenomena where precursory event sequences provide a window into the underlying instability. 
+
+Acknowledgments —ISTerre is part of Labex OSUG@2020. This work has been supported by the French National Research Agency in the framework of the ”Investissements d’Avenir” program (ANR-15-IDEX-02). J.C.V.E. thanks funding from the Vilho, Yrj¨ oand Kalle V¨ ais¨ al¨ a Foundation of the Finnish Academy of Science and Letters. J.C.V.E., T.M. and M.J.A. acknowledge the support from FinnCERES flagship (grant no. 151830423), Business Finland (grant nos. 211835, 211909, and 211989), and the Research Council of Finland (13361245). M.J.A. acknowledges support from the Academy of Finland Center of Excellence program (program nos. 278367 and 317464), as well as the Finnish Cultural Foundation. The authors acknowledge the computational resources provided by the Aalto University School of Science “Science-IT” project.      
+
+> [1] H. A. Lockwood, M. H. Agar, and S. M. Fielding, Power law creep and delayed failure of gels and fibrous materials under stress, Soft Matter 20 , 2474 (2024). [2] J. C. Verano-Espitia, J. Weiss, D. Amitrano, T. M¨ akinen, and M. Alava, Effect of quenched heterogeneity on creep lifetimes of disordered materials, Physical Review E 110 ,064133 (2024). [3] P. Chaudhuri, L. Berthier, and M. Ozawa, Athermal creep deformation of ultrastable amorphous solids, Sci-Post Phys. 19 , 092 (2025). [4] M. Leocmach, C. Perge, T. Divoux, and S. Manneville, Creep and fracture of a protein gel under stress, Physical Review Letters 113 , 038303 (2014). [5] J. Koivisto, M. Ovaska, A. Miksic, L. Laurson, and M. J.
+
+6
+
+Alava, Predicting sample lifetimes in creep fracture of heterogeneous materials, Physical Review E 94 , 023002 (2016). [6] T. M¨ akinen, J. Koivisto, L. Laurson, and M. J. Alava, Scale-free features of temporal localization of deforma-tion in late stages of creep failure, Physical Review Ma-terials 4, 093606 (2020). [7] T. Divoux, E. Agoritsas, S. Aime, C. Barentin, J.-L. Bar-rat, R. Benzi, L. Berthier, D. Bi, G. Biroli, D. Bonn, P. Bourrianne, M. Bouzid, E. Del Gado, H. Delano¨ e-Ayari, K. Farain, S. Fielding, M. Fuchs, J. van der Gucht, S. Henkes, M. Jalaal, Y. M. Joshi, A. Lemaˆ ıtre, R. L. Leheny, S. Manneville, K. Martens, W. C. K. Poon, M. Popovi´ c, I. Procaccia, L. Ramos, J. A. Richards, S. Rogers, S. Rossi, M. Sbragaglia, G. Tarjus, F. Toschi, V. Trappe, J. Vermant, M. Wyart, F. Zamponi, and D. Zare, Ductile-to-brittle transition and yielding in soft amorphous materials: perspectives and open questions, Soft Matter 20 , 6868 (2024). [8] J. H. Cho and I. Bischofberger, Yield precursor in pri-mary creep of colloidal gels, Soft Matter 18 , 7612 (2022). [9] D. Shohat, Y. Friedman, and Y. Lahini, Logarithmic ag-ing via instability cascades in disordered systems, Nature Physics 19 , 1890 (2023). [10] D. J. Korchinski, D. Shohat, Y. Lahini, and M. Wyart, Thermal avalanches drive logarithmic creep in disordered media, Physical Review X 15 , 031024 (2025). [11] V. Y. Rudyak, D. Shohat, and Y. Lahini, Spatiotem-poral hierarchy of thermal avalanches, arXiv preprint arXiv:2507.02573 (2025). [12] D. Shohat, P. Baconnier, I. Procaccia, M. van Hecke, and Y. Lahini, Aging of amorphous materials under cyclic strain, Proceedings of the National Academy of Sciences 
+
+123 , e2515075123 (2026). [13] P. Cao, M. P. Short, and S. Yip, Potential energy landscape activations governing plastic flows in glass rheology, Proceedings of the Na-tional Academy of Sciences 116 , 18790 (2019), https://www.pnas.org/doi/pdf/10.1073/pnas.1907317116. [14] Y.-i. Mototake, H. Izuno, K. Nagata, M. Demura, and M. Okada, A universal bayesian inference framework for complicated creep constitutive equations, Sci. Rep. 10 ,10437 (2020). [15] T. M¨ akinen, A. D. Parmar, S. Bonfanti, and M. J. Alava, Growth and prediction of plastic strain in metallic glasses, Physical Review Materials 10 , 1 (2026). [16] F. Monkman and N. Grant, An empirical relationship between rupture life and minimum creep rate in creep rupture, Proceedings of the ASTM 56 , 593 (1957). [17] H. Nechad, A. Helmstetter, R. El Guerjouma, and D. Sor-nette, Creep ruptures in heterogeneous materials, Physi-cal Review Letters 94 , 045501 (2005). [18] D. Sornette and A. Helmstetter, Occurrence of finite-time singularities in epidemic models of rupture, earth-quakes, and starquakes, Physical Review Letters 89 ,158501 (2002). [19] Q. Lei and D. Sornette, Emergence of finite-time singu-larities from accelerated event recurrence: Insights into the mechanism of catastrophic failure, arXiv preprint arXiv:2507.22368 (2025). [20] Q. Lei and D. Sornette, A stochastic dynamical model of slope creep and failure, Geophysical Research Letters 
+
+50 , e2022GL102587 (2023). [21] Q. Lei and D. Sornette, Log-periodic power law singular-ities in landslide dynamics: Statistical evidence from 52 crises, Geophysical Research Letters 52 , e2025GL116379 (2025). [22] E. Intrieri, T. Carl` a, and G. Gigli, Forecasting the time of failure of landslides at slope-scale: A literature review, Earth-science reviews 193 , 333 (2019). [23] Q. Lei and D. Sornette, Oscillatory finite-time singulari-ties in rockbursts, International Journal of Rock Mechan-ics and Mining Sciences 192 , 106156 (2025). [24] G. Crosta and F. Agliardi, Failure forecast for large rock slides by surface displacement measurements, Canadian Geotechnical Journal 40 , 176 (2003). [25] J. Faillettaz, M. Funk, and D. Sornette, Icequakes cou-pled with surface displacements for predicting glacier break-off, Journal of Glaciology 57 , 453 (2011). [26] J. Faillettaz, M. Funk, and C. Vincent, Avalanching glacier instabilities: Review on processes and early warn-ing perspectives, Reviews of Geophysics 53 , 203 (2015). [27] J. Faillettaz, M. Funk, and M. Vagliasindi, Time fore-cast of a break-off event from a hanging glacier, The Cryosphere 10 , 1191 (2016). [28] Q. Lei and D. Sornette, Log-periodic precursors to vol-canic eruptions: Evidence from 34 events, arXiv preprint arXiv:2502.21277 (2025). [29] Q. Lei and D. Sornette, Unified failure model for land-slides, rockbursts, glaciers, and volcanoes, Communica-tions Earth & Environment 6, 390 (2025). [30] T. M¨ akinen, J. Weiss, D. Amitrano, and P. Roux, His-tory effects in the creep of a disordered brittle material, Physical Review Materials 7, 033602 (2023). [31] T. M¨ akinen, L. Tuokkola, J. Lahikainen, I. V. Lomakin, J. Koivisto, and M. J. Alava, Crack propagation by acti-vated avalanches during creep and fatigue from elastic interface theory, Physical Review Letters 134 , 098202 (2025). [32] J. C. Verano-Espitia, T. M¨ akinen, M. J. Alava, and J. Weiss, Creep failure in heterogeneous materials from the barrier landscape, Phys. Rev. E 112 , L063501 (2025). [33] O. Abril-Pla, V. Andreani, C. Carroll, L. Dong, C. J. Fonnesbeck, M. Kochurov, R. Kumar, J. Lao, C. C. Luh-mann, O. A. Martin, M. Osthege, R. Vieira, T. Wiecki, and R. Zinkov, PyMC: A modern and comprehensive probabilistic programming framework in Python, PeerJ Computer Science 9, 10.7717/peerj-cs.1516 (2023). [34] H. Hersbach, Decomposition of the continuous ranked probability score for ensemble prediction systems, Weather and Forecasting 15 , 559 (2000). 
+
+END MATTER Derivation of the estimates of the population quantities 
+
+We start from the multiplicative process (Eq. 4) and a functional form for the multiplier rk = R0/k where R0 is a prefactor accounting for the sample-to-sample variation (having a mean value ⟨R0⟩ and standard deviation δR 0). This functional form naturally holds only for primary creep [32] ( rk decreases rapidly when entering tertiary creep). The sample-to-sample variation could be intro-duced in other ways (e.g. varying the power-law exponent 7of rk around unity), but the results would be similar and this derivation is in any case an approximation. By taking the logarithm of Eq. 4 and using the expan-sion ln(1 + x) ≈ x, one gets ln tj+1 = ln t1 + R0Hj (7) where Hj = Pjk=1 k−1. This has known asymptotics, 
+
+Hj ∼ γ + ln j (where γ ≈ 0.577 is the Euler–Mascheroni constant). With this, and by shifting the indices by one, one gets the form ln tj ≈ ln t1 + R0γ + R0 ln( j − 1) . (8) Taking the population average over the sample-to-sample random variables ( tj , t1, and R0) yields 
+
+⟨ln tj ⟩ = ⟨ln t1⟩ + γ ⟨R0⟩ + ⟨R0⟩ ln( j − 1) . (9) Similarly, for the standard deviation (neglecting any co-variance terms) 
+
+δ ln tj ≈
+
+q
+
+(δ ln t1)2 + [ γ + ln( j − 1)] 2 (δR 0)2. (10) This enables then the determination of the exponent 
+
+θj = δ ln tf
+
+δ ln tj
+
+=    
+
+> δln tf
+> δln t1
+
+r
+
+1 + [ γ + ln( j − 1)] 2  δR 0  
+
+> δln t1
+
+2 (11) which goes to zero as j → ∞ . However, we know that θj
+
+goes to unity at some finite j = N (close to failure), so we can simply write 
+
+θj =
+
+vuuuut
+
+1 + [ γ + ln( N − 1)] 2  δR 0  
+
+> δln t1
+
+2
+
+1 + [ γ + ln( j − 1)] 2  δR 0  
+
+> δln t1
+
+2 (12) which only depends on the constants N , δR 0, and δ ln t1.Similarly, we can approximate the mean (log) failure time from Eq. 9 by assuming that as j → N , tj → tf .This enables the computation of the prefactor 
+
+Cj = ( ⟨ln t1⟩ + γ ⟨R0⟩) (1 − θj )+ ⟨R0⟩ [ln( N − 1) − θj ln( j − 1)] (13) which only depends on ⟨ln t1⟩, ⟨R0⟩, and N . So by know-ing the distributions of N , R0, and t1, one can get the full behavior of θj and Cj .

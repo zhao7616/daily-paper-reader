@@ -1,0 +1,491 @@
+Title: Energy-Aware Integrated Proactive Maintenance Planning and Production Scheduling
+
+URL Source: https://arxiv.org/pdf/2603.14060v1
+
+Published Time: Tue, 17 Mar 2026 01:24:01 GMT
+
+Number of Pages: 8
+
+Markdown Content:
+# Energy-Aware Integrated Proactive Maintenance Planning and Production Scheduling 
+
+Hongliang Li 1, Herschel C. Pangborn 2, and Ilya Kovalenko 3
+
+Abstract — Demand-side energy management, such as the real-time pricing (RTP) program, offers manufacturers oppor-tunities to reduce energy costs by shifting production to low-price hours. However, this strategy is challenging to imple-ment when machine degradation is considered, as degraded machines have decreased processing capacity and increased energy consumption. Proactive maintenance (PM) can restore machine health but requires production downtime, creating a challenging trade-off: scheduling maintenance during low-price periods sacrifices energy savings opportunities, while deferring maintenance leads to capacity losses and higher energy consumption. To address this challenge, we propose a hierarchical bi-level control framework that jointly optimizes PM planning and runtime production scheduling, considering the machine degradation. A higher-level optimization, with the lower-level model predictive control (MPC) embedded as a sub-problem, determines PM plans that minimize total operational costs under day-ahead RTP. At runtime, the lower-level MPC executes closed-loop production scheduling to minimize energy costs under realized RTP, meeting delivery targets. Simulation results from a lithium-ion battery pack assembly line case study demonstrate that the framework strategically shifts PM away from bottlenecks and high-price hours, meeting daily production targets while reducing energy costs. 
+
+I. I NTRODUCTION 
+
+The manufacturing sector accounts for roughly 30% of global energy use [1]. Since electricity cost represents about 40% of primary production, manufacturers are highly motivated to curb their electricity spending [2]. Demand-side energy management (DSM) can reduce these costs by shifting energy-intensive activities to off-peak hours [3]. One prominent DSM program is real-time pricing (RTP), in which electricity prices vary with grid conditions, including demand and renewable availability [4]. Under RTP, manufacturers can proactively reschedule production to low-price periods, re-ducing utility charges without additional capital investment. In practice, however, RTP-based scheduling is complicated by machine degradation. Machine health evolves due to wear, fatigue, and operating stress [5]. Degradation undermines RTP benefits in two ways: (1) effective capacity declines, limiting flexibility to shift loads, and (2) energy consumption rises as health deteriorates, eroding savings even during low-price hours [6]. Therefore, operators face a trade-off between 
+
+> 1Hongliang Li is with the Department of Industrial and Manufacturing Engineering, The Pennsylvania State University, University Park, PA, USA, e-mail: hjl5377@psu.edu.
+> 2Herschel C. Pangborn is with the Department of Mechanical Engineer-ing, The Pennsylvania State University, University Park, PA, USA, e-mail: hcpangborn@psu.edu.
+> 3Ilya Kovalenko is with the Department of Mechanical Engineering and the Department of Industrial and Manufacturing Engineering, The Pennsyl-vania State University, University Park, PA, USA, e-mail: iqk5135@psu.edu.
+
+Fig. 1: The proposed hierarchical control framework coor-dinates PM planning with runtime production scheduling, achieving system-level energy-efficiency improvements and energy cost savings. Dashed arrows denote information flow, while solid arrows denote maintenance execution, energy supply, and product delivery. meeting deliveries at high energy cost and risking missed targets while waiting for off-peak prices. Proactive Maintenance (PM) restores machine health be-fore failures occur [7]. However, PM requires scheduled downtime, interrupting production and reducing system flex-ibility. Scheduling maintenance during low-price hours sac-rifices opportunities for cost-effective production, whereas deferring maintenance risks operating with degraded ca-pacity and reduced efficiency [8]. PM planning is further constrained by resource and time limits. Balancing these factors yields a coupled planning problem that requires co-optimizing production scheduling and PM decisions with joint awareness of energy prices and machine health. Ex-isting literature has not fully addressed this intersection. Most RTP scheduling formulations assume static health, treating machine capacity as time-invariant and decoupled from energy efficiency [9], [10]. PM optimization typi-cally prioritizes reliability, spare parts, and workforce costs without co-optimizing against energy efficiency [11]. The few integrated approaches often adopt sequential decision-making and do not consider the bidirectional connections between production (driving degradation) and PM (altering future capacity and efficiency) [12]. Another challenge is the inherent temporal mismatch, as PM is planned over long horizons, while production must react on short horizons to accommodate runtime plant operations. Hierarchical control provides an effective framework for coordinating multi-timescale decisions by considering them at different control layers [13]. A hierarchical model pre-dictive control (MPC) has been applied to a renewable-powered ammonia plant, using a slow-timescale layer for 
+
+> arXiv:2603.14060v1 [eess.SY] 14 Mar 2026
+
+Fig. 2: Hierarchical control framework for integrated PM planning and production scheduling with RTP-based energy costs in a make-to-order manufacturing environment. storage and process control and a fast-timescale layer to manage the variability of the energy resource [14]. However, implementing hierarchical control is challenging: effective coordination requires models that capture the connections among machine degradation, PM actions, and production dynamics, such as health-dependent processing capacity and energy consumption. This paper proposes a hierarchical bi-level control frame-work that jointly optimizes PM planning and production scheduling under RTP, as shown in Fig. 1. The higher level optimizes the PM plan offline by solving a bi-level optimiza-tion that accounts for day-ahead RTP with the lower-level MPC embedded as a subproblem to evaluate the production cost and feasibility of each candidate plan. At runtime, the lower level executes hourly production scheduling in closed loop under actual RTP, ensuring delivery targets and health-adjusted constraints. The main contributions are: (1) a unified state-space model that links buffer/machine dynamics with health evolution and energy use, (2) a hierarchical bi-level control framework that coordinates the PM planning and production scheduling, and (3) a case study that demonstrates the proposed control framework. The remainder of the paper is organized as follows. Section II provides the assumptions and problem statement. Section III describes the system model. Section IV details the hierarchical control framework. Section V presents case study results. Section VI provides conclusions and future work. II. P ROBLEM STATEMENT 
+
+In this study, we consider a multi-stage batch manu-facturing system in which raw materials progress through a network of machines and buffers. The system operates in a make-to-order (MTO) supply chain with known daily customer orders [15]. Machines undergo progressive degra-dation: as health declines, effective processing capacity and energy efficiency decrease. To preserve reliability, PM is employed. While maintenance restores health, it requires downtime that temporarily halts production. Energy costs for processing are charged at the RTP provided by the utility company. RTP programs generally include two profiles: a day-ahead forecast (RTP est ), released 24 hours in advance for assisting end-users’ energy management, and an actual real-time price (RTP act ), updated hourly to determine utility charges [16]. The offline PM planning uses the RTP est and the online production schedule responding to the RTP act . The objective is to determine a PM plan and production schedules that (1) meet customer orders on time, (2) maintain machine reliability, and (3) minimize total energy costs. To focus on the key decision aspects, we adopt the following modeling assumptions. (1) Raw materials are con-tinuously available. In MTO settings, procurement/prepara-tion occurs based on confirmed orders. (2) Compared with processing energy, the energy use directly associated with PM is negligible and thus omitted. PM incurs fixed costs reflecting maintenance labor and the opportunity cost of lost production. (3) Energy consumption due to buffer holding is neglected, since machine processing dominates total energy use. (4) As health deteriorates, we assume effective capacity decreases, and power draw increases linearly [17]. We focus on gradual, predictable degradation and neglect sudden or random failures that may occur. Future work will relax this assumption to account for stochastic degradation. III. S YSTEM MODELS 
+
+A. Manufacturing Network Model 
+
+Adapted from our prior work [9], the manufacturing network is modeled as a discrete-time state space model: 
+
+x(k + 1) = As x(k) + Bs u(k) + Ws d(k) (1) where x(k) ∈ Rnx denotes the buffer inventory vector, 
+
+u(k) ∈ Rnu represents the machine processing rates, and 
+
+d(k) ∈ Rnp captures the product outflow demands at time step k. The indices nx, n u, n p denote the total numbers of buffers, machines, and products, respectively. Buffers, ma-chines, and products are indexed by i, j, and p, respectively. The state-transition matrix As ∈ Rnx×nx is taken as the identity matrix. The input matrix Bs ∈ Rnx×nu encodes the manufacturing network topology: 
+
+Bs,ij =
+
+
+
+1, if uj delivers material into xi
+
+−1, if uj draws material from xi
+
+0, otherwise (2) The matrix Ws ∈ Rnx×np links product outflows to buffer: 
+
+Ws,ip =
+
+(
+
+−1, if dp is shipped from xi
+
+0, otherwise (3) To track material withdrawals, we define the outflow matrix 
+
+Bo as Bo,ij = −1 if Bs,ij < 0, otherwise Bo,ij = 0 .
+
+B. Machine Degradation Model 1) Machine Health Degradation: Let h(k) ∈ [0 , 1] nu
+
+denote the machine-health vector at time k, and let m(k) ∈{0, 1}nu denote the PM activation vector with mj (k) = 1 
+
+indicating maintenance on machine j at time k. Let hj (k) = 1 denote that the machine is in an “as-new” condition, and hj (k) = 0 denotes that the machine is in a failure condition. A linear degradation model is adopted as a first-order approximation that captures usage-driven wear [18]: 
+
+h(k+1) = Ah h(k) − Bh u(k) + Wh m(k) (4) where matrix Ah ∈ Rnu×nu is taken as the identity matrix. 
+
+Bh = diag( b1, . . . , b nu ) and Wh = diag( w1, . . . , w nu )
+
+with bj , w j ≥ 0. Here, bj is the degradation rate per unit processing on machine j, representing the incremental health loss from each unit of production throughput. The parameter 
+
+wj is the health restoration rate per unit maintenance time on machine j, characterizing how maintenance activities recover machine condition. Both parameters are machine-specific, reflecting differences in mechanical complexity, component wear characteristics, and maintainability. 
+
+2) Maintenance Constraints: PM is limited by crew avail-ability and permissible working hours. Over a planning horizon (e.g., one day), we have: 
+
+mj (k) ≤ η(k) (5) 
+
+> nu
+
+X
+
+> j=1
+
+mj (k) ≤ Ncrew (k) (6) where mj (k) ∈ { 0, 1} indicates whether machine j under-goes PM at time k, η(k) ∈ { 0, 1} encodes maintenance-permissible time windows, and Ncrew (k) ∈ Z≥0 denotes the available PM crew capacity (e.g., the number of simultaneous maintenance tasks that can be staffed). For example, if operators perform maintenance only during working hours 
+
+Twork = {9, . . . , 18 }, then we have: 
+
+η(k) = 
+
+(
+
+1, if k ∈ Twork 
+
+0, otherwise (7) PM requires human operators and induces production down-time, incurring both labor and opportunity costs. We model the instantaneous maintenance cost as 
+
+CM (k) = φ ∥m(k)∥1 (8) where ∥m(k)∥1 counts the number of concurrent mainte-nance actions, and φ > 0 is the per–machine–hour PM cost (labor, tooling, and lost throughput). 
+
+3) Performance-Degradation Integration: Machine degra-dation impacts both effective processing capacity and energy efficiency. Let ¯C ∈ Rnu 
+
+> +
+
+denote the as-new capacity vector and κ ∈ [0 , 1] nu the fractional capacity loss at zero health. We model the health–capacity relation as: 
+
+C(k) = ¯C ⊙ 
+
+h
+
+1 − κ ⊙  1 − h(k)i
+
+(9) where ⊙ denotes the elementwise product and h(k) ∈
+
+[0 , 1] nu is the health vector. Machine processing capacity is linearly decreased when the machine deteriorates. Sim-ilarly, let ¯E ∈ Rnu 
+
+> +
+
+denote the as-new power (or specific energy-intensity) vector and γ ∈ Rnu 
+
+> ≥0
+
+quantify the per-machine energy penalty as health declines. We use a linear health–energy relation: 
+
+E(k) = ¯E ⊙ 
+
+h
+
+1 + γ ⊙  1 − h(k)i
+
+(10) 
+
+C. Energy Consumption Model 
+
+At each time step, the processing energy is: 
+
+E(k) = ∆ t E(k)⊤u(k) (11) where ∆t is the step length. PM actions do not explicitly consume energy in the model, but they restore health and hence reduce future energy needs. Let ρ(k) denote the nominal RTP. Then the energy cost at time k is: 
+
+CE (k) = ρ(k) E(k) (12) Note that for offline planning, the day-ahead RTP est , denoted as ρest , is used to estimate the energy cost. For runtime control, the realized RTP act , denoted as ρact , is used for calculating the actual energy costs. 
+
+D. System Operational Constraints 1) Machine and Buffer Capacity Constraints: Buffer lev-els x(k) ∈ Rnx are bounded by physical limits: 
+
+xmin ≤ x(k) ≤ xmax (13) Machines are limited by health-dependent capacities and are unavailable during PM. Then, the control input satisfies: 
+
+0 ≤ u(k) ≤ C (k) ⊙  1 − m(k) (14) so that when mj (k) = 1 , we have uj (k) = 0 .
+
+2) Production Flow Conservation: Material balance re-quires sufficient inventory for processing and deliveries. A conservative (no shortage) condition is: 
+
+x(k) + Bo u(k) + Ws d(k) ≥ 0 (15) Cumulative shipments π(k) over the prediction horizon N
+
+must track the production target σ(k):
+
+π(k) + ξ(k) ≥ σ(k), ξ(k) ≥ 0 (16) where ξ(k) is the slack variable that allows temporary, penal-ized deviations to preserve feasibility. Cumulative shipments 
+
+π(k) can be calculated as: 
+
+π(k) = 
+
+> k
+
+X
+
+> t=0
+
+d(t), k = 0 , . . . , N −1 (17) IV. H IERARCHICAL CONTROL FORMULATION 
+
+Fig. 2 shows the hierarchical control architecture. The higher level solves an offline PM planning problem, for-mulated as a bi-level optimization, whose inner problem is the lower-level MPC (L-MPC) that evaluates the production optimality and feasibility of a candidate PM plan. The lower-level runs a closed-loop receding-horizon MPC that uses real system feedback and actual RTP to generate runtime produc-tion schedules and track production targets. The hierarchical structure operates across different timescales such that hourly production scheduling in the lower level respects the daily PM plan from the higher level. 
+
+A. Lower-level MPC 
+
+Given a PM plan m and a production target σ, the L-MPC seeks a production schedule that balances inventory regu-lation, energy cost, smooth operation, and target tracking. Before linearization, the energy term renders the problem bilinear. We state the nominal problem and then introduce a convex McCormick relaxation. Given a PM plan m, the nominal L-MPC is formulated as: 
+
+min  
+
+> x,u,d,ξ
+
+JL = 
+
+> N−1
+
+X
+
+> k=0
+
+
+
+∥x(k) − xg ∥2 
+
+> Q
+
++ λe CE (k)+ λu ∥u(k) − u(k−1) ∥22 + λξ ∥ξ(k)∥1
+
+
+
+(18a) s.t. k ∈ { 0, 1, . . . , N − 1} (18b) 
+
+x(0) = x0, h (0) = h0 (18c) 
+
+x(k+1) = Asx(k) + Bsu(k) + Wsd(k) (18d) 
+
+h(k+1) = Ahh(k) − Bhu(k) + Whm(k) (18e) 
+
+xmin ≤ x(k) ≤ xmax (18f) 
+
+0 ≤ u(k) ≤ C (k) ⊙  1 − m(k) (18g) 
+
+x(k) + Bo u(k) + Ws d(k) ≥ 0 (18h) 
+
+d(k) ≥ 0 (18i) 
+
+π(k) + ξ(k) ≥ σ(k), ξ(k) ≥ 0 (18j) where x0 and h0 are the initial conditions, and xg is the safe inventory level, a design parameter that balances work-in-process reduction against production flexibility by penalizing excess buffer accumulation through the quadratic cost ∥x(k) − xg ∥2
+
+> Q
+
+. The weights λe, λ u, λ ξ ≥ 0 tune the trade-offs. To model the integration of machine degradation and machine power while keeping the L-MPC convex, we use McCormick envelopes to relax the bilinear term of 
+
+CE (k) [19]. We introduce the auxiliary variable w(k) := 
+
+h(k) ⊙ u(k). Then we have: 
+
+E(k) =  ( ¯E+γ)⊤u(k) − γ⊤w(k)∆t
+
+The bilinearities appear through w(k) = h(k) ⊙ u(k). Given the machine health bound 0 ≤ hj (k) ≤ 1 and the machine capacity bound 0 ≤ uj (k) ≤ ¯Cj , the convex McCormick envelope for wj (k) is: 
+
+wj (k) ≥ 0, wj (k) ≤ uj (k), (19) 
+
+wj (k) ≤ ¯Cj hj (k), wj (k) ≥ uj (k) − ¯Cj
+
+ 1 − hj (k)
+
+With (19), the energy cost term becomes linear: 
+
+CE (k) = ρ(k)
+
+
+
+( ¯E+γ)⊤u(k) − γ⊤w(k)
+
+
+
+∆t (20) and the L-MPC (18) reduces to a convex quadratic pro-gram. Empirically, the McCormick envelope’s relaxation is tight [20]. We also apply the bound 0 ≤ uj (k) ≤ ¯Cj to ensure the machine capacity is within the as-new condition capacity. 
+
+B. Higher-level Bi-level Optimization 
+
+The higher level is formulated as a bi-level optimization problem with the L-MPC as the embedded subproblem to evaluate the system performance based on the candidate PM plan. The bi-level mixed-integer linear problem is: 
+
+min  
+
+> m,θ
+
+JH = θ + 
+
+> T−1
+
+X
+
+> t=0
+
+
+
+− λp ρest ∥m(t)∥1 + λm CM (t)
+
+
+
+(21a) s.t. t ∈ { 0, . . . , T − 1} (21b) 
+
+mj (t) ≤ η(t) (21c) 
+
+> nu
+
+X
+
+> j=1
+
+mj (t) ≤ Ncrew (t) (21d) 
+
+1 ≥ h(T ) ≥ hmin (21e) 
+
+θ ≥ J∗
+
+> L
+
+(m) (21f) where η(t) ∈ { 0, 1} enforces permissible windows, and 
+
+Ncrew (t) limits crew capacity. The weight λp tunes the preference of PM allocation during high RTP periods. Weight 
+
+λm tunes the PM costs, primarily due to the crew cost and loss of production. Constraint (21e) ensures that the end-of-the-day machine health h is higher then the safe machine health hmin to prevent machine failure. Constraint (21f) uses the optimal value J∗
+
+> L
+
+(m) of the L-MPC (18) evaluated under the plan m.
+
+C. Solution Approach 
+
+The high-level problem (21) evaluates a PM plan m ∈{0, 1}nu×T via the L-MPC (18). The L-MPC optimal value 
+
+J∗
+
+> L
+
+(m) enters the higher-level objective through a variable 
+
+θ with the constraint θ ≥ J∗
+
+> L
+
+(m). As detailed in Alg. 1, we adopt a Generalized Benders Decomposition (GBD) approach for solving the bi-level MILP (21) [21]. GBD al-ternates a fixed-size master problem with repeatedly solving the convex subproblem. We denote the problem (21) as the master problem with the embedded subproblem of L-MPC. At iteration ℓ, the master proposes (m[ℓ], θ [ℓ]); solving L-MPC at m[ℓ] yields the value J∗
+
+> L
+
+(m[ℓ]) and dual multipliers. Let μj (k) ≥ 0 denote the dual multiplier of the per–time-step capacity constraint (18g) and let λh(k) ∈ Rnu be Algorithm 1 GBD for PM Planning 
+
+Require: Initial (x0, h 0), RTP ρ(t), targets τ (t), weights 
+
+(λp, λ m, λ e, λ u, λ ξ ), tolerance ε 
+
+> 1:
+
+L ← ∅ ▷ cut set  
+
+> 2:
+
+UB ← +∞, LB ← −∞ , ℓ ← 0 
+
+> 3:
+
+repeat  
+
+> 4:
+
+Master: Solve (21) with cuts L to get (m[ℓ], θ [ℓ]) 
+
+> 5:
+
+LB [ℓ] ← master problem objective value  
+
+> 6:
+
+Subproblem: Solve (18) at m[ℓ] to obtain J∗
+
+> L
+
+(m[ℓ]) 
+
+> 7:
+
+and duals (μ, λ h) 
+
+> 8:
+
+Cut: Build g(m[ℓ]) via (22) and add (23) to L 
+
+> 9:
+
+Update UB: UB [ℓ] ← min( UB [ℓ−1] , (24))  
+
+> 10:
+
+ℓ ← ℓ + 1  
+
+> 11:
+
+until UB [ℓ−1] − LB [ℓ−1] ≤ ε 
+
+> 12:
+
+return m⋆, θ⋆, UB 
+
+the multiplier of the health dynamics (18e) where τ (k) ∈{1, . . . , T } maps the intra-day index k to the day-ahead slot 
+
+t = τ (k).In the L-MPC (18), the PM plan m affects the problem through (18g) and (18e). Under convexity and strong duality of the L-MPC QP, the optimal value function J∗
+
+> L
+
+(m) is convex in m, and a valid subgradient at m is obtained from the dual solution as: 
+
+gj (k; ˆ m) = Cj (k)μj (k; ˆ m) − W ⊤ 
+
+> h
+
+λh(k; ˆ m)
+
+> j
+
+j = 1 , . . . , n u, k = 0 , . . . , N −1 (22) The associated global supporting hyperplane in the lifted 
+
+(m, θ ) space is: 
+
+θ ≥ J∗
+
+> L
+
+( ˆ m) +  
+
+> N−1
+
+X
+
+> k=0
+> nu
+
+X
+
+> j=1
+
+gj
+
+ k; ˆ m   mj (τ (k)) − ˆmj (τ (k)) 
+
+(23) Because the L-MPC problem is a convex QP, strong duality holds and (23) is valid for all m ∈ {0, 1}nu×T . The GBD alternates a fixed-size higher-level MILP (master) with repeated solves of the convex L-MPC (subproblem). At iter-ation ℓ, the master solves (21) subject to all accumulated cuts 
+
+L, producing a candidate PM plan m[ℓ], an epigraph value 
+
+θ[ℓ], and an updated lower bound LB [ℓ]. The subproblem L-MPC is then solved at m[ℓ] to obtain the operational cost 
+
+J∗
+
+> L
+
+( ˜ m[ℓ]) and the dual multipliers (μ, λ h). The subgradient (22) and the cut (23) are formed and appended to L. The incumbent upper bound UB [ℓ] is updated by adding the subproblem cost to cost function of (21a) as: 
+
+J∗
+
+> L
+
+( ˜ m[ℓ])+  
+
+> T−1
+
+X
+
+> t=0
+
+
+
+−λp ρ(t) ∥ ˜m[ℓ](t)∥1 +λm ∥ ˜m[ℓ](t)∥1
+
+
+
+(24) The iteration terminates when: 
+
+UB [ℓ] − LB [ℓ] ≤ ε (25) where ε > 0 is a prescribed relative convergence tolerance. 
+
+D. Integration of the Hierarchical Control 
+
+The proposed bi-level optimization-based hierarchical con-trol enables bi-directional communication between higher-
+
+Fig. 3: Lithium-ion battery pack manufacturing system con-sidered in the case study. level PM planning and lower-level production schedul-ing. The higher-level optimization passes the PM plan to the lower-level MPC, which enforces maintenance-induced downtime through the capacity constraint (18g) and receives health restoration through the health dynamics (18e). The PM plan m thus shapes the lower-level feasible region by dictating when machines are available and at what health states they operate. The lower-level MPC provides feedback to the higher level through the bi-level optimization structure. It should be noted that, in the online implementation, the lower-level MPC executes in closed loop with hourly state feedback, but does not modify the daily PM plan once it is committed. This reflects practical scheduling realities: maintenance crews, spare parts, and tooling are arranged at the start of the day based on the PM plan, making intra-day rescheduling operationally costly. The GBD-based solution approach ensures that the PM plans are evaluated against production performance through the embedded L-MPC. Hence, the PM plan is production-aware even though it is not updated at runtime. Future work could introduce a rolling-horizon re-planning mechanism that triggers higher-level PM plan updates when realized conditions deviate significantly from day-ahead assumptions, enabling tighter bi-directional coordination. V. C ASE STUDY 
+
+A. Case Study Setup 
+
+We evaluate the proposed hierarchical control framework in simulation on a Li-ion battery pack assembly line. The production network consists of six buffer stages and seven processing machines arranged in a hybrid serial-parallel configuration, as illustrated in Fig. 3. The production line follows a multi-stage assembly process beginning with raw material processing, progressing through cell preparation, and branching into parallel module assembly operations. The workflow continues through module testing, pack as-sembly, and concludes with final testing and packaging. This configuration represents typical battery manufacturing workflows [22]. The system configuration and parameters are based on [22]. ∆t is defined as 1 hour. Buffer capacities are 
+
+xmax = [300 , 250 , 200 , 180 , 180 , 400] ⊤ units, reflecting physical space. We assume full capacity loss at zero health, that is, κ = 1. Machine capacities are ¯C =Fig. 4: Machine schedules under the baseline controller. An orange dot indicates that the machine is under PM. 
+
+Fig. 5: Machine schedules under the proposed framework. A green triangle indicates that the machine is under PM. 
+
+Fig. 6: System intensity and PM plan of baseline controller and proposed framework. 
+
+[40 , 25 , 20 , 20 , 20 , 25 , 30] ⊤ units/hour, with u3 and u4 op-erating in parallel. Baseline (as-new) per-unit energy use is ¯E = [0 .5, 0.9, 1.8, 1.8, 2.6, 1.0, 0.4] ⊤ kWh/unit, and sen-sitivity parameters γ = [0 .1, 0.3, 0.8, 0.8, 1.0, 0.4, 0.2] ⊤
+
+capture how energy intensity increases with load/health. Inventory holding costs follow a quadratic penalty with 
+
+Q = diag(0 .04 , 0.06 , 0.08 , 0.10 , 0.10 , 1.00) with the in-creasing downstream to encourage lean work in process. Safe inventory xg = 0 to minimize the work in pro-cess. The L-MPC weight parameters are λe = 1.0,
+
+λu = 1.5, and larger penality on the production ful-fillment λξ = 1 × 10 5. Maintenance costs are φ =$100 /hour. Machine health evolves with production-induced wear Bh = 5 × 10 −4I, where I is the identity matrix. Maintenance restores health at machine-specific rates Wh =diag(0 .15 , 0.15 , 0.20 , 0.20 , 0.20 , 0.15 , 0.15) per hour; higher rates for u3–u5 reflect their bottleneck criticality. The PM weighting parameters are λp = 1 .5 and λm = 10 . Mainte-nance is workforce-constrained to 9:00–18:00 with at most two concurrent activities, and each machine must satisfy a day-end health floor of 60% to ensure next-day operability. Daily demand is 150 battery packs, consistent with just-in-time automotive requirements. We compare the proposed framework to a baseline controller in which a fixed daily PM plan is passed to the L-MPC. Based on the system configurations, the fixed PM plan is set as the daily one-hour PM for machines 1 and 7. This represents common industrial practice where maintenance follows a fixed calendar-based policy. Simulations use PJM Chicago-area RTP from May 2024 over a 5-day (120-hour) horizon [16]. Fig. 7: Machine health degradation and restoration under baseline controller and proposed framework. 
+
+Fig. 8: Product delivery and production goal under baseline controller and proposed framework. 
+
+B. Results and Discussions 
+
+Fig. 4 and Fig. 5 compare machine-runtime schedules under the baseline controller with the fixed PM plan and the proposed hierarchical control framework. In the baseline controller, a fixed PM plan is applied independently of the production schedule: machines 1 and 7 each receive one hour of daily maintenance at a predetermined time within the working window, regardless of RTP conditions, buffer states, or machine health levels. The fixed PM interrupts production periodically. Consequently, the L-MPC must both avoid high-RTP hours and work around PM downtime, forcing higher processing rates in the remaining windows. For example, at hour 20, when RTP is elevated, machines under the baseline controller still accelerate to meet the daily production goal, sacrificing energy-saving opportunities. The proposed frame-work integrates PM planning with production scheduling via the embedded L-MPC, explicitly accounting for production performance. The resulting PM is preferentially scheduled near higher-RTP periods, preserving low-RTP hours for pro-TABLE I: Performance evaluation 
+
+Metric Baseline Proposed Diff (%) 
+
+Energy Cost ($) 1232.91 1166.62 -5.38 PM Cost ($) 2000.00 1300.00 -35.00 Total Cost ($) 3232.91 2466.62 -23.70 Cost/Unit ($/Unit) 16.44 15.55 -5.41 Avg. Health 0.87 0.90 +3.45 PM (Hours) 20 13 -35.00 duction and thereby increasing energy savings. The proposed framework also reflects the coupling between degradation and workload. PM is planned after intensive production to restore health and mitigate machine failure risk. Fig. 6 presents system intensity, PM, and RTP. System intensity (SI) Is(k) is defined as the sum of machine processing rates at time k, namely Is(k) = ∆ t Pnu 
+
+> j=1
+
+uj (k). For both the baseline controller and the proposed framework, the L-MPC responds to RTP to avoid peak prices. However, the baseline exhibits sharper swings in system intensity due to uncoordinated PM interruptions. The proposed hierarchical control framework yields a smoother production profile by aligning PM with high-RTP intervals, thereby improving energy efficiency and benefiting long-term machine health. Fig. 7 presents the selected machine health degradation profiles under both the baseline controller and the proposed hierarchical control framework. The baseline approach fol-lows a rigid maintenance policy, resulting in abrupt health restorations at fixed intervals, regardless of actual machine condition or production requirements. This leads to prema-ture maintenance in some cases and delayed intervention in others. Fig. 8 shows actual daily production versus the pro-duction goal. Both controllers meet the cumulative shipment targets each day. The proposed framework, however, tracks more tightly during target transitions and reaches interme-diate checkpoints earlier, reflecting faster post-PM recovery and better use of low-RTP periods. Table I summarizes eco-nomic performance over the 120-hour horizon. The proposed framework reduces total operational cost by 23.70% relative to the baseline, driven primarily by optimized maintenance scheduling that cuts preventive maintenance cost by 35% and total maintenance time from 20 to 13 hours. Despite reaching production targets, energy cost decreases by 5.38%, and cost per unit drops by 5.41%. The proposed framework achieves a 3.45% improvement in average system health, demonstrating its ability to simultaneously lower operating costs and enhance machine reliability. 
+
+C. Scalability Analysis 
+
+All simulations were performed on an Apple MacBook Pro with an M3 Max processor and 48 GB of RAM, using MATLAB [23] with YALMIP [24] and Gurobi [25]. The 5-day (120-hour) simulation completed in 36.32 s of total wall-clock time. The L-MPC had a mean solve time of 0.25 s per hourly decision and a worst-case solve time of 0.47 s. This is well within the 1-hour control interval, confirming that the proposed hierarchical framework is computationally tractable for online deployment. The day-ahead solution of the higher-level optimization took approximately 1.22 s, which is negligible relative to its 24-hour planning cycle. Regarding scalability to larger systems, the L-MPC re-mains convex under the McCormick relaxation. Each Ben-ders cut is generated efficiently. The L-MPC scales with the number of machines, buffers, and horizon length and can be solved efficiently with commercial solvers that exploit sparsity and warm-starting. The master MILP, however, contains nu × 24 binary variables for hourly PM decisions. In the worst case, solving the master problem is NP-hard and scales exponentially with the binary dimension. For the case study with 168 binary variables, the master problem solves within seconds, but for significantly larger systems (e.g., hundreds of machines or multi-line configurations), the master problem may become the computational bottle-neck. Potential mitigation strategies include aggregating PM decisions to coarser time blocks (e.g., per-shift rather than per-hour), exploiting warm-starting across GBD iterations, and applying decomposition techniques at the lower level to maintain tractability [26]. VI. C ONCLUSION 
+
+This paper presented a framework for integrating PM scheduling with production planning in manufacturing sys-tems, addressing the central challenge of coordinating equip-ment health management with DSM-driven operations. We developed a hierarchical control architecture with a two-level structure that explicitly embeds machine health dynamics into production decisions, moving beyond approaches that treat maintenance and production as separate problems. A Li-ion battery pack case study demonstrated the framework’s practical value, where it is able to meet production targets while reducing energy costs. By coupling health-dependent capacity constraints with time-varying electricity prices, the framework balances immediate production needs against long-term equipment sustainability. Future work will model stochastic degradation using chance-constrained or robust optimization to improve reliability and will broaden the objective to include additional sustainability metrics, such as carbon emissions and water usage. REFERENCES [1] International Energy Agency (IEA), “Energy efficiency 2023,” IEA Publications , 2023. [Online]. Available: https://www.iea.org/reports/ energy-efficiency-2023 [2] D. Foster, S. Nabahe, and B. Siu Hon Ng, “Energy and manufacturing in the united states,” MIT Center for Energy and Environmental Policy Research , 2020. [3] H. Li, H. C. Pangborn, and I. Kovalenko, “A system-level energy-efficient digital twin framework for runtime control of batch manu-facturing processes,” in 2023 IEEE 19th International Conference on Automation Science and Engineering (CASE) , 2023, pp. 1–6. [4] O. Elma, A. Ta¸ scıkarao˘ glu, A. T. ˙ Ince, and U. S. Selamo˘ gulları, “Implementation of a dynamic energy management system using real time pricing and local renewable energy generation forecasts,” Energy ,vol. 134, pp. 206–220, 2017. [5] L. Zhou, J. Li, F. Li, Q. Meng, J. Li, and X. Xu, “Energy consumption model and energy efficiency of machine tools: a comprehensive literature review,” Journal of Cleaner Production , vol. 112, pp. 3721– 3734, 2016. [6] X. Luan, S. Zhang, J. Li, G. Mendis, F. Zhao, and J. W. Sutherland, “Trade-off analysis of tool wear, machining quality and energy effi-ciency of alloy cast iron milling process,” Procedia Manufacturing ,vol. 26, pp. 383–393, 2018. [7] T. Kaihara, N. Fujii, A. Tsujibe, and Y. Nonaka, “Proactive mainte-nance scheduling in a re-entrant flow shop using lagrangian decom-position coordination method,” CIRP Annals , vol. 59, pp. 453–456, 2010. [8] G. A. Susto, J. Wan, S. Pampuri, M. Zanon, A. B. Johnston, P. G. O’Hara, and S. McLoone, “An adaptive machine learning decision system for flexible predictive maintenance,” in 2014 IEEE Interna-tional Conference on Automation Science and Engineering (CASE) ,2014, pp. 806–811. [9] H. Li, H. C. Pangborn, and I. Kovalenko, “Energy-aware model predictive control for batch manufacturing system scheduling under different electricity pricing strategies,” in 2025 IEEE 21st International Conference on Automation Science and Engineering (CASE) , 2025, pp. 2096–2102. [10] Y. Li, Q. Wang, X. Li, L. Gao, L. Fu, Y. Yu, and W. Zhou, “Real-time scheduling for flexible job shop with agvs using multiagent reinforce-ment learning and efficient action decoding,” IEEE Transactions on Systems, Man, and Cybernetics: Systems , 2025. [11] T. Xia, Y. Ding, Y. Dong, Z. Chen, M. Zheng, E. Pan, and L. Xi, “Collaborative production and predictive maintenance scheduling for flexible flow shop with stochastic interruptions and monitoring data,” 
+
+Journal of Manufacturing Systems , vol. 65, pp. 640–652, 2022. [12] G. Bencheikh, A. Letouzey, and X. Desforges, “An approach for joint scheduling of production and predictive maintenance activities,” 
+
+Journal of Manufacturing Systems , vol. 64, pp. 546–560, 2022. [13] R. Scattolini, “Architectures for distributed and hierarchical model predictive control–a review,” Journal of Process Control , vol. 19, no. 5, pp. 723–731, 2009. [14] Z. Tully, K. Johnson, G. Starke, and J. King, “Hierarchical multi-timescale mpc for control of off-grid renewable energy powered ammonia plant with storage,” in 2025 American Control Conference (ACC) , 2025, pp. 4097–4102. [15] Y. Zhai and T. Cheng, “Lead-time quotation and hedging coordination in make-to-order supply chain,” European Journal of Operational Research , vol. 300, no. 2, pp. 449–460, 2022. [16] PJM Interconnection, LLC, “PJM-Your Power, Our Grid,” 2023. [Online]. Available: https://www.pjm.com/ [17] F. Schulze Spüntrup, G. D. Ave, L. Imsland, and I. Harjunkoski, “Integration of maintenance scheduling and planning for large-scale asset fleets,” Optimization and Engineering , vol. 23, no. 3, pp. 1255– 1287, 2022. [18] P. Rokhforoz and O. Fink, “Distributed joint dynamic maintenance and production scheduling in manufacturing systems: Framework based on model predictive control and benders decomposition,” Journal of Manufacturing Systems , vol. 59, pp. 596–606, 2021. [19] G. P. McCormick, “Computability of global solutions to factorable nonconvex programs: Part I — Convex underestimating problems,” 
+
+Mathematical Programming , vol. 10, no. 1, pp. 147–175, 1976. [20] N. Boland, S. S. Dey, T. Kalinowski, M. Molinaro, and F. Rigterink, “Bounding the gap between the mccormick relaxation and the convex hull for bilinear functions,” Mathematical Programming , vol. 162, no. 1, pp. 523–535, 2017. [21] S. Bolusani and T. K. Ralphs, “A framework for generalized benders’ decomposition and its application to multilevel optimization,” Mathe-matical Programming , vol. 196, no. 1, pp. 389–426, 2022. [22] H. H. Heimes, A. Kampker, C. Lienemann, M. Locke, C. Offermanns, S. Michaelis, and E. Rahimzei, Lithium-ion battery cell production process . PEM Der RWTH Aachen University, 2018. [23] The MathWorks Inc., “MATLAB version: 24.2.0.2923080 (r2024b),” Natick, Massachusetts, United States, 2024. [Online]. Available: https://www.mathworks.com [24] J. Löfberg, “YALMIP: A toolbox for modeling and optimization in MATLAB,” in 2004 IEEE International Conference on Robotics and Automation , 2004, pp. 284–289. [25] Gurobi Optimization, LLC, “Gurobi Optimizer Reference Manual,” 2023. [Online]. Available: https://www.gurobi.com [26] H. Wei, B.-B. Hu, Y. Wang, and C. Lv, “Scalable and constrained consensus in multiagent systems: Distributed model predictive control-based approaches,” IEEE Transactions on Industrial Informatics ,vol. 20, no. 4, pp. 5969–5978, 2023.

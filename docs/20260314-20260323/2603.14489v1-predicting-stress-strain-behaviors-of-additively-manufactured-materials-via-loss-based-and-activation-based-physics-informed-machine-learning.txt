@@ -1,0 +1,2145 @@
+Title: 2603.14489v1.pdf
+
+URL Source: https://arxiv.org/pdf/2603.14489v1
+
+Published Time: Tue, 17 Mar 2026 02:04:23 GMT
+
+Number of Pages: 22
+
+Markdown Content:
+1
+
+Predicti ng Stress -strain Behaviors of Additively Manufactured Materials via Loss -based and Activation -based 
+
+Physic s-informed Machine Learning 
+
+Chenglong Duan 1 and Dazhong Wu 1, * 
+
+> 1
+
+Department of Mechanical and Aerospace Engineering, College of Engineering and Computer Science, 
+
+University of Central Florida, Orlando, FL 32816, USA 
+
+* Corresponding author 
+
+Email: dazhong.wu@ucf.edu 
+
+Abstract 
+
+Predicting the stress -strain behaviors of additively manufactured materials is crucial for part qualification 
+
+in additive manufacturing (AM) . Conventional physics -based constitutive model s of materials have 
+
+limitations such as oversimplification of material properties, narrow applicability to limited strain rates ,
+
+while purely data -driven machine learning (ML) models often lack physical consistency and interpretability .
+
+To address these issues, we propose a physics -informed machine learning (PIML) framework that leverages 
+
+physical laws in elastic and plastic regions to improve the predictive performance and physical consistency 
+
+of ML models for predicting the stress -strain curves of additively manufactured polymers and metals. A 
+
+polynomial regression model is first used to predict the yield point based on AM process parameters, then 
+
+stress -strain curve s are segmented into elastic and plastic regions . Two l ong short -term memory (LSTM) 
+
+models are trained to predict two regions separately . For the elastic region , Hooke’s law is embedded in the 
+
+LSTM model s for both polymer s and metal s; For the plastic region , Voce hardening law and Hollomon’s 
+
+law are embedded in the LSTM model s for the polymer and metal , respectively . In addition, the PIML 
+
+framework is implemented by two architectures , including the loss -based and activation -based PIML 
+
+architectures , where the physic al law s were embedded into the loss and activation function s, respectively .
+
+The performance of the two PIML architectures are compared with two LSTM -based ML models , three 
+
+additional ML models , including a ridge polynomial regression model , an artificial neural network , and a
+
+transformer , and a physics -based constitutive model . These models are built on experimental data collected 
+
+from two additively manufactured polymer s (i.e., Nylon and carbon fiber -acrylonitrile butadiene styrene )
+
+and two additively manufactured metal s (i.e., AlSi10Mg and Ti6Al4V) . Experimental results have 
+
+demonstrated that two PIML architectures consistently outperform three ML base line models and one 
+
+physics -based constitutive model . The segmental predictive model with activation -based PIML architecture 
+
+achieves the best overall performance, with the lowest MAPE of 10.46 ±0.81% and the highest R² of 
+
+0.82 ±0.05, indicating superior predictive performance and stable generalization across materials. 
+
+Keywords : Physics -informed machine learning; Stress -strain behavior; Additive manufacturing; Loss 
+
+function ; Activation function .
+
+1. Introduction 
+
+Additive manufacturing (AM) is a transformative technology that can fabricate parts with complex 
+
+geometries [1, 2] , lightweight structures [3, 4] , and functional components [5, 6] across aerospace [7, 8] ,
+
+biomedical [9, 10] , and automotive industries [11, 12] . By fabricating parts layer -by -layer, AM achieves 
+
+much higher design freedom than subtractive manufacturing, allowing for rapid prototyping [13 -15] .
+
+However, AM has not been widely adopted in critical applications due to inconsistent mechanical 
+
+performance of additively manufactured parts [16] . Specifically , the mechanical performance of additively 
+
+manufactured parts , particularly their stress -strain behavior s, remains highly sensitive to material variability ,
+
+part geometry , and process condition [17 -22] . Therefore, part qualification techniques are used to verif y
+
+the stress -strain behaviors of additively manufactured parts satisfy the required design specifications to 
+
+ensure these parts can be consistently reproduced, scaled for mass production, and reliably used in critical 
+
+applications [23, 24] .2
+
+Conventional AM part qualification technique s rel y heavily on destructive and non -destructive testing .
+
+These techniques are expensive, time -consuming , and difficult to scale . Therefore, the physics -based 
+
+constitutive models (e.g., plasticity and viscoelastic models) [25 -28] and data -driven machine learning (ML) 
+
+models [29 -34] ha ve been used to predict the stress -strain behaviors of additively manufactured part s.
+
+However, physics -based constitutive models require extensive parameter calibration based on prior 
+
+knowledge and often oversimplify material properties . In many cases, physics -based constitutive models 
+
+are sensitive to initial parameter selection and exhibit limited generalizability across different materials .
+
+For the data -driven ML models , although they can capture the complex, nonlinear relationship between 
+
+input and output automatically, they typically lack inherent physical constraints. As a result, the predicted 
+
+stress -strain behaviors may not be consistent with the actual stress -strain behaviors. 
+
+Recent advances in physics -informed machine learning (PIML) offer a potential solution by embedding 
+
+physic al law s directly into the training process of a ML model . While the effectiveness of PIML has been 
+
+demonstrated in fluid dynamics [35, 36] , heat transfer [37, 38] , and other fields [39, 40] , To the best of our 
+
+knowledge, no studies have been reported on predicting the stress -strain behaviors of additively 
+
+manufactured parts with PIML architecture . One challenge associated with apply ing PIML to solve 
+
+problem s in this field is the complex deformation behavior of material s. Specifically, the elastic region is 
+
+governed by a simple and linear elasticity law (e.g., Hooke’s Law ), but the plastic region is governed by a 
+
+complex and non -linear hardening law (e.g., Voce hardening law) . Moreover , the plastic deformation 
+
+mechanisms of additively manufactured polymers and metals differ substantially due to their underlying 
+
+microstructural and molecular structures . Therefore, a material -specific and region -specific PIML 
+
+framework is highly desirable to predict the stress -strain behaviors of additively manufactured polymers 
+
+and metals .
+
+Furthermore, although physics can be embedded into ML models through various mechanisms, embedding 
+
+physics directly into the loss function is the most common approach in existing literature . For example, 
+
+most of the existing loss -based PIML architecture s integrate physics into a loss function with a learnable 
+
+physics weight ing coefficient . Alternatively, the activation -based PIML architecture enforces physics as 
+
+hard constraints within a ML architecture . By integrating physics into the activation function of the output 
+
+layer , it ensu res consistent predictions at every time step and reducing reliance on the physics weight ing 
+
+coefficient in loss -based PIML architecture .
+
+To address the aforementioned issues, a material -specific and region -specific PIML framework was 
+
+developed to predict the stress -strain behaviors of additively manufactured polymers and metals. 
+
+Specifically, two polymer and two metal datasets were used to demonstrate the proposed framework, 
+
+including Nylon ( Ultimaker ) and carbon fiber -acrylonitrile butadiene styrene (CF -ABS, Push Plastic) 
+
+samples fabricated by FFF, AlSi10Mg ( 3D Systems, Inc ) and Ti6Al4V ( 3D Systems, Inc ) samples 
+
+fabricated by laser powder bed fusion (L -PBF). By firstly segmenting a stress -strain curve into an elastic 
+
+region and a plastic region based on the predicted yield point, the material -specific and region -specific 
+
+physic al laws are embedded in to the PI ML architecture . Specifically, a loss -based and an activation -based 
+
+PIML architecture s were developed by embedding the physic al laws into a loss function or an activation 
+
+function , respectively . We also compared the performance of the proposed PIML models with two LSTM -
+
+based ML models ( i.e., non -segmental and segmental predictive model without PIML ), three additional ML 
+
+models (i.e., ridge polynomial model, artificial neural network (ANN) , and transformer ), and one physics -
+
+based constitutive model to further demonstrate the effectiveness of the PIML framework . Th e main 
+
+contributions of this study are summarized as follows: 
+
+1.  A PIML framework that integrate s physical laws (i.e., constitutive models) into ML models was 
+
+developed to predict the complex stress -strain behaviors of additively manufactured polymers and 
+
+metals .
+
+2.  Two PIML architecture s, including a loss -based and an activation -based PIML architecture s, were 
+
+developed by embedding physical laws into the loss and activation functions, respectively. 3
+
+3.  The loss -based and activation -based PIML architecture s were demonstrated on two additively 
+
+manufactured polymer datasets and two additively manufactured metal datasets through a 5-fold cross 
+
+validation , outperform ing two LSTM -based models, th ree additional ML models , and a physics -based 
+
+constitutive model .
+
+2. Material and methods 
+
+2.1 PIML framework 
+
+Fig. 1 illustrates the three -step PIML framework for predicti ng the stress -strain behaviors of additively 
+
+manufactured polymers and metals. In step 1, the predicted yield strain (𝜀 𝑝𝑦 ) and yield stress ( 𝜎 𝑝𝑦 ) are first 
+
+obtained from process parameters in each fold . Since the relationship between process parameters and yield 
+
+strain or yield stress is fundamentally a scalar -to -scalar mapping, it can be effectively modeled using a 
+
+simple regression model . To determine an optimal model , multiple regression and ML models, including 
+
+extreme gradient boosting ( XGBoost ) model , ridge polynomial regression model , support vector regression 
+
+(SVR) model , and ANN, were evaluated. Table 1 shows the average mean absolute percentage error 
+
+(MAPE) between predicted and actual yield strain and yield stress for the Nylon, CF -ABS, AlSi10Mg, and 
+
+Ti6Al4V samples using four different models. Among the four models, the ridge polynomial regression 
+
+model achieve s the best predictive performance, with an average MAPE of 5.51% for yield strain and 7.71% 
+
+for y ield stress , respectively . Therefore, a ridge polynomial regression model is used to predict the yield 
+
+point .
+
+Fig . 1 . Overview of the PIML framework .
+
+Table 1. Average MAPEs between predicted and actual yield strain and yield stress of the Nylon, CF -
+
+ABS, AlSi10Mg, and Ti6Al4V samples. 
+
+XGBoost  SVR  ANN  Ridge polynomial 
+
+Predicted yield strain ( 𝜀 𝑝𝑦 ) 7.79 % 8.12 % 315.63 % 5. 51 %
+
+Predicted yield strain ( 𝜎 𝑝𝑦 ) 9.15 % 9.04 % 13.56 % 7.7 1%rocess arame ers 
+
+ime 
+
+e redic ield s rain and s ress 
+
+rocess arame ers idge ol nomial regression model 
+
+e segmen s ress s rain c r es ased on redic ed ield s rain 
+
+e redic s ress s rain c r es o di eren regions ia loss or ac i a ion ased L archi ec re 
+
+las ic region Hooke s law 
+
+las ic region Voce hardening or 
+
+Hollomon s law ased on ma erial 
+
+ime 
+
+L model 
+
+mm mm 
+
+> a
+
+redic ed 
+
+c al 
+
+las ic region 
+
+las ic region 
+
+redic ed ield s rain 
+
+redic ed ield s r ess 
+
+rocess arame ers 4
+
+In step 2, the predicted yield strain is used to segment each stress -strain curve into an elastic region and a 
+
+plastic region, allowing the subsequent PIML architecture s to focus on the material -specific and region -
+
+specific physical laws. In step 3, the stress -strain curves in elastic and plastic regions are predicted using 
+
+either the loss -based or activation -based PIML architecture s. Each stress -strain curve is split into an input 
+
+matrix and a corresponding output sequence. Each input matrix consists of a sequence of strain values ( 𝜀 𝑡 ,
+
+time -variant) along with constant process parameters (time -invariant) concatenated at each time step. Each 
+
+output sequence consists of the stress values at each time step ( 𝜎 𝑡 , time -variant). After obtaining two stress 
+
+sequences for the elastic region and plastic region, these two sequences are combined to obtain the final 
+
+predicted stress -strain curve. The detailed mechanism of loss -based and activation -based PIML models will 
+
+be introduced in Section 2.2. 
+
+2.2 Embedding physic al laws in to loss function or activation function 
+
+To implement the PIML framework, we developed two PIML architectures , including loss -based and 
+
+activation -based PIML architectures . Fig. 2 illustrates the loss -based PIML architecture for both elastic and 
+
+plastic regions , the physic al law is embedded into an additional physics loss function. Specifically, the total 
+
+loss  𝐿 𝑡𝑜𝑡𝑎𝑙  is composed of three terms: a data -driven loss  𝐿 𝑑𝑎𝑡𝑎 −𝑑𝑟𝑖𝑣𝑒𝑛  , a physics loss  𝐿 𝑝 ℎ𝑦𝑠𝑖𝑐𝑠  , and an 
+
+auxiliary loss  𝐿 auxiliary :
+
+𝐿 𝑡𝑜𝑡𝑎𝑙 = 𝐿 𝑑𝑎𝑡𝑎 −𝑑𝑟𝑖𝑣𝑒𝑛 + 𝜆 𝑝 ℎ𝑦𝑠𝑖𝑐𝑠 ∗ 𝐿 𝑝 ℎ𝑦𝑠𝑖𝑐𝑠 + 𝐿 auxiliary  (1)
+
+where  𝜆 𝑝 ℎ𝑦𝑠𝑖𝑐𝑠  is a learnable physics weight ing coefficient of  𝐿 𝑝 ℎ𝑦𝑠𝑖𝑐𝑠 . At each time step  𝑡 , a sequence of 
+
+strain s and corresponding process parameters are fed into the LSTM model . Then , based on (elastic or 
+
+plastic) and material type (polymer or metal) , the LSTM model outputs the predicted stress  (𝜎 𝑝 
+
+> 𝑡
+
+) and the 
+
+physics variables required by the physics loss  𝐿 𝑝 ℎ𝑦𝑠𝑖𝑐𝑠 . For the elastic region of both polymer and metal 
+
+samples , the Yo ng’s mod l s  (𝐸 𝑝  
+
+> 𝑡
+
+) is predicted , the Hooke ’s law [41] is integrated into  𝐿 𝑝 ℎ𝑦𝑠𝑖𝑐𝑠 :
+
+𝐿 𝑝 ℎ𝑦𝑠𝑖𝑐𝑠 = 1 
+
+> 𝑁
+
+∑ ([𝜎 𝑝 
+
+> 𝑡
+
+]𝑖 − [𝐸 𝑝  
+
+> 𝑡
+
+∗ 𝜀 𝑡 ]𝑖 )2 
+
+> 𝑁
+> 𝑖 =1
+
+(2)
+
+For the plastic region of the polymer samples , the stress amplitude  𝑎 𝑝  
+
+> 𝑡
+
+and strain -hardening rate  𝑏 𝑝  
+
+> 𝑡
+
+are 
+
+predicted , the Voce hardening law [42] is integrated into  𝐿 𝑝 ℎ𝑦𝑠𝑖𝑐𝑠 :
+
+𝐿 𝑝 ℎ𝑦𝑠𝑖𝑐𝑠 = 1 
+
+> 𝑁
+
+∑ ([𝜎 𝑝 
+
+> 𝑡
+
+]𝑖 − [𝜎 𝑝𝑦 + 𝑎 𝑝  
+
+> 𝑡
+
+(1 − 𝑒 −𝑏 𝑝  
+
+> 𝑡 (
+> ε𝑡 −𝜀 𝑝𝑦 )
+
+)]𝑖 )2 
+
+> 𝑁
+> 𝑖 =1
+
+(3)
+
+where  𝜎 𝑝𝑦  and  𝜀 𝑝𝑦  are predicted yield stress and strain in step 1 of the PIML framework .
+
+For the plastic region of the metal samples , the strength coefficient  𝐾 𝑝  
+
+> 𝑡
+
+and strain -hardening exponent  𝑛 𝑝 
+
+> 𝑡
+
+are predicted , the Hollomon's law [43] is integrated into  𝐿 𝑝 ℎ𝑦𝑠𝑖𝑐𝑠 :
+
+𝐿 𝑝 ℎ𝑦𝑠𝑖𝑐𝑠 = 1 
+
+> 𝑁
+
+∑ ([𝜎 𝑝 
+
+> 𝑡
+
+]𝑖 − [𝜎 𝑝𝑦 + 𝐾 𝑝 
+
+> 𝑡
+
+(𝜀 𝑡 − 𝜀 𝑝𝑦 )𝑛 𝑝 
+
+> 𝑡
+
+)]𝑖 
+
+) 
+
+> 2
+> 𝑁
+> 𝑖 =1
+
+(4)
+
+For  𝐿 𝑑𝑎𝑡𝑎 −𝑑𝑟𝑖𝑣𝑒𝑛 , it is the mean squared error (MSE) between the predicted stress  𝜎 𝑝  
+
+> 𝑡
+
+and the actual stress 
+
+𝜎 𝑡  to enforce their agreement :
+
+𝐿 𝑑𝑎𝑡𝑎 −𝑑𝑟𝑖𝑣𝑒𝑛 = 1 
+
+> 𝑁
+
+∑ ([𝜎 𝑝 
+
+> 𝑡
+
+]𝑖 − [𝜎 𝑡 ]𝑖 )2 
+
+> 𝑁
+> 𝑖 =1
+
+(5)
+
+For  𝐿 auxiliary , t his term acts as a constraint that keeps the learnable physics weight  𝜆 𝑝 ℎ𝑦𝑠𝑖𝑐𝑠  near 1, ensuring 
+
+balanced contributions between the  𝐿 𝑑𝑎𝑡𝑎 −𝑑𝑟𝑖𝑣𝑒𝑛 and  𝐿 𝑝 ℎ𝑦𝑠𝑖𝑐𝑠 :
+
+𝐿 auxiliary = 𝛼 (𝜆 𝑝 ℎ𝑦𝑠𝑖𝑐𝑠 − 1)2 (6)5
+
+where  𝛼  is equals to 0.1. This scaling coefficient  𝛼  is set up to maintain the auxiliary regularization at a 
+
+comparable numerical scale to the other loss terms, ensuring it only stabilizes the learnable physics weigh 
+
+𝜆 𝑝 ℎ𝑦𝑠𝑖𝑐𝑠  without influencing the overall optimization trend of  𝐿 𝑡𝑜𝑡𝑎𝑙 .
+
+Fig. 2. Loss -based PIML architecture .
+
+Fig. 3 illustrates the activation -based PIML architecture for both elastic and plastic regions. Instead of 
+
+embedding physical law in the loss function, the activation -based PIML architecture embeds physical law 
+
+directly into the activation function of the output layer. At each time step  𝑡 , the LSTM model receives a 
+
+sequence of strains and corresponding process parameters. Then, based on region (elastic or plastic) and 
+
+material type (polymer or metal), the LSTM model first outputs the physics variables required by the 
+
+activation function  𝑓 , after which the activation function  𝑓  transforms these physics variables into the final 
+
+predicted stress  (𝜎 𝑝 
+
+> 𝑡
+
+). For the elastic region of both polymer and metal samples , Yo ng’s mod l s  (𝐸 𝑝  
+
+> 𝑡
+
+) is 
+
+redic ed, he Hooke’s law is in egra ed in o ac i a ion nc ion  𝑓  to transform  𝐸 𝑝  
+
+> 𝑡
+
+into  𝜎 𝑝 
+
+> 𝑡
+
+:
+
+𝜎 𝑝  
+
+> 𝑡
+
+= 𝑓 (𝐸 𝑝  
+
+> 𝑡
+
+) = 𝐸 𝑝  
+
+> 𝑡
+
+∗ 𝜀 𝑡  (7)
+
+For the plastic region of the polymer samples , the stress amplitude  𝑎 𝑝  
+
+> 𝑡
+
+and strain -hardening rate  𝑏 𝑝  
+
+> 𝑡
+
+are 
+
+predicted , the Voce hardening law is integrated into activation function  𝑓  to transform  𝑎 𝑝  
+
+> 𝑡
+
+and  𝑏 𝑝  
+
+> 𝑡
+
+into  𝜎 𝑝 
+
+> 𝑡
+
+:
+
+𝜎 𝑝  
+
+> 𝑡
+
+= 𝑓 (𝑎 𝑝  
+
+> 𝑡
+
+, 𝑏 𝑝  
+
+> 𝑡
+
+) = 𝜎 𝑝𝑦 + 𝑎 𝑝  
+
+> 𝑡
+
+(1 − 𝑒 −𝑏 𝑝  
+
+> 𝑡 (
+> ε𝑡 −𝜀 𝑝𝑦 )
+
+) (8)ol mer 
+
+,
+
+ime ime 
+
+ime 
+
+e al 
+
+ime ime 
+
+ime 
+
+> ack ro aga ion , da e model weigh s and
+
+,
+
+> 1
+> 1
+> 1
+> 1
+> 1
+> 1
+
+6
+
+For the plastic region of metal samples , the strength coefficient  𝐾 𝑝  
+
+> 𝑡
+
+and strain -hardening exponent  𝑛 𝑝  
+
+> 𝑡
+
+are 
+
+predicted , Hollomon's law is integrated into activation function  𝑓  to transform  𝐾 𝑝  
+
+> 𝑡
+
+and  𝑛 𝑝  
+
+> 𝑡
+
+into  𝜎 𝑝 
+
+> 𝑡
+
+:
+
+𝜎 𝑝  
+
+> 𝑡
+
+= 𝑓 (𝐾 𝑝 
+
+> 𝑡
+
+, 𝑛 𝑝  
+
+> 𝑡
+
+) = 𝜎 𝑝𝑦 + 𝐾 𝑝 
+
+> 𝑡
+
+(𝜀 − 𝜀 𝑝𝑦 )𝑛 𝑝 
+
+> 𝑡
+
+) (9)
+
+𝐿 𝑝 ℎ𝑦𝑠𝑖𝑐𝑠  is the MSE between the predicted stress  𝜎 𝑝  
+
+> 𝑡
+
+and the actual stress  𝜎 𝑡  to enforce their agreement :
+
+𝐿 𝑝 ℎ𝑦𝑠𝑖𝑐𝑠 = 1 
+
+> 𝑁
+
+∑ ([𝜎 𝑝 
+
+> 𝑡
+
+]𝑖 − [𝜎 𝑡 ]𝑖 )2 
+
+> 𝑁
+> 𝑖 =1
+
+(10 )
+
+Fig. 3. Activation -based PIML architecture .
+
+2.3 Machine learning and physics -based constitutive models 
+
+2.3.1 Machine learning models 
+
+For the LSTM model used in th e PIML framework , it originally evolved from the recurrent neural network 
+
+[44] . By incorporating a gate -controlled memory cell, LSTM is designed to handle the long -term 
+
+dependency problem often encountered in sequential tasks [45] . The core component is the cell state, which 
+
+acts as a memory capable of storing information over extended time steps. Three gates include forget gate, ime 
+
+ime 
+
+ime ime 
+
+ime 
+
+> ack ro aga ion , da e model weigh s
+> 1
+> 1
+> 1
+> 1
+> 1
+> 1
+
+c i a ion 
+
+nc ion c i a ion 
+
+nc ion 
+
+ol mer 
+
+,
+
+ime 
+
+e al 
+
+,7
+
+input gate, and output gate, controlling the flow of information into and out of the cell state. The forget gate 
+
+determines how much of the previous cell state should be retained, while the input gate decides the degree 
+
+to which new candidate information updates the current cell state. Finally, the output gate governs how 
+
+much of the updated cell state is revealed as the hidden state at the current time step. More details about 
+
+LSTM can be found in the literature. 
+
+In this study , the LSTM model was built using PyTorch and was trained on a computer equipped with an 
+
+NV D GeForce X 4090 G U, an n el i9 4900KF C U, and G o . The model consists of 
+
+one LSTM layer that contain s 32 hidden units, followed by a fully connected layer that maps the final 
+
+hidden state to a single stress output. The learning rate is 0.01, the batch size is 1, the training epochs are 
+
+10 for all datasets. Moreover, since stress -strain curves are time -series data, the sequence length is another 
+
+crucial hyperparameter when designing the LSTM input structure . For a sequence length  𝑛 , the input from 
+
+the  𝑛  sequential data points (strain and parameter s) are combined to predict the (𝑛 + 1) -th stress. 
+
+Specifically , for the elastic region, the sequence length is 2, 2, 5, 10 for Nylon, CF -ABS, AlSi10Mg, 
+
+Ti6Al4V dataset, respectively; for the plastic region, the sequence length is 10, 10, 5, 10 for Nylon, CF -
+
+ABS, AlSi10Mg, Ti6Al4V dataset, respectively. 
+
+To better demonstrate the effectiveness of the proposed PIML framework based on the LSTM model , three 
+
+additional ML models , including a ridge polynomial regression model, an ANN, and a transformer , are 
+
+included for comparison. The baseline ML models are introduced to provide a fair assessment of the 
+
+contribution of physics integration beyond pure data -driven modeling . Specifically , t hree baseline ML 
+
+models span a broad range of model complexity . The r idge polynomial regression model represents a low -
+
+complexity parametric model with limited nonlinear flexibility. The ANN provides a moderate level of 
+
+complexity through multilayer nonlinear transformations but does not explicitly model sequential 
+
+dependencies. The transformer repres ents a high -complexity architecture with attention -based sequence 
+
+modelin g.
+
+2.3.2 Physics -based c onstitutive models 
+
+In addition, a physics -based constitutive model which purely rel ies on predefined physic al laws and material 
+
+parameters is included to assess the necessity of incorporating ML algorithm . In each fold of the polymer 
+
+datasets, five material parameters are fixed and shared across all test samples. These fixed parameters are 
+
+computed as the mean value of the corresponding values fitted by the training samples based on the 
+
+nonlinear least squares . Specifically,  𝐸 ̅ is sed in he Hooke’s law or the elastic region,  𝜀 ̅𝑦 , 𝜎 ̅𝑦 , 𝑎 ̅ , and  𝑏 ̅
+
+are used in the Voce hardening law . Therefore, the physics -based constitutive model for the polymer 
+
+samples is defined as: 
+
+𝜎 𝑝  
+
+> 𝑡
+
+= 𝐸 ̅ ∗ 𝜀 𝑡 , 𝜀 < 𝜀 ̅𝑦 
+
+𝜎 𝑝  
+
+> 𝑡
+
+= 𝜎 ̅𝑦 + 𝑎 ̅ (1 − 𝑒 −𝑏 ̅ (
+
+> ε𝑡 −𝜀 ̅𝑦 )
+
+), 𝜀 ≥ 𝜀 ̅𝑦 
+
+(11)
+
+Similarly for each fold of the metal datasets, five material parameters are fixed and shared across all test 
+
+samples. These fixed parameters are computed as the mean value of the corresponding values fitted by the 
+
+training samples based on the nonlinear least squares. Specifically,  𝐸 ̅ is sed in he Hooke’s law or he 
+
+elastic region,  𝜀 ̅𝑦 , 𝜎 ̅𝑦 , 𝐾 ̅ , and  𝑛 ̅ are used in the Hollomon's law . Therefore, the physics -based constitutive 
+
+model for the metal samples is defined as: 
+
+𝜎 𝑝  
+
+> 𝑡
+
+= 𝐸 ̅ ∗ 𝜀 𝑡 , 𝜀 < 𝜀 ̅𝑦 
+
+𝜎 𝑝  
+
+> 𝑡
+
+= 𝜎 ̅𝑦 + 𝐾 ̅ (𝜀 − 𝜀 ̅𝑦 )𝑛 ̅ , 𝜀 ≥ 𝜀 ̅𝑦 
+
+(12)
+
+Several error metrics, including MAPE and coefficient of determination (R²), are used to evaluate the 
+
+performance of the model s. These error metrics are defined as follows :8
+
+𝑀𝐴𝑃𝐸 (%) =
+
+∑ |𝑦 𝑖 − 𝑦 ̂𝑖 |
+
+𝑦 𝑖 
+
+> 𝑛
+> 𝑖 =1
+
+𝑛 × 1
+
+(13)
+
+𝑅 2 = 1 − ∑ (𝑦 𝑖 − 𝑦 ̂𝑖 )2𝑛 
+
+> 𝑖 =1
+
+∑ (𝑦 𝑖 − 𝑦 ̅𝑖 )2𝑛 
+
+> 𝑖 =1
+
+(14 )
+
+where n is the number of values , 𝑦 𝑖  is the actual value,  𝑦 ̂𝑖  is the predicted value,  𝑦 ̅𝑖  is the mean of actual 
+
+value. 
+
+To quantify the uncertainty of the reported mean values, we further compute the 95% confidence interval 
+
+(CI) for each metric. The 95% CI is calculated as: 
+
+𝐶𝐼 = 𝑥 ̅ ± 𝑡 ∗( 𝑠 
+
+√𝑛 ) (15 )
+
+where  𝑥 ̅ and  𝑠  is the mean value and standard de viation of a metric , 𝑡 ∗ is the critical value from the t-table 
+
+that depends on the degrees if freedom. 
+
+2.4 Experimental design and data description 
+
+The Nylon and CF -ABS samples were fabricated via an FFF -based Ultimaker S3 printer (Ultimaker, 
+
+Netherlands) with a 250 μm nozzle diameter . The diameters of the Nylon (Ultimaker, Netherlands) and CF -
+
+ABS (Push Plastic, USA) filaments are 2.85 mm diameter. All polymer samples were fabricated in 
+
+accordance with ASTM D638 type V [46] . Uniaxial tensile tests were conducted on a universal test frame 
+
+(AGS -X Series, Shimadzu, Japan) to characterize the stress -strain curves of the samples . The load capacity 
+
+of the test frame was 10 kN. The test speed and sampling frequency were 2 mm/min and 10 Hz, respectively. 
+
+A full factorial design of experiments (DOE) was developed to collect experimental data by varying critical 
+
+process parameters. Table 2 and Table A.1 show the DOE for fabricating the Nylon and CF -ABS samples. 
+
+Each material involved two process parameters, and each paramete r was set at five numerical levels, 
+
+resulting in a total of 25 samples per polymer dataset. 
+
+Table 2. Experimental design for the polymer and metal samples .
+
+Material  Parameter  Number of samples  Standard 
+
+Polymer 
+
+Nylon  Print speed (mm/s )
+
+Print temperature ( ℃) 25 
+
+ASTM D638 
+
+CF -ABS  Print speed (mm/s )
+
+Print temperature ( ℃) 25 
+
+Metal 
+
+AlSi10Mg  Laser power (W) 
+
+Scanning speed (mm/s)  28 
+
+ASTM E8/E8M 
+
+Ti6Al4V  Laser power (W) 
+
+Scanning speed (mm/s)  42 
+
+The AlSi10Mg dataset was published by the Pennsylvania State University [47] . All the samples were 
+
+fabricated with a 3D Systems ProX DMP 320 L -PBF system machine (3D System, Inc, United States) using 
+
+gas atomized LaserForm AlSi10Mg (A) metallic powder (3D System, Inc, United States) in accordance 
+
+with ASTM E8/E8M [48] . Table 2 and Table B.1 show the DOE for fabricating the AlSi10Mg samples. In 
+
+total, 28 samples were fabricated with varying laser power s and scanning speed s. The Ti6Ai4V dataset was 
+
+also published by the Pennsylvania State University [49] , all samples were fabricated accordance with the 
+
+same ASTM standard and L -PBF system using LaserForm Ti Gr23(A) Ti -6Al -4V powder (3D Systems, 
+
+Inc, United States). Table 2 and Table B. 1 show the DOE of Ti6Al4V samples. In total, 42 samples were 
+
+fabricated with varying laser power s and scanning speed s. After fabrication, uniaxial tensile tests were 
+
+performed for the metal samples by an electromechanical load frame (Criterion Model 45, MTS Systems, 
+
+Inc., United States) with maximum load of 10 kN and a strain rate of 3 × 10 -4/s. 9
+
+Table 3 provides the divisions of the training and test datasets for 5 -fold cross validation. The use of 5 -fold 
+
+cross -validation balances computational efficiency and statistical reliability. By cyclically rotating the 
+
+training and test datasets, cross validation minimizes the potential bias that could arise from a single 
+
+train/test split and provides a more comprehensive evaluation of model stability and performance across 
+
+different subsets of data. Specifically, for each material, 20% of the total samples are selected as the training 
+
+dataset, while the remaining 80% are the test dataset in each fold. Therefore, every sample is used once for 
+
+training and four times for testing across the five folds, providing a robust assessment of model 
+
+generalization. 
+
+Table 3. Divisions of the training and test dataset s for each fold in 5-fold cross validation .
+
+Material  Training dataset  Test dataset 
+
+Polymer 
+
+Nylon  20% of the dataset :
+
+5 samples 
+
+Remaining 80% of the dataset: 
+
+20 samples 
+
+CF -ABS  20% of the dataset :
+
+5 samples 
+
+Remaining 80% of the dataset: 
+
+20 samples 
+
+Metal 
+
+AlSi10Mg  20% of the dataset :
+
+5 samples 
+
+Remaining 80% of the dataset: 
+
+23 samples 
+
+Ti6Al4V  20% of the dataset :
+
+8 samples 
+
+Remaining 80% of the dataset: 
+
+34 samples 
+
+3. Results 
+
+3.1 Mechanical behaviors of additively manufactured polymer s and metal s
+
+Fig. 4 shows the stress -strain curves of samples fabricated by two polymers (i.e., Nylon and CF -ABS) and 
+
+two metals (i.e., AlSi10Mg and Ti6Al4V) with varying process parameters. To better distinguish 
+
+mechanical behaviors of each material , he corres onding dis ri ions o Yo ng’s mod l s and l ima e 
+
+tensile strength (UTS) are also included in Fig. 4, highlight ing differences in magnitude and variability 
+
+within the same material .
+
+In general, t hese four materials exhibit distinct mechanical behaviors, including yield strain, yield stress, 
+
+stiffness, strength, and ductility. For the polymers, the CF -ABS samples exhibit higher stiffness and 
+
+strength but lower ductility than the Nylon samples , primarily due to the reinforcing effect of carbon fibers, 
+
+which restricts chain mobility and enhances load transfer. In contrast, the Nylon samples demonstrate 
+
+oscillatory softening after yielding and longest plastic region among four materials. F or the metals, the 
+
+Ti6Al4V samples show signi ican l higher ield s ress and o ng’s mod l s com ared wi h the AlSi10Mg 
+
+samples , consistent with its  𝛼 − 𝛽  titanium alloy microstructure that offers superior load -bearing capability, 
+
+whereas the AlSi10Mg samples exhibit lower strength ductility due to its relatively brittle  𝐴𝑙 − 𝑆𝑖  phase. 
+
+When comparing the metal samples with the polymer samples , the metal samples exhibit stress levels in an 
+
+order of magnitude higher and much steeper initial slopes than the polymer samples , indicating far greater 
+
+stiffness and strength. 10 
+
+Fig. 4. Stress -strain curves , the distributions of Yo ng’s mod l s and UTS of (a) Nylon, (b) CF -ABS, (c) 
+
+AlSi10g, and (d) Ti6Al4V samples .
+
+3.2 Predictive performance for additively manufactured polymer samples 
+
+Table 4. MAPEs between predicted and actual stress -strain curves of the polymer samples. 
+
+Nylon 
+
+Elastic region  Plastic region  Whole curve 
+
+Non -segmental predictive model  - - 13.42% 
+
+Segment al predictive model without PIML 
+
+architecture  19.75 % 12.01 % 12.42 %
+
+Segment al predictive model with 
+
+loss -based PIML architecture 
+
+18.27 %
+
+Average  𝜆 𝑝 ℎ𝑦𝑠 
+
+= 0.9284 
+
+5.86 %
+
+Average  𝜆 𝑝 ℎ𝑦𝑠 
+
+= 0.9978 
+
+6.53 %
+
+Segment al predictive model with 
+
+activation -based PIML architecture  18.52 % 4.87 % 5.52 %
+
+CF -ABS 
+
+Elastic region  Plastic region  Whole curve 
+
+Non -segmental predictive model  - - 23.90 %
+
+Segment al predictive model without PIML 
+
+architecture 
+
+23.41 % 12.14 % 15.36 %
+
+Segment al predictive model with 
+
+loss -based PIML architecture 
+
+13.69 %
+
+Average  𝜆 𝑝 ℎ𝑦𝑠 
+
+= 0.9881 
+
+7.57% 
+
+Average  𝜆 𝑝 ℎ𝑦𝑠 
+
+= 0.9912 
+
+9.28 %
+
+Segment al predictive model with 
+
+activation -based PIML architecture  7.33%  8.59 % 8.25% 
+
+Table 4 shows a comparison of the MAPEs of different models between predicted and actual stress -strain 
+
+curves of additively manufactured polymer samples (i.e., the Nylon and CF -ABS samples ). To highlight 
+
+the advantage of integrating segmentation and physics , two PIML architecture are compared with two a
+
+c d
+
+> Yo ng  s
+> mod l s  a
+> Ul ima e ensile
+> s reng h  a
+> Yo ng  s
+> mod l s  a
+> Ul ima e ensile
+> s reng h  a
+> Yo ng  s
+> mod l s  a
+> Ul ima e ensile
+> s reng h  a
+> Yo ng  s
+> mod l s  a
+> Ul ima e ensile
+> s reng h  a
+
+11 
+
+LSTM -based ML models , including the non -segmental predictive model and the se gmental predictive 
+
+model without PIML . The non -segmental predictive model treated the stress -strain curve as a single, 
+
+continuous curve without any segmentation. The segmental predictive model without PIML adopted the 
+
+same segmentation strategy, but without embedding any physic al law . Except for the MAPEs, average 
+
+𝜆 𝑝 ℎ𝑦𝑠  across all folds is included for the segmental predictive model with loss -based PIML. Since e ach 
+
+average  𝜆 𝑝 ℎ𝑦𝑠  is close to 1, the auxiliary loss  𝐿 auxiliary  successfully complete s it s role. For both of the 
+
+polymer samples , the segmental predictive model with PIML outperform s the non -segmental predictive 
+
+model and the segmental predictive model without PIML . Overall , the activation -based PIML model 
+
+achieves the best predictive performance with an average MAPE of 5.52% for the Nylon samples and 8.25% 
+
+for the CF -ABS samples, respectively . However, an opposite trend is observed in the elastic region of the 
+
+Nylon samples and the plastic region of the CF -ABS samples , where the loss -based PIML architecture 
+
+slightly outperforms the activation -based PIML architecture . The reason is the elastic region s of the Nylon 
+
+samples exhibit a less distinct linear elastic behavior, enforcing the Hooke’s law hro gh a hard constraint 
+
+(i.e., activation function ) limit s the flexibility of the model . In contrast , with a soft constraint (i.e., loss 
+
+fu nc tion) , the model can better accommodate the nonlinearity in the elastic regions of the Nylon samples .
+
+Fig. 5. Actual versus predicted stress -strain curves of additively manufactured polymer samples using 
+
+different models. The s egment al predictive model with activation -based PIML architecture outperforms the c al                
+
+> Non segmen al
+> redic ion model
+> egmen al
+> redic ion model
+> wi ho L
+> archi ec re
+> egmen al redic ion
+> model wi h
+> loss ased L
+> archi ec re
+> egmen al redic ion
+> model wi h
+> ac i a ion ased L
+> archi ec re
+> Fold 4
+> am le 4
+> Fold
+> am le 0
+
+a
+
+c d
+
+> Fold
+> am le
+> Fold
+> am le
+
+12 
+
+other models. Nylon: (a) sample 14 in Fold 4 and ( b) sample 10 in Fold 5 . CF -ABS: (a) sample 1 in Fold 1 
+
+and (b) sample 25 in Fold 2. 
+
+Fig. 5 shows the actual versus predicted stress -strain curves of additively manufactured polymer samples 
+
+by different models (i.e., Fig s. 5a and 5b for the Nylon samples, Fig s. 5c and 5d for the CF -ABS samples). 
+
+Overall, compared with the actual curves (red lines), the predictions from the non -segmental predictive 
+
+models (purple lines) and the segmental predictive models without PIML architecture (green lines) show 
+
+noticeable deviations in both elastic and plastic regions of the polymer samples . In contrast, the predicted 
+
+curves by two PIML archit ecture s closely follow the actual ones . The activation -based PIML architecture s
+
+(black lines) achieve the best predictive performance and exhibit the smoothest transitions between elastic 
+
+and plastic regions. Specifically, for Nylon sample 14 in Fold 4 (Fig. 5a), the predicted curve by the non -
+
+segmental predictive model shows an unrealistic abrupt slope change near yield point and large deviations 
+
+in the plastic region. Although all other models perform reasonably well in the elastic region, only the 
+
+segmen tal predictive model with activation -based PIML architecture yields a curve that remains highly in 
+
+agreement with the actual curve in the plastic region. Similarly, for Nylon sample 10 in Fold 5 (Fig. 5b), 
+
+the predicted curve by the segmental predictive model with activation -based PIML architecture consistently 
+
+follow the actual curve, especially for the yield point; the other models all overestimate the yield stress. For 
+
+CF -ABS sample 1 in Fold 1 (Fig. 5c) , the non -segmental predictive model performs poorly at the beginning 
+
+of the elastic region, while the segmental model without PIML architecture shows noticeable deviation in 
+
+the plastic region . The segmental predictive model with loss -based PIM L architecture underestimates the 
+
+UTS , whereas the segmental predictive model with activation -based PIML architecture provides the most 
+
+accurate prediction across the entire stress -strain curve. Similar trends can also be observed in CF -ABS 
+
+sample 25 in Fold 2 (Fig. 5d). 
+
+Table 5. MAPEs between predicted and actual Yo ng’s mod l s and UTS of polymer samples. 
+
+Nylon 
+
+Young ’s modulus  UTS 
+
+Non -segmental predictive model  38.98 % 7.10 %
+
+Segment al predictive model without PIML 
+
+architecture  34.68 % 17.79 %
+
+Segment al predictive model with 
+
+loss -based PIML architecture  23.48 % 5.69 %
+
+Segment al predictive model with 
+
+activation -based PIML architecture  20.54%  3.81% 
+
+CF -ABS 
+
+Young ’s modulus  UTS 
+
+Non -segmental predictive model  18.54 % 8.32 %
+
+Segment al predictive model without PIML 
+
+architecture  9.33 % 6.90 %
+
+Segment al predictive model with 
+
+loss -based PIML architecture  5.23 % 5.19% 
+
+Segment al predictive model with 
+
+activation -based PIML architecture  4.41%  6.02 %
+
+In addition, the MAPEs of two key mechanical properties , which are Yo ng’s mod l s and UTS , are also 
+
+reported to quantitatively demonstrate the improved physical consistency of two PIML architecture s. As 
+
+shown in Table 5, for the Nylon samples , the segment al predictive model with activation -based PIML 
+
+architecture achieve s the lowest MAPE o Yo ng’s mod l s and UTS of 20.54% and 3.81%, respectively. 
+
+For the CF -ABS samples , the segment al predictive model with activation -based PIML architecture achieve s13 
+
+the lowest MAPE of 4.41% for predicting Yo ng’s mod l s , while the segment al predictive model with 
+
+loss -based PIML architecture achieves the lowest MAPE of 5.19 % for predicting UTS .
+
+Fig. 6 illustrates the training evolution of different loss components for the loss -based and activation -based 
+
+PIML architecture s within the plastic region of the Nylon dataset in Fold 1 . It can be seen that as training 
+
+progresses, all the loss es reach relatively low levels at the 10th training epoch , indicating stable convergence 
+
+of two PIML architecture s. The auxiliary loss (Fig. 6c) is designed to constrain the learnable physics 
+
+weight ing coefficient  𝜆 𝑝 ℎ𝑦𝑠𝑖𝑐𝑠  to remain close to 1 (Fig. 6d), ensuring that the contributions of the data -
+
+driven and physics -informed terms are balanced during training. Therefore, after 5 training epochs , the 
+
+auxiliary loss is almost equal to 0, ensuring that it no longer interferes with the training process .
+
+Fig. 6. Training evolution of (a) data -driven, (b) physics, and (c) auxiliary losses as well as (d) the learnable 
+
+physics weight ing coefficient  𝜆 𝑝 ℎ𝑦𝑠𝑖𝑐𝑠  for the loss -based PIML architecture within the plastic region of the 
+
+Nylon dataset in Fold 1 . Training evolution of (e) physics loss for the activation -based PIML architecture 
+
+within the plastic region of the Nylon dataset in Fold 1. 
+
+3.3 Predictive performance for additively manufactured metal samples 
+
+Table 6. MAPEs between predicted and actual stress -strain curves of metal samples. 
+
+AlSi10Mg 
+
+Elastic region  Plastic region  Whole curve 
+
+Non -segmental predictive model  - - 26.09 %
+
+Segment al predictive model without PIML  28.99 % 23.10 % 25.76 %
+
+Segment al predictive model with 
+
+loss -based PIML 
+
+20.90 %
+
+Average  𝜆 𝑝 ℎ𝑦𝑠 
+
+= 0.9912 
+
+17.04 %
+
+Average  𝜆 𝑝 ℎ𝑦𝑠 
+
+= 0.9987 
+
+17.03 %
+
+Segment al predictive model with 
+
+activation -based PIML  18.55%  16.84%  16.51% 
+
+Ti6Al4V 
+
+Elastic region  Plastic region  Whole curve 
+
+Non -segmental predictive model  - - 17.93 %
+
+Segment al predictive model without PIML  23.07 % 6.12 % 15.28 %
+
+Segment al predictive model with 
+
+loss -based PIML 
+
+16.39 %
+
+Average  𝜆 𝑝 ℎ𝑦𝑠 
+
+= 0.9996 
+
+5.61 %
+
+Average  𝜆 𝑝 ℎ𝑦𝑠 
+
+= 0.993 9
+
+11.63 %
+
+Segment al predictive model with 
+
+activation -based PIML  14.82%  5.19%  10.58% 
+
+Table 6 shows a comparison of the MAPEs of different models between predicted and actual stress -strain 
+
+curves of additively manufactured metal samples (i.e., the AlSi10Mg and Ti6Al4V samples ). Except for Da a  dri en loss    
+
+> h sics  loss
+> iliar  loss
+> h sics  loss
+> acde
+
+14 
+
+the MAPEs, average  𝜆 𝑝 ℎ𝑦𝑠  across all folds are included for the segmental predictive model with loss -based 
+
+PIML architecture . Since each average  𝜆 𝑝 ℎ𝑦𝑠  is close to 1, the auxiliary loss  𝐿 auxiliary  successfully 
+
+completes its role. Across both metal sample s, the segmental predictive model with activation -based PIML 
+
+architecture consistently achieve s the best predictive performance in the elastic regio n, plastic region , and 
+
+whole stress -strain curve . This trend is expected since metallic materials generally follow well -defined 
+
+physic al laws because of the consistent dislocation motion . Therefore, the hard constraint embedded in the 
+
+activation function can help the model learn the physics more effectively . Specifically, for the AlSi10Mg 
+
+samples , the segmental predictive model with activation -based PIML architecture achieve s the best 
+
+predictive performance with an average MAPE of 18.55%, 16.84%, and 16.51% for the elastic region ,
+
+plastic region , and whole stress -strain curve, respectively, followed by the segmental predictive model with 
+
+loss -based PIML architecture (i.e., 20.90%, 17.04%, 17.03%) , the segmental predictive model without 
+
+PIML architecture (i.e., 28.99%, 23.10%, 25.76%) , and the worst non -segmental predictive model with the 
+
+highest MAPE of 26.09% for the whole stress -strain curve . Similarly, for the Ti6Al4V samples , the 
+
+segmental predictive model with activation -based PIML architecture yield s the lowest MAPE of 14.82% 
+
+for the elastic region, 5.19% for the plastic region, and 10.58% for the whole stress -strain curve .
+
+Fig. 7 shows the actual versus predicted stress -strain curves of additively manufactured metal samples (i.e., 
+
+Fig s. 7a and 7b for the AlSi10Mg samples, Fig s. 7c and 7d for the Ti6Al4V samples) by different models. 
+
+Overall, compared with the actual curves (red lines), the predictions from the non -segmental predictive 
+
+model (purple lines) and the segmental predictive model without PIML architecture (green lines) show 
+
+noticeable deviations in both elastic and plastic regions. In contrast, the predicted curves by two PIML 
+
+architecture s closely follow the actual ones . T he segmental predictive model with activation -based PIML 
+
+architecture (black lines) achieve s the best predictive performance and exhibits the smoothest transitions 
+
+between elastic and plastic regions. Specifically, for the AlSi10Mg sample 1 6 in Fold 3 (Fig. 7a), the non -
+
+segmental predictive model shows the worst predictive performance in the plastic region among all models ,
+
+while the segmental predictive model without PIML architecture exhibits the worst predictive performance 
+
+in the elastic region among all models . The other two PIML architecture s both perform well in the elastic 
+
+region, while the predic tions by the activation -based PIML architecture show s better agreement with the 
+
+actual stress -strain curve in the plastic region . For the AlSi10Mg sample 1 4 in Fold 4 (Fig. 7b), in the plastic 
+
+region, both the predicted stress -strain curves by the non -segmental predictive model and segmental 
+
+predictive model with loss -based PIML architecture exhibit unrealistic stress drops near the end of the curve, 
+
+indicating unstable predictions without physical consistency . In contrast, the segmental predictive model 
+
+with activation -based PIML architecture provides the most accurate prediction across the whole stress -
+
+strain curve . For the Ti6Al4V sample 19 in Fold 2 (Fig. 7c), the differences in predictive performance 
+
+among different models are primarily observed in the plastic region. The segmental predictive model 
+
+without PIML architecture shows the largest deviation, followed by the non -segmental predictive model .
+
+The segmental predictive model with activation -based PIML architecture achieves the best predictive 
+
+performance in the plastic region . For the Ti6Al4V sample 29 in Fold 5 (Fig. 7d), more obvious differences 
+
+appear across models in both the elastic and plastic regions. The non -segmental predictive model 
+
+significantly underestimates stress throughout the stress -strain curve and predicts an unrealistic plateau at 
+
+the beginning of the elastic region . The segmental predictive model with loss -based PIML architecture 
+
+improves predictive performance but still underestimates the stress es in the plastic region . In contrast, the 
+
+predicted curve by the segmental predictive model with activation -based PIML architecture closely follows 
+
+the actual stress -strain curve, accurately capturing both the yield point and the subsequent hardening 
+
+behavior in the elastic region .15 
+
+Fig. 7. Actual versus predicted stress -strain curves of additively manufactured metal samples using 
+
+different models. The s egment al predictive model with activation -based PIML architecture outperforms 
+
+the other models. AlSi10Mg : (a) sample 16 in Fold 3 and (b) sample 14 in Fold 4. Ti6Al4 V: (a) sample 
+
+19 in Fold 2 and (b) sample 2 9 in Fold 5.
+
+In addition, the MAPEs of two key mechanical properties , which are Yo ng’s mod l s and UTS , are also 
+
+reported to quantitatively demonstrate the improved physical consistency of two PIML architecture s. As 
+
+shown in Table 7, for the AlSi10Mg samples , the segment al predictive model with loss -based PIML 
+
+architecture both achieve s the lowest MAPE o Yo ng’s mod l s and UTS of 11.24 % and 16.89 %, 
+
+respectively. For the Ti6Al4V samples , the segment al predictive model with activation -based PIML 
+
+architecture both achieve s the lowest MAPE o Yo ng’s mod l s and UTS of 5.65 % and 4.98 %, 
+
+respectively. Fold   
+
+> am le
+> Fold 4
+> am le 4
+
+a
+
+c d               
+
+> Fold
+> am le 9
+> Fold
+> am le 9
+> cal
+> Non segmen al
+> redic ion model
+> egmen al
+> redic ion model
+> wi ho L
+> archi ec re
+> egmen al redic ion
+> model wi h
+> loss ased L
+> archi ec re
+> egmen al redic ion
+> model wi h
+> ac i a ion ased L
+> archi ec re
+
+16 
+
+Table 7. MAPEs between predicted and actual Yo ng’s mod l s and UTS of the metal samples. 
+
+AlSi10Mg 
+
+Young ’s modulus  Ultimate strength 
+
+Non -segmental predictive model  21.64 % 19.59 %
+
+Segment al predictive model without PIML  25.47 % 24.16 %
+
+Segment al predictive model with 
+
+loss -based PIML  11.24%  16.89% 
+
+Segment al predictive model with 
+
+activation -based PIML  16.44 % 18.53 %
+
+Ti 6Al4V 
+
+Young ’s modulus  Ultimate strength 
+
+Non -segmental predictive model  12.27 % 8.77 %
+
+Segment al predictive model without PIML  10.78 % 5.59 %
+
+Segment al predictive model with 
+
+loss -based PIML  6.81 % 5.39 %
+
+Segment al predictive model with 
+
+activation -based PIML  5.65%  4.98% 
+
+Fig. 8 illustrates the training evolution of different loss components for the loss -based and activation -based 
+
+PIML architecture s within the elastic region of the AlSi10Mg dataset in Fold 1. It can be seen that as 
+
+training progresses, all the loss es reach relatively low levels at the 10th training epoch , indicating stable 
+
+convergence of the two PIML architecture s. The auxiliary loss (Fi g. 8c) is designed to constrain the 
+
+learnable physics weight ing coefficient  𝜆 𝑝 ℎ𝑦𝑠𝑖𝑐𝑠  to remain close to 1 (Fig. 8d), ensuring that the 
+
+contributions of the data -driven and physics -informed terms are balanced during training. Therefore, after 
+
+4 training epochs , the auxiliary loss is almost equal to 0, ensuring that it no longer interferes with the training 
+
+process .
+
+Fig. 8. Training evolution of (a) data -driven, (b) physics, and (c) auxiliary losses as well as (d) the learnable 
+
+physics weight  𝜆 𝑝 ℎ𝑦𝑠𝑖𝑐𝑠  for the loss -based PIML architecture within the elastic region of AlSi10Mg dataset 
+
+in Fold 1. Training evolution of (e) physics loss for the activation -based PIML architecture within the elastic 
+
+region of AlSi10Mg dataset in Fold 1. 
+
+3.4 Average p redi ctive performance comparison 
+
+Table 8 summarizes the average predictive performance of different models across four datasets ( i.e., Nylon, 
+
+CF -ABS, AlSi10Mg, and Ti6Al4V datasets ), with 95% CI reported to quantify statistical uncertainty. 
+
+Compared with three additional ML model s and a physics -based constitutive model , both PIML 
+
+architecture s demonstrate substantially improved predictive performance .
+
+Among the three additional ML models , the ridge polynomial regression model exhibits the weakest 
+
+predictive performance with MAPE of 40.56 ±2.96% and R² of 0.33 ±0.20, indicating this simple regression 
+
+model has limited capacity to capture the nonlinear stress -strain behaviors . Although ANN and transformer h sics  loss    
+
+> iliar  loss
+> h sics  loss
+> acde
+> Da a  dri en loss
+
+17 
+
+improve predictive performance , their errors remain significantly higher than those of the PIML 
+
+architecture s. Although the physics -based constitutive model achieves relatively competitive MAPE of 
+
+18.33 ±0.82%, the R² of 0.34 ±0.06 indicates that the physics -based constitutive model can only capture the 
+
+general trend of the stress -strain curve . The limited flexibility of the constitutive mode restricts its ability 
+
+to model complex deviations from idealized deformation behavi or . In contrast, the segment al predictive 
+
+model s with loss -based or activation -based architecture s effectively balance physical constraints and data 
+
+adaptability. The segment al predictive model with loss -based PIML architecture achieves an average 
+
+MAPE of 11.38 ±0.90% and an average R² of 0.80 ±0.06), while the activation -based PIML architecture 
+
+further improves predictive performance to the lowest MAPE of 10.46 ±0.81% with the highest R² of 
+
+0.82 ±0.05. The low 95% CIs indicate stable predictive performance across folds and materials. 
+
+Table 8. Average predictive performance of PIML , ML, and physics -based constitutive models .
+
+MAPE ±95% CI  R2±95% CI 
+
+Physics -based constitutive model  18.33 ±0.82%  0. 34 ±0.06 
+
+Ridge polynomial regression model  40.56 ±2.96%  0.33 ±0.20 
+
+ANN  18.86 ±1.48 % 0.73 ±0.05 
+
+Transformer  22.33 ±1.79 % 0.70 ±0.07 
+
+Segment al predictive model with loss -based PIML 
+
+architecture  11.38 ±0.90 % 0.80 ±0.06 
+
+Segment al predictive model with activation -based PIML 
+
+architecture  10.46 ±0.81%  0.82 ±0.05 
+
+In general, both loss -based and activation -based PIML architectur es effectively integrate physical laws into 
+
+the ML mode l, enhancing the predictive performance and physical consistency of stress -strain behaviors 
+
+compared with ML model . However, their mechanisms and advantages differ. The loss -based PIML 
+
+architecture introduces physic al laws as a soft constraint through an additional loss term, offering greater 
+
+flexibility and stability when data noise or slight nonlinearity exists. In contrast, the activation -based PIML 
+
+architecture embeds the physical laws directly into the network structure, enforcing a hard constraint that 
+
+ensures strict physical consistency. This design generally yields higher predict ive performance and 
+
+smoother predictions, particularly for data that are closely following well -defined physic al laws. Therefore, 
+
+the activation -based PIML architecture demonstrates stronger generalization and physical fidelity, while 
+
+the loss -based PIML architecture remains advantageous for data with complex nonlinear behavior. 
+
+4. Conclusions 
+
+In t his study , a material -specific and region -specific PIML framework was developed to predict the stress -
+
+strain curves of additively manufactured polymers and metals . Th e framework was demonstrated on two 
+
+additively manufactured polymer datasets (i.e., Nylon and CF -ABS) and two additively manufactured metal 
+
+datasets (i.e., AlSi10Mg and Ti6Al4V ). A ridge polynomial regression model was first used to predict the 
+
+yield point based on the process parameters so that each stress -strain curve was segmented into an elastic 
+
+region and a plastic region. For the elastic region, Hooke’s law was leveraged by the PIML framework . For 
+
+he las ic region, he Voce hardening law and Hollomon’s law were leveraged by the PIML framework 
+
+for the polymer and metal samples , respectively . Specifically, these physical laws were embedded in either 
+
+an additional physics loss function or an activation function of the output layer . Two PIML architectur es
+
+were further compared with two LSTM -based ML model s (i.e., the non -segmental predictive model and 
+
+the segmental predictive model without PIML architectur e), three additional ML models ( i.e., ridge 
+
+polynomial regression model, ANN, and transformer) and a physics -based constitutive model .
+
+Experimental results showed that two PIML architectur es consistently outperformed all the other models 
+
+on two additively manufactured polymer datasets and two additively manufactured metal datasets .
+
+Furthermore, the segmental predictive model with activation -based PIML architectur e achieves the best 
+
+predictive performance with the lowest MAPE of 10.46 ±0.81% and the highest R² of 0.82 ±0.05 across 18 
+
+four datasets . In future work, additional physic al laws designed for other critical regions will be 
+
+incorporated into the PIML fra mework .
+
+Acknowledgments 
+
+This research is sponsored by the Defense Advanced Research Projects Agency. The content of the 
+
+information does not necessarily reflect the position or the policy of the Government. No official 
+
+endorsement should be inferred. We would like to thank Dr. Qi ngyang Liu for collecting the raw data for 
+
+the polymer datasets. 
+
+Data Availability Statement 
+
+The dataset generated and supporting the findings of this article are available upon reasonable request from 
+
+the corresponding author. 
+
+App endix A. DOE of polymer samples 
+
+Table A.1 DOE for fabricating the Nylon and CF -ABS samples via FFF .
+
+Nylon  CF -ABS 
+
+Sample 
+
+ID 
+
+Print 
+
+temperature 
+
+(℃)
+
+Print 
+
+speed 
+
+(mm/s) 
+
+Sample 
+
+ID 
+
+Print 
+
+temperature 
+
+(℃)
+
+Print 
+
+speed 
+
+(mm/s) 
+
+1 220  10  1 200  10 
+
+2 220  20  2 200  30 
+
+3 220  30  3 200  50 
+
+4 220  40  4 200  70 
+
+5 220  50  5 200  90 
+
+6 230  10  6 220  10 
+
+7 230  20  7 220  30 
+
+8 230  30  8 220  50 
+
+9 230  40  9 220  70 
+
+10  230  50  10  220  90 
+
+11  240  10  11  240  10 
+
+12  240  20  12  240  30 
+
+13  240  30  13  240  50 
+
+14  240  40  14  240  70 
+
+15  240  50  15  240  90 
+
+16  250  10  16  260  10 
+
+17  250  20  17  260  30 
+
+18  250  30  18  260  50 
+
+19  250  40  19  260  70 
+
+20  250  50  20  260  90 
+
+21  260  10  21  280 10 
+
+22  260  20  22  280 30 
+
+23  260  30  23  280 50 
+
+24  260  40  24  280 70 
+
+25  260  50  25  280 90 19 
+
+App endix B. DOE of metal samples 
+
+Table B.1 DOE for fabricating the AlSi10Mg and Ti6Al4V samples via L-PBF .
+
+AlSi10Mg  Ti6Al4V 
+
+Sample ID  Laser 
+
+power (W) 
+
+Scanning speed 
+
+(mm/s) 
+
+Sample ID  Laser 
+
+power (W) 
+
+Scanning speed 
+
+(mm/s) 
+
+1 60  250  1 275  800 
+
+2 160  250  2 275  760 
+
+3 160  800  3 275  720 
+
+4 260  250  4 275  680 
+
+5 260  800  5 275  640 
+
+6 260  1350  6 275  600 
+
+7 360  250  7 275  840 
+
+8 360  800  8 275  880 
+
+9 360  1350  9 275  920 
+
+10  360  1900  10  275  960 
+
+11  460  250  11  275  1000 
+
+12  460  800  12  175  800 
+
+13  460  1350  13  195  800 
+
+14  460  1900  14  215  800 
+
+15  460  2450  15  235  800 
+
+16  110  250  16  255  800 
+
+17  110  500  17  295  800 
+
+18  160  500  18  315  800 
+
+19  260  500  19  335  800 
+
+20  360  500  20  355  800 
+
+21  460  500  21  375  800 
+
+22  210  250  22  135  400 
+
+23  210  500  23  205  600 
+
+24  210  800  24  345  1000 
+
+25  210  1100  25  415  1200 
+
+26  260  1100  26  485  1400 
+
+27  360  1100  27  500  1480 
+
+28  460  1100  28  155  400 
+
+29  235  600 
+
+30  395  1000 
+
+31  475  1200 
+
+32  500  1290 
+
+33  115  400 
+
+34  175  600 
+
+35  295  1000 
+
+36  355  1200 
+
+37  475  1600 
+
+38  75  400 
+
+39  115  600 
+
+40  195  1000 
+
+41  235  1200 
+
+42  315  1600 20 
+
+Reference s
+
+[1] C. Druzgalski, A. Ashby, G. Guss, W. King, T.T. Roehling, M.J. Matthews, Process optimization of 
+
+complex geometries using feed forward control for laser powder bed fusion additive manufacturing, 
+
+Additive Manufacturing 34 (2020) 101169. 
+
+[2] J. López -Barroso, C.G. Flores -Hernández, A.L. Martínez -Hernández, G. Martínez -Barrera, C. Velasco -
+
+Santos, Additive Manufacturing for Complex Geometries in Polymer Composites, Advanced Composites, 
+
+Springer2023, pp. 121 -186. 
+
+[3] J. Plocher, A. Panesar, Review on design and structural optimisation in additive manufacturing: 
+
+Towards next -generation lightweight structures, Materials & Design 183 (2019) 108164. 
+
+[4] P. Vivegananthan, S. Gao, W. Ji, H. Fan, C. Han, K. Zhou, Recent Progress on 3D Printing of 
+
+Lightweight Meta l Thin ‐Walled Structures, Advanced Materials 36(49) (2024) 2402130. 
+
+[5] K.S. Prakash, T. Nancharaih, V.S. Rao, Additive manufacturing techniques in manufacturing -an 
+
+overview, Materials Today: Proceedings 5(2) (2018) 3873 -3882. 
+
+[6] Q. Liu, C. Duan, F. Richter, W. Shen, D. Wu, Interfacial behavior between thermoplastics and 
+
+thermosets fabricated by material extrusion -based multi -process additive manufacturing, Additive 
+
+Manufacturing 96 (2024) 104568. 
+
+[7] B. Blakey -Milner, P. Gradl, G. Snedden, M. Brooks, J. Pitot, E. Lopez, M. Leary, F. Berto, A. Du Plessis, 
+
+Metal additive manufacturing in aerospace: A review, Materials & Design 209 (2021) 110008. 
+
+[8] F. Lomo, M. Patel, A. Vargas -Uscategui, P. King, I. Cole, A design and optimisation framework for 
+
+cold spray additive manufacturing of lightweight aerospace structural components, Additive Manufacturing 
+
+78 (2023) 103891. 
+
+[9] X. Yin, Q. Zhang, Y. Li, D. Wu, S. Wang, Y. Fu, S. Wei, N. Li, X. Chen, X. Ding, Multi -Wavelength 
+
+Centrifugal Processing Enables 3D Printing of Functionally Graded Medical Devices: Construction and 
+
+Validation of Mechanically Tunable Orthodontic Aligner s, Additive Manufacturing (2025) 104930. 
+
+[10] M.H. Razzaq, M.U. Zaheer, H. Asghar, O.C. Aktas, M.F. Aycan, Y.K. Mishra, Additive manufacturing 
+
+for biomedical bone implants: Shaping the future of bones, Materials Science and Engineering: R: Reports 
+
+163 (2025) 100931. 
+
+[11] D.K. Pokkalla, N. Garg, M. Paramanathan, V. Kumar, M.L. Rencheck, P. Nandwana, V. Kunc, A.A. 
+
+Hassen, S. Kim, Design optimization of lightweight automotive seatback through additive manufacturing 
+
+compression overmolding of metal polymer composites, Com posite Structures 349 (2024) 118504. 
+
+[12] M.M. Garmabi, P. Shahi, J. Tjong, M. Sain, 3D printing of polyphenylene sulfide for functional 
+
+lightweight automotive component manufacturing through enhancing interlayer bonding, Additive 
+
+Manufacturing 56 (2022) 102780. 
+
+[13] S. Aabith, R. Caulfield, O. Akhlaghi, A. Papadopoulou, S. Homer -Vanniasinkam, M.K. Tiwari, 3D 
+
+direct -write printing of water soluble micromoulds for high -resolution rapid prototyping, Additive 
+
+Manufacturing 58 (2022) 103019. 
+
+[14] I. Campbell, D. Bourell, I. Gibson, Additive manufacturing: rapid prototyping comes of age, Rapid 
+
+prototyping journal 18(4) (2012) 255 -258. 
+
+[15] M. Rodríguez -Martín, R. Domingo, J. Ribeiro, Mapping and prospective of additive manufacturing in 
+
+the context of Industry 4.0 and 5.0, Rapid Prototyping Journal 30(7) (2024) 1393 -1410. 
+
+[16] F. Frölich, L. Bechtloff, B.M. Scheuring, A.L. Heuer, F. Wittemann, L. Kärger, W.V. Liebig, 
+
+Evaluation of mechanical properties characterization of additively manufactured components, Progress in 
+
+Additive Manufacturing 10(2) (2025) 1217 -1229. 
+
+[17] A.O. Adisa, A.R. Colon, D.O. Kazmer, A.M. Peterson, Interrelation ships between process parameters, 
+
+cross ‐sectional geometry, fracture behavior, and mechanical properties in material extrusion additive 
+
+manufacturing, Polymer Engineering & Science 63(11) (2023) 3906 -3918. 
+
+[18] J.M. Chacón, M.A. Caminero, E. García -Plaza, P.J. Núnez, Additive manufacturing of PLA structures 
+
+using fused deposition modelling: Effect of process parameters on mechanical properties and their optimal 
+
+selection, Materials & Design 124 (2017) 143 -15 7. 21 
+
+[19] A.H. Maamoun, Y.F. Xue, M.A. Elbestawi, S.C. Veldhuis, The effect of selective laser melting process 
+
+parameters on the microstructure and mechanical properties of Al6061 and AlSi10Mg alloys, Materials 
+
+12(1) (2018) 12. 
+
+[20] C. Duan, D. Wu, Inverse design of lattice structures with target mechanical performance via generative 
+
+adversarial networks considering the effect of process parameters, Advanced Engineering Informatics 65 
+
+(2025) 103221. 
+
+[21] U.P. Singh, A. Shukla, S. Swaminathan, G. Phanikumar, Effect of build orientations on residual stress, 
+
+microstructure, and mechanical properties of additively manufactured alloy -718 components, Journal of 
+
+Manufacturing Processes 113 (2024) 1 -15. 
+
+[22] C. Zhang, H. Ozcan, L. Xue, K.C. Atli, R. Arróyave, I. Karaman, A. Elwany, On the effect of scan 
+
+strategies on the transformation behavior and mechanical properties of additively manufactured NiTi shape 
+
+memory alloys, Journal of Manufacturing Processe s 84 (2022) 260 -271. 
+
+[23] Z. Chen, C. Han, M. Gao, S.Y. Kandukuri, K. Zhou, A review on qualification and certification for 
+
+metal additive manufacturing, Virtual and Physical Prototyping 17(2) (2022) 382 -405. 
+
+[24] M.P. Samuel, A.K. Mishra, R. Mishra, Additive manufacturing of Ti -6Al -4V aero engine parts: 
+
+qualification for reliability, Journal of Failure Analysis and Prevention 18(1) (2018) 136 -144. 
+
+[25] N. Kouraytem, X. Li, W. Tan, B. Kappes, A.D. Spear, Modeling process –structure –property 
+
+relationships in metal additive manufacturing: a review on physics -driven versus data -driven approaches, 
+
+Journal of Physics: Materials 4(3) (2021) 032002. 
+
+[26] E. Starovoitov, F.B.O. Naghiyev, Foundations of the theory of elasticity, plasticity, and viscoelasticity, 
+
+CRC Press2012. 
+
+[27] G. Kermouche, J. Loubet, J. Bergheau, Extraction of stress –strain curves of elastic –viscoplastic solids 
+
+using conical/pyramidal indentation testing with application to polymers, Mechanics of Materials 40(4 -5) 
+
+(2008) 271 -283. 
+
+[28] N.Y. Golovina, Modeling the Stress -Strain Curve of Elastic -Plastic Materials, Solid State Phenomena 
+
+316 (2021) 936 -941. 
+
+[29] Q. Liu, D. Wu, Machine learning and feature representation approaches to predict stress -strain curves 
+
+of additively manufactured metamaterials with varying structure and process parameters, Materials & 
+
+Design 241 (2024) 112932. 
+
+[30] L. Wang, J. Jiang, O. Ghita, Y. Zhu, V.I. Sucala, Knowledge -enabled stress –strain prediction in 
+
+additive manufacturing via transferable deep temporal modelling, Advanced Engineering Informatics 69 
+
+(2026) 104004. 
+
+[31] C. Duan, D. Wu, Predicting stress –strain relationships of additively manufactured materials under 
+
+compression and tension using transfer learning and Wasserstein distance -based dataset pruning, Materials 
+
+& Design (2025) 114209. 
+
+[32] J. Lizarazu, E. Harirchian, U.A. Shaik, M. Shareef, A. Antoni -Zdziobek, T. Lahmer, Application of 
+
+machine learning -based algorithms to predict the stress -strain curves of additively manufactured mild steel 
+
+out of its microstructural characteristics, R esults in engineering 20 (2023) 101587. 
+
+[33] C. Yang, Y. Kim, S. Ryu, G.X. Gu, Prediction of composite microstructure stress -strain curves using 
+
+convolutional neural networks, Materials & Design 189 (2020) 108509. 
+
+[34] C. Duan, D. Wu, An Additive Manufacturing Part Qualification Framework: Transferring Knowledge 
+
+of Stress -strain Behaviors from Additively Manufactured Polymers to Metals, arXiv preprint 
+
+arXiv:2512.08699 (2025). 
+
+[35] Y. Tian, D. Livescu, M. Chertkov, Physics -informed machine learning of the Lagrangian dynamics of 
+
+velocity gradient tensor, Physical Review Fluids 6(9) (2021) 094607. 
+
+[36] M. Kim, N. -K. Chau, S. Park, P.C. Nguyen, S.S. Baek, S. Choi, Physics -aware machine learning for 
+
+computational fluid dynamics surrogate model to estimate ventilation performance, Physics of Fluids 37(2) 
+
+(2025). 
+
+[37] Q. Zhu, Z. Lu, Y. Hu, A reality -augmented adaptive physics informed machine learning method for 
+
+efficient heat transfer prediction in laser melting, Journal of Manufacturing Processes 124 (2024) 444 -457. 22 
+
+[38] F. Jiang, M. Xia, Y. Hu, Physics -informed machine learning for accurate prediction of temperature 
+
+and melt pool dimension in metal additive manufacturing, 3D Printing and Additive Manufacturing 11(4) 
+
+(2024) e1679 -e1689. 
+
+[39] J. Leng, K. Zuo, C. Xu, X. Zhou, S. Zheng, J. Kang, Q. Liu, X. Chen, W. Shen, L. Wang, Physics -
+
+informed machine learning in intelligent manufacturing: a review, Journal of Intelligent Manufacturing 
+
+(2025) 1 -43. 
+
+[40] M. Ahmadi, D. Biswas, M. Lin, F.D. Vrionis, J. Hashemi, Y. Tang, Physics -informed machine learning 
+
+for advancing computational medical imaging: integrating data -driven approaches with fundamental 
+
+physical principles, Artificial Intelligence Review 58( 10) (2025) 1 -49. 
+
+[41] J. Rychlewski, On Hooke's law, Journal of Applied Mathematics and Mechanics 48(3) (1984) 303 -
+
+314. 
+
+[42] S. Alexandrov, A property of equations of rigid/plastic material obeying a Voce –type hardening law, 
+
+Meccanica 34(5) (1999) 349 -356. 
+
+[43] W. Sing, K. Rao, Role of strain -hardening laws in the prediction of forming limit curves, Journal of 
+
+Materials Processing Technology 63(1 -3) (1997) 105 -110. 
+
+[44] S. Hochreiter, Long Short -term Memory, Neural Computation MIT -Press (1997). 
+
+[45] S. Hochreiter, J. Schmidhuber, Long short -term memory, Neural computation 9(8) (1997) 1735 -1780. 
+
+[46] A. international, Standard test method for tensile properties of plastics, ASTM international2014. 
+
+[47] Q. Luo, N. Huang, T. Fu, J. Wang, D.L. Bartles, T.W. Simpson, A.M. Beese, New insight into the 
+
+multivariate relationships among process, structure, and properties in laser powder bed fusion AlSi10Mg, 
+
+Additive Manufacturing 77 (2023) 103804. 
+
+[48] A.I.C.E. -o.M. Testing, Standard test methods for tension testing of metallic materials, ASTM 
+
+international2021. 
+
+[49] Q. Luo, L. Yin, T.W. Simpson, A.M. Beese, Effect of processing parameters on pore structures, grain 
+
+features, and mechanical properties in Ti -6Al -4V by laser powder bed fusion, Additive Manufacturing 56 
+
+(2022) 102915.

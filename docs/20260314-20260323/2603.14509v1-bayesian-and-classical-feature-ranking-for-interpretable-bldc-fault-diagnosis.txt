@@ -1,0 +1,444 @@
+Title: Bayesian and Classical Feature Ranking for Interpretable BLDC Fault Diagnosis
+
+URL Source: https://arxiv.org/pdf/2603.14509v1
+
+Published Time: Tue, 17 Mar 2026 02:00:58 GMT
+
+Number of Pages: 6
+
+Markdown Content:
+# Bayesian and Classical Feature Ranking for Interpretable BLDC Fault Diagnosis 
+
+Waldemar Bauer 
+
+Department of Automatic Control & Robotics AGH University of Krakow 
+
+Krakow, Poland 0000-0002-8543-0995 bauer@agh.edu.pl 
+
+Jerzy Baranowski 
+
+Department of Automatic Control & Robotics AGH University of Krakow 
+
+Krakow, Poland 0000-0003-3313-581X jb@agh.edu.pl 
+
+Abstract —This paper compares Bayesian and classical feature ranking methods for interpretable fault diagnosis of brushless DC (BLDC) motors. Two Bayesian approaches, spike-and-slab and ARD logistic ranking, are evaluated against three classical baselines on a public BLDC benchmark in binary and multi-class settings using current-based, rotational-speed-based, and combined feature sets. The strongest overall results are obtained for the combined representation. In binary classification, ReliefF achieves the highest balanced accuracy of 0.923, while ARD logistic and spike-and-slab remain very close at 0.919 and 0.920 with much smaller subsets ( k = 5 ). In multiclass classification, ARD logistic performs best for the combined variant with balanced accuracy 0.914, followed closely by LASSO (0.913) and spike-and-slab (0.912). The results show that Bayesian ranking is particularly competitive for current-only and combined descrip-tors, while ReliefF remains especially effective for speed-based ranking. Because the benchmark consists of short segmented observations from a limited number of experimental conditions, the findings are interpreted primarily as benchmark-specific evidence rather than strong claims of fault generalization. 
+
+Index Terms —fault diagnosis, feature ranking, Bayesian meth-ods, BLDC motor, interpretability, classification 
+
+I. I NTRODUCTION 
+
+Feature ranking is an important component of interpretable fault diagnosis, especially when models are built from hand-crafted time- and frequency-domain descriptors extracted from electrical and mechanical signals. In such settings, compact subsets of informative features may improve predictive per-formance, reduce redundancy, and support physical inter-pretation. Classical methods such as ReliefF, mRMR, and LASSO remain standard baselines for this purpose [1]–[3], whereas Bayesian approaches provide an attractive alternative by expressing relevance through posterior uncertainty and hierarchical shrinkage rather than a single deterministic score [4]–[6]. The present study considers feature ranking for BLDC fault diagnosis on the public DUDU-BLDC benchmark [7], [8]. This benchmark is compact and consists of short segmented 
+
+Partially funded by the European Union. Views and opinion expressed are however those of the author(s) only and do not necessarily reflect those of the European Union or Europe’s Rail Joint Undertaking. Neither the European Union nor the granting authority can be held responsible for them. The project FP3-IAM4Rail is supported by the Europe’s Rail Joint Undertaking and its members. Partially Funded by AGH’s subvention for scientific research. 
+
+observations derived from a limited number of experimen-tal conditions, so segment-level evaluation may overestimate generalization. For this reason, the paper emphasizes com-parative ranking behavior, subset compactness, and stability rather than strong claims about universal fault discrimination performance. The work is also closely related to our earlier studies on the same benchmark. Previous results established the dataset itself [7], [8], reported Gaussian Naive Bayes baselines [9], and showed that Bayesian fusion of current and speed information can improve multiclass fault recognition [10]. In contrast, the present paper does not introduce a new benchmark or a new fusion architecture, but addresses an open question for this dataset: whether Bayesian feature ranking can provide more stable and interpretable subsets than widely used classical ranking methods. The main contribution of the paper is a comparative study of two Bayesian ranking methods, spike-and-slab and ARD logistic ranking, against three classical baselines, ReliefF, mRMR, and LASSO, on the DUDU-BLDC benchmark in both binary and multiclass settings. The comparison is carried out across current-only, speed-only, and combined feature groups, and evaluates predictive performance, subset compactness, and ranking stability under limited and potentially dependent observations. In this way, the paper contributes an uncertainty-aware analysis of feature relevance for BLDC diagnostics rather than a new dataset or a new classification architecture. The remainder of the paper is organized as follows. Section II briefly describes the benchmark dataset and diagnostic tasks, Section III introduces the ranking methods, Section IV presents the experimental protocol, Section V reports the results, and Section VI discusses the findings and concludes the paper. II. B ENCHMARK DATASET AND DIAGNOSTIC TASKS 
+
+A. Benchmark Dataset 
+
+The experiments are conducted on a public BLDC diag-nostic benchmark introduced in prior work and cited here through its public dataset release. In the merged data file used in this study, the benchmark contains 184 observations and four balanced diagnostic classes:                       
+
+> arXiv:2603.14509v1 [eess.SY] 15 Mar 2026 TABLE I SUMMARY OF DIAGNOSTIC TASKS AND FEATURE VARIANTS .Task / Variant Classes Samples Features Binary / Current 2184 13 Binary / Speed 2184 13 Binary / Combined 2184 26 Multiclass / Current 4184 13 Multiclass / Speed 4184 13 Multiclass / Combined 4184 26
+> •
+
+Healthy , 
+
+> •
+
+Mech_Damage , 
+
+> •
+
+Elec_Damage , 
+
+> •
+
+Mech_Elec_Damage .Each observation is represented by handcrafted descriptors derived from two signal domains:  
+
+> •
+
+current-related features,  
+
+> •
+
+rotational-speed-related features. The merged table contains 13 current features and 13 rotational-speed features, yielding 26 modeled descriptors in total. The detailed acquisition protocol and benchmark con-struction are not repeated here; instead, the original dataset publication is cited as the primary source of documentation. 
+
+B. Diagnostic Tasks 
+
+Two diagnostic formulations are considered:  
+
+> •
+
+Binary classification : Healthy versus all fault condi-tions merged into one damaged class,  
+
+> •
+
+Multiclass classification : Healthy , Mech_Damage ,
+
+Elec_Damage , and Mech_Elec_Damage .These two tasks make it possible to study ranking behavior in both simplified fault detection and more detailed fault-type discrimination scenarios. III. F EATURE RANKING METHODS 
+
+Five feature ranking methods are considered in this work: ReliefF, mRMR, LASSO, Bayesian spike-and-slab ranking, and Bayesian ARD logistic ranking. For multiclass classifi-cation, the Bayesian methods are implemented in a one-vs-rest scheme and the resulting relevance scores are aggregated across classes. 
+
+A. ReliefF 
+
+ReliefF is a distance-based feature ranking method that estimates feature relevance by comparing neighboring obser-vations from the same and different classes [1], [11]. Let wj
+
+denote the relevance weight of feature j. At each update step, the method compares a sampled observation with its nearest hits and misses, rewarding features that separate observations from different classes and penalizing features that vary within the same class. In simplified form, 
+
+wj ← wj − 1
+
+m diff( xj , hit j ) + 1
+
+m diff( xj , miss j ), (1) where m is the number of update steps and diff( ·, ·) measures discrepancy in the j-th feature. The final ranking is obtained by sorting the features accord-ing to wj in descending order. Relief-based methods remain attractive because they can capture local class structure without assuming a linear predictive model [12]. 
+
+B. mRMR 
+
+The minimum Redundancy Maximum Relevance (mRMR) method ranks features by balancing their relevance to the class label against redundancy with respect to already selected features [2], [13]. If S is the current subset and xj is a candidate feature, then the score can be written as 
+
+mRMR( xj ) = I(xj ; c) − 1
+
+|S|
+
+X 
+
+> xk∈S
+
+I(xj ; xk), (2) where I(·; ·) denotes mutual information and c is the class label. The first term promotes predictive relevance, whereas the second penalizes redundancy. Features are selected greedily according to this criterion, and the order of selection induces the final ranking. 
+
+C. LASSO 
+
+LASSO performs embedded feature selection through ℓ1-regularized estimation [3], [14]. In the present study, it is used in its classification form through logistic regression with an ℓ1
+
+penalty. The model parameters are estimated by minimizing 
+
+ˆβ = arg min  
+
+> β
+
+[−ℓ(β; D) + λ∥β∥1] , (3) where ℓ(β; D) is the logistic log-likelihood and λ > 0 is the regularization parameter. The ℓ1 penalty shrinks weak coefficients toward zero, thereby inducing sparsity. The feature ranking is obtained from the absolute values | ˆβj |, with larger magnitudes interpreted as stronger diagnostic relevance. 
+
+D. Bayesian Spike-and-Slab Ranking 
+
+The first Bayesian ranking method is based on a spike-and-slab prior for sparse variable selection [4], [15]. Let γj ∈{0, 1} be a latent inclusion indicator for feature j. A standard spike-and-slab specification is 
+
+βj | γj ∼ (1 −γj ) N (0 , τ 20 )+ γj N (0 , τ 21 ), τ 20 ≪ τ 21 , (4) with 
+
+γj ∼ Bernoulli( π). (5) The spike component strongly shrinks negligible effects to-ward zero, while the slab component allows practically rele-vant coefficients to remain active. Feature ranking is based on the posterior inclusion proba-bility 
+
+rj = Pr( γj = 1 | D ), (6) where D denotes the training data. Larger values of rj indicate stronger posterior evidence that feature j should be included in the predictive model. In the multiclass setting, one-vs-rest models are fitted and the class-specific scores are aggregated into a single ranking. E. Bayesian ARD Logistic Ranking 
+
+The second Bayesian ranking method is based on Bayesian logistic regression with automatic relevance determination (ARD) [5], [6], [16]. In ARD, each coefficient is assigned its own feature-specific shrinkage level, which allows the model to regularize weak predictors more strongly than informative ones. A typical hierarchical specification is 
+
+βj | αj ∼ N (0 , α −1 
+
+> j
+
+), (7) where αj is a feature-specific precision parameter. Larger values of αj imply stronger shrinkage and thus lower relevance of the corresponding feature. For binary classification, the conditional observation model is 
+
+yi ∼ Bernoulli( pi), pi = σ(x⊤ 
+
+> i
+
+β), (8) where σ(z) = (1 + e−z )−1 denotes the logistic link. In the multiclass setting, ARD is implemented in a one-vs-rest manner and the resulting relevance scores are aggregated across classes. To preserve the uncertainty-aware character of the ranking, feature j is scored by the posterior threshold-exceedance probability 
+
+rj = Pr ( |βj | > ϵ | D ) , (9) where ϵ is a small relevance threshold. Features with larger rj
+
+values are interpreted as more consistently informative under posterior uncertainty. 
+
+F. Ranking Aggregation in the Multiclass Setting 
+
+For the Bayesian methods, multiclass feature ranking is performed using one-vs-rest decomposition. Let r(k) 
+
+> j
+
+denote the relevance score of feature j for the classifier separating class k from the remaining classes. The final multiclass relevance score is defined as 
+
+¯rj = 1
+
+K
+
+> K
+
+X
+
+> k=1
+
+r(k) 
+
+> j
+
+, (10) where K is the number of classes. Features are then ranked according to ¯rj .IV. E XPERIMENTAL PROTOCOL 
+
+A. Overview 
+
+The experiments are designed to compare feature ranking methods rather than to provide a definitive estimate of out-of-sample fault generalization. For this reason, the evaluation protocol emphasizes consistency of ranking behavior, com-pactness of selected subsets, and predictive performance under repeated resampling. All preprocessing, feature ranking, and classifier fitting steps are performed using training data only within each split. Test data are used exclusively for final evaluation. This is intended to prevent direct information leakage from the test partition into feature ranking or model fitting. 
+
+B. Feature Sets and Tasks 
+
+Three feature-set variants are considered:  
+
+> •
+
+Current : 13 current-derived features,  
+
+> •
+
+Speed : 13 rotational-speed-derived features,  
+
+> •
+
+Combined : all 26 modeled features. Two diagnostic tasks are evaluated:  
+
+> •
+
+Binary classification : Healthy versus all fault condi-tions merged into one damaged class,  
+
+> •
+
+Multiclass classification : Healthy , Mech_Damage ,
+
+Elec_Damage , and Mech_Elec_Damage .
+
+C. Data Standardization 
+
+For each split, input features are standardized using statistics computed on the training partition only. The same transfor-mation is then applied to the corresponding test partition. Standardization is performed separately for each evaluated feature-set variant. This step is particularly important for coefficient-based ranking methods such as LASSO, spike-and-slab, and Bayesian ARD logistic regression, because their relevance scores depend on the scale of the predictors. 
+
+D. Resampling Strategy 
+
+The main evaluation protocol is based on repeated stratified 
+
+K-fold cross-validation. In the present study, we use 
+
+K = 5 (11) and repeat the full procedure across multiple random parti-tions. Stratification preserves class proportions in each fold. This choice is motivated by the compact size of the benchmark and the need to compare ranking methods across many train–test configurations. However, because the benchmark is composed of segmented observations originating from a limited number of underlying experimental conditions, the resulting perfor-mance estimates should be interpreted with caution. They are used here primarily for comparative analysis of ranking methods rather than as definitive measures of real-world fault generalization. 
+
+E. Ranking-and-Classification Pipeline 
+
+For every resampling split, the following steps are carried out: 1) select the training and test partitions, 2) standardize the training data and transform the test data using training statistics only, 3) fit the ranking method on the training data, 4) compute a full ranking of features, 5) select the top-k features, 6) train the downstream logistic regression classifier using the selected training features, 7) evaluate the classifier on the corresponding test partition. This procedure is repeated independently for each ranking method, each task, each feature-set variant, and each tested value of k.F. Downstream Classifier 
+
+To keep the comparison focused and compact, a single downstream classifier is used throughout the study: logistic regression. This choice provides a simple and interpretable predictive model while avoiding confounding effects intro-duced by varying the classifier family across experiments. For binary classification, standard logistic regression is used. For multiclass classification, the downstream classifier is implemented in a one-vs-rest form for consistency with the Bayesian ranking procedures. 
+
+G. Feature Ranking Methods in the Multiclass Setting 
+
+For ReliefF, mRMR, and LASSO, multiclass ranking is computed directly using the multiclass labels. For the Bayesian methods, multiclass ranking is implemented through one-vs-rest decomposition. Specifically, one binary ranking model is fitted for each class against the remaining classes, and the resulting class-specific relevance scores are aggregated by averaging: 
+
+¯rj = 1
+
+K
+
+> K
+
+X
+
+> k=1
+
+r(k) 
+
+> j
+
+, (12) where K is the number of classes and r(k) 
+
+> j
+
+denotes the relevance score of feature j for the k-th one-vs-rest problem. 
+
+H. Subset Sizes 
+
+Each ranking method produces a full ordered list of features. From this ranking, a sequence of top-k subsets is evaluated. In the implementation, we consider the subset sizes 
+
+k ∈ { 3, 5, 7, 10 , 13 } (13) for the 13-feature variants and 
+
+k ∈ { 3, 5, 7, 10 , 13 , 16 , 20 , 26 } (14) for the combined feature set. These values allow us to compare compact and moderately sized subsets without overloading the final presentation of results. In the paper, only the best result over tested values of k and the corresponding subset size are reported for each experimental configuration. 
+
+I. Bayesian Inference 
+
+The Bayesian spike-and-slab and ARD ranking models are fitted on the training data only. Posterior inference is initially performed using variational inference in PyMC to make re-peated fitting across many resampling splits computationally feasible. If posterior behavior or ranking stability indicates substantial approximation issues, selected configurations may additionally be checked using Hamiltonian Monte Carlo as a diagnostic reference. For Bayesian ARD logistic ranking, feature j is scored using the posterior threshold-exceedance probability 
+
+rj = Pr ( |βj | > ϵ | D ) , (15) where ϵ is a small relevance threshold and D denotes the training data. In the implementation, ϵ is defined after feature                                                  
+
+> TABLE II BEST BINARY CLASSIFICATION RESULTS BY FEATURE VARIANT .
+> Variant ARD SS LAS Rel mRMR Current 0.844
+> k= 3
+> J=.923
+> 0.855
+> k= 7
+> J=.943
+> 0.850
+> k= 5
+> J=.947
+> 0.841
+> k= 10
+> J=.949
+> 0.836
+> k= 13
+> J= 1 .000
+> Speed 0.870
+> k= 7
+> J=.839
+> 0.865
+> k= 7
+> J=.822
+> 0.867
+> k= 5
+> J=.731
+> 0.888
+> k= 3
+> J= 1 .000
+> 0.871
+> k= 7
+> J=.796
+> Combined 0.919
+> k= 5
+> J=.855
+> 0.920
+> k= 5
+> J=.828
+> 0.906
+> k= 10
+> J=.614
+> 0.923
+> k= 20
+> J=.942
+> 0.908
+> k= 10
+> J=.773
+> Entries report balanced accuracy, subset size k, and Jaccard stability
+> J. ARD: ARD logistic, SS: Spike-and-Slab, LAS: LASSO, Rel: ReliefF.
+
+standardization so that the threshold is comparable across predictors. For spike-and-slab ranking, the feature score is given by the posterior inclusion probability 
+
+rj = Pr( γj = 1 | D ). (16) 
+
+J. Evaluation Metrics 
+
+The primary predictive metric is balanced accuracy, chosen because it remains informative in both the binary and mul-ticlass settings and is appropriate for class-wise comparison even when effective decision difficulty differs across classes. To complement predictive performance, two additional as-pects are evaluated:  
+
+> •
+
+Subset compactness , quantified by the number of se-lected features k required to achieve the best reported result,  
+
+> •
+
+Ranking stability , quantified through agreement of se-lected top-k subsets across repeated resampling runs. Let S(k) 
+
+> a
+
+and S(k) 
+
+> b
+
+denote the top-k feature subsets obtained in two resampling runs. Their overlap is measured using the Jaccard index, 
+
+J
+
+
+
+S(k) 
+
+> a
+
+, S (k)
+
+> b
+
+
+
+= |S(k) 
+
+> a
+
+∩ S(k) 
+
+> b
+
+||S(k) 
+
+> a
+
+∪ S(k) 
+
+> b
+
+| . (17) The reported stability score is the mean Jaccard agreement over repeated runs for the selected subset size. 
+
+K. Interpretation of Results 
+
+Because the benchmark is small and built from segmented observations associated with a limited number of underlying experimental conditions, the reported results should be inter-preted primarily as benchmark-specific evidence. In this work, the main objective is therefore not to claim universal fault gen-eralization, but to assess which ranking methods produce the most stable, compact, and uncertainty-aware feature subsets under this constrained setting. TABLE III BEST MULTICLASS CLASSIFICATION RESULTS BY FEATURE VARIANT .                                              
+
+> Variant ARD SS LAS Rel mRMR Current 0.859
+> k= 7
+> J=.828
+> 0.861
+> k= 7
+> J=.877
+> 0.858
+> k= 7
+> J=.927
+> 0.839
+> k= 13
+> J= 1 .000
+> 0.839
+> k= 13
+> J= 1 .000
+> Speed 0.825
+> k= 7
+> J=.896
+> 0.805
+> k= 10
+> J=.878
+> 0.825
+> k= 3
+> J=.810
+> 0.870
+> k= 5
+> J= 1 .000
+> 0.818
+> k= 7
+> J=.768
+> Combined
+> 0.914
+> k= 20
+> J=.863
+> 0.912
+> k= 20
+> J=.844
+> 0.913
+> k= 10
+> J=.833
+> 0.905
+> k= 26
+> J= 1 .000
+> 0.905
+> k= 26
+> J= 1 .000
+> Entries report balanced accuracy, subset size k, and Jaccard stability
+> J. ARD: ARD logistic, SS: Spike-and-Slab, LAS: LASSO, Rel: ReliefF.
+
+V. R ESULTS 
+
+A. Main Comparative Results 
+
+Tables II and III summarize the best balanced accuracy, the corresponding subset size, and the ranking stability for all task and feature-set variants. In the binary setting, the combined feature set provides the strongest overall performance. The best binary result for the combined variant is obtained by ReliefF with a balanced accuracy of 0.923, while ARD logistic and spike-and-slab achieve nearly identical performance of 0.919 and 0.920, respectively, using much smaller subsets (k = 5 for both Bayesian methods versus k = 20 for ReliefF). For the current-only binary task, spike-and-slab achieves the highest balanced accuracy of 0.855, whereas for the speed-only binary task ReliefF performs best with 0.888 and a compact 3-feature subset. In the multiclass setting, the combined feature repre-sentation again yields the strongest results. ARD logistic achieves the highest balanced accuracy for the combined variant (0.914), followed very closely by LASSO (0.913) and spike-and-slab (0.912). For the current-only multiclass task, spike-and-slab performs best (0.861), narrowly ahead of ARD logistic (0.859) and LASSO (0.858). In contrast, the speed-only multiclass task is dominated by ReliefF, which reaches 0.870 and also exhibits perfect stability. Overall, the Bayesian methods are most competitive in the current-only and combined variants, whereas ReliefF remains particularly strong for speed-based ranking. The stability values indicate that highly accurate rankings are not always the most stable. For example, in the binary current-only setting mRMR attains perfect stability but the lowest balanced accuracy among the compared methods, while in the multiclass combined setting ReliefF and mRMR are perfectly stable but slightly less accurate than ARD logistic. This confirms that predictive quality and ranking stability should be interpreted jointly rather than separately. 
+
+B. Compact Performance Summary 
+
+Figure 1 confirms that the combined representation is the strongest overall in both binary and multiclass settings. The   
+
+> Fig. 1. Compact comparison of the best predictive performance obtained by all ranking methods across tasks and feature variants.
+> Fig. 2. Summary of top-ranked features and agreement between Bayesian and classical methods.
+
+advantage of combining current and rotational-speed descrip-tors is particularly visible in the multiclass problem, where the combined variant consistently outperforms the current-only and speed-only alternatives for most methods. Among the single-domain representations, speed features are generally stronger in the binary task, whereas current-only features become more competitive in multiclass classification when Bayesian ranking is used. 
+
+C. Feature-Level Agreement 
+
+Figure 2 shows that several descriptors are selected consis-tently across methods. In particular, strong agreement is vis-ible for CURRENT (A) Frequency Center , CURRENT (A) Spectrum Area , CURRENT (A) max , CURRENT (A) skew , as well as ROTO (RPM) Spectrum Area ,
+
+ROTO (RPM) mean , and ROTO (RPM) std . This pattern suggests that both statistical and spectral descriptors contribute to fault discrimination, with rotational-speed features playing a particularly prominent role in the most accurate subsets. VI. D ISCUSSION AND CONCLUSIONS 
+
+The reported results show that the combined feature repre-sentation is the strongest overall for both diagnostic tasks. In the binary setting, the highest balanced accuracy is obtained by ReliefF for the combined variant (0.923), but the two Bayesian methods remain very competitive, reaching 0.919 for ARD logistic and 0.920 for spike-and-slab while using substantially smaller subsets ( k = 5 in both cases, compared with k = 20 for ReliefF). In the multiclass setting, the best result for the combined representation is achieved by ARD logistic (0.914), followed very closely by LASSO (0.913) and spike-and-slab (0.912). These results indicate that Bayesian ranking is most competitive for the current-only and combined variants, whereas ReliefF remains particularly strong for the speed-only representation. The comparison also shows that predictive quality, subset compactness, and stability should be interpreted jointly. The Bayesian methods are not uniformly the most accurate across all settings, but they often achieve competitive performance with relatively compact subsets and provide an uncertainty-aware view of feature relevance. At the same time, the most stable rankings are not always the most accurate ones. For example, mRMR attains perfect stability in the binary current-only setting but also the lowest balanced accuracy among the compared methods, while in the multiclass combined setting ReliefF and mRMR are perfectly stable but slightly less accurate than ARD logistic. This confirms that stability alone is not sufficient as a selection criterion and should be considered together with predictive performance and subset size. The feature-agreement analysis further suggests that arelatively small group of descriptors carries most of the useful diagnostic information. Repeatedly selected features include CURRENT (A) Frequency Center , CURRENT (A) Spectrum Area , CURRENT (A) max , CURRENT (A) skew , as well as ROTO (RPM) Spectrum Area ,
+
+ROTO (RPM) mean , and ROTO (RPM) std . This pattern is consistent with the broader observation that both statistical and spectral descriptors contribute to discrimination, with rotational-speed features playing a particularly important role in the strongest-performing subsets. These findings should nevertheless be interpreted with caution. The benchmark contains 184 observations derived from short segmented recordings and a limited number of underlying experimental conditions, so the reported results should be treated primarily as benchmark-specific evidence rather than definitive fault signatures transferable to all BLDC operating scenarios. Within this constraint, however, the study shows that Bayesian ranking methods constitute meaningful alternatives to classical baselines: ARD logistic provides the strongest overall Bayesian performance, while spike-and-slab remains competitive and offers a complementary sparse rele-vance perspective. Overall, the paper contributes a comparative and uncertainty-aware view of feature ranking for BLDC diag-nostics rather than a new dataset or a new fusion architecture. Future work should focus on stricter evaluation protocols, validation on additional diagnostic datasets, and extension toward more advanced probabilistic relevance models. REFERENCES [1] I. Kononenko, “Estimating attributes: Analysis and extensions of RELIEF,” in Machine Learning: ECML-94 , ser. Lecture Notes in Computer Science, F. Bergadano and L. De Raedt, Eds., vol. 784. Berlin, Heidelberg: Springer, 1994, pp. 171–182. [Online]. Available: https://doi.org/10.1007/3-540-57868-4_57 [2] H. Peng, F. Long, and C. Ding, “Feature selection based on mutual information: Criteria of max-dependency, max-relevance, and min-redundancy,” IEEE Transactions on Pattern Analysis and Machine Intelligence , vol. 27, no. 8, pp. 1226–1238, 2005. [Online]. Available: https://doi.org/10.1109/TPAMI.2005.159 [3] R. Tibshirani, “Regression shrinkage and selection via the lasso,” 
+
+Journal of the Royal Statistical Society: Series B (Methodological) ,vol. 58, no. 1, pp. 267–288, 1996. [Online]. Available: https: //doi.org/10.1111/j.2517-6161.1996.tb02080.x [4] E. I. George and R. E. McCulloch, “Variable selection via gibbs sampling,” Journal of the American Statistical Association ,vol. 88, no. 423, pp. 881–889, 1993. [Online]. Available: https: //doi.org/10.1080/01621459.1993.10476353 [5] D. J. C. MacKay, “Probable networks and plausible predictions—a review of practical bayesian methods for supervised neural networks,” 
+
+Network: Computation in Neural Systems , vol. 6, no. 3, pp. 469–505, 1995. [Online]. Available: https://doi.org/10.1088/0954-898X_6_3_011 [6] Z. Liu, D. Saha, and F. Liang, “Bayesian smoothing and variable selection using variational automatic relevance determination,” Journal of Computational and Graphical Statistics , 2026, online first. [Online]. Available: https://doi.org/10.1080/10618600.2026.2619519 [7] K. Jarzyna, P. Pi ˛ atek, W. Bauer, and J. Baranowski, “Dudu-bldc: Dataset for diagnostics of brushless dc motors with degrading magnets,” in 2025 7th International Conference on Electrical, Control and Instrumentation Engineering (ICECIE) , Nov 2025, pp. 236–239. [8] J. Baranowski, W. Bauer, K. Jarzyna, and P. Pi ˛ atek, “Dudu-bldc: Data set for diagnostic of brushless dc motors with degrading magnets,” May 2025. [Online]. Available: https://doi.org/10.5281/zenodo.15522163 [9] W. Bauer, K. Jarzyna, P. Pi ˛ atek, and J. Baranowski, “Detecting faults in electric motors based on current and rotor speed measurement using a naive bayesian classifier,” in 2025 29th International Conference on Methods and Models in Automation and Robotics (MMAR) , Aug 2025, pp. 261–265. [10] W. Bauer and J. Baranowski, “Improving bldc motor fault detection via kde-based bayesian data fusion,” in 2025 7th International Conference on Electrical, Control and Instrumentation Engineering (ICECIE) , Nov 2025, pp. 217–223. [11] R. J. Urbanowicz, M. Meeker, W. La Cava, R. S. Olson, and J. H. Moore, “Relief-based feature selection: Introduction and review,” 
+
+Journal of Biomedical Informatics , vol. 85, pp. 189–203, 2018. [Online]. Available: https://doi.org/10.1016/j.jbi.2018.07.014 [12] T. T. Le, R. J. Urbanowicz, J. H. Moore, and B. A. McKinney, “STatistical Inference Relief (STIR) feature selection,” Bioinformatics ,vol. 35, no. 8, pp. 1358–1365, 2019. [Online]. Available: https: //doi.org/10.1093/bioinformatics/bty788 [13] J. Hermo, V. Bolón-Canedo, and S. Ladra, “Fed-mrmr: A lossless federated feature selection method,” Information Sciences , vol. 675, p. 120609, 2024. [Online]. Available: https://doi.org/10.1016/j.ins.2024. 120609 [14] M. Fira, L. Goras, and H.-N. Costin, “Evaluating sparse feature selection methods: A theoretical and empirical perspective,” Applied Sciences , vol. 15, no. 7, p. 3752, 2025. [Online]. Available: https://doi.org/10.3390/app15073752 [15] A. Menacher, T. E. Nichols, C. Holmes, and H. Ganjgahi, “Bayesian lesion estimation with a structured spike-and-slab prior,” Journal of the American Statistical Association , vol. 119, no. 545, pp. 66–80, 2024. [Online]. Available: https://doi.org/10.1080/01621459.2023.2278201 [16] R. M. Neal, Bayesian Learning for Neural Networks , ser. Lecture Notes in Statistics. New York: Springer, 1996, vol. 118. [Online]. Available: https://doi.org/10.1007/978-1-4612-0745-0

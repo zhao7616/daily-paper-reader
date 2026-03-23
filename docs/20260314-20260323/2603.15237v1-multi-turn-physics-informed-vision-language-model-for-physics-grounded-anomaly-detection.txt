@@ -1,0 +1,330 @@
+Title: Multi-turn Physics-informed Vision-language Model for Physics-grounded Anomaly Detection
+
+URL Source: https://arxiv.org/pdf/2603.15237v1
+
+Published Time: Tue, 17 Mar 2026 05:25:55 GMT
+
+Number of Pages: 5
+
+Markdown Content:
+MULTI-TURN PHYSICS-INFORMED VISION-LANGUAGE MODEL FOR PHYSICS-GROUNDED ANOMALY DETECTION 
+
+Yao Gu ⋆ Xiaohao Xu † Yingna Wu ⋆⋆Shanghaitech University †University of Michigan, Ann Arbor 
+
+ABSTRACT 
+
+Vision-Language Models (VLMs) demonstrate strong general-purpose reasoning but remain limited in physics-grounded anomaly detection, where causal understanding of dynam-ics is essential. Existing VLMs, trained predominantly on appearance-centric correlations, fail to capture kinematic constraints, leading to poor performance on anomalies such as irregular rotations or violated mechanical motions. We introduce a physics-informed instruction tuning framework that explicitly encodes object properties, motion paradigms, and dynamic constraints into structured prompts. By de-livering these physical priors through multi-turn dialogues, our method decomposes causal reasoning into incremental steps, enabling robust internal representations of normal and abnormal dynamics. Evaluated on the Phys-AD benchmark, our approach achieves 96.7% AUROC in video-level detec-tion—substantially outperforming prior SOTA (66.9%)—and yields superior causal explanations (0.777 LLM score). This work highlights how structured physics priors can transform VLMs into reliable detectors of dynamic anomalies. 
+
+Index Terms — Anomaly Detection, Instruction Fine-Tuning, VLM, Physics-Informed AI 
+
+1. INTRODUCTION 
+
+Anomaly detection in industrial and mechanical systems is a long-standing problem in computer vision. Traditional meth-ods focus primarily on appearance-based defects [1], such as scratches or cracks, where anomalies manifest in static images. However, many real-world failures arise from viola-tions of physical laws: a bearing that rotates irregularly or a gear system that skips motion cycles. Detecting such physics-grounded anomalies requires reasoning about dynamics and causal relations, not just appearance. This issue was intro-duced by Phys-AD [2], the first dataset in this field, that features clear physical information and standardized content. Hence, our method is mainly developed on this dataset. Recent advances in Vision-Language Models (VLMs) have unlocked impressive general-purpose reasoning abil-ity. Yet, despite their broad pre-training, they lack explicit grounding in physics. As shown in the Phys-AD benchmark,      
+
+> ACCEPTED BY IEEE ICASSP2026. LLM
+> Encoder + projection Word embedding layer
+> Ground truth
+> Q&A: motion?
+> Q&A: feature?
+> Q&A: component?
+> History
+> Physics
+> information LLM
+> Concat
+> Word embedding layer
+> Encoder + projection
+> Ground truth
+> Video Prompt
+> Video
+> Prompt
+
+(a) 
+
+(b) 
+
+Fig. 1 . Comparison of (a) conventional instruction fine-tuning and (b) our multi-turn physics-informed approach. 
+
+Our method uses multi-turn dialogue to incorporate struc-tured physical information as prior knowledge, enhancing the LLM’s autoregressive generation with improved logic and structure. This universal physical prior reduces dataset con-struction burden. current state-of-the-art models achieve only 66.9% AUROC, underscoring their inability to distinguish between physically correct and anomalous motions. The gap arises because large-scale pre-training endows VLMs with semantic correlations, but not the causal structure of dynamics. We address this challenge with a novel physics-informed instruction fine-tuning strategy. Instead of relying solely on video data, we inject explicit physical priors into the VLM through structured instructional prompts. These instructions, covering object identity, dynamic parts, and normative mo-tion, are delivered in a step-wise multi-turn dialogue. By framing physics knowledge as a conversational learning pro-cess, the VLM is guided to form causal representations that generalize to unseen anomalies. As Figure 1(a) shows, conventional instruction fine-tuning uses a prompt with a video, supervised by ground truth. By contrast, (b) shows that our approach adopts multi-turn dialogue, introducing physical information as prior knowl-
+
+> arXiv:2603.15237v1 [cs.CV] 16 Mar 2026
+
+edge. This approach endows the knowledge with better logic and structure, providing a solid basis for autoregressive LLM generation. Additionally, the universality of physical infor-mation makes prior knowledge generic within each object category, avoiding heavy burden of the dataset construction. Our main contributions are: • We introduce an instruction fine-tuning strategy that ex-plicitly encodes physics priors as structured, domain-specific instructions for VLMs. • We design a multi-turn dialogue mechanism that de-composes physical reasoning into incremental steps, fa-cilitating robust reasoning. • We demonstrate state-of-the-art results on the Phys-AD benchmark, with large gains in both anomaly detec-tion accuracy (96.7% AUROC) and causal explanation quality (0.777 LLM score). 
+
+2. RELATED WORK Appearance-based vs. Dynamic Anomaly Detection . Tra-ditional anomaly detection has focused on appearance-based defects, both in industrial settings [1, 3] and general video contexts [4]. Early deep learning video methods relied on reconstruction [5, 6, 7] or pseudo-labels [8], targeting visual novelty. The introduction of CLIP [9] spurred a new wave of vision-language methods [10, 11], which were later improved with techniques like learnable prompts [12] and embedding space adjustments [13]. Recently, LLMs have been used for anomaly detection and explanation via captioning [14], de-scription matching [15], and advanced prompting [16, 17]. Despite these advances, the core limitation remains: these methods lack explicit physical grounding. The Phys-AD benchmark [2] formalized this gap, demonstrating the fail-ure of existing models on kinematic irregularities. Our work directly addresses this by teaching the underlying physical laws. 
+
+Instruction Tuning of Vision-Language Models . Instruc-tion fine-tuning is the standard paradigm for aligning large models to user intent [18, 19], though typically for general-purpose skills. Our work innovates by repurposing it for 
+
+deep knowledge injection . By creating a specialized instruc-tion set from physics principles, we demonstrate that this paradigm can instill domain-specific, causal expertise into a generalist VLM, moving beyond simple task-following to knowledge-based reasoning. 
+
+3. METHODOLOGY 
+
+Our approach grounds a Vision-Language Model (VLM) in physical principles using an instruction fine-tuning strategy. We first formalize the problem of physics-grounded anomaly detection and then introduce our two core contributions: (1) a The key component of       
+
+> the object
+> The main features of
+> the component
+> Normal behavior
+> according to the
+> features
+> Given the object Initial
+> Round 1
+> Scom
+> Round 2
+> Sdyn
+> Round 3
+> Smot
+> t
+
+Fig. 2. The construction process of our structured physics information. This explicit knowledge base, Pc =(Scom , S dyn , S mot ), guides the model through a logical rea-soning chain for physics-grounded anomaly detection. structured framework for representing physical knowledge as explicit instructions, and (2) a multi-turn dialogue mechanism to effectively inject this knowledge into the VLM. 
+
+3.1. Problem Formulation 
+
+Given a video V = {f1, f 2, . . . , f T } composed of T frames, the task is to learn a function F that maps V to an output pair 
+
+(y, E ). Here, y ∈ { 0, 1} is a binary label indicating a normal 
+
+(y = 0 ) or anomalous (y = 1 ) motion, and E is a natural language string providing a causal explanation for the verdict. We aim to train a VLM, parameterized by θ, to approximate this function: 
+
+F(V ; θ) 7 → (y, E ) (1) The central challenge is that F must evaluate the video against implicit, category-specific physical laws not present in standard pre-training data. 
+
+3.2. Structuring Physics as Textual Priors 
+
+Our solution makes these implicit physical principles explicit. The cornerstone of our method is the formalization of abstract physical knowledge into a structured, machine-readable for-mat. For each object category c, we define a physics prior tuple , Pc = ( Scom , S dyn , S mot ). As illustrated in Figure 2, this tuple serves as a knowledge base, with each component guiding the model through a logical reasoning step: 
+
+1) Component Recognition ( Scom ): Grounds the model by identifying the key component of the object and linking it to pre-existing semantic knowledge (e.g., ”The clip has a spring mechanism, which possesses elasticity.”). 
+
+2) Dynamic Subject Focusing ( Sdyn ): Deconstructs the sys-tem’s kinematics by identifying the principal moving parts and their physical properties (e.g., ‘The spring should deform under force and rebound upon release.’). Focus on the motion           
+
+> of the clip in the
+> video. Combine the
+> knowledge of the
+> clip with the motion
+> of clip in the video
+> and think step by
+> step...
+> ... Decide whether
+> the clip in the video
+> normal . Answer 'Yes'
+> or 'No'.
+> ... What is the defect?
+> Give the reasons
+> about how does the
+> anomaly happen .
+> The defect: The clip cannot
+> be pressed down . The
+> reason: The clip stays fixed
+> closed, likely because
+> internal debris is hindering
+> its operation.
+> Vision tower + Projection
+> Word embedding
+> LLM
+> Video
+> Instruction (Round 4)
+> Main component?
+> Main features?
+> Normal behavior?
+> It is ...
+> Features: 1, 2...
+> It should ...
+> Detected abnormal videos
+> Stage 1 only
+> Stage 2 only
+> Both stages
+> Train
+> Freeze
+> Round 1: Scom
+> Round 2: Sdyn
+> Round 3: Smot
+> Physics knowledge
+> Explanation
+> Detection
+
+Concat   
+
+> *N
+> RMS Norm
+> QKV
+> Self-attention
+> RMS Norm
+> FFN
+> SwiGLU
+> LLM
+
+Fig. 3 . Our model architecture for physics-grounded anomaly detection and explanation. Based on Video-LLaVA, only the LLM components (QKV matrices and FFN layer) are fine-tuned, while the vision tower and multi-modal projector remain frozen. The multi-turn dialogue injects physical priors, enabling robust anomaly detection and causal explanation in two stages. 
+
+3) Motion Specification ( Smot ): Defines the observable mo-tion of the object based on the subject’s properties, establish-ing the expected spatio-temporal behavior (e.g., ‘Therefore, the clip’s jaws should open when pressed and close when re-leased.’). 
+
+3.3. Learning via Multi-Turn Dialogue 
+
+We inject the structured knowledge from Pc into the VLM us-ing a multi-turn instructional dialogue. For each training sam-ple (V, y, E ), the model processes a sequence of four prompt-response pairs, {(Qi, A i)}4
+
+> i=1
+
+.The dialogue first instills the normative physical model before asking for a diagnosis. The target responses for the first three turns are set to the components of the physics prior, forcing the model to internalize them: A1 = Scom , A2 =
+
+Sdyn , and A3 = Smot .The final turn transitions from knowledge assimilation to diagnostic reasoning. The target response A4 combines the ground-truth verdict and explanation, formatted as ϕ(y, E )
+
+(e.g., ‘Verdict: Anomalous. Reason: [E]’). The model parameters θ are optimized by minimizing the standard auto-regressive loss over the dialogue sequence: 
+
+L(θ) = −
+
+> 4
+
+X
+
+> i=1
+
+log P (Ai|V, Q 1, A 1, . . . , Q i; θ) (2) This multi-turn structure is crucial. A naive single-turn ap-proach, which concatenates all information into one response, suffers from gradient dilution : the repetitive physics text can dominate the loss signal, overshadowing the critical verdict information. Our step-by-step dialogue decomposes the task, ensuring the model first builds a robust knowledge foundation before applying it for diagnosis. 
+
+3.4. Inference and Implementation Inference. At test time, a new video Vnew is presented with the same three-turn physics-grounding dialogue. The model then autoregressively generates the final answer ˆA4, which is parsed to extract the predicted verdict ˆy and explanation ˆE.
+
+Architecture. We build on Video-LLaVA [18], which uses a ViT vision tower and the Vicuna-7B LLM. As shown in Figure 3, we follow standard efficient fine-tuning practices: the vision tower and projector are kept frozen, and we only update the parameters of the LLM (specifically, the self-attention and feed-forward layers) during training. This fo-cuses the learning on integrating the new physics knowledge with the model’s existing reasoning capabilities. 
+
+4. EXPERIMENTS 4.1. Experimental Setup Dataset and Model. We evaluate our method on the Phys-AD benchmark [2], which consists of 21 categories of objects with physics-grounded anomalies. We use Video-LLaVA [18] as our base VLM and train models on a single NVIDIA RTX 4090 GPU. 
+
+Evaluation Metrics. For anomaly detection, we report video-level Area Under the Receiver Operating Character-istic curve (AUROC). For anomaly explanation, we use two metrics: SBERT Score (cosine similarity between sentence embeddings of predicted and ground-truth explanations) and 
+
+LLM Score (a refined PAEval metric [2], where an external LLM, ‘deepseek-v3’, scores predictions from 0 to 1 based on anomaly type correctness and reasoning logic). Table 1 . Video-level AUROC ( ↑) result on Phys-AD. Category LAVAD ZS Clip ZS ImageBind Video-ChatGPT Video-LLaMA Video-LLaVA Ours 
+
+Car 0.557 0.500 0.500 0.500 0.678 0.522 0.999 
+
+Fan 0.510 0.500 0.500 0.549 0.592 0.611 0.912 
+
+Rolling Bearing 0.532 0.500 0.500 0.300 0.500 0.500 1.000 
+
+Spherical Bearing 0.435 0.500 0.500 0.450 0.550 0.500 1.000 
+
+Servo 0.502 0.500 0.500 0.506 0.683 0.464 0.926 
+
+Clip 0.516 0.500 0.500 0.669 0.556 0.458 0.974 
+
+USB 0.513 0.500 0.500 0.565 0.575 0.500 0.964 
+
+Hinge 0.564 0.500 0.500 0.500 0.692 0.500 0.818 
+
+Sticky Roller 0.266 0.500 0.500 0.450 0.544 0.467 1.000 
+
+Caster Wheel 0.615 0.500 0.500 0.444 0.642 0.500 1.000 
+
+Screw 0.688 0.500 0.500 0.472 0.256 0.550 0.981 
+
+Lock 0.341 0.500 0.500 0.279 0.494 0.500 1.000 
+
+Gear 0.603 0.500 0.500 0.544 0.603 0.517 0.991 
+
+Clock 0.500 0.500 0.500 0.501 0.360 0.500 0.886 
+
+Slide 0.425 0.500 0.500 0.562 0.567 0.179 1.000 
+
+Zipper 0.535 0.500 0.500 0.547 0.489 0.500 0.945 
+
+Button 0.439 0.500 0.500 0.515 0.517 0.360 0.987 
+
+Liquid 0.504 0.500 0.500 0.410 0.278 0.217 1.000 
+
+Rubber Band 0.511 0.500 0.500 0.517 0.450 0.450 0.958 
+
+Ball 0.603 0.500 0.500 0.562 0.636 0.533 0.973 
+
+Magnet 0.502 0.500 0.500 0.683 0.300 0.400 1.000 
+
+Average 0.510 0.500 0.500 0.496 0.523 0.463 0.967 Table 2 . Video-level SBERT ( ↑) result on Phys-AD dataset. Category Video-ChatGPT Video-LLaMA Video-LLaVA Ours 
+
+SBERT LLM SBERT LLM SBERT LLM SBERT LLM Car 0.703 0.074 0.577 0.108 0.580 0.052 0.758 0.875 
+
+Fan 0.775 0.234 0.715 0.557 0.619 0.135 0.844 0.875 
+
+Rolling Bearing 0.755 0.330 0.583 0.200 0.729 0.268 0.746 0.997 
+
+Spherical Bearing 0.836 0.050 0.634 0.158 0.826 0.213 0.883 1.000 
+
+Servo 0.738 0.255 0.642 0.304 0.706 0.277 0.743 0.491 
+
+Clip 0.647 0.270 0.517 0.083 0.511 0.223 0.946 0.983 
+
+USB 0.766 0.164 0.691 0.098 0.732 0.171 0.837 0.887 
+
+Hinge 0.720 0.480 0.675 0.377 0.614 0.230 0.711 0.565 
+
+Sticky Roller 0.805 0.240 0.708 0.220 0.676 0.110 0.850 0.513 
+
+Caster Wheel 0.704 0.135 0.662 0.156 0.574 0.000 0.764 0.863 
+
+Screw 0.656 0.283 0.613 0.314 0.485 0.008 0.995 0.933 
+
+Lock 0.804 0.459 0.646 0.351 0.756 0.394 0.826 0.910 
+
+Gear 0.720 0.264 0.679 0.415 0.602 0.169 0.825 0.888 
+
+Clock 0.720 0.208 0.607 0.161 0.537 0.093 0.732 0.729 
+
+Slide 0.775 0.262 0.663 0.201 0.701 0.217 0.894 0.561 
+
+Zipper 0.555 0.549 0.551 0.599 0.429 0.322 0.782 0.951 
+
+Button 0.618 0.267 0.539 0.254 0.435 0.034 0.869 0.846 
+
+Liquid 0.686 0.339 0.558 0.095 0.599 0.136 0.752 0.384 
+
+Rubber Band 0.744 0.338 0.567 0.210 0.596 0.167 0.884 0.940 
+
+Ball 0.648 0.157 0.587 0.044 0.488 0.004 0.806 0.881 
+
+Magnet 0.655 0.130 0.581 0.070 0.459 0.013 0.855 0.363 
+
+Average 0.716 0.261 0.619 0.237 0.603 0.154 0.824 0.777 4.2. Results Anomaly Detection. As shown in Table 1, our physics-informed approach achieves an average AUROC of 96.7% ,significantly outperforming prior methods, including the pre-vious VLM-based SOTA (LAVAD at 51.0%). This demon-strates the superior efficacy of explicitly teaching physical principles over implicit inference. Our method achieves per-fect or near-perfect scores on 14 of 21 categories. 
+
+Anomaly Explanation. Table 2 presents causal explanation results. Our model achieves an average SBERT score of 0.824 (high semantic relevance) and an average LLM score of 0.777 , a substantial improvement over Video-ChatGPT (0.261). This validates that our model generates causally and logically correct explanations, not merely relevant keywords. 
+
+Qualitative Results. Figure 4 illustrates that prior anomaly explanation methods often yield irrelevant or misinterpreted results. While standard fine-tuning improves relevance, it pro-duces repetitive causal explanations. Our physics-informed approach, however, enhances object comprehension, leading to more diverse and accurate reasoning. Video -LLaVA :                                                                                                                                       
+
+> “The ball is awhite soccer ball .”
+> “The ball is red and sits on a
+> black table .It moves on ablack
+> table and then it is moved by
+> the machine, indicating it was
+> printed by a3Dprinter .”
+> (wrong reasonin g)
+> Proposed method :
+> The anomaly :The ball is leak .
+> The reason :
+> 1)Weak material quality
+> allowing gas molecules to escape
+> through microscopic pores .
+> 2)Poor stitching or sealing at
+> manufacturing seams /interfaces .
+> 3)Overinflation beyond
+> material's pressure tolerance
+> causing structural failure .
+> (correct reasoning)
+> No physics -tuned :
+> “The ball in the video is evidently abnormal .Upon
+> being pressed by the robot arm, it undergoes visible
+> deformation, likely from insufficient inflation .
+> Unable to recover its shape because of air leakage ,
+> the ball's abnormality is confirmed .”
+> ….(repeated for two times in response) ….
+> “Observing the video, the ball's abnormality becomes
+> evident .When pressed by the robot arm, it visibly
+> deforms, indicating alack of full inflation .Due to air
+> escaping ,it cannot revert to its original shape,
+> confirming its unusual state .
+
+Fig. 4 . Qualitative comparison of anomaly explanation methods on a ‘leaking ball’ scene. Our multi-turn physics-informed VLM provides a more accurate and causally rele-vant explanation than prior SOTA methods. 
+
+Table 3 . Detection performance comparison between single-turn and multi-turn conversation. Evaluated with video-level AUROC ( ↑) result of 21 categories on Phys-AD dataset. Failure cases (AUROC ≈ 0.5) are highlighted in red. Car Fan Rolling Bearing Spherical Bearing Servo Clip USB Hinge Sticky Roller Ball Magnet No-phys 0.994 0.912 1.000 1.000 0.877 1.000 0.958 0.557 1.000 0.935 1.000 Single-turn 1.000 0.868 1.000 1.000 0.898 1.000 0.969 0.500 0.500 0.919 0.500 Multi-turn 0.999 0.912 1.000 1.000 0.926 0.974 0.964 0.818 1.000 0.973 1.000 Caster Wheel Screw Lock Gear Clock Slide Zipper Button Liquid Rubber Band Average No-phys 0.905 0.846 1.000 0.986 0.757 1.000 0.932 1.000 1.000 0.771 0.925 Single-turn 0.500 0.500 1.000 0.988 0.549 0.514 0.833 1.000 0.981 0.500 0.787 Multi-turn 1.000 0.981 1.000 0.991 0.886 1.000 0.945 0.987 1.000 0.958 0.967 
+
+4.3. Ablation Study 
+
+To validate our multi-turn dialogue design, we compare it against two ablated baselines. The single-turn approach con-catenates all three physics prior components with the final verdict into one large target response. As shown in Table 3, the multi-turn approach significantly outperforms the ’No-phys’ (standard SFT) baseline, especially on challenging cat-egories. Notably, the single-turn method suffered from con-vergence failure on 8 of 21 categories, yielding performance equivalent to random guessing (AUROC ≈ 0.5), highlighted by red text. This confirms that a step-by-step instructional process is vital for proper assimilation of complex knowledge. 
+
+5. CONCLUSION 
+
+We introduced a physics-informed instruction tuning frame-work to address the critical gap in VLM reasoning for dy-namic, physics-grounded anomaly detection. By formalizing physical principles as structured instructions and delivering them through a multi-turn dialogue, we successfully taught a general-purpose VLM to perform complex causal reasoning about dynamics. Our approach establishes a new state-of-the-art on the Phys-AD benchmark. This work paves the way for more reliable and capable AI systems, where understanding and reasoning about physical laws is paramount. 6. REFERENCES 
+
+[1] Paul Bergmann, Michael Fauser, David Sattlegger, and Carsten Steger, “Mvtec ad — a comprehensive real-world dataset for unsupervised anomaly detection,” in 
+
+2019 IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR) , 2019, pp. 9584–9592. [2] Wenqiao Li, Yao Gu, Xintao Chen, Xiaohao Xu, Ming Hu, Xiaonan Huang, and Yingna Wu, “Towards visual discrimination and reasoning of real-world physical dy-namics: Physics-grounded anomaly detection,” in Pro-ceedings of the Computer Vision and Pattern Recogni-tion Conference , 2025, pp. 30409–30419. [3] Karsten Roth, Latha Pemula, Joaquin Zepeda, Bernhard Sch¨ olkopf, Thomas Brox, and Peter Gehler, “Towards total recall in industrial anomaly detection,” in Proceed-ings of the IEEE/CVF conference on computer vision and pattern recognition , 2022, pp. 14318–14328. [4] Waqas Sultani, Chen Chen, and Mubarak Shah, “Real-world anomaly detection in surveillance videos,” in Pro-ceedings of the IEEE conference on computer vision and pattern recognition , 2018, pp. 6479–6488. [5] Dong Gong, Lingqiao Liu, Vuong Le, Budhaditya Saha, Moussa Reda Mansour, Svetha Venkatesh, and Anton van den Hengel, “Memorizing normality to detect anomaly: Memory-augmented deep autoencoder for un-supervised anomaly detection,” in Proceedings of the IEEE/CVF international conference on computer vision ,2019, pp. 1705–1714. [6] Hyunjong Park, Jongyoun Noh, and Bumsub Ham, “Learning memory-guided normality for anomaly de-tection,” in Proceedings of the IEEE/CVF conference on computer vision and pattern recognition , 2020, pp. 14372–14381. [7] Hui Lv, Chen Chen, Zhen Cui, Chunyan Xu, Yong Li, and Jian Yang, “Learning normal dynamics in videos with meta prototype network,” in Proceedings of the IEEE/CVF conference on computer vision and pattern recognition , 2021, pp. 15425–15434. [8] Jhih-Ciang Wu, He-Yen Hsieh, Ding-Jie Chen, Chiou-Shann Fuh, and Tyng-Luh Liu, “Self-supervised sparse representation for video anomaly detection,” in Euro-pean Conference on Computer Vision . Springer, 2022, pp. 729–745. [9] Alec Radford, Jong Wook Kim, Chris Hallacy, Aditya Ramesh, Gabriel Goh, Sandhini Agarwal, Girish Sas-try, Amanda Askell, Pamela Mishkin, Jack Clark, et al., “Learning transferable visual models from natural lan-guage supervision,” in International conference on ma-chine learning . PmLR, 2021, pp. 8748–8763. [10] Peng Wu, Xuerong Zhou, Guansong Pang, Lingru Zhou, Qingsen Yan, Peng Wang, and Yanning Zhang, “Vad-clip: Adapting vision-language models for weakly su-pervised video anomaly detection,” in Proceedings of the AAAI Conference on Artificial Intelligence , 2024, vol. 38, pp. 6074–6082. [11] Chao Huang, Weiliang Huang, Qiuping Jiang, Wei Wang, Jie Wen, and Bob Zhang, “Multimodal eviden-tial learning for open-world weakly-supervised video anomaly detection,” IEEE Transactions on Multimedia ,2025. [12] Kaiyang Zhou, Jingkang Yang, Chen Change Loy, and Ziwei Liu, “Learning to prompt for vision-language models,” International Journal of Computer Vision , vol. 130, no. 9, pp. 2337–2348, 2022. [13] Qihang Zhou, Guansong Pang, Yu Tian, Shibo He, and Jiming Chen, “Anomalyclip: Object-agnostic prompt learning for zero-shot anomaly detection,” arXiv preprint arXiv:2310.18961 , 2023. [14] Luca Zanella, Willi Menapace, Massimiliano Mancini, Yiming Wang, and Elisa Ricci, “Harnessing large lan-guage models for training-free video anomaly detec-tion,” in Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , 2024, pp. 18527–18536. [15] Shibo Gao, Peipei Yang, and Linlin Huang, “Suvad: Semantic understanding based video anomaly detection using mllm,” in ICASSP 2025-2025 IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP) . IEEE, 2025, pp. 1–5. [16] Jinjin Zhang, Guodong Wang, Yizhou Jin, and Di Huang, “Towards training-free anomaly detection with vision and language foundation models,” in Pro-ceedings of the Computer Vision and Pattern Recogni-tion Conference , 2025, pp. 15204–15213. [17] Zhaopeng Gu, Bingke Zhu, Guibo Zhu, Yingying Chen, Ming Tang, and Jinqiao Wang, “Anomalygpt: Detecting industrial anomalies using large vision-language mod-els,” in Proceedings of the AAAI conference on artificial intelligence , 2024, vol. 38, pp. 1932–1940. [18] Bin Lin, Yang Ye, Bin Zhu, Jiaxi Cui, Munan Ning, Peng Jin, and Li Yuan, “Video-llava: Learning united visual representation by alignment before projection,” 
+
+arXiv preprint arXiv:2311.10122 , 2023. [19] Hang Zhang, Xin Li, and Lidong Bing, “Video-llama: An instruction-tuned audio-visual language model for video understanding,” arXiv preprint arXiv:2306.02858 , 2023.

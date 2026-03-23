@@ -1,0 +1,2924 @@
+Title: On the cumulative residual interval entropy of doubly truncated random variables
+
+URL Source: https://arxiv.org/pdf/2603.16037v1
+
+Published Time: Wed, 18 Mar 2026 00:29:55 GMT
+
+Number of Pages: 33
+
+Markdown Content:
+# On the cumulative residual interval entropy of doubly truncated random variables 
+
+Stathis Chadjiconstantinidis and Apostolos Bozikas ∗
+
+Department of Statistics and Insurance Science, University of Piraeus, 80 Karaoli and Dimitriou str., Piraeus, 18534, Greece 
+
+Abstract 
+
+This paper introduces and studies a new uncertainty measure, the cumulative residual inter-val entropy (CRIE). Defined as the cumulative residual entropy of a doubly truncated (interval) continuous random variable, this measure has several applications when data fall between two points. The CRIE generalizes the cumulative residual entropy proposed by Rao et al. [31] and the dynamic cumulative residual entropy proposed by Asadi and Zohrevand [1]. We establish some properties of the generalized hazard rate and the doubly truncated mean residual lifetime, which are useful for obtaining results for the CRIE. Furthermore, we provide several represen-tations of the CRIE based on reliability measures, covariance, the relevation transform, and increasing transformations. Finally, upper and lower bounds, as well as monotonicity results for the CRIE, are provided. 
+
+Keywords: Cumulative and dynamic cumulative residual entropy, interval entropy, doubly trun-cated random variable, generalized failure rate, doubly truncated mean residual lifetime. 
+
+MSC Classification: 60E15, 62B10, 62N05, 94A17. 
+
+# 1 Introduction 
+
+Entropy is a key concept in many areas, such as probability, statistics, actuarial science, commu-nication theory, physics, and economics. In information theory, it quantifies the uncertainty of a random variable. For instance, if we are interested in studying the uncertainty of a system and/or a unit that starts its activity at time zero and continues to function regularly until it fails, then the famous Shannon’s entropy is an acceptable measure of uncertainty. Let X be a non-negative, absolutely continuous random variable with distribution function 
+
+FX (x) = Pr( X ≤ x), survival function F X (x) = Pr( X > x ) = 1 − FX (x) and probability density function fX (x) = F ′ 
+
+> X
+
+(x). Shannon’s entropy (also called as “differential entropy” in the continuous case) was introduced by [36] and defined as 
+
+S(X) = −E[ln fX (X)] = − R ∞ 
+
+> 0
+
+fX (x) ln fX (x) dx, (1) where “ln” denotes the natural logarithm with the convention 0 ln 0 = 0. The Shannon entropy has certain disadvantages. For example, in order to estimate the Shannon entropy for a continuous  
+
+> ∗Corresponding author. Email: bozikas@unipi.gr
+
+1
+
+> arXiv:2603.16037v1 [math.PR] 17 Mar 2026
+
+density, one must obtain the density estimation, which is not a trivial task, and also, the Shannon entropy may take negative values. Rao et al. [31] extended the Shannon entropy by introducing a novel measure of information known as the cumulative residual entropy (CRE), defined by 
+
+E(X) = − R ∞ 
+
+> 0
+
+F X (x) ln F X (x) dx, (2) which is always non-negative and can easily be computed from sample data. For additional mathe-matical properties of E(X), see also Rao [30]. A generalization of E(X) was obtained by Psarrakos and Navarro [29] who introduced and studied the generalized cumulative residual entropy. Whereas sometimes in the study of a system’s lifetime, the initial age is non-zero and an individual’s interest is to study the uncertainty of the system, which is known to survive up to a certain age, or failed at a fixed time, or when it is known to fail between two time points, then 
+
+S(X) and E(X) are not suitable for uncertainty measures. In a situation where it is known that the system has survived up to a specific age, uncertainty is related to the residual distribution of the system as well as to a left truncation of system’s lifetime. Let the left-truncated random variable 
+
+Xt = X | X > t having survival function 
+
+F Xt (x) = F X (x)   
+
+> FX(t)
+
+, x > t. 
+
+Based on the entropy E(X) given by (2), Asadi and Zohrevand [1] introduced the dynamic cumulative residual entropy at time t of X, denoted by E(X; t) and defined as E(X; t) = E(Xt), that is, 
+
+E(X; t) = − R ∞     
+
+> tFX(x)
+> FX(t)
+
+ln 
+
+ F X (x)  
+
+> FX(t)
+
+
+
+dx. (3) It is clear that E(X; 0) = E(X). Asadi and Zohrevand [1] obtained several properties for E(X; t) as well as some characterizations of lifetime distributions based on this measure. In addition, further results for E(X) and E(X; t) were obtained by [27]. Let X(t) = X − t | X > t , t ≥ 0, be the residual lifetime of X, having the survival function given by 
+
+F X(t) (x) = F X (x+t)   
+
+> FX(t)
+
+, x > 0,
+
+provided that F X (t) > 0. This random variable has important applications in several scientific fields. For example, in life insurance, actuaries utilize residual lifetime when determining life insurance premiums, mathematical reserves, and benefits. In this case, X denotes the lifetime of a newborn and X(t) is the future lifetime of a person of age t > 0. In non-life insurance, if X
+
+represents the individual loss of an insurance portfolio and t is an ordinary deductible, then X(t)
+
+denotes the payment-per-payment of the insurance company to the policyholder (see Klugman et al. [19]). Ebrahimi [9] considered the differential entropy of X(t) which according to (1) is given by 
+
+E(X(t)) = − R ∞ 
+
+> 0
+
+F X(t) (x) ln F X(t) (x) dx. 
+
+Since 
+
+E(X(t)) = − R ∞     
+
+> 0
+> FX(x+t)
+> FX(t)
+
+ln 
+
+ F X (x+t)  
+
+> FX(t)
+
+
+
+dx 
+
+= − R ∞     
+
+> tFX(x)
+> FX(t)
+
+ln 
+
+ F X (x)  
+
+> FX(t)
+
+
+
+dx, 
+
+it follows that E(X(t)) = E(Xt) (each equal to E(X; t)), that is, the dynamic cumulative residual entropy at time t of X is equal to the differential entropy of the residual lifetime X(t) of X.2In recent years, there has been growing interest in studying doubly truncated random variables in several scientific fields, such as survival studies and life testing, reliability, economy, astronomy, actuarial science, and various other fields. The subject of doubly truncation of a lifetime ran-dom variable in the reliability literature has been started by Navarro and Ruiz [26]. More recently, Kharazmi and Balakrishnan [16] introduced and studied the cumulative residual and relative cumu-lative residual Fisher information, establishing important properties and connections to measures of uncertainty under truncation, thereby further motivating the study of information measures for truncated lifetimes. If the random variable X denotes the lifetime of a system, then the random variable 
+
+Xτ1,τ 2 = X | τ1 ≤ X ≤ τ2,
+
+is referred to as the doubly truncated random variable with ( τ1, τ 2) ∈ DX , where 
+
+DX = {(x, y ) : FX (x) < F X (y)}.
+
+Hence, the random variable Xτ1,τ 2 represents the lifetime of a system and/or a unit that was in working condition at age τ1, but out of order when observing at time τ2, that is, the lifetime of a system that fails in the interval [ τ1, τ 2]. For further results on this topic, we refer to Sankaran and Sunoj [33] who defined and studied the expected value of doubly truncated random variables. Moreover, Sunoj et al. [37] studied characterizations of lifetime distributions using conditional expectations of doubly truncated random variables, and Khorashadizadeh et al. [17] investigated the doubly truncated mean residual and past lifetime. In survival studies and life testing, significant attention has been paid to truncated lifetimes. Among the truncated study, the most commonly observed truncation is of doubly truncated situa-tions. In many practical cases, data are available only within a limited range between two points. Therefore, it is important to analyze statistical measures, especially in fields such as information theory, reliability, actuarial science, and economics, when random variables are doubly truncated. Hence, event times of units that lie within a specific time interval are only observed, and we cannot have access to information about the subjects outside of this interval. For example, in survival studies, one may often observe truncation situations while analyzing data with respect to time. Some instances of truncated situations include analysis of COVID-19 data on the time from infec-tion to death, the time it takes for treatment to show a response, and the duration until the disease reoccurs. As an example in reliability testing, a product may only be observed until a certain time point (upper truncation) after it has been in use for a given period (lower truncation), leading to doubly truncated data. A detailed understanding and proper analysis of these data are crucial to make an accurate assessment of the reliability of the system and making informed decisions about maintenance, product design, or risk management. In addition, final products are often subject to selection checks before being sent to the customer. The usual practice is that if the performance of a product falls within certain tolerance limits, it is referred as compatible and sent to the customer. If it fails, a product is rejected, and thus revoked. In this case, the actual distribution to the customer is called doubly (interval) truncated. When studying income distribution, inequality is not measured only for incomes above or below a fixed value. It is also important to examine incomes within a given range, as well as incomes higher or lower than a specified level. For instance, it is interesting to examine the inequality of a population that excludes the richest and poorest members; hence doubly truncated populations are taken into consideration in many practical situations. Doubly truncated random variables are widely used in actuarial science and especially are used to model insurance companies’ compensation to policyholders. A “franchise deductible” (see 3Klugman et al. [19]) is a provision under which the insurance pays nothing when the loss is below the deductible amount, but pays the whole loss if it exceeds the deductible. Hence, if the random variable X represents the individual (and / or the collective) loss of an insurance portfolio and 
+
+d > 0 is the amount of the franchise deductible, then the random variable Y Pd representing the payment-per-payment is given by 
+
+Y Pd =
+
+(
+
+undefined , X ≤ dX, X > d , i.e., Y Pd = X | X > d. 
+
+Suppose that losses are not recorded for or above a certain policy (liability) limit u > 0. For example, a home insurance policy covers losses up to a limit u, while the policyholder covers major losses that exceed the amount u. In this case, the random variable representing the payment of the insurance company is 
+
+Zu =
+
+(
+
+X, X ≤ u
+
+undefined , X > u , i.e., Zu = X | X ≤ u. 
+
+Therefore, in this case, the random variable Zu is truncated from above. It should be noted that this case is different from the loss censoring above. For the latter case, the insurance company’s payment is the random variable min {X, u }, and therefore when X > u , the company pays an amount equal to u. Now, suppose that the losses X of an insurance portfolio are covered by a franchise deductible d > 0 and are not recorded for or above a policy limit u > d . Then, the payment of the insurance company to the policyholder is obviously a doubly truncated random variable Xd,u = X | d < X ≤ u. Another example in insurance is that the claim time of a policyholder is doubly truncated between the policy’s start and maturity dates. It can be easily shown that for all ( τ1, τ 2) ∈ DX , the survival function F Xτ1,τ 2 (x) = Pr( Xτ1,τ 2 >x) and the probability density function fXτ1,τ 2 (x) = − ddx F Xτ1,τ 2 (x) of Xτ1,τ 2 are given respectively by 
+
+F Xτ1,τ 2 (x) = F X (x)−F X (τ2)     
+
+> FX(τ1)−FX(τ2)
+
+, τ1 ≤ x ≤ τ2,fXτ1,τ 2 (x) = fX (x)   
+
+> FX(τ2)−FX(τ1)
+
+, τ1 ≤ x ≤ τ2.
+
+A measure of uncertainty for the random variable Xτ1,τ 2 , also known as the interval entropy of 
+
+X in the interval ( τ1, τ 2) is introduced by [37] and is defined as 
+
+S(X; τ1, τ 2) = − R τ2 
+
+> τ1
+
+fXτ1,τ 2 (x) ln fXτ1,τ 2 (x) dx 
+
+= − R τ2    
+
+> τ1
+> fX(x)
+> FX(τ2)−FX(τ1)
+
+ln 
+
+ fX (x)  
+
+> FX(τ2)−FX(τ1)
+
+
+
+dx. (4) which is the Shannon entropy for Xτ1,τ 2 , i.e., S(X; τ1, τ 2) = S(Xτ1,τ 2 ). Clearly, it holds S(X; t, ∞) = 
+
+S(X; t) and S(X; 0 , t ) = S(X; t). Some further properties of interval entropy were obtained by [22] and [24]. In addition, the weighted interval entropy was studied by [23]. Based on the measures E(X) and E(X; t), in this paper we introduce the cumulative residual interval entropy of the doubly truncated random variable X in the interval ( τ1, τ 2), denoted by 
+
+H(X; τ1, τ 2) and defined as 
+
+H(X; τ1, τ 2) = E(Xτ1,τ 2 ) = − R ∞ 
+
+> 0
+
+F Xτ1,τ 2 (x) ln F Xτ1,τ 2 (x) dx. 
+
+Hence, based on the definition of F Xτ1,τ 2 (x) we give the following definition. 4Definition 1. Let X be a non-negative absolutely continuous random variable. For all (τ1, τ 2) ∈
+
+DX , the cumulative residual interval entropy (CRIE) of the doubly truncated random variable X
+
+in the interval (τ1, τ 2), is defined as 
+
+H(X; τ1, τ 2) = − R τ2 
+
+> τ1
+
+F Xτ1,τ 2 (x) ln F Xτ1,τ 2 (x) dx 
+
+= − R τ2         
+
+> τ1
+> FX(x)−FX(τ2)
+> FX(τ1)−FX(τ2)
+
+ln 
+
+ F X (x)−F X (τ2)    
+
+> FX(τ1)−FX(τ2)
+
+
+
+dx. (5) From (5) it easily follows that H(X; τ1, τ 2) takes values in [0 , +∞), i.e., the measure H(X; τ1, τ 2)is always non-negative. Also, it holds that H(X; t, ∞) = E(X; t) as well as H(X; 0 , ∞) = E(X). Let us consider the random variable X(τ1,τ 2) = X − τ1 | τ1 ≤ X ≤ τ2 which is the doubly truncated mean residual lifetime of X. Thus, X(τ1,τ 2) represents the future lifetime of a unit and / or a system in the time interval [ τ1, τ 2] given that it has survived to age τ1. The random variable 
+
+X(τ1,τ 2) ∈ (0 , τ 2 − τ1] and has survival function 
+
+F X(τ1,τ 2) (x) = Pr( X(τ1,τ 2) > x ) = F X (x+τ1)−F X (τ2)     
+
+> FX(τ1)−FX(τ2)
+
+, 0 ≤ x ≤ τ2 − τ1.
+
+Therefore, the CRE of the random variable X(τ1,τ 2) according to (2) is 
+
+E(X(τ1,τ 2)) = − R ∞ 
+
+> 0
+
+F X(τ1,τ 2) (x) ln F X(τ1,τ 2) (x) dx 
+
+= − R τ2−τ1         
+
+> 0
+> FX(x+τ1)−FX(τ2)
+> FX(τ1)−FX(τ2)
+
+ln 
+
+ F X (x+τ1)−F X (τ2)    
+
+> FX(τ1)−FX(τ2)
+
+
+
+dx, 
+
+and since the last relationship can be equivalently rewritten as 
+
+E(X(τ1,τ 2)) = − R τ2         
+
+> τ1
+> FX(x)−FX(τ2)
+> FX(τ1)−FX(τ2)
+
+ln 
+
+ F X (x)−F X (τ2)    
+
+> FX(τ1)−FX(τ2)
+
+
+
+dx, 
+
+it follows that 
+
+H(X; τ1, τ 2) = E(X(τ1,τ 2)) = E(Xτ1,τ 2 ).
+
+Remark 1. Many studies (see, e.g., [18, 34, 13], among others) have referred to F X (x)     
+
+> FX(τ1)−FX(τ2)
+
+as the survival function of the truncated random variable Xτ1,τ 2 = X | τ1 ≤ X ≤ τ2, and on this basis defined the cumulative residual interval entropy as 
+
+H1(X; τ1, τ 2) = − R τ2       
+
+> τ1
+> FX(x)
+> FX(τ1)−FX(τ2)
+
+ln 
+
+ F X (x)    
+
+> FX(τ1)−FX(τ2)
+
+
+
+dx. 
+
+However, this interpretation is incorrect, as the expression F X (x)     
+
+> FX(τ1)−FX(τ2)
+
+is not associated with a valid survival function of a random variable. For this reason, it is more appropriate to consider 
+
+H1(X; τ1, τ 2) as a modified cumulative residual interval entropy , in line with Definition 1 of [11] for the corresponding extropies. 
+
+Remark 2. As pointed out by Di Crescenzo and Longobardi [7], in many real-world applications uncertainty is not necessarily related to the future but rather to the past. This observation motivated the introduction of past entropy measures, which, unlike residual entropy measures, are defined in terms of the cumulative distribution function of the underlying random variable. Di Crescenzo and Longobardi [7] studied the cumulative past entropy defined by 
+
+C E (X) = − R ∞ 
+
+> 0
+
+FX (x) ln FX (x) dx, 
+
+5as well as the dynamic cumulative past entropy given by 
+
+C E (X; t) = − R t   
+
+> 0
+> FX(x)
+> FX(t)
+
+ln FX (x)  
+
+> FX(t)
+
+dx. 
+
+Also let FXτ1,τ 2 (x) = Pr( Xτ1,τ 2 ≤ x) = FX (x)−FX (τ1)   
+
+> FX(τ2)−FX(τ1)
+
+be the distribution function of Xτ1,τ 2 = X |
+
+τ1 ≤ X ≤ τ2. Based on Definition 1, we can analogously define the cumulative past interval entropy as 
+
+H(X; τ1, τ 2) = − R τ2 
+
+> τ1
+
+FXτ1,τ 2 (x) ln FXτ1,τ 2 (x) dx 
+
+= − R τ2     
+
+> τ1
+> FX(x)−FX(τ2)
+> FX(τ1)−FX(τ2)
+
+ln 
+
+ FX (x)−FX (τ2)  
+
+> FX(τ1)−FX(τ2)
+
+
+
+dx, 
+
+for all (τ1, τ 2) ∈ DX . Also, we can easily observe that, by setting Y = X − τ1 and t = τ2 − τ1, we obtain 
+
+{X | τ1 ≤ X ≤ τ2} = {τ1 + Y | τ1 ≤ τ1 + Y ≤ τ2}
+
+= τ1 + {Y | 0 ≤ Y ≤ τ2 − τ1}
+
+= τ1 + {Y | 0 ≤ Y ≤ t}.
+
+This relation shows that the uncertainty associated with [X | τ1 ≤ X ≤ τ2] may be expressed in terms of the uncertainty of the shifted past lifetime [Y | 0 ≤ Y ≤ t]. Since the uncertainty of Y(t) =
+
+Y | 0 ≤ Y ≤ t is characterized by its cumulative distribution function, the above representation allows us to express H(X; τ1, τ 2) through the cumulative past entropy denoted by C E (Y ; t). Indeed, since 
+
+FXτ1,τ 2 (x) = Pr( Xτ1,τ 2 ≤ x) = Pr( Y ≤ x − τ1 | Y ≤ t) = Pr( Y ≤ x⋆ | Y ≤ t),
+
+we obtain 
+
+C E (Y ; t) = − R t 
+
+> 0
+
+FY(t) (x⋆) ln FY(t) (x⋆) dx ⋆
+
+= − R τ2 
+
+> τ1
+
+FXτ1,τ 2 (x) ln FXτ1,τ 2 (x) dx 
+
+= H(X; τ1, τ 2),
+
+where x⋆ = x − τ1.Therefore, the cumulative past interval entropy H(X; τ1, τ 2) coincides with the dynamic cumu-lative past entropy C E (X − τ1; τ2 − τ1) of the shifted random variable. Consequently, this quantity does not require a separate study. In contrast, the proposed measure H(X; τ1, τ 2) cannot be derived from any existing entropy measure and therefore constitutes a novel measure deserving separate attention. 
+
+In the sequel, we recall some concepts useful in classifying life distributions in reliability theory, as well as some concepts about the stochastic orders between random variables. 
+
+Definition 2. Let X be an absolutely continuous and non-negative random variable. Then X has: (i) an increasing (decreasing) failure rate or IFR (DFR), if hX (x) is increasing (decreasing) in 
+
+x ≥ 0;(ii) an increasing (decreasing) mean residual lifetime or IMRL (DMRL), if mX (x) is increasing (decreasing) in x ≥ 0;(iii) the new worse (better) than used in expectation or NWUE (NBUE) if mX (x) ≥ (≤)mX (0) = 
+
+E(X).
+
+6Thus, the relations between the classes given in the above definition are IFR (DFR) ⇒ DMRL (IMRL) ⇒ NBUE (NWUE) .
+
+Definition 3. Let X and Y be two absolutely continuous non-negative random variables having distribution functions F X (x) and F Y (x), probability density functions fX (x) and fY (x), and hazard rate functions hX (x) and hY (x), respectively. Then, X is smaller than Y in (i) the usual stochastic order, denoted by X ≤st Y , if F X (x) ≤ F Y (x) for all x ≥ 0;(ii) the hazard rate order, denoted by X ≤hr Y , if hY (x) ≤ hX (x) or equivalently, if F Y (x)   
+
+> FX(x)
+
+is increasing in x ≥ 0;(iii) the likelihood ratio order, denoted by X ≤lr Y , if fY (x)  
+
+> fX(x)
+
+is increasing in x ≥ 0.
+
+For the stochastic orders given in Definition 3, it is well known that the following relations are valid. 
+
+X ≤lr Y ⇒ X ≤hr Y ⇒ X ≤st Y. 
+
+This paper aims to study the entropy measure H(X; τ1, τ 2). In this context, Section 2 provides several properties satisfied by the generalized failure rate introduced by Navarro et al. [26] and the doubly truncated mean residual lifetime introduced by Ruiz and Navarro [32], which, apart from being useful in themselves, are also needed for our subsequent analysis. In Section 3, we give several alternative representations for H(X; τ1, τ 2), which are useful for obtaining bounds for this information measure. It is shown that CRIE is related to well-known reliability measures, especially with the expectation of doubly truncated mean residual lifetime. Also, a covariance as well as a revelation transform representation of CRIE are given, and the problem of the evaluation of CRIE under increasing transformations is considered. In Section 4, we obtain several upper and lower bounds for CRIE, and we obtain a relationship between the CRIE of two non-negative and absolutely continuous random variables ordered in the usual likelihood ratio order and/or ordered with respect to their generalized failure rates. Finally, in Section 5, we introduce two new classes of distribution, namely the increasing (decreasing) CRIE or ICRIE (DCRIE) and we give several necessary and sufficient conditions under which CRIE is monotone. As a result, some further bounds for CRIE are also obtained. In addition, it is shown that the ICRIE (DCRIE) class is closed under increasing linear transformations, and that the DCRIE class is closed under increasing convex transformations. 
+
+# 2 Some results on the generalized failure rate and doubly trun-cated mean residual lifetime 
+
+Suppose that X is a non-negative and absolutely continuous random variable, which usually repre-sents the lifetime of a unit and / or a system. One measure that is time-dependent and determines an instantaneous rate of failure is the hazard (or failure) rate (HR). This is one of the most im-portant concepts in reliability theory, survival analysis, actuarial science and risk analysis, defined by 
+
+hX (t) = fX (t)   
+
+> FX(t)
+
+,
+
+provided that F X (t) > 0. 7Another measure of ageing used frequently is the mean residual lifetime (MRL) which represents the expected residual lifetime of a unit and/or a system of a specific age. The MRL at age t ≥ 0is defined by 
+
+mX (t) = E(X − t | X > t ) = 1  
+
+> FX(t)
+
+R ∞ 
+
+> t
+
+F X (x) dx, 
+
+for t such that F X (t) > 0. In analogy to the hazard rate, Navarro and Ruiz [26] introduced the concept of the generalized failure rate (GFR) function for a doubly truncated random variable X | τ1 ≤ X ≤ τ2 where (τ1, τ 2) ∈ DX . The GFR function is defined by the following relationship. 
+
+hX, 1(τ1, τ 2) = lim dt →0+
+
+n Pr( τ1≤X≤τ1+dt |τ1≤X≤τ2)
+
+> dt
+
+o
+
+= fX (τ1)     
+
+> FX(τ1)−FX(τ2)
+
+, (6) for all ( τ1, τ 2) ∈ DX . Note that hX, 1(τ1, τ 2) is the failure rate of the random variable X | τ1 ≤ X ≤ τ2
+
+at time τ1. Also, when τ2 → ∞ , it holds that hX, 1(t, ∞) = hX (t). It should be noted that [26] also defined the following GFR. 
+
+hX, 2(τ1, τ 2) = lim dt →0−
+
+n Pr( τ2+dt ≤X≤τ2|τ1≤X≤τ2)
+
+> dy
+
+o
+
+= fX (τ2)     
+
+> FX(τ1)−FX(τ2)
+
+,
+
+for all ( τ1, τ 2) ∈ DX .Let mX, 1(τ1, τ 2) = E(X − τ1 | τ1 ≤ X ≤ τ2) = 1    
+
+> FX(τ1)−FX(τ2)
+
+R τ2 
+
+> τ1
+
+(x − τ1)fX (x) dx, denote the 
+
+doubly truncated mean residual lifetime of X (see, e.g., [32]). Then, it can be shown that 
+
+mX, 1(τ1, τ 2) = 1    
+
+> FX(τ1)−FX(τ2)
+
+nR τ2 
+
+> τ1
+
+F X (x) dx − (τ2 − τ1)F X (τ2)
+
+o
+
+, (7) and 
+
+mX, 1(τ1, τ 2) = R τ2         
+
+> τ1
+> FX(x)−FX(τ2)
+> FX(τ1)−FX(τ2)
+
+dx. (8) It can be directly verified that the following relationship between hX, 1(τ1, τ 2) and mX, 1(τ1, τ 2) holds. 
+
+hX, 1(τ1, τ 2) = 1 + ∂m X, 1(τ1,τ 2)
+
+> ∂τ 1
+
+mX, 1(τ1, τ 2) . (9) In addition, Ruiz and Navarro [32] introduced the doubly truncated mean past lifetime of X,which is defined by mX, 2(τ1, τ 2) = E(τ2 − X | τ1 ≤ X ≤ τ2). The mX, 1(τ1, τ 2) can be interpreted as the expected additional lifetime for a unit that was functioning at an age τ1 and ceased to function before an age τ2, and mX, 2(τ1, τ 2) as the inactivity expected time for this unit. It is well-known that both hX, 1(τ1, τ 2) and hX, 2(τ1, τ 2) univocally determine the distribution function of X. This is also true for the functions mX, 1(τ1, τ 2) and mX, 2(τ1, τ 2). The doubly truncated mean function for all ( τ1, τ 2) ∈ DX is defined by 
+
+μX (τ1, τ 2) = E{X | τ1 ≤ X ≤ τ2} = 1  
+
+> FX(τ2)−FX(τ1)
+
+R τ2 
+
+> τ1
+
+xf X (x) dx, 
+
+and from the definitions of mX, 1(τ1, τ 2) and mX, 2(τ1, τ 2) it holds that 
+
+μX (τ1, τ 2) = τ1 + mX, 1(τ1, τ 2) = τ2 − mX, 2(τ1, τ 2). (10) In the sequel, we give several results regarding the generalized hazard rate hX, 1(t, τ 2) and the doubly truncated mean residual lifetime mX, 1(τ1, τ 2), which, as stated previously, apart from being useful in themselves, are also needed for our subsequent analysis. 8Lemma 1. For any (τ1, τ 2) ∈ DX it holds (i)          
+
+> FX(x)−FX(τ2)
+> FX(τ1)−FX(τ2)
+
+= exp 
+
+n
+
+− R xτ1 hX, 1(t, τ 2) dt 
+
+o
+
+and, (11) 
+
+(ii) 
+
+mX, 1(τ1, τ 2) = R τ2 
+
+> τ1
+
+exp 
+
+n
+
+− R xτ1 hX, 1(t, τ 2) dt 
+
+o
+
+dx. (12) 
+
+Proof. (i) We have 
+
+hX, 1(t, τ 2) = − (F X (t)−F X (τ2)) ′     
+
+> FX(t)−FX(τ2)
+
+,
+
+and thus R xτ1         
+
+> (FX(t)−FX(τ2)) ′
+> FX(t)−FX(τ2)
+
+dt = − R xτ1 hX, 1(t, τ 2) dt, 
+
+which yields ln[ F X (x) − F X (τ2)] − ln[ F X (τ1) − F X (τ2)] = − R xτ1 hX, 1(t, τ 2) dt. 
+
+Therefore, we get ln 
+
+ F X (x)−F X (τ2)    
+
+> FX(τ1)−FX(τ2)
+
+
+
+= − R xτ1 hX, 1(t, τ 2) dt, 
+
+from which we immediately obtain (11). (ii) By integrating both sides of (11) from τ1 to τ2 and using (8), we obtain (12). 
+
+Lemma 2. (i) The generalized failure rate hX, 1(x, y ) is increasing (decreasing) in x for any fixed value of y, if and only if the function          
+
+> FX(x+t)−FX(y)
+> FX(x)−FX(y)
+
+, t > 0
+
+is decreasing (increasing) in x.(ii) If hX, 1(x, y ) increases (decreases) in x for any fixed value of y, then mX, 1(x, y ) decreases (increases) in x.Proof. (i) From the definition of hX, 1(x, y ) we have that 
+
+hX, 1(x, y ) = lim t→0+
+
+ 1 
+
+> t
+
+Pr( x ≤ X ≤ x + t | x ≤ X ≤ y)
+
+= lim t→0+
+
+n 1 
+
+> t
+
+· Pr( x≤X≤x+t)Pr( x≤X≤y)
+
+o
+
+= lim t→0+
+
+n 1 
+
+> t
+
+· Pr( x≤X≤y)−Pr( x+t≤X≤y)Pr( x≤X≤y)
+
+o
+
+= lim t→0+
+
+n 1
+
+> t
+
+
+
+1 − Pr( x+t≤X≤y)Pr( x≤X≤y)
+
+o 
+
+,
+
+and hence hX, 1(x, y ) is increasing (decreasing) in x if and only if the function 
+
+> Pr( x+t≤X≤y)Pr( x≤X≤y)
+
+is decreasing (increasing) in x. Thus, the proof is completed. (ii) From (8) we get 
+
+mX, 1(x, y ) = R τ2         
+
+> xFX(z)−FX(y)
+> FX(x)−FX(y)
+
+dz = R τ2−x         
+
+> 0
+> FX(x+t)−FX(y)
+> FX(x)−FX(y)
+
+dt, 
+
+9and thus 
+
+∂m X, 1(x, y )
+
+∂x = − F X (x+y−x)−F X (y)     
+
+> FX(x)−FX(y)
+
++ R τ2−x
+
+> 0
+> ∂∂x
+
+ F X (x+t)−F X (y)    
+
+> FX(x)−FX(y)
+
+
+
+dt 
+
+= R τ2−x
+
+> 0
+> ∂∂x
+
+ F X (x+t)−F X (y)    
+
+> FX(x)−FX(y)
+
+
+
+dt. 
+
+Therefore, if hX, 1(x, y ) is increasing (decreasing) in x, from (i) it follows that ∂m X, 1(x,y ) 
+
+> ∂x
+
+≤ (≥)0 and hence the result follows. 
+
+Lemma 3. Let X and Y be two non-negative absolutely continuous random variables with finite generalized failure rates hX, 1(τ1, τ 2) and hY, 1(τ1, τ 2), respectively. If for any (τ1, τ 2) ∈ DX ∩ DX it holds hX, 1(τ1, τ 2) ≤ (≥)hY, 1(τ1, τ 2), then for any increasing (decreasing) function φE[φ(Y ) | τ1 < Y ≤ τ2] ≤ (≥)E[φ(X) | τ1 ≤ X ≤ τ2]. (13) 
+
+Proof. We have 
+
+E[φ(X) | τ1 ≤ X ≤ τ2]= 1    
+
+> FX(τ1)−FX(τ2)
+
+R τ2 
+
+> τ1
+
+φ(x)fX (x)dx 
+
+= − 1    
+
+> FX(τ1)−FX(τ2)
+
+R τ2 
+
+> τ1
+
+φ(x)F ′ 
+
+> X
+
+(x)dx 
+
+= 1    
+
+> FX(τ1)−FX(τ2)
+
+n
+
+φ(τ1)F X (τ1) − φ(τ2)F X (τ2) + R τ2 
+
+> τ1
+
+φ′(x)F X (x)dx 
+
+o
+
+= φ(τ1) + 1    
+
+> FX(τ1)−FX(τ2)
+
+nR τ2 
+
+> τ1
+
+φ′(x)F X (x)dx − [φ(τ2) − φ(τ1)] F X (τ2)
+
+o
+
+= φ(τ1) + R τ2 
+
+> τ1
+
+φ′(x) F X (x)−F X (τ2)     
+
+> FX(τ1)−FX(τ2)
+
+dx. 
+
+Using (11), the last relationship implies that 
+
+E[φ(X) | τ1 ≤ X ≤ τ2] = φ(τ1) + R τ2 
+
+> τ1
+
+φ′(x) exp 
+
+n
+
+− R xτ1 hX, 1(t, τ 2)dt 
+
+o
+
+dx. (14) If hX, 1(τ1, τ 2) ≤ (≥)hY, 1(τ1, τ 2) and since φ′(x) ≥ (≤)0 if φ(x) is increasing (decreasing) in x ≥ 0, from (14) it follows that 
+
+E[φ(X) | τ1 ≤ X ≤ τ2] ≥ (≤)φ(τ1) + R τ2 
+
+> τ1
+
+φ′(x) exp 
+
+n
+
+− R xτ1 hY, 1(t, τ 2)dt 
+
+o
+
+dx 
+
+= E[φ(Y ) | τ1 < Y ≤ τ2],
+
+where the last equality follows again from (14). Hence, (13) was proved. 
+
+Remark 3. (i) From Navarro et al. [25, Proposition 2.1], we have that it holds hX, 1(τ1, τ 2) ≤
+
+hY, 1(τ1, τ 2) if and only if Y ≤lr X.(ii) Here we shall give another proof of (13) when the function φ(x) is increasing. For this we need to recall the following two stochastic orders. 
+
+• The random variable X is smaller than Y in the increasing convex order (denoted by X ≤icx 
+
+Y ) if (see [35]). 
+
+E[φ(X)] ≤ E[φ(Y )] , for all increasing convex functions φ. 
+
+• The random variable X is said to be smaller than Y in the mean doubly truncated order (denoted as X ≤mdt Y ) if μX (x, y ) ≤ μY (x, y ) for all (x, y ) ∈ DX ∩ DY (see [25]). 
+
+10 From Navarro et al. [25, Proposition 3.3], we get that if Y ≤lr X then Y ≤mdt X, which in turn implies that (see [25, Proposition 3.1]) 
+
+[Y | τ1 < Y ≤ τ2] ≤icx [X | τ1 ≤ X ≤ τ2].
+
+Hence it follows that if Y ≤lr X (which is equivalent to hX, 1(τ1, τ 2) ≤ hY, 1(τ1, τ 2)), then (13) holds. 
+
+For any non-negative absolutely continuous random variables X and Y consider the function 
+
+gX,Y (x; τ1, τ 2) =            
+
+> F Y(x)−F Y(τ2)
+> F Y(τ1)−F Y(τ2)
+> F X(x)−F X(τ2)
+> F X(τ1)−F X(τ2)
+> 
+
+= F Yτ 1,τ 2 (x)   
+
+> FXτ 1,τ 2(x)
+
+. (15) 
+
+Lemma 4. Let X and Y be two non-negative absolutely continuous random variables with fi-nite generalized failure rates hX, 1(τ1, τ 2) and hY, 1(τ1, τ 2), respectively. We have hY, 1(τ1, τ 2) ≤ (≥
+
+)hX, 1(τ1, τ 2) if and only if gX,Y (x; τ1, τ 2) is increasing in x.Proof. Using (11) we obtain that 
+
+gX,Y (x; τ1, τ 2) = exp 
+
+nR xτ1 [hX, 1(t, τ 2) − hY, 1(t, τ 2)] dt 
+
+o
+
+,
+
+which implies that   
+
+> ∂g X,Y (x;τ1,τ 2)
+> ∂x
+
+= [ hX, 1(t, τ 2) − hY, 1(t, τ 2)] gX,Y (x; τ1, τ 2),
+
+from which the result follows since gX,Y (x; τ1, τ 2) ≥ 0. From Remark 3 (i) and Lemma 4 it follows that X ≤lr Y if and only if the function gX,Y (x; τ1, τ 2)is increasing in x.Let Xe denote the equilibrium random variable corresponding to X. If fXe and F Xe denote respectively the probability density function and the survival function of Xe, then provided that 
+
+E(X) < ∞,
+
+fXe (x) = F X (x) 
+
+> E(X)
+
+and F Xe (x) =      
+
+> R∞
+> xFX(t)dt E(X)
+
+.
+
+Let also hXe,1(x, y ) = fXe (x)     
+
+> FXe (x)−FXe (y)
+
+denote the GFR of Xe.
+
+Lemma 5. If the generalized failure rate hX, 1(x, y ) is decreasing (increasing) in x for any fixed value of y, then 
+
+hXe,1(x, y ) ≤ (≥)hX, 1(x, y ).
+
+Proof. From (15), we get that 
+
+gX,X e (x; τ1, τ 2) = F X (τ1)−F X (τ2)     
+
+> FXe (τ1)−FXe (τ2)
+
+· F Xe (x)−F Xe (τ2)    
+
+> FX(x)−FX(τ2)
+
+= F X (τ1)−F X (τ2)     
+
+> FXe (τ1)−FXe (τ2)
+
+·       
+
+> Rτ2
+> xfXe (t)dt
+> Rτ2
+> xfX(t)dt
+
+,
+
+and ∂∂x 
+
+ R τ2     
+
+> xfXe (t)dt
+> Rτ2
+> xfX(t)dt
+
+
+
+= 1
+
+(R τ2  
+
+> xfX(t)dt
+
+)2E(X)
+
+R τ2
+
+> x
+
+fX (x)F X (t) − fX (t)F X (x) dt. 
+
+If hX, 1(x, y ) is decreasing in x, it also follows that the failure rate hX (x) is decreasing in x, and thus for t ≥ x it holds hX (x) ≥ hX (t) implying that fX (x)F X (t) ≥ fX (t)F X (x). Therefore, it holds that gX,X e (x; τ1, τ 2) is increasing in x, and hence the result follows from Lemma 4. Similarly, if hX, 1(x, y ) is increasing in x, it can be shown that gXe,X (x; τ1, τ 2) is increasing in x and thus from Lemma 4 we obtain hX, 1(x, y ) ≤ hXe,1(x, y ).
+
+11 3 Representations for H(X; τ1, τ 2)
+
+From (5) and using (8), an alternative representation of H(X; τ1, τ 2) is given by 
+
+H(X; τ1, τ 2) = mX, 1(τ1, τ 2) ln[ F X (τ1) − F X (τ2)] − R τ2         
+
+> τ1
+> FX(x)−FX(τ2)
+> FX(τ1)−FX(τ2)
+
+ln[ F X (x) − F X (τ2)] dx. (16) 
+
+Example 1. Table 1 provides the values of H(X; τ1, τ 2) based on the survival functions F (x) of the following distributions: The power distribution (PD) with F (x) = 1 − (x/b )a for 0 < x < b ,
+
+a > 0 and b̸ = 1 , the beta distribution with F (x) = 1 − xc for 0 < x < 1 and c > 0, the exponential distribution with F (x) = exp( −λx ) for x ≥ 0 and λ > 0, and the Lomax (or Pareto type II) distribution with F (x) = [ λ/ (λ + x)] α for x ≥ 0 and λ, α > 0. In Table 1, we can easily observe that H(X; τ1, τ 2) is decreasing in τ1 for fixed values of τ2, and increasing in τ2 for fixed values of 
+
+τ1.
+
+Table 1: Values of H(X; τ1, τ 2) for various distributions. 
+
+τ1 τ2 PD(0.1, 0.9) PD(0.3, 0.9) Beta(0.2,1) Beta(0.5,1) 0.1 0.6 0.13182 0.13180 0.13193 0.13084 0.3 0.6 0.07722 0.07687 0.07705 0.07643 0.5 0.6 0.02522 0.02517 0.02520 0.02513 0.1 0.7 0.15839 0.15862 0.15868 0.15752 0.3 0.7 0.10347 0.10298 0.10325 0.10232 0.5 0.7 0.05078 0.05063 0.05071 0.05047 0.1 0.9 0.21145 0.21241 0.21223 0.21111 0.3 0.9 0.15629 0.15559 0.15599 0.15447 0.5 0.9 0.10258 0.10214 0.10237 0.10162 
+
+τ1 τ2 Exp(0.5) Exp(1) Lomax(2,1) Lomax(3,1) 3 10 1.52470 0.97614 1.61098 1.45535 7 10 0.76254 0.68870 0.77343 0.77164 9 10 0.25514 0.25652 0.25364 0.25439 3 12 1.73694 0.99480 1.95250 1.69662 7 12 1.20018 0.90432 1.28394 1.26233 9 12 0.76254 0.68870 0.77200 0.77252 3 15 1.90245 0.99955 2.38429 1.96523 7 15 1.64355 0.98871 2.00701 1.91438 9 15 1.37740 0.95123 1.54259 1.51885 The following theorem shows the relation between the entropy H(X; τ1, τ 2) and the doubly truncated mean residual lifetime mX, 1(τ1, τ 2) of X.
+
+Theorem 1. Let X be a non-negative absolutely continuous random variable. Then, for all 
+
+(τ1, τ 2) ∈ DX
+
+H(X; τ1, τ 2) = E[mX, 1(X, τ 2) | τ1 ≤ X ≤ τ2]. (17) 
+
+Proof. It holds 
+
+E[mX, 1(X, τ 2) | τ1 ≤ X ≤ τ2] = 1    
+
+> FX(τ1)−FX(τ2)
+
+R τ2 
+
+> τ1
+
+mX, 1(t, τ 2)fX (t)dt, 
+
+12 and hence using (8) we get 
+
+E[mX, 1(X, τ 2) | τ1 ≤ X ≤ τ2] = 1    
+
+> FX(τ1)−FX(τ2)
+
+× R τ2    
+
+> τ1
+> 1
+> FX(t)−FX(τ2)
+
+R τ2 
+
+> t
+
+[F X (x) − F X (τ2)] dx f X (t)dt. 
+
+Applying Fubini’s Theorem, the last relation yields 
+
+E[mX, 1(X, τ 2) | τ1 ≤ X ≤ τ2]= 1    
+
+> FX(τ1)−FX(τ2)
+
+R τ2 
+
+> τ1
+
+[F X (x) − F X (τ2)] 
+
+R xτ1      
+
+> fX(t)
+> FX(t)−FX(τ2)
+
+dt 
+
+
+
+dx 
+
+= − 1    
+
+> FX(τ1)−FX(τ2)
+
+R τ2 
+
+> τ1
+
+[F X (x) − F X (τ2)] 
+
+R xτ1 
+
+> ddt
+
+ln[ F X (t) − F X (τ2)] dt 
+
+
+
+dx 
+
+= H(X; τ1, τ 2).
+
+When τ2 → ∞ , (17) is reduced to E(X; t) = E[mX (X) | X > t ] which is proved in Theorem 3.1 of [1]. 
+
+Example 2. If X is uniformly distributed in [0 , b ], then mX, 1(τ1, τ 2) = τ2−τ1 
+
+> 2
+
+, and hence from Theorem 1 
+
+H(X; τ1, τ 2) = E  τ2−X 
+
+> 2
+
+| τ1 ≤ X ≤ τ2
+
+ = τ2−τ1 
+
+> 4
+
+.
+
+This shows that the CRIE for the uniform distribution is an increasing function in τ2 and a de-creasing function in τ1. Hence, as τ2 gets smaller (larger), the uncertainty gets smaller (larger). Similarly, as τ1 gets larger (smaller), the uncertainty gets smaller (larger). 
+
+In Theorem 2 we give a covariance representation of H(X; τ1, τ 2), which is very useful to obtain upper bounds of this information measure. 
+
+Theorem 2. Let X be a non-negative absolutely continuous random variable. Then for all (τ1, τ 2) ∈
+
+DX
+
+H(X; τ1, τ 2) = Cov  X, − ln[ F X (X) − F X (τ2)] | τ1 ≤ X ≤ τ2
+
+ . (18) 
+
+Proof. We have Cov  X, − ln[ F X (X) − F X (τ2)] | τ1 ≤ X ≤ τ2
+
+
+
+= −E[X ln[ F X (X) − F X (τ2)] | τ1 ≤ X ≤ τ2]+ μX (τ1, τ 2)E[ln[ F X (X) − F X (τ2)] | τ1 ≤ X ≤ τ2]. (19) It holds 
+
+E[ln[ F X (X) − F X (τ2)] | τ1 ≤ X ≤ τ2]= 1    
+
+> FX(τ1)−FX(τ2)
+
+R τ2 
+
+> τ1
+
+ln[ F X (x) − F X (τ2)] fX (x)dx 
+
+= 1    
+
+> FX(τ1)−FX(τ2)
+
+R τ2 
+
+> τ1
+
+ln[ F X (x) − F X (τ2)]( F X (x)) ′dx 
+
+= − 1    
+
+> FX(τ1)−FX(τ2)
+
+R τ2 
+
+> τ1
+
+ln[ F X (x) − F X (τ2)]( F X (x) − F X (τ2)) ′dx 
+
+= ln[ F X (τ1) − F X (τ2)] − 1, (20) and similarly, 
+
+E[X ln[ F X (X) − F X (τ2)] | τ1 ≤ X ≤ τ2]= − 1    
+
+> FX(τ1)−FX(τ2)
+
+R τ2 
+
+> τ1
+
+x ln[ F X (x) − F X (τ2)]( F X (x) − F X (τ2)) ′dx 
+
+= τ1 ln[ F X (τ1) − F X (τ2)] + 1    
+
+> FX(τ1)−FX(τ2)
+
+R τ2 
+
+> τ1
+
+[F X (x) − F X (τ2)] ln[ F X (x) − F X (τ2)] dx − μX (τ1, τ 2). (21) 13 Hence, substituting (20) and (21) into the right-hand side of (19) we obtain Cov  X, − ln[ F X (X) − F X (τ2)] | τ1 ≤ X ≤ τ2
+
+ = −τ1 ln[ F X (τ1) − F X (τ2)] 
+
+− R τ2         
+
+> τ1
+> FX(x)−FX(τ2)
+> FX(τ1)−FX(τ2)
+
+ln[ F X (x) − F X (τ2)] dx 
+
++ μX (τ1, τ 2) ln[ F X (τ1) − F X (τ2)] . (22) Now, using (8) and (10) it follows that 
+
+μX (τ1, τ 2) = τ1 + R τ2         
+
+> τ1
+> FX(x)−FX(τ2)
+> FX(τ1)−FX(τ2)
+
+dx, 
+
+and substituting this into the right-hand side of (22), we get Cov  X, − ln F X (X) − F X (τ2) τ1 ≤ X ≤ τ2
+
+
+
+= − R τ2         
+
+> τ1
+> FX(x)−FX(τ2)
+> FX(τ1)−FX(τ2)
+
+ln F X (x) − F X (τ2) dx 
+
++ ln F X (τ1) − F X (τ2) R τ2         
+
+> τ1
+> FX(x)−FX(τ2)
+> FX(τ1)−FX(τ2)
+
+dx 
+
+= H(X; τ1, τ 2).
+
+From Theorem 2, we can directly obtain the following corollary. 
+
+Corollary 1. Let X be a non-negative absolutely continuous random variable. Then it holds 
+
+E(X; t) = Cov( X, − ln F X (X) | X > t ).
+
+For an absolutely non-negative continuous random variable X with survival function F X (x) = 1 − FX (x) and finite mean value, let us now recall that the relevation transform # (where the symbol # denotes the relevation transform of FX by itself) allows us to define a new random variable, denoted as X#X, having survival function (F X #F X )( x) = F X#X (x) = F X (x) + F X (x) R x    
+
+> 0
+> fX(u)
+> FX(u)
+
+du, x ≥ 0. (23) The relevation transform was introduced by Krakowski [20]. For further results, see [4], [14], [29], [5], [8], and [28] as well as the references therein. Based on (23), we can define the revelation transform of the doubly truncated random variable 
+
+Xτ1,τ 2 = X|τ1 ≤ X ≤ τ2, i.e., the relevation transform of FXτ1,τ 2 by itself. Thus, we have the following definition. 
+
+Definition 4. Let X be a non-negative absolutely continuous random variable. The survival func-tion of the relevation transform of Xτ1,τ 2 #Xτ1,τ 2 , where Xτ1,τ 2 = X|τ1 ≤ X ≤ τ2, is given by 
+
+(F Xτ1,τ 2 #F Xτ1,τ 2 )( x) = F Xτ1,τ 2 #Xτ1,τ 2 (x)+ F Xτ1,τ 2 #Xτ1,τ 2 (x) R xτ1    
+
+> fXτ 1,τ 2(u)
+> FXτ 1,τ 2(u)
+
+du, τ1 ≤ x ≤ τ2. (24) It can be verified that F Xτ1,τ 2 #F Xτ1,τ 2 is a survival function. Indeed, it holds (F Xτ1,τ 2 #F Xτ1,τ 2 )( τ1) = 1; (F Xτ1,τ 2 #F Xτ1,τ 2 )( τ2) = 0 14 and ddx (F Xτ1,τ 2 #F Xτ1,τ 2 )( x) = −fXτ1,τ 2 (x) R xτ1 hX, 1(u, τ 2) du < 0,
+
+implying that F Xτ1,τ 2 #F Xτ1,τ 2 is a survival function. From (24), we can directly obtain the following alternative representation for the survival func-tion of Xτ1,τ 2 #Xτ1,τ 2 .(F Xτ1,τ 2 #F Xτ1,τ 2 )( x) = F Xτ1,τ 2 (x) + F Xτ1,τ 2 (x) R xτ1 hX, 1(u, τ 2) du. (25) Also, by setting Λ X (x; τ1, τ 2) to the cumulative hazard rate at the age x for the doubly truncated random variable Xτ1,τ 2 , i.e., ΛX (x; τ1, τ 2) = R xτ1 hX, 1(u, τ 2) du, τ1 ≤ x ≤ τ2,
+
+or equivalently by Lemma 1 (i) ΛX (x; τ1, τ 2) = − ln F Xτ1,τ 2 (x) = − ln 
+
+ F X (x)−F X (τ2)    
+
+> FX(τ1)−FX(τ2)
+
+
+
+, τ1 ≤ x ≤ τ2,
+
+then from (25) it also follows that (F Xτ1,τ 2 #F Xτ1,τ 2 )( x) = [1 + Λ X (x; τ1, τ 2)] F Xτ1,τ 2 (x).
+
+For τ1 = 0, τ2 → ∞ , the last relation is reduced to the well-known identity (see, for example, rel. (10) in [28]) (F X #F X )( x) = [1 + Λ X (x)] F X (x).
+
+From (23), it follows that 
+
+E(X) = R ∞ 
+
+> 0
+
+(F X #F X )( x) dx − E(X), (26) that is, the CRE of X can be written as the difference between the mean values of X#X and X.The next theorem provides an alternative representation for H(X; τ1, τ 2) based on the relevation transform of FXτ1,τ 2 by itself, which also generalizes (26). 
+
+Theorem 3. If X is a non-negative absolutely continuous random variable, then, for all (τ1, τ 2) ∈
+
+DX
+
+H(X; τ1, τ 2) = R τ2 
+
+> τ1
+
+(F Xτ1,τ 2 #F Xτ1,τ 2 )( x) dx − mX, 1(τ1, τ 2). (27) 
+
+Proof. Using (25) and (8) we obtain 
+
+R τ2 
+
+> τ1
+
+(F Xτ1,τ 2 #F Xτ1,τ 2 )( x) dx = mX, 1(τ1, τ 2) + R τ2 
+
+> τ1
+
+F Xτ1,τ 2 (x) R xτ1 hX, 1(u, τ 2) du dx. 
+
+Applying Fubini’s Theorem, the last relationship can be rewritten as 
+
+R τ2 
+
+> τ1
+
+(F Xτ1,τ 2 #F Xτ1,τ 2 )( x) dx = mX, 1(τ1, τ 2) + R τ2
+
+> τ1
+
+R τ2 
+
+> u
+
+hX, 1(u, τ 2)F Xτ1,τ 2 (x) dx du 
+
+= mX, 1(τ1, τ 2) + R τ2     
+
+> τ1
+> fX(u)
+> FX(τ1)−FX(τ2)
+
+R τ2         
+
+> uFX(x)−FX(τ2)
+> FX(u)−FX(τ2)
+
+dx 
+
+
+
+du 
+
+= mX, 1(τ1, τ 2) + 1    
+
+> FX(τ1)−FX(τ2)
+
+R τ2 
+
+> τ1
+
+mX, 1(u, τ 2)fX (u) du 
+
+= mX, 1(τ1, τ 2) + E[mX, 1(X, τ 2) | τ1 ≤ X ≤ τ2],
+
+and hence the result follows from Theorem 1. It is easy to see that for τ1 = 0, τ2 → ∞ , (27) is reduced to (26). 15 Remark 4. (i) If we consider the random variable Xt = X|X > t , then from Theorem 3 it follows that 
+
+E(X; t) = R ∞ 
+
+> t
+
+(F Xt #F Xt )( x) dx − mX (t).
+
+(ii) For the residual lifetime random variable X(t) = X − t|X > t , it can be easily shown that 
+
+R ∞ 
+
+> 0
+
+(F X(t) #F X(t) )( x) dx = mX (t) + E[mX (X) | X > t ],
+
+and since the dynamic cumulative residual entropy E(X; t) satisfies (see [1]) 
+
+E(X; t) = E[mX (X) | X > t ],
+
+it also follows that 
+
+E(X; t) = R ∞ 
+
+> 0
+
+(F X(t) #F X(t) )( x) dx − mX (t).
+
+The following results consider the evaluation of CRIE under increasing transformations. 
+
+Theorem 4. Let X be a non-negative absolutely continuous random variable and Y = φ(X),where φ is an increasing and differentiable function with continuous derivative φ′. Then, for all 
+
+(τ1, τ 2) ∈ DX
+
+H(Y ; τ1, τ 2) = − R φ−1(τ2) 
+
+> φ−1(τ1)
+
+φ′(x) F X (x)−F X (φ−1(τ2))      
+
+> FX(x)−FX(φ−1(τ2))
+
+ln 
+
+ F X (x)−F X (φ−1(τ2))     
+
+> FX(φ−1(τ1)) −FX(φ−1(τ2))
+
+
+
+dx. 
+
+Proof. From (5) we have 
+
+H(Y ; τ1, τ 2) = − R τ2         
+
+> τ1
+> FY(y)−FY(τ2)
+> FY(τ1)−FY(τ2)
+
+ln 
+
+ F Y (y)−F Y (τ2)    
+
+> FY(τ1)−FX(τ2)
+
+
+
+dy. 
+
+Then, by setting y = φ(x), we obtain F Y (y) = F X (φ−1(y)), implying that 
+
+H(Y ; τ1, τ 2) = − R φ−1(τ2)         
+
+> φ−1(τ1)
+> FX(x)−FX(φ−1(τ2))
+> FX(φ−1(τ1)) −FX(φ−1(τ2))
+
+ln 
+
+ F X (x)−F X (φ−1(τ2))     
+
+> FX(φ−1(τ1)) −FX(φ−1(τ2))
+
+
+
+φ′(x) dx, 
+
+and hence, the result follows. 
+
+Proposition 1. Let X be a non-negative absolutely continuous random variable and Y = aX + b,where a > 0, b ≥ 0. Then 
+
+H(Y ; τ1, τ 2) = aH (X; τ1−ba , τ2−ba ).
+
+Proof. Let y = φ(x) = ax + b. Then, φ−1(ti) = ti−ba and since a > 0, the function φ is increasing with φ′(x) = a. Applying Theorem 4, the result follows. In the next section, we shall give bounds for H(Y ; τ1, τ 2), some of which are derived by using the results of this section. 
+
+# 4 Bounds for H(X; τ1, τ 2)
+
+Since for many distributions it is very difficult to analytically compute the measure H(X; τ1, τ 2), it is useful to obtain upper and lower bounds for it. In Theorem 5 by using the well-known bound Cov( X, Y ) ≤ pVar( X)pVar( Y ),
+
+for two random variables X and Y , we obtain an upper bound for H(X; τ1, τ 2) in terms of the conditional variance Var( X|τ1 ≤ X ≤ τ2). 16 Theorem 5. Let X be a non-negative absolutely continuous random variable. Then, for all 
+
+(τ1, τ 2) ∈ DX
+
+H(X; τ1, τ 2) ≤ pVar( X|τ1 ≤ X ≤ τ2). (28) 
+
+Proof. From Theorem 2 it follows that 
+
+H(X; τ1, τ 2) = Cov( X, − ln[ F X (X) − F X (τ2)] |τ1 ≤ X ≤ τ2)
+
+≤ pVar( X|τ1 ≤ X ≤ τ2)
+
+q
+
+Var( − ln[ F X (X) − F X (τ2)] |τ1 ≤ X ≤ τ2)= pVar( X|τ1 ≤ X ≤ τ2)
+
+q
+
+Var(ln[ F X (X) − F X (τ2)] |τ1 ≤ X ≤ τ2). (29) Since 
+
+E{(ln[ F X (X) − F X (τ2)]) 2|τ1 ≤ X ≤ τ2}
+
+= − R τ2        
+
+> τ1
+> (ln[ FX(x)−FX(τ2)]) 2
+> FX(τ1)−FX(τ2)
+
+ F X (x) − F X (τ2)′ dx 
+
+= (ln[ F X (τ1) − F X (τ2)]) 2 − 2 R τ2         
+
+> τ1
+> ln[ FX(x)−FX(τ2)]
+> FX(τ1)−FX(τ2)
+
+fX (x)dx 
+
+= (ln[ F X (τ1) − F X (τ2)]) 2 − 2E(ln[ F X (X) − F X (τ2)] |τ1 ≤ X ≤ τ2)= (ln[ F X (τ1) − F X (τ2)]) 2 − 2 ln[ F X (τ1) − F X (τ2)] + 2 ,
+
+where the last equality follows from (20). Using again (20) and the last relationship, it follows that Var(ln[ F X (X) − F X (τ2)] |τ1 ≤ X ≤ τ2)= E{(ln[ F X (X) − F X (τ2)]) 2|τ1 ≤ X ≤ τ2}− { E(ln[ F X (X) − F X (τ2)] |τ1 ≤ X ≤ τ2)}2
+
+= (ln[ F X (τ1) − F X (τ2)]) 2 − 2 ln[ F X (τ1) − F X (τ2)] + 2 
+
+− (ln[ F X (τ1) − F X (τ2)] − 1) 2
+
+= 1 . (30) Now, (28) follows directly from (29) and (30). From Theorem 5 it follows that if Var( X|τ1 ≤ X ≤ τ2) < ∞, then H(X; τ1, τ 2) is finite. Also, from Theorem 5 we get the following corollary. 
+
+Corollary 2. Let X be a non-negative absolutely continuous random variable. Then 
+
+E(X; t) ≤ pVar( X|X > t ).
+
+Using again Theorem 2 we can also obtain a different upper bound for H(X; τ1, τ 2) in terms of 
+
+E[|X − E(X|τ1 ≤ X ≤ τ2)|| τ1 ≤ X ≤ τ2]. 
+
+Theorem 6. Let X be a non-negative absolutely continuous random variable. Then, for all 
+
+(τ1, τ 2) ∈ DX
+
+H(X; τ1, τ 2) ≤ 2E[|X − E(X|τ1 ≤ X ≤ τ2)| ln |X − E(X|τ1 ≤ X ≤ τ2)|| τ1 ≤ X ≤ τ2]+ 4e−1
+
+√F X (τ1)−F X (τ2) . (31) 17 Proof. From (18) and (19) it follows that H(X; τ1, τ 2) can be equivalently rewritten as 
+
+H(X; τ1, τ 2) = E [X − E(X|τ1 ≤ X ≤ τ2)]( − ln[ F X (X) − F X (τ2)]) |τ1 ≤ X ≤ τ2 ,
+
+and following similar steps as in Rao [30, Section 6] we obtain 
+
+H(X; τ1, τ 2) ≤2E(|X − E(X|τ1 ≤ X ≤ τ2)| ln |X − E(X|τ1 ≤ X ≤ τ2)|| τ1 ≤ X ≤ τ2)+ 2 E
+
+
+
+− exp 
+
+
+
+−
+
+q
+
+ln[ F X (X) − F X (τ2)] − 1
+
+
+
+|τ1 ≤ X ≤ τ2
+
+
+
+. (32) It holds 
+
+E
+
+
+
+− exp 
+
+
+
+−
+
+q
+
+ln[ F X (X) − F X (τ2)] − 1
+
+
+
+|τ1 ≤ X ≤ τ2
+
+
+
+= e−1 R τ2         
+
+> τ1
+> [FX(x)−FX(τ2)] −1/2
+> FX(τ1)−FX(τ2)
+
+fX (x) dx 
+
+= e−1 R F X (τ1)−F X (τ2)0     
+
+> u−1/2
+> FX(τ1)−FX(τ2)
+
+du 
+
+= 2e−1
+
+√F X (τ1)−F X (τ2) ,
+
+and hence the bound in (31) follows directly from (32) and the last relationship. When τ1 = 0 and τ2 → ∞ , the bound in (31) is reduced to the upper bound for E(X) given in Rao [30, Section 6]. When τ2 → ∞ , from Theorem 6 we immediately obtain the following corollary. 
+
+Corollary 3. Let X be a non-negative absolutely continuous random variable. Then 
+
+E(X; t) ≤ 2E(|X − E(X | X > t )| ln |X − E(X | X > t )| | X > t ) + 4e−1
+
+√F X (t) .
+
+Proposition 2. Let X be a non-negative absolutely continuous random variable. Then, for all 
+
+(τ1, τ 2) ∈ DX
+
+H(X; τ1, τ 2) ≤ mX, 1(τ1, τ 2) ln 
+
+ τ2−τ1
+
+> mX, 1(τ1,τ 2)
+
+
+
+.
+
+Proof. From Log-Sum inequality we have 
+
+R τ2 
+
+> τ1
+
+[F X (x) − F X (τ2)] ln 
+
+ F X (x)−F X (τ2)    
+
+> FX(τ1)−FX(τ2)
+
+
+
+dx 
+
+≥
+
+R τ2 
+
+> τ1
+
+[F X (x) − F X (τ2)] dx 
+
+
+
+ln 
+
+ R τ2         
+
+> τ1[FX(x)−FX(τ2)] dx
+> (τ2−τ1)[ FX(τ1)−FX(τ2)]
+
+
+
+.
+
+Using (8), the above relationship yields 
+
+R τ2 
+
+> τ1
+
+[F X (x) − F X (τ2)] ln 
+
+ F X (x)−F X (τ2)    
+
+> FX(τ1)−FX(τ2)
+
+
+
+dx 
+
+≥ mX, 1(τ1, τ 2)[ F X (τ1) − F X (τ2)] ln 
+
+ mX, 1(τ1,τ 2)
+
+> τ2−τ1
+
+
+
+,
+
+which proves the upper bound. Using the inequality 1 − 1 
+
+> x
+
+≤ ln x ≤ x − 1 for x ≥ 0, from the definition of H(X; τ1, τ 2) we can easily obtain a two-sided bound for H(X; τ1, τ 2) given in the next proposition. 18 Proposition 3. Let X be a non-negative absolutely continuous random variable. Then, for all 
+
+(τ1, τ 2) ∈ DX    
+
+> 1[FX(τ1)−FX(τ2)] 2
+
+R τ2 
+
+> τ1
+
+[F X (x) − F X (τ2)][ F X (τ1) − F X (x)] dx ≤ H(X; τ1, τ 2) ≤ mX, 2(τ1, τ 2).
+
+Remark 5. (i) Note that the lower bound in Proposition 3 can be equivalently rewritten as 
+
+H(X; τ1, τ 2) ≥ R τ2 
+
+> τ1
+
+F Xτ1,τ 2 (x)FXτ1,τ 2 (x)dx. 
+
+(ii) When τ1 = 0 , τ2 → ∞ , from Proposition 3 we obtain that 
+
+E(X) ≥ R ∞ 
+
+> 0
+
+F X (x)FX (x)dx, 
+
+which is also given in Rao [30, rel. (5)]. (iii) When τ2 → ∞ , from Proposition 2 we obtain the following lower bound for the dynamic cumulative residual entropy of X.
+
+E(X; t) ≥ mX (t) − 1[F X (t)] 2
+
+R ∞ 
+
+> t
+
+[F X (x)] 2dx. 
+
+A different lower bound for H(X; τ1, τ 2) than that obtained in Proposition 3 is given in Propo-sition 4. 
+
+Proposition 4. Let X be a non-negative absolutely continuous random variable. Then, for all 
+
+(τ1, τ 2) ∈ DX
+
+H(X; τ1, τ 2) ≥ 1     
+
+> FX(τ1)−FX(τ2)
+
+E [F X (X) − F X (τ2)] mX, 1(X, τ 2) | τ1 ≤ X ≤ τ2 .
+
+Proof. For u ≥ τ1 it holds F X (u) ≤ F X (τ1), and thus 
+
+R xτ1 hX, 1(u, τ 2)du = R xτ1      
+
+> fX(u)
+> FX(u)−FX(τ2)
+
+du ≥ R xτ1      
+
+> fX(u)
+> FX(τ1)−FX(τ2)
+
+du. 
+
+Therefore, from (25) we get 
+
+R τ2
+
+> τ1
+
+ F Xτ1,τ 2 #F Xτ1,τ 2
+
+ (x)dx ≥ R τ2 
+
+> τ1
+
+F Xτ1,τ 2 (x)dx + 1    
+
+> FX(τ1)−FX(τ2)
+
+R τ2 
+
+> τ1
+
+F Xτ1,τ 2 (x) R xτ1 fX (u)du dx, 
+
+or equivalently, by using Theorem 3 
+
+H(X; τ1, τ 2) ≥ 1    
+
+> FX(τ1)−FX(τ2)
+
+R τ2 
+
+> τ1
+
+F Xτ1,τ 2 (x) R xτ1 fX (u)du dx. 
+
+Applying Fubini’s Theorem, it follows that 
+
+H(X; τ1, τ 2) ≥ 1    
+
+> FX(τ1)−FX(τ2)
+
+R τ2 
+
+> τ1
+
+fX (u) R τ2 
+
+> u
+
+F Xτ1,τ 2 (x)dx du, 
+
+and since 
+
+R τ2 
+
+> u
+
+F Xτ1,τ 2 (x)dx = 1    
+
+> FX(τ1)−FX(τ2)
+
+R τ2 
+
+> u
+
+[F X (x) − F X (τ2)] dx = F X (u)−F X (τ2)     
+
+> FX(τ1)−FX(τ2)
+
+mX, 1(u, τ 2),
+
+we obtain 
+
+H(X; τ1, τ 2) ≥ 1[F X (τ1)−F X (τ2)] 2
+
+R τ2 
+
+> τ1
+
+[F X (u) − F X (τ2)] mX, 1(u, τ 2)fX (u)du, 
+
+which completes the proof. 19 Corollary 4. Let X be a non-negative absolutely continuous random variable. If hX, 1(x, y ) is decreasing in x for any fixed value of y, then, for all (τ1, τ 2) ∈ DX
+
+H(X; τ1, τ 2) ≥ R τ2
+
+> τ1
+
+ F X (x)−F X (τ2)    
+
+> FX(τ1)−FX(τ2)
+
+2
+
+dx. 
+
+Proof. If hX, 1(x, y ) is decreasing in x, then mX, 1(x, y ) is increasing in x (see Lemma 2 (ii)), and hence from (9) it follows that 
+
+mX, 1(x, y ) ≥ 1
+
+hX, 1(x, y ) .
+
+Then, from Proposition 4 we have 
+
+H(X; τ1, τ 2) ≥ 1[F X (τ1)−F X (τ2)] 2
+
+R τ2 
+
+> τ1
+
+[F X (u) − F X (τ2)] 1 
+
+> hX, 1(u,τ 2)
+
+fX (u)du, 
+
+and using (6) the result follows. Since hX, 1(x, ∞) = hX (x), from Corollary 4 we immediately obtain the following corollary. 
+
+Corollary 5. Let X be a non-negative absolutely continuous random variable. If X is DFR, then 
+
+E(X; t) ≥ R ∞
+
+> t
+
+ F X (x)  
+
+> FX(t)
+
+2
+
+dx, 
+
+and 
+
+E(X) ≥ R ∞
+
+> 0
+
+ F X (x)2 dx. 
+
+Remark 6. (i) Let LC = R ∞ 
+
+> 0
+
+(F X (x)) 2dx be the lower bound for E(X) given in Corollary 5, and 
+
+LR = R ∞ 
+
+> 0
+
+F X (x)FX (x)dx be the general lower bound for E(X) given by [30]. Suppose that X is absolutely continuous and DFR. Let xm be the median of X, i.e., xm is the solution of FX (xm) = 
+
+F X (xm) = 12 . It holds that LC ≥ (≤)LR if and only if FX (x) ≤ (≥) 12 , i.e., FX (x) ≤ (≥)FX (xm),and since FX (x) is increasing in x, it follows that LC ≥ (≤)LR if and only if x ≤ (≥)xm. Therefore, if X is non-negative absolutely continuous and DFR, then the bound LC is better than LR for 
+
+x < x m, and LR is better than LC for x > x m.(ii) Recently, Jahanshahi et al. [12] proposed an alternative measure of uncertainty for non-negative random variables called cumulative residual extropy (CRJ), which is denoted by CRJ (X) = − 12
+
+R ∞ 
+
+> 0
+
+(F X (x)) 2dx. 
+
+Therefore, from Corollary 5 it follows that if the non-negative absolutely continuous random variable 
+
+X is DFR, then E(X) and CRJ (X) satisfy the relationship 
+
+E(X) ≥ − 2CRJ (X).
+
+In Proposition 5, as in [31], we obtain a lower bound for H(X; τ1, τ 2) in terms of the entropy 
+
+S(X; τ1, τ 2), as well as an upper bound using the Log-Sum inequality. 
+
+Proposition 5. Let X be a non-negative absolutely continuous random variable. Then, for all 
+
+(τ1, τ 2) ∈ DX
+
+H(X; τ1, τ 2) ≥ C exp {S(X; τ1, τ 2)},
+
+where C = exp 
+
+nR 10 ln( u| ln u|) du 
+
+o
+
+≈ 0.2065 , S(X; τ1, τ 2) is defined by (4), and 
+
+H(X; τ1, τ 2) ≤ mX, 1(τ1, τ 2) ln 
+
+ τ2 − τ1
+
+mX, 1(τ1, τ 2)
+
+
+
+.
+
+20 Proof. Using again the Log-Sum inequality, then as in Rao et al. [31], we have 
+
+R τ2
+
+τ1
+
+fX (x)
+
+F X (τ1)−F X (τ2) ln        
+
+> fX(x)
+> F X(τ1)−F X(τ2)
+> F X(x)−F X(τ2)
+> F X(τ1)−F X(τ2)
+
+F X (x)−F X (τ2)
+
+F X (τ1)−F X (τ2)
+
+!
+
+dx ≥ ln 
+
+ 1
+
+H(X;τ1,τ 2)
+
+
+
+,
+
+implying that 
+
+−S(X; τ1, τ 2) − R τ2
+
+τ1
+
+fX (x)
+
+F X (τ1)−F X (τ2) ln 
+
+ F X (x)−F X (τ2)
+
+F X (τ1)−F X (τ2)
+
+F X (x)−F X (τ2)
+
+F X (τ1)−F X (τ2)
+
+
+
+dx ≥ ln 
+
+ 1
+
+H(X;τ1,τ 2)
+
+
+
+,
+
+which yields ln H(X; τ1, τ 2) ≥ R τ2
+
+τ1
+
+fX (x)
+
+F X (τ1)−F X (τ2) ln 
+
+ F X (x)−F X (τ2)
+
+F X (τ1)−F X (τ2)
+
+F X (x)−F X (τ2)
+
+F X (τ1)−F X (τ2)
+
+
+
+dx + S(X; τ1, τ 2).
+
+By setting 
+
+u = F X (x)−F X (τ2)
+
+F X (τ1)−F X (τ2) ,
+
+then the integral becomes R 10 ln( u| ln u|) du, 
+
+and hence the lower bound follows. Using again the Log-Sum inequality, we obtain 
+
+R τ2
+
+τ1 [F X (x) − F X (τ2)] ln 
+
+ F X (x)−F X (τ2)
+
+F X (τ1)−F X (τ2)
+
+
+
+dx 
+
+≥
+
+R τ2
+
+τ1 [F X (x) − F X (τ2)] dx 
+
+
+
+ln 
+
+ R τ2 
+
+> τ1
+
+[F X (x)−F X (τ2)] dx 
+
+(τ2−τ1)[ F X (τ1)−F X (τ2)] 
+
+
+
+= mX, 1(τ1, τ 2)[ F X (τ1) − F X (τ2)] ln 
+
+ mX, 1(τ1,τ 2)
+
+τ2−τ1
+
+
+
+,
+
+which yields immediately the upper bound. Hence, one can use the lower bounds for S(X; τ1, τ 2) (see, e.g., Moharana and Kayal[24]) to ob-tain the corresponding bounds for H(X; τ1, τ 2). In Proposition 6, we obtain a relationship between the CRIE of two non-negative and absolutely continuous random variables ordered in the usual likelihood ratio order. 
+
+Proposition 6. If X and Y are non-negative absolutely continuous random variables with finite doubly truncated mean residual lifetimes mX, 1(τ1, τ 2) and mY, 1(τ1, τ 2), respectively, such that X ≤lr 
+
+Y , then, for all (τ1, τ 2) ∈ DX ∩ DY
+
+H(X; τ1, τ 2) ≤ H(Y ; τ1, τ 2) − mX, 1(τ1, τ 2) ln 
+
+ mX, 1(τ1, τ 2)
+
+mY, 1(τ1, τ 2)
+
+
+
+.
+
+Proof. Let F Y (x) = Pr( Y > x ) be the survival function of Y . From the Log-Sum inequality we obtain 
+
+R τ2
+
+τ1
+
+F X (x)−F X (τ2)
+
+F X (τ1)−F X (τ2) ln         
+
+> F X(x)−F X(τ2)
+> F X(τ1)−F X(τ2)
+> F Y(x)−F Y(τ2)
+> F Y(τ1)−F Y(τ2)
+
+!
+
+dx ≥ mX, 1(τ1, τ 2) ln 
+
+ mX, 1(τ1,τ 2)
+
+mY, 1(τ1,τ 2)
+
+
+
+, (33) and thus, it follows that 
+
+H(X; τ1, τ 2) ≤ − R τ2
+
+τ1
+
+F X (x)−F X (τ2)
+
+F X (τ1)−F X (τ2) ln 
+
+ F Y (x)−F Y (τ2)
+
+F Y (τ1)−F Y (τ2)
+
+
+
+dx − mX, 1(τ1, τ 2) ln 
+
+ mX, 1(τ1,τ 2)
+
+mY, 1(τ1,τ 2)
+
+
+
+. (34) 21 Since X ≤lr Y , it follows from Theorem 1.C.5 of Shaked and Shanthikumar [35] that [X | τ1 ≤ X ≤ τ2] ≤st [Y | τ1 ≤ Y ≤ τ2],
+
+i.e., it holds F X (x)−F X (τ2)     
+
+> FX(τ1)−FX(τ2)
+
+≤ F Y (x)−F Y (τ2)     
+
+> FY(τ1)−FY(τ2)
+
+, for any x ∈ [τ1, τ 2]. (35) Since 
+
+− ln 
+
+ F Y (x) − F Y (τ2)
+
+F Y (τ1) − F Y (τ2)
+
+
+
+≥ 0,
+
+from (34) and (35) we obtain 
+
+H(X; τ1, τ 2) ≤ − R τ2         
+
+> τ1
+> FY(x)−FY(τ2)
+> FY(τ1)−FY(τ2)
+
+ln 
+
+ F Y (x)−F Y (τ2)    
+
+> FY(τ1)−FY(τ2)
+
+
+
+dx − mX, 1(τ1, τ 2) ln 
+
+ mX, 1(τ1,τ 2)
+
+> mY, 1(τ1,τ 2)
+
+
+
+,
+
+and hence the result follows. 
+
+Remark 7. (i) Using the inequality x ln xy ≥ x − y, x > 0, y > 0, we get the following weaker but simpler upper bound than that given in Proposition 6 under the assumption that X ≤lr YH(X; τ1, τ 2) ≤ H(Y ; τ1, τ 2) − [mX, 1(τ1, τ 2) − mY, 1(τ1, τ 2)] .
+
+(ii) As an information distance between two distribution functions FX and FY , Kullback and Leibler [21] proposed the following discrimination measure, also known as relative entropy of X and YIX,Y = R ∞ 
+
+> 0
+
+fX (x) ln 
+
+ fX (x) 
+
+> fY(x)
+
+
+
+dx, 
+
+where fX (x) and fY (x) are the densities of X and Y , respectively. In addition, Ebrahimi and Kirmani [10], and Di Crescenzo and Longobardi [6] defined measures of discrimination between two truncated distributions. The results in Proposition 6 are useful for constructing a goodness-of-fit test (see also [2]). For this, let us define a new measure of distance between two distributions that is like Kullback–Leibler divergence (KL), but using the survival function for doubly truncated random variables rather than the density function and call it cumulative residual interval Kullback–Leibler (CRIKL) divergence, that is CRIKL (FX , F Y ; τ1, τ 2) = R τ2         
+
+> τ1
+> FX(x)−FX(τ2)
+> FX(τ1)−FX(τ2)
+
+ln         
+
+> F X(x)−F X(τ2)
+> F X(τ1)−F X(τ2)
+> F Y(x)−F Y(τ2)
+> F Y(τ1)−F Y(τ2)
+
+!
+
+dx − [mX, 1(τ1, τ 2) − mY, 1(τ1, τ 2)] .
+
+From (33) we have 
+
+R τ2         
+
+> τ1
+> FX(x)−FX(τ2)
+> FX(τ1)−FX(τ2)
+
+ln         
+
+> F X(x)−F X(τ2)
+> F X(τ1)−F X(τ2)
+> F Y(x)−F Y(τ2)
+> F Y(τ1)−F Y(τ2)
+
+!
+
+≥ mX, 1(τ1, τ 2) ln 
+
+ mX, 1(τ1, τ 2)
+
+mY, 1(τ1, τ 2)
+
+
+
+≥ mX, 1(τ1, τ 2) − mY, 1(τ1, τ 2),
+
+and thus, it holds CRIKL (X, Y ; τ1, τ 2) ≥ 0 and note that in the Log-Sum inequality used in Propo-sition 5, equality holds if and only if          
+
+> FX(x)−FX(τ2)
+> FX(τ1)−FX(τ2)
+
+= F Y (x)−F Y (τ2)     
+
+> FY(τ1)−FY(τ2)
+
+.
+
+22 From the last relationship, we get mX, 1(τ1, τ 2) = mY, 1(τ1, τ 2), implying that in the last inequality, the equality holds if and only if F X (x) = F Y (x). Therefore, if our aim is to test the hypothesis 
+
+H0 : FX (x) = G(x), vs. H1 : FX (x)̸ = G(x),
+
+where G(x) is an estimated distribution function, then under the null hypothesis it holds CRIKL (FX , G ; τ1, τ 2) = 0 and a large value of CRIKL (FX , G ; τ1, τ 2) leads us to reject the null hypothesis H0 in favor of the alternative hypothesis H1.
+
+Corollary 6. If X and Y are two non-negative absolutely continuous random variables with finite mean residual lifetimes mX (t) and mY (t), respectively, such that X ≤hr Y , then 
+
+E(X; t) ≤ E (Y ; t) − mX (t) ln 
+
+ mX (t)
+
+mY (t)
+
+
+
+.
+
+Proof. If X ≤hr Y , then from the relationship (1.B.7) of Shaked and Shanthikumar[35] it holds that [ X | X > t ] ≤st [Y | Y > t ], which implies that      
+
+> FX(x)
+> FX(t)
+
+≤ F Y (x)   
+
+> FY(t)
+
+, for any x > t, 
+
+and hence using (34) with τ2 → ∞ we get that 
+
+E(X; t) ≤ − R ∞     
+
+> tFX(x)
+> FX(t)
+
+ln 
+
+ F Y (x)  
+
+> FY(t)
+
+
+
+dx − mX (t) ln 
+
+ mX (t) 
+
+> mY(t)
+
+
+
+(36) 
+
+≤ − R ∞     
+
+> tFY(x)
+> FY(t)
+
+ln 
+
+ F Y (x)  
+
+> FY(t)
+
+
+
+dx − mX (t) ln 
+
+ mX (t) 
+
+> mY(t)
+
+
+
+= E(Y ; t) − mX (t) ln 
+
+ mX (t) 
+
+> mY(t)
+
+
+
+.
+
+When t = 0, Corollary 6 is reduced to Proposition 2.1 of Navarro et al. [27]. 
+
+Remark 8. Considering that Y ∼ Exp (λ), λ > 0, with F Y (x) = e−λx , x ≥ 0, and mY (t) = 1 /λ ,from (36) we obtain that 
+
+−E (X; t) ≥ − λ
+
+Z ∞
+
+> t
+
+(x − t) F X (x)
+
+F X (t) dx + mX (t) ln( λm X (t)) = −λ 1  
+
+> FX(t)
+
+R ∞ 
+
+> t
+
+xF X (x)dx + λtm X (t) + mX (t) ln( mX (t)) + mX (t) ln λ
+
+= −λ 12
+
+E(X2 | X > t ) − t2 + λtm X (t) + mX (t) ln( mX (t)) + mX (t) ln λ
+
+= −λ 12 E[( X − t)2 | X > t ] + mX (t) ln( mX (t)) + mX (t) ln λ. (37) 
+
+The value of λ that maximizes the right-hand side of (37) is 
+
+λmax = 2mX (t)
+
+E[( X − t)2 | X > t ] .
+
+Substituting this into the right-hand side of (37) we get 
+
+−E (X; t) ≥ − mX (t) + mX (t) ln 
+
+ 2m2 
+
+> X(t)
+> E[( X−t)2|X>t ]
+
+
+
+,
+
+23 and using the inequality ln x ≥ 1 − 1 
+
+> x
+
+, x ≥ 0, the above relationship implies that 
+
+−E (X; t) ≥ − mX (t) + mX (t)
+
+n
+
+1 − E[( X−t)2|X>t ]2m2 
+
+> X(t)
+
+o
+
+,
+
+and thus, we obtain that 
+
+E(X; t) ≤ E[( X − t)2 | X > t ]2m2 
+
+> X
+
+(t) .
+
+Note that this bound has been proved by Asadi and Zohrevand [1, Theorem 4.10] using a different approach. 
+
+From Theorem 4, we immediately obtain the following proposition. 
+
+Proposition 7. Let X be a non-negative absolutely continuous random variable and Y = φ(X),where φ is an increasing and differentiable function with derivative φ′. If φ′(x) ≥ (≤)1 , then, for all (τ1, τ 2) ∈ DX ∩ DY
+
+H(Y ; τ1, τ 2) ≤ (≥)H(X; φ−1(τ1), φ −1(τ2)) .
+
+As in Rao [30, Section 5], in the next theorem and based on CRIE, we provide an upper bound for the mean of the absolute difference between two independent and identically distributed random variables that are doubly truncated. 
+
+Theorem 7. Let X and Y be two non-negative absolutely continuous, independent and identically distributed random variables. Then 
+
+E[|X − E(X)| | τ1 ≤ X ≤ τ2] ≤ E[|X − Y | | τ1 ≤ X ≤ τ2, τ 1 ≤ Y ≤ τ2] ≤ 2H(X; τ1, τ 2).
+
+Proof. Since Pr[max( X, Y ) > x | τ1 ≤ X ≤ τ2, τ 1 ≤ Y ≤ τ2] = 1 − [1 − F Xτ1,τ 2 (x)] 2,
+
+and Pr[min( X, Y ) > x | τ1 ≤ X ≤ τ2, τ 1 ≤ Y ≤ τ2] = [ F Xτ1,τ 2 (x)] 2,
+
+we get that Pr[max( X, Y ) > x |τ1 ≤ X ≤ τ2, τ 1 ≤ Y ≤ τ2] − P r [min( X, Y ) > x |τ1 ≤ X ≤ τ2, τ 1 ≤ Y ≤ τ2]= 2 F Xτ1,τ 2 (x)[1 − F Xτ1,τ 2 (x)] .
+
+Integrating both sides from τ1 to τ2 yields 
+
+E[|X − Y | | τ1 ≤ X ≤ τ2, τ 1 ≤ Y ≤ τ2] = 2 R τ2        
+
+> τ1
+> FX(x)−FX(τ2)
+> FX(τ1)−FX(τ2)
+
+h
+
+1 − F X (x)−F X (τ2)    
+
+> FX(τ1)−FX(τ2)
+
+i
+
+dx. 
+
+Making use of the inequality x(1 − x) ≤ x| ln x|, 0 < x < 1, we obtain 
+
+E[|X − Y | | τ1 ≤ X ≤ τ2, τ 1 ≤ Y ≤ τ2]
+
+≤ 2 R τ2         
+
+> τ1
+> FX(x)−FX(τ2)
+> FX(τ1)−FX(τ2)
+
+ln 
+
+ F X (x)−F X (τ2)    
+
+> FX(τ1)−FX(τ2)
+
+
+
+dx 
+
+= 2 H(X; τ1, τ 2).
+
+The left-side inequality follows as in Rao [30] using Jensen’s inequality. 24 Theorem 8. Let X and Y be two non-negative absolutely continuous random variables with finite generalized failure rates hX, 1(τ1, τ 2) and hY, 1(τ1, τ 2) and doubly truncated mean residual lifetimes 
+
+mX, 1(τ1, τ 2) and mY, 1(τ1, τ 2), respectively. (i) If for any (τ1, τ 2) ∈ DX ∩ DY it holds hX, 1(τ1, τ 2) ≤ hY, 1(τ1, τ 2) and mX, 1(x, τ 2) is increasing in 
+
+x ≥ 0, then 
+
+H(Y ; τ1, τ 2) ≤ H(X; τ1, τ 2). (38) 
+
+(ii) If for any (τ1, τ 2) ∈ DX ∩ DY it holds hY, 1(τ1, τ 2) ≤ hX, 1(τ1, τ 2) and mX, 1(x, τ 2) is decreasing in x ≥ 0, then 
+
+H(X; τ1, τ 2) ≤ H(Y ; τ1, τ 2). (39) 
+
+Proof. (i) If hX, 1(τ1, τ 2) ≤ hY, 1(τ1, τ 2), then from Lemma 1 (i) it follows that mX, 1(x, τ 2) ≥
+
+mY, 1(τ1, τ 2) and hence using Theorem 1 we get 
+
+H(Y ; τ1, τ 2) = 1    
+
+> FY(τ1)−FY(τ2)
+
+R τ2 
+
+> τ1
+
+mY, 1(x, τ 2)fY (x)dx 
+
+≤ 1    
+
+> FY(τ1)−FY(τ2)
+
+R τ2 
+
+> τ1
+
+mX, 1(x, τ 2)fY (x)dx 
+
+= E[mX, 1(Y, τ 2) | τ1 < Y ≤ τ2], (40) where fY (x) and F Y (x) are the probability density function and the survival function of Y , respec-tively. By setting ϕ(x) = mX, 1(x, τ 2), from Lemma 3, it follows that 
+
+E[mX, 1(X, τ 2) | τ1 ≤ X ≤ τ2] ≥ E[mX, 1(Y, τ 2) | τ1 < Y ≤ τ2],
+
+and hence from Theorem 1 we obtain 
+
+E[mX, 1(Y, τ 2) | τ1 < Y ≤ τ2] ≤ H(X; τ1, τ 2). (41) Now, the result in (38) follows immediately from (40) and (41). (ii) The proof is similar to (i) by interchanging the role of X and Y and reversing the inequalities. In the sequel, we give some applications of Theorem 8. 
+
+Proposition 8. Let X be a non-negative absolutely continuous random variable and Xe be the equilibrium random variable corresponding to X. If hX, 1(x, τ 2) is increasing in x, then 
+
+H(Xe; τ1, τ 2) ≤ H(X; τ1, τ 2).
+
+Proof. It holds 
+
+hXe,1(x, τ 2) = fXe (x)
+
+F Xe (x) − F Xe (τ2) = F X (x)
+
+R τ2 
+
+> x
+
+F X (t)dt 
+
+= 1
+
+mX (x) − F X (τ2)/F X (x) .
+
+If hX, 1(x, τ 2) is increasing in x for any τ2, it follows that hX (x) is increasing in x, implying 
+
+mX (x) is decreasing in x (see [38]). Since F X (x) is decreasing in x, we get hXe,1(x, τ 2) is also increasing in x. Hence, from Lemma 2 (ii) the doubly truncated mean residual lifetime mXe,1(x, τ 2)of Xe is decreasing in x. Also, since hX, 1(x, τ 2) is increasing, from Lemma 5 it follows hX, 1(x, τ 2) ≤
+
+hXe,1(x, τ 2). Now, the result follows from Theorem 8 (ii). 25 Navarro et al. [27] compared the CREs of the random variables X and X(p), where the distri-bution of the random variable X(p) belongs to the proportional odds family (POF), which is family of distributions arising in several scientific areas, such as in survival and reliability data. For a further discussion on POF models, one may refer to Kirmani and Gupta [15]. If gp(x) and Gp(x)denote respectively the probability density function and the survival function of X(p), then 
+
+gp(x) = pf X (x)[1 −(1 −p)F X (x)] 2 and Gp(x) = pF X (x)1−(1 −p)F X (x) , 0 < p < 1. (42) The parameter p is called “tilt parameter” . This is because the hazard rate of this family is shifted above the hazard rate of the underlying (baseline) distribution. 
+
+Proposition 9. Let X be a non-negative absolutely continuous random variable and X(p) be a random variable with survival function given by (42). If mX, 1(x, τ 2) is increasing in x, then 
+
+H(X(p); τ1, τ 2) ≤ H(X; τ1, τ 2).
+
+Proof. Since F X (x) ≥ F X (τ2) for x ≤ τ2 and 0 < p < 1, it can be verified that hX, 1(x, τ 2) ≤
+
+hX(p),1(x, τ 2), and hence the result follows immediately from Theorem 8 (i). 
+
+# 5 Monotonicity results and further bounds for H(X; τ1, τ 2)
+
+To obtain the next result, we assume that for any fixed value of τ2, the derivative of H(X; τ1, τ 2)with respect to τ1 exists. First, based on H(X; τ1, τ 2), we define two new classes of distributions. 
+
+Definition 5. A random variable X is said to have an increasing (decreasing) cumulative residual interval entropy, or ICRIE (DCRIE), if H(X; τ1, τ 2) is increasing (decreasing) in τ1 for any fixed value of τ2.
+
+Theorem 9. Let X be a non-negative absolutely continuous random variable. The random variable 
+
+X is ICRIE (DCRIE), if and only if for all (τ1, τ 2) ∈ DH(X; τ1, τ 2) ≥ (≤) mX, 1(τ1, τ 2).
+
+Proof. For any fixed value of τ2 and using (8), the differentiation of both sides of (40) gives  
+
+> ∂H (X;τ1,τ 2)
+> ∂τ 1
+
+= ln[ F X (τ1) − F X (τ2)] 
+
+n
+
+1 + ∂m X, 1(τ1,τ 2)
+
+> ∂τ 1
+
+o
+
+− mX, 1(τ1, τ 2)hX, 1(τ1, τ 2)+ hX, 1(τ1, τ 2) H(X; τ1, τ 2) − mX, 1(τ1, τ 2) ln[ F X (τ1) − F X (τ2)] .
+
+Hence, using (9) it follows that  
+
+> ∂H (X;τ1,τ 2)
+> ∂τ 1
+
+= hX, 1(τ1, τ 2) {H(X; τ1, τ 2) − mX, 1(τ1, τ 2)} . (43) Now, the result follows directly from (43). 
+
+Corollary 7. Let X be a non-negative absolutely continuous random variable. If for any fixed value of τ2, mX, 1(τ1, τ 2) is increasing (decreasing) in τ1, then the random variable X is ICRIE (DCRIE). Proof. From Theorem 1 we have 
+
+H(X; τ1, τ 2) = 1    
+
+> FX(τ1)−FX(τ2)
+
+R τ2 
+
+> τ1
+
+mX, 1(x, τ 2)fX (x) dx. 
+
+26 If mX, 1(τ1, τ 2) is increasing (decreasing) in τ1, then for x ≥ τ1 it holds mX, 1(x, τ 2) ≥ (≤)mX, 1(τ1, τ 2), and thus we obtain 
+
+H(X; τ1, τ 2) ≥ (≤) mX, 1(τ1,τ 2)    
+
+> FX(τ1)−FX(τ2)
+
+R τ2 
+
+> τ1
+
+fX (x) dx, 
+
+i.e., 
+
+H(X; τ1, τ 2) ≥ (≤)mX, 1(τ1, τ 2).
+
+Now, the result follows from Theorem 9. 
+
+Example 3. Using Corollary 7, to illustrate the behavior of the mean residual lifetime function 
+
+mX, 1(τ1, τ 2) and the associated entropy measure H(X; τ1, τ 2), we present graphical representations for specific distributional cases. These visualizations help us to understand the monotonicity prop-erties of H(X; τ1, τ 2) with respect to τ1 under varying parameter settings. In Figure 1, we consider the beta distribution with different shape parameters, while in Figure 2, we explore the exponential distribution with various rate parameters. Each figure includes plots of both the mean residual life-time function and the entropy measure for a fixed value of τ2, showing how these quantities evolve as τ1 increases. We observe that for both distributions, the doubly truncated mean residual lifetime 
+
+mX, 1(τ1, τ 2) is a decreasing function in τ1, and the same is also true for H(X; τ1, τ 2), as expected by Corollary 7. 
+
+Figure 1: Plots of the mean residual lifetime function mX, 1(τ1, τ 2) (left panel) and the entropy measure H(X; τ1, τ 2) (right panel) versus τ1 with fixed τ2 = 0 .9 for the beta distribution with 
+
+F (x) = 1 − xc for 0 < x < 1, where c = 1 , 2, 5. 27 Figure 2: Plots of the mean residual lifetime function mX, 1(τ1, τ 2) (left panel) and the entropy measure H(X; τ1, τ 2) (right panel) versus τ1 with fixed τ2 = 10 for the exponential distribution with F (x) = exp( −λx ) for x ≥ 0, where λ = 0 .2, 0.5, 1. We know from Lemma 2 (ii) that if hX, 1(x, y ) is decreasing (increasing) in x, then mX, 1(x, y )is increasing (decreasing) in x. Therefore, the condition that hX, 1(x, y ) is decreasing (increasing) in x is stronger than the condition that mX, 1(x, y ) is increasing (decreasing) in x. In the following proposition, based on the relevation transform representation of H(X; τ1, τ 2) given by Theorem 3, we prove that Corollary 7 also holds under the stronger condition that hX, 1(x, y ) is decreasing (increasing) in x and, furthermore, is given a two-sided bound for H(X; τ1, τ 2). 
+
+Proposition 10. Let X be a non-negative absolutely continuous random variable. If hX, 1(x, y ) is decreasing (increasing) in x, then, for all (τ1, τ 2) ∈ DX
+
+mX, 1(τ1, τ 2) ≤ (≥)H(X; τ1, τ 2) ≤ (≥) 12 hX, 1(τ1, τ 2)E[( X − τ1)2 | τ1 ≤ X ≤ τ2],
+
+and thus X is ICRIE (DCRIE). Proof. If hX, 1(x, τ 2) is decreasing (increasing) in x, then, for τ1 ≤ u ≤ x it holds (x − τ1)hX, 1(x, τ 2) ≤ (≥) R xτ1 hX, 1(u, τ 2) du ≤ (≥)( x − τ1)hX, 1(τ1, τ 2).
+
+Then, from (25) it follows that 
+
+F Xτ1,τ 2 (x) + F Xτ1,τ 2 (x)( x − τ1)hX, 1(x, τ 2) ≤ (≥)( F Xτ1,τ 2 #F Xτ1,τ 2 )( x)
+
+≤ (≥)F Xτ1,τ 2 (x) + F Xτ1,τ 2 (x)( x − τ1)hX, 1(τ1, τ 2).
+
+Integrating all sides from τ1 to τ2 and using (8) we obtain 
+
+mX, 1(τ1, τ 2) + R τ2 
+
+> τ1
+
+F Xτ1,τ 2 (x)( x − τ1)hX, 1(x, τ 2) dx 
+
+≤ (≥) R τ2 
+
+> τ1
+
+(F Xτ1,τ 2 #F Xτ1,τ 2 )( x) dx 
+
+≤ (≥)mX, 1(τ1, τ 2) + R τ2 
+
+> τ1
+
+F Xτ1,τ 2 (x)( x − τ1)hX, 1(τ1, τ 2) dx. 
+
+28 Therefore, from Theorem 3 the above relationship yields 
+
+R τ2 
+
+> τ1
+
+F Xτ1,τ 2 (x)( x − τ1)hX, 1(x, τ 2) dx ≤ (≥)H(X; τ1, τ 2)
+
+≤ (≥) R τ2 
+
+> τ1
+
+F Xτ1,τ 2 (x)( x − τ1)hX, 1(τ1, τ 2) dx, 
+
+or equivalently,     
+
+> 1
+> FX(τ1)−FX(τ2)
+
+R τ2 
+
+> τ1
+
+(x − τ1)fX (x) dx 
+
+≤ (≥)H(X; τ1, τ 2) ≤ (≥) hX, 1(τ1,τ 2)    
+
+> FX(τ1)−FX(τ2)
+
+R τ2 
+
+> τ1
+
+(x − τ1)[ F X (x) − F X (τ2)] dx, 
+
+i.e., 
+
+mX, 1(τ1, τ 2) ≤ (≥)H(X; τ1, τ 2) ≤ (≥) 12 hX, 1(τ1, τ 2)E[( X − τ1)2 | τ1 ≤ X ≤ τ2].
+
+Now, since 
+
+E[( X − τ1)2 | τ1 ≤ X ≤ τ2] = 2    
+
+> FX(τ1)−FX(τ2)
+
+R τ2 
+
+> τ1
+
+(x − τ1)[ F X (x) − F X (τ2)] dx, 
+
+the result follows from the above two-sided inequalities. By setting τ2 → ∞ , from Proposition 10 we immediately obtain the following corollary. 
+
+Corollary 8. Let X be a non-negative absolutely continuous random variable. If X is DFR (IFR) then 
+
+mX (t) ≤ (≥)E(X; t) ≤ (≥) 12 hX (t)E[( X − t)2 | X > t ], (44) 
+
+and 
+
+E(X) ≤ (≥)E(X) ≤ (≥) 12 fX (0) E[X2]. (45) 
+
+Remark 9. (i) Asadi and Zohrevand [1] proved in Corollary 4.4 that if X is IMRL (DMRL) then 
+
+E(X; t) ≥ (≤)mX (t).
+
+Since the DFR (IFR) class is a subclass of the IMRL (DMRL) class, from Corollary 8 it follows that Corollary 4.4 of [1] is still valid under the stronger condition that X is DFR (IFR). (ii) We consider that X has an exponential distribution with parameter λ > 0. Since it has a constant hazard rate, it follows that X is DFR and IFR. In this case (44) and (45) must hold as equalities, i.e., we must have 
+
+E(X; t) = mX (t) = 12 hX (t)E[( X − t)2 | X > t ], (46) 
+
+and 
+
+E(X) = E(X) = 12 fX (0) E[X2]. (47) 
+
+Since 
+
+E(X; t) = E(X) = 1 
+
+> λ
+
+, hX (t) = fX (0) = λ, mX (t) = E(X) = 1 
+
+> λ
+
+,
+
+and 
+
+E[( X − t)2 | X > t ] = E[X2] = 2 
+
+> λ2
+
+,
+
+it follows that (46) and (47) are valid. Therefore, the bounds in (44) and (45) are sharp. 
+
+The following corollary considers the behavior of the ICRIE (DCRIE) class under increasing linear transformations. 29 Corollary 9. Let X be a non-negative absolutely continuous random variable, a > 0 and b ≥ 0 be constants. If X is ICRIE (DCRIE), then aX + b is ICRIE (DCRIE). Proof. Under the conditions of theorem, from Theorem 1 it holds that 
+
+aH 
+
+
+
+X; τ1−ba , τ2−ba
+
+
+
+≥ (≤)am X, 1
+
+ τ1−ba , τ2−ba
+
+
+
+. (48) Since it can be easily shown that 
+
+maX +b, 1(τ1, τ 2) = am X, 1
+
+ τ1−ba , τ2−ba
+
+
+
+,
+
+then from Proposition 1 and (48) we get that 
+
+H(aX + b; τ1, τ 2) ≤ (≥)maX +b, 1(τ1, τ 2),
+
+and hence the result follows from Theorem 9. From Corollary 9, we conclude that the ICRIE (DCRIE) class is closed under increasing linear transformations. Hence, it is interesting to examine whether this also holds for any increasing transformation. In Theorem 10, it is shown a more general result for the DCRIE but under an increasing convex transformation. More precisely, it is shown that the DCRIE class is closed under increasing convex transformations. For this, first we need the following proposition in which we give an equivalent condition to that of Theorem 9 in order for the random variable X to be ICRIE (DCRIE). 
+
+Proposition 11. Let X be a non-negative absolutely continuous random variable. The random variable X is ICRIE (DCRIE), if and only if for all (τ1, τ 2) ∈ DX
+
+R τ2        
+
+> τ1
+> FX(x)−FX(τ2)
+> FX(τ1)−FX(τ2)
+
+n
+
+ln 
+
+ F X (x)−F X (τ2)    
+
+> FX(τ1)−FX(τ2)
+
+
+
++ 1 
+
+o
+
+dx ≤ (≥)0 . (49) 
+
+Proof. Under the conditions of theorem, from Theorem 9 and (8) we get 
+
+− R τ2         
+
+> τ1
+> FX(x)−FX(τ2)
+> FX(τ1)−FX(τ2)
+
+ln 
+
+ F X (x)−F X (τ2)    
+
+> FX(τ1)−FX(τ2)
+
+
+
+dx ≥ (≤) R τ2         
+
+> τ1
+> FX(x)−FX(τ2)
+> FX(τ1)−FX(τ2)
+
+dx, 
+
+from which (49) follows immediately. 
+
+Theorem 10. Let X be a non-negative absolutely continuous random variable, and φ be an in-creasing convex function on [0 , +∞) such that the derivative φ′ of φ is continuous. If X is DCRIE, then φ(X) is also DCRIE. Proof. Suppose that X is DCRIE. Then, from (49) it follows that it also holds 
+
+R φ−1(τ2)        
+
+> φ−1(τ1)
+> FX(x)−FX(φ−1(τ2))
+> FX(φ−1(τ1)) −FX(φ−1(τ2))
+
+n
+
+ln 
+
+ F X (x)−F X (φ−1(τ2))     
+
+> FX(φ−1(τ1)) −FX(φ−1(τ2))
+
+
+
++ 1 
+
+o
+
+dx ≥ 0.
+
+Since φ(x) is increasing convex function implying that φ′(x) is non-negative increasing, from the above relationship and Corollary 7.2 (p. 121) of Barlow and Proschan [3] we have that 
+
+R φ−1(τ2) 
+
+> φ−1(τ1)
+
+φ′(x) F X (x)−F X (φ−1(τ2))     
+
+> FX(φ−1(τ1)) −FX(φ−1(τ2))
+
+n
+
+ln 
+
+ F X (x)−F X (φ−1(τ2))     
+
+> FX(φ−1(τ1)) −FX(φ−1(τ2))
+
+
+
++ 1 
+
+o
+
+dx ≥ 0. (50) 30 By setting Y = φ(X), we obtain 
+
+R τ2        
+
+> τ1
+> FY(y)−FY(τ2)
+> FY(τ1)−FY(τ2)
+
+n
+
+ln 
+
+ F Y (y)−F Y (τ2)    
+
+> FY(τ1)−FY(τ2)
+
+
+
++ 1 
+
+o
+
+dy 
+
+= R φ−1(τ2)        
+
+> φ−1(τ1)
+> FX(φ−1(y)) −FX(φ−1(τ2))
+> FX(φ−1(τ1)) −FX(φ−1(τ2))
+
+n
+
+ln 
+
+ F X (φ−1(y)) −F X (φ−1(τ2))     
+
+> FX(φ−1(τ1)) −FX(φ−1(τ2))
+
+
+
++ 1 
+
+o
+
+dy 
+
+= R φ−1(τ2)
+
+> φ−1(τ1)
+> φ′(x)
+
+(F X (x)−F X (φ−1(τ2)) )    
+
+> FX(φ−1(τ1)) −FX(φ−1(τ2))
+
+n
+
+ln 
+
+ F X (x)−F X (φ−1(τ2))     
+
+> FX(φ−1(τ1)) −FX(φ−1(τ2))
+
+
+
++ 1 
+
+o
+
+dx 
+
+≥ 0,
+
+where the last inequality follows from (50). Therefore, from (49) we get that the random variable 
+
+Y is DCRIE, which completes the proof. 
+
+Theorem 11. Let X be a non-negative absolutely continuous random variable. If the random variable X is ICRIE (DCRIE), then, for all (τ1, τ 2) ∈ DX
+
+H(X; τ1, τ 2) ≤ (≥) 1
+
+hX, 1(τ1, τ 2) . (51) 
+
+Proof. We have lim τ1→τ2 H(X; τ1, τ 2)= lim τ1→τ2                          
+
+> −Rτ2
+> τ1[FX(x)−FX(τ2)] ln[ FX(x)−FX(τ2)] dx +ln[ FX(x)−FX(τ2)] Rτ2
+> τ1[FX(x)−FX(τ2)] dx FX(τ1)−FX(τ2)
+
+= lim τ1→τ2          
+
+> Rτ2
+> τ1[FX(x)−FX(τ2)] dx FX(τ1)−FX(τ2)
+
+= 1 
+
+> hX, 1(τ1,τ 2)
+
+.
+
+If H(X; τ1, τ 2) is increasing (decreasing) in τ1, then, for all τ1 ≤ τ2 it holds 
+
+H(X; τ1, τ 2) ≤ (≥)H(X; τ2, τ 2) = lim τ1→τ2 H(X; τ1, τ 2),
+
+and hence (51) follows from the last two relationships. Using Theorems 9 and 11, a two-sided bound for H(X; τ1, τ 2) can be immediately obtained if 
+
+H(X; τ1, τ 2) increases in τ1 for any fixed value of τ2. Thus, we have the following corollary. 
+
+Corollary 10. Let X be a non-negative absolutely continuous random variable. If the random variable X is ICRIE (DCRIE), then, for all (τ1, τ 2) ∈ DmX, 1(τ1, τ 2) ≤ (≥)H(X; τ1, τ 2) ≤ (≥) 1 
+
+> hX, 1(τ1,τ 2)
+
+.
+
+# References 
+
+[1] Asadi M, Zohrevand Y (2007) On the dynamic cumulative residual entropy. J Stat Plann Inference 137:1931–1941 [2] Baratpour S, Rad AH (2012) Testing goodness-of-fit for exponential distribution based on cumulative residual entropy. Commun Stat Theory Methods 41:1387–1396 [3] Barlow RE, Proschan F (1975) Statistical theory of reliability and life testing: Probability models. International Series in Decision Processes 31 [4] Baxter LA (1982) Reliability applications of the relevation transform. Nav Res Logist Q 29:323– 330 [5] Burkschat M, Navarro J (2014) Asymptotic behavior of the hazard rate in systems based on sequential order statistics. Metrika 77:965–994 [6] Di Crescenzo A, Longobardi M (2004) A measure of discrimination between past lifetime distributions. Stat Probab Lett 67:173–182 [7] Di Crescenzo A, Longobardi M (2009) On cumulative entropies. J Stat Plann Inference 139:4072–4087 [8] Di Crescenzo A, Toomaj A (2015) Extension of the past lifetime and its connection to the cumulative entropy. J Appl Probab 52:1156–1174 [9] Ebrahimi N (1996) How to measure uncertainty in the residual lifetime distribution. Sankhya Ser A 58:48–56 [10] Ebrahimi N, Kirmani SNUA (1996) A measure of discrimination between two residual lifetime distributions and its applications. Ann Inst Stat Math 48:257–265 [11] Hashempour M, Mohammadi M, Jahanshahi SMA, Khammar AH (2024) Modified cumulative extropies of doubly truncated random variables. Sankhya B 86:558–585 [12] Jahanshahi SMA, Zarei H, Khammar AH (2020) On cumulative residual extropy. Probab Eng Inf Sci 34:605–625 [13] Jalayeri S, Borzadaran GM, Khorashadizadeh M (2024) Some properties of Tsallis entropy based on a doubly truncated (interval) random variable. Reliab Theory Appl 19:448–464 [14] Kapodistria S, Psarrakos G (2012) Some extensions of the residual lifetime and its connection to the cumulative residual entropy. Probab Eng Inf Sci 26:129–146 [15] Kirmani SNUA, Gupta RC (2001) On the proportional odds model in survival analysis. Ann Inst Stat Math 53:203–216 [16] Kharazmi O, Balakrishnan N (2021) Cumulative residual and relative cumulative residual Fisher information and their properties. IEEE Trans Inf Theory 67:6306–6312 [17] Khorashadizadeh M, Rezaei Roknabadi AH, Mohtashami Borzadaran GR (2012) Characteri-zations of lifetime distributions based on doubly truncated mean residual life and mean past to failure. Commun Stat Theory Methods 41:1105–1115 [18] Khorashadizadeh M, Roknabadi AR, Borzadaran GM (2013) Doubly truncated (interval) cu-mulative residual and past entropy. Stat Probab Lett 83:1464–1471 [19] Klugman SA, Panjer HH, Willmot GE (2019) Loss models: From data to decisions, 5th edn. Wiley, New York [20] Krakowski M (1973) The relevation transform and a generalization of the gamma distribution function. RAIRO Rech Oper 7:107–120 [21] Kullback S, Leibler RA (1951) On information and sufficiency. Ann Math Stat 22:79–86 32 [22] Misagh F (2012) Some properties of interval entropy function and their applications. World Appl Sci J 20:1666–1671 [23] Misagh F, Yari GH (2011) On weighted interval entropy. Stat Probab Lett 81:188–194 [24] Moharana R, Kayal S (2020) Properties of Shannon entropy for double truncated random variables and its applications. J Stat Theory Appl 19:261–273 [25] Navarro J, Belzunce F, Ruiz JM (1997) New stochastic orders based on double truncation. Probab Eng Inf Sci 11:395–402 [26] Navarro J, Ruiz JM (1996) Failure rate functions for doubly truncated random variables. IEEE Trans Reliab 45:685–690 [27] Navarro J, del Aguila Y, Asadi M (2010) Some new results on the cumulative residual entropy. J Stat Plann Inference 140:310–322 [28] Psarrakos G, Di Crescenzo A (2018) A residual inaccuracy measure based on the relevation transform. Metrika 81:37–59 [29] Psarrakos G, Navarro J (2013) Generalized cumulative residual entropy and record values. Metrika 76:623–640 [30] Rao M (2005) More on a new concept of entropy and information. J Theor Probab 18:967–981 [31] Rao M, Chen Y, Vemuri BC, Wang F (2004) Cumulative residual entropy: A new measure of information. IEEE Trans Inf Theory 50:1220–1228 [32] Ruiz JM, Navarro J (1996) Characterizations based on conditional expectations of the doubly truncated distribution. Ann Inst Stat Math 48:563–572 [33] Sankaran PG, Sunoj SM (2004) Identification of models using failure rate and mean residual life of doubly truncated random variables. Stat Papers 45:97–109 [34] Sekeh SY, Borzadaran GM, Roknabadi AR (2015) On double truncated (interval) WCRE and WCE. arXiv:1508.00246 [35] Shaked M, Shanthikumar JG (2007) Stochastic orders. Springer, New York [36] Shannon CE (1948) A mathematical theory of communication. Bell Syst Tech J 27:379–423 [37] Sunoj SM, Sankaran PG, Maya SS (2009) Characterizations of life distributions using con-ditional expectations of doubly (interval) truncated random variables. Commun Stat Theory Methods 38:1441–1452 [38] Willmot GE, Lin XS (2001) Lundberg approximations for compound distributions with insur-ance applications. Springer, New York 33

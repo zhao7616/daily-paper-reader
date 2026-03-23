@@ -1,0 +1,164 @@
+Title: Scientific Machine Learning-assisted Model Discovery from Telemetry Data
+
+URL Source: https://arxiv.org/pdf/2603.15943v1
+
+Published Time: Wed, 18 Mar 2026 00:22:20 GMT
+
+Number of Pages: 7
+
+Markdown Content:
+# Scientific Machine Learning-assisted Model Discovery from Telemetry Data 
+
+Sebastian Micluta-Campeanu a, Avinash Subramanian a, Anas Abdelrehim a, Ranjan Anantharaman a, Rohit Dhumane b, Brad Carman a, Chris Rackauckas a
+
+> aJuliaHub Inc.
+> bTrane Technologies Inc.
+
+Abstract 
+
+Calibration of dynamic models to data is an important step in building building digital twins of HVAC equipment, thermal loads and control systems. Sometimes, when a model fails to calibrate to data, a possible cause is that the model has made too many sim-plifying assumptions and is missing physics. In this paper we propose a semi-automated approach, called Dyad Model Discovery, that can augment the physical equations of the model with symbolic expressions discovered from the data. We demonstrate this method on a digital twin of a transportation refrigeration unit to improve its predictive performance, trained using telemetry data. An engineer-in-the-loop workflow is proposed, which provides suggestions to the user which can then be accepted or rejected. This is the first AI-assisted engineering design workflow to our knowledge. 
+
+Keywords: model discovery, universal di ff erential equations, calibration, transportation refrigeration 
+
+1. Introduction 
+
+The calibration of dynamical systems can be a challenging task, especially in the heating ventilation, cooling and refrig-eration (HVAC&R) domain Chakrabarty et al. (2021). A num-ber of calibration approaches may need to explored Rackauckas et al. (2022) to ensure the convergence of the resulting high-dimensional, non-linear optimization problem. However, the lack of convergence may be due to tangential reasons such as the lack of parameter identifiability Browning et al. (2022) or due an insu ffi ciently detailed model that may not capture all of the latent dynamics observed in the data. In this paper, we pro-pose a semi-automated method that takes in an existing model, a dataset and proposes modifications to the model’s underly-ing physical equations. We refer to this process henceforth as model discovery. Model discovery is distinct from system identification ap-proaches such as SinDy Fasel et al. (2021) or classical linear system identification methods Carlson et al. (2021), both of which are purely data-driven. In contrast, our approach is based upon Universal Di ff erential equations proposed in Rackauckas et al. (2020), which augments dynamical systems with neural networks, and subsequently calibrates the augmented system to data. Our approach builds upon this, but adds important new features such as sensitivity analysis and symbolic regression, both of which provide unique insight into the physical models developed by the user. In this paper, we demonstrate the usage of this proposed tech-nique on a model of a cargo box, a fundamental modeling com-ponent of a transportation refrigeration unit (TRU) Dhumane and Greene (2023); Dhumane and Stinson (2024). Refrigerated transport is a crucial component of the modern economy that ensures the delivery of food and medicine. With increased fo-cus on energy e ffi ciency and decarbonization, there is a need for  
+
+> Figure 1: Dyad Model Discovery . The user-facing engineer-in-the-loop steps are on the left, while the automated procedures are found on the right. Finally, the engineer has a choice whether to accept or reject the proposed changes from the system.
+> arXiv:2603.15943v1 [cs.CE] 16 Mar 2026
+
+improved prediction of transport refrigeration unit (TRU) per-formance for fleet planning and route optimization. The TRU contains a cargo box which is simulated using 1D thermal-fluid models with lumped air control volumes and several parame-ters like capacitance which are calibrated from test data. The problem is more challenging for multi-temperature cargo where there are several unknown parameters for calibration. To make the problem more challenging, there is significant deviation in the parameters across units. An automatic model calibration or model discovery algorithm can help improve performance pre-diction of individual units. A transportation refrigeration unit (TRU) consists of a re-frigeration system which we shall refer to as the plant, a load which we will refer to as the cargo box, and a control system that ensures that the refrigeration system maintains the load at a particular set point. A detailed description of the physics of the plant, cargo box and control system are given in Dhumane and Stinson (2024). In this paper we shall focus on the cargo box itself, which is the main load of the TRU. The cargo box is sometimes divided into multiple zones, where each zone is given a di ff erent set point, so as to facil-itate the transportation of multiple types of cargo during the same trip Dhumane and Greene (2023). A multi-zone cargo box consists of multiple cargo box models separated by a bulk-head, through which heat is conducted between the boxes. In this paper, we use a scientific machine learning (SciML) tech-nique to improve the dynamic temperature prediction in a two-zone box model. In particular, we shall use Universal Di ff er-ential Equations (UDEs) Rackauckas et al. (2020), a SciML technique which corrects the physics of a model in order to im-prove its predictive power. The method is leveraged through the modeling and simulation product Dyad (formerly called Ju-liaSim) Rackauckas et al. (2022), and provides an engineer-guided workflow for fast convergence. The rest of this paper is organized as follows: first, we pro-vide background on the UDE method, and describe its imple-mentation and workflow in Dyad, including the di ff erent stages of training. Finally, we discuss the implications of the results for future work. 
+
+2. Methods and Tools 
+
+Dyad Model Discovery consists of four numerical meth-ods performed in sequence. In this section, we describe each method and the heuristics used. 
+
+2.1. Universal Di ff erential Equations 
+
+Universal Di ff erential Equations is a scientific machine learning technique used to correct the dynamics of a system of ordinary or di ff erential algebraic equation. Consider a dy-namical physics model of the following form, represented by a di ff erential algebraic equation: 
+
+du d
+
+dt = f (u, x, p, t) (1) 0 = g(u, x, p, t) (2) where u(0) = u0 and t ∈ (0 , T ), and the state vector u = {ud, ua}
+
+where ud denotes the di ff erential variables and ua denotes the algebraic variables. Consider the output y from this system de-picted by ˆy(t) = h(u, x, p, t) (3) Consider a test dataset that captures the outputs {y(ti) : ti ∈
+
+(0 , T )}, and a residual in the output 
+
+r = || ˆy − y|| 2 (4) The technique tries to correct this residual term by introduc-ing a neural network correction term to the time derivative. The inputs to this neural network are the state derivatives ud and the outputs are the correction terms required. As an example, consider the correction term 
+
+NN (ud, x, p, t; θ), where θ are the weights of the neural network. This modifies Equation 2, generating a new dynamical system. 
+
+du d
+
+dt = f (u, x, p, t) + NN (u, x, p, t; θ) (5) 0 = g(u, x, p, t) (6) ˆy = h(u, x, p, t) (7) The optimization problem that is then solved is min  
+
+> θ
+
+r = min  
+
+> θ
+
+|| y − ˆy|| 2 (8) The above system is posed as an unconstrained optimization problem and can be trained by a number of gradient-based and gradient-free methods. Gradient-based methods would require the implementation of an adjoint equation to calculate the gradi-ent of the residual with respect to the neural network parameters 
+
+θ. Typically this is implemented using reverse-mode automatic di ff erentiation. An implementation of these adjoint methods is provided in the SciML software stack Rackauckas et al. (2020); Rackauckas and Nie (2017). 
+
+2.1.1. Output Masking 
+
+After training this neural network, the desired correction is in essence determined. The user may choose to simply stop training now and use the resulting grey box model. However, the engineer may choose to reduce the scope of the correction, namely through the following steps: 1. Reducing the number of corrections (output dimension of the network) 2. Reducing the number of states needed to make this correc-tion (initially, all states are used for training) 3. Converting the reduced neural network into symbolic re-gression. This section explains how the output dimension of the neu-ral network is reduced. The magnitude of the neural network outputs are examined, and a metric may be chosen to determine 2Figure 2: Prediction by a trained Dyad UDE on an unseen dataset, yielding a 3% improvement in the loss function. 
+
+if the magnitude of the correction is relatively small. An ex-ample heuristic is the ratio of the correction magnitude to the maximum value of the time derivative over time: 
+
+|∆d′ 
+
+> i
+
+|
+
+max T |d′ 
+
+> i
+
+|
+
+In this way, the top outputs may be determined. An iterative masking procedure is then applied where the top X outputs are unmasked and the rest of the outputs are masked. The goal of this procedure is to determine the minimum number of correc-tions to be kept such that the loss function given by Equation 4. After the number of output dimensions are reduced, the net-work is re-trained with the smaller output dimension, using the same procedure as described in the previous section. 
+
+2.1.2. Sensitivity Analysis 
+
+The input dimension may now be reduced using sensitivity analysis. A Jacobian matrix from input to output is computed at the optimal parameters, and the relative magnitudes of the columns can be used to pick the top input variables. 
+
+2.1.3. Symbolic Regression 
+
+Finally, the neural network can be replaced by symbolic expressions using symbolic regression techniques Cranmer (2023). This conducts a massive distributed search for expres-sions that map from the input variables to the output correc-tion values. Model parameters are also included as input vari-ables so as to provide generalizability of the resulting expres-sion across model parameters. Finally, the symbolic regression returns the best equations from the search. 
+
+2.2. Implementation in Dyad 
+
+Dyad is an acausal modeling environment Rackauckas et al. (2022); Ma et al. (2021) that composes system modeling and machine learning. Universal Di ff erential Equations are pro-vided via a sub-module of Dyad, known as Dyad AI, which pro-vides an approachable and automated pipeline for using UDEs. Dyad AI consists of both universal di ff erential equations, as well as surrogate modeling methods. Abdelrehim et al. (2025). The Universal Di ff erential Equations formalism provides aug-ments first-principles physics-based models as well as existing knowledge with a machine learning model that captures un-known physics. 
+
+2.2.1. Physics-based Thermal-fluid modeling 
+
+First, a thermal-fluid model is developed for the TRU in Dyad. The TRU is an insulated box that is divided into 3 dif-ferent temperature zones using 2 partitions. This Dyad model is based on the low to medium fidelity Modelica-based model developed by Dhumane and Greene (Dhumane and Greene (2023)). The developed model is a systems of Di ff erential Al-gebraic Equation (DAEs) generated from composable acausal symbolic models. The key dynamic observable quantities of interest are the temperatures in each of the 3 zones. The key physical phenom-ena of interest are: heat transfer from the ambient air through the insulating walls into the air zones, heat transfer from the air zones to the refrigeration system, and mass transfer within the air zones and between zones resulting from air leaks. Full details of the physics-based model are presented in (Dhumane and Greene (2023)). In summary: lumped control volume models are used to represent the air zones, distributed models are used to describe the enclosure walls by discretizing along the wall thickness (with the other two dimensions kept as lumped control volumes). Convective heat transfer inside the air zone is implemented together with conductive heat transfer through the enclosure walls. Several parameters such as box di-mensions (height, width, zone lengths) as well as heat and mass transfer correlation parameters influence the model with the lat-ter determined using a calibration analysis. The two zones are separated by means of a bulkhead, which accounts for conduc-3tive heat transfer between the zones. 
+
+2.2.2. Structural Simplification 
+
+A physics model in Dyad is fundamentally a system of di ff erential-algebraic equations. This system, as specified by the user, undergoes a series of transformations and symbolic manipulations Ma et al. (2021) such as index lowering via the Pantiledes algorithm, alias elimination, tearing, dummy deriva-tives and others. These symbolic manipulations preserve the system exactly and are not approximations. The result is a smaller, symbolically simplified system of equations. 
+
+2.2.3. Universal Di ff erential Equations 
+
+After the Dyad model is structurally simplified, the dynam-ics are now augmented with a neural network. Initally, the in-put dimension of the neural network is the number of states and the output is the number of di ff erential equations /variables. Before training an input and output normalization step is un-dertaken: input normalization prevents the neural network acti-vation functions from saturating and output normalization steps ensure the correction terms are not too large so as to make the augmented system unstable. After the normalization steps, the neural network is trained such that the solution of the hybrid system matches the data well. Additionally, a number of dif-ferent architectures are trained simultaneously using an exper-iment tracking system within Dyad. The architecure with the best performance is automatically picked for the user, but the engineer can go into the experiment tracker and pick a di ff erent neural network if desired. 
+
+2.2.4. Masking, Sensitivity Analysis and Symbolic Regression 
+
+Once the optimization problem has converged to a solution, a new hybrid system with the neural network embeddings is produced. Two heuristics are performed to reduce the size of the neural network: the outputs with the highest magnitudes are considered, while masking the low magnitude corrections. This reduces the output dimension of the neural network. The network is then re-trained with the smaller output dimension. Next, sensitivity analysis step is performed to determine which variables most significantly contribute to these correc-tions. This reduces the input dimension of the correction. Fi-nally, a symbolic regression Cranmer (2023) is performed to re-place the input-output of the neural network with symbolic ex-pressions. The reduced outputs, reduced input variables, along with hand-chosen parameters are fed to the symbolic regression algorithm, which then produces a minimal expression. The final result is a new model which consists of new symbolic expres-sions can be appended to the original model, and the choice is provided to the user. The entire pipeline is summarized in Figure 1. 
+
+3. Results 
+
+3.1. Test Model, Dataset and Structural Simplification 
+
+A detailed description of a multizone cargo box model is available in Dhumane and Greene (2023) along with the dis-cretization schemes employed to build the model. Our test model is a two-zone cargo box model with thermal insulation on all sides. Zones are thermally separated by means of a bulk-head. The air within the boxes are modeled as a lumped control volume. Heat transfer occurs between zones due to temperature di ff erence and mass transfer occurs due to temperature di ff er-ence. The two zone box model also has several configurations corresponding to the relative sizes of each zone. Our training dataset corresponded to the following configurations B and E as shown in Figure 4 More specifically, the test cases that were studied are sum-marized in Table 2 and Figure 4. The dataset consists of three instances of telemetry data corresponding to the temperature in each zone. We use two of the three data instances for training and one for test. The Dyad model underwent structural simplification, gener-ating a compiled model with 36 states of which 8 were algebraic variables and 28 were di ff erential variables. 
+
+3.2. Universal Di ff erential Equations 
+
+As a starting point, a neural network N : u 7 → ∆u′ 
+
+> d
+
+is ap-pended to the system like Equation 5. The input dimension of the neural network was the total number of states in the system (36) and the output dimension was the total number of di ff eren-tial equations in the system (28). A number of di ff erent hidden layers and architectures are trained using Dyad’s experiment tracking feature and the best architecture was chosen. For this model, multi-layer perceptrons with di ff erent hidden layer sizes were trained. The final fitting results are shown in Figure 2. 
+
+3.3. Masking and Sensitivity Analysis 
+
+In order to improve the generalizability of the resulting UDE, Dyad is determining what are the most influential equations in the system and produces neural network output data only for those specific equations. The trained neural network from the previous step was analyzed. Of the 28 outputs, it was found that most of the neural network outputs were actually close to zero, and the outputs with the top 2 magnitudes provided su ffi cient correction for a very low loss value. Thus, a new network with 36 inputs and 2 outputs was con-structed and trained using the same procedure as before, result-ing in the same predictive performance as the previous network. Finally, a sensitivity analysis is conducted by computing a jaco-bian matrix of the outputs to the inputs, to determine the input variables that the outputs are most sensitive to. A heatmap of the jacobian matrix is shown in Figure 3. 
+
+3.4. Symbolic Regression 
+
+That data is then further processed with symbolic regression Cranmer (2023), such that we obtain parametrized expressions that represent the UDE correction terms. The symbolic regres-sion requires a set of input variables and parameters. The top 7 inputs as determined by the sensitivity analysis as well as three parameters were provided to the symbolic regression and an ex-pression was generated. Table X shows the inputs provided to the symbolic regression. 4Figure 3: A heatmap of the jacobian matrix computed as part of the sensitivity analysis. The top 7 inputs are marked on the X-axis. Inputs that end in "_t(t)" represent dummy derivatives generated by the model compilation. 
+
+Variable Type Description xPartition Parameter Relative size of two partitions initialAirTemperatureZ1 Parameter Initial Temperature of Zone 1 initialAirTemperatureZ2 Parameter Initial Temperature of Zone 2 zone1.gasHeatCapacitor.m_flowMakeup Di ff erential Variable Mass Flow Rate in Zone 1 zone2.gasHeatCapacitor.m_flowMakeup Di ff erential Variable Mass Flow Rate in Zone 2 zone2.discretized_wall1.heatCapacitor1.T Di ff erential Variable Temperature in Discrete Element of Wall zone2.discretized_wall1.heatCapacitor3.T Parameter Temperature in Discrete Element of Wall zone2.gasHeatCapacitor.m Algebraic Variable Mass Within Zone2 zone1.gasHeatCapacitor.T_t Dummy Derivative D.D of Temperature in Zone 1 zone2.gasHeatCapacitor.T_t Dummy Derivative D.D of Temperature in Zone 1 
+
+> Table 1: Inputs variables supplied to the the symbolic regression routine, decided based on the results of the sensitivity analysis and some knowledge of the model.
+
+5Figure 4: Trailer configurations for a two-zone box model. The Dyad UDE was trained on Configuration B and E, and tested on a proprietary configuration. 
+
+ID Dimensions Temperature Zone1 Zone2 Zone1 Zone2 1 9m 4.5m -20C 0C 2 2.5m 11m -25C 4C 3 4.5m 9m -20C 2C 
+
+> Table 2: Di ff erent vehicle configurations in the training set (#1 and #3) and test set (#2)
+
+Fig 5 shows the resulting correction terms that were ob-tained from the symbolic regression procedure on the first two datatest. As we can observe, the symbolic expressions are parametrized by zone configuration specific parameters, such as the initial air temperature in zone 2 or the length of the par-titions. Using symbolic expression for the correction terms en-ables us to have a more general correction term. In order to test the results, the last test case was used. 
+
+4. Discussion 
+
+The Dyad-UDE workflow makes use of a number of sym-bolic and numeric passes, and so naturally a model will have to ported to Dyad to take advantage of this method. This can be accomplished either through either the Dyad graphical program or by writing code in the Dyad Modeling Language (JSML), an acausal declarative language embedded in Julia. In this in-stance, the test model was ported over from the Modelica lan-guage to JSML. Model updates are not performed without the engineer’s ap-proval. The engineer also has the freedom to make choices at every stage of the training process, such as picking a suitable architecture from a list of hyperparameter searches, the number of output variables to mask, and finally, most notably the input variables into the symbolic regression. In this case, we made a choice to include three parameters into the regression, and this choice was informed by knowledge of the model itself. This underscores the need for the engineer to be involved. Each training stage of the neural network involved testing over 500 di ff erent choices of architecure and hyperparameters through an experiment tracker. Every training run was submit-ted to the JuliaHub cloud product and linked to the experiment tracker through a job ID. After the symbolic regression, we notice that dummy deriva-tives show up in the final expressions, as they come from the prior sensitivity analysis. Dummy derivatives are a-physical and are simply an artifact of the compilation process. Future work is required to determine how to eliminate them in favor of physical quantities. Finally, these corrections are applied to a compiled model (i.e., post structural simplification). Future work is required to determine how to correct specific equations in the user code before compilation. 
+
+5. Conclusion 
+
+Model Discovery is a powerful tool to autocomplete system models. In this work, model discovery was able to fit the data accurately and extrapolate to unseen conditions. They are a promising tool to improve the accuracy of component based models, and a workflow is presented within Dyad. 
+
+References 
+
+Abdelrehim, A., Gandhi, D., Yalburgi, S., Bharambe, A., Anan-tharaman, R., Rackauckas, C.V., 2025. Active learning en-6Figure 5: The final symbolic expressions generated by the symbolic regression. Only five input variables and two parameters were used to generate the expressions. 
+
+hanced surrogate modeling of jet engines in juliasim, in: AIAA SCITECH 2025 Forum, p. 2323. Browning, A.P., Drovandi, C., Turner, I.W., Jenner, A.L., Simp-son, M.J., 2022. E ffi cient inference and identifiability analy-sis for di ff erential equation models with random parameters. PLOS Computational Biology 18, e1010734. Carlson, F.B., Fält, M., Heimerson, A., Troeng, O., 2021. Con-trolsystems. jl: A control toolbox in julia, in: 2021 60th IEEE conference on decision and control (CDC), IEEE. pp. 4847– 4853. Chakrabarty, A., Maddalena, E., Qiao, H., Laughman, C., 2021. Scalable bayesian optimization for model calibration: Case study on coupled building and hvac dynamics. Energy and Buildings 253, 111460. Cranmer, M., 2023. Interpretable machine learning for sci-ence with pysr and symbolicregression. jl. arXiv preprint arXiv:2305.01582 . Dhumane, R., Greene, M., 2023. Modeling and calibration of a multi-temperature cargo for trailer . Dhumane, R., Stinson, M., 2024. A generic modeling frame-work for duty cycle simulations of transport refrigeration units . Fasel, U., Kaiser, E., Kutz, J.N., Brunton, B.W., Brunton, S.L., 2021. Sindy with control: A tutorial, in: 2021 60th IEEE conference on decision and control (CDC), IEEE. pp. 16–21. Ma, Y., Gowda, S., Anantharaman, R., Laughman, C., Shah, V., Rackauckas, C., 2021. Modelingtoolkit: A composable graph transformation system for equation-based modeling. arXiv preprint arXiv:2103.05244 . Rackauckas, C., Gwozdz, M., Jain, A., Ma, Y., Martinuzzi, F., Rajput, U., Saba, E., Shah, V.B., Anantharaman, R., Edel-man, A., et al., 2022. Composing modeling and simulation with machine learning in julia, in: 2022 Annual Modeling and Simulation Conference (ANNSIM), IEEE. pp. 1–17. Rackauckas, C., Ma, Y., Martensen, J., Warner, C., Zubov, K., Supekar, R., Skinner, D., Ramadhan, A., Edelman, A., 2020. Universal di ff erential equations for scientific machine learn-ing. arXiv preprint arXiv:2001.04385 . Rackauckas, C., Nie, Q., 2017. Di ff erentialequa-tions.jl – a performant and feature-rich ecosystem for solving di ff erential equations in julia. The Journal of Open Research Software 5. URL: 
+
+https://app.dimensions.ai/details/publication/pub.1085 and http://openresearchsoftware.metajnl.com/articles/1 
+
+doi:10.5334 /jors.151. exported from https: // app.dimensions.ai on 2019 /05 /05. 7
