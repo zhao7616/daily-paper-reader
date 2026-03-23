@@ -64,3 +64,36 @@ subscriptions:
           source: manual
           note: ''
       updated_at: '2026-03-12T07:45:18.667Z'
+      paused: true
+    - tag: PHM
+      description: 查找同时做故障诊断和寿命预测的相关论文
+      enabled: true
+      keywords:
+        - keyword: joint diagnosis prognosis
+          keyword_cn: 联合诊断与预测
+          query: joint fault diagnosis and prognosis framework
+        - keyword: multi-task learning
+          keyword_cn: 多任务学习
+          query: multi-task learning for diagnosis and RUL
+      intent_queries:
+        - query: joint fault diagnosis and remaining useful life prediction
+          query_cn: 故障诊断与剩余寿命联合预测
+          enabled: true
+          source: manual
+          note: ''
+        - query: integrated framework for diagnosis and prognosis
+          query_cn: 诊断与预测的集成框架
+          enabled: true
+          source: manual
+          note: ''
+        - query: multi task learning for simultaneous diagnosis and RUL estimation
+          query_cn: 用于同时诊断和寿命估计的多任务学习
+          enabled: true
+          source: manual
+          note: ''
+        - query: unified model for fault classification and health prediction
+          query_cn: 故障分类与健康预测的统一模型
+          enabled: true
+          source: manual
+          note: ''
+      updated_at: '2026-03-23T01:01:47.758Z'
