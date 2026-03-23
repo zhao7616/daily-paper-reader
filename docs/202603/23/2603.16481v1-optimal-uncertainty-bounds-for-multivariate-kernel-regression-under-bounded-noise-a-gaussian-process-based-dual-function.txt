@@ -1,0 +1,1082 @@
+Title: Optimal uncertainty bounds for multivariate kernel regression under bounded noise: A Gaussian process-based dual function
+
+URL Source: https://arxiv.org/pdf/2603.16481v1
+
+Published Time: Wed, 18 Mar 2026 01:11:46 GMT
+
+Number of Pages: 6
+
+Markdown Content:
+# Optimal uncertainty bounds for multivariate kernel regression under bounded noise: A Gaussian process-based dual function 
+
+Amon Lahr a, Anna Scampicchio b, ∗, Johannes K ¨ ohler c, ∗, Melanie N. Zeilinger a
+
+Abstract — Non-conservative uncertainty bounds are es-sential for making reliable predictions about latent func-tions from noisy data—and thus, a key enabler for safe learning-based control. In this domain, kernel methods such as Gaussian process regression are established tech-niques, thanks to their inherent uncertainty quantification mechanism. Still, existing bounds either pose strong as-sumptions on the underlying noise distribution, are con-servative, do not scale well in the multi-output case, or are difficult to integrate into downstream tasks. This paper ad-dresses these limitations by presenting a tight, distribution-free bound for multi-output kernel-based estimates. It is obtained through an unconstrained, duality-based formula-tion, which shares the same structure of classic Gaussian process confidence bounds and can thus be straightfor-wardly integrated into downstream optimization pipelines. We show that the proposed bound generalizes many exist-ing results and illustrate its application using an example inspired by quadrotor dynamics learning. 
+
+Index Terms — Machine learning and control, Estimation, Uncertain systems 
+
+I. I NTRODUCTION 
+
+# KERNEL methods have recently attracted a lot of at-tention in control due to their accurate estimation per-formance, flexibility and low tuning effort [1]. In particu-lar, estimates from Gaussian process (GP) regression [2], being complemented by rigorous uncertainty bounds, are very promising in view of learning-based control with safety constraints [3]–[5]. However, standard confidence bounds for Gaussian process regression [6]–[10] cannot handle correlated noise sequences and their probabilistic safety certification does not scale favorably when the function to be estimated has multiple output dimensions. Deterministic bounds [11]– [16] alleviate this independence assumption, providing robust uncertainty envelopes for bounded noise realizations without asserting a particular noise distribution. Yet, while similarly being restricted to the scalar-output case, existing deterministic bounds are either conservative [11]–[14], require constrained  
+
+> a
+
+Institute for Dynamical Systems and Control, ETH Zurich, Zurich, Switzerland; {amlahr,mzeilinger }@ethz.ch  
+
+> b
+
+Department of Electrical Engineering, Chalmers University of Tech-nology, G ¨ oteborg, Sweden; anna.scampicchio@chalmers.se  
+
+> c
+
+Department of Mechanical Engineering, Imperial College London, London, UK; j.kohler@imperial.ac.uk  
+
+> ∗
+
+Both co-authors contributed equally. 
+
+or non-smooth optimization [15], or are restricted to simple hyper-cube or ellipsoidal uncertainty sets [11]–[16]. In this work, we derive a tight, deterministic uncertainty bound in terms of the unconstrained optimizer of a Gaus-sian process-based dual function (Section III). We extend and generalize the results in [16] to the multivariate case as well as to an intersection of ellipsoidal noise bounds, also covering point-wise bounded noise realizations assumed in [11]–[15]. Additionally, we provide a thorough comparison with other existing deterministic bounds, showing that our bound encompasses the ones by [13]–[16] as special cases (Section IV). Finally, we numerically compare the bounds’ conservatism and solve time using an application example inspired by multivariate quadrotor dynamics learning subject to direction-dependent wind disturbances (Section V). 
+
+Notation: The space of (strictly) positive real numbers is denoted by R≥0 (R>0). We denote by ei ∈ RN the 
+
+i-th unit vector in RN , and by 1N ∈ RN a vector of ones. The weighted Euclidean norm is denoted by ∥v∥M
+
+.
+
+=√v⊤M v . The concatenation of matrices Mi ∈ Rn×m is written as [Mi]Ni=1 
+
+.
+
+= [ M ⊤ 
+
+> 1
+
+, . . . , M ⊤ 
+
+> N
+
+]⊤ ∈ RN n ×m. Likewise, for two ordered index sets I, J ⊆ N with cardinalities |I| = N ,
+
+|J| = M , particularly for e.g. IN
+
+> 1
+
+.
+
+= 1 : N .
+
+= {1, . . . , N },the matrix Kf
+
+> I,J
+
+.
+
+= [ k(xi, x j )] i∈I,j ∈J ∈ RN n f ×M n f collects the evaluations of the (matrix-valued) kernel function 
+
+k : Rnx × Rnx → Rnf ×nf at pairs of input locations xi, xj .
+
+II. P ROBLEM SETTING 
+
+We consider the problem of computing uncertainty bounds for the value of an unknown multivariate function f tr : Rnx →
+
+Rnf at an arbitrary input location xN +1 ∈ Rnx . Information about the latent function is given in terms of a data set of N
+
+noisy, partial measurements y = [ yi]Ni=1 ∈ RN ,
+
+yi = c⊤ 
+
+> i
+
+f tr (xi) + wi, ∀i ∈ IN 
+
+> 1
+
+(1) corrupted by additive noise wi. We assume that the distur-bances w = [ wi]Ni=1 ∈ RN are jointly bounded by a collection of ellipsoidal uncertainty sets, defined as follows. 
+
+Assumption 1. The noise realizations are bounded by 
+
+w⊤P wj w < Γ2 
+
+> w,j
+
+∀j ∈ Incon  
+
+> 1
+
+, (2) 
+
+with known constants Γw,j > 0 and positive-semidefinite ma-trices P wj ∈ RN ×N . Additionally, the matrix P w .
+
+= Pncon  
+
+> j=1
+
+P wj
+
+is positive definite. 
+
+> arXiv:2603.16481v1 [cs.LG] 17 Mar 2026
+
+Special cases of Assumption 1 include: 1) point-wise bounded noise: For ncon = N and P wj =
+
+ej e⊤ 
+
+> j
+
+, Eq. (2) reads as w2 
+
+> j
+
+< Γ2 
+
+> w,j
+
+, j ∈ IN 
+
+> 1
+
+.2) energy-bounded noise: For ncon = 1 , Eq. (2) reads as 
+
+w⊤P w 
+
+> 1
+
+w < Γ2
+
+> w, 1
+
+, with P w 
+
+> 1
+
+positive definite. The special case P w 
+
+> 1
+
+= IN recovers the setting of energy-bounded noise realizations, i.e., the constraint PNi=1 w2 
+
+> i
+
+< Γ2
+
+> w, 1
+
+.To infer uncertainty bounds about the latent function f , we make use of the following standard regularity assumption [6]– [16], cf. [15, Remark 1] for a discussion. 
+
+Assumption 2. Let f ∈ Hk be an element of the Re-producing Kernel Hilbert Space (RKHS) Hk, defined by a given positive-semidefinite, matrix-valued kernel function 
+
+k : Rnx × Rnx → Rnf × Rnf . Furthermore, let the norm of f
+
+be bounded, i.e., ∥f ∥Hk < Γf , for a known constant Γf > 0.
+
+This general set-up encompasses latent-function estimation using multivariate finite-dimensional features (through positive semi-definiteness of k), independent scalar outputs (through a diagonal structure of k), or any combination thereof. 
+
+III. M AIN RESULT 
+
+We formulate the desired uncertainty bound for the vector-valued unknown function in terms of its test-point-dependent, worst-case realization for an arbitrary direction h ∈ Rnf . To this end, we transcribe Assumptions 1 and 2 as well as Eq. (1) into the following optimization problem: 
+
+f h(xN +1 ) = sup  
+
+> f∈H k
+> w∈RN
+
+h⊤f (xN +1 ) (3a) 
+
+s.t. c⊤ 
+
+> i
+
+f (xi) + wi = yi, i ∈ IN 
+
+> 1
+
+, (3b) 
+
+w⊤P wj w ≤ Γ2 
+
+> w,j
+
+, j ∈ Incon  
+
+> 1
+
+, (3c) 
+
+∥f ∥2 
+
+> Hk
+
+≤ Γ2 
+
+> f
+
+. (3d) By definition, an optimal solution of Problem (3) determines the optimal worst-case bound for the value of f tr (xN +1 ) in the direction h, subject to the available information. Conse-quently, the tightest containment interval along this axis is 
+
+−f −h(xN +1 ) ≤ h⊤f tr (xN +1 ) ≤ f h(xN +1 ).Our main result derives an optimal solution to Problem (3) using familiar terms from GP regression, using a particular measurement noise covariance. To this end, we denote the multi-output GP posterior mean and covariance by 
+
+f μσ (xN +1 ) .
+
+= KfN +1 ,1: N C ˆK−1 
+
+> σ
+
+y, (4) 
+
+Σfσ (xN +1 ) .
+
+= KfN +1 ,N +1 − KfN +1 ,1: N C ˆK−1 
+
+> σ
+
+C⊤Kf 
+
+> 1: N,N +1
+
+,
+
+respectively. The matrix ˆKσ
+
+.
+
+= C⊤Kf 
+
+> 1: N, 1: N
+
+C + Kwσ denotes the Gram matrix, where the matrix Kf 
+
+> 1: N, 1: N
+
+of kernel evalua-tions on the training inputs is projected using the measurement matrix C⊤ .
+
+= blkdiag  c⊤ 
+
+> 1
+
+, . . . , c ⊤
+
+> N
+
+ ∈ RN ×nf N , defined according to the linear measurement model (1). While Kwσ
+
+commonly denotes the covariance of (possibly correlated) Gaussian measurement noise, here we define 
+
+Kwσ
+
+.
+
+= ( P wσ )−1 .
+
+=
+
+
+
+> ncon
+
+X
+
+> j=1
+
+σ−2 
+
+> j
+
+P wj
+
+
+
+> −1
+
+(5) based on the ellipsoidal noise bounds (2) and a free vector of noise parameters σ = [ σj ]ncon  
+
+> j=1
+
+∈ Rcon  
+
+> >0
+
+. For special case 1) of Assumption 1, note that Kwσ = diag( σ21 , . . . , σ 2 
+
+> N
+
+) corresponds to assuming independent, heteroscedastic noise; for special case 2), i.e., Kwσ = σ21 (P w 
+
+> 1
+
+)−1, the scalar parameter σ1
+
+can be interpreted as the output scale for an unknown noise-generating process [16, Sec. 3.1]. We are now ready to state our main result. 
+
+Theorem 1. Let Assumptions 1 and 2 hold and define 
+
+f σh(xN +1 ) .
+
+= h⊤f μσ (xN +1 ) + βσ
+
+q
+
+h⊤Σσ (xN +1 )h, (6) 
+
+with 
+
+βσ
+
+.
+
+=
+
+vuutΓ2 
+
+> f
+
++
+
+> ncon
+
+X
+
+> j=1
+
+Γ2
+
+> w,j
+
+σ2
+
+> j
+
+− ∥ y∥2ˆK−1
+
+> σ
+
+. (7) 
+
+Then, for any h ∈ Rnf and any xN +1 ∈ Rnx ,
+
+i) h⊤f tr (xN +1 ) ≤ f σh(xN +1 ) for all σ ∈ Rncon  
+
+> >0
+
+;
+
+ii) the optimal uncertainty bound (3) is given by 
+
+f h(xN +1 ) = inf 
+
+> σ∈Rncon
+> >0
+
+f σh(xN +1 ); (8) iii) f σh(xN +1 ) is invex: σ⋆ ∈ Rncon  
+
+> >0
+
+is a global minimizer of Problem (8) if and only if ∂∂σ f σh(xN +1 ) σ=σ⋆
+
+= 0 .
+
+The proof of Theorem 1, reported in Section B, mainly relies on strong duality of a finite-dimensional representation of Problem (3). In particular, the function f σh(xN +1 ), which corresponds to βσ -confidence bounds of the multivariate GP posterior in the direction h, is shown to be a reparametriza-tion of the dual function of Problem (3), establishing state-ments i) and ii) by weak and strong duality, respectively. For the reparametrization, the optimal dual variable λ0 for the complexity constraint (3d) is determined in closed form and the noise parameters [σ2 
+
+> j
+
+]ncon 
+
+> j=1
+
+.
+
+= [ λ0 
+
+> λj
+
+]ncon  
+
+> j=1
+
+are inversely proportional to the dual variables [λj ]ncon  
+
+> j=1
+
+for each respective constraint (3c). The scaling factor βσ can be interpreted as the total RKHS norm in a data-generating RKHS, subtracted by the RKHS norm of the corresponding minimum-norm interpolant, cf. [16, Eq. (6)]. Statement i) of Theorem 1 establishes a valid, yet potentially conservative uncertainty bound for all noise parameters σ ∈
+
+Rncon  
+
+> >0
+
+. Noting that this upper bound is given by the projection of the multivariate GP posterior in the direction h for a fixed vector of noise parameters, we can derive the following ellipsoidal uncertainty bound. 
+
+Corollary 1. Let Assumptions 1 and 2 hold. Then, ∀σ ∈ Rncon 
+
+> >0
+
+∥f tr (xN +1 ) − f μσ (xN +1 )∥Σf (xN +1 )−1 ≤ βσ . (9) 
+
+Proof. Using h = Σ( xN +1 )−1(f tr (xN +1 ) − f μσ (xN +1 )) , the assertion is obtained by rearranging Theorem 1, point i). An essential advantage of the duality-based, unconstrained 
+
+bound formulation in Theorem 1, i) and Corollary 1 is their straightforward integration into downstream optimization tasks: the dual (noise) parameters σ can be simultaneously optimized alongside the primary objective, tightening the uncertainty bound as necessary for the downstream task while guaranteeing safe predictions at each iteration. Invexity in statement iii) is derived from the unique mapping between the original dual variables and the noise parameters σ,and the concavity of the original dual function. It guarantees that any local minimizer in the open domain Rncon  
+
+> >0
+
+is globally optimal, rendering the bound attractive for scalable gradient-based optimization. Note, however, that the invexity property does not guarantee attainment of the optimizer in the open domain Rncon  
+
+> >0
+
+: indeed, the optimal bound in Eq. (8) might be attained only in the limit for some σj → 0 or σj → ∞ .
+
+Illustrative example: Fig. 1 illustrates Theorem 1 for a simple example, where the proposed uncertainty bound is computed for a random unknown function f tr ∈ H k with the squared-exponential kernel k(x, x ′) = exp( −∥ x − x′∥22), a known RKHS-norm bound Γ2 
+
+> f
+
+= 1 and N = 2 training points corrupted by point-wise bounded noise realizations |wj | ≤ 0.2
+
+[equivalent to special case 1) of Assumption 1 with Γw,j =0.2]. The optimal value of the dual function coincides with the optimal uncertainty bound at each respective test point due to strong duality; additionally, weak duality ensures that it also provides a conservative bound for the whole domain. The incurred conservatism depends on the value of the noise parameters σ: for [σ]ncon  
+
+> j=1
+
+→ ∞ , the uncertainty bound (6) converges to the prior bound, f σh(x) → Γf
+
+ph⊤k(x, x )h; if any σj → 0, it may grow unbounded; cf. [16, Sec. 3.3] for a detailed discussion. −0.50.00.51.0
+
+> Uncertainty bounds
+
+true function data lower bound upper bound        
+
+> 10 −2
+> 10 0
+> 10 2
+> σ ∗
+> 1
+> 0.00.51.01.52.02.53.03.5
+
+xN+110 −2          
+
+> 10 0
+> 10 2
+> σ ∗
+> 2
+> Fig. 1. Illustrative example of proposed uncertainty bound. The top plot shows the optimal uncertainty bounds (solid), as well as the corresponding dual functions (shaded), evaluated for the optimal dual (noise) parameters σ⋆at the test point xN+1 =1.5(dotted red). The bottom two plots show the corresponding optimal value of the dual (noise) parameters σ⋆for all test points.
+
+IV. D ISCUSSION 
+
+In this section, we compare the proposed bound with available kernel regression bounds. Since all available results are presented in the scalar-output case, we restrict the following discussion to nf = 1 .
+
+1) Optimal deterministic bounds (optimization-based): The proposed bound generalizes the optimal deterministic bounds developed by [15] and [16] for point-wise bounded and energy-bounded noise realizations, which are both recovered as special cases 1) and 2) of Assumption 1, respectively. For point-wise bounded noise, assuming a uniform noise bound |wi| ≤ ¯Γw and a positive-definite kernel function k,[15] also provides a duality-based formulation of their bound, 
+
+f h(xN +1 ) = inf  
+
+> ν∈RN,λ> 0
+
+y⊤ν + ¯Γw∥ν∥1 + λΓ2 
+
+> f
+
+(10) 
+
++ 14λ
+
+
+
+KfN +1 ,N +1 + ∥Cν ∥2
+
+> Kf
+> 1: N, 1: N
+
+− 2KfN +1 ,1: N Cν 
+
+
+
+.
+
+Compared with the proposed dual objective in Theorem 1, which is invex and smooth, the dual objective (10) is convex and non-smooth. To address non-smoothness, [15, Alg. 1] pro-poses an alternating-optimization procedure, iterating closed-form optimization of the scalar multiplier λ and 1-norm-constrained quadratic minimization of ν ∈ RN . While this algorithm is found to be effective for iterating towards the optimal uncertainty bound (see Section V), it remains difficult to integrate into downstream (optimization) tasks as it still involves inequality constraints. In contrast, the proposed dual objective (6) is straightforwardly integrated into optimization pipelines, optimizing σ as part of the downstream objective. For energy-bounded noise, Theorem 1 encompasses [16, Theorem 1], which equivalently expresses the optimal uncer-tainty bound in terms of unconstrained optimization of the (scalar) noise parameter σ. This paper extends these results by additionally showing invexity of the dual function (6). Moreover, the duality-based viewpoint of the upper bound simplifies the proof, cf. [16, Appendix C], while explaining the potential conservatism of existing suboptimal, closed-form bounds as discussed in the following. 
+
+2) Suboptimal deterministic bounds (closed-form): Available closed-form, suboptimal bounds in the bounded-noise setting can be classified into two types. First, utilizing the Cauchy-Schwarz inequality for an inner product defined by the posterior kernel k(·, ·) −
+
+Kf 
+
+> ·,1: N
+
+ˆK−1 
+
+> σ
+
+Kf
+
+> 1: N, ·
+
+, cf. [6, Lemma 7.2], the works [13, Lemma 2] and [14, Lemma 2] obtain a bound of the form 
+
+|f tr (xN +1 ) − f μσ (xN +1 )| ≤ βσ
+
+pΣσ (xN +1 ) (11) for a fixed value of σ = ¯ σ1N and a uniform noise bound 
+
+|wi| ≤ ¯Γw for all i ∈ IN 
+
+> 1
+
+. In this case, the scaling factor βσ
+
+in Eq. (4) simplifies to β2 
+
+> σ
+
+= Γ 2 
+
+> f
+
++ N ¯Γ2 
+
+> w
+
+¯σ−2 − ∥ y∥2ˆK−1
+
+> σ
+
+, with 
+
+¯σ2 = ¯Γ2 
+
+> w
+
+and ¯σ2 = N ¯Γ2 
+
+> w
+
+for [13] and [14], respectively. These bounds are recovered by Corollary 1 for point-wise bounded noise [special case 1) of Assumption 1], showing that their conservatism can be attributed to the fact that they correspond to an evaluation of the dual function (6) for a fixed set of dual (noise) parameters. Second, in [11], [12], [15], suboptimal, closed-form uncer-tainty bounds are obtained by separating the prediction error in an interpolation- and a noise-error term. For example, the bound formulated in [12, Theorem 2] reads as 
+
+|f tr (xN +1 ) − f μσ (xN +1 )| ≤ βf
+
+> max
+
+pΣσ (xN +1 )+ ¯Γw∥ ˆK−1 
+
+> σ
+
+Kf 
+
+> 1: N,N +1
+
+∥1, (12) where βf
+
+> max
+
+.
+
+=
+
+q
+
+Γ2 
+
+> f
+
+− min |wi|≤ ¯Γw ∥y − w∥2ˆK−1
+
+> σ
+
+. This formu-lation generalizes the ones in [11, Theorem 1], [15, Proposi-tion 3] in that it allows for an arbitrary noise parameter ¯σ > 0,with σ = ¯ σ1N . In contrast, the preceding works are restricted to ¯σ = 0 in the interpolation term (which comes with the additional limitation to positive-definite kernels and unique training input locations), and bound the difference to the actual mean prediction f μσ separately using the triangle inequality. Despite the additional conservatism incurred by the separation of errors, one advantage of these bounds is that the value of the uncertainty bound stays bounded as ¯σ → 0. Still, the evaluation of the scaling factor βf 
+
+> max
+
+requires solving a quadratic program comparable in complexity to (10) whenever the data set is modified. 
+
+3) Finite-dimensional hypothesis spaces: Since our theoreti-cal analysis applies to general positive-semidefinite kernels (cf. Assumption 2), it applies to the classical special case of linear regression with a finite-dimensional hypothesis spaces, i.e., 
+
+k(x, x ′) = Φ( x)Φ( x′)⊤ for some features Φ : Rnx → Rnf ×r .In terms of application to control, this can, e.g., be used for estimating (non-falsified) nonlinear system dynamics from noisy measurements, where the noise at each time step is bounded by a quadratic constraint (2), cf. [5, Sec. 5]. In the special case of a single quadratic noise constraint, our result recovers classical analytical regression bounds under energy-bounded noise [17]; see also [16, Sec. 4.1] for a discussion. 
+
+4) Probabilistic bounds: The proposed bound shares the same structure with many probabilistic results, where (11) holds with some user-defined confidence 1 − δ, and measure-ment noise realizations are assumed to be conditionally zero-mean R-sub-Gaussian [18]. This different setting is reflected in the expressions for the scaling factor βσ , which commonly feature both the variance proxy R and the parameter δ en-forcing the desired confidence level, cf., e.g., [9, Eq. (7)]. The main limitation of these bounds is their strong assumption on the measurement noise, preventing them from rigorously handling biased, correlated and adversarial disturbances— all scenarios encompassed by the proposed distribution-free bounds. Moreover, they can handle only increasing training data-set sizes: as such, differently from the proposed ap-proach, they cannot be applied to subset-of-data strategies to improve scalability. Further discussions can be found in [15, Section VI, Example 1] and [16, Section 4.3]. 
+
+V. A PPLICATION EXAMPLE 
+
+In the following, we compare the proposed bound with existing bounds using an application example inspired by dynamics learning in control 1. Here, the task is to estimate the residual acceleration f tr (x) = ( ax(θ), a z (θ)) ∈ R2 of  
+
+> 1The full source code and implementation details are available at https: //gitlab.ethz.ch/ics/bounded-rkhs-bounds-duality .
+
+0
+
+π/2
+
+π
+
+3π/22πθ
+
+−10 010 
+
+ax(θ )
+
+−10 010 
+
+> ay(θ )
+
+true function Dual-GD (e)                                                                                       
+
+> Fig. 2. Proposed multivariate uncertainty bound for quadrotor example with ndata =10 training points. The latent function (dashed black) is tightly bounded by the optimal uncertainty bounds evaluated for both output dimensions (Theorem 1); the multivariate ellipsoidal tube is generated using σ-values corresponding to the optimal upper bound in x-direction (Corollary 1). The (projected) data points and (projected) uncertainty bounds are shown in red and gray, respectively. TABLE I EXPERIMENTAL RESULTS FOR THE QUADROTOR EXAMPLE
+> Method Suboptimality Time [s] min. avg. max. min. avg. max.
+> ndata  = 100  CVX-full (e) 0.00 0.00 0.00 0.55 0.66 3.16 CVX-full (p) 0.01 0.22 0.70 0.13 0.19 0.27 [15] (p) 0.01 0.22 0.70 0.00 0.02 0.07 [12] (p) 0.31 0.70 2.09 0.01 0.01 0.03 Dual-GD (e) 0.00 0.00 0.03 0.40 1.46 1.84 Dual-GD (p) 0.01 0.23 0.70 0.21 0.76 1.55
+> ndata  = 1000  CVX-full (e) 0.00 0.00 0.00 289.66 302.84 326.85 CVX-full (p) 0.00 0.19 0.62 32.88 34.19 49.30 [15] (p) 0.00 0.19 0.62 0.92 2.68 26.83 [12] (p) 0.46 0.71 1.30 0.04 0.05 0.11 Dual-GD (e) 0.03 0.15 0.39 3.45 5.10 16.70 Dual-GD (p) 0.18 0.37 0.79 0.76 1.07 2.27
+
+a two-dimensional quadrotor in body frame as a function of its tilt angle θ ∈ [0 , 2π] ( nx = 1) , based on noisy measurements of its acceleration ax, a z in both components 
+
+(nf = 2) . The latent function f tr is randomly generated using a periodic kernel, enforcing the RKHS-norm bound Γ2 
+
+> f
+
+= 1 .The ndata ∈ { 100 , 1000 } measurements are corrupted by an unknown wind force, which is assumed to be contained within a 2D ellipsoid with differently scaled semi-axes in the global coordinate frame, resulting in tilt-angle-dependent, ellipsoidal noise bounds P wj (θ), j ∈ Indata  
+
+> 1
+
+. The components of each measurement are extracted by defining c⊤ 
+
+> i,x
+
+= 1 0 and 
+
+c⊤ 
+
+> i,z
+
+= 0 1, resulting in a total of N = 2 ndata data points. Fig. 2 depicts this setup for ndata = 10 measurements. The following methods are compared in Table I: “CVX-full” solves the finite-dimensional version of Problem (3), see Section A, using CVXPY [19]; “[15]” implements the iterative algorithm discussed in Section IV-.1 in CVXPY [19]; “[12]” computes the closed-form bound in Eq. (12) with ¯σ = ¯Γwset to the uniform noise error bound 2; “Dual-GD” optimizes Problem (8) with GPyTorch [20] using the accelerated gradi-ent descent method Adam with a fixed learning rate of 0.1. To compare the conservatism resulting from the ellipsoidal “(e)” or the corresponding smallest uniform point-wise “(p)” noise bound ¯Γw imposed by [12], [15], we additionally implement a variant using the latter noise assumption. This variant results in a reduced number of N = ndata data points since only measurements for the respective coordinate are utilized. Table I shows the suboptimality and computation time (minimum, mean, and maximum), indicating the difference to the optimal uncertainty bound “CVX-full (e)”, normalized by the differ-ence of the prior uncertainty bound. The following stopping times are selected: for “CVX-full”, until convergence; for [15, Alg. 1], until 10 −2 suboptimality with respect to “CVX-full (p)”; for “Dual-GD”, after 100 gradient steps. The results indicate that [15, Alg. 1] converges reliably and quickly to the optimal uncertainty bound assuming pointwise-bounded noise realizations, explaining the remaining differ-ence to the optimal solution utilizing the ellipsoidal noise bound. The closed-form bound in [12, Theorem 2] naturally achieves the lowest computational time; however, it also shows the highest conservatism. For Dual-GD, reliable convergence to the optimal solution is observed for ndata = 100 . For 
+
+ndata = 1000 , convergence is challenged by the high density of training points, which leads to more than 95% of the optimal values σ⋆j → ∞ at the boundary of the domain for both noise assumptions. Nevertheless, it effectively reduces the size of the uncertainty bound in the limited number of iterations, leading to competitive uncertainty estimates. 
+
+VI. C ONCLUSIONS 
+
+We have derived a tight, deterministic uncertainty bound for kernel-based worst-case uncertainty quantification. The duality-based formulation extends the applicability of kernel-based uncertainty bounds to the multivariate case and more complex noise descriptions, while unifying a range of existing results in the literature. Enabled by the unconstrained problem formulation, the numerical results highlight the effectiveness of the bound in reducing the size of the uncertainty enve-lope, motivating its application to downstream tasks such as Bayesian optimization or safe learning-based control. 
+
+REFERENCES 
+
+[1] B. Sch¨ olkopf and A. J. Smola, Learning with Kernels: Support Vector Machines, Regularization, Optimization, and Beyond , ser. Adaptive Computation and Machine Learning. Cambridge, Mass: MIT Press, 2002. [2] C. E. Rasmussen and C. K. I. Williams, Gaussian Processes for Machine Learning , ser. Adaptive Computation and Machine Learning. Cambridge, Massachusetts: MIT Press, 2006. [3] A. Scampicchio, E. Arcari, A. Lahr, and M. N. Zeilinger, “Gaussian processes for dynamics learning in model predictive control,” Annual Reviews in Control , vol. 60, 2025. [4] K. P. Wabersich, A. J. Taylor, J. J. Choi, K. Sreenath, C. J. Tomlin, A. D. Ames, and M. N. Zeilinger, “Data-Driven Safety Filters: Hamilton-Jacobi Reachability, Control Barrier Functions, and Predictive Methods for Uncertain Systems,” IEEE Control Systems Magazine , vol. 43, no. 5, 2023. 
+
+> 2
+
+Different tested choices ¯σ ∈ { 10 −3, ¯Γw , 10 3} lead to similar results, with ¯σ = ¯Γw achieving the lowest suboptimality. [5] T. Martin, T. B. Sch¨ on, and F. Allg¨ ower, “Guarantees for data-driven control of nonlinear systems using semidefinite programming: A survey,” 
+
+Annual Reviews in Control , vol. 56, 2023. [6] N. Srinivas, A. Krause, S. M. Kakade, and M. W. Seeger, “Information-Theoretic Regret Bounds for Gaussian Process Optimization in the Bandit Setting,” IEEE Transactions on Information Theory , vol. 58, no. 5, 2012. [7] Y. Abbasi-Yadkori, “Online learning for linearly parametrized control problems,” Ph.D. dissertation, University of Alberta, Edmonton, Alberta, 2013. [8] S. R. Chowdhury and A. Gopalan, “On Kernelized Multi-armed Ban-dits,” in Proceedings of the 34th International Conference on Machine Learning . PMLR, 2017. [9] C. Fiedler, J. Menn, L. Kreisk¨ other, and S. Trimpe, “On safety in safe bayesian optimization,” Transactions on Machine Learning Research ,2024. [10] O. Molodchyk, J. Teutsch, and T. Faulwasser, “Towards safe Bayesian optimization with Wiener kernel regression,” in 2025 European Control Conference (ECC) , 2025. [11] E. T. Maddalena, P. Scharnhorst, and C. N. Jones, “Deterministic error bounds for kernel-based learning techniques under bounded noise,” 
+
+Automatica , vol. 134, 2021. [12] R. Reed, L. Laurenti, and M. Lahijanian, “Error Bounds for Gaussian Process Regression Under Bounded Support Noise with Applications to Safety Certification,” Proceedings of the AAAI Conference on Artificial Intelligence , vol. 39, no. 19, 2025. [13] K. Hashimoto, A. Saoud, M. Kishida, T. Ushio, and D. V. Dimarogonas, “Learning-based symbolic abstractions for nonlinear control systems,” 
+
+Automatica , vol. 146, 2022. [14] Z. Yang, X. Dai, W. Yang, B. Ilgen, A. Anzel, and G. Hattab, “Kernel-based Learning for Safe Control of Discrete-Time Unknown Systems under Incomplete Observations,” in 2024 43rd Chinese Control Confer-ence (CCC) , 2024. [15] P. Scharnhorst, E. T. Maddalena, Y. Jiang, and C. N. Jones, “Robust Uncertainty Bounds in Reproducing Kernel Hilbert Spaces: A Convex Optimization Approach,” IEEE Transactions on Automatic Control ,vol. 68, no. 5, 2023. [16] A. Lahr, J. K¨ ohler, A. Scampicchio, and M. N. Zeilinger, “Optimal kernel regression bounds under energy-bounded noise,” 2025, to be published in Advances in Neural Information Processing Systems, doi:10.48550/arXiv.2505.22235. [17] E. Fogel, “System identification via membership set constraints with energy constrained noise,” IEEE Transactions on Automatic Control ,vol. 24, no. 5, 1979. [18] C. Fiedler, C. W. Scherer, and S. Trimpe, “Practical and Rigorous Uncertainty Bounds for Gaussian Process Regression,” Proceedings of the AAAI Conference on Artificial Intelligence , vol. 35, no. 8, 2021. [19] S. Diamond and S. Boyd, “CVXPY: A Python-embedded modeling lan-guage for convex optimization,” Journal of Machine Learning Research ,vol. 17, no. 83, 2016. [20] J. Gardner, G. Pleiss, K. Q. Weinberger, D. Bindel, and A. G. Wilson, “GPyTorch: Blackbox Matrix-Matrix Gaussian Process Inference with GPU Acceleration,” in Advances in Neural Information Processing Systems , vol. 31. Curran Associates, Inc., 2018. [21] S. P. Boyd and L. Vandenberghe, Convex Optimization . Cambridge, UK ; New York: Cambridge University Press, 2004. 
+
+APPENDIX 
+
+A. Auxiliary results 
+
+Lemma 1. The optimal solution to (3) coincides with the solution to the following finite-dimensional convex program 
+
+f h(xN +1 ) = sup 
+
+> θ∈Rr
+
+h⊤ΦN +1 θ (13a) 
+
+s.t. ∥θ∥22 ≤ Γ2 
+
+> f
+
+, (13b) 
+
+∥y − C⊤Φ1: N θ∥2  
+
+> Pwj
+
+≤ Γ2 
+
+> w,j
+
+, (13c) 
+
+for j ∈ Incon  
+
+> 1
+
+. The feature matrix Φ1: N +1 
+
+.
+
+= [Φ i]N +1  
+
+> i=1
+
+∈
+
+Rnf (N +1) ×r , with full column rank r ≤ nf (N +1) , composed of feature evaluations Φi ∈ Rnf ×r at input locations xi,is given by the Gram matrix factorization Kf  
+
+> 1: N+1 ,1: N+1
+
+.
+
+=[k(xi, x j )] N +1  
+
+> i,j =1
+
+= Φ 1: N +1 Φ⊤  
+
+> 1: N+1
+
+∈ Rnf (N +1) ×nf (N +1) .Proof. The result is derived using adaptation of the representer theorem, following the steps in [16, Appendix A]. 
+
+Lemma 2. Strong duality holds for Problem (13) .Proof. Let 
+
+f tr ,int = arg min  
+
+> f∈H k
+
+∥f ∥2 
+
+> Hk
+
+(14a) 
+
+s.t. f (xi) = f tr (xi), i ∈ IN +1 1 (14b) be the minimum-norm interpolant of f tr at the training-and test-inputs. By the representer theorem [1, Ch. 4.2], 
+
+f tr ,int (xN +1 ) = Φ N +1 θtr . Hence, ∥θtr ∥2 = ∥f tr ,int ∥Hk ≤∥f tr ∥Hk < Γf , where the final inequality follows from Assumption 2, establishing θtr as a strictly feasible point of the convex program (13). Thus, Slater’s condition [21, Chap. 5.2.3] is satisfied, yielding the claim. 
+
+B. Proof of Theorem 1 
+
+1) Proof of statements i) and ii): The optimal solution to the infinite-dimensional problem (3) coincides with the op-timal solution of the finite-dimensional, convex program (13) (cf. Lemma 1). The Lagrangian of (13) is 
+
+L(θ, λ 0: ncon ) = h⊤ΦN +1 θ − λ0
+
+ ∥θ∥22 − Γ2
+
+> f
+
+
+
+−
+
+> ncon
+
+X
+
+> j=1
+
+λj
+
+
+
+∥y − C⊤Φ1: N θ∥2  
+
+> Pwj
+
+− Γ2
+
+> w,j
+
+
+
+, (15) and d(λ0: ncon ) = sup θ L(θ, λ 0: ncon ) is its concave dual function. Due to strong duality (cf. Lemma 2), the optimal solution to (13) is equal to the dual solution 
+
+f h(xN +1 ) = inf   
+
+> λ0,...,λ ncon ≥0
+
+d(λ0: ncon ). (16) By defining the “partially-minimized” dual function 
+
+d0(λ1: ncon ) = inf λ0≥0 sup θ L(θ, λ 0: ncon ), we can write Problem (16) as f h(xN +1 ) = inf λ1,...,λ ncon ≥0 d0(λ1: ncon ).
+
+Due to continuity of the dual function with respect to the dual variables λ, we can assume λj > 0, j ∈ Incon  
+
+> 0
+
+, without loss of generality: by the definition of the infimum, it holds that inf λ0: ncon ≥0 d(λ0: ncon ) = inf λ0: ncon >0 d(λ0: ncon ). Hence, we can reparametrize the original Lagragian (15) as 
+
+Lσ (θ, λ 0, σ 1: ncon ) = h⊤ΦN +1 θ − λ0
+
+ ∥θ∥22 − Γ2
+
+> f
+
+
+
+− λ0
+
+
+
+∥y − C⊤Φ1: N θ∥2  
+
+> Pwσ
+
+− Γ2
+
+> w,j
+
+
+
+,
+
+(17) with Lσ (θ, λ 0, σ 1: ncon ) = L(θ, λ 0: ncon ) for the dual (noise) parameter [σ2 
+
+> j
+
+]ncon  
+
+> j=1
+
+= [ λ0 
+
+> λj
+
+]ncon  
+
+> j=1
+
+. We analogously reparametrize 
+
+dσ 
+
+> 0
+
+(σ1: ncon ) = inf λ0>0 sup θ Lσ (θ, λ 0, σ 1: ncon ) and re-cover the original optimal solution (16) as 
+
+f h(xN +1 ) = inf   
+
+> σ1,...,σ ncon ∈(0 ,∞)
+
+dσ 
+
+> 0
+
+(σ1: ncon ). (18) Finally, we derive dσ 
+
+> 0
+
+(σ1: ncon ) in closed form by noting that it is the dual solution for the primal problem 
+
+f σh(xN +1 ) = sup 
+
+> θ∈Rr
+
+h⊤ΦN +1 θ (19a) 
+
+s.t. ∥θ∥22 + ∥y − C⊤Φ1: N θ∥2 
+
+> Pwσ
+
+≤ Γ2 
+
+> f
+
++
+
+> ncon
+
+X
+
+> j=1
+
+Γ2
+
+> w,j
+
+σ2
+
+> j
+
+.
+
+(19b) The analytical solution to this convex program with linear cost and a single quadratic constraint is (see Section C) 
+
+f σh(xN +1 ) = h⊤f μσ (xN +1 ) + βσ
+
+q
+
+h⊤Σσ (xN +1 )h. (20) For Problem (19), strong duality is established using the same strictly feasible point as in Lemma 2, since every (strictly) feasible solution to (13) is a (strictly) feasible solution to (19). With f σh(xN +1 ) = dσ 
+
+> 0
+
+(σ1: ncon ), inserting Eq. (20) in Eq. (18) gives statement i): h⊤f tr (xN +1 ) ≤ f h(xN +1 ) ≤ f σh(xN +1 );statement ii) follows directly from Eq. (18). 
+
+2) Proof of statement iii): Let ∂∂σ f σh(xN +1 ) = 0 for some 
+
+σ⋆ ∈ Rncon  
+
+> +
+
+. Since f σh(xN +1 ) = dσ 
+
+> 0
+
+(σ⋆ 
+
+> 1: ncon
+
+), it holds that  
+
+> ∂∂σ
+
+dσ 
+
+> 0
+
+(σ⋆ 
+
+> 1: ncon
+
+) = 0. Using the reparametrization (σ⋆j )2 =
+
+> λ0
+> λ⋆j
+
+, j ∈ Incon  
+
+> 1
+
+, we obtain that ∂∂λ 1: ncon 
+
+d0(λ⋆ 
+
+> 1: ncon
+
+) = 0.As dσ 
+
+> 0
+
+(xN +1 ) is the restriction of the convex dual func-tion d(λ0: ncon ) through partial maximization of its λ0-component over the convex set λ0 ∈ (0 , ∞), it is convex [21, Chap. 3.2.5]. Therefore, λ⋆ 
+
+> 1: ncon
+
+is the global minimizer of problem (16), which implies the assertion that f σh(xN +1 ) = 
+
+f h(xN +1 ) with σ = σ⋆ is globally optimal. 
+
+C. Proof of Eq. (20) 
+
+The claim follows by re-writing (19) through a suitable reparametrization. First, consider (19) and let h⊤ΦN +1 
+
+.
+
+= q⊤,
+
+C⊤Φ1: N
+
+.
+
+= A⊤ and Γ2 
+
+> f
+
++ Pncon  
+
+> j=1
+
+σ−2 
+
+> j
+
+Γ2
+
+> w,j
+
+.
+
+= Γ 2; additionally, define S .
+
+= I + AP wσ A⊤ with matrix square-root S =
+
+S1/2S1/2. Finally, let θμσ
+
+.
+
+= A
+
+
+
+A⊤A + ( P wσ )−1−1
+
+y =
+
+S−1AP wσ y be the vector yielding the finite-dimensional parametrization of the GP posterior mean f μσ (xN +1 ) =ΦN +1 θμσ . This allows us to rewrite (19b) as 
+
+∥θ − θμσ ∥2 
+
+> S
+
++ ∥y∥2ˆK−1
+
+> σ
+
+≤ Γ2, (21) where we have used that P wσ − P wσ A⊤S−1AP wσ =
+
+A⊤A + ( P wσ )−1−1
+
+= ˆK−1 
+
+> σ
+
+entering (4). Using Eq. (21) and a change of coordinates ξ .
+
+= S1/2 (θ − θμσ ), we can rewrite problem (19) as a linear problem with norm-ball constraint: 
+
+f σh(xN +1 ) = sup 
+
+> ξ∈Rr
+
+q⊤θμσ + q⊤S−1/2ξ
+
+s.t. ∥ξ∥22 ≤ Γ2 − ∥ y∥2ˆK−1
+
+> σ
+
+.
+
+The unique optimal solution is ξ⋆ =
+
+q
+
+Γ2 − ∥ y∥2ˆK−1 
+
+> σ
+> S−1/2q
+> ∥q∥S−1
+
+,defining the value of the worst-case latent function at the test point: f ⋆(xN +1 ) = Φ N +1 θ⋆ = Φ N +1 (θμσ + S−1/2ξ⋆). With 
+
+∥q∥2 
+
+> S−1
+
+= q⊤ 
+
+I − A  A⊤A + ( P wσ )−1−1 A⊤
+
+q
+
+= h⊤ΦN +1 
+
+
+
+I − Φ⊤ 
+
+> 1: N
+
+C ˆK−1 
+
+> σ
+
+C⊤Φ1: N
+
+
+
+Φ⊤ 
+
+> N+1
+
+h
+
+= h⊤Σσ (xN +1 )h, 
+
+this leads to the sought optimal value 
+
+f σh(xN +1 ) = q⊤θμσ +
+
+q
+
+Γ2 − ∥ y∥2ˆK−1
+
+> σ
+
+∥q∥S−1
+
+= h⊤f μσ + βσ
+
+q
+
+h⊤Σfσ (xN +1 )h.

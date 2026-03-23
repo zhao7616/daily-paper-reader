@@ -1,0 +1,471 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-03-23T20:05:14.003379+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 1,
+    "deep_cap": 6,
+    "deep_selected": 1,
+    "quick_candidates": 13,
+    "quick_skim_target": 11,
+    "quick_selected": 11
+  },
+  "deep_dive": [
+    {
+      "id": "2603.18546v1",
+      "title": "HEP Statistical Inference for UAV Fault Detection: CLs, LRT, and SBI Applied to Blade Damage",
+      "abstract": "This paper transfers three statistical methods from particle physics to multirotor propeller fault detection: the likelihood ratio test (LRT) for binary detection, the CLs modified frequentist method for false alarm rate control, and sequential neural posterior estimation (SNPE) for quantitative fault characterization. Operating on spectral features tied to rotor harmonic physics, the system returns three outputs: binary detection, controlled false alarm rates, and calibrated posteriors over fault severity and motor location. On UAV-FD, a hexarotor dataset of 18 real flights with 5% and 10% blade damage, leave-one-flight-out cross-validation gives AUC 0.862 +/- 0.007 (95% CI: 0.849--0.876), outperforming CUSUM (0.708 +/- 0.010), autoencoder (0.753 +/- 0.009), and LSTM autoencoder (0.551). At 5% false alarm rate the system detects 93% of significant and 81% of subtle blade damage. On PADRE, a quadrotor platform, AUC reaches 0.986 after refitting only the generative models. SNPE gives a full posterior over fault severity (90% credible interval coverage 92--100%, MAE 0.012), so the output includes uncertainty rather than just a point estimate or fault flag. Per-flight sequential detection achieves 100% fault detection with 94% overall accuracy.",
+      "authors": [
+        "Khushiyant"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.RO",
+        "eess.SY"
+      ],
+      "published": "2026-03-19T07:01:09+00:00",
+      "link": "https://arxiv.org/pdf/2603.18546v1",
+      "tags": [
+        "query:PHM"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "joint binary detection and quantitative fault characterization for UAV propellers",
+      "llm_evidence_cn": "无人机螺旋桨的联合二元检测与定量故障表征",
+      "llm_evidence": "无人机螺旋桨的联合二元检测与定量故障表征",
+      "canonical_evidence": "无人机螺旋桨的联合二元检测与定量故障表征",
+      "llm_tldr_en": "Transfers particle physics methods to UAV fault detection for simultaneous detection and severity estimation.",
+      "llm_tldr_cn": "将粒子物理方法应用于无人机故障检测，实现故障检测与严重程度的同步评估。",
+      "llm_tldr": "将粒子物理方法应用于无人机故障检测，实现故障检测与严重程度的同步评估。",
+      "llm_tags": [
+        "query:phm:composite"
+      ],
+      "matched_query_tag": "query:phm:composite",
+      "matched_query_text": "Papers central to 同时涉及故障诊断与剩余寿命预测的研究论文, especially work that connects or combines: joint modeling of diagnosis and prognosis; multi-task learning for diagnosis and RUL; simultaneous fault diagnosis and remaining useful life prediction; integrated approach for machinery fault diagnosis and prognosis; multi task deep learning for PHM applications; joint diagnosis and RUL estimation research papers.",
+      "matched_requirement_id": "req-composite-phm",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2603.15265v1",
+      "title": "MoE-ACT: Scaling Multi-Task Bimanual Manipulation with Sparse Language-Conditioned Mixture-of-Experts Transformers",
+      "abstract": "The ability of robots to handle multiple tasks under a unified policy is critical for deploying embodied intelligence in real-world household and industrial applications. However, out-of-distribution variation across tasks often causes severe task interference and negative transfer when training general robotic policies. To address this challenge, we propose a lightweight multi-task imitation learning framework for bimanual manipulation, termed Mixture-of-Experts-Enhanced Action Chunking Transformer (MoE-ACT), which integrates sparse Mixture-of-Experts (MoE) modules into the Transformer encoder of ACT. The MoE layer decomposes a unified task policy into independently invoked expert components. Through adaptive activation, it naturally decouples multi-task action distributions in latent space. During decoding, Feature-wise Linear Modulation (FiLM) dynamically modulates action tokens to improve consistency between action generation and task instructions. In parallel, multi-scale cross-attention enables the policy to simultaneously focus on both low-level and high-level semantic features, providing rich visual information for robotic manipulation. We further incorporate textual information, transitioning the framework from a purely vision-based model to a vision-centric, language-conditioned action generation system. Experimental validation in both simulation and a real-world dual-arm setup shows that MoE-ACT substantially improves multi-task performance. Specifically, MoE-ACT outperforms vanilla ACT by an average of 33% in success rate. These results indicate that MoE-ACT provides stronger robustness and generalization in complex multi-task bimanual manipulation environments. Our open-source project page can be found at https://j3k7.github.io/MoE-ACT/.",
+      "authors": [
+        "Kangjun Guo",
+        "Haichao Liu",
+        "Yanji Sun",
+        "Ruhan Zhao",
+        "Jinni Zhou",
+        "Jun Ma"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO"
+      ],
+      "published": "2026-03-16T13:33:59+00:00",
+      "link": "https://arxiv.org/pdf/2603.15265v1",
+      "tags": [
+        "keyword:PHM",
+        "query:PHM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "multi-task imitation learning framework for industrial applications",
+      "llm_evidence_cn": "工业应用的多任务模仿学习框架",
+      "llm_evidence": "工业应用的多任务模仿学习框架",
+      "canonical_evidence": "工业应用的多任务模仿学习框架",
+      "llm_tldr_en": "A multi-task learning framework using Mixture-of-Experts to handle task interference in robotic manipulation.",
+      "llm_tldr_cn": "一种利用混合专家模型处理机器人操作中任务干扰的多任务学习框架。",
+      "llm_tldr": "一种利用混合专家模型处理机器人操作中任务干扰的多任务学习框架。",
+      "llm_tags": [
+        "query:phm"
+      ],
+      "matched_query_tag": "query:phm",
+      "matched_query_text": "multi task deep learning for PHM applications",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.14107v1",
+      "title": "ST-ResGAT: Explainable Spatio-Temporal Graph Neural Network for Road Condition Prediction and Priority-Driven Maintenance",
+      "abstract": "Climate-vulnerable road networks require a paradigm shift from reactive, fix-on-failure repairs to predictive, decision-ready maintenance. This paper introduces ST-ResGAT, a novel Spatio-Temporal Residual Graph Attention Network that fuses residual graph-attention encoding with GRU temporal aggregation to forecast pavement deterioration. Engineered for resource-constrained deployment, the framework translates continuous Pavement Condition Index (PCI) forecasts directly into the American Society for Testing and Materials (ASTM)-compliant maintenance priorities. Using a real-world inspection dataset of 750 segments in Sylhet, Bangladesh (2021-2024), ST-ResGAT significantly outperforms traditional non-spatial machine learning baselines, achieving exceptional predictive fidelity (R2 = 0.93, RMSE = 2.72). Crucially, ablation testing confirmed the mathematical necessity of modeling topological neighbor effects, proving that structural decay acts as a spatial contagion. Uniquely, we integrate GNNExplainer to unbox the model, demonstrating that its learned priorities align perfectly with established physical engineering theory. Furthermore, we quantify classification safety: achieving 85.5% exact ASTM class agreement and 100% adjacent-class containment, ensuring bounded, engineer-safe predictions. To connect model outputs to policy, we generate localized longitudinal maintenance profiles, perform climate stress-testing, and derive Pareto sustainability frontiers. ST-ResGAT therefore offers a practical, explainable, and sustainable blueprint for intelligent infrastructure management in high-risk, low-resource geological settings.",
+      "authors": [
+        "Mohsin Mahmud Topu",
+        "Azmine Toushik Wasi",
+        "Mahfuz Ahmed Anik",
+        "MD Manjurul Ahsan"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI",
+        "cs.CE",
+        "cs.ET",
+        "cs.NE"
+      ],
+      "published": "2026-03-14T20:24:32+00:00",
+      "link": "https://arxiv.org/pdf/2603.14107v1",
+      "tags": [
+        "query:PHM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "spatio-temporal forecasting for pavement deterioration and maintenance",
+      "llm_evidence_cn": "路面退化预测与维护的时空预测模型",
+      "llm_evidence": "路面退化预测与维护的时空预测模型",
+      "canonical_evidence": "路面退化预测与维护的时空预测模型",
+      "llm_tldr_en": "Predicts infrastructure deterioration using spatio-temporal GNNs for proactive maintenance.",
+      "llm_tldr_cn": "利用时空图神经网络预测基础设施退化，支持主动维护决策。",
+      "llm_tldr": "利用时空图神经网络预测基础设施退化，支持主动维护决策。",
+      "llm_tags": [
+        "query:rul:composite"
+      ],
+      "matched_query_tag": "query:rul:composite",
+      "matched_query_text": "Papers central to 剩余寿命预测和旋转机械设备剩余寿命预测, especially work that connects or combines: Remaining Useful Life (RUL) prediction methods; Health monitoring and RUL for rotating machinery; Remaining useful life prediction for rolling element bearings; Deep learning architectures for RUL estimation; State of the art methods for remaining useful life prediction of rotating machinery; Deep learning based RUL estimation for industrial bearings and motors; Data driven vs physics informed models for RUL prediction; Real time health assessment and RUL forecasting for rotating components.",
+      "matched_requirement_id": "req-composite-rul",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.18123v1",
+      "title": "Understanding Task Aggregation for Generalizable Ultrasound Foundation Models",
+      "abstract": "Foundation models promise to unify multiple clinical tasks within a single framework, but recent ultrasound studies report that unified models can underperform task-specific baselines. We hypothesize that this degradation arises not from model capacity limitations, but from task aggregation strategies that ignore interactions between task heterogeneity and available training data scale. In this work, we systematically analyze when heterogeneous ultrasound tasks can be jointly learned without performance loss, establishing practical criteria for task aggregation in unified clinical imaging models. We introduce M2DINO, a multi-organ, multi-task framework built on DINOv3 with task-conditioned Mixture-of-Experts blocks for adaptive capacity allocation. We systematically evaluate 27 ultrasound tasks spanning segmentation, classification, detection, and regression under three paradigms: task-specific, clinically-grouped, and all-task unified training. Our results show that aggregation effectiveness depends strongly on training data scale. While clinically-grouped training can improve performance in data-rich settings, it may induce substantial negative transfer in low-data settings. In contrast, all-task unified training exhibits more consistent performance across clinical groups. We further observe that task sensitivity varies by task type in our experiments: segmentation shows the largest performance drops compared with regression and classification. These findings provide practical guidance for ultrasound foundation models, emphasizing that aggregation strategies should jointly consider training data availability and task characteristics rather than relying on clinical taxonomy alone.",
+      "authors": [
+        "Fangyijie Wang",
+        "Tanya Akumu",
+        "Vien Ngoc Dang",
+        "Amelia Jimńez-Sánchez",
+        "Jieyun Bai",
+        "Guénolé Silvestre",
+        "Karim Lekadir",
+        "Kathleen M. Curran"
+      ],
+      "primary_category": "eess.IV",
+      "categories": [
+        "eess.IV",
+        "cs.AI"
+      ],
+      "published": "2026-03-18T16:43:43+00:00",
+      "link": "https://arxiv.org/pdf/2603.18123v1",
+      "tags": [
+        "keyword:PHM",
+        "query:PHM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "multi-task framework for unified clinical imaging models",
+      "llm_evidence_cn": "统一临床成像模型的多任务框架",
+      "llm_evidence": "统一临床成像模型的多任务框架",
+      "canonical_evidence": "统一临床成像模型的多任务框架",
+      "llm_tldr_en": "A study on task aggregation for multi-task ultrasound models using Mixture-of-Experts for adaptive capacity.",
+      "llm_tldr_cn": "一项关于多任务超声模型任务聚合的研究，使用混合专家模型进行自适应容量分配。",
+      "llm_tldr": "一项关于多任务超声模型任务聚合的研究，使用混合专家模型进行自适应容量分配。",
+      "llm_tags": [
+        "query:phm"
+      ],
+      "matched_query_tag": "query:phm",
+      "matched_query_text": "multi task deep learning for PHM applications",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.14622v1",
+      "title": "Progress-Based Fault Detection and Health-Aware Task Allocation for Heterogeneous Multi-Robot Systems",
+      "abstract": "We present a progress-based fault detection module and its integration with dynamic task allocation for heterogeneous robot teams. The detector monitors a normalized task-completion signal with a lightweight Kalman filter (KF) and a normalized innovation squared (NIS) test, augmented with a low-rate stall gate, an uncertainty gate, and debounce logic. Health estimates influence the allocator via health-weighted costs and health-dependent masks; reallocation is event-triggered and regularized with an $\\ell_1$ assignment-change penalty to limit reassignment churn while preserving feasibility through slack variables. The detector has constant per-robot update cost, and the allocation remains a convex quadratic program (QP). Experiments on a common team-task setup evaluate measurement-noise increases, velocity-slip biases, communication dropouts, and task abandonment. The results show timely detection in the noise and bias cases, maintained task completion with limited reassignment, and the expected observability delays under communication dropouts.",
+      "authors": [
+        "Jack Cline",
+        "Christian Macaranas",
+        "Siavash Farzan"
+      ],
+      "primary_category": "eess.SY",
+      "categories": [
+        "eess.SY"
+      ],
+      "published": "2026-03-15T21:37:27+00:00",
+      "link": "https://arxiv.org/pdf/2603.14622v1",
+      "tags": [
+        "keyword:PHM",
+        "query:PHM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "fault detection and health-aware task allocation",
+      "llm_evidence_cn": "故障检测与健康感知任务分配",
+      "llm_evidence": "故障检测与健康感知任务分配",
+      "canonical_evidence": "故障检测与健康感知任务分配",
+      "llm_tldr_en": "Integrates progress-based fault detection with health-aware task allocation for multi-robot systems.",
+      "llm_tldr_cn": "将基于进度的故障检测与多机器人系统的健康感知任务分配相结合。",
+      "llm_tldr": "将基于进度的故障检测与多机器人系统的健康感知任务分配相结合。",
+      "llm_tags": [
+        "query:phm:composite"
+      ],
+      "matched_query_tag": "query:phm:composite",
+      "matched_query_text": "Papers central to 同时涉及故障诊断与剩余寿命预测的研究论文, especially work that connects or combines: joint modeling of diagnosis and prognosis; multi-task learning for diagnosis and RUL; simultaneous fault diagnosis and remaining useful life prediction; integrated approach for machinery fault diagnosis and prognosis; multi task deep learning for PHM applications; joint diagnosis and RUL estimation research papers.",
+      "matched_requirement_id": "req-composite-phm",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.20037v1",
+      "title": "Federated Hyperdimensional Computing for Resource-Constrained Industrial IoT",
+      "abstract": "In the Industrial Internet of Things (IIoT) systems, edge devices often operate under strict constraints in memory, compute capability, and wireless bandwidth. These limitations challenge the deployment of advanced data analytics tasks, such as predictive and prescriptive maintenance. In this work, we explore hyperdimensional computing (HDC) as a lightweight learning paradigm for resource-constrained IIoT. Conventional centralized HDC leverages the properties of high-dimensional vector spaces to enable energy-efficient training and inference. We integrate this paradigm into a federated learning (FL) framework where devices exchange only prototype representations, which significantly reduces communication overhead. Our numerical results highlight the potential of federated HDC to support collaborative learning in IIoT with fast convergence speed and communication efficiency. These results indicate that HDC represents a lightweight and resilient framework for distributed intelligence in large-scale and resource-constrained IIoT environments.",
+      "authors": [
+        "Nikita Zeulin",
+        "Olga Galinina",
+        "Nageen Himayat",
+        "Sergey Andreev"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.NI"
+      ],
+      "published": "2026-03-20T15:22:12+00:00",
+      "link": "https://arxiv.org/pdf/2603.20037v1",
+      "tags": [
+        "query:PHM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "predictive and prescriptive maintenance for resource-constrained IIoT",
+      "llm_evidence_cn": "资源受限工业物联网的预测性和规范性维护",
+      "llm_evidence": "资源受限工业物联网的预测性和规范性维护",
+      "canonical_evidence": "资源受限工业物联网的预测性和规范性维护",
+      "llm_tldr_en": "Explores hyperdimensional computing for lightweight predictive maintenance in industrial IoT environments.",
+      "llm_tldr_cn": "探索用于工业物联网环境下轻量级预测性维护的高维计算方法。",
+      "llm_tldr": "探索用于工业物联网环境下轻量级预测性维护的高维计算方法。",
+      "llm_tags": [
+        "query:rul:composite"
+      ],
+      "matched_query_tag": "query:rul:composite",
+      "matched_query_text": "Papers central to 剩余寿命预测和旋转机械设备剩余寿命预测, especially work that connects or combines: Remaining Useful Life (RUL) prediction methods; Health monitoring and RUL for rotating machinery; Remaining useful life prediction for rolling element bearings; Deep learning architectures for RUL estimation; State of the art methods for remaining useful life prediction of rotating machinery; Deep learning based RUL estimation for industrial bearings and motors; Data driven vs physics informed models for RUL prediction; Real time health assessment and RUL forecasting for rotating components.",
+      "matched_requirement_id": "req-composite-rul",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.14688v1",
+      "title": "AgentTrace: Causal Graph Tracing for Root Cause Analysis in Deployed Multi-Agent Systems",
+      "abstract": "As multi-agent AI systems are increasingly deployed in real-world settings - from automated customer support to DevOps remediation - failures become harder to diagnose due to cascading effects, hidden dependencies, and long execution traces. We present AgentTrace, a lightweight causal tracing framework for post-hoc failure diagnosis in deployed multi-agent workflows. AgentTrace reconstructs causal graphs from execution logs, traces backward from error manifestations, and ranks candidate root causes using interpretable structural and positional signals - without requiring LLM inference at debugging time. Across a diverse benchmark of multi-agent failure scenarios designed to reflect common deployment patterns, AgentTrace localizes root causes with high accuracy and sub-second latency, significantly outperforming both heuristic and LLM-based baselines. Our results suggest that causal tracing provides a practical foundation for improving the reliability and trustworthiness of agentic systems in the wild.",
+      "authors": [
+        "Zhaohui Geoffrey Wang"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI",
+        "cs.SE"
+      ],
+      "published": "2026-03-16T00:46:44+00:00",
+      "link": "https://arxiv.org/pdf/2603.14688v1",
+      "tags": [
+        "query:PHM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "root cause analysis and failure diagnosis",
+      "llm_evidence_cn": "根因分析与故障诊断",
+      "llm_evidence": "根因分析与故障诊断",
+      "canonical_evidence": "根因分析与故障诊断",
+      "llm_tldr_en": "A causal tracing framework for post-hoc failure diagnosis in multi-agent systems.",
+      "llm_tldr_cn": "一种用于多智能体系统事后故障诊断的轻量级因果追踪框架。",
+      "llm_tldr": "一种用于多智能体系统事后故障诊断的轻量级因果追踪框架。",
+      "llm_tags": [
+        "query:phm:composite"
+      ],
+      "matched_query_tag": "query:phm:composite",
+      "matched_query_text": "Papers central to 同时涉及故障诊断与剩余寿命预测的研究论文, especially work that connects or combines: joint modeling of diagnosis and prognosis; multi-task learning for diagnosis and RUL; simultaneous fault diagnosis and remaining useful life prediction; integrated approach for machinery fault diagnosis and prognosis; multi task deep learning for PHM applications; joint diagnosis and RUL estimation research papers.",
+      "matched_requirement_id": "req-composite-phm",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.15862v1",
+      "title": "Self-supervised Disentanglement of Disease Effects from Aging in 3D Medical Shapes",
+      "abstract": "Disentangling pathological changes from physiological aging in 3D medical shapes is crucial for developing interpretable biomarkers and patient stratification. However, this separation is challenging when diagnosis labels are limited or unavailable, since disease and aging often produce overlapping effects on shape changes, obscuring clinically relevant shape patterns. To address this challenge, we propose a two-stage framework combining unsupervised disease discovery with self-supervised disentanglement of implicit shape representations. In the first stage, we train an implicit neural model with signed distance functions to learn stable shape embeddings. We then apply clustering on the shape latent space, which yields pseudo disease labels without using ground-truth diagnosis during discovery. In the second stage, we disentangle factors in a compact variational space using pseudo disease labels discovered in the first stage and the ground truth age labels available for all subjects. We enforce separation and controllability with a multi-objective disentanglement loss combining covariance and a supervised contrastive loss. On ADNI hippocampus and OAI distal femur shapes, we achieve near-supervised performance, improving disentanglement and reconstruction over state-of-the-art unsupervised baselines, while enabling high-fidelity reconstruction, controllable synthesis, and factor-based explainability. Code and checkpoints are available at https://github.com/anonymous-submission01/medical-shape-disentanglement",
+      "authors": [
+        "Jakaria Rabbi",
+        "Nilanjan Ray",
+        "Dana Cobzas"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.LG"
+      ],
+      "published": "2026-03-16T19:52:52+00:00",
+      "link": "https://arxiv.org/pdf/2603.15862v1",
+      "tags": [
+        "keyword:PHM",
+        "query:PHM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "disentangling disease effects from aging in shape representations",
+      "llm_evidence_cn": "在形状表征中解耦疾病影响与老化过程",
+      "llm_evidence": "在形状表征中解耦疾病影响与老化过程",
+      "canonical_evidence": "在形状表征中解耦疾病影响与老化过程",
+      "llm_tldr_en": "Separates pathological changes from physiological aging using self-supervised learning for better diagnosis.",
+      "llm_tldr_cn": "利用自监督学习将病理变化与生理衰老解耦，以实现更准确的诊断。",
+      "llm_tldr": "利用自监督学习将病理变化与生理衰老解耦，以实现更准确的诊断。",
+      "llm_tags": [
+        "query:phm"
+      ],
+      "matched_query_tag": "query:phm",
+      "matched_query_text": "joint modeling of diagnosis and prognosis",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.16451v1",
+      "title": "TinyGLASS: Real-Time Self-Supervised In-Sensor Anomaly Detection",
+      "abstract": "Anomaly detection plays a key role in industrial quality control, where defects must be identified despite the scarcity of labeled faulty samples. Recent self-supervised approaches, such as GLASS, learn normal visual patterns using only defect-free data and have shown strong performance on industrial benchmarks. However, their computational requirements limit deployment on resource-constrained edge platforms.   This work introduces TinyGLASS, a lightweight adaptation of the GLASS framework designed for real-time in-sensor anomaly detection on the Sony IMX500 intelligent vision sensor. The proposed architecture replaces the original WideResNet-50 backbone with a compact ResNet-18 and introduces deployment-oriented modifications that enable static graph tracing and INT8 quantization using Sony's Model Compression Toolkit.   In addition to evaluating performance on the MVTec-AD benchmark, we investigate robustness to contaminated training data and introduce a custom industrial dataset, named MMS Dataset, for cross-device evaluation. Experimental results show that TinyGLASS achieves 8.7x parameter compression while maintaining competitive detection performance, reaching 94.2% image-level AUROC on MVTec-AD and operating at 20 FPS within the 8 MB memory constraints of the IMX500 platform.   System profiling demonstrates low power consumption (4.0 mJ per inference), real-time end-to-end latency (20 FPS), and high energy efficiency (470 GMAC/J). Furthermore, the model maintains stable performance under moderate levels of training data contamination.",
+      "authors": [
+        "Pietro Bonazzi",
+        "Rafael Sutter",
+        "Luigi Capogrosso",
+        "Mischa Buob",
+        "Michele Magno"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-03-17T12:31:34+00:00",
+      "link": "https://arxiv.org/pdf/2603.16451v1",
+      "tags": [
+        "keyword:PHM",
+        "query:PHM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "industrial anomaly detection and quality control",
+      "llm_evidence_cn": "工业异常检测与质量控制",
+      "llm_evidence": "工业异常检测与质量控制",
+      "canonical_evidence": "工业异常检测与质量控制",
+      "llm_tldr_en": "A lightweight self-supervised framework for real-time in-sensor industrial anomaly detection.",
+      "llm_tldr_cn": "一种轻量级自监督框架，用于传感器端实时工业异常检测。",
+      "llm_tldr": "一种轻量级自监督框架，用于传感器端实时工业异常检测。",
+      "llm_tags": [
+        "query:phm"
+      ],
+      "matched_query_tag": "query:phm",
+      "matched_query_text": "integrated approach for machinery fault diagnosis and prognosis",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.16481v1",
+      "title": "Optimal uncertainty bounds for multivariate kernel regression under bounded noise: A Gaussian process-based dual function",
+      "abstract": "Non-conservative uncertainty bounds are essential for making reliable predictions about latent functions from noisy data--and thus, a key enabler for safe learning-based control. In this domain, kernel methods such as Gaussian process regression are established techniques, thanks to their inherent uncertainty quantification mechanism. Still, existing bounds either pose strong assumptions on the underlying noise distribution, are conservative, do not scale well in the multi-output case, or are difficult to integrate into downstream tasks. This paper addresses these limitations by presenting a tight, distribution-free bound for multi-output kernel-based estimates. It is obtained through an unconstrained, duality-based formulation, which shares the same structure of classic Gaussian process confidence bounds and can thus be straightforwardly integrated into downstream optimization pipelines. We show that the proposed bound generalizes many existing results and illustrate its application using an example inspired by quadrotor dynamics learning.",
+      "authors": [
+        "Amon Lahr",
+        "Anna Scampicchio",
+        "Johannes Köhler",
+        "Melanie N. Zeilinger"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "eess.SY",
+        "math.OC"
+      ],
+      "published": "2026-03-17T13:06:54+00:00",
+      "link": "https://arxiv.org/pdf/2603.16481v1",
+      "tags": [
+        "query:PHM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "uncertainty bounds for multi-output kernel regression",
+      "llm_evidence_cn": "多输出核回归的不确定性边界",
+      "llm_evidence": "多输出核回归的不确定性边界",
+      "canonical_evidence": "多输出核回归的不确定性边界",
+      "llm_tldr_en": "Provides tight uncertainty bounds for multi-output regression, useful for reliable RUL forecasting.",
+      "llm_tldr_cn": "为多输出回归提供紧确的不确定性边界，有助于可靠的剩余寿命预测。",
+      "llm_tldr": "为多输出回归提供紧确的不确定性边界，有助于可靠的剩余寿命预测。",
+      "llm_tags": [
+        "query:rul:composite"
+      ],
+      "matched_query_tag": "query:rul:composite",
+      "matched_query_text": "Papers central to 剩余寿命预测和旋转机械设备剩余寿命预测, especially work that connects or combines: Remaining Useful Life (RUL) prediction methods; Health monitoring and RUL for rotating machinery; Remaining useful life prediction for rolling element bearings; Deep learning architectures for RUL estimation; State of the art methods for remaining useful life prediction of rotating machinery; Deep learning based RUL estimation for industrial bearings and motors; Data driven vs physics informed models for RUL prediction; Real time health assessment and RUL forecasting for rotating components.",
+      "matched_requirement_id": "req-composite-rul",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.16980v1",
+      "title": "Interpretable AI-Assisted Early Reliability Prediction for a Two-Parameter Parallel Root-Finding Scheme",
+      "abstract": "We propose an interpretable AI-assisted reliability diagnostic framework for parameterized root-finding schemes based on kNN-LLE proxy stability profiling and multi-horizon early prediction. The approach augments a numerical solver with a lightweight predictive layer that estimates solver reliability from short prefixes of iteration dynamics, enabling early identification of stable and unstable parameter regimes. For each configuration in the parameter space, raw and smoothed proxy profiles of a largest Lyapunov exponent (LLE) estimator are constructed, from which contractivity-based reliability scores summarizing finite-time convergence are derived. Machine learning models predict the reliability score from early segments of the proxy profile, allowing the framework to determine when solver dynamics become diagnostically informative. Experiments on a two-parameter parallel root-finding scheme show reliable prediction after only a few iterations: the best models achieve R^2=0.48 at horizon T=1, improve to R^2=0.67 by T=3, and exceed R^2=0.89 before the characteristic minimum-location scale of the stability profile. Prediction accuracy increases to R^2=0.96 at larger horizons, with mean absolute errors around 0.03, while inference costs remain negligible (microseconds per sample). The framework provides interpretable stability indicators and supports early decisions during solver execution, such as continuing, restarting, or adjusting parameters.",
+      "authors": [
+        "Bruno Carpentieri",
+        "Andrei Velichko",
+        "Mudassir Shams",
+        "Paola Lecca"
+      ],
+      "primary_category": "math.NA",
+      "categories": [
+        "math.NA",
+        "cs.LG"
+      ],
+      "published": "2026-03-17T15:17:35+00:00",
+      "link": "https://arxiv.org/pdf/2603.16980v1",
+      "tags": [
+        "keyword:PHM",
+        "query:PHM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "reliability diagnostic framework and multi-horizon early prediction",
+      "llm_evidence_cn": "可靠性诊断框架与多时域早期预测",
+      "llm_evidence": "可靠性诊断框架与多时域早期预测",
+      "canonical_evidence": "可靠性诊断框架与多时域早期预测",
+      "llm_tldr_en": "Proposes an AI framework for early reliability prediction and diagnostics of numerical solver stability.",
+      "llm_tldr_cn": "提出一种用于数值求解器稳定性早期可靠性预测和诊断的AI框架。",
+      "llm_tldr": "提出一种用于数值求解器稳定性早期可靠性预测和诊断的AI框架。",
+      "llm_tags": [
+        "query:phm:composite"
+      ],
+      "matched_query_tag": "query:phm:composite",
+      "matched_query_text": "Papers central to 同时涉及故障诊断与剩余寿命预测的研究论文, especially work that connects or combines: joint modeling of diagnosis and prognosis; multi-task learning for diagnosis and RUL; simultaneous fault diagnosis and remaining useful life prediction; integrated approach for machinery fault diagnosis and prognosis; multi task deep learning for PHM applications; joint diagnosis and RUL estimation research papers.",
+      "matched_requirement_id": "req-composite-phm",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.18111v1",
+      "title": "BoundAD: Boundary-Aware Negative Generation for Time Series Anomaly Detection",
+      "abstract": "Contrastive learning methods for time series anomaly detection (TSAD) heavily depend on the quality of negative sample construction. However, existing strategies based on random perturbations or pseudo-anomaly injection often struggle to simultaneously preserve temporal semantic consistency and provide effective decision-boundary supervision. Most existing methods rely on prior anomaly injection, while overlooking the potential of generating hard negatives near the data manifold boundary directly from normal samples themselves. To address this issue, we propose a reconstruction-driven boundary negative generation framework that automatically constructs hard negatives through the reconstruction process of normal samples. Specifically, the method first employs a reconstruction network to capture normal temporal patterns, and then introduces a reinforcement learning strategy to adaptively adjust the optimization update magnitude according to the current reconstruction state. In this way, boundary-shifted samples close to the normal data manifold can be induced along the reconstruction trajectory and further used for subsequent contrastive representation learning. Unlike existing methods that depend on explicit anomaly injection, the proposed framework does not require predefined anomaly patterns, but instead mines more challenging boundary negatives from the model's own learning dynamics. Experimental results show that the proposed method effectively improves anomaly representation learning and achieves competitive detection performance on the current dataset.",
+      "authors": [
+        "Xiancheng Wang",
+        "Lin Wang",
+        "Zhibo Zhang",
+        "Rui Wang",
+        "Minghang Zhao"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "stat.ML"
+      ],
+      "published": "2026-03-18T13:50:59+00:00",
+      "link": "https://arxiv.org/pdf/2603.18111v1",
+      "tags": [
+        "keyword:PHM",
+        "query:PHM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "time series anomaly detection and reconstruction-driven framework",
+      "llm_evidence_cn": "时间序列异常检测与重构驱动框架",
+      "llm_evidence": "时间序列异常检测与重构驱动框架",
+      "canonical_evidence": "时间序列异常检测与重构驱动框架",
+      "llm_tldr_en": "A framework for time series anomaly detection using reconstruction-driven hard negative generation.",
+      "llm_tldr_cn": "一种利用重构驱动的硬负样本生成进行时间序列异常检测的框架。",
+      "llm_tldr": "一种利用重构驱动的硬负样本生成进行时间序列异常检测的框架。",
+      "llm_tags": [
+        "query:rul:composite"
+      ],
+      "matched_query_tag": "query:rul:composite",
+      "matched_query_text": "Papers central to 剩余寿命预测和旋转机械设备剩余寿命预测, especially work that connects or combines: Remaining Useful Life (RUL) prediction methods; Health monitoring and RUL for rotating machinery; Remaining useful life prediction for rolling element bearings; Deep learning architectures for RUL estimation; State of the art methods for remaining useful life prediction of rotating machinery; Deep learning based RUL estimation for industrial bearings and motors; Data driven vs physics informed models for RUL prediction; Real time health assessment and RUL forecasting for rotating components.",
+      "matched_requirement_id": "req-composite-rul",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}

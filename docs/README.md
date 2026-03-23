@@ -6,67 +6,58 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-02-22 ~ 2026-03-23
-- 运行时间：2026-03-23 01:17:58 UTC
+- 最新运行日期：2026-03-23
+- 运行时间：2026-03-23 20:06:48 UTC
 - 运行状态：成功
-- 本次总论文数：15
-- 精读区：4
+- 本次总论文数：12
+- 精读区：1
 - 速读区：11
 
 ### 今日简报（AI）
-深度研读 15 篇工业智能运维论文，聚焦跨域健康指标学习与数字孪生精准校准。
-核心突破在于利用同步采样与自编码器解决退化监测难题，并实现了柱塞泵复杂工况下的故障仿真。
-建议关注物理残差学习与世界模型在电池及船舶动力系统中的跨界应用。
-- 详情：[/20260222-20260323/README](/20260222-20260323/README)
+今日聚焦12项前沿进展，重点探索高能物理统计推断在无人机叶片故障检测中的跨界应用。
+核心研究证实SBI与LRT等物理算法能显著提升损伤识别精度，同时涵盖了MoE架构下的双臂协作机器人与超声大模型。
+建议优先研读物理推断在工业监测中的落地案例，并关注稀疏混合专家模型对复杂机器人任务的性能提升。
+- 详情：[/202603/23/README](/202603/23/README)
 
 ### 精读区论文标签
-1. [Domain-Adaptive Health Indicator Learning with Degradation-Stage Synchronized Sampling and Cross-Domain Autoencoder](/20260222-20260323/2603.10430v1-domain-adaptive-health-indicator-learning-with-degradation-stage-synchronized-sampling-and-cross-domain-autoencoder)  
-   标签：评分：9.0/10、query:rul
-   evidence：用于预测与健康管理的健康指标学习
-2. [Multi-Condition Digital Twin Calibration for Axial Piston Pumps : Compound Fault Simulation](/20260222-20260323/2603.00199v1-multi-condition-digital-twin-calibration-for-axial-piston-pumps--compound-fault-simulation)  
-   标签：评分：8.0/10、query:rul
-   evidence：轴向柱塞泵的数字孪生校准与故障模拟
-3. [Battery Lifetime Prediction using Data-driven Modeling Approaches](/20260222-20260323/2603.00875v1-battery-lifetime-prediction-using-data-driven-modeling-approaches)  
-   标签：评分：8.0/10、query:rul
-   evidence：数据驱动建模用于电池寿命预测
-4. [Retrieval-Augmented Generation with Covariate Time Series](/20260222-20260323/2603.04951v1-retrieval-augmented-generation-with-covariate-time-series)  
-   标签：评分：8.0/10、query:rul
-   evidence：工业阀门预测性维护的时间序列RAG框架
+1. [HEP Statistical Inference for UAV Fault Detection: CLs, LRT, and SBI Applied to Blade Damage](/202603/23/2603.18546v1-hep-statistical-inference-for-uav-fault-detection-cls-lrt-and-sbi-applied-to-blade-damage)  
+   标签：评分：8.0/10、query:phm
+   evidence：无人机螺旋桨的联合二元检测与定量故障表征
 
 ### 速读区论文标签
-1. [Battery Discharge Modeling for Electric Vehicles: A Hybrid Physics-based Residual Learning Approach](/20260222-20260323/2603.01587v1-battery-discharge-modeling-for-electric-vehicles-a-hybrid-physics-based-residual-learning-approach)  
+1. [MoE-ACT: Scaling Multi-Task Bimanual Manipulation with Sparse Language-Conditioned Mixture-of-Experts Transformers](/202603/23/2603.15265v1-moe-act-scaling-multi-task-bimanual-manipulation-with-sparse-language-conditioned-mixture-of-experts-transformers)  
+   标签：评分：7.0/10、query:phm
+   evidence：工业应用的多任务模仿学习框架
+2. [Understanding Task Aggregation for Generalizable Ultrasound Foundation Models](/202603/23/2603.18123v1-understanding-task-aggregation-for-generalizable-ultrasound-foundation-models)  
+   标签：评分：7.0/10、query:phm
+   evidence：统一临床成像模型的多任务框架
+3. [Federated Hyperdimensional Computing for Resource-Constrained Industrial IoT](/202603/23/2603.20037v1-federated-hyperdimensional-computing-for-resource-constrained-industrial-iot)  
    标签：评分：7.0/10、query:rul
-   evidence：基于物理与数据驱动残差学习的混合电池状态估计
-2. [World Model for Battery Degradation Prediction Under Non-Stationary Aging](/20260222-20260323/2603.10527v1-world-model-for-battery-degradation-prediction-under-non-stationary-aging)  
-   标签：评分：7.0/10、query:rul
-   evidence：结合物理约束的世界模型进行退化预测
-3. [On Using Machine Learning to Early Detect Catastrophic Failures in Marine Diesel Engines](/20260222-20260323/2603.12733v1-on-using-machine-learning-to-early-detect-catastrophic-failures-in-marine-diesel-engines)  
-   标签：评分：7.0/10、query:rul
-   evidence：船用柴油机灾难性故障的早期检测
-4. [Motion-Specific Battery Health Assessment for Quadrotors Using High-Fidelity Battery Models](/20260222-20260323/2603.12791v1-motion-specific-battery-health-assessment-for-quadrotors-using-high-fidelity-battery-models)  
-   标签：评分：7.0/10、query:rul
-   evidence：电池健康评估与退化建模
-5. [Learning to Predict, Discover, and Reason in High-Dimensional Discrete Event Sequences](/20260222-20260323/2603.16313v1-learning-to-predict-discover-and-reason-in-high-dimensional-discrete-event-sequences)  
-   标签：评分：7.0/10、query:rul
-   evidence：利用诊断故障代码序列进行车辆健康监测
-6. [Learning to Predict, Discover, and Reason in High-Dimensional Event Sequences](/20260222-20260323/2603.16313v2-learning-to-predict-discover-and-reason-in-high-dimensional-event-sequences)  
-   标签：评分：7.0/10、query:rul
-   evidence：预测车辆子系统的健康演变
-7. [A data-driven model-free physical-informed deep operator network for solving nonlinear dynamic system](/20260222-20260323/2602.19262v1-a-data-driven-model-free-physical-informed-deep-operator-network-for-solving-nonlinear-dynamic-system)  
+   evidence：资源受限工业物联网的预测性和规范性维护
+4. [ST-ResGAT: Explainable Spatio-Temporal Graph Neural Network for Road Condition Prediction and Priority-Driven Maintenance](/202603/23/2603.14107v1-st-resgat-explainable-spatio-temporal-graph-neural-network-for-road-condition-prediction-and-priority-driven-maintenance)  
    标签：评分：6.0/10、query:rul
-   evidence：用于非线性动力系统的数据驱动物理信息DeepOnet
-8. [Spectral bias in physics-informed and operator learning: Analysis and mitigation guidelines](/20260222-20260323/2602.19265v1-spectral-bias-in-physics-informed-and-operator-learning-analysis-and-mitigation-guidelines)  
+   evidence：路面退化预测与维护的时空预测模型
+5. [Progress-Based Fault Detection and Health-Aware Task Allocation for Heterogeneous Multi-Robot Systems](/202603/23/2603.14622v1-progress-based-fault-detection-and-health-aware-task-allocation-for-heterogeneous-multi-robot-systems)  
+   标签：评分：6.0/10、query:phm
+   evidence：故障检测与健康感知任务分配
+6. [AgentTrace: Causal Graph Tracing for Root Cause Analysis in Deployed Multi-Agent Systems](/202603/23/2603.14688v1-agenttrace-causal-graph-tracing-for-root-cause-analysis-in-deployed-multi-agent-systems)  
+   标签：评分：6.0/10、query:phm
+   evidence：根因分析与故障诊断
+7. [Self-supervised Disentanglement of Disease Effects from Aging in 3D Medical Shapes](/202603/23/2603.15862v1-self-supervised-disentanglement-of-disease-effects-from-aging-in-3d-medical-shapes)  
+   标签：评分：6.0/10、query:phm
+   evidence：在形状表征中解耦疾病影响与老化过程
+8. [TinyGLASS: Real-Time Self-Supervised In-Sensor Anomaly Detection](/202603/23/2603.16451v1-tinyglass-real-time-self-supervised-in-sensor-anomaly-detection)  
+   标签：评分：6.0/10、query:phm
+   evidence：工业异常检测与质量控制
+9. [Optimal uncertainty bounds for multivariate kernel regression under bounded noise: A Gaussian process-based dual function](/202603/23/2603.16481v1-optimal-uncertainty-bounds-for-multivariate-kernel-regression-under-bounded-noise-a-gaussian-process-based-dual-function)  
    标签：评分：6.0/10、query:rul
-   evidence：物理信息神经网络中的谱偏差
-9. [Scalable multitask Gaussian processes for complex mechanical systems with functional covariates](/20260222-20260323/2602.20640v1-scalable-multitask-gaussian-processes-for-complex-mechanical-systems-with-functional-covariates)  
+   evidence：多输出核回归的不确定性边界
+10. [Interpretable AI-Assisted Early Reliability Prediction for a Two-Parameter Parallel Root-Finding Scheme](/202603/23/2603.16980v1-interpretable-ai-assisted-early-reliability-prediction-for-a-two-parameter-parallel-root-finding-scheme)  
+   标签：评分：6.0/10、query:phm
+   evidence：可靠性诊断框架与多时域早期预测
+11. [BoundAD: Boundary-Aware Negative Generation for Time Series Anomaly Detection](/202603/23/2603.18111v1-boundad-boundary-aware-negative-generation-for-time-series-anomaly-detection)  
    标签：评分：6.0/10、query:rul
-   evidence：机械系统的多任务高斯过程
-10. [Physics-Informed Machine Learning for Vessel Shaft Power and Fuel Consumption Prediction: Interpretable KAN-based Approach](/20260222-20260323/2602.22055v1-physics-informed-machine-learning-for-vessel-shaft-power-and-fuel-consumption-prediction-interpretable-kan-based-approach)  
-   标签：评分：6.0/10、query:rul
-   evidence：物理信息机器学习用于转轴功率预测
-11. [TEFL: Prediction-Residual-Guided Rolling Forecasting for Multi-Horizon Time Series](/20260222-20260323/2602.22520v1-tefl-prediction-residual-guided-rolling-forecasting-for-multi-horizon-time-series)  
-   标签：评分：6.0/10、query:rul
-   evidence：多步时间序列的滚动预测框架
+   evidence：时间序列异常检测与重构驱动框架
 
 
 <div class="dpr-home-promo-card">

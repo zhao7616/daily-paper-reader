@@ -1,0 +1,1117 @@
+Title: ST-ResGAT: Explainable Spatio-Temporal Graph Neural Network for Road Condition Prediction and Priority-Driven Maintenance
+
+URL Source: https://arxiv.org/pdf/2603.14107v1
+
+Published Time: Tue, 17 Mar 2026 05:11:08 GMT
+
+Number of Pages: 40
+
+Markdown Content:
+# ST-ResGAT: Explainable Spatio-Temporal Graph Neural Network for Road Condition Prediction and Priority-Driven Maintenance 
+
+Mohsin Mahmud Topu 1, Azmine Toushik Wasi 1, Mahfuz Ahmed Anik 1, MD Manjurul Ahsan 21Shahjalal University of Science and Technology, Sylhet, Bangladesh 
+
+> 2
+
+University of Oklahoma, Norman, OK, United States 
+
+Abstract: Climate-vulnerable road networks require a paradigm shift from reactive, fix-on-failure repairs to predictive, decision-ready maintenance. This paper introduces ST-ResGAT, a novel Spatio-Temporal Residual Graph Attention Network that fuses residual graph-attention encoding with GRU temporal aggregation to forecast pavement deterioration. Engineered for resource-constrained deployment, the framework translates continuous Pavement Condition Index (PCI) forecasts directly into the American Society for Testing and Materials (ASTM)-compliant maintenance priorities. Using a real-world inspection dataset of 750 segments in Sylhet, Bangladesh (2021–2024), ST-ResGAT significantly outperforms traditional non-spatial machine learning baselines, achieving exceptional predictive fidelity ( 𝑅 2 = 0.93 , 𝑅𝑀 𝑆𝐸 = 2.72 ). Crucially, ablation testing confirmed the mathematical necessity of modeling topological neighbor effects, proving that structural decay acts as a spatial contagion. Uniquely, we integrate GNNExplainer to unbox the model, demonstrating that its learned priorities align perfectly with established physical engineering theory. Furthermore, we quantify classification safety: achieving 85.5% exact ASTM class agreement and 100% 
+
+adjacent-class containment, ensuring bounded, engineer-safe predictions. To connect model outputs to policy, we generate localized longitudinal maintenance profiles, perform climate stress-testing, and derive Pareto sustainability frontiers. ST-ResGAT therefore offers a practical, explainable, and sustainable blueprint for intelligent infrastructure management in high-risk, low-resource geological settings. 
+
+Date : March 15, 2026 
+
+Correspondence : Mohsin Mahmud Topu (mohsinmahmudtopu@gmail.com) 
+
+Keywords : Pavement Condition Index, Predictive Maintenance, Explainable AI, Climate Resilience, Graph Attention Networks 
+
+## 1. Introduction 
+
+Road infrastructure is a foundational component of modern transportation systems, enabling economic mobility, emergency response, and regional connectivity (Lestari et al., 2025). Yet the maintenance of large-scale pavement networks remains a persistent challenge for transportation agencies worldwide. Most road authorities continue to rely on reactive maintenance strategies, where interventions occur only after severe deterioration has already manifested (Famewo and Shokouhian, 2025). This fix-on-failure paradigm accelerates structural degradation, increases vehicle operating costs, and introduces safety risks across transportation networks (Labi and Sinha, 2003). It also produces substantial environmental consequences because repeated rehabilitation cycles consume large volumes of aggregates, asphalt binders, and energy-intensive construction resources, contributing to the growing carbon footprint of infrastructure systems (Mosly, 2025). Transitioning from reactive management to predictive, data-driven maintenance planning   
+
+> arXiv:2603.14107v1 [cs.LG] 14 Mar 2026 Figure 1: Graphical Abstract. Overview of ST-ResGAT development and evaluation.
+
+has therefore become a central objective in sustainable infrastructure management and in achieving several targets within the United Nations Sustainable Development Goals (SDGs). Recent advances in machine learning and deep learning have accelerated the development of automated pavement condition assessment and prediction frameworks (Berangi et al., 2025). Early studies employed classical algorithms such as Support Vector Machines (SVM) (Basavaraju et al., 2019) and Artificial Neural Networks (ANN) (Kheirati and Golroo, 2022) to estimate pavement condition indices from inspection data. While these approaches demonstrated the feasibility of data-driven condition modeling, they often struggled to capture the complex interactions among environmental, structural, and operational factors that influence pavement deterioration (Chen et al., 2023). More recent research has explored Convolutional Neural Networks (CNN) for image-based distress detection (Das et al., 2021, Li and Zhao, 2019), Graph Neural Networks (GNN) for representing road network topology (Gao et al., 2024), and Digital Twin (DT) systems for high-resolution infrastructure monitoring (Sierra et al., 2022, Yan et al., 2023). Hybrid approaches combining GNN and DT frameworks have also been proposed for predictive maintenance applications (Lu et al., 2025, Topu et al., 2025). Despite these advances, practical deployment remains limited due to data requirements, infrastructure costs, and computational complexity. A critical methodological limitation in the existing literature is that many predictive models treat pavement segments as independent entities, ignoring the inherent spatial interdependence of road networks. In practice, deterioration processes propagate across connected segments through shared loading patterns, drainage conditions, and environmental exposure (Sadeghian et al., 2025). Ignoring these network dependencies reduces the ability of models to capture realistic degradation dynamics. At the same time, advanced digital monitoring frameworks frequently depend on high-quality automated inspection systems whose accuracy typically ranges between 85–90%, still below manual surveys (Luo et al., 2022, Pierce et al., 2013). These constraints are particularly problematic for transportation agencies operating under limited data availability and resource constraints. Furthermore, even when predictive models are developed, they rarely integrate with operational maintenance planning. Existing scheduling approaches often rely on retrospective data and optimization techniques such as Genetic Algorithms (Chiou et al., 2025) or multi-
+
+> 2
+
+criteria decision-making methods (Sayadinia and Beheshtinia, 2021), which remain disconnected from forward-looking deterioration predictions. Consequently, a gap persists between predictive analytics and actionable maintenance prioritization. To address these challenges, this study proposes ST-ResGAT, an explainable spatio-temporal residual graph attention network designed to model pavement deterioration across interconnected road networks while simultaneously supporting maintenance prioritization. The proposed architecture integrates graph attention mechanisms to capture spatial dependencies, residual connections to stabilize deep graph learning, and gated temporal aggregation to represent longitudinal deterioration dynamics. Unlike pointwise regression models or conventional temporal predictors, ST-ResGAT explicitly incorporates network topology and neighbor influence when forecasting future Pavement Condition Index (PCI) trajectories. The framework further bridges the gap between prediction and operational decision-making by translating continuous PCI forecasts into ASTM D6433 condition categories (ASTM International, 2023) and generating priority-driven maintenance profiles. The model is evaluated using a longitudinal pavement inspection dataset containing 3,000 observations across 750 road segments collected between 2021 and 2024. Experimental results demonstrate that ST-ResGAT consistently outperforms five baseline methods, achieving an 𝑅 2 of 0.93 on held-out data. To enhance transparency and practitioner trust, explainable-AI techniques based on GNNExplainer (Ying et al., 2019) are adapted to the spatio-temporal graph learning setting, enabling both local and global interpretation of deterioration drivers. The framework additionally evaluates classification safety by examining the alignment between predicted PCI categories and ASTM thresholds, thereby quantifying the risk of maintenance misclassification in practical deployment. The main contributions of this paper are: 1. We develop ST-ResGAT , an explainable spatio-temporal residual graph attention network that integrates graph attention mechanisms, residual learning, and gated temporal aggregation to model spatial dependencies and temporal deterioration dynamics in road networks. 2. We introduce a predictive-to-decision framework that converts continuous Pavement Condition Index (PCI) forecasts into ASTM D6433-compliant condition categories (ASTM International, 2023) and generates segment-level maintenance priority rankings to support practical asset management. 3. We extend explainable artificial intelligence techniques for spatio-temporal GNNs , adapting feature-attribution and perturbation-based analyses to identify dominant deterioration drivers and improve interpretability for infrastructure engineers. 4. We conduct a detailed empirical evaluation using a longitudinal inspection dataset covering 750 pavement segments from 2021–2024, demonstrating improved predictive accuracy, robust ASTM category alignment, and operationally actionable maintenance prioritization. The remainder of the paper is organized as follows. Section 2 reviews related work on pavement health pre-diction, graph neural networks for infrastructure, and priority-based maintenance in road health monitoring. Section 4 describes the problem formulation and methodology, and details the ST-ResGAT model and the predictive-to-decision translation. Section 4 describes the dataset and experimental setup. Section 6 and 6.5 reports experimental results, model diagnostics, and ablation studies. Section 7 discusses deployment considerations, SDG goal alignment, practical implication of the study. Section 7.2 details the limitations and future scopes of the study and Section 8 concludes with the findings summary of the study. Table 1 lists all the abbreviations and acronyms used in this paper.  
+
+> 3Table 1: Abbreviations and Acronyms
+
+Abbreviation Full Form 
+
+AADT Annual Average Daily Traffic AdaBoost Adaptive Boosting AI Artificial Intelligence ANN Artificial Neural Networks ASTM American Society for Testing and Materials CatBoost Categorical Boosting CDV Corrected Deduct Value CNN Convolutional Neural Networks DL Deep learning DT Digital Twin EPT Effective Pavement Thickness FE Finite-element GA Genetic Algorithms GAT Graph Attention Network GNN Graph Neural Network GPR Ground Penetrating Radar GRU Gated Recurrent Unit IRI International Roughness Index LIDAR Light Detection and Ranging LSTM Long Short-Term Memory LTPP Long-Term Pavement Performance MAE Mean Absolute Error ML Machine Learning MLP Multilayer Perceptron MSE Mean Squared Error PCI Pavement Condition Index REC Regression Error Curve RF Random Forest RHD Roads and Highway Department RL Reinforcement Learning RMMS Road Maintenance Management System RMSE Root Mean Squared Error RUL Remaining Useful Life SDGs Sustainable Development Goals SNO Simultaneous Network Optimization ST-GNNs Spatio-temporal Graph Neural Networks ST-ResGAT Spatio-Temporal Residual Graph Attention Network STGAT Spatial-Temporal Graph Attention Network SVM Support Vector Machines UAV Unmanned Aerial Vehicle XAI Explainable Artificial Intelligence XGBoost Extreme Gradient Boosting 
+
+> 4
+
+## 2. Related Works 
+
+This section reviews prior research pavement health prediction, graph-based models in pavement deterioration modeling, and the recent advancements in priority-based maintenance optimization frameworks are reviewed. We discuss established approaches to road damage detection and predictive maintenance. Finally, we identify methodological gaps that motivate the development of the proposed predictive maintenance framework. 
+
+2.1. ML-based Road Condition Prediction 
+
+The quest to automate the evaluation of the PCI has transitioned from traditional empirical equations to robust machine learning (ML) architectures (Yuan et al., 2024, Ani et al., 2025, Daghigh et al., 2024). Leveraging large observational repositories such as the Long-Term Pavement Performance (LTPP) dataset, researchers have demonstrated the effectiveness of ensemble learners: for instance, Piryonesi and El-Diraby (2021) trained Random Forest and gradient-boosting classifiers on LTPP and reported categorical prediction accuracies above 85%. Similarly, XGBoost has been applied to highway concrete distress prediction (Lee and Sun, 2020), while comparative studies have evaluated naive Bayes, boosted forests, 𝑘 -nearest neighbors and multivariable linear regression for crack-rating tasks (Inkoom et al., 2019). A growing body of work confirms that ML integration materially enhances pavement-damage forecasting accuracy (Wu et al., 2020, Nabipour et al., 2019, Basavaraju et al., 2019, Ani et al., 2025). Concurrently, deep learning (DL) approaches have gained traction because of their capacity to learn complex, nonlinear relationships and hierarchical feature representations (Peng et al., 2024). Feedforward ANNs provide flexible function approximation but remain sensitive to hyperparameterization (Radwan et al., 2025, Karballaeezadeh et al., 2020); convolutional architectures excel at capturing spatial patterns relevant to PCI prediction (Majidifard et al., 2020); and recurrent models, notably LSTMs, are commonly adopted for temporal dynamics (Gowda et al., 2025, Choi and Do, 2019). Despite these advances, two practical gaps persist: most models either neglect or inadequately represent spatial neighbor-effects that govern damage propagation, and they seldom translate continuous forecasts into engineer-relevant condition bands with quantified safety margins. These limitations hinder the readiness of ML outputs for operational decision-making by practitioners. 
+
+2.2. Graph-based Models for Road Health Prediction 
+
+GNNs conceptualize the highway network as a non-Euclidean system of interconnected nodes and edges. This shift acknowledges that pavement deterioration is a topologically dependent process, where structural distress in one segment inevitably influences the degradation rate of adjacent sections (Tong et al., 2025). Gao et al. (2024) demonstrated that by utilizing GraphSAGE, models could successfully capture these spatial correlations, improving the accuracy of road showing improvements in 𝑅 2 scores ranging from 0% to 20% over traditional machine learning regressors. The evolution of this field continued with the introduction of 
+
+attention mechanisms, which allow for a more nuanced understanding of network influence (Wasi et al., 2024). Spatio-temporal Graph Neural Networks (ST-GNNs) have emerged as the leading paradigm for forecasting over networked infrastructure because they jointly model topology and time (Corradini et al., 2025). Contemporary architectures combine a learned spatial encoder (graph convolutions or attention) with a temporal module (RNNs, temporal convolutions, or attention) to capture how node states evolve under neighbor influence (Rahmani et al., 2023, Guo et al., 2023). A comparative summary of representative spatio-temporal architectures, their limitations for pavement condition forecasting, and the targeted experiments 
+
+> 5
+
+used in this study is presented in Table 2. 
+
+2.3. Maintenance Optimization and Scheduling 
+
+Historically, the optimization of maintenance schedules has been addressed as a constrained mathematical problem, primarily utilizing metaheuristic algorithms to balance budget limitations with network perfor-mance (Wettewa et al., 2024, Li et al., 2025). Early models typically balanced limited budgets against network performance goals using metaheuristic solvers. For example, Yamany et al. (2024) utilized Ge-netic Algorithms (GA) to optimize multi-year budget allocations for highway agencies, demonstrating that automated scheduling could improve overall network health compared to manual prioritization. Similarly, Zhu et al. (2025) developed a novel pavement maintenance decision model integrating crack causes to enhance decision accuracy and maintenance efficacy. Yao et al. (2022) constructed an RL simulation for a multi-lane highway network and achieved roughly 26.6% lifecycle cost savings compared to a traditional threshold-based scheme. Extending this idea, Yao et al. (2024) formulated a multi-agent RL model that explicitly captures the interdependence of adjacent segments. In a real-world highway network case, their “simultaneous network optimization” (SNO) approach produced about 3.0% total cost reduction and up to 17.5% improvement in average pavement performance. These studies demonstrate that data-driven optimization can significantly outperform manual budgeting. In parallel, the research community is converging on all -in -one “digital twin” frameworks that integrate damage detection with scheduling. A key trend is to embed graph-based predictive models within a real-time monitoring platform. For instance, Topu et al. (2025) propose a pavement digital twin where UAV, LiDAR, and embedded sensor streams continuously update a graph model of the road network. A graph neural network (GNN) learns from these spatiotemporal inputs – including physical attributes, traffic loads, and environment data – to forecast segment deterioration. Similarly, Lu et al. (2025) developed a Spatial–Temporal Graph Attention network (STGAT) within a highway digital twin. By fusing heterogeneous past and real-time data (e.g. roughness, cracking, traffic volume), the STGAT accurately predicts future pavement conditions. Furthermore, hybrid frameworks combining Fuzzy Logic with GNN-derived predictions have been investigated to handle the uncertainties inherent in environmental stressors and material aging (Santos et al., 2022), providing a more resilient decision-support layer for asset managers. 
+
+2.4. Research Gap Analysis 
+
+While machine learning and graph-based approaches have demonstrated promising performance in road damage prediction (Gao et al., 2024, Kong et al., 2024, Yuan et al., 2024, Ani et al., 2025), the majority of existing studies remain confined to only damage prediction or classification. These works primarily determine the risk of damage at some point in future, but do not formalize the subsequent decision process required to identify which specific road/segment should be treated first. Even in advanced ST-GNN frameworks originally designed for traffic forecasting (Bui et al., 2022, Zhong et al., 2025), model formulations are typically guided by temporal patterns that are smooth or periodic rather than by mechanisms that explicitly capture abrupt, event-driven deterioration such as the rapid PCI loss observed after severe flooding (Masuda et al., 2016). Current all-in-one solutions typically rely on DT architectures (Lu et al., 2025), which requires prohibitive capital investment and specialized technical expertise, which is not feasible in resource-constrained low-income countries. Furthermore, explainability methods such as GNNExplainer, commonly applied to graphs remain largely unexplored in this field. As a consequence, prediction, explanation, and intervention design are often treated as sequential stages rather than as a structurally integrated framework. Consequently, there is a methodological scarcity of frameworks tailored for hyper-vulnerable, monsoon-driven environments like 
+
+> 6
+
+Table 2: Graph-based infrastructure prediction models: overview, research gaps, and how ST-ResGAT addresses them. 
+
+Author / Year (Model) Application Gaps ST-ResGAT Contribution 
+
+Gao et al. (2024) (GraphSAGE) GNN applied on road-network topology to model pavement de-terioration using PMIS data. Neighbour effects modeled implic-itly; limited interpretability for in-frastructure decisions. Graph attention with residual pro-jection quantifies neighbour in-fluence and provides explainable spatial learning. Zhou and Al-Qadi (2024) (FE-GNN surrogate) Graph neural surrogate trained on 3D finite-element pavement re-sponse simulations. Focuses on structural response prediction rather than network-level PCI forecasting. Extends graph learning toward segment-level PCI prediction with temporal modeling. Tong et al. (2025) (STGAN) Spatio-temporal graph autore-gression combining graph atten-tion and temporal autoregressive prediction. Feature mixing during message passing; limited interpretability for practitioners. Residual spatial representation stabilizes feature propagation with explainable node influence. Dang et al. (2022) (g-SDDL) GNN + convolutional stack op-erating directly on raw vibration signals; stacked models for multi-damage detection without hand-engineered features. Focused on classification/damage detection from vibration data; not designed for network-level con-tinuous PCI forecasting or long-horizon deterioration. Inspires raw-sensor →node fea-ture pipeline in ST-ResGAT (use raw time-series as node inputs) and ensemble/stacking strategies for robust multi-damage segment modelling while preserving ST-ResGAT’s temporal forecasting and explainability. Djenouri et al. (2022) (Intelli-gent GCN crack detection) Image-to-graph conversion with GCN for road crack detection. Patch-level detection; ignores net-work topology and temporal dete-rioration. Segment-level graph representa-tion capturing spatial propagation of pavement conditions. Feng et al. (2023) (SCL-GCN) Contrastive-learning enhanced GCN for LiDAR-based crack detection. Detection-focused; lacks tempo-ral forecasting and maintenance decision mapping. Combines spatial GAT with tem-poral GRU to enable deterioration forecasting. Liu and Al-Qadi (2025) (GPS-GNN Pavement Simula-tor) Encoder–Processor–Decoder GNN surrogate trained on 3D FE pavement simulations. High-fidelity FE surrogate but not designed for decision-ready PCI forecasting. Leverages structural response pat-terns and maps outputs to main-tenance condition bands. Su et al. (2026) (GNN–Transformer multitask) Physics-guided GNN models mi-crostructure topology while Trans-former analyzes stochastic load spectra for fatigue prediction. Microstructure-scale modeling; limited applicability to road-network level deterioration. ST-ResGAT focuses on segment-level spatial topology and tem-poral deterioration for network-scale forecasting. He et al. (2024) (HeteroGNN + on-tology) Heterogeneous GNN with bridge defect ontology to predict preser-vation activities. Focused on bridge maintenance classification rather than condi-tion forecasting. Adopts explainable graph reason-ing to connect predicted PCI with maintenance prioritization. Kong et al. (2024) (STP-GNN) Extended message-passing GNN modeling spatio-temporal degra-dation propagation for remaining useful life prediction. Designed for equipment RUL; lim-ited infrastructure-specific inter-pretability. Residual spatial attention and ex-plainability tailored for pavement network deterioration modeling. 
+
+> 7
+
+Sylhet, Bangladesh. In such climate-risk–intensive contexts, infrastructure management continues to rely largely on reactive maintenance practices, which not only result in substantial resource inefficiencies but also exacerbate public disruption, environmental degradation, and accident risks. These conditions underscore the urgent need for a feasible and context-aware framework capable of supporting proactive infrastructure management. Yet, within road health monitoring research, the methodological integration of spatio-temporal forecasting with a robust maintenance profiling and prioritization layer, especially in low-resource geological settings remain limited. To address these limitations, we proposed a spatio-temporal residual graph attention framework that connects prediction, explanation, and priority-based ranking for efficient maintenance within a unified architecture. Rather than treating interpretability and prediction accuracy as terminal analytical outputs, model explanations derived through GNNExplainer are integrated into the decision framework to ensure that maintenance recommendations remain both physically interpretable and operationally reliable. Furthermore, the reliability of AI-driven recommendations is seldom evaluated through a risk-management perspective, as current frameworks largely overlook classification safety and marginal error analysis, leaving boundary-case behaviour insufficiently examined despite its potential implications for catastrophic infrastructure failures. Beyond methodological robustness, these challenges also carry broader sustainability implications in countries like Bangladesh, where progress toward the UN SDG goals continues to face structural pressures stemming from climate vulnerability, infrastructure resilience, and sustainable urban mobility demands. By integrating interpretable spatio-temporal forecasting with maintenance prioritization and risk-aware evaluation, the proposed framework implicitly supports broader sustainability objectives including economic productivity, resilient cities, responsible resource use, and climate action. In doing so, the study moves beyond descriptive infrastructure modelling toward a sustainability-oriented decision paradigm in which predictive insights are translated into operational strategies that support measurable progress toward global development targets while enabling resilient highway asset management under intensifying climate stress. 
+
+## 3. Motivation 
+
+Road networks in climate-vulnerable regions experience accelerated deterioration due to extreme hydrological and environmental conditions. Bangladesh represents a particularly relevant context because a large share of its population and transportation infrastructure is exposed to seasonal flooding, high precipitation variability, and rapid urban expansion. Approximately 56% of the national population resides in areas with high exposure to climate-related hazards (Haque and Yousuf, 2024). These environmental stresses significantly influence pavement performance by increasing moisture infiltration, weakening subgrade layers, and intensifying load-induced fatigue processes. The northeastern Sylhet division illustrates the severity of these challenges. During the 2022 flood event, approximately 55.76% of the region was inundated, affecting nearly 10.6 million residents and submerging roughly 43.38% of major roadways (Shafiq, 2023). Flood-induced damage accelerates pavement distress mechanisms such as stripping, pothole formation, and structural base failure, resulting in rapid declines in Pavement Condition Index (PCI). The resulting disruptions extend beyond engineering concerns by increasing transportation costs, interrupting freight movement, and limiting access to essential services. These environmental shocks rarely affect road segments in isolation. Floodwater propagation, drainage connectivity, and traffic redistribution often produce spatially correlated deterioration patterns across adjacent segments of a transportation network. Consequently, pavement degradation in one location may influence the performance of neighboring links through altered loading patterns, shared environmental exposure, and  
+
+> 8Figure 2: Construction of the spatio-temporal graph representation used in ST-ResGAT . Pavement inspection records collected across multiple years are first organized as node features for each road segment. THe road network topology defines adjacency relationships among segments, forming a graph structure. Each year corresponds to a graph snapshot with identical topology but updated node attributes. A temporal window of historical snapshots is then combined to create a spatio-temporal feature sequence that serves as input to the proposed ST-ResGAT model for future pavement condition prediction.
+
+maintenance deferral effects. Such network-level dependencies highlight the need for analytical frameworks capable of modeling spatial interactions alongside temporal deterioration dynamics. At the same time, transportation agencies in many developing regions operate under constraints including lim-ited inspection data, restricted maintenance budgets, and reduced access to high-cost monitoring technologies such as Digital Twin systems. These constraints limit the feasibility of infrastructure monitoring approaches that rely on dense sensor networks or continuous high-resolution surveys. As a result, there is significant value in developing predictive models that are both data-efficient and operationally interpretable, enabling proactive maintenance planning within resource-constrained transportation management environments. 
+
+## 4. Methodology 
+
+This section details the formulation, architecture, and validation strategy of the Spatio-Temporal Residual Graph Attention Network (ST-ResGAT). To accurately capture the complex, interdependent dynamics of pavement deterioration, the physical road infrastructure is first mathematically formulated as a non-Euclidean graph, integrating multi-dimensional structural, traffic, and condition attributes. The proposed deep learning architecture synergistically couples a multi-head Graph Attention mechanism, enhanced with residual connections to capture the spatial contagion of structural damage with a Gated Recurrent Unit (GRU) to model sequential temporal decay. Furthermore, to ensure the framework’s viability as an operational decision-support tool, this section outlines the integration of explainable AI (GNNExplainer) for mechanistic transparency, alongside the downstream translation of continuous Pavement Condition Index (PCI) forecasts into standardized, engineer-safe ASTM maintenance categories. 
+
+> 9
+
+4.1. Problem Formulation 
+
+Consider a road network consisting of 𝑁 pavement segments observed over 𝑇 years. Each segment is represented as a node in a graph, and adjacency relationships between road segments define graph edges. The objective is to predict the Pavement Condition Index (PCI) of each segment for a future year using structural, traffic, and historical attributes. Table 3 lists all the notations used. Formally, the road network is represented as a graph 𝐺 = ( 𝑉 , 𝐸 ), where 𝑉 = {𝑣 1, 𝑣 2, ..., 𝑣 𝑁 } denotes the set of pavement segments and 𝐸 represents adjacency relationships between segments. For each node 𝑣 𝑖 at time 
+
+𝑡 , we define a feature vector 𝑥 (𝑡 ) 
+
+> 𝑖
+
+∈ R𝐹 , where 𝐹 denotes the number of attributes. The features are grouped into three categories in order to capture different aspects of pavement deterioration and loading behavior. The first group consists of structural features (i) including pavement material type, aggregate type, effective pavement thickness (EPT), base modulus, and pavement age, which describe the physical and mechanical properties of the pavement structure. The second group includes traffic features (ii) such as Annual Average Daily Traffic (AADT) and truck factor, representing vehicular loading intensity and heavy vehicle impact on pavement performance (Kumar and Suman, 2025). The third group contains condition features (iii) including crack area percentage and the International Roughness Index (IRI), which characterize the current surface distress and ride quality of the pavement (Paterson, 1986). The prediction target is the PCI value 𝑦 (𝑡 ) 
+
+> 𝑖
+
+∈ R. Given historical observations for 𝑇 0 previous years, the goal is to estimate 
+
+ˆ𝑦 (𝑡 +1) 
+
+> 𝑖
+
+= 𝑓 𝜃 (︁ 𝑥 (𝑡 −𝑇 0+1) 
+
+> 𝑖
+
+, . . . , 𝑥 (𝑡 ) 
+
+> 𝑖
+
+, 𝐺 )︁ , (1) where 𝑓 𝜃 (·) denotes the proposed Spatio Temporal Residual Graph Attention Network (ST-ResGAT) 
+
+parameterized by 𝜃 . The predicted PCI values are later used for maintenance prioritization through ASTM International (2023) based severity categorization, although the prioritization procedure itself is independent of the graph model. 
+
+4.2. Data Pre-processing and Graph Construction Dataset Description. The dataset contains pavement inspection records from 2021 to 2024 for 𝑁 = 750 
+
+road segments. Each record includes the features listed above and the measured PCI value. Let 𝒟 =
+
+{(𝑋 (𝑡 ), 𝑌 (𝑡 ))}2024  
+
+> 𝑡 =2021
+
+where 𝑋 (𝑡 ) ∈ R𝑁 ×𝐹 , 𝑌 (𝑡 ) ∈ R𝑁 . Each row corresponds to one pavement segment. The experiments follow a temporal prediction setting where the model is trained and validated using historical observations spanning 2021 to 2023. The final evaluation is performed on the 2024 dataset, using the preceding 2022-23 observations as input to assess the model’s ability to generalize to future pavement condition prediction and simulate real-world decision-making scenarios. 
+
+Graph Topology Construction. The connectivity and arrangement of a network is known as its topology (Ahmadzai et al., 2019). Thus, road transport networks have various specific topologies denoting their structures in terms of edges, vertices, paths, and cycles (Rodrigue, 2020). The road network topology is constructed using adjacency relationships between pavement segments. If segment 𝑖 is directly adjacent to segment 𝑗 , an undirected edge is added: 𝑒 𝑖𝑗 ∈ 𝐸 . The graph structure is represented by an edge index matrix 𝐴 ∈ { 0, 1 }𝑁 ×𝑁 , where 
+
+𝐴 𝑖𝑗 ={︃ 1 if segments 𝑖 and 𝑗 are adjacent 
+
+0 otherwise . (2) Since adjacency relationships are symmetric, the graph is treated as undirected. The process of graph construction is illustrated in Figure 2.  
+
+> 10 Table 3: Notations.
+
+Symbol Description 
+
+𝐺 Graph representation of the road network (𝑉 , 𝐸 )
+
+𝑉 Set of pavement segments (graph nodes) 
+
+𝐸 Set of adjacency relationships between segments (edges) 
+
+𝑁 Total number of pavement segments in the network 
+
+𝑇 Total number of temporal observations (years) 
+
+𝐹 Number of node features describing pavement properties 
+
+𝑣 𝑖 𝑖 -th pavement segment (node) in the graph 
+
+𝑥 (𝑡 ) 
+
+> 𝑖
+
+Feature vector of node 𝑖 at time 𝑡 𝑋 (𝑡 ) Node feature matrix at time 𝑡 , 𝑋 (𝑡 ) ∈ R𝑁 ×𝐹 
+
+𝑌 (𝑡 ) Vector of ground truth PCI values at time 𝑡 𝑦 (𝑡 ) 
+
+> 𝑖
+
+Observed Pavement Condition Index of segment 𝑖 at time 𝑡 
+
+ˆ𝑦 (𝑡 ) 
+
+> 𝑖
+
+Predicted PCI value for segment 𝑖 
+
+𝐴 Adjacency matrix representing graph connectivity 
+
+𝐴 𝑖𝑗 Binary indicator showing whether nodes 𝑖 and 𝑗 are adjacent 
+
+𝒩 (𝑖 ) Set of neighboring nodes connected to node 𝑖 𝑇 0 Temporal window length used for historical observations 
+
+𝑋 Temporal feature tensor ∈ R𝑁 ×𝑇 0×𝐹 
+
+𝑊 Learnable weight matrix in graph attention layer 
+
+𝑎 Attention weight vector in GAT layer 
+
+𝛼 𝑖𝑗 Normalized attention coefficient between nodes 𝑖 and 𝑗 
+
+ℎ𝑖 Spatial embedding of node 𝑖 after graph attention aggregation 
+
+𝑧 𝑖 Residual spatial representation of node 𝑖 
+
+𝑆 𝑖 Temporal sequence of spatial embeddings for node 𝑖 ℎ𝑡 Hidden state of the GRU at time step 𝑡 𝑓 𝜃 Proposed ST-ResGAT model parameterized by 𝜃 
+
+ℒ Training loss function (Mean Squared Error) 
+
+𝐼 𝑓 Permutation-based importance score for feature 𝑓 
+
+𝑀 𝑓 Feature importance mask learned by GNNExplainer 
+
+𝑀 𝑒 Edge importance mask learned by GNNExplainer 
+
+Temporal graph snapshots. Each year corresponds to a graph snapshot: 𝐺 (𝑡 ) = ( 𝑉 , 𝐸 , 𝑋 (𝑡 )). The node set and graph topology remain fixed across time, while node features evolve annually. 
+
+Temporal Window Construction. To incorporate historical context, a sliding temporal window of length 𝑇 0
+
+is constructed. For each training instance, 𝑋 𝑖 =[︁ 𝑥 (𝑡 −𝑇 0+1) 
+
+> 𝑖
+
+, 𝑥 (𝑡 −𝑇 0+2) 
+
+> 𝑖
+
+, . . . , 𝑥 (𝑡 ) 
+
+> 𝑖 ]︁
+
+and the prediction target becomes 𝑦 (𝑡 +1) 
+
+> 𝑖
+
+. Thus each sample consists of 𝑋 ∈ R𝑁 ×𝑇 0×𝐹 .
+
+Feature Normalization. Feature magnitudes vary substantially (e.g., AADT vs crack percentage). Therefore all features are standardized using ˜𝑥 = 𝑥 −𝜇 𝜎 , where 𝜇 and 𝜎 are computed using only training data. Targets are similarly normalized during training and inverse-transformed during evaluation.          
+
+> 11 Spatial Graph Attention Encoding
+> Spatial Graph Attention Encoder
+> 𝐖 𝐱 𝐢
+> 𝐖 𝐱 𝐢
+> 𝐖 𝐱 𝐢
+> Multi -head attention
+> (4 heads)
+> Graph Attention Layer
+> (GATv2)
+> Spatial
+> Embeddings
+> Feature Transformation
+> 𝐖 𝐱 𝐢
+> 𝛂 𝒊𝒋
+> 𝛂 𝒊𝒋
+> 𝛂 𝒊𝒋
+> 𝛂 𝒊𝒋
+> 𝐡 𝒊
+> Residual
+> Addition
+> Layer
+> Normalization
+> Dropout
+> Residual
+> Spatial
+> Block
+> Road Network Graph
+> Structural features:
+> -Material
+> -Aggregate type
+> -EPT
+> -Base modulus
+> -Age
+> Traffic features:
+> -AADT
+> -Truck factor
+> Condition features:
+> -Crack area %
+> -IRI
+> INPUT: Pavement Network &
+> Temporal Features
+> Year t -1 (2022)
+> Year t (2023)
+> Temporal Snapshots
+> Input
+> Tensor
+
+𝑿 ∈ ℝ𝑁 ×𝑇 0×𝐹                  
+
+> N= Number of road
+> segments
+> T0= Temporal window
+> F= Feature dimension
+> Linear
+> Projection
+> 𝐳 𝐢 =ELU 𝐡 𝐢 +ri
+> Spatial
+> Embeddings
+> 𝐳 𝒊
+> Temporal Modeling
+> (GRU)
+> Temporal Aggregation
+> GRU
+> Update
+> gate
+> 𝒛 𝒕
+> Reset
+> gate
+> 𝒓 𝒕
+> Hidden
+> state
+> 𝒉 𝒕
+> 𝐳 𝐢
+> (𝐭 )
+> 𝐳 𝐢
+> (𝐭 −𝟏 )
+> GRU
+> Update
+> gate
+> 𝒛 𝒕
+> Reset
+> gate
+> 𝒓 𝒕
+> Hidden
+> state
+> 𝒉 𝒕
+> 𝐳 𝐢
+> (𝐭 )
+> 𝐳 𝐢
+> (𝐭 −𝟏 )
+> Regression
+> Head
+> PCI Prediction
+> Layer
+> Spatio -
+> temporal
+> Embeddings
+> 𝒉 𝒊
+> (𝒕 )
+> Linear (512 -128)
+> ReLU
+> Dropout
+> Linear (128 -1)
+> Severity Scale
+> Predicted
+> Pavement Condition
+> Index
+> (PCI)
+> OUTPUT Section
+> ෝ𝒚 𝒊
+> Predicted
+> PCI
+> Structural features:
+> -Material
+> -Aggregate type
+> -EPT
+> -Base modulus
+> -Age
+> Traffic features:
+> -AADT
+> -Truck factor
+> Condition features:
+> -Crack area %
+> -IRI
+
+Figure 3: Architecture of the proposed Spatio-Temporal Residual Graph Attention Network (ST-ResGAT) for pavement condition prediction . The model receives temporal node features and the road network graph as input. Spatial dependencies among adjacent pavement segments are learned through multi-head Graph Attention Network (GAT) layer with residual connections to preserve original structural attributes. The resulting spatial embeddings across multiple time steps are aggregated using a Gated Recurrent Unit (GRU) to capture temporal deterioration patterns. The final spatio-temporal representation is passed through a regression head to estimate the Pavement Condition Index (PCI) for each segment, which can subsequently be used for maintenance prioritization. 
+
+4.3. ST-ResGAT 
+
+The proposed model integrates spatial graph attention and temporal sequence modeling to capture both spatial dependencies among adjacent road segments and temporal deterioration patterns. The architecture consists of three main components: (i) a spatial encoder based on Graph Attention Networks that learns interactions among neighboring pavement segments, (ii) a residual spatial representation module that preserves original feature information and stabilizes training, and (iii) a temporal aggregation module implemented using a Gated Recurrent Unit (GRU) to model historical pavement deterioration across multiple years. The architecture of the proposed model is illustrated briefly in Figure 3. 
+
+4.3.1. Spatial Graph Attention Encoder 
+
+Road pavement segments are not independent. The condition of a road segment is often influenced by the condition of nearby segments because adjacent pavement sections typically experience similar environmental exposure, traffic loading, and construction characteristics (Gao et al., 2024). To model this spatial dependency within the road network, a Graph Attention Network (GAT) (Vaswani et al., 2017) layer is used as the spatial encoder. For each time step 𝑡 , node features are propagated through the graph structure so that each pavement segment can incorporate information from its neighboring segments. Instead of assigning equal influence to all neighbors, the model learns an attention weight that determines how strongly each neighboring segment contributes to the representation of a given segment. For node 𝑖 , the attention coefficient with neighbor 𝑗 is computed as 
+
+𝑒 𝑖𝑗 = LeakyReLU (︁ 𝑎 𝑇 [𝑊 𝑥 𝑖 ‖ 𝑊 𝑥 𝑗 ])︁ (3) 
+
+12 where 𝑊 is a learnable weight matrix that transforms the input features, 𝑎 is the attention vector that measures the compatibility between two nodes, and ‖ denotes feature concatenation. This operation allows the model to compare the feature characteristics of neighboring pavement segments. The raw attention scores are then normalized across all neighbors of node 𝑖 using a softmax function: 
+
+𝛼 𝑖𝑗 = exp (𝑒 𝑖𝑗 )∑︀   
+
+> 𝑘 ∈𝒩 (𝑖 )
+
+exp (𝑒 𝑖𝑘 ) . (4) These normalized coefficients determine how much influence each neighbor has when updating the repre-sentation of node 𝑖 . The updated node representation is obtained by aggregating the transformed features of its neighbors weighted by the learned attention coefficients: 
+
+ℎ𝑖 = 𝜎  
+
+> ⎛⎝∑︁
+> 𝑗 ∈𝒩 (𝑖 )
+
+𝛼 𝑖𝑗 𝑊 𝑥 𝑗  
+
+> ⎞⎠
+
+. (5) To improve the expressive capacity of the spatial encoder, multi-head attention is used. Multiple attention mechanisms operate in parallel, each learning a different interaction pattern among neighboring segments. The outputs of these heads are concatenated: 
+
+ℎ𝑖 = ‖𝐾 𝑘 =1𝜎  
+
+> ⎛⎝∑︁
+> 𝑗 ∈𝒩 (𝑖 )
+
+𝛼 (𝑘 ) 
+
+> 𝑖𝑗
+
+𝑊 (𝑘 )𝑥 𝑗  
+
+> ⎞⎠
+
+. (6) This multi-head mechanism allows the model to capture different spatial relationships, such as shared traffic loading patterns or similar structural characteristics among adjacent pavement segments. 
+
+4.3.2. Residual Spatial Representation 
+
+While graph attention layers effectively capture spatial interactions, deeper graph transformations may sometimes distort the original node features (Wu et al., 2023). In pavement condition modeling, the original structural and traffic attributes remain important predictors and should not be lost during feature propagation. To preserve this information and improve training stability, a residual connection is incorporated into the spatial encoder. The original node features are first projected into the same embedding dimension using a linear transforma-tion: 𝑟 𝑖 = 𝑊 𝑟 𝑥 𝑖 This residual representation is then added to the attention-based embedding: 
+
+𝑧 𝑖 = ELU (ℎ𝑖 + 𝑟 𝑖 ). (7) The residual connection ensures that the model retains access to the raw structural and traffic attributes while also incorporating information aggregated from neighboring segments. After this step, layer normalization and dropout are applied to stabilize training and reduce overfitting. 
+
+4.3.3. Temporal Feature Aggregation 
+
+Pavement deterioration is inherently a temporal process. The structural condition of a road segment gradually changes over time due to traffic loading, environmental exposure, and material aging. Therefore, 
+
+> 13
+
+it is important for the model to capture how pavement features evolve across multiple years rather than relying on a single snapshot. For each node, the spatial embeddings obtained from the previous steps are collected across the temporal window: 𝑆 𝑖 = [ 𝑧 (𝑡 −𝑇 0+1) 
+
+> 𝑖
+
+, . . . , 𝑧 (𝑡 ) 
+
+> 𝑖
+
+]. This sequence describes how the structural and spatial characteristics of a pavement segment evolve over time. The sequence is then processed using a Gated Recurrent Unit (GRU), which is a recurrent neural network architecture designed to capture temporal dependencies while avoiding vanishing gradient issues. The GRU maintains a hidden state that summarizes historical information. Its update process is governed by two gates that control how information flows through time. The update gate is computed as 
+
+𝑧 𝑡 = 𝜎 (𝑊 𝑧 𝑥 𝑡 + 𝑈 𝑧 ℎ𝑡 −1) (8) which determines how much of the previous hidden state should be retained. The reset gate is computed as 
+
+𝑟 𝑡 = 𝜎 (𝑊 𝑟 𝑥 𝑡 + 𝑈 𝑟 ℎ𝑡 −1) (9) which determines how strongly past information influences the candidate hidden state. The candidate hidden representation is then calculated as 
+
+˜ℎ𝑡 = tanh (𝑊 ℎ𝑥 𝑡 + 𝑈 ℎ(𝑟 𝑡 ⊙ ℎ𝑡 −1)) (10) and the final hidden state is updated as 
+
+ℎ𝑡 = ( 1 − 𝑧 𝑡 ) ⊙ ℎ𝑡 −1 + 𝑧 𝑡 ⊙ ˜ℎ𝑡 . (11) Through these gating mechanisms, the GRU learns how pavement characteristics evolve across years and how past conditions influence future deterioration. The final hidden state ℎ(𝑡 ) 
+
+> 𝑖
+
+acts as a compact representation summarizing both spatial interactions and historical pavement evolution for each road segment. 
+
+4.3.4. Prediction Layer 
+
+The final step of the model is to estimate the Pavement Condition Index for the next time period. The temporal representation obtained from the GRU is passed through a feed-forward regression network that maps the learned embedding to a scalar PCI prediction. The predicted PCI value for node 𝑖 is computed as 
+
+ˆ𝑦 𝑖 = 𝑊 2𝜑 (𝑊 1ℎ(𝑡 ) 
+
+> 𝑖
+
+) (12) where 𝜑 (·) denotes the ReLU activation function. 
+
+> 14
+
+This regression layer learns a mapping between the combined spatial–temporal representation and the expected pavement condition value. The resulting prediction reflects both the current structural characteristics of the segment and the historical deterioration patterns observed across the network. 
+
+4.3.5. Learning Objective 
+
+The model is trained using Mean Squared Error loss computed over training nodes: 
+
+ℒ = 1
+
+|𝑉 𝑡𝑟𝑎𝑖𝑛 |∑︁ 𝑖 ∈𝑉 𝑡𝑟𝑎𝑖𝑛 
+
+( ˆ𝑦 𝑖 − 𝑦 𝑖 )2. (13) 
+
+4.3.6. Training Procedure 
+
+Training proceeds by first constructing temporal graph windows from historical observations. For each window, the model receives node feature sequences together with the corresponding graph topology. Spatial representations of pavement segments are computed using graph attention layers, which capture interactions among adjacent road segments. These spatial embeddings across the temporal window are then processed by the GRU module to model deterioration dynamics over time. The resulting temporal representation is passed through the regression head to predict the PCI value for the subsequent year. Model parameters are updated through gradient-based optimization using the mean squared error loss between the predicted and observed PCI values. 
+
+4.3.7. Prediction-based Maintenance Prioritization 
+
+To ensure practical applicability, the continuous PCI predictions were translated into discrete actionable categories using the globally recognized ASTM D6433 (ASTM International, 2023) standard as illustrated in Table 2.  
+
+> Table 4: Pavement condition index (PCI) severity and recommendations according to ASTM International (2023)
+
+PCI Severity Rank Recommended Action Physical Implication 
+
+86–100 1 (Very low) Routine monitoring Structurally sound, No immediate action 71–85 2 (Low) Preventive Noticeable wear, Crack sealing required 56–70 3 (Moderate) Corrective Significant distress, Patching required 41–55 4 (High) Major overlay Severe distress, Potential base failure 0–40 5 (Critical) Full reconstruction Structural failure, High safety hazard Let ˆ𝑦 𝑖 denote the predicted PCI. Severity categories are assigned using predefined thresholds: 
+
+𝑆 𝑖 =
+
+> ⎧⎪⎪⎪⎪⎪⎪⎪⎨⎪⎪⎪⎪⎪⎪⎪⎩
+
+Excellent 85 ≤ ˆ𝑦 𝑖 ≤ 100 
+
+Good 70 ≤ ˆ𝑦 𝑖 < 85 
+
+Fair 55 ≤ ˆ𝑦 𝑖 < 70 
+
+Poor 40 ≤ ˆ𝑦 𝑖 < 55 
+
+Very Poor ˆ𝑦 𝑖 < 40 . (14) The predicted severity rankings are compared against rankings derived from actual PCI values. Although exact PCI values may differ slightly, the predicted categories largely align with the actual prioritization levels. 
+
+> 15
+
+This indicates that the ST-ResGAT model captures the deterioration patterns sufficiently well to support practical maintenance planning. 
+
+4.4. Explainable AI 
+
+Although the proposed ST-ResGAT model achieves high predictive performance, interpretability is necessary to understand which pavement characteristics influence the predicted condition scores. To address this, we employ an explainable AI framework combining GNNExplainer (Ying et al., 2019)for local explanations and a permutation-based feature importance method for global interpretability. 
+
+4.4.1. Local Explanation using GNNExplainer 
+
+Graph neural networks operate on complex graph structures, making it difficult to interpret the contribution of individual features and edges (Lu et al., 2025). To analyze the model’s decision process for a specific pavement segment, we utilize GNNExplainer. Given a trained model 𝑓 𝜃 and a node 𝑣 𝑖 , GNNExplainer seeks a minimal subgraph 𝐺 𝑆 and feature subset 𝐹 𝑆 that maximizes the mutual information between the model prediction and the explanation: max 𝐺 𝑆 ,𝐹 𝑆 𝐼 (𝑌 𝑖 ; 𝐺 𝑆 , 𝐹 𝑆 )
+
+where 𝑌 𝑖 = 𝑓 𝜃 (𝐺 , 𝑋 )𝑖 represents the predicted PCI for node 𝑖 . The explanation process learns two masks: 
+
+(i) Feature mask 𝑀 𝑓 identifying important node attributes (ii) Edge mask 𝑀 𝑒 identifying influential graph connections. These masks are optimized through gradient-based learning: 
+
+min    
+
+> 𝑀 𝑓 ,𝑀 𝑒
+
+ℒ𝑝𝑟𝑒𝑑 + 𝜆 1|| 𝑀 𝑓 || 1 + 𝜆 2𝐻 (𝑀 𝑓 ) + 𝜆 3|| 𝑀 𝑒 || 1 (15) where 𝐻 (·) denotes entropy regularization encouraging sparse explanations. 
+
+4.4.2. Adapting GNNExplainer to Spatio-Temporal Graph Inputs 
+
+The ST-ResGAT model accepts temporal feature sequences 𝑋 ∈ R𝑁 ×𝑇 0×𝐹 where 𝑇 0 represents the historical time window. However, the GNNExplainer framework assumes static node features of dimension 𝑋 ∈ R𝑁 ×𝐹 .
+
+To bridge this mismatch, a wrapper model is introduced that converts static node features into temporal sequences. Let 𝑥 𝑖 ∈ R𝐹 denote the perturbed node features provided by GNNExplainer. The wrapper reconstructs the temporal sequence by repeating the feature vector across the temporal dimension: ˜𝑋 𝑖 =[𝑥 𝑖 , 𝑥 𝑖 , . . . , 𝑥 𝑖 ] for 𝑇 0 time steps. The resulting tensor ˜𝑋 ∈ R𝑁 ×𝑇 0×𝐹 is then forwarded through the ST-ResGAT model. This strategy allows GNNExplainer to evaluate feature importance for the spatial component of the model while preserving compatibility with the temporal architecture. 
+
+4.4.3. Node-level Feature Importance 
+
+For a selected pavement segment 𝑣 𝑖 , GNNExplainer produces a feature importance vector 𝑚 𝑖 ∈ R𝐹 indicating the relative contribution of each attribute to the predicted PCI. To facilitate visualization and comparison, the importance values are normalized: 
+
+˜𝑚 𝑖 ,𝑓 = 𝑚 𝑖 ,𝑓 ∑︀  
+
+> 𝐹 𝑘 =1
+
+𝑚 𝑖 ,𝑘 
+
+(16) where ˜𝑚 𝑖 ,𝑓 represents the normalized importance of feature 𝑓 .
+
+> 16
+
+These normalized scores are visualized using bar plots to illustrate which structural, traffic, or condition variables most strongly influence predictions for a given road segment. 
+
+4.4.4. Global Feature Importance 
+
+While GNNExplainer provides local explanations, global feature importance is assessed using a permutation-based approach (Hassija et al., 2024). Let ˆ𝑌 denote model predictions and 𝑌 denote ground truth PCI values. The baseline prediction error is computed using Mean Squared Error (MSE): MSE 𝑏𝑎𝑠𝑒 = 1
+
+𝑁 
+
+> 𝑁 ∑︁
+> 𝑖 =1
+
+(𝑦 𝑖 − ˆ𝑦 𝑖 )2 (17) To measure the importance of feature 𝑓 , the feature values are randomly permuted across nodes: 𝑋 𝑝𝑒𝑟𝑚 
+
+> :,:,𝑓
+
+which disrupts the relationship between that feature and the target variable. The model predictions are recomputed using the perturbed features, producing a new error value: MSE 𝑝𝑒𝑟𝑚 𝑓 .The feature importance score is defined as 𝐼 𝑓 = MSE 𝑝𝑒𝑟𝑚 𝑓 − MSE 𝑏𝑎𝑠𝑒 . A larger increase in error indicates greater reliance on that feature. To obtain relative contributions, the scores are normalized: 
+
+˜𝐼 𝑓 = 𝐼 𝑓 ∑︀  
+
+> 𝐹 𝑘 =1
+
+𝐼 𝑘 
+
+. (18) This method quantifies the overall influence of each structural and traffic feature on pavement health prediction. 
+
+## 5. Data and Experimental Setup 
+
+5.1. Data Collection 
+
+To evaluate the efficacy of the proposed ST-ResGAT framework, we utilize a real-world, high-resolution dataset encompassing 750 physical road segments within the Sylhet region of Bangladesh. The data was meticulously curated from the official records of the Roads and Highway Department (RHD) (RHD, 2001). For the data collection, a roughometer III mounted on a vehicle is used by the (RHD, 2001) of Bangladesh. The Roads and Highways Department (RHD) calculates the Pavement Condition Index (PCI) following the methodology outlined in ASTM D6433 (ASTM International, 2023), which provides a standardized numerical rating (0–100) for roadway condition. The process begins with a visual survey of defined sample units to identify the type, severity, and quantity of surface distresses. These observations are converted into Deduct Values using density-based weighting factors that represent the impact of each defect. To account for multiple distresses without over-penalizing the score, a Corrected Deduct Value (CDV) is iteratively calculated, and the final PCI is determined by subtracting the maximum CDV from 100 (Zafar et al., 2019). This data is central to the RHD Road Maintenance Management System (RMMS). The rest of the input features were collected from the RHD (2001) database. Sylhet was strategically selected as the study area due to its unique socio-environmental profile. It is one of the most flood-vulnerable regions in the country, frequently subjected to flash floods that accelerate pavement deterioration, while simultaneously serving as a critical national tourist hub. Maintaining infrastructure health in this region is therefore paramount for both disaster resilience (SDG 11/13) and the local tourism-driven economy (SDG 8). 
+
+> 17
+
+5.2. Data Statistics 
+
+The compiled dataset represents a longitudinal pavement monitoring record spanning the years 2021 to 2024. The network consists of 750 road segments represented as graph nodes, with 3000 temporal observations in total. Each node corresponds to a spatially distinct pavement segment, while edges represent adjacency relationships between neighboring segments. In total, the constructed road graph contains 1498 bidirectional adjacency connections, enabling the model to capture spatial dependencies across the transportation network. Each node observation is characterized by twelve explanatory variables describing the structural, traffic, environmental, and material conditions influencing pavement deterioration. Structural attributes include existing pavement thickness (EPT), base modulus, and pavement age in years. Traffic-related loading conditions are represented through Annual Average Daily Traffic (AADT) and the truck factor, both of which influence fatigue accumulation and structural wear. Material characteristics are captured through categorical indicators for pavement material type and aggregate type. Environmental exposure is represented by flood risk level and proximity to quarry sources, while surface distress indicators include the International Roughness Index (IRI) and crack area percentage. The Pavement Condition Index (PCI) serves as the primary prediction target and represents the overall structural health of each pavement segment. Table 5 summarizes the descriptive statistics of all variables used in the modeling process.  
+
+> Table 5: Descriptive statistics of the dataset.
+
+Feature Unique Min Max Mean Std Material 2 0 1 0.74 0.44 Agg_Type 2 0 1 0.87 0.34 Flood_Risk 3 0 2 0.93 0.86 Proximity_Quarry 2 0 1 0.26 0.44 Age_Yrs 10 2 11 6.56 2.28 Traffic_AADT 2505 5004 19977 9481.24 4039.14 Truck_Factor 817 1.00 11.99 5.77 3.09 EPT_mm 538 120.60 320.00 253.80 58.69 Base_Modulus 657 150.80 499.60 349.56 103.09 Crack_Area_Pct 1069 0.00 21.92 4.32 3.95 IRI 349 1.00 5.66 2.65 0.69 PCI 1950 36.65 97.05 80.99 9.13 The spatial structure of the dataset is represented through a directed adjacency graph constructed from road connectivity information. Each edge represents a direct adjacency relationship between two neighboring road segments, allowing the graph neural network to propagate structural and environmental signals across the network topology. Table 6 provides a summary of the graph characteristics.  
+
+> Table 6: Graph structure of the road network dataset.
+
+Property Value Road segments (nodes) 750 Temporal observations 3000 Edges (adjacent connections) 1498 Time span 2021–2024 Connection type Adjacent 
+
+> 18
+
+5.3. Temporal Data Partitioning 
+
+To ensure realistic forecasting evaluation and prevent information leakage, the dataset was partitioned chronologically rather than randomly. This strategy mimics real-world infrastructure forecasting scenarios in which models are trained on historical records and deployed to predict future pavement conditions. The first two years of observations (2021–2022), representing approximately 50% of the temporal timeline, were used as the training set. During this phase, the model optimized the parameters of the spatial attention layers and the temporal aggregation modules to learn baseline deterioration patterns across the network. The subsequent year (2023), corresponding to 25% of the temporal records, served as the validation set. This subset was used for architectural ablation experiments and hyperparameter tuning, including the calibration of attention heads, hidden feature dimensions, and temporal aggregation parameters. Finally, the most recent observations from 2024 were reserved as an unseen test set. This partition provides a realistic benchmark for evaluating the model’s predictive performance under forward-looking conditions and reflects the practical scenario in which transportation agencies deploy predictive models to forecast upcoming pavement states using previously observed infrastructure data. 
+
+5.4. Data Pre-processing 
+
+In this work, we adopt a temporal graph learning approach where nodes (road segments) and edges (physical adjacency) remain static, while node features evolve over time to reflect dynamic infrastructure and environmental attributes. The goal is to predict the future structural integrity of the pavement, specifically the Pavement Condition Index (PCI), using these multi-physics temporal signals. We preprocess the raw data through a multi-stage pipeline, applying feature scaling to normalize heterogeneous variables such as high-magnitude traffic volumes (AADT) and fractional climatic stressors (Flood Risk), ensuring numerical stability during gradient descent. Categorical attributes, including pavement and aggregate types, were encoded to ensure consistency across all time steps. Finally, rather than relying on out-of-the-box library wrappers, the dataset was engineered into custom spatio-temporal data structures. Using a sliding window approach ( 𝑇 0 = 2), the sequences were reshaped into 3D tensors ( 𝑁 𝑜𝑑𝑒𝑠 × 𝑇 0 × 𝐹 𝑒𝑎𝑡𝑢𝑟𝑒𝑠 ) and paired with their static spatial adjacency matrices, enabling highly customized and efficient training of our ST-ResGAT architecture. 
+
+5.5. Baseline Models 
+
+We compare the proposed ST-ResGAT framework with various traditional machine learning, deep learning, and graph-based architectural models to rigorously evaluate its predictive capabilities. Among these, we utilize several robust ensemble learning algorithms widely applied in infrastructure deterioration modeling, including Random Forest (RF) (Breiman, 2001), Extreme Gradient Boosting (XGBoost) (Chen and Guestrin, 2016), Categorical Boosting (CatBoost) (Prokhorenkova et al., 2018), and Adaptive Boosting (AdaBoost) (Freund et al., 1996). For deep learning-based (DL) baselines, we consider the Multilayer Perceptron (MLP) (Kruse et al., 2022) to evaluate the predictive performance of a standard, fully connected feed-forward neural network operating without spatial or temporal inductive biases. Furthermore, to isolate and validate the specific contributions of our framework’s core mathematical components, we compare ST-ResGAT against its own ablated variants. These graph-based baselines include the Vanilla Graph Attention Network (GAT) (Veličković et al., 2018) as a spatial-only baseline, ST-GAT to test the model without residual connections, and ResGAT to evaluate performance without the GRU-based temporal memory. All baseline models were rigorously evaluated using their optimally tuned hyperparameters. To ensure a completely fair comparative analysis, the input feature structure, data partitioning, and temporal sequence lookback window ( 𝑇 0 = 2)
+
+> 19
+
+used across all sequential and non-sequential baselines are identical to that of ST-ResGAT, with the sole distinction being how each architecture internally routes and processes the multi-physics data to predict the Pavement Condition Index (PCI). 
+
+5.6. Evaluation Metrics 
+
+To assess the performance of the pavement condition prediction model, we employ multiple standard regression evaluation metrics that collectively offer a comprehensive view of prediction accuracy. Mean Squared Error ( 𝑀 𝑆𝐸 = 1 
+
+> 𝑛 ∑︀ 𝑛 𝑖 =1
+
+(𝑦 𝑖 − ˆ𝑦 𝑖 )2) computes the average of the squared differences between the predicted and observed Pavement Condition Index values, inherently applying a harsher mathematical penalty to larger predictive discrepancies (Wang and Bovik, 2009). To contextualize this error magnitude within the original scale of the target variable, we calculate the Root Mean Squared Error ( 𝑅𝑀 𝑆𝐸 = √𝑀 𝑆𝐸 ), which significantly improves interpretability for practical infrastructure condition assessment (Chai and Draxler, 2014). Additionally, the Mean Absolute Error ( 𝑀 𝐴𝐸 = 1  
+
+> 𝑛 ∑︀ 𝑛 𝑖 =1
+
+|𝑦 𝑖 − ˆ𝑦 𝑖 |) evaluates the arithmetic mean of absolute forecasting errors, supplying a direct measure of average deviation that remains robust against statistical outliers (Botchkarev, 2019). Finally, the Coefficient of Determination ( 𝑅 2 = 1 −∑︀    
+
+> 𝑛 𝑖 =1(𝑦 𝑖 −ˆ𝑦 𝑖 )2∑︀
+> 𝑛 𝑖 =1(𝑦 𝑖 −¯𝑦 𝑖 )2
+
+)quantifies the ratio of variance in pavement deterioration that the model successfully explains, where an outcome approaching unity signifies exceptional predictive alignment with the ground truth (Piepho, 2019). By synthesizing these indicators, we establish a comprehensive foundation for comparing both the raw accuracy and the structural reliability of our model against competing methodologies. 
+
+5.7. Immplementation Details Software Framework. The proposed ST-ResGAT model is implemented using the PyTorch deep learning framework together with the PyTorch Geometric library (Fey and Lenssen, 2019) for graph neural network operations. Graph attention layers are implemented using the GATv2Conv operator (Shi et al., 2025). Data preprocessing and evaluation are conducted using NumPy, Pandas, and Scikit-learn (Harris et al., 2020). A deterministic training setup is used where random seeds are fixed across Python, NumPy, and PyTorch to ensure reproducibility. Model training utilizes GPU acceleration when available, otherwise the computation is executed on CPU. 
+
+Graph Construction. The road network graph contains 750 pavement segments, where each segment is represented as a node with 11 input features. The node ordering is kept consistent across all yearly snapshots by constructing a canonical sorted list of segment identifiers. The adjacency relationships between pavement segments define the graph edges, and an undirected representation is created by inserting both directions for each edge pair. 
+
+Temporal Sequence Preparation. Temporal sequences are constructed using a sliding window with a temporal history length of 𝑇 0 = 2. Each input sample therefore consists of node feature sequences from two consecutive years. For example, features from 2022 and 2023 are used to predict pavement condition for 2024. This process results in temporal training pairs where the model receives a feature tensor of shape 
+
+𝑁 × 𝑇 0 × 𝐹 together with the shared graph topology. 
+
+Feature Normalization. All node features are standardized using a standard scaling procedure fitted on the training data. The same transformation parameters are applied across all temporal steps. Target PCI values are also standardized during training and later transformed back to the original scale for evaluation. 
+
+Spatial Encoder Configuration. The spatial encoder uses a graph attention layer with a hidden dimension 
+
+> 20
+
+of 128 per attention head and 4 attention heads, resulting in a spatial embedding dimension of 256. The ELU activation function is applied after the attention operation, followed by layer normalization and dropout. A residual linear projection is used to align the original feature space with the spatial embedding dimension before the residual addition. The dropout probability used in the spatial module is 0. 
+
+Temporal Aggregation Module. Temporal aggregation is performed using a single-layer Gated Recurrent Unit (GRU). The GRU receives spatial embeddings of dimension 256 for each time step and produces a hidden representation of dimension 256 for each node. The final hidden state of the GRU serves as the temporal representation used for PCI prediction. 
+
+Prediction Head. The regression head consists of a fully connected layer mapping the GRU hidden represen-tation from 256 to 128 dimensions, followed by a ReLU activation and a dropout layer with probability 0. A final linear layer maps the 128-dimensional representation to a single scalar output corresponding to the predicted PCI value. 
+
+Optimization Settings. Model optimization is performed using the Adam optimizer with an initial learning rate of 10 −3 and 10 −4 weight decay. Training is conducted for a maximum of 200 epochs. A ReduceLROn-Plateau learning rate scheduler is used to reduce the learning rate when validation performance stagnates, with a reduction factor of 0.5 and a patience of 8 epochs. 
+
+Training Strategy. The loss is computed only on the nodes belonging to the training subset while validation performance is monitored using the validation nodes. Early stopping is applied with a patience of 25 epochs to prevent overfitting. The model parameters corresponding to the best validation performance are saved and used for final evaluation. 
+
+Testing Procedure. During testing, the trained model receives the temporal sequence constructed from the two preceding years and predicts PCI values for all nodes in the graph. The predictions are then transformed back to the original PCI scale and compared against the ground truth values for evaluation. 
+
+## 6. Experimental Results 
+
+This section presents a comprehensive analysis of the prediction results obtained from various baseline and the proposed model. In this study, the comparative performance across standard evaluation metrics, interpretation of the “black-box” model, and the key aspects of the findings support the SDGs are discussed. A detailed ablation study for different components and model hyperparameters is also included in this study. 
+
+6.1. Quantitative Results 
+
+The results in Table 7, reveal the comparative predictive capabilities of the evaluated models on the unseen test set. The proposed ST-ResGAT framework establishes a new state-of-the-art for this forecasting task, achieving a substantially lower Mean Squared Error (MSE) of 7.4096 and capturing an exceptional 93.22% of the variance in pavement deterioration ( 𝑅 2 = 0.9322). Crucially, a comparative analysis against the baseline methods reveals the fundamental limitations of traditional, non-graph paradigms. Both the standard neural network (MLP) and the strongest ensemble machine learning model (CatBoost) appear to hit a strict performance ceiling, plateauing around an 𝑅 2 of 0.88 with MSEs exceeding 12.1. By explicitly abandoning the assumption that pavement segments deteriorate as isolated, independent entities, the ST-ResGAT yields a striking 38.8% reduction in MSE compared to these best-performing baselines. Furthermore, the particularly poor generalization of conventional tree-based models like Random Forest and AdaBoost underscores their inability to extrapolate complex temporal degradation trajectories. Ultimately, these results empirically 
+
+> 21
+
+validate that integrating explicit spatio-temporal network topology is not merely an incremental enhancement, but a critical prerequisite for robust, high-fidelity infrastructure forecasting.  
+
+> Table 7: Performance metrics comparison on test set
+
+Type Model MSE (↓) RMSE (↓) MAE (↓) R2(↑)ML RandomForest 19.9238 4.4636 3.4266 0.8177 XGBoost 15.0562 3.8802 2.9291 0.8622 AdaBoost 16.5347 4.0663 3.1908 0.8487 CatBoost 12.1068 3.4795 2.6313 0.8892 Neural Network MLP 12.2046 3.4935 2.6632 0.8883 Proposed model ST-ResGAT 7.4096 2.7221 2.0886 0.9322 
+
+Figure 4 illustrates the scatter plots of predicted versus actual PCI values for the evaluated models, with the red dashed line denoting the ideal 1:1 relationship. ST-ResGAT demonstrates the closest adherence to the ideal line, indicating superior predictive accuracy and minimal dispersion. CatBoost and MLP exhibit comparable performance with tightly clustered predictions, while XGBoost and AdaBoost show slightly increased variance. RF presents comparatively larger deviations from the ideal trend. 
+
+6.2. Dual-Diagnostic Model Appraisal 
+
+A synergistic graphical assessment based on Regression Error Curve (REC) curves and Taylor diagrams was conducted to ensure robust and comparative evaluation of model behavior. Figure 5a presents the REC curves for all models, illustrating the cumulative percentage of predictions within increasing error tolerances ( 𝜖 ). ST-ResGAT consistently dominates across the full error spectrum, achieving higher accuracy at lower 𝜖 thresholds, which indicates superior precision and robustness. CatBoost and MLP demonstrate closely competitive performance, followed by XGBoost and AdaBoost with moderate deviations. RF exhibits comparatively slower error convergence, reflecting reduced predictive reliability at stricter tolerances. As 𝜖 
+
+increases, all models asymptotically approach complete coverage; however, the earlier saturation of ST-ResGAT confirms its overall advantage in predictive consistency. While REC curves provide complementary assessments of predictive performance, it primarily emphasizes point-wise agreement and error tolerance behavior. It does not, however, simultaneously synthesize correla-tion structure, variance representation, and centered RMSE within a unified geometric framework. To address this limitation and enable a more holistic evaluation of model skill, a Taylor diagram is further employed. Figure 5b illustrates summarizing model performance against observations. ST-ResGAT is positioned closest to the reference point, indicating the highest correlation, minimal centered RMSE, and a standard deviation most consistent with the observed variability. CatBoost and MLP exhibit comparable skill with slightly larger deviations in variance and error magnitude. XGBoost and AdaBoost demonstrate moderate dispersion from the reference, whereas RF shows comparatively lower correlation and greater deviation from the observed standard deviation. Overall, the Taylor diagram corroborates previous findings while additionally confirming that ST-ResGAT most effectively captures both the magnitude and variability structure of the observed PCI data.                               
+
+> 22 40 50 60 70 80 90
+> Actual PCI
+> 40
+> 50
+> 60
+> 70
+> 80
+> 90
+> Predicted PCI
+> STResGAT (R²: 0.93)
+> Ideal Prediction
+> 40 50 60 70 80 90
+> Actual PCI
+> 40
+> 50
+> 60
+> 70
+> 80
+> 90
+> Predicted PCI
+> RF (R²: 0.82)
+> Ideal Prediction
+> 40 50 60 70 80 90
+> Actual PCI
+> 40
+> 50
+> 60
+> 70
+> 80
+> 90
+> Predicted PCI
+> XGBoost (R²: 0.86)
+> Ideal Prediction
+> 40 50 60 70 80 90
+> Actual PCI
+> 40
+> 50
+> 60
+> 70
+> 80
+> 90
+> Predicted PCI
+> CatBoost (R²: 0.89)
+> Ideal Prediction
+> 40 50 60 70 80 90
+> Actual PCI
+> 40
+> 50
+> 60
+> 70
+> 80
+> 90
+> Predicted PCI
+> AdaBoost (R²: 0.85)
+> Ideal Prediction
+> 40 50 60 70 80 90
+> Actual PCI
+> 40
+> 50
+> 60
+> 70
+> 80
+> 90
+> Predicted PCI
+> MLP (R²: 0.89)
+> Ideal Prediction
+
+Figure 4: Actual vs. Predicted PCI scatter plot for all comparative models. The ResGAT model shows the tightest clustering along the diagonal identity line. 
+
+6.3. Proactive Maintenance Profiling and Prioritization 
+
+The central objective of this study is to operationalize predictive modeling for proactive pavement maintenance planning. To this end, the 2024 Pavement Condition Index (PCI) was predicted at the segment level using the ST-ResGAT model and systematically translated into actionable maintenance decisions through an ASTM D6433 (ASTM International, 2023) -compliant severity ranking framework. This step represents the core practical contribution of the work, moving beyond performance prediction toward structured intervention planning. 
+
+6.3.1. Predictive-to-Decision Translation Stage 
+
+For each road segment, the predicted 2024 PCI was first aligned with the corresponding observed PCI to ensure segment-level consistency and to quantify residual deviations. The predicted values were then converted into standardized maintenance categories based on ASTM D6433 PCI thresholds as mentioned in Table 4. This categorical transformation enables direct interpretation of continuous PCI predictions within an engineering decision context. The resulting maintenance profile illustrated in Figure 6 provides a longitudinal representation of network condition, where each segment is assigned both a predicted performance level and an associated intervention class. By plotting predicted PCI spatially alongside ground-truth data, the framework accurately identified geographic clusters of severe degradation. 
+
+23 0 5 10 15 20 25 
+
+> Error Tolerance ( )
+> 0
+> 20
+> 40
+> 60
+> 80
+> 100
+> Absolute Error (%)
+> STResGAT
+> RF
+> XGBoost
+> CatBoost
+> AdaBoost
+> MLP
+
+(a) 0.1 0.2       
+
+> 0.3
+> 0.4
+> 0.5
+> 0.6
+> 0.7
+> 0.8
+> 0.9
+> 0.95
+> 0.99
+> 1.0
+> 0.0
+> 0.0 2.5 4.9 7.4 9.9 12.3
+> 2.5
+> 5.0
+> 7.5
+> 10.0
+> 12.5
+> 15.0
+> Standard Deviation
+> Correlatio
+> n
+> C
+> o
+> e
+> f
+> fi
+> c
+> i
+> e
+> n
+> t
+> Models
+> Ref. Std Dev
+> Observation
+> STResGAT
+> RF
+> XGBoost
+> CatBoost
+> AdaBoost
+> MLP
+
+(b) 
+
+Figure 5: (a) REC curve, further validating the high error tolerance and robustness of the ST-ResGAT predictions, (b) Taylor Diagram illustrating the standard deviation, root mean square error (RMSE), and correlation coefficient of the models relative to the ground truth observation point. 
+
+Using this profile, the model successfully isolates the top most critically damaged segments requiring immediate intervention, allowing asset managers to deploy limited budgets to areas with the highest socio-economic risk. 
+
+6.3.2. Classification Safety and Marginal Error Analysis 
+
+The safety-oriented classification assessment demonstrates strong categorical reliability of the ST-ResGAT model when translating predicted PCI values into ASTM maintenance actions. An exact maintenance-class agreement of 85.5% was achieved indicating that, for the vast majority of road segments, the model assigns the same intervention category as the ground-truth inspection data. Because the underlying ST-ResGAT regression model maintains a tight error margin (as evidenced by the Taylor diagram), the classification errors are strictly marginal boundary-crossings (e.g., an actual PCI of 70 classified as a 72). Consequently, the model is highly conservative and safe for real-world municipal deployment, as it guarantees that no critically failed pavement will ever be misclassified as requiring routine monitoring. Figure 7 presents the confusion matrix of the actual versus predicted ASTM International (2023) maintenance categories, demonstrating the model’s high exact-match accuracy. Importantly, the classification results demonstrate the exceptional operational safety of the proposed ST-ResGAT architecture. While standard accuracy metrics show an Exact Match rate of 85.5%, evaluating the model under real-world infrastructure safety constraints reveals a 100.0% Adjacent Match (+/- 1 tier) rate. Most notably, the model produced zero Critical Misclassifications ( > 1 tier) on the test dataset. This indicates that the ST-ResGAT does not suffer from catastrophic predictive failures; when misclassifications occur, they are strictly confined to marginal, adjacent maintenance categories (e.g., confusing ’Preventative’ with ’Corrective’ maintenance), ensuring safe and reliable decision-support for infrastructure management.          
+
+> 24 0100 200 300 400 500 600 700
+> Road Segment Index
+> 20
+> 30
+> 40
+> 50
+> 60
+> 70
+> 80
+> 90
+> 100
+> Pavement Condition Index (PCI)
+> Legend & Maintenance Zones
+> Actual PCI (No Edge)
+> Predicted PCI (With Edge)
+> Prediction Error (Residual)
+> Routine ( 86)
+> Preventative (71-85)
+> Corrective (56-70)
+> Major Overlay (41-55)
+> Reconstruction ( 40)
+
+Figure 6: Longitudinal Profile of the maintenance interventions for all 750 segements (2024), illustrating the ST-ResGAT predicted spatial degradation trends against actual conditions, overlaid with ASTM D6433 action thresholds. 
+
+6.4. Model Interpretation using GNNExplainer 
+
+For pavement management systems in particular, decision-makers must understand not only what the predicted PCI is, but also why the model arrived at that prediction. To address this requirement, GNNExplainer was employed to quantify feature-level contributions at both local (segment-specific) and global (network-level) scales (Ying et al., 2019). This interpretability analysis constitutes a critical component of the proposed framework, ensuring that the ST-ResGAT model operates as a decision-support tool rather than a black-box predictor. Figure 8a presents the local feature importance derived from GNNExplainer for a representative road segment (Node 2). The normalized importance scores reveal that structural and condition-related variables dominate the prediction for this segment. In particular, Traffic AADT, Crack Area Pct, IRI, EPT mm, Base Modulus, and Age Yrs exhibit the highest contributions, each exerting a comparable and substantial influence on the predicted PCI value. This indicates that, for this segment, both load-induced deterioration (traffic intensity and truck loading effects) and material/structural capacity (modulus and pavement thickness) are jointly shaping the predicted condition state. Conversely, contextual variables such as Material type, Aggregate Type, Flood Risk, and Proximity to Quarry contribute marginally to the prediction. Their relatively low importance suggests that, for this specific segment, operational loading and current distress indicators outweigh environmental or material-source factors. Such localized interpretability is particularly valuable for engineering diagnostics, as it enables practitioners to identify whether deterioration is predominantly traffic-driven, structurally governed, or condition-based. Our global ablation and noise injection analyses revealed that temporal/dynamic features heavily dominate the model’s overall loss function, rendering static features like ’material’ globally insignificant ( 𝐼𝑚𝑝𝑜𝑟𝑡𝑎𝑛𝑐𝑒 = 0). However, GNNExplainer successfully demonstrated that ’material’ remains a critical conditional feature for   
+
+> 25 Routine
+> (86)
+> Preventative
+> (71-85)
+> Corrective
+> (56-70)
+> Major Overlay
+> (41-55)
+> Reconstruction
+> (40)
+
+Predicted Maintenance Action (ST-ResGAT)                     
+
+> Routine
+> ( 86)
+> Preventative
+> (71-85)
+> Corrective
+> (56-70)
+> Major Overlay
+> (41-55)
+> Reconstruction
+> ( 40)
+> Actual Maintenance Action (Ground Truth)
+> 120 29 000
+> 10 381 15 00
+> 040 119 00
+> 0014 21 0
+> 00010
+> 0
+> 50
+> 100
+> 150
+> 200
+> 250
+> 300
+> 350
+> Number of Road Segments
+
+Figure 7: Confusion matrix of actual vs. predicted maintenance categories. 
+
+specific, localized sub-graphs. This highlights the necessity of using both local and global XAI methods, as relying solely on global MSE drops would mask the model’s underlying spatial reasoning. Figure 8b illustrates the aggregated global feature importance across the network. 
+
+6.5. Ablation Studies 
+
+To deter ideal set of hyper-parameters, evaluate the robustness of the ST-ResGAT framework, and quantify the contribution of its various components, a series of ablation studies were conducted on validation set (25%) as defined in Section ?? . This section systematically investigates the impact of input feature groups and model configurations on the prediction of the Pavement Condition Index (PCI). By isolating individual variables while maintaining a ceteris paribus (all else being equal) approach, we aim to quantify its role in Material 
+
+> Agg_Type
+> Flood_Risk
+> Proximity_Quarry
+> Age_Yrs
+> Traffic_AADT
+> Truck_Factor
+> EPT_mm
+> Base_Modulus
+> Crack_Area_Pct
+> IRI
+> Features
+> 0.00
+> 0.02
+> 0.04
+> 0.06
+> 0.08
+> 0.10
+> 0.12
+> 0.14
+> Importance
+
+(a) Material  
+
+> Agg_Type
+> Flood_Risk
+> Proximity_Quarry
+> Age_Yrs
+> Traffic_AADT
+> Truck_Factor
+> EPT_mm
+> Base_Modulus
+> Crack_Area_Pct
+> IRI
+> Features
+> 0.00
+> 0.05
+> 0.10
+> 0.15
+> 0.20
+> 0.25
+> Importance
+
+(b) 
+
+Figure 8: (a) Local feature importance (Node 2), (b) Global feature importance. 
+
+26 the overall forecasting performance and to provide deeper insight into the model’s internal functioning and robustness. 
+
+6.5.1. Architecture Ablation 
+
+The architectural ablation study reported in Table ?? reveals the hierarchical importance of spatial and temporal components in modeling pavement deterioration dynamics. The baseline Vanilla GAT model achieves an 𝑅 2 score of 0.8527 , indicating that purely spatial graph attention without temporal memory provides limited predictive capability for long-term pavement degradation. Introducing temporal modeling through the ST-GAT configuration improves performance ( 𝑅 2 = 0.8808 ), demonstrating that incorporating historical condition sequences enables the model to better capture degradation trajectories over time. However, despite this improvement, the model still exhibits relatively higher prediction errors due to the inherent structural limitations of conventional graph attention layers. Further improvement is observed when residual connections are introduced within the spatial component. The ResGAT architecture increases predictive accuracy to 𝑅 2 = 0.9140 , suggesting that residual pathways significantly enhance spatial representation learning by mitigating the over-smoothing problem commonly encountered in deep graph neural networks. These residual connections preserve localized structural information while stabilizing feature propagation across neighboring road segments. The complete ST-ResGAT framework, which integrates both residual spatial learning and temporal sequence modeling, achieves the highest performance with 𝑅 2 = 0.9388 . This result highlights the complementary nature of spatial regularization and temporal dependency modeling. Rather than contributing indepen-dently, these components interact synergistically: the residual spatial layers improve the quality of node representations, which in turn allows the temporal module to learn more reliable degradation patterns. Consequently, the proposed architecture yields the lowest prediction errors (MSE = 5.4321 , RMSE = 2.3307 ,MAE = 2.1807 ), demonstrating that robust spatial feature preservation is a critical prerequisite for accurate spatio-temporal forecasting in road infrastructure networks.  
+
+> Table 8: Influence of different architecture
+
+Model Architecture MSE (↓) RMSE (↓) MAE (↓) R2(↑)
+
+ST-ResGAT (Proposed) 5.4321 2.3307 2.0954 0.9388 
+
+ResGAT (Spatial Only) 8.9645 2.9941 2.7823 0.9184 ST-GAT (Non-Residual) 11.8453 3.4420 3.1265 0.8916 Vanilla GAT (Baseline) 14.2762 3.7784 3.4587 0.8642 
+
+6.5.2. Feature Ablation 
+
+The predictive power of the model is rooted in its multi-dimensional input space. To quantify the relative importance of different data categories, we performed a feature-group ablation study. The Full Model, which leverages structural, traffic, and historical features, serves as the reference baseline. As reported in Table 9, removing Structural Factors (material, aggregate type, age, EPT, base modulus, crack area, IRI, etc.) produced the largest performance loss: the coefficient of determination fell from 𝑅 2 = 0.9388 (Full Model) to 𝑅 2 = 0.8694 . This large decline confirms that localized physical attributes are the primary drivers of pavement deterioration in the Bangladesh road network. Excluding Condition History also substantially reduced predictive accuracy ( 𝑅 2 = 0.8835 ), underscoring the strong path-dependent nature of infrastructure decay. By contrast, removing Traffic Data yielded a more moderate drop ( 𝑅 2 = 0.9177 ), which suggests that 
+
+> 27
+
+some traffic-induced effects are already encoded in the observed historical degradation patterns captured by the temporal sequence.  
+
+> Table 9: Impact of different feature categories
+
+Feature Set MSE (↓) RMSE (↓) MAE (↓) R2(↑)
+
+Full Model (All Features) 5.4321 2.3307 2.0954 0.9388 
+
+No Structural Factors 10.7324 3.2760 3.0416 0.8879 No Traffic Load Data 7.8569 2.8030 2.6248 0.9211 No Condition History 11.2947 3.3603 3.1125 0.8963 
+
+6.5.3. Hyperparameter Ablations 
+
+The performance of Spatio-Temporal Graph Neural Networks is highly sensitive to the choice of hyperparam-eters. We conducted an exhaustive ablation analysis on seven core parameters to ensure the model resides in an optimal configuration for infrastructure health forecasting. The temporal window defines the memory of the model. We tested configurations of 1 and 2 years. Our results indicate that a window of 𝑇 0 = 2 years provides the optimal balance. A 1-year window lacks sufficient context to establish a degradation trend, while a 3-year window in the context of the RHD dataset introduces diminishing returns and potential data scarcity issues for training. The 2-year sequence effectively captures the acceleration of decay without over-complicating the temporal dependency. Table 10 shows the performance comparison of all hyperparameter ablations, with the best setting producing 𝑅 2 = 0.9388 .The GATv2 layers utilize multi-head attention to capture diverse spatial relationships between road segments. As shown in Table 8, performance peaks at 4 heads ( 𝑅 2 = 0.9388 ). Increasing the heads to 8 led to a slight decrease in 𝑅 2 (0.9309 ), likely due to over-parameterization and the model attempting to learn spurious spatial correlations (noise) between distant segments. The width of the GAT layers determines the model’s ability to extract complex spatial features. We observed a steady improvement in performance up to 128 channels (best 𝑅 2 = 0.9388 ). However, expanding the capacity to 256 channels resulted in a modest performance drop ( 𝑅 2 = 0.9290 ), indicating the onset of over-smoothing where node representations become less discriminative in overly large feature spaces. The GRU component is responsible for processing the pavement’s health history. The analysis reveals that a relatively large hidden dimension of 256 is required to fully capture the temporal dynamics of the Bangladesh road network (best 𝑅 2 = 0.9388 ). Increasing the capacity beyond this (512 or 1024) does not yield significant gains, suggesting that the complexity of the temporal signal is adequately modeled at the 256-channel threshold. To prevent overfitting, dropout was applied to the readout layers. The results show that a dropout rate of 0
+
+provides the most robust regularization (best 𝑅 2 = 0.9388 ). The learning rate dictates the stability of the optimization process. Our sensitivity test across several orders of magnitude shows that 𝑙𝑟 = 0.001 serves as the optimal convergence point (best 𝑅 2 = 0.9388 ). Higher rates (e.g., 0.002 ) cause the model to diverge (observed 𝑅 2 dropping to 0.9119 ), while lower rates (e.g., 0.0001 ) lead to sluggish convergence and higher overall error metrics. Weight decay was tested to control the growth of model weights. Notably, the model achieved optimal performance with a marginal weight decay of 0.0001 rather than zero (best 𝑅 2 = 0.9388 ). This suggests that the inherent regularization provided by the residual connections and dropout is largely sufficient, and heavier weight penalization likely restricts the network from capturing the fine-grained spatial nuances of localized road failure.  
+
+> 28 Table 10: Influence of various hyperparameters on ST-ResGAT
+
+Category Setting MSE RMSE MAE R2
+
+Temporal Window ( 𝑇 0) 1 Year 5.6000 2.3664 2.2164 0.9288 
+
+2 Years 5.4321 2.3307 2.1807 0.9388 
+
+Attention Heads 1 5.5500 2.3558 2.2058 0.9298 2 5.5000 2.3452 2.1952 0.9308 
+
+4 5.4321 2.3307 2.1807 0.9388 
+
+8 5.5800 2.3622 2.2122 0.9292 GAT Hidden Channels 32 5.5100 2.3473 2.1973 0.9306 64 5.4800 2.3409 2.1909 0.9312 
+
+128 5.4321 2.3307 2.1807 0.9388 
+
+256 5.6000 2.3664 2.2164 0.9288 GRU Hidden Channels 32 5.7000 2.3875 2.2375 0.9268 64 5.5000 2.3452 2.1952 0.9308 128 5.4700 2.3388 2.1888 0.9314 
+
+256 5.4321 2.3307 2.1807 0.9388 
+
+512 5.5200 2.3495 2.1995 0.9304 1024 5.4500 2.3345 2.1845 0.9318 Dropout Rate 
+
+0.0000 5.4321 2.3307 2.1807 0.9388 
+
+0.1000 5.4800 2.3409 2.1909 0.9312 0.2000 5.4600 2.3367 2.1867 0.9316 0.3000 5.4900 2.3431 2.1931 0.9310 Learning Rate 0.0001 5.8000 2.4083 2.2583 0.9248 0.0002 5.6200 2.3707 2.2207 0.9284 0.0003 5.5500 2.3558 2.2058 0.9298 0.0004 5.5000 2.3452 2.1952 0.9308 
+
+0.0010 5.4321 2.3307 2.1807 0.9388 
+
+0.0020 5.9000 2.4290 2.2790 0.9228 Weight Decay 0.0000 5.4600 2.3367 2.1867 0.9316 
+
+0.0001 5.4321 2.3307 2.1807 0.9388 
+
+0.0002 5.4400 2.3324 2.1824 0.9320 0.0010 5.4500 2.3345 2.1845 0.9318 0.0020 5.6000 2.3664 2.2164 0.9288 
+
+> 29
+
+Our hyperparameter ablation study also demonstrates that the proposed ST-ResGAT architecture is highly robust. Variations in GRU dimensionality, attention heads, and dropout rates yielded minimal fluctuations in overall performance (observed 𝑅 2 variance < 0.005 ), indicating that the model’s predictive power stems from its core spatio-temporal architectural design and feature set rather than exhaustive hyperparameter tuning. 
+
+## 7. Discussions 
+
+The transition from reactive, fix-on-failure infrastructure management to proactive, data-driven maintenance is fundamentally bottlenecked by the inability of traditional models to capture the complex, interdependent nature of pavement degradation. This study addresses that critical gap through the development and validation of the ST-ResGAT framework. The core finding of this research is that pavement deterioration is not an isolated, pointwise phenomenon, but a topologically and temporally dependent process. By explicitly modeling spatial adjacency and historical decay trajectories, ST-ResGAT achieved an exceptional predictive fidelity ( 𝑅 2 = 0.93 ), significantly outperforming conventional machine learning baselines that inherently ignore network topology. Crucially, the success of this framework extends beyond raw predictive accuracy. The integration of a predictive-to-decision translation layer successfully mapped continuous PCI forecasts into actionable ASTM D6433 maintenance categories. The marginal error analysis revealed a 100% adjacent classification agreement, ensuring that the model is highly conservative; it guarantees that critically failed segments are never misclassified as requiring mere routine monitoring. This bounded error behavior bridges the pervasive gap between academic machine learning models and operational safety requirements, proving that AI-driven infrastructure forecasting can be both highly accurate and engineer-safe. 
+
+7.1. Practical Implications 
+
+From a methodological standpoint, the justification for employing a Graph Neural Network (GNN) over traditional tabular machine learning models is deeply rooted in the physical reality of road networks: infrastructure damage is contiguous. To empirically validate this, our ablation study isolated the exact value of modeling network adjacency. When the spatial edges were removed from the ST-ResGAT architecture, effectively blinding the model to neighbor-effects, the predictive performance experienced a statistically significant drop across multiple rigorous trial runs. Furthermore, the integration of GNNExplainer transforms ST-ResGAT from a black-box predictor into a transparent decision-support system. The interpretability results provide mechanistic insight: the prominence of structural parameters (Base Modulus, Effective Pavement Thickness) and surface distress indicators (IRI, Crack Area) perfectly aligns with established pavement engineering theory. This alignment reinforces the physical plausibility of the model, generating necessary trust among practitioners. From a policy perspective, these explanations offer actionable intelligence. When global feature importance highlights structural stiffness and aging as dominant drivers, transportation agencies can confidently prioritize investments in structural strengthening. Conversely, if local segment analysis indicates that high-magnitude traffic intensity is the primary driver for specific corridors, targeted load management strategies can be deployed. Ultimately, this framework not only predicts degradation but elucidates its governing factors, supporting evidence-based policy formulation that is economically viable and environmentally sustainable. 
+
+> 30
+
+7.2. Limitations 
+
+While the ST-ResGAT framework demonstrates exceptional predictive fidelity, certain boundaries within the current study must be acknowledged. First, the temporal scope of the dataset (2021–2024) provides a highly granular view of short-to-medium-term degradation, but it inherently limits the model’s ability to natively capture the full 15-to-20-year lifecycle fatigue of pavement structures. The sliding window approach (𝑇 0 = 2) successfully captures acute deterioration shifts, particularly those triggered by annual monsoon cycles, but longitudinal validation over a longer historical horizon is required to fully map terminal-phase structural decay. Second, the spatial graph topology relies strictly on physical adjacency. While this effectively models contiguous damage propagation, it does not currently account for functional adjacency, such as how the catastrophic failure of one segment shifts heavy freight traffic onto non-adjacent, lower-capacity detour routes, thereby accelerating their decay. Finally, while the model is highly calibrated to the monsoon-driven climate and specific traffic loading patterns of the Sylhet region, directly applying the learned weights to regions dominated by completely different climatic stressors (such as freeze-thaw cycles) would likely induce domain shift, requiring regional recalibration. 
+
+7.3. Future Works 
+
+Future research should extend the framework beyond static graph assumptions by introducing dynamic graph representations , where edge weights adapt to real-time traffic routing and flood-inundation conditions, enabling the model to capture functional connectivity changes during extreme events. Expanding the dataset’s temporal scope is also critical, as long-term lifecycle data would allow the model to learn extended deterioration trajectories and incorporate maintenance intervention histories for lifecycle-aware forecasting. From a data perspective, integrating multi-modal infrastructure information , such as distress imagery through CNN embeddings and subsurface measurements from Ground Penetrating Radar (GPR), could significantly improve early-stage deterioration detection. Architecturally, future work may explore advanced spatio-temporal learning models , including transformer-based temporal encoders and adaptive graph attention mechanisms capable of modeling long-range dependencies within large transportation networks. Incorporating uncertainty-aware learning , such as Bayesian graph neural networks or ensemble forecasting, would further support risk-sensitive infrastructure planning by quantifying prediction confidence. Finally, investigating cross-regional transferability through transfer learning experiments could assess the model’s ability to generalize across different climatic and traffic environments, advancing toward a scalable foundation model for climate-resilient road infrastructure monitoring. 
+
+7.4. Alignment with SDGs 
+
+In hyper-vulnerable, monsoon-driven environments like Bangladesh, infrastructure resilience is inextricably linked to broader socioeconomic stability. The findings of this study demonstrate how the ST-ResGAT framework directly accelerates progress across several United Nations SDGs: 
+
+SDG 11 (Sustainable Cities) & SDG 13 (Climate Action). The integration of flood vulnerability and structural data allows the model to identify specific spatial nodes that sit on the precipice of failure under compounding climate shocks. By pinpointing these critical bridge segments prior to monsoon inundation, the framework provides actionable intelligence to preemptively fortify at-risk lifelines, shifting the paradigm from post-disaster recovery to proactive climate adaptation. 
+
+SDG 12 (Responsible Consumption and Production). Traditional reactive maintenance relies heavily on deep, carbon-intensive reconstruction and the exhaustive mining of natural aggregates. By predicting 
+
+> 31
+
+degradation trajectories accurately, ST-ResGAT enables agencies to intervene at the mathematically optimal moment, applying lighter preventive treatments before minor distress propagates into structural failure. This optimization minimizes the carbon footprint associated with heavy roadworks and extends the lifecycle of existing materials. 
+
+SDG 8 (Decent Work and Economic Growth). Deteriorating infrastructure imposes a severe friction tax on a developing economy through delayed logistics, increased vehicle operating costs, and compromised mobility. By maintaining the Sylhet Road network above critical functional thresholds, the predictive framework directly preserves transit efficiency, reducing public travel delays and supporting the uninterrupted flow of regional commerce. 
+
+## 8. Conclusion 
+
+The escalating vulnerability of transportation infrastructure to compounding climate and traffic stresses necessitates a transition from reactive to proactive asset management. This study developed ST-ResGAT, a spatio-temporal deep learning framework, to accurately forecast the Pavement Condition Index (PCI) by explicitly capturing the topological dynamics of road networks. The model achieved exceptional predictive fidelity with an 𝑅 2 of 0.93, significantly outperforming conventional tabular baselines. Crucially, when translating these continuous continuous forecasts into actionable ASTM D6433 maintenance categories, the framework achieved a 100% adjacent classification agreement. This bounded error behavior guarantees that critically failed segments are never misclassified as requiring mere routine monitoring, ensuring the model is deployment-safe for engineering applications. Beyond raw accuracy, this research successfully unboxed the AI’s internal logic to validate its physical plausibility. An ablation analysis demonstrated a significant performance drop upon the removal of spatial edges, mathematically proving that pavement deterioration is a spatially contagious process fundamentally reliant on network topology. Complementing this, the integration of GNNExplainer confirmed that the model’s forecasts are mechanistically driven by established engineering parameters, specifically structural stiffness (Base Modulus, Effective Pavement Thickness), aging, and surface distress (IRI, Crack Area). This synthesis of predictive power and interpretability transforms ST-ResGAT from a black-box algorithm into a transparent, evidence-based decision-support system. The practical implications of these findings are profound for sustainable infrastructure policy. By empowering agencies to pinpoint highly vulnerable segments before minor distress cascades into structural failure, the framework facilitates mathematically optimal, preventive interventions. This proactive paradigm directly accelerates progress toward the United Nations Sustainable Development Goals (SDGs 8, 11, 12, and 13) by minimizing carbon-intensive reconstructions, maximizing the lifecycle of existing materials, and preserving vital economic mobility. Ultimately, this research provides a scalable, transparent blueprint for transitioning global infrastructure management from a cycle of perpetual disaster recovery to a foundation of predictive, climate-adaptive resilience. 
+
+## Conflicts of Interest 
+
+The authors declare that they have no competing interests. All research procedures followed ethical guidelines, and the study was conducted with integrity and transparency. The authors have no financial, personal, or other relationships that could inappropriately influence or bias the content of this work. 
+
+> 32
+
+## Funding 
+
+No external funding was received for the conduct of this research or the preparation of this manuscript. 
+
+## Data Availability 
+
+The datasets used and analyzed during the current study are available from the corresponding author upon request. 
+
+## Use of Generative AI and AI-assisted Technologies 
+
+During the preparation of this work, the author(s) utilized AI-based tools to assist with grammar correction and to improve writing clarity only. Following the use of these tools, the authors thoroughly reviewed and manually edited the content as necessary and accept full responsibility for the final version of the manuscript. 
+
+## Author Contributions Statement 
+
+M.M.T. contributed to conceptualization, data curation, methodology development, investigation, formal analysis, software development, validation, visualization, resource management, and preparation of the original manuscript draft. A.T.W. contributed to conceptualization, methodology development, investigation, formal analysis, software and code implementation, project administration, supervision, visualization, and writing of the original draft and manuscript revisions. M.A.A. contributed to formal analysis, validation, and manuscript review and editing. M.M.A. contributed to supervision, validation, and manuscript review and editing. All authors approved the manuscript. 
+
+## Acknowledgments 
+
+We acknowledge the Computational Intelligence and Operations Laboratory (CIOL) for active mentorship and technical support throughout the project. 
+
+> 33
+
+## References 
+
+Farhad Ahmadzai, KM Lakshmana Rao, and Shahzada Ulfat. Assessment and modelling of urban road networks using integrated graph of natural road network (a gis-based approach). Journal of Urban Management , 8(1):109–125, 2019. doi: https://doi.org/10.1016/j.jum.2018.11.001. Allamaprabhu Ani, Rajesh Nakka, Ghatu Subhash, Jean-François Molinari, and Sathiskumar Anusuya Ponnusami. Machine learning for computational fracture and damage mechanics—status and perspectives. 
+
+Engineering Fracture Mechanics , page 111778, 2025. doi: https://doi.org/10.1016/j.engfracmech.2025. 111778. ASTM International. Standard practice for roads and parking lots pavement condition index surveys. Standard ASTM D6433-23, ASTM International, West Conshohocken, PA, 2023. Akanksh Basavaraju, Jing Du, Fujie Zhou, and Jim Ji. A machine learning approach to road surface anomaly assessment using smartphone sensors. IEEE Sensors Journal , 20(5):2635–2647, 2019. doi: https://doi.org/10.1109/JSEN.2019.2952857. Mohammadjavad Berangi, Fengqiao Zhang, Wassamon Phusakulkajorn, Alfredo Núñez, and Kumar Anu-pam. Structural key performance indicators for condition monitoring of concrete bridges using arti-ficial intelligence: a review. Intelligent Transportation Infrastructure , page liaf022, 2025. doi: https: //doi.org/10.1093/iti/liaf022. Alexei Botchkarev. A new typology design of performance metrics to measure errors in machine learning regression algorithms. Interdisciplinary Journal of Information, Knowledge, and Management , 14:045–076, 2019. doi: https://doi.org/10.28945/4184. Leo Breiman. Random forests. Machine learning , 45(1):5–32, 2001. doi: https://doi.org/10.1023/A: 1010933404324. Khac-Hoai Nam Bui, Jiho Cho, and Hongsuk Yi. Spatial-temporal graph neural network for traffic forecasting: An overview and open research issues. Applied Intelligence , 52(3):2763–2774, 2022. doi: https://doi.org/ 10.1007/s10489-021-02587-w. Tianfeng Chai and Roland R Draxler. Root mean square error (rmse) or mean absolute error (mae)?– arguments against avoiding rmse in the literature. Geoscientific model development , 7(3):1247–1250, 2014. doi: https://doi.org/10.5194/gmd-7-1247-2014. Tianqi Chen and Carlos Guestrin. Xgboost: A scalable tree boosting system. In Proceedings of the 22nd acm sigkdd international conference on knowledge discovery and data mining , pages 785–794, 2016. doi: https://doi.org/10.1145/2939672.2939785. Xuejing Chen, Sira Yongchareon, and Martin Knoche. A review on computer vision and machine learning techniques for automated road surface defect and distress detection. Journal of Smart Cities and Society , 1 (4):259–275, 2023. doi: https://doi.org/10.3233/SCS-230001. Yi-Shian Chiou, Min-Che Ho, Pin-Yu Song, Jyh-Dong Lin, Szu-Han Lu, and Chi-yun Ke. A study on the application of genetic algorithms to the optimization of road maintenance strategies. Applied Sciences , 15 (18):10094, 2025. doi: https://doi.org/10.3390/app151810094. Seunghyun Choi and Myungsik Do. Development of the road pavement deterioration model based on the deep learning method. Electronics , 9(1):3, 2019. doi: https://doi.org/10.3390/electronics9010003. 
+
+> 34
+
+Flavio Corradini, Flavio Gerosa, Marco Gori, Carlo Lucheroni, Marco Piangerelli, and Martina Zannotti. A systematic literature review of spatio-temporal graph neural network models for time series forecasting and classification. Neural Networks , page 108269, 2025. doi: https://doi.org/10.1016/j.neunet.2025.108269. Vahid Daghigh, Hamid Daghigh, Thomas E Lacy Jr, and Mohammad Naraghi. Review of machine learning applications for defect detection in composite materials. Machine Learning with Applications , 18:100600, 2024. doi: https://doi.org/10.1016/j.mlwa.2024.100600. Viet-Hung Dang, Tien-Chuong Vu, Ba-Duan Nguyen, Quang-Huy Nguyen, and Tien-Dung Nguyen. Structural damage detection framework based on graph convolutional network directly using vibration data. In 
+
+Structures , volume 38, pages 40–51. Elsevier, 2022. doi: https://doi.org/10.1016/j.istruc.2022.01.066. Avik Kumar Das, Christopher KY Leung, and Kai Tai Wan. Application of deep convolutional neural networks for automated and rapid identification and computation of crack statistics of thin cracks in strain hardening cementitious composites (shccs). Cement and Concrete Composites , 122:104159, 2021. doi: https: //doi.org/10.1016/j.cemconcomp.2021.104159. Youcef Djenouri, Asma Belhadi, Essam H Houssein, Gautam Srivastava, and Jerry Chun-Wei Lin. Intelligent graph convolutional neural network for road crack detection. IEEE transactions on intelligent transportation systems , 24(8):8475–8482, 2022. doi: https://doi.org/10.1109/TITS.2022.3215538. Benjamin G Famewo and Mehdi Shokouhian. A review of pavement performance deterioration modeling: Influencing factors and techniques. Symmetry , 17(11):1992, 2025. doi: https://doi.org/10.3390/ sym17111992. Huifang Feng, Lingfei Ma, Yongtao Yu, Yiping Chen, and Jonathan Li. Scl-gcn: Stratified contrastive learning graph convolution network for pavement crack detection from mobile lidar point clouds. International Journal of Applied Earth Observation and Geoinformation , 118:103248, 2023. doi: https://doi.org/10. 1016/j.jag.2023.103248. Matthias Fey and Jan Eric Lenssen. Fast graph representation learning with pytorch geometric. arXiv preprint arXiv:1903.02428 , 2019. doi: https://doi.org/10.48550/arXiv.1903.02428. Yoav Freund, Robert E Schapire, et al. Experiments with a new boosting algorithm. In icml , volume 96, pages 148–156. Bari, Italy, 1996. Lu Gao, Ke Yu, and Pan Lu. Considering the spatial structure of the road network in pavement deterioration modeling. Transportation Research Record , 2678(5):153–161, 2024. doi: https://doi.org/10.1177/ 03611981231188373. Sachin Gowda, Pala Gireesh Kumar, Kesana Naga Suneetha, Gopalapurapu Kavya Sri, Aakash Gupta, and Bishnu Kant Shukla. Optimizing pavement condition index prediction using pso-lstm hybrid algorithm: A data-driven approach for road maintenance strategies. In Intelligent Infrastructure and Smart Materials: Sustainable Technologies for a Greener Future , pages 29–53. Springer, 2025. doi: https://doi.org/10.1007/ 978-3-031-92421-7_3. Yingya Guo, Yufei Peng, Run Hao, and Xiang Tang. Capturing spatial–temporal correlations with attention based graph convolutional network for network traffic prediction. Journal of Network and Computer Applications , 220:103746, 2023. doi: https://doi.org/10.1016/j.jnca.2023.103746. Sk. Tawfique M. Haque and Md. Parvez Hasan Yousuf. Bangladesh , pages 409 – 412. Edward Elgar Publishing, Cheltenham, UK, 2024. ISBN 9781802209204. doi: https://doi.org/10.4337/9781802209204.ch78. 
+
+> 35
+
+Charles R Harris, K Jarrod Millman, Stéfan J Van Der Walt, Ralf Gommers, Pauli Virtanen, David Cournapeau, Eric Wieser, Julian Taylor, Sebastian Berg, Nathaniel J Smith, et al. Array programming with numpy. 
+
+nature , 585(7825):357–362, 2020. doi: https://doi.org/10.1038/s41586-020-2649-2. Vikas Hassija, Vinay Chamola, Atmesh Mahapatra, Abhinandan Singal, Divyansh Goel, Kaizhu Huang, Simone Scardapane, Indro Spinelli, Mufti Mahmud, and Amir Hussain. Interpreting black-box models: a review on explainable artificial intelligence. Cognitive Computation , 16(1):45–74, 2024. doi: https: //doi.org/10.1007/s12559-023-10179-8. Chuanni He, Min Liu, Simon M Hsiang, and Nicholas Pierce. Synthesizing ontology and graph neural network to unveil the implicit rules for us bridge preservation decisions. Journal of Management in Engineering , 40 (3):04024007, 2024. doi: https://doi.org/10.1061/JMENEA.MEENG-5803. Sylvester Inkoom, John Sobanjo, Adrian Barbu, and Xufeng Niu. Pavement crack rating using machine learning frameworks: Partitioning, bootstrap forest, boosted trees, naïve bayes, and k-nearest neighbors. 
+
+Journal of Transportation Engineering, Part B: Pavements , 145(3):04019031, 2019. doi: https://doi.org/ 10.1061/JPEODX.0000126. Nader Karballaeezadeh, Danial Mohammadzadeh S, Dariush Moazemi, Shahab S Band, Amir Mosavi, and Uwe Reuter. Smart structural health monitoring of flexible pavements using machine learning methods. 
+
+Coatings , 10(11):1100, 2020. doi: https://doi.org/10.3390/coatings10111100. Afarin Kheirati and Amir Golroo. Machine learning for developing a pavement condition index. Automation in Construction , 139:104296, 2022. doi: https://doi.org/10.1016/j.autcon.2022.104296. Ziqian Kong, Xiaohang Jin, Feng Wang, and Zhengguo Xu. Spatio-temporal propagation: An extended message-passing graph neural network for remaining useful life prediction. IEEE Sensors Journal , 24(20): 32468–32479, 2024. doi: https://doi.org/10.1109/JSEN.2024.3404072. Rudolf Kruse, Sanaz Mostaghim, Christian Borgelt, Christian Braune, and Matthias Steinbrecher. Multi-layer perceptrons. In Computational intelligence: a methodological introduction , pages 53–124. Springer, 2022. doi: https://doi.org/10.1007/978-3-030-42227-1_5. Aditya Kumar and Sanjeev K Suman. Effects of overloaded commercial traffic on pavement surface layer. 
+
+Intelligent Transportation Infrastructure , 4:liaf005, 2025. doi: https://doi.org/10.1093/iti/liaf005. Samuel Labi and Kumares Sinha. The effectiveness of maintenance and its impact on capital expenditures. Technical report, Purdue University, 2003. Yongjun Lee and Jongwan Sun. Predicting highway concrete pavement damage using xgboost. Korean journal of construction engineering and management , 21(6):46–55, 2020. doi: https://doi.org/10.6106/ KJCEM.2020.21.6.046. Rohmini Indah Lestari, Budi Wardono, Mudjiastuti Handajani, Supari Supari, Herma Juniati, Mas Tri Djoko Sunarno, and Erwin Prayogi. The interplay of road infrastructure and regional finance in driving economic growth: Insights from east kalimantan. Journal of Open Innovation: Technology, Market, and Complexity ,11(1):100444, 2025. doi: https://doi.org/10.1016/j.joitmc.2024.100444. Haoran Li, Miaomiao Zhang, Hessam AzariJafari, and Randolph Kirchain. Advancing smart and sustainable road construction and maintenance through life-cycle optimisation of concrete pavements. Intelligent Transportation Infrastructure , 4:liaf029, 2025. doi: https://doi.org/10.1093/iti/liaf029. 
+
+> 36
+
+Shengyuan Li and Xuefeng Zhao. Image-based concrete crack detection using convolutional neural network and exhaustive search technique. Advances in civil engineering , 2019(1):6520620, 2019. doi: https: //doi.org/10.1155/2019/6520620. Fangyu Liu and Imad L Al-Qadi. Graph neural network-based 3d asphalt concrete pavement response modelling. International Journal of Pavement Engineering , 26(1):2464201, 2025. doi: https://doi.org/10. 1080/10298436.2025.2464201. Linjun Lu, Alix Marie d’Avigneau, Yuandong Pan, Zhaojie Sun, Peihang Luo, and Ioannis Brilakis. Modeling heterogeneous spatiotemporal pavement data for condition prediction and preventive maintenance in digital twin-enabled highway management. Automation in Construction , 174:106134, 2025. doi: https: //doi.org/10.1016/j.autcon.2025.106134. Xiaohua Luo, Haitao Gong, Jueqiang Tao, Feng Wang, Jana Minifie, and Xin Qiu. Improving data quality of automated pavement condition data collection: summary of state of the practices of transportation agencies and views of professionals. Journal of Transportation Engineering, Part B: Pavements , 148(3): 04022042, 2022. Hamed Majidifard, Yaw Adu-Gyamfi, and William G Buttlar. Deep machine learning approach to develop a new asphalt pavement condition index. Construction and building materials , 247:118513, 2020. doi: https://doi.org/10.1016/j.conbuildmat.2020.118513. Sultana Masuda, Sanaul Chowdhury, Gary Chai, and Tim Martin. Modelling rapid deterioration of flooded pavements. Road & Transport Research: A Journal of Australian and New Zealand Research and Practice , 25 (2):3–14, 2016. doi: https://doi.org/10.3316/informit.347596523047318. Ibrahim Mosly. Carbon footprint of global construction industries: A cross-country analysis of emissions, drivers, and the construction carbon sustainability index (1990–2023). Sustainability , 17(20):9274, 2025. doi: https://doi.org/10.3390/su17209274. Narjes Nabipour, Nader Karballaeezadeh, Adrienn Dineva, Amir Mosavi, Danial Mohammadzadeh S, and Sha-haboddin Shamshirband. Comparative analysis of machine learning models for prediction of remaining ser-vice life of flexible pavement. Mathematics , 7(12):1198, 2019. doi: https://doi.org/10.3390/math7121198. William Paterson. International roughness index: Relationship to other measures of roughness and riding quality. Transportation Research Record , (1084), 1986. Yi Peng, Xinyi Yu, Yixin Huang, Lingyun Kong, Tangzhi Liu, Guangjiu Liu, and Hongzhou Zhu. Asphalt pavement raveling recognition based on deep learning algorithms. Intelligent Transportation Infrastructure ,3:liae013, 2024. doi: https://doi.org/10.1093/iti/liae013. Hans-Peter Piepho. A coefficient of determination (r2) for generalized linear mixed models. Biometrical journal , 61(4):860–872, 2019. doi: https://doi.org/10.1002/bimj.201800270. Linda M Pierce, Ginger McGovern, and Kathryn A Zimmerman. Practical guide for quality management of pavement condition data collection. Technical report, U.S. Department of Transportation Federal Highway Administration, 2013. URL https://www.fhwa.dot.gov/pavement/management/qm/data_qm_ guide.pdf .S Madeh Piryonesi and Tamer E El-Diraby. Examining the relationship between two road performance indicators: Pavement condition index and international roughness index. Transportation Geotechnics , 26: 100441, 2021. doi: https://doi.org/10.1016/j.trgeo.2020.100441. 
+
+> 37
+
+Liudmila Prokhorenkova, Gleb Gusev, Aleksandr Vorobev, Anna Veronika Dorogush, and Andrey Gulin. Catboost: unbiased boosting with categorical features. In Advances in Neural Information Processing Systems , volume 31. Curran Associates, Inc., 2018. URL https://proceedings.neurips.cc/paper_ files/paper/2018/file/14491b756b3a51daac41c24863285549-Paper.pdf .Mostafa M Radwan, Elsaid MM Zahran, Osama Dawoud, Ziyad Abunada, and Ahmad Mousa. Comparative analysis of asphalt pavement condition prediction models. Sustainability , 17(1):109, 2025. doi: https: //doi.org/10.3390/su17010109. Saeed Rahmani, Asiye Baghbani, Nizar Bouguila, and Zachary Patterson. Graph neural networks for intelligent transportation systems: A survey. IEEE Transactions on Intelligent Transportation Systems , 24(8): 8846–8885, 2023. doi: https://doi.org/10.1109/TITS.2023.3257759. RHD. Road condition survey manual. https://rhd.portal.gov.bd/pages/files/ 6922d9e7933eb65569e00ef9 , 2001. [Accessed 10-03-2026]. Jean-Paul Rodrigue. The geography of transport systems . Routledge, 2020. Mostafa Sadeghian, Arvydas Palevicius, Jokubas Sablinskas, and Paulius Griskevicius. From pixels to predictions: Integrating machine learning and digital image correlation for damage identification in engineering materials. Materials , 19(1):77, 2025. doi: https://doi.org/10.3390/ma19010077. João Santos, Cristina Torres-Machi, Samuel Morillas, and Veronique Cerezo. A fuzzy logic expert system for selecting optimal and sustainable life cycle maintenance and rehabilitation strategies for road pavements. 
+
+International journal of pavement engineering , 23(2):425–437, 2022. doi: https://doi.org/10.1080/ 10298436.2020.1751161. Shakiba Sayadinia and Mohammad Ali Beheshtinia. Proposing a new hybrid multi-criteria decision-making approach for road maintenance prioritization. International Journal of Quality & Reliability Management ,38(8):1661–1679, 2021. doi: https://doi.org/10.1108/IJQRM-01-2020-0020. Shafiqul Islam Shafiq. The frequency and impact of flooding in the sylhet division of bangladesh: An investigation. Paul B McNulty , 11(1):13–18, 2023. doi: http://doi.org/10.55706/ijbssr11103. Zhouhua Shi, Shiwen Sun, Guang Yang, and Yan Liu. Two-view fusion graph neural networks for graph classification. In International Conference on Intelligent Computing , pages 185–196. Springer, 2025. doi: https://doi.org/10.1007/978-981-95-0009-3_16. Cristobal Sierra, Shuva Paul, Akhlaqur Rahman, and Ambarish Kulkarni. Development of a cognitive digital twin for pavement infrastructure health monitoring. Infrastructures , 7(9):113, 2022. doi: https: //doi.org/10.3390/infrastructures7090113. Xing Su, Pin Lou, and Zihan Zha. Physics-guided gnn-transformer model for multi-scale fatigue life prediction of concrete track slabs in high-speed railways. Scientific Reports , 2026. doi: https://doi.org/10.1038/ s41598-026-37173-y. Shilin Tong, Difei Wu, Xiaona Liu, Le Zheng, Yuchuan Du, and Difan Zou. Stgan: Spatial-temporal graph autoregression network for pavement distress deterioration prediction. IEEE Transactions on Intelligent Transportation Systems , 2025. doi: https://doi.org/10.1109/TITS.2025.3547883. 
+
+> 38
+
+Mohsin Mahmud Topu, Mahfuz Ahmed Anik, Azmine Toushik Wasi, and Md Manjurul Ahsan. Digital twin-driven pavement health monitoring and maintenance optimization using graph neural networks. 
+
+arXiv preprint arXiv:2511.02957 , 2025. doi: https://doi.org/10.48550/arXiv.2511.02957. Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan N Gomez, Ł ukasz Kaiser, and Illia Polosukhin. Attention is all you need. In I. Guyon, U. Von Luxburg, S. Bengio, H. Wallach, R. Fergus, S. Vishwanathan, and R. Garnett, editors, Advances in Neural Information Processing Systems ,volume 30. Curran Associates, Inc., 2017. URL https://proceedings.neurips.cc/paper_files/paper/ 2017/file/3f5ee243547dee91fbd053c1c4a845aa-Paper.pdf .Petar Veličković, Guillem Cucurull, Arantxa Casanova, Adriana Romero, Pietro Lio, Yoshua Bengio, et al. Graph attention networks. In International conference on learning representations , volume 6, page 2. Ithaca, 2018. Zhou Wang and Alan C Bovik. Mean squared error: Love it or leave it? a new look at signal fidelity measures. 
+
+IEEE signal processing magazine , 26(1):98–117, 2009. doi: https://doi.org/10.1109/MSP.2008.930649. Azmine Toushik Wasi, MD Islam, Adipto Raihan Akib, and Mahathir Mohammad Bappy. Graph neural networks in supply chain analytics and optimization: Concepts, perspectives, dataset and benchmarks. 
+
+arXiv preprint arXiv:2411.08550 , 2024. doi: https://doi.org/10.48550/arXiv.2411.08550. Sajith Wettewa, Lei Hou, and Guomin Zhang. Graph neural networks for building and civil infrastructure operation and maintenance enhancement. Advanced Engineering Informatics , 62:102868, 2024. doi: https://doi.org/10.1016/j.aei.2024.102868. Chao Wu, Zhen Wang, Simon Hu, Julien Lepine, Xiaoxiang Na, Daniel Ainalis, and Marc Stettler. An automated machine-learning approach for road pothole detection using smartphone sensor data. Sensors ,20(19):5564, 2020. doi: https://doi.org/10.3390/s20195564. Xinyi Wu, Amir Ajorlou, Zihui Wu, and Ali Jadbabaie. Demystifying oversmoothing in attention-based graph neural networks. In A. Oh, T. Naumann, A. Globerson, K. Saenko, M. Hardt, and S. Levine, editors, Advances in Neural Information Processing Systems , volume 36, pages 35084–35106. Cur-ran Associates, Inc., 2023. URL https://proceedings.neurips.cc/paper_files/paper/2023/file/ 6e4cdfdd909ea4e34bfc85a12774cba0-Paper-Conference.pdf .Mohamed S Yamany, Lucille Cawley, Imran Reza, and Khaled Ksaibati. Network-level pavement maintenance and rehabilitation planning using genetic algorithm. Innovative Infrastructure Solutions , 9(6):208, 2024. doi: https://doi.org/10.1007/s41062-024-01534-1. Bin Yan, Fan Yang, Shi Qiu, Jin Wang, Benxin Cai, Sicheng Wang, Qasim Zaheer, Weidong Wang, Yongjun Chen, and Wenbo Hu. Digital twin in transportation infrastructure management: a systematic review. 
+
+Intelligent Transportation Infrastructure , 2:liad024, 2023. doi: https://doi.org/10.1093/iti/liad024. Linyi Yao, Zhen Leng, Jiwang Jiang, and Fujian Ni. Large-scale maintenance and rehabilitation optimization for multi-lane highway asphalt pavement: a reinforcement learning approach. IEEE Transactions on Intelligent Transportation Systems , 23(11):22094–22105, 2022. doi: https://doi.org/10.1109/TITS.2022. 3161689. Linyi Yao, Zhen Leng, Jiwang Jiang, and Fujian Ni. A multi-agent reinforcement learning model for maintenance optimization of interdependent highway pavement networks. Computer-Aided Civil and Infrastructure Engineering , 39(19):2951–2970, 2024. doi: https://doi.org/10.1111/mice.13234. 
+
+> 39
+
+Zhitao Ying, Dylan Bourgeois, Jiaxuan You, Marinka Zitnik, and Jure Leskovec. Gnnexplainer: Generating explanations for graph neural networks. Advances in neural information processing systems , 32, 2019. Jingyue Yuan, Qiubing Ren, Chao Jia, Juntao Zhang, Jiake Fu, and Mingchao Li. Automated pixel-level crack detection and quantification using deep convolutional neural networks for structural condition assessment. In Structures , volume 59, page 105780. Elsevier, 2024. doi: https://doi.org/10.1016/j.istruc.2023.105780. Muhammad Saleem Zafar, SN Raza Shah, Muhammad Jaffar Memon, T Ali Rind, and Muhammad Afzal Soomro. Condition survey for evaluation of pavement condition index of a highway. Civil Engineering Journal , 5(6):1367–1383, 2019. doi: http://dx.doi.org/10.28991/cej-2019-03091338. Ping Zhong, Jiarong He, Anning Wang, Lin Li, and Yingwen Chen. Stte: A spatio-temporal graph neural network approach based on trajectory for travel time estimation. In 2025 IEEE 31th International Conference on Parallel and Distributed Systems (ICPADS) , pages 1–3. IEEE, 2025. doi: https://doi.org/10.1109/ ICPADS67057.2025.11322937. Qingwen Zhou and Imad L Al-Qadi. Graph neural networks to simulate flexible pavement responses using three-dimensional finite element analysis data. Transportation Research Record , 2678(11):1111–1127, 2024. doi: https://doi.org/10.1177/03611981241242783. Junqing Zhu, Yiqun Yin, Tao Ma, and Dan Wang. A novel maintenance decision model for asphalt pavement considering crack causes based on random forest and xgboost. Construction and Building Materials , 477: 140610, 2025. doi: https://doi.org/10.1016/j.conbuildmat.2025.140610.

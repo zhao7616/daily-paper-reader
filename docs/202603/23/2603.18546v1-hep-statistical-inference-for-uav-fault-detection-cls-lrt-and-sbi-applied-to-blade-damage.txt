@@ -1,0 +1,218 @@
+Title: HEP Statistical Inference for UAV Fault Detection: CLs, LRT, and SBI Applied to Blade Damage
+
+URL Source: https://arxiv.org/pdf/2603.18546v1
+
+Published Time: Fri, 20 Mar 2026 00:44:37 GMT
+
+Number of Pages: 12
+
+Markdown Content:
+# HEP Statistical Inference for UAV Fault Detection: CLs, LRT, and SBI Applied to Blade Damage 
+
+Khushiyant 
+
+Department of Computer Science University of Freiburg 
+
+khushiyant.khushiyant@uni-freiburg.de 
+
+# Abstract 
+
+This paper transfers three statistical methods from particle physics to multirotor propeller fault detection: the likelihood ratio test (LRT) for binary detection, the CLs modified frequentist method for false alarm rate control, and sequential neural posterior estimation (SNPE) for quantitative fault characterization. Operating on spectral features tied to rotor harmonic physics, the system returns three outputs: binary detection, controlled false alarm rates, and calibrated posteriors over fault severity and motor location. On UAV-FD, a hexarotor dataset of 18 real flights with 5% and 10% blade damage, leave-one-flight-out cross-validation gives AUC 
+
+0.862 ± 0.007 (95% CI: 0.849–0.876), outperforming CUSUM ( 0.708 ± 0.010 ), autoencoder ( 0.753 ± 0.009 ), and LSTM autoencoder (0.551). At 5% false alarm rate the system detects 93% of significant and 81% of subtle blade damage. On PADRE, a quadrotor platform, AUC reaches 0.986 after refitting only the generative models. SNPE gives a full posterior over fault severity (90% credible interval coverage 92–100%, MAE 0.012), so the output includes uncertainty rather than just a point estimate or fault flag. Per-flight sequential detection achieves 100% fault detection with 94% overall accuracy. 
+
+# 1 Introduction 
+
+A chipped or bent propeller blade creates a persistent rotational imbalance that degrades flight stability, reduces thrust efficiency, and can ultimately cause loss of control. For autonomous UAVs in safety-critical settings, including defense applications driven by recent domestic-supply mandates Puchalski and Giernacki [2022], detecting this kind of damage in flight is not optional. Model-based methods Puchalski and Giernacki [2022] work well when the fault is large: a complete rotor loss produces residuals that clearly exceed normal variation. For partial blade damage, however, the vibration signal is small enough to hide in flight turbulence, and sensitivity drops sharply. Data-driven methods (CUSUM, autoencoders, LSTM sequence models) avoid explicit physics modeling but introduce a different problem: their outputs are hard to act on. An operator gets “fault” or “no fault,” with no indication of how severe the damage is or how confident the detection is. Particle physics has dealt with a version of this problem for thirty years: detecting rare processes like the Higgs boson ATLAS Collaboration [2012], CMS Collaboration [2012] in noisy collider data, with strict false-discovery control. The tools that emerged (the likelihood ratio test, CLs Read [2002], Junk [1999], and simulation-based inference Cranmer et al. [2020]) are mathematically general, not tied to particle physics. As far as we can tell, nobody has tried them for UAV fault detection. 
+
+Intuition. The idea is straightforward. Each window of IMU data gets compared against two models, one for healthy flight ( H0) and one for faults ( H1), and the decision reduces to which model explains the data better. If the fault model wins, SNPE estimates how severe the damage is and which 
+
+Preprint. 
+
+> arXiv:2603.18546v1 [cs.LG] 19 Mar 2026
+
+motor is affected, with a calibrated confidence level. So instead of a binary flag, the operator gets a quantitative answer: what is broken, how badly, and how certain are we? 
+
+Why CLs. Thresholding the likelihood ratio controls the false alarm rate in the nominal regime but ignores statistical power. When H0 and H1 overlap substantially, as they do for subtle 5% blade damage, a raw threshold will occasionally flag healthy windows that fall in the overlap region. The key step in CLs is dividing by the test’s power, which pushes the statistic toward 1 when the evidence is ambiguous and suppresses premature detection claims. CUSUM and autoencoder baselines have no equivalent correction. 
+
+Why parametric models on small data. UAV-FD contains 18 flights. Deep learning models consistently overfit in this regime; the LSTM autoencoder results below confirm this. Parametric generative models, which require estimating only a mean vector and covariance matrix per hypothesis, are better matched to the available sample size. We evaluate under leave-one-flight-out cross-validation, which ensures no windows from the test flight appear in training. 
+
+Contributions. We make three contributions: 1. Unified inference framework. A single hypothesis testing formulation providing three levels of diagnostic output: binary detection via composite LRT, false alarm rate control via CLs, and fault characterization via SNPE. The composite LRT scans per-motor alternative hypotheses, analogous to scanning over signal mass hypotheses in resonance searches, improving AUC by 0.046 over a pooled alternative. 2. Detection-oriented CLs adaptation. The CLs method was originally developed for exclusion limits at LEP. We adapt it for the detection setting by inverting the ratio, yielding a statistic that suppresses false detections in low-power regimes without sacrificing sensitivity where the signal is strong. 3. Calibrated severity posteriors. SNPE provides the full posterior over fault severity and motor identity, giving operators a continuous damage estimate with calibrated uncertainty (90% CI coverage 92–100%, MAE 0.012). No existing UAV fault detection method produces this kind of output. Under leave-one-flight-out cross-validation, the composite LRT with EMA smoothing achieves AUC 
+
+0.862 ± 0.007 on UAV-FD and 0.986 on PADRE, with lower false alarm rates than all baselines at practical operating points. 
+
+# 2 Related Work 
+
+UAV fault detection. Most UAV fault detection relies on residual generation: a physics or observer model predicts nominal sensor values, and deviations raise an alarm. This works for gross failures, but for partial blade damage the residuals fall within the noise floor of normal flight Puchalski and Giernacki [2022]. Kalman filter variants face the same issue: the innovation sequence absorbs weak fault signals when they are comparable to process noise. Data-driven methods avoid system identification. Autoencoders Pang et al. [2021] flag high reconstruction error; LSTM encoder-decoders Malhotra et al. [2016] extend this to sequences; CUSUM Page [1954] provides sequential testing with average-run-length guarantees. In our experiments, CUSUM’s cumulative statistic eventually triggers on every healthy flight because it lacks a reset mechanism for persistent monitoring, and the LSTM overfits on small per-fold training sets ( ∼800 windows). None of them tells an operator how bad the damage is or how much to trust the detection. 
+
+Spectral methods for propeller fault detection. Vibration analysis is standard in rotating machin-ery diagnostics because blade-pass harmonics produce characteristic PSD peaks, and multirotors are no exception Baldini et al. [2023], Puchalski et al. [2023]. The UAV-FD Baldini et al. [2023] and PADRE Puchalski et al. [2023] datasets provide real-flight benchmarks for this setting; prior work on these datasets reports high classification accuracy under standard train-test splits but does not evaluate cross-flight generalization via leave-one-flight-out protocols. Our analysis confirms that spectral features in the 80–150 Hz rotor harmonic band are essential: time-domain statistics yield AUC ∼0.66 while spectral features yield AUC ∼0.86 under the same LRT. The gap is large, and it makes physical sense: blade imbalance concentrates energy in the harmonic bands. 2Statistical hypothesis testing in HEP. We draw on three specific tools from HEP. CLs Read [2002], Junk [1999], developed for exclusion limits at LEP, includes a power correction that suppresses detection claims when sensitivity is low, which is exactly the regime of subtle 5% blade damage. In our setting, the likelihood ratio test is a natural way to compare faulty and nominal flight behavior; it extends to composite alternatives by scanning over per-motor hypotheses and taking the maximum, the same strategy used in LHC resonance searches ATLAS Collaboration [2012], CMS Collaboration [2012]. SNPE Cranmer et al. [2020], Papamakarios and Murray [2016] handles settings where the likelihood is unavailable, enabling posterior estimation over continuous fault parameters. All three are workhorse tools in particle physics, particularly in LHC searches where controlling false discoveries is critical. We are not aware of prior work applying them to mechanical fault detection. 
+
+Cross-platform generalization. Cross-platform generalization is difficult because different air-frames produce different vibration profiles, and most detection methods bake in platform-specific parameters Puchalski and Giernacki [2022]. Domain adaptation has been tried Malhotra et al. [2016], Pang et al. [2021] but typically needs labeled target-domain data. Our approach sidesteps this by keeping the inference structure fixed and refitting only the generative models ( H0, H1) to target data. On PADRE, a quadrotor with a different airframe, sensor layout, and fault types than UAV-FD, the LRT achieves AUC 0.986 after fitting to one healthy configuration. 
+
+# 3 Methodology 
+
+3.1 Problem Formulation 
+
+Starting from a single hypothesis test, we get three kinds of output: (i) binary fault detection via the likelihood ratio test, (ii) detection with controlled false alarm rates via CLs, and (iii) full posterior estimation over fault severity and motor identity via simulation-based inference. Let x ∈ RD denote a vector of sensor features extracted from a sliding window of IMU measurements. The null hypothesis H0 represents nominal (healthy) flight and the alternative H1 represents the presence of a propeller fault. We construct a test statistic q(x) where larger values indicate stronger evidence for a fault. Here we use a composite LRT that scans over a family of alternative hypotheses, one per motor, and takes the maximum test statistic rather than testing a single fixed alternative. 
+
+3.2 Feature Extraction  
+
+> (a) PSD Comparison (b) Feature Importance
+
+Figure 1: Physical basis for fault detection. (a) Spectral density elevated in the 80–150 Hz band during 10% blade damage confirms the rotor harmonic signal. (b) Cohen’s d ranking shows spectral features are 2.5 × more discriminative than time-domain statistics, motivating the feature space choice. From each window of W = 500 IMU samples ( ∼1.3 s at 376 Hz) with stride W/ 2, we extract D = 90 
+
+features across the six IMU channels (accelerometer and gyroscope, three axes each), as illustrated in 3Figure 1. For each channel we compute four time-domain statistics (mean, standard deviation, RMS, excess kurtosis) and eleven spectral statistics: log band power and fractional band power in four frequency bands (5–30, 30–80, 80–150, 150–250 Hz), spectral centroid, dominant frequency, and spectral entropy. The spectral features are computed via Welch’s method with 256-sample segments. The 80–150 Hz band captures blade-pass harmonics and dominates discrimination (Cohen’s d = 0 .84 
+
+for GyrZ_psd_high ), whereas time-domain features alone yield AUC ∼0.66 .
+
+3.3 Generative Models 
+
+Under each hypothesis, we fit a multivariate Gaussian to the feature vectors using maximum likelihood with Ledoit-Wolf shrinkage Ledoit and Wolf [2004]: 
+
+Hk : x ∼ N (μk, Σk), k ∈ { 0, 1} (1) where Σk is the shrinkage-regularized covariance. Shrinkage matters here because D = 90 features with N ≈ 900 samples per fold makes the raw sample covariance poorly conditioned. The H0 model is fit to healthy flight data. For H1, rather than fitting a single model to all fault data, we fit per-motor alternative models {H(m)1 }Mm=1 , where M is the number of motors, each trained on fault data from motor m only. 
+
+3.4 Composite Likelihood Ratio Test 
+
+The per-window test statistic scans over all motor-specific alternatives and takes the maximum, analogous to scanning over signal mass hypotheses in HEP: 
+
+q(x) = max  
+
+> m∈{ 1,...,M }
+
+h
+
+log p(x | H(m)1 ) − log p(x | H0)
+
+i
+
+(2) Scanning per motor sharpens the test because each H(m)1 has tighter covariance than the pooled alternative; the max picks the best-matching fault hypothesis. As a byproduct, the identity of the maximizing motor m∗ = arg max m qm(x) gives us fault localization without a dedicated classifier. 
+
+Temporal smoothing. Since propeller faults are persistent, we apply an exponential moving average (EMA) to the per-window test statistic within each flight: 
+
+˜qt = α q t + (1 − α) ˜ qt−1, α = 0 .3 (3) Transient noise gets suppressed. Sustained elevation from a real fault does not. 
+
+3.5 CLs False Alarm Rate Control 
+
+We adapt the CLs method Read [2002], Junk [1999] from its original use in setting exclusion limits at LEP and the LHC to a detection-oriented formulation. The standard CLs ratio is inverted for fault detection: 
+
+CLs det = P (q ≥ qobs | H0)
+
+P (q ≥ qobs | H1) = pb
+
+ps+b
+
+(4) A fault is declared when CLs det < α . The denominator ps+b measures the test’s statistical power: when H0 and H1 overlap heavily (as with subtle 5% blade damage), ps+b ≈ pb and CLs det ≈ 1,preventing detection claims in low-sensitivity regions. Raw p-value thresholding and CUSUM have no such correction, which is why they struggle in the low-power regime. The distributions of q under H0 and H1 are estimated via 10 4 pseudo-experiments (toy Monte Carlo), sampling feature vectors from the fitted generative models and evaluating the test statistic on each. 
+
+3.6 Simulation-Based Inference for Fault Parameter Estimation 
+
+Beyond binary detection, we use sequential neural posterior estimation (SNPE) Papamakarios and Murray [2016], Cranmer et al. [2020] to infer a full posterior over fault parameters θ = ( θsev , θ mot ),where θsev ∈ [0 , 0.12] is the blade damage fraction and θmot ∈ R7 is a soft one-hot encoding over motor identity (including a healthy class). 4The prior is uniform: θsev ∼ U (−0.01 , 0.13) and θmot ,k ∼ U (−0.1, 1.1) . Training pairs (θi, xi) are constructed from labeled flight data with severity dequantization (Gaussian noise σ = 0 .005 ) and three-fold data augmentation (feature-space jittering at 5% of per-feature standard deviation). SNPE trains a conditional neural density estimator ˆp(θ | x) that amortizes inference: once trained, a single forward pass gives the approximate posterior for any new window xobs . From each posterior we extract: • A severity point estimate ˆθsev = E[θsev | xobs ] with calibrated credible intervals, • A fault probability P (θsev ≥ 0.025 | xobs ),• A motor identification via arg max k E[θmot ,k | xobs ].For a UAV operator, the difference is between seeing “10% blade damage, 93% confident” ver-sus just “fault detected.” Existing multirotor fault detection methods do not provide this level of detail Puchalski and Giernacki [2022]. 
+
+3.7 Baselines 
+
+We compare against four baselines: • CUSUM : Mahalanobis distance from the healthy distribution with Ledoit-Wolf covariance Page [1954]. • Autoencoder : Feedforward network (90–64–32–64–90) trained on healthy features; reconstruction MSE as anomaly score. • LSTM-AE : LSTM encoder-decoder (6–64, 2 layers) on raw IMU windows; reconstruction MSE as anomaly score Malhotra et al. [2016]. • SPRT : Sequential probability ratio test with majority vote over per-window decisions within each flight. All methods are evaluated under leave-one-flight-out cross-validation on UAV-FD (18 flights) and within-dataset evaluation on PADRE (28 configurations). 
+
+# 4 Results 
+
+4.1 Datasets 
+
+We evaluate on two real-flight datasets spanning different airframe types. Both are small by machine learning standards; we report bootstrap confidence intervals throughout and caution against over-interpreting point estimates. 
+
+UAV-FD Baldini et al. [2023] contains 18 flights from a hexarotor running ArduPilot: 6 healthy, 6 with 5% chipped blade damage, and 6 with 10% damage, distributed across all six motors. IMU data is logged at ∼376 Hz. We extract 3,043 windows (935 healthy, 1,035 fault-5%, 1,073 fault-10%). 
+
+PADRE Puchalski et al. [2023] provides 28 flight configurations from a Parrot Bebop 2 quadrotor with four per-arm IMUs at 500 Hz. Fault types include chipped, bent, and cut propellers across 1–4 simultaneous rotors. We average the four arm-level IMU signals into a single 6-channel representation and extract 9,604 windows (343 healthy, 9,261 fault). 
+
+4.2 Evaluation Protocol 
+
+On UAV-FD we use leave-one-flight-out (LOFO) cross-validation: for each of the 18 folds, models are trained on the remaining 17 flights and tested on the held-out flight. The goal is an honest estimate of cross-flight generalization. On PADRE, which contains only a single healthy configuration, we report within-dataset results. All reported metrics are aggregated over the held-out windows. 
+
+4.3 Detection Performance and Ablation 
+
+Figure 2 and Table 1 report per-window AUC under LOFO on UAV-FD with 95% bootstrap confidence intervals (1,000 resamples). The top three rows ablate our method, showing what each component adds. With only 18 flights, the confidence intervals are wide and should be read accordingly. 5(a) Test Statistic Distributions (b) LOFO ROC Curves (c) Architecture Ablation 
+
+Figure 2: Detection performance on UAV-FD under LOFO. (a) The composite LRT statistic separates cleanly between healthy and faulty windows. (b) LRT dominates all baselines on the ROC curve, with deep learning underperforming due to overfitting on small training sets. (c) Each ablation component contributes measurable AUC improvement, showing each design choice adds measurable value. Table 1: Leave-one-flight-out AUC on UAV-FD. Top rows: ablation of our method. Bottom rows: baselines. ± denotes bootstrap standard deviation; 95% CI in brackets. Method AUC (all) AUC (5%) AUC (10%) 
+
+Ablation (ours) 
+
+Pooled LRT 0.791 — —+ Per-motor H1 (composite) 0.837 — —+ EMA smoothing ( full ) 0.862 ± 0.007 0.803 0.919 
+
+Baselines 
+
+Autoencoder 0.753 ± 0.009 — —CUSUM (Mahalanobis) 0.708 ± 0.010 — —LSTM-AE 0.551 — —Per-motor alternative hypotheses add 0.046 AUC over the pooled LRT by avoiding dilution of motor-specific spectral signatures, and temporal smoothing adds a further 0.025 by suppressing transient noise. The confidence intervals of our full method ( [0 .849 , 0.876] ) and the best baseline ([0 .735 , 0.771] ) do not overlap, confirming the improvement is statistically significant. The LSTM autoencoder underperforms all other methods, which we attribute to overfitting on the small per-fold training set ( ∼800 windows of 500-sample sequences). 
+
+Per-severity analysis. Detection of 10% blade damage is substantially easier (AUC 0.919) than 5% damage (AUC 0.803). Unsurprisingly, larger blade asymmetry produces stronger harmonic signatures in the 80–150 Hz band. 
+
+4.4 False Alarm Rate 
+
+Table 2 reports the false alarm rate (FAR) at fixed true positive rates under LOFO. Our method achieves 2.7 × lower FAR than CUSUM at 80% TPR. Table 2: False alarm rate at fixed detection rate (LOFO, UAV-FD). TPR Composite+EMA AE CUSUM LSTM-AE 80% 20.4% 41.9% 55.1% 71.3% 90% 46.0% 75.2% 72.1% 85.5% 95% 69.4% 91.2% 85.0% 94.4% 6At a controlled 5% FAR (threshold set at the 95th percentile of healthy EMA scores), the system detects 93.0% of 10% blade damage and 81.2% of 5% damage. The practical deployment operating point is 80% TPR, where 20.4% FAR is acceptable for a monitoring system in which missed faults carry higher cost than false alarms. 
+
+4.5 Cross-Platform Generalization 
+
+Table 3 shows within-dataset results on PADRE. The LRT generalizes to a different airframe (quadro-tor vs. hexarotor) without architectural modification; only the H0 and H1 models are refit to PADRE data. Table 3: Within-dataset AUC on PADRE (Bebop 2 quadrotor). Method AUC Autoencoder 0.991 LRT (ours) 0.986 CUSUM 0.935 LSTM-AE 0.888 All methods achieve high AUC on PADRE because the propeller faults (chipped, bent, cut) produce stronger vibration signatures than the subtle blade chips in UAV-FD. The LRT and autoencoder perform comparably; the CUSUM and LSTM-AE trail by 5–10 points. 
+
+4.6 Sequential Per-Flight Detection  
+
+> (a) Sequential Detection (Single Flight) (b) Per-Flight Majority Vote
+
+Figure 3: Operational deployment via sequential testing. (a) The raw LRT statistic is highly volatile; exponential moving average (EMA) smoothing prevents transient noise from crossing the detection threshold. (b) A heatmap of the majority vote decisions across all 18 LOFO folds, achieving 100% fault recall with a single conservative false alarm. For operational deployment, a per-flight decision is more actionable than per-window scores (Figure 3). Using a majority vote over per-window EMA-smoothed LRT decisions within each flight (fault declared if >50% of windows have ˜q > 0), we achieve 94% overall per-flight accuracy under LOFO: all 12 fault flights are correctly detected (100% fault recall) and 5 of 6 healthy flights are correctly classified. The single false alarm (NO_FAULT1) exhibits consistently elevated spectral energy in the 80–150 Hz band, suggesting a genuinely borderline flight condition. 7Page’s CUSUM accumulator detects all fault flights with a mean delay of 15.8 windows ( ∼21 s) but eventually triggers on all healthy flights as well, yielding 0% healthy specificity. Cumulative schemes clearly need reset mechanisms when monitoring for persistent faults. 
+
+4.7 Severity Estimation via SBI 
+
+Figure 4: Simulation-Based Inference (SBI) severity posteriors. Unlike binary classifiers, the neural density estimator produces calibrated uncertainty. The 10% fault posterior is sharply concentrated, whereas the 5% fault posterior accurately reflects the broader statistical ambiguity of subtle damage. Figure 4 and Table 4 report the performance of the SNPE posterior over fault severity, evaluated on 40 randomly sampled windows per condition. Table 4: SBI severity estimation and motor identification (in-sample). Condition Sev. MAE 90% CI Cov. P (fault ) SBI Motor NN Motor Healthy 0.028 92% — 90% 98% 5% damage 0.012 98% 64% 40% 98% 10% damage 0.012 100% 92% 70% 100% The severity posterior is well-calibrated: 90% credible intervals achieve 92–100% empirical coverage, and the mean absolute error is 0.012 on a [0 , 0.10] severity scale. For 10% damage, the posterior concentrates tightly around the true value with P (fault ) = 92% . For 5% damage, the posterior is broader and P (fault ) = 64% , reflecting genuine uncertainty at this subtle damage level. 
+
+Motor identification. SBI motor accuracy reaches 70% for 10% damage and 40% for 5% damage using the 8-dimensional soft one-hot encoding (chance level: 14%). A dedicated neural network classifier achieves 98–100% in-sample accuracy but does not provide uncertainty estimates. The two approaches are complementary: SBI provides the calibrated severity posterior, while the NN handles motor classification. The fundamental limit on SBI motor accuracy is that a single centrally-mounted IMU receives similar vibration signatures from equidistant motors. 
+
+4.8 Feature Importance 
+
+The top 10 features by Cohen’s d are all spectral (Table 5). Gyroscope and accelerometer PSD in the 80–150 Hz band provide the strongest discrimination, consistent with the physics of rotor imbalance: a chipped blade creates a once-per-revolution force asymmetry whose harmonics fall in this range for typical multirotor motor speeds (6,000–9,000 RPM). Table 5: Top 5 discriminative features (Cohen’s d, healthy vs. fault). Rank Feature Cohen’s d
+
+1 GyrZ PSD 80–150 Hz 0.843 2 AccX PSD 80–150 Hz 0.778 3 AccY PSD 80–150 Hz (ratio) 0.710 4 AccY PSD 80–150 Hz 0.709 5 AccX PSD 150–250 Hz 0.702 8Time-domain features (mean, std, RMS, kurtosis) achieve a maximum Cohen’s d of 0.33 and yield AUC ∼0.66 when used alone, confirming that spectral analysis is essential for detecting subtle blade damage. 
+
+# 5 Discussion 
+
+5.1 Why Do HEP Methods Work Here? 
+
+Why do methods from particle physics work for propeller faults? The problems share the same structure. A weak signal sits in noisy background data. False alarms are expensive. The signal shows up in specific physical observables (invariant mass at the LHC, vibration PSD for rotors). And in both cases, the background distribution must be learned from limited control samples. In practice, what carries over most directly is not the algorithms but the feature choice. Decades of LHC resonance searches showed that restricting analysis to the physics-motivated observable is what drives sensitivity. We see the same pattern here: spectral features in the rotor harmonic band achieve Cohen’s d = 0 .84 while time-domain statistics stay below d = 0 .33 , producing AUC ∼0.86 
+
+vs. ∼0.66 with the same LRT. 
+
+5.2 Composite Scan and Motor Localization 
+
+Fitting a single pooled H1 across all motors and severities gives AUC 0.791; the per-motor composite scan reaches 0.837. The 0.046 gain comes from avoiding dilution of motor-specific spectral signatures: each per-motor model has a tighter covariance than the pooled alternative, so the maximization selects the sharpest discriminant. The maximizing motor m∗ = arg max m qm(x) also tells us which rotor is likely affected. It works, but only to a point. Localization accuracy (70% for 10% damage) is limited by the single centrally-mounted IMU: all motors sit at roughly the same distance from the sensor, so their vibration signatures overlap. Per-arm IMU placement, as in PADRE, would resolve this. 
+
+5.3 CLs and the Low-Sensitivity Regime 
+
+A concrete problem arises when the test has low statistical power: what should the system report? For 5% blade damage, the H0 and H1 feature distributions overlap substantially, and a raw p-value threshold will occasionally flag healthy windows in the overlap region. The CLs correction works by dividing by ps+b, which is close to pb in this regime; the result is that CLs det gets pushed toward 1, suppressing detection claims. At 5% FAR, CLs detects 93% of 10% damage and 81% of 5% damage. The gap reflects the underlying signal strength: 5% blade damage produces roughly half the spectral distortion of 10% damage. 
+
+5.4 SBI: Posteriors vs. Point Estimates 
+
+The NN classifier and SBI answer different questions. The NN outputs a point classification: “motor 3,” with no uncertainty or severity estimate. SBI returns the full posterior p(θsev , θ mot | x), which includes a continuous severity estimate with calibrated uncertainty (90% CI coverage 92–100%), a fault probability P (fault | x) for borderline cases, and the posterior shape itself. The distinction matters operationally. For a 5% damage window where P (fault ) = 0 .64 , the posterior communicates that the evidence is ambiguous. A binary classifier would force a yes/no decision and discard that information. A 93% confident detection of 10% damage and a 64% detection of possible 5% damage should trigger different responses; only the posterior-based output supports this. In practice we use both: SBI for severity and uncertainty, the NN for motor identification where the soft one-hot encoding is limited by the physical symmetry of a single central IMU. 
+
+5.5 Limitations Dataset scale. UAV-FD contains only 18 flights. While LOFO cross-validation provides honest generalization estimates, the confidence intervals on our AUC values are wide. The LOFO AUC 9of 0.862 should be interpreted as a point estimate from a small-sample evaluation, not a precise population parameter. 
+
+Persistent faults only. Both UAV-FD and PADRE contain persistent faults present for the entire flight. We cannot evaluate fault onset detection latency, arguably the most operationally relevant metric, because there is no in-flight transition from healthy to faulty. The Page’s CUSUM result (mean delay 15.8 windows once calibrated) is measured on persistent faults and would likely differ for abrupt onset scenarios. 
+
+Single IMU limitation. Motor localization accuracy is fundamentally limited by the single centrally-mounted IMU in UAV-FD. The vibration transfer function from each motor to the IMU depends on the airframe’s mechanical structure, and for a symmetric hexarotor this function is nearly identical for all motors. The PADRE dataset’s per-arm IMU arrangement would enable significantly better localization, but PADRE lacks severity labels needed for quantitative severity estimation. 
+
+PADRE evaluation. The PADRE results (AUC 0.986) are within-dataset because only one healthy configuration exists. We frame this as a demonstration that the LRT transfers to a new platform without architectural changes, not as evidence of cross-dataset generalization in the train-on-A-test-on-B sense. 
+
+LSTM-AE performance. The LSTM autoencoder (AUC 0.551) underperforms even CUSUM. We attribute this to overfitting: with ∼800 healthy training windows per fold, the 2-layer LSTM encoder-decoder has sufficient capacity to memorize training patterns but fails to generalize. This is consistent with findings in the anomaly detection literature that deep models require substantially more training data than shallow baselines to realize their advantage Pang et al. [2021]. 
+
+5.6 Implications for Deployment 
+
+In practice, we envision a two-stage system. The composite LRT with temporal smoothing runs continuously as a lightweight monitor at the 80% TPR / 20% FAR operating point. When the EMA-smoothed statistic crosses threshold, SBI kicks in on the flagged window to estimate severity and confidence, while the NN identifies the affected rotor. The first stage is cheap enough for embedded hardware; the second runs only when needed. For defense applications where the NDAA 2024 Chinese drone ban has created demand for domestic autonomous platforms, the false alarm rate is the critical metric. At 5% controlled FAR with 93% detection of significant damage, the system meets the threshold for an advisory-level diagnostic that flags potential faults for human review rather than triggering autonomous emergency maneuvers. 
+
+# 6 Conclusion 
+
+We have shown that the likelihood ratio test, CLs method, and simulation-based inference, all standard in particle physics ATLAS Collaboration [2012], CMS Collaboration [2012], transfer to UAV propeller fault detection with minimal adaptation. Both problems reduce to detecting a weak signal buried in noise, whether it is a resonance peak at the LHC or a small spectral shift from blade imbalance, and the same mathematical machinery applies. The composite LRT achieves 0.862 AUC under leave-one-flight-out cross-validation on UAV-FD, outperforming CUSUM (0.708), autoencoder (0.754), and LSTM autoencoder (0.551). With only the generative models refit, the same method reaches 0.986 on PADRE (quadrotor). At 5% false alarm rate, the system detects 93% of significant and 81% of subtle blade damage; per-flight majority vote achieves 100% fault recall with 94% overall accuracy. Beyond the aggregate numbers, three findings stand out. First, feature choice matters more than method choice: the same LRT gets AUC ∼0.66 on time-domain features and ∼0.86 on spectral features. The 80–150 Hz rotor harmonic band (Cohen’s d = 0 .84 ) carries nearly all the discriminative information, consistent with the physics of blade imbalance. This is worth stating plainly because it is easy to overlook when the focus is on the inference machinery. 10 Second, the CLs power correction fills a gap that standard anomaly detectors do not address. For 5% blade damage, where H0 and H1 overlap heavily, raw thresholding produces false alarms on healthy windows that land in the overlap region. CLs suppresses these by normalizing against statistical power, at the cost of reduced sensitivity in the ambiguous regime, a tradeoff suited to advisory-level diagnostics where false alarms carry maintenance cost. Third, the SNPE posterior gives operators something qualitatively different from a binary flag: a continuous severity estimate with calibrated uncertainty (90% CI coverage 92–100%, MAE 0.012). Whether this additional output justifies the inference cost depends on the application; for safety-critical platforms where 10% damage warrants landing and 5% damage warrants monitoring, the graded output is directly actionable. 
+
+6.1 Limitations and Future Work 
+
+The evaluation is limited by dataset scale (18 flights in UAV-FD) and the absence of in-flight fault onset data, which prevents measuring detection latency for abrupt failures. Motor localization from a single central IMU remains fundamentally constrained by the mechanical symmetry of the airframe; per-arm sensor placement would resolve this. The LSTM autoencoder’s poor performance (AUC 0.551) likely reflects overfitting on the small training set rather than a fundamental limitation of the architecture, and would benefit from larger datasets or pretraining strategies. Three extensions follow directly. First, a physics-informed neural network (PINN) encoding rotor aerodynamics could replace the empirical H0 model with a physics-grounded nominal model, improv-ing generalization across flight conditions. Second, the fault detector’s output (fault type, severity, and confidence) can serve as an explicit input to an adaptive flight controller, enabling fault-aware trajectory planning rather than passive monitoring. Third, extending the composite hypothesis scan to a continuous severity parameter (replacing the discrete per-motor models with a parameterized family) would unify the LRT and SBI into a single profiled likelihood framework, directly analogous to the profile likelihood ratio used for Higgs boson property measurements at the LHC. More broadly, the HEP statistical toolkit, developed for a specific problem but mathematically general, appears underexploited in engineering fault detection. Whether the same transfer works in other domains (structural health monitoring, industrial process control) remains to be tested, but the inferential structure is shared wherever small signals must be detected in noisy data with controlled error rates. 
+
+# References 
+
+ATLAS Collaboration. Observation of a new particle in the search for the Standard Model Higgs boson with the ATLAS detector at the LHC. Physics Letters B , 716(1):1–29, 2012. doi: 10.1016/j. physletb.2012.08.020. Alessandro Baldini, Lorenzo D’Alleva, Riccardo Felicetti, Francesco Ferracuti, Alessandro Freddi, and Andrea Monteriù. UAV-FD: A dataset for actuator fault detection in multirotor drones. In 
+
+2023 International Conference on Unmanned Aircraft Systems (ICUAS) , pages 998–1004. IEEE, 2023. doi: 10.1109/ICUAS57906.2023.10156060. CMS Collaboration. Observation of a new boson at a mass of 125 GeV with the CMS experiment at the LHC. Physics Letters B , 716(1):30–61, 2012. doi: 10.1016/j.physletb.2012.08.021. Kyle Cranmer, Johann Brehmer, and Gilles Louppe. The frontier of simulation-based inference. 
+
+Proceedings of the National Academy of Sciences , 117(48):30055–30062, 2020. doi: 10.1073/ pnas.1912789117. Thomas Junk. Confidence level computation for combining searches with small statistics. Nuclear Instruments and Methods in Physics Research Section A: Accelerators, Spectrometers, Detectors and Associated Equipment , 434(2–3):435–443, 1999. doi: 10.1016/S0168-9002(99)00498-2. Olivier Ledoit and Michael Wolf. A well-conditioned estimator for large-dimensional covariance matrices. Journal of Multivariate Analysis , 88(2):365–411, 2004. doi: 10.1016/S0047-259X(03) 00096-4. 11 Pankaj Malhotra, Anusha Ramakrishnan, Gaurangi Anand, Lovekesh Vig, Puneet Agarwal, and Gautam Shroff. LSTM-based encoder-decoder for multi-sensor anomaly detection. In ICML 2016 Anomaly Detection Workshop , New York, NY, USA, 2016. arXiv preprint arXiv:1607.00148. E. S. Page. Continuous inspection schemes. Biometrika , 41(1-2):100–115, 1954. doi: 10.1093/ biomet/41.1-2.100. Guansong Pang, Chunhua Shen, Longbing Cao, and Anton van den Hengel. Deep learning for anomaly detection: A review. ACM Computing Surveys , 54(2):1–38, 2021. doi: 10.1145/3439950. George Papamakarios and Iain Murray. Fast ε-free inference of simulation models with Bayesian conditional density estimation. In D. Lee, M. Sugiyama, U. Luxburg, I. Guyon, and R. Garnett, editors, Advances in Neural Information Processing Systems , volume 29, pages 1028–1036. Curran Associates, Inc., 2016. Radosław Puchalski and Wojciech Giernacki. UAV fault detection methods, state-of-the-art. Drones ,6(11):330, 2022. doi: 10.3390/drones6110330. Radosław Puchalski, Marek Kołodziejczak, Adam Bondyra, Jinjun Rao, and Wojciech Giernacki. PADRE – propeller anomaly data REpository for UAVs various rotor fault configurations. In 2023 International Conference on Unmanned Aircraft Systems (ICUAS) , pages 982–989. IEEE, 2023. doi: 10.1109/ICUAS57906.2023.10156238. Alexander L. Read. Presentation of search results: the CLs technique. Journal of Physics G: Nuclear and Particle Physics , 28(10):2693–2704, 2002. doi: 10.1088/0954-3899/28/10/313. 12
