@@ -129,6 +129,10 @@ window.SubscriptionsManager = (function () {
       keyword,
       keyword_cn: keywordCn,
       query: query || keyword,
+      embedding_cache:
+        item.embedding_cache && typeof item.embedding_cache === 'object'
+          ? cloneDeep(item.embedding_cache)
+          : undefined,
     };
   };
 
@@ -169,6 +173,10 @@ window.SubscriptionsManager = (function () {
       enabled: item.enabled !== false,
       source: normalizeText(item.source || 'manual'),
       note: normalizeText(item.note || ''),
+      embedding_cache:
+        item.embedding_cache && typeof item.embedding_cache === 'object'
+          ? cloneDeep(item.embedding_cache)
+          : undefined,
     };
   };
 
@@ -315,7 +323,7 @@ window.SubscriptionsManager = (function () {
           return null;
         }
 
-        return {
+        const result = {
           tag,
           description,
           enabled,
@@ -323,6 +331,10 @@ window.SubscriptionsManager = (function () {
           intent_queries: normalizedIntentQueries,
           updated_at: normalizeText(p.updated_at) || new Date().toISOString(),
         };
+        if ('paused' in p) {
+          result.paused = !!p.paused;
+        }
+        return result;
       })
       .filter(Boolean);
   };
