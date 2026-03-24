@@ -1,0 +1,766 @@
+Title: End-to-End Multi-Task Learning for Adjustable Joint Noise Reduction and Hearing Loss Compensation
+
+URL Source: https://arxiv.org/pdf/2603.20387v1
+
+Published Time: Tue, 24 Mar 2026 00:08:34 GMT
+
+Number of Pages: 13
+
+Markdown Content:
+> SUBMITTED TO IEEE TRANSACTIONS ON AUDIO, SPEECH, AND LANGUAGE PROCESSING 1
+
+# End-to-End Multi-Task Learning for Adjustable Joint Noise Reduction and Hearing Loss Compensation 
+
+Philippe Gonzalez , Vera Margrethe Frederiksen , Torsten Dau , Tobias May 
+
+Abstract —A multi-task learning framework is proposed for optimizing a single deep neural network (DNN) for joint noise reduction (NR) and hearing loss compensation (HLC). A distinct training objective is defined for each task, and the DNN predicts two time-frequency masks. During inference, the amounts of NR and HLC can be adjusted independently by exponentiating each mask before combining them. In contrast to recent approaches that rely on training an auditory-model emulator to define a differentiable training objective, we propose an auditory model that is inherently differentiable, thus allowing end-to-end optimization. The audiogram is provided as an input to the DNN, thereby enabling listener-specific personalization without the need for retraining. Results show that the proposed approach not only allows adjusting the amounts of NR and HLC individually, but also improves objective metrics compared to optimizing a single training objective. It also outperforms a cascade of two DNNs that were separately trained for NR and HLC, and shows competitive HLC performance compared to a traditional hearing-aid prescription. To the best of our knowledge, this is the first study that uses an auditory model to train a single DNN for both NR and HLC across a wide range of listener profiles. 
+
+Index Terms —Differentiable auditory model, multi-task learn-ing, noise reduction, hearing loss compensation 
+
+I. I NTRODUCTION 
+
+# HEARING impairment affects millions of people world-wide and has major negative consequences for social interaction, cognitive function, and overall quality of life [1]. Mild to moderate sensorineural hearing loss is typically treated with hearing aids, which aim to improve audibility and listening comfort through noise reduction (NR) and hearing loss compensation (HLC) algorithms. Although these algorithms can be effective, hearing impaired (HI) listeners often continue to report difficulties understanding speech in complex acoustic environments, even when wearing hearing aids. Moreover, the typical signal processing building blocks used in hearing aids, such as beamforming, NR, and amplification, are often designed and optimized independently [2]. In contrast, deep neural networks (DNNs) can jointly model multiple signal processing stages and may surpass traditional approaches by learning complex nonlinear relationships between noisy speech, listener profiles, and optimal NR and HLC strategies. In recent years, DNNs have been applied to speech en-hancement and NR successfully [3], [4]. These systems are typically trained by generating noisy speech mixtures from clean speech utterances and noise segments. As a result, the clean speech ground-truth target is directly available during 
+
+The authors are with the Department of Health Technology, Technical University of Denmark, 2800 Lyngby, Denmark (e-mail: phigon@dtu.dk; vmbfr@dtu.dk; tdau@dtu.dk; tobmay@dtu.dk). 
+
+training, making it straightforward to define a training objective. In contrast, DNN-based HLC remains largely unexplored and is considerably more challenging due to the absence of an obvious ground-truth target. The recent Clarity Enhancement Challenge [5] addressed this issue by requiring submitted systems to perform joint NR and HLC. The systems were then evaluated subjectively by a panel of HI listeners. Despite this effort, most submissions focused primarily on developing strong NR systems and combined them with generic HLC strategies such as NAL-R and dynamic range compression. This underlines the current lack of DNN-based HLC solutions that can outperform conventional hearing-aid prescriptions. One way to train a DNN for HLC is to minimize the difference between the outputs of a normal hearing (NH) auditory model and an HI auditory model. More specifically, the NH auditory model provides a physiologically grounded computational target, and the DNN is tasked with processing the input signal such that the output of the HI auditory model matches this target. However, off-the-shelf auditory models are not well suited to this application, since they are nondifferentiable and thus prevent gradients from being backpropagated to update the DNN parameters. Additionally, they operate at very high sampling rates and involve multiple processing stages, which makes them computationally expen-sive. To address this limitation, recent studies have trained auxiliary DNNs to approximate nondifferentiable models of the auditory periphery [6], [7], [8]. These auditory-model emulators were then used as proxies for defining differentiable training objectives [9], [10], [11], [12], [13], [14]. However, this approach requires training an additional DNN. As a result, it becomes difficult to investigate the effect of individual auditory model parameters on HLC performance, since any update to the auditory model requires retraining the emulator. Moreover, most studies have trained both the auditory-model emulator and the HLC system for individual listener profiles. This limits practical applicability, since training two DNNs for each hearing-aid user is time-consuming. An alternative approach is to design auditory models that are inherently differentiable. Such models can be integrated directly into the optimization framework of the HLC algorithm, thus enabling end-to-end training. This makes it easier to investigate which auditory model stages are essential for delivering perceptual benefits, since no additional emulator needs to be retrained whenever the auditory model is modified. Previous work has shown that HLC algorithms trained in this way [15], [16], [17] can yield superior objective metrics compared to traditional hearing-aid prescriptions, both in quiet [15] and in noise [16]. However, these studies trained systems for individual  
+
+> arXiv:2603.20387v1 [eess.AS] 20 Mar 2026 SUBMITTED TO IEEE TRANSACTIONS ON AUDIO, SPEECH, AND LANGUAGE PROCESSING 2
+
+listener profiles, and it therefore remains unclear whether the results generalize to systems trained for a broad range of HI listeners. In addition, they used relatively simple learning-based HLC algorithms with few trainable parameters, such as fixed banks of finite impulse response (FIR) filters with learnable gains. To provide benefits across a wide range of HI listeners, deeper neural networks may be required, yet such models remain largely unexplored for end-to-end HLC learning. A small number of studies have proposed solutions that can be personalized without training the HLC system, or an auditory-model emulator, separately for each listener profile [18], [19], [20], [21]. This is typically achieved by providing the user’s audiogram as an additional input to the DNN, acknowledging that supra-threshold deficits are not taken into account by the auditory model. In [18], different HLC algorithms were trained using a differentiable implementation of the Moore, Stone, Baer, and Glasberg (MSBG) model [22], [23], [24], [25] proposed in [16]. However, joint NR and HLC was not considered. In [19], the same differentiable MSBG model was used, but separate NR and HLC stages were optimized and applied sequentially. This mirrors the typical hearing-aid processing chain, in which NR is applied before HLC. However, optimizing each task in isolation may lead to suboptimal performance or unnecessary redundancies. Since NR and HLC are both audio-to-audio tasks, internal representations learned by the DNN for one task may also benefit the other. Jointly optimizing a single DNN for both tasks may therefore be more efficient and may produce more robust internal representations [26]. In [20], [21], a single DNN was trained to perform both NR and HLC. However, the training target was clean speech processed by a traditional hearing-aid prescription, namely the FIG6 formula [27]. This approach implicitly assumes that FIG6 is the optimal HLC strategy and trains the DNN to approximate it. In contrast, training the system to restore the output of a physiologically grounded auditory model may allow the discovery of novel HLC strategies that outperform traditional prescriptions. Another limitation of previous single-DNN solutions for joint NR and HLC is that they do not allow the amount of NR or HLC to be adjusted at inference time. Studies have shown that some subpopulations of HI listeners prefer strong NR, whereas others prefer milder NR [28], [29]. More generally, users may wish to prioritize NR or HLC depending on the acoustic environment or their listening intent. For example, in very noisy environments, users may prefer strong NR, whereas in small social gatherings, HLC without NR may be more desirable. The ability to adjust the amount of NR and HLC at inference time is therefore a desirable feature in hearing aids. Previous single-DNN approaches [14], [16], [20], [21] used training objectives whose individual terms optimized both tasks simultaneously. As a consequence, it is unclear which task drives the optimization, or whether the DNN implicitly prioritizes one task over the other. One recent study addressed this issue by providing the target signal-to-noise ratio (SNR) as an additional input to the DNN [13]. However, that system could not adjust the amount of HLC and was still trained for individual listener profiles. In the present work, we propose a DNN that performs joint NR and HLC for a wide range of hearing-loss profiles. This is achieved through a multi-task learning framework and a differentiable auditory model, which together eliminate the need for an auditory-model emulator and enable end-to-end optimization. Each task is assigned a distinct training objective, and the two objectives are automatically balanced during training using an uncertainty-based weighting scheme [30]. During inference, the time-frequency masks predicted for each task are combined after being exponentiated by two independent parameters, thereby enabling adjustable NR and HLC. This represents a significant improvement over our previous study [31], in which the denoised and compensated signals were mixed in the time domain using a single parameter, and increasing the amount of NR simultaneously reduced the amount of HLC, which may undesirable for HI listeners. The user’s audiogram is provided as an input to the DNN, allowing personalization without retraining the system for each listener profile. Different objective metrics are used to compare the proposed approach with both a traditional hearing-aid prescription and a cascade of two DNNs optimized separately for each task. Code and audio examples are available online 1.II. P REVIOUS FRAMEWORKS 
+
+This section describes previous approaches for training a DNN for NR-only, HLC-only, or joint NR and HLC using auditory models. We consider a single DNN being optimized, and therefore exclude approaches where separate NR and HLC systems are trained and applied sequentially [17], [19]. Let Fθ be a DNN that takes a signal x as input and is optimized over its parameters θ to perform NR, HLC, or joint NR and HLC. Let ANH be a NH auditory model and AHI 
+
+an HI auditory model. These can be auditory models that are differentiable by design, or emulators that were previously trained to approximate nondifferentiable auditory models. AHI 
+
+is parameterized by an audiogram ∆dB that characterizes the hearing loss of a given HI listener. The audiogram ∆dB can be provided as an additional input to Fθ to enable personalization without the need for retraining for each listener profile. 
+
+A. NR-only 
+
+Figure 1a describes how ANH can be used to train Fθ for NR-only. The denoised output signal ˆy = Fθ (x) and the corresponding clean target signal y are independently processed by ANH . A loss function ℓ is then used to compare the two auditory-model outputs and optimize Fθ . The overall training objective can be expressed as 
+
+LNR = ℓ
+
+
+
+ANH 
+
+ Fθ (x), ANH (y)
+
+
+
+. (1) This is conceptually very similar to traditional speech enhance-ment, even though the vast majority of studies do not charac-terize their training objectives in terms of auditory modelling. Nevertheless, commonly used training objectives can be seen as simple implementations of ANH and ℓ, and thus technically fall into this category. A handful of speech enhancement studies have proposed more perceptually motivated training objectives similar to auditory modelling [32], [33], [34], [35].   
+
+> 1https://philgzl.com/cnrhlc SUBMITTED TO IEEE TRANSACTIONS ON AUDIO, SPEECH, AND LANGUAGE PROCESSING 3Loss DNN Clean speech NH auditory model NH auditory model Noisy speech
+> (a) NR-only HI auditory model Loss DNN NH auditory model Noisy or clean speech Audiogram
+> (b) HLC-only Loss DNN NH auditory model HI auditory model Clean speech Noisy speech Audiogram
+> (c) Joint NR and HLC Fig. 1. Traditional single-DNN frameworks for (a) NR-only, (b) HLC-only, and (c) joint NR and HLC using auditory models.
+
+B. HLC-only 
+
+Figure 1b describes how both ANH and AHI can be used to train Fθ for HLC-only. The input signal x and the compensated output signal ˆy = Fθ (x, ∆dB ) are processed by ANH and AHI ,respectively. Similar to NR-only, the two auditory-model outputs are compared using a loss function ℓ. The training objective can be expressed as 
+
+LHLC = ℓ
+
+
+
+AHI 
+
+ Fθ (x, ∆dB ), ∆dB , ANH (x)
+
+
+
+. (2) This effectively trains Fθ to process the input signal x such that the output of the HI auditory model AHI is restored to that of the NH auditory model ANH .Previous studies falling in this category can be split into two groups: those that have used differentiable auditory models for ANH and AHI [15], [18], and those that have trained emulators beforehand to approximate nondifferentiable models of the auditory periphery [9], [10], [11], [12], [14]. They can be further categorized based on whether Fθ takes the audiogram ∆dB as an additional input [11], [18], allowing personalization without retraining, or not [9], [10], [12], [14], [15]. When Fθ does not take ∆dB as an input, a separate DNN must be trained for each listener profile. Note that in [11], even though Fθ took ∆dB as an input, the auditory-model emulator AHI was trained for individual listener profiles using transfer learning. The input signal x can be clean [9], [10], [11], [12], [15], [18] or noisy [14]. Studies training with clean speech and evaluating in noisy conditions have shown that the system can restore the auditory model response to the unprocessed noisy speech [10], [11], [12]. This suggests that the system learns to amplify all input sounds and does not perform zero-shot denoising, despite only seeing clean speech during training. Therefore, it may be preferable to include noisy speech during training to diversify the observed acoustic conditions and further improve the performance in noise [14]. 
+
+C. Joint NR and HLC 
+
+Figure 1c describes how Fθ can be trained for joint NR and HLC. This is similar to HLC-only, except that the input signal x
+
+to Fθ is noisy speech, and ANH processes the corresponding clean speech y instead of x. The training objective is 
+
+LNRHLC = ℓ
+
+
+
+AHI 
+
+ Fθ (x, ∆dB ), ∆dB , ANH (y)
+
+
+
+. (3) This approach was adopted by two studies [14], [16]. It results in a single DNN performing both NR and HLC simultaneously, which may be more efficient compared to designing two systems independently and applying them sequentially. However, this comes at the cost of flexibility, since the amount of NR and HLC cannot be independently adjusted. Moreover, since both tasks are optimized through the same training objective, it is unclear which task is driving the optimization, and whether the DNN favors one over the other. Additionally, these studies in fact did not provide the audiogram ∆dB as an input to Fθ , and thus trained a separate DNN for each listener profile. Therefore, it remains unclear whether a single DNN can restore the output of an auditory model across a wide range of listeners while simultaneously providing NR. III. P ROPOSED MULTI -TASK FRAMEWORK 
+
+To overcome the limitations of previous single-DNN approaches for joint NR and HLC, we propose a multi-task learning framework illustrated in Fig. 2a. In contrast to previous methods where a single output is produced, the DNN Fθ is tasked with producing two separate outputs: a denoised signal ˆyNR and a compensated signal ˆyHLC ,
+
+Fθ (x, ∆dB ) = (ˆ yNR , ˆyHLC ). (4) This allows defining distinct training objectives for NR and HLC, which in turn allows balancing the two tasks during training. More specifically, we use the same training objectives as in (1) and (2), 
+
+LNR = ℓ ANH (ˆ yNR ), ANH (y), (5) 
+
+LHLC = ℓ AHI (ˆ yHLC , ∆dB ), ANH (x). (6) In typical multi-task learning, the individual training objectives are combined using a weighted sum. The weights remain fixed during training, and are commonly selected via a grid search. However, grid searches can be time-consuming, and the results can be sensitive to the choice of weights. Moreover, the optimal weights may change during training, and thus using SUBMITTED TO IEEE TRANSACTIONS ON AUDIO, SPEECH, AND LANGUAGE PROCESSING 4Noisy speech Loss DNN HI auditory model Clean speech Audiogram NH auditory model Loss   
+
+> (a) Training Mask combination DNN DNN backbone iSTFT STFT
+> (b) Inference Fig. 2. Proposed multi-task framework for adjustable joint NR and HLC using a single DNN and two auditory models. During training (a), the DNN predicts both a denoised and a compensated signal, and a distinct training objective is defined for each output. During inference (b), the amount of NR and HLC can be adjusted independently by exponentiating each predicted time-frequency mask.
+
+fixed weights may not be ideal. One solution to automatically adjust the weights during training consists in modelling the target observations as isotropic Gaussian distributions whose parameters are predicted by the DNN, and maximizing the corresponding log-likelihood [30]. In practice, this reduces to optimizing two additional parameters uNR = log σ2NR 
+
+and uHLC = log σ2HLC along with the DNN parameters θ,where σNR > 0 and σHLC > 0 represent the homoscedastic uncertainty related to each task. The final training objective is 
+
+LCNRHLC = LNR 
+
+euNR + uNR + LHLC 
+
+euHLC + uHLC . (7) The uncertainties σNR and σHLC are inherent to each task. They are not data-dependent, nor indicative of the DNN convergence. Therefore, each loss term is weighted down if the related uncertainty is high. Concurrently, these uncertainties are encouraged to be as small as possible, since their logarithms appear as additive terms penalizing the final loss. To combine the two tasks and define a single output signal during inference, we consider a DNN backbone predicting two real- or complex-valued masks MNR and MHLC in the time-frequency domain, 
+
+ˆYNR = MNR ⊙ X, ˆYHLC = MHLC ⊙ X, (8) where X, ˆYNR , and ˆYHLC are the short-time Fourier transforms (STFTs) of x, ˆyNR , and ˆyHLC , respectively, and ⊙ is the element-wise multiplication. During inference, two parame-ters αNR ∈ [0 , 1] and αHLC ∈ [0 , 1] are used to exponentiate the predicted masks independently. For each time-frequency unit (t, f ), the exponentiated masks ˜MNR and ˜MHLC are computed as 
+
+˜M t,f  
+
+> NR
+
+=  M t,f 
+
+> NR
+
+αNR 
+
+, ˜M t,f  
+
+> HLC
+
+=  M t,f 
+
+> HLC
+
+αHLC 
+
+. (9) This exponentiation linearly scales the magnitude in dB for real-valued masks, and both the magnitude and phase for complex-valued masks. The two exponentiated masks are then combined by multiplying them together element-wise. To allow gradual adjustment of the amount of NR for noise-only time-frequency units where the predicted mask MNR may be close to zero, the magnitude of the combined mask is thresholded using an αNR -dependent minimum gain. Limiting the attenuation also allows an optimal balance between speech intelligibility and perceived quality [36], [37], [38]. The final mask M is computed for each time-frequency unit (t, f ) as 
+
+|M t,f | = max  | ˜M t,f 
+
+> NR
+
+|| ˜M t,f 
+
+> HLC
+
+|, G min αNR , (10) 
+
+∠M t,f = ∠ ˜M t,f  
+
+> NR
+
++ ∠ ˜M t,f 
+
+> HLC
+
+, (11) 
+
+M t,f = |M t,f |ej∠M t,f 
+
+, (12) where Gmin is the desired minimum gain when αNR = 1 . The amplification can also be limited using a maximum gain Gmax .However, we do not consider this in the present study. The mask M is then applied to the noisy STFT X,
+
+ˆY = M ⊙ X. (13) The final time-domain output ˆy is obtained by comput-ing the inverse short-time Fourier transform (iSTFT) of ˆY .When αNR = αHLC = 1 , maximum NR and HLC are applied. Conversely, when αNR = αHLC = 0 , no NR or HLC is applied, and the output ˆy is identical to the input x.IV. E XPERIMENTAL SETUP 
+
+A. DNN backbone and STFT parameters 
+
+The proposed DNN backbone is based on the band-split recurrent neural network (BSRNN) [39]. BSRNN achieves state-of-the-art results in speech enhancement [40], [41] and offers an excellent balance between computational complexity and performance [42]. A BSRNN-based system also achieved first place in the recent URGENT 2025 Speech Enhancement Challenge [43]. Figure 3 provides an overview of the DNN backbone architecture. The real and imaginary parts of the input STFT X
+
+are stacked along the channel dimension to form an input tensor of shape (2 , F, T ), where F denotes the number of frequency bins and T the number of time frames. The band-split module projects K frequency bands with increasing width {Gi}Ki=1 , where PKi=1 Gi = F , onto a fixed number of channels N using band-specific fully connected (FC) layers. Each FC layer is preceded by a global normalization layer (GLN) [44] aggregating statistics over all channels, time frames, and frequency bins within the current band [45]. Interleaved sequence modelling across time frames and frequency bands is performed using residual bidirectional long short-term memory (LSTM) blocks in L layers. Each LSTM is preceded by a GLN and followed by an FC layer. If the DNN performs HLC, features are extracted from the audiogram using band-specific SUBMITTED TO IEEE TRANSACTIONS ON AUDIO, SPEECH, AND LANGUAGE PROCESSING 5Unbind Band-merging Concat Norm FC Tanh FC GLU Chunk Band-splitting Stack Norm FC Norm Time LSTM FC Norm Band LSTM FC FC Tanh Chunk Interleaved sequence modelling            
+
+> Fig. 3. BSRNN-based DNN backbone. The band-split module projects K
+> frequency bands with increasing width {Gi}Ki=1 onto a fixed number of channels N. Interleaved sequence modelling across time and bands is performed using residual LSTM blocks in Llayers. Features extracted from the audiogram are included in each layer using FiLM. The band-merging module projects each band back to the original frequency resolution and outputs real- or complex-valued masks MNR and MHLC .
+
+FC layers and a Tanh activation function, and are included before each sequence modelling layer using feature-wise linear modulation (FiLM) [46]. The band-merging module projects each frequency band back to the original STFT resolution using band-specific multilayer perceptrons (MLPs). Each MLP is preceded by a GLN aggregating statistics over all channels and time frames. Each MLP uses a Tanh activation function after each hidden layer, and a gated linear unit (GLU) [47] after the output layer. The number of output channels in each MLP is doubled when predicting complex-valued masks, and further doubled when predicting separate masks MNR and MHLC for adjustable NR and HLC as described in Fig. 2. The STFT uses a Hann window, a frame length of 32 ms ,and a hop size of 16 ms . We use K = 32 frequency bands with bounds uniformly spaced on a mel scale. The number of channels is N = 64 , the number of layers is L = 6 , and the number of hidden channels in each LSTM direction is 2N =128 . Each MLP in the band-merging module has one hidden layer with 4N = 256 channels. The total number of trainable parameters ranges from 3.3 M to 3.7 M , depending on whether the DNN predicts real- or complex-valued masks, takes the audiogram as additional input for HLC, and predicts one or two masks. Note that due to the normalization layers and the bidirectional LSTMs, the DNN is noncausal. Moreover, the STFT and its inverse have an algorithmic latency equal to the frame length, i.e. 32 ms , which is too high for hearing-aid applications. We leave the adaptation of the proposed system to online low-latency processing for future work. 
+
+B. Differentiable auditory model 
+
+The differentiable auditory model used in this study is a simplified auditory front-end inspired by established models of auditory processing and masking [48], [49], [50], [51]. In particular, it follows the general structure of peripheral filtering, envelope extraction, and compressive neural representation that has been used successfully to account for a range of Audiogram DRNL filterbank IHC Adaptation   
+
+> Outer-middle ear filter Input signal Interpolation + 2/3–1/3 rule
+> (a) Auditory model stages. Broken-stick Gammatone Low-pass Gammatone Stapes velocity Basilar membrane velocity Linear gain Gammatone Low-pass (b) Single DRNL filter. Fig. 4. Overview of the proposed differentiable auditory model.
+
+psychoacoustic data. At the same time, the model is deliberately simplified to make it suitable for end-to-end optimization: all stages are differentiable, the computational complexity is reduced, and only the stages considered most relevant for the present joint NR and HLC objective are retained. Figure 4a gives an overview of the resulting model. 
+
+1) Outer-middle ear filter [52]: The first stage is a 512-tap FIR filter modelling the combined transfer function of the outer and middle ear, transforming headphone-delivered sound pressure into stapes velocity at the cochlear base. This stage can be implemented directly in a differentiable way without the need for approximation. 
+
+2) Dual-resonance nonlinear (DRNL) filterbank [52]: The cochlear stage is implemented using a bank of NCF = 31 
+
+DRNL filters with center frequencies evenly spaced by one unit on the equivalent rectangular bandwidth (ERB)-rate scale between 80 and 7643 Hz . This stage models the frequency selectivity of the basilar membrane along the cochlea as well as the level-dependent amplification provided by outer hair cells (OHCs). Figure 4b shows the structure of a single DRNL filter. Each filter consists of a linear and a nonlinear path in parallel. The linear path includes a linear gain, a gammatone filter, and a low-pass Butterworth filter. The nonlinear path consists of a first gammatone filter, a broken-stick nonlinearity, a second gammatone filter, and a low-pass Butterworth filter. The broken-stick nonlinearity is defined as 
+
+h = sgn g · min( an|g|∆n
+
+> OHC
+
+, b n|g|cn ), (14) where g and h are the input and output signals, respectively, 
+
+n ∈ { 1, . . . , N CF } is the DRNL filter index, an, bn, and cn
+
+are parameters controlling the shape of the nonlinearity, and 
+
+∆n 
+
+> OHC
+
+is the OHC-induced hearing loss in linear scale. The outputs of the linear and nonlinear paths are summed to form the DRNL output. The complete set of DRNL parameters is taken from rom [52]. To accelerate training, the gammatone and low-pass filters are implemented as 512-tap FIR filters SUBMITTED TO IEEE TRANSACTIONS ON AUDIO, SPEECH, AND LANGUAGE PROCESSING 6
+
+rather than infinite impulse response (IIR) filters. The broken-stick nonlinearity is differentiable everywhere except at g = 0 ,and therefore |g| is thresholded using a very small value. 
+
+3) Inner hair cell (IHC) transduction: The next stage models the transformation from basilar-membrane vibrations to a neural representation by the IHCs. In the present model, this stage is implemented as half-wave rectification followed by listener-specific gain adjustment. In contrast to more detailed peripheral models, no additional low-pass filtering is applied here. Preliminary experiments showed that including such a low-pass stage tended to produce artifacts in the time-frequency masks estimated by the DNN. The IHC-induced hearing loss for the n-th center frequency, denoted by ∆n
+
+> IHC
+
+, is applied as a gain function at the output of this stage. 
+
+4) Compression stage: Classical auditory models for mask-ing and modulation processing often include a cascade of adaptation loops to account for neural adaptation and dynamic compression [48]. However, the recursive nature of the adapta-tion loops makes it difficult to implement them in an efficient and differentiable way. Therefore, in the present work, this stage is replaced by an instantaneous static log-compression, 
+
+v = log(1 + u/u 0), (15) where u and v are the input and output signals, respectively, and u0 = 1 · 10 −5 for all center frequencies. In the original auditory model from [49], the compressed output is followed by a modulation filterbank that represents modulation-frequency selective processing. Preliminary ex-periments indicated that including a modulation filterbank degraded NR performance, presumably because it removes signal components outside the modulation-frequency range that are nevertheless informative for separating speech from noise. Therefore, in the present study, such a stage is omitted. The OHC- and IHC-induced hearing losses ∆n 
+
+> OHC
+
+and ∆n
+
+> IHC
+
+are estimated by first linearly interpolating the audiogram thresholds in dB ∆dB from the audiometric frequencies to the DRNL center frequencies on a logarithmic frequency axis. Following previous studies [53], [54], [55], each interpolated threshold ∆n, dB interp . is then split into OHC- and IHC-induced hearing losses using the following 2/3–1/3 rule: 
+
+∆n, dB OHC = min 
+
+ 23 ∆n, dB interp ., ∆n, dB OHC ,max 
+
+
+
+, (16) 
+
+∆n, dB IHC = ∆ n, dB interp . − ∆n, dB OHC , (17) where ∆n, dB OHC ,max denotes the maximum OHC-induced hearing loss that can be represented by the n-th DRNL filter. 
+
+C. Datasets 
+
+DNNs are trained with noisy and reverberant speech sampled at 16 kHz . Each acoustic scene is simulated by placing one speech source and one to three noise sources in the same room. Clean speech utterances are selected from DNS5 [56], LibriSpeech [57], MLS [58], VCTK [59], and EARS [60]. Noise segments are selected from DNS5 [56], WHAM! [61], FSD50K [62], and FMA [63]. The total amount of available speech and noise is 1713 and 541 h , respectively. The room impulse responses (RIRs) are simulated using a fast random approximation of the image-source method proposed in [64]. The room size is uniformly selected between 3 × 3 × 2.5 and 10 × 10 × 4 m 3. The reverberation time T60 is uniformly selected between 0.1 and 0.7 s . The level of each reverberant noise source is uniformly selected within a 10 dB range to randomize the relative level between noise sources. The SNR between the reverberant speech and the sum of the reverberant noise sources is uniformly selected between −5 and 15 dB .The level of the total reverberant mixture is uniformly selected between 65 and 85 dB SPL using the same convention as in the Auditory Modelling Toolbox [65], [66], i.e. a root mean square (RMS) value of 1 corresponds to 93.98 dB SPL. When training for NR, early speech reflections are included in the target signal y using a reflection boundary of 50 ms as suggested in previous studies [67], [68]. Therefore, systems trained for NR also perform dereverberation. Acoustic scenes are generated on-the-fly during training to maximize data diversity and improve generalization [69], [70]. For testing, 1000 scenes are generated using speech utterances, noise segments, and RIRs from unseen datasets, namely Clarity [71], TUT [72], and DNS5 [56], respectively. All the utilized datasets are publicly available. 
+
+D. Training 
+
+All DNNs are trained with 4-s-long scenes for 200 epochs, with one epoch being 10 000 scenes. We use a batch size of 32 and the Adam optimizer [73] with an initial learning rate of 1 · 10 −3. The learning rate is multiplied by 0.99 after each epoch. Gradients are clipped with a maximum L2 norm of 5. Training takes approximately one day on a single 40 GB A100 graphics processing unit (GPU). 
+
+E. Audiograms 
+
+We consider the set of 10 standard audiograms from [74], which we extend with the flat NH audiogram for which all thresholds are equal to 0 dB . When training for HLC, an audiogram ∆dB 
+
+is uniformly selected from the 11 profiles for each training scene. To increase the diversity of audiograms observed by the DNN during training, a uniformly distributed random jitter between −10 and 10 dB is applied to each threshold, after which thresholds are constrained to the range [0, 105] dB . During testing, each scene is processed for each of the 11 profiles. Audiometric frequencies are fixed to 250 , 375 , 500 , 750 , 1000 ,1500 , 2000 , 3000 , 4000 and 6000 Hz . Each threshold in dB is divided by 100 at the input of the DNN to normalize the input scale. Only the thresholds are provided as input to the DNN, i.e. the frequencies are discarded, although including the frequencies may allow the DNN to support audiograms measured at arbitrary frequencies. 
+
+F. Objective metrics 
+
+Systems are evaluated for NR and joint NR and HLC separately. NR performance is evaluated using perceptual evaluation of speech quality (PESQ) [75], extended short-term objective intelligibility (ESTOI) [76] and signal-to-distortion ratio (SDR). When reporting PESQ, ESTOI, and SDR, a NH audiogram is provided to systems capable of performing HLC. Joint NR SUBMITTED TO IEEE TRANSACTIONS ON AUDIO, SPEECH, AND LANGUAGE PROCESSING 7
+
+and HLC performance is evaluated using hearing-aid speech perception index (HASPI) [77] and hearing-aid speech quality index (HASQI) [78]. When reporting HASPI and HASQI, each test scene is processed for each of the 11 standard audiograms, and results are averaged over all audiograms unless stated otherwise. For all metrics, the reference signal y only includes the early speech reflections as described in Section IV-C . We use the HASPI and HASQI implementations from the Clarity Challenge toolkit 2.To evaluate the ability of the system to restore the output of the HI auditory model AHI to that of the NH auditory model ANH , we also report the normalized root mean square error (NRMSE) between the NH population response rp to the reference speech y and the HI population response ˆrp to the processed speech ˆy, similar to [10], [11], [12], [13], 
+
+rm 
+
+> p
+
+=
+
+> NCF
+
+X
+
+> n=1
+
+An,m  
+
+> NH
+
+(y), ˆrm 
+
+> p
+
+=
+
+> NCF
+
+X
+
+> n=1
+
+An,m  
+
+> HI
+
+(ˆ y, ∆dB ), (18) 
+
+NRMSE = 1max   
+
+> m∈{ 1,...,M }
+
+rm
+
+> p
+
+vuut 1
+
+M
+
+> M
+
+X
+
+> m=1
+
+ rm 
+
+> p
+
+− ˆrm
+
+> p
+
+2, (19) where m is the time sample index and M is the total number of time samples. Similar to HASPI and HASQI, NRMSE results are averaged over all 11 standard audiograms. 
+
+G. Compared systems 
+
+The following BSRNN-based DNNs are trained using the differentiable auditory model proposed in Section IV-B:  
+
+> •
+
+DNN-NR : baseline predicting a single mask and trained for NR-only using (1) as the training objective.  
+
+> •
+
+DNN-HLC : baseline predicting a single mask and trained for HLC-only using (2) as the training objective.  
+
+> •
+
+DNN-NRHLC : baseline predicting a single mask and trained for joint NR and HLC using (3) as the training objective.  
+
+> •
+
+DNN-CNRHLC : proposed solution predicting two masks and trained for adjustable joint NR and HLC using (7) as the training objective. An initial experiment compares these systems when predicting either real- or complex-valued masks and using either the mean squared error (MSE) or the mean absolute error (MAE) as the loss function ℓ. We then investigate adjusting the amount of NR and HLC during inference by varying αNR and αHLC 
+
+for DNN-CNRHLC as described in Section III. Finally, the selected systems are compared against the traditional hearing-aid prescription NAL-R [79]. We also investigate applying systems sequentially. For example, DNN-NR + DNN-HLC denotes a system that processes the noisy input signal with DNN-NR for NR first, and then processes the denoised signal with DNN-HLC for HLC. Similarly, DNN-NR + NAL-R denotes a system that chains DNN-NR for NR and NAL-R for HLC. An additional NR-only baseline DNN-SDR is trained with SDR as the training objective, as commonly done in speech enhancement. We use SDR instead of scale-invariant signal-to-distortion ratio (SI-SDR) [80] such that the DNN preserves the              
+
+> 2https://github.com/claritychallenge/clarity 0
+> 1
+> 2
+> PESQ
+> Real mask MSE loss
+> Complex mask MSE loss
+> Real mask MAE loss
+> Complex mask MAE loss
+> 0.00
+> 0.25
+> 0.50
+> 0.75
+> ESTOI
+> 0
+> 5
+> 10
+> SDR
+> 0.00
+> 0.25
+> 0.50
+> 0.75
+> HASPI
+> Noisy DNN-NR DNN-HLC DNN-NRHLC DNN-CNRHLC
+> 0.0
+> 0.2
+> 0.4
+> HASQI
+> Fig. 5. Objective metrics for real- or complex-valued masks and MSE or MAE loss. For PESQ, ESTOI, and SNR, a NH audiogram is provided to systems providing HLC. For HASPI and HASQI, results are averaged over all audiograms. Both αNR and αHLC are set to 1 for DNN-CNRHLC.
+
+level of the target signal as in previous studies [17], [19], [81]. The magnitude of the predicted mask is thresholded using Gmin 
+
+for all DNNs, except DNN-CNRHLC for which the combined mask is thresholded using an αNR -dependent minimum gain as in (10) . Following previous studies [37], [38], we set Gmin to −25 dB . We use the NAL-R implementation from the Clarity Challenge toolkit 3.V. R ESULTS 
+
+A. Real vs. complex masks and MSE vs. MAE loss 
+
+Figure 5 shows the average objective metrics for the systems trained with the proposed differentiable auditory model when using either real- or complex-valued masks and either MSE or MAE as the loss function ℓ. For DNN-CNRHLC, both αNR 
+
+and αHLC are set to 1. Firstly, DNN-NRHLC and DNN-CNRHLC, which are trained for both NR and HLC, show similar NR performance to DNN-NR, which is trained for NR-only, as reflected by PESQ, ESTOI, and SDR. This suggests 
+
+> 3https://github.com/claritychallenge/clarity
+
+SUBMITTED TO IEEE TRANSACTIONS ON AUDIO, SPEECH, AND LANGUAGE PROCESSING 80.0 0.25 0.5 0.75 1.0 
+
+αHLC                     
+
+> 0.0
+> 0.25
+> 0.5
+> 0.75
+> 1.0
+> αNR
+> 1.24 1.24 1.24 1.24 1.24
+> 1.48 1.48 1.48 1.48 1.48
+> 1.81 1.81 1.82 1.82 1.82
+> 2.12 2.12 2.12 2.13 2.13
+> 2.28 2.28 2.28 2.28 2.28
+
+PESQ     
+
+> 0.0 0.25 0.5 0.75 1.0
+
+αHLC                     
+
+> 0.60 0.60 0.60 0.60 0.60
+> 0.68 0.68 0.68 0.68 0.68
+> 0.74 0.74 0.74 0.74 0.74
+> 0.79 0.79 0.79 0.79 0.79
+> 0.84 0.84 0.84 0.84 0.84
+
+ESTOI     
+
+> 0.0 0.25 0.5 0.75 1.0
+
+αHLC                     
+
+> 3.04 3.01 2.98 2.96 2.94
+> 7.70 7.70 7.70 7.69 7.69
+> 11.30 11.30 11.29 11.29 11.28
+> 13.06 13.05 13.05 13.03 13.02
+> 13.48 13.47 13.46 13.45 13.43
+
+SDR     
+
+> 0.0 0.25 0.5 0.75 1.0
+
+αHLC                     
+
+> 0.46 0.51 0.59 0.71 0.82
+> 0.51 0.56 0.66 0.79 0.91
+> 0.51 0.56 0.65 0.78 0.91
+> 0.51 0.55 0.64 0.77 0.89
+> 0.50 0.54 0.62 0.75 0.87
+
+HASPI     
+
+> 0.0 0.25 0.5 0.75 1.0
+
+αHLC                     
+
+> 0.20 0.23 0.30 0.36 0.34
+> 0.23 0.28 0.36 0.43 0.41
+> 0.25 0.29 0.37 0.46 0.45
+> 0.25 0.29 0.37 0.46 0.46
+> 0.24 0.28 0.36 0.45 0.46
+> Phantom
+
+HASQI 
+
+Fig. 6. Objective metrics as a function of αNR and αHLC . For PESQ, ESTOI, and SNR, a NH audiogram is provided to the DNN. For HASPI and HASQI, results are averaged over all audiograms. 0.0                     
+
+> 0.25
+> 0.5
+> 0.75
+> 1.0
+> αNR
+> 0.90 0.90 0.90 0.90 0.90
+> 0.95 0.95 0.95 0.95 0.95
+> 0.97 0.97 0.97 0.97 0.97
+> 0.98 0.98 0.98 0.98 0.98
+> 0.98 0.98 0.98 0.98 0.98
+
+HASPI                     
+
+> 0.32 0.32 0.32 0.32 0.32
+> 0.41 0.41 0.41 0.41 0.41
+> 0.48 0.48 0.48 0.48 0.48
+> 0.51 0.51 0.51 0.51 0.51
+> 0.51 0.51 0.51 0.51 0.51
+> NH
+
+HASQI                                                                                                                             
+
+> 0.0
+> 0.25
+> 0.5
+> 0.75
+> 1.0
+> αNR
+> 0.84 0.87 0.89 0.90 0.89
+> 0.90 0.93 0.95 0.96 0.97
+> 0.92 0.94 0.95 0.97 0.97
+> 0.92 0.93 0.95 0.96 0.97
+> 0.91 0.92 0.94 0.95 0.96
+> 0.36 0.37 0.36 0.33 0.31
+> 0.45 0.47 0.49 0.47 0.43
+> 0.48 0.51 0.53 0.53 0.50
+> 0.49 0.52 0.54 0.55 0.53
+> 0.47 0.50 0.52 0.53 0.52
+> N1
+> 0.0
+> 0.25
+> 0.5
+> 0.75
+> 1.0
+> αNR
+> 0.59 0.65 0.72 0.81 0.85
+> 0.64 0.74 0.83 0.91 0.95
+> 0.63 0.72 0.80 0.89 0.95
+> 0.60 0.69 0.77 0.85 0.93
+> 0.57 0.66 0.74 0.83 0.91
+> 0.26 0.31 0.36 0.37 0.34
+> 0.27 0.34 0.41 0.44 0.41
+> 0.26 0.33 0.41 0.46 0.44
+> 0.25 0.31 0.39 0.45 0.45
+> 0.24 0.30 0.37 0.43 0.44
+> N3
+> 0.0
+> 0.25
+> 0.5
+> 0.75
+> 1.0
+> αNR
+> 0.01 0.02 0.24 0.56 0.76
+> 0.01 0.02 0.23 0.63 0.86
+> 0.01 0.02 0.22 0.60 0.85
+> 0.01 0.02 0.21 0.57 0.82
+> 0.01 0.02 0.21 0.55 0.80
+> 0.00 0.02 0.24 0.44 0.39
+> 0.00 0.02 0.24 0.45 0.41
+> 0.00 0.02 0.24 0.45 0.41
+> 0.00 0.02 0.23 0.44 0.41
+> 0.00 0.02 0.23 0.44 0.40
+> N6
+> 0.0 0.25 0.5 0.75 1.0
+
+αHLC                         
+
+> 0.0
+> 0.25
+> 0.5
+> 0.75
+> 1.0
+> αNR
+> 0.63 0.64 0.64 0.67 0.78
+> 0.73 0.77 0.80 0.82 0.90
+> 0.76 0.79 0.81 0.84 0.91
+> 0.75 0.78 0.80 0.83 0.90
+> 0.73 0.75 0.78 0.81 0.88
+> 0.0 0.25 0.5 0.75 1.0
+
+αHLC                     
+
+> 0.29 0.32 0.34 0.34 0.28
+> 0.34 0.39 0.44 0.46 0.40
+> 0.35 0.40 0.46 0.49 0.45
+> 0.35 0.39 0.45 0.49 0.47
+> 0.33 0.37 0.43 0.47 0.47
+> S2
+
+Fig. 7. HASPI and HASQI as a function of αNR and αHLC for the NH audiogram and HI audiograms N1, N3, N6, and S2. 
+
+that the same system can be optimized for both NR and HLC without compromising on NR performance. We attribute this to the internal representations learned by the system being suitable for both tasks. DNN-HLC shows similar NR performance to the unprocessed noisy signal as expected, since a NH audiogram is provided to the system, and thus no HLC is applied. Note that this behavior is not explicitly enforced by the system architecture; it is a desirable byproduct of the proposed optimization framework. Secondly, DNN-NR achieves similar HASPI and HASQI to the unprocessed noisy signal, which suggests NR-only is not sufficient to improve speech intelligibility and quality for HI listeners. Providing HLC-only significantly improves both HASPI and HASQI, as shown by DNN-HLC. While performing joint NR and HLC provides optimal HASQI, it shows limited HASPI improvements compared to HLC-only, as shown by DNN-NRHLC and DNN-CNRHLC. Finally, for all tasks and all metrics, the best performance is consistently achieved when using a complex-valued mask and MAE loss, except for HASPI. Therefore, in the following sections, we use complex-valued masks and MAE loss for all DNN-based systems. 
+
+B. Influence of αNR and αHLC 
+
+Figure 6 shows the average objective metrics as a function of αNR and αHLC for DNN-CNRHLC. For the sake of clarity, 
+
+αNR and αHLC are varied between 0 and 1 with a step size of 0.25. For PESQ, ESTOI, and SDR, the results improve as αNR increases as expected. Meanwhile, they remain constant as αHLC varies, which is also expected since a NH audiogram is provided to the system, and thus there is no hearing loss to compensate for. Note that, similar to DNN-HLC in Section V-A ,this behavior is not explicitly enforced, but naturally emerges thanks to the training procedure. For HASPI, the best results are achieved for αNR = 0 .5 and αHLC = 1 , while for HASQI, they are achieved for αNR = 1 and αHLC = 1 . Therefore, in the following section, we use αNR = 0 .75 and αHLC = 1 
+
+when reporting HASPI and HASQI. Figure 7 shows the HASPI and HASQI results as a function of αNR and αHLC for specific listener profiles, namely the NH audiogram and HI audiograms N1, N3, N6, and S2. For the NH audiogram, the results remain constant as αHLC is varied, since there is no hearing loss to compensate for. For the HI audiograms, the HASPI and HASQI sensitivity to αNR 
+
+and αHLC significantly varies across profiles. While the optimal SUBMITTED TO IEEE TRANSACTIONS ON AUDIO, SPEECH, AND LANGUAGE PROCESSING 9                                                                                                     
+
+> TABLE I OBJECTIVE METRICS FOR ALL DNN-BASED SYSTEMS , NAL-R, AND VARIOUS COMBINATIONS . F OR PESQ, ESTOI, AND SNR, ANH
+> AUDIOGRAM IS PROVIDED TO SYSTEMS PROVIDING HLC. F OR HASPI AND
+> HASQI, RESULTS ARE AVERAGED OVER ALL AUDIOGRAMS .DNN-CNRHLC USES (αNR , α HLC ) = (1 ,1) FOR PESQ, ESTOI, AND
+> SNR, AND (0 .75 ,1) FOR HASPI, HASQI, AND NRMSE. Parameters (M) PESQ  ↑
+> ESTOI (%)  ↑
+> SDR  ↑
+> HASPI (%)  ↑
+> HASQI (%)  ↑
+> NRMSE (%)  ↓
+> Noisy –1.24 60.3 3.0 46.2 19.9 26.6 Noisy + NAL-R –1.24 60.2 3.0 72.5 56.4 26.6 Clean + NAL-R –4.64 100.0 ∞85.4 99.5 24.8 DNN-SDR 3.42 2.26 84.6 13.7 50.6 24.4 26.3 DNN-SDR + NAL-R 3.42 2.26 84.6 13.7 75.9 71.9 26.3 DNN-NR 3.42 2.28 83.4 13.3 49.8 23.7 26.6 DNN-NR + NAL-R 3.42 2.28 83.4 13.3 74.0 70.8 26.6 DNN-HLC 3.46 1.24 60.3 3.0 82.3 33.7 18.5 DNN-NRHLC 3.46 2.24 83.7 13.0 88.3 45.9 13.6 DNN-CNRHLC 3.73 2.28 84.4 13.4 89.0 46.4 13.4
+> DNN-NR + DNN-HLC 6.88 2.28 83.3 13.3 87.7 45.5 14.1 Values in bold indicate best performance among DNN-based systems.
+
+values for αHLC and αNR are similar across profiles, they are not exactly the same. This highlights the benefit of the ability to adjust the amount of NR and HLC at inference time, as αHLC 
+
+and αNR can be tuned for each listener without the need for retraining the system. 
+
+C. Comparison with SDR loss, NAL-R, and chained systems 
+
+Table I shows the average objective metrics for all DNN-based systems, NAL-R, and different combinations of systems applied sequentially. The proposed DNN-CNRHLC system achieves similar NR performance to DNN-SDR, as reflected by PESQ, ESTOI, and SDR, and shows the highest PESQ among all systems. This suggests that the output of the proposed differentiable auditory model is a suitable training target for NR, as it competes with the widely used SDR loss. Moreover, since DNN-CNRHLC is optimized for both NR and HLC, this also suggests that the same system can be optimized for both tasks without compromising on NR performance, which we attribute to the internal representations learned by the system being suitable for both tasks. The systems trained with the proposed differentiable au-ditory model for joint NR and HLC systems, namely DNN-NRHLC, DNN-CNRHLC, and DNN-NR + DNN-HLC, show significantly higher HASPI compared to combinations of NAL-R and NR-only systems, namely DNN-SDR + NAL-R and DNN-NR + NAL-R. In fact, they even achieve superior HASPI compared to applying NAL-R to the oracle clean speech signal (“Clean + NAL-R”). However, systems using NAL-R for HLC show substantially higher HASQI compared to other systems. This can be explained by the fact that HASQI applies NAL-R to the reference signal internally before it is compared with the processed signal, as illustrated by the near-perfect HASQI achieved by “Clean + NAL-R”. Therefore, HASQI is not suitable for evaluating novel HLC algorithms, since it implicitly assumes that NAL-R is the ideal compensation strategy. Regarding NRMSE, the systems trained with the proposed differentiable auditory model naturally achieve the best results, while NAL-R shows poor performance similar to the unprocessed noisy signal. This shows that NAL-R is not effective at restoring the auditory-model output. The adjustable system DNN-CNRHLC optimized with the proposed multi-task learning framework achieves superior results across all metrics compared to the nonadjustable system DNN-NRHLC optimized with a single training objective. This shows that the proposed approach not only allows NR and HLC to be adjusted at inference time, but also improves overall performance, while requiring only a slight increase in the number of trainable parameters. Chaining two DNNs trained for NR and HLC separately (DNN-NR + DNN-HLC) achieves similar results compared to DNN-NRHLC and DNN-CNRHLC, while doubling the number of trainable parameters. This shows that a single DNN can effectively learn both tasks jointly, and even outperform a larger system comprising two specialized blocks designed for each task separately, as commonly done in hearing-aid signal processing. 
+
+D. Example spectrograms and masks 
+
+Figure 8 shows an example of a noisy input spectrogram and a clean target spectrogram, the NR and HLC masks MNR 
+
+and MHLC predicted by DNN-CNRHLC, the resulting com-bined mask M , and the output spectrogram ˆY for listener profiles NH, N1, N2, and N3. For illustration purposes, both αNR and αHLC are set to 1, resulting in maximum NR and HLC. The NR mask MNR correctly attenuates time-frequency units dominated by noise, and preserves those with speech activity. It is also consistent across listener profiles. Note that this desirable consistency is not explicitly enforced, but results from the proposed optimization procedure. Meanwhile, the magnitude of the HLC mask MHLC is 0 dB for the NH audiogram, which is desirable since no HLC is required. It increases as the severity of the hearing loss increases, particularly at high frequencies where the hearing loss is more pronounced. Note that while MHLC shows fewer temporal fluctuations compared to MNR , it is not constant over time. This suggests that the DNN has learned to provide a dynamic compensation strategy, rather than a simple static frequency-dependent amplification. The combined mask M effectively integrates both NR and HLC tasks, as it correctly attenuates time-frequency units dominated by noise, while amplifying those with speech activity. This is because, for time-frequency units dominated by noise, the attenuation provided by the NR mask MNR is much greater than the amplification provided by the HLC mask MHLC in absolute values. In that regard, it is important to threshold the magnitude of the combined mask M with Gmin only after combining the two masks, as thresholding MNR before combining with MHLC would result in time-frequency units dominated by noise being amplified. This illustrates the benefit of designing the NR and HLC stages together, since information about the noise presence can guide the HLC strategy. SUBMITTED TO IEEE TRANSACTIONS ON AUDIO, SPEECH, AND LANGUAGE PROCESSING 10 0                          
+
+> 2
+> 4
+> 6
+> 8
+> Frequency (kHz)
+> NR mask MNR HLC mask MHLC Combined mask M
+> NH
+> Output ˆY
+> 0
+> 2
+> 4
+> 6
+> 8
+> Frequency (kHz)
+> N1
+> 0
+> 2
+> 4
+> 6
+> 8
+> Frequency (kHz)
+> N2
+> 0.0 0.5 1.0 1.5
+> Time (s)
+> 0
+> 2
+> 4
+> 6
+> 8
+> Frequency (kHz)
+> 0.0 0.5 1.0 1.5
+> Time (s)
+> 0.0 0.5 1.0 1.5
+> Time (s)
+> 0.0 0.5 1.0 1.5
+> Time (s)
+> N3
+> 50
+> 25
+> 0
+> 25
+> 50
+> 50
+> 25
+> 0
+> 25
+> 50
+> 50
+> 25
+> 0
+> 25
+> 50
+> 60
+> 40
+> 20
+> 0
+> 50
+> 25
+> 0
+> 25
+> 50
+> 50
+> 25
+> 0
+> 25
+> 50
+> 50
+> 25
+> 0
+> 25
+> 50
+> 60
+> 40
+> 20
+> 0
+> 50
+> 25
+> 0
+> 25
+> 50
+> 50
+> 25
+> 0
+> 25
+> 50
+> 50
+> 25
+> 0
+> 25
+> 50
+> 60
+> 40
+> 20
+> 0
+> 50
+> 25
+> 0
+> 25
+> 50
+> 50
+> 25
+> 0
+> 25
+> 50
+> 50
+> 25
+> 0
+> 25
+> 50
+> 60
+> 40
+> 20
+> 0
+> 0.0 0.5 1.0 1.5
+> 0
+> 2
+> 4
+> 6
+> 8
+> Frequency (kHz)
+> Noisy input X
+> 0.0 0.5 1.0 1.5
+> Clean target Y
+> 60
+> 40
+> 20
+> 0
+> 60
+> 40
+> 20
+> 0
+
+Fig. 8. Example predicted NR mask MNR , HLC mask MHLC , combined mask M , and output spectrogram ˆY for the NH audiogram and HI audiograms N1, N2 and N3. Both αNR and αHLC are set to 1. The masks are complex-valued and their magnitude is plotted in dB. The magnitude of the combined mask M is thresholded using a minimum gain Gmin of −25 dB. 
+
+VI. D ISCUSSION 
+
+A. Optimizing the amount of NR and HLC 
+
+The results obtained with the adjustable joint NR and HLC system DNN-CNRHLC were based on fixed values of αNR and 
+
+αHLC selected from the average results across all test scenes and listener profiles. However, this choice may be suboptimal, since the appropriate amounts of NR and HLC are likely to depend on the acoustic properties of the scene, such as the SNR, the type of background noise, or the amount of reverberation. They may also depend on the listener profile, listening intent, or individual preference. By exponentiating the predicted masks with αNR and αHLC at inference time, the proposed approach provides a simple and flexible way of controlling the amounts of NR and HLC, thereby opening several possibilities for further improvement. For example, since the mask exponentiation and combination are computationally lightweight and do not introduce additional algorithmic latency, the parameters αNR 
+
+and αHLC could be adjusted dynamically on the basis of short-time acoustic features. Alternatively, a user interface could allow listeners to adjust αNR and αHLC manually in real time according to their own preferences. Exploring such possibilities is an important direction for future work. 
+
+B. Validating the differentiable auditory model 
+
+The differentiable auditory model used in this study is a simplified auditory front-end inspired by established models of auditory processing and masking [48], [49], [50], [51]. This simplification was necessary to enable gradient backpropaga-tion, reduce computational complexity, and avoid artifacts in the predicted masks, as discussed in Section IV-B . Auditory models within this class have been shown to account for a wide range of psychoacoustic phenomena in NH listeners, including intensity discrimination, spectral and temporal masking, and modulation detection [50]. Related model extensions have also been used to describe the average behavior of HI listeners [82], [83]. However, the simplifications introduced in the present work may affect the extent to which the resulting model retains these predictive properties. Future work should therefore validate SUBMITTED TO IEEE TRANSACTIONS ON AUDIO, SPEECH, AND LANGUAGE PROCESSING 11 
+
+the proposed differentiable auditory model, for example by examining whether its output still supports accurate predictions of NH and HI listener behavior across relevant psychoacoustic conditions. Such analyses may reveal limitations of the current model formulation and thereby suggest ways of improving both the auditory model itself and the resulting NR and HLC performance of the DNN. 
+
+C. Excessive amplification 
+
+The DNNs trained for HLC using the proposed differentiable auditory model achieved superior HASPI compared to NAL-R. The results also show that NAL-R is relatively ineffective at restoring the output of the auditory model. However, we observe that the DNN-based systems tend to provide substantially more amplification compared to NAL-R. Although this behavior may be undesirable in practice, it is not unexpected, since the proposed framework does not include an explicit mechanism for limiting the amplification provided by the system. The DNN is thus encouraged to restore the auditory-model output as closely as possible, even if doing so requires unrealistically large gains. In contrast, traditional compensation strategies primarily aim to restore speech audibility rather than to normalize hearing thresholds across all frequencies and input levels. Excessive amplification may reduce listening comfort and could potentially lead to unsafe output levels. Future work should therefore investigate strategies for limiting the amplification provided by the DNN-based systems. This could be achieved by refining the auditory model, constraining the DNN output during training, or thresholding the predicted HLC mask with a maximum gain Gmax during inference. Note that the proposed adjustable system DNN-CNRHLC already offers a simple way of limiting amplification without retraining, by choosing 
+
+αHLC < 1.VII. C ONCLUSION 
+
+In this work, we proposed a multi-task learning framework for optimizing a DNN to perform joint NR and HLC. In contrast to previous approaches, we used a differentiable auditory model, which eliminated the need to train an auditory-model emulator and therefore enabled end-to-end optimization. This simplification of the optimization framework facilitates refining the auditory model to improve the DNN performance. In addition, the listener’s audiogram was provided as an extra input to the DNN, enabling personalization without retraining, unlike in many previous studies. To the best of our knowledge, this is the first study to use an auditory model to train a DNN for both NR and HLC across a wide range of listener profiles. Furthermore, the proposed solution allows the amounts of NR and HLC to be adjusted independently at inference time, without retraining the DNN. This was achieved by defining two distinct training objectives, one for NR and one for HLC, and by predicting a separate time-frequency mask for each task. During training, the contributions of the two objectives were automatically balanced using an uncertainty-based weighting scheme [30]. After training, the two masks can be exponentiated independently and then combined, allowing flexible control over the amounts of NR and HLC. This represents a significant improvement over previous approaches in which both tasks were optimized through a single training objective, resulting in systems that deliver a fixed combination of NR and HLC. In addition to this increased flexibility, the proposed approach also showed superior joint NR and HLC performance, after tuning the exponents αNR and αHLC , according to objective metrics. The proposed system also outperformed NAL-R in terms of HASPI and restoration of the auditory-model output. Although NAL-R achieved higher HASQI, this is likely due to the fact that HASQI implicitly assumes that NAL-R is the ideal compensation strategy. The proposed system also outperformed a specialized NR-only system in terms of PESQ, which we attribute to the multi-task learning framework: by learning internal representations that are useful for both tasks, the DNN may become more robust [26]. Finally, applying two specialized systems in series for joint NR and HLC, similar to conventional hearing-aid processing chains, resulted in inferior performance compared to the proposed single-DNN system, despite doubling the total number of trainable parameters. The flexibility offered by the proposed system opens several avenues for future work. The exponents αNR and αHLC could be adjusted heuristically on the basis of short-time acoustic features to further improve performance and perceptual benefit. Alternatively, future experiments could allow participants to set αNR and αHLC according to personal preference, which may provide insight into subjectively optimal strategies for joint NR and HLC. Future work should also focus on validating the proposed differentiable auditory model and on adapting the DNN architecture to reduce computational complexity and enable real-time processing. REFERENCES [1] World Health Organization, “World report on hearing,” 2021. [Online]. Available: https://www.who.int/publications/i/item/ world-report-on-hearing [2] E. Georganti, G. Courtois, P. Derleth, and S. Launer, “Intelligent hearing instruments—Trends and challenges,” in The Technology of Binaural Understanding . Springer, 2020, pp. 733–761. [3] D. Wang and J. Chen, “Supervised speech separation based on deep learning: An overview,” IEEE/ACM Trans. Audio, Speech, Lang. Process. ,vol. 26, pp. 1702–1726, 2018. [4] C. Zheng, H. Zhang, W. Liu, X. Luo, A. Li, X. Li, and B. C. Moore, “Sixty years of frequency-domain monaural speech enhancement: From traditional to deep learning methods,” Trends Hear. , vol. 27, p. 23312165231209913, 2023. [5] S. Graetzer, J. Barker, T. J. Cox, M. Akeroyd, J. F. Culling, G. Naylor, E. Porter, R. V. Munoz et al. , “Clarity-2021 challenges: Machine learning challenges for advancing hearing aid processing,” in Proc. Interspeech ,2021, pp. 686–690. [6] D. Baby, A. van den Broucke, and S. Verhulst, “A convolutional neural-network model of human cochlear mechanics and filter tuning for real-time applications,” Nat. Mach. Intell. , vol. 3, pp. 134–143, 2021. [7] F. Drakopoulos, D. Baby, and S. Verhulst, “A convolutional neural-network framework for modelling auditory sensory cells and synapses,”       
+
+> Commun. Biol. , vol. 4, p. 827, 2021. [8] P. Leer, J. Jensen, Z.-H. Tan, J. Østergaard, and L. Bramsløw, “How to train your ears: Auditory-model emulation for large-dynamic-range inputs and mild-to-severe hearing losses,” IEEE/ACM Trans. Audio, Speech, Lang. Process. , vol. 32, pp. 2006–2020, 2024. [9] F. Drakopoulos and S. Verhulst, “A differentiable optimisation framework for the design of individualised DNN-based hearing-aid strategies,” in
+> Proc. ICASSP , 2022, pp. 351–355. [10] ——, “A neural-network framework for the design of individualised hearing-loss compensation,” IEEE/ACM Trans. Audio, Speech, Lang. Process. , vol. 31, pp. 2395–2409, 2023. SUBMITTED TO IEEE TRANSACTIONS ON AUDIO, SPEECH, AND LANGUAGE PROCESSING 12
+
+[11] F. Drakopoulos, A. van den Broucke, and S. Verhulst, “A DNN-based hearing-aid strategy for real-time processing: One size fits all,” in Proc. ICASSP , 2023, pp. 1–5. [12] C. Wen, G. Torfs, and S. Verhulst, “dCoNNear: An artifact-free neural network architecture for closed-loop audio signal processing,” IEEE/ACM Trans. Audio, Speech, Lang. Process. , pp. 1–15, 2025. [13] C. Wen and S. Verhulst, “Individualized speech enhancement for hearing-impaired listeners,” in Proc. Interspeech , 2025, pp. 3843–3847. [14] P. Leer, J. Jensen, L. H. Carney, Z.-H. Tan, J. Østergaard, and L. Bramsløw, “Hearing-loss compensation using deep neural networks: A framework and results from a listening test,” IEEE Trans. Audio, Speech, Lang. Process. , vol. 33, pp. 828–841, 2025. [15] Z. Tu, N. Ma, and J. Barker, “DHASP: Differentiable hearing aid speech processing,” in Proc. ICASSP , 2021, pp. 296–300. [16] ——, “Optimising hearing aid fittings for speech in noise with a differentiable hearing loss model,” in Proc. Interspeech , 2021, pp. 691– 695. [17] Z. Tu, J. Zhang, N. Ma, and J. Barker, “A two-stage end-to-end system for speech-in-noise hearing aid processing,” in Proc. Clarity , 2021, pp. 1–5. [18] S. Drgas, L. Bramsløw, A. Politis, G. Naithani, and T. Virtanen, “Dynamic processing neural network architecture for hearing loss compensation,” 
+
+IEEE/ACM Trans. Audio, Speech, Lang. Process. , vol. 32, pp. 203–214, 2023. [19] K. ˇZmol ´ıkov ´a and J. H. ˇCernock ´y, “BUT system for the first Clarity Enhancement Challenge,” in Proc. Clarity , 2021, pp. 1–3. [20] J. Cheng, R. Liang, L. Zhao, C. Huang, and B. W. Schuller, “Speech denoising and compensation for hearing aids using an FTCRN-based metric GAN,” IEEE Signal Process. Lett. , vol. 30, pp. 374–378, 2023. [21] Y. Ni, R. Liang, X. Hao, J. Cheng, Q. Wang, C. Huang, C. Zou, W. Zhou, W. Ding, and B. W. Schuller, “Affine modulation-based audiogram fusion network for joint noise reduction and hearing loss compensation,” Inf. Fusion , vol. 127, p. 103726, 2026. [22] T. Baer and B. C. J. Moore, “Effects of spectral smearing on the intelligibility of sentences in noise,” J. Acoust. Soc. Am. , vol. 94, pp. 1229–1241, 1993. [23] ——, “Effects of spectral smearing on the intelligibility of sentences in the presence of interfering speech,” J. Acoust. Soc. Am. , vol. 95, pp. 2277–2280, 1994. [24] B. C. J. Moore and B. R. Glasberg, “Simulation of the effects of loudness recruitment and threshold elevation on the intelligibility of speech in quiet and in a background of speech,” J. Acoust. Soc. Am. , vol. 94, pp. 2050–2062, 1993. [25] M. A. Stone and B. C. J. Moore, “Tolerable hearing aid delays. I. Estimation of limits imposed by the auditory path alone using simulated hearing losses,” Ear Hear. , vol. 20, pp. 182–192, 1999. [26] J. Baxter, “A model of inductive bias learning,” J. Artif. Intell. Res. ,vol. 12, pp. 149–198, 2000. [27] M. C. Killion, “The 3 types of sensorineural hearing loss: Loudness and intelligibility considerations,” Hear. J. , vol. 46, pp. 31–36, 1993. [28] T. Neher, “Relating hearing loss and executive functions to hearing aid users’ preference for, and speech recognition with, different combinations of binaural noise reduction and microphone directionality,” Front. Neurosci. , vol. 8, p. 391, 2014. [29] T. Neher, K. C. Wagener, and R.-L. Fischer, “Directional processing and noise reduction in hearing aids: Individual and situational influences on preferred setting,” J. Am. Acad. Audiol. , vol. 27, pp. 628–646, 2016. [30] A. Kendall, Y. Gal, and R. Cipolla, “Multi-task learning using uncertainty to weigh losses for scene geometry and semantics,” in Proc. CVPR , 2018, pp. 7482–7491. [31] P. Gonzalez, T. Dau, and T. May, “Controllable joint noise reduction and hearing loss compensation using a differentiable auditory model,” in 
+
+Proc. Clarity , 2025, pp. 48–52. [32] Y. Zhao, B. Xu, R. Giri, and T. Zhang, “Perceptually guided speech enhancement using deep neural networks,” in Proc. ICASSP , 2018, pp. 5074–5078. [33] T. Vuong, Y. Xia, and R. M. Stern, “A modulation-domain loss for neural-network-based real-time speech enhancement,” in Proc. ICASSP ,2021, pp. 6643–6647. [34] N. Eng, Y. Hioka, and C. I. Watson, “Using perceptual quality features in the design of the loss function for speech enhancement,” in Proc. APSIPA ASC , 2022, pp. 1904–1909. [35] N.-E. Monir, P. Magron, and R. Serizel, “Frequency-weighted training losses for phoneme-level DNN-based speech enhancement,” in Proc. MMSP , 2025, pp. 1–5. [36] I. Brons, R. Houben, and W. A. Dreschler, “Perceptual effects of noise reduction by time-frequency masking of noisy speech,” J. Acoust. Soc. Am. , vol. 132, pp. 2690–2699, 2012. [37] B. J. Borgstr ¨om and M. S. Brandstein, “Speech enhancement via attention masking network (SEAMNET): An end-to-end system for joint suppression of noise and reverberation,” IEEE/ACM Trans. Audio, Speech, Lang. Process. , vol. 29, pp. 515–526, 2020. [38] E. M. Johnson and E. W. Healy, “An ideal compressed mask for increasing speech intelligibility without sacrificing environmental sound recognition,” 
+
+J. Acoust. Soc. Am. , vol. 156, pp. 3958–3969, 2024. [39] Y. Luo and J. Yu, “Music source separation with band-split RNN,” 
+
+IEEE/ACM Trans. Audio, Speech, Lang. Process. , vol. 31, pp. 1893– 1901, 2023. [40] J. Yu and Y. Luo, “Efficient monaural speech enhancement with universal sample rate band-split RNN,” in Proc. ICASSP , 2023, pp. 1–5. [41] J. Yu, Y. Luo, H. Chen, R. Gu, and C. Weng, “High fidelity speech enhancement with band-split RNN,” in Proc. Interspeech , 2023, pp. 2483–2487. [42] W. Zhang, K. Saijo, J.-W. Jung, C. Li, S. Watanabe, and Y. Qian, “Beyond performance plateaus: A comprehensive study on scalability in speech enhancement,” in Proc. Interspeech , 2024, pp. 1740–1744. [43] Z. Sun, A. Li, T. Lei, R. Chen, M. Yu, C. Zheng, Y. Zhou, and D. Yu, “Scaling beyond denoising: Submitted system and findings in URGENT Challenge 2025,” in Proc. Interspeech , 2025, pp. 873–877. [44] Y. Luo and N. Mesgarani, “Conv-TasNet: Surpassing ideal time-frequency magnitude masking for speech separation,” IEEE/ACM Trans. Audio, Speech, Lang. Process. , vol. 27, pp. 1256–1266, 2019. [45] Y. Wu and K. He, “Group normalization,” in Proc. ECCV , 2018, pp. 3–19. [46] E. Perez, F. Strub, H. de Vries, V. Dumoulin, and A. Courville, “FiLM: Visual reasoning with a general conditioning layer,” in Proc. AAAI , 2018, pp. 3942–3951. [47] Y. N. Dauphin, A. Fan, M. Auli, and D. Grangier, “Language modeling with gated convolutional networks,” in Proc. ICML , 2017, pp. 933–941. [48] T. Dau, D. P ¨uschel, and A. Kohlrausch, “A quantitative model of the “effective” signal processing in the auditory system. I. Model structure,” 
+
+J. Acoust. Soc. Am. , vol. 99, pp. 3615–3622, 1996. [49] T. Dau, B. Kollmeier, and A. Kohlrausch, “Modeling auditory processing of amplitude modulation. I. Detection and masking with narrow-band carriers,” J. Acoust. Soc. Am. , vol. 102, pp. 2892–2905, 1997. [50] M. L. Jepsen, S. D. Ewert, and T. Dau, “A computational model of human auditory signal processing and perception,” J. Acoust. Soc. Am. ,vol. 124, pp. 422–438, 2008. [51] L. C. Paulick, H. Rela ˜no-Iborra, and T. Dau, “The computational auditory signal processing and perception model: A revised version,” J. Acoust. Soc. Am. , vol. 157, pp. 3232–3244, 2025. [52] E. A. Lopez-Poveda and R. Meddis, “A human nonlinear cochlear filterbank,” J. Acoust. Soc. Am. , vol. 110, pp. 3107–3118, 2001. [53] E. A. Lopez-Poveda and P. T. Johannesen, “Behavioral estimates of the contribution of inner and outer hair cell dysfunction to individualized audiometric loss,” J. Assoc. Res. Otolaryngol. , vol. 13, pp. 485–504, 2012. [54] J. Zaar and L. H. Carney, “Predicting speech intelligibility in hearing-impaired listeners using a physiologically inspired auditory model,” Hear. Res. , vol. 426, p. 108553, 2022. [55] H. Rela ˜no-Iborra, J. Zaar, and T. Dau, “Evaluating an auditory model as predictor of speech understanding in hearing-impaired listeners,” in 
+
+Proc. Forum Acust. , 2023. [56] H. Dubey, A. Aazami, V. Gopal, B. Naderi, S. Braun, R. Cutler, H. Gamper, M. Golestaneh, and R. Aichner, “ICASSP 2023 Deep Noise Suppression Challenge,” IEEE Open J. Signal Process. , vol. 5, pp. 725– 737, 2024. [57] V. Panayotov, G. Chen, D. Povey, and S. Khudanpur, “LibriSpeech: An ASR corpus based on public domain audio books,” in Proc. ICASSP ,2015, pp. 5206–5210. [58] V. Pratap, Q. Xu, A. Sriram, G. Synnaeve, and R. Collobert, “MLS: A large-scale multilingual dataset for speech research,” in Proc. Interspeech ,2020, pp. 2757–2761. [59] C. Veaux, J. Yamagishi, and S. King, “The Voice Bank corpus: Design, collection and data analysis of a large regional accent speech database,” in Proc. O-COCOSDA/CASLRE , 2013, pp. 1–4. [60] J. Richter, Y.-C. Wu, S. Krenn, S. Welker, B. Lay, S. Watanabe, A. Richard, and T. Gerkmann, “EARS: An anechoic fullband speech dataset benchmarked for speech enhancement and dereverberation,” in 
+
+Proc. Interspeech , 2024, pp. 4873–4877. SUBMITTED TO IEEE TRANSACTIONS ON AUDIO, SPEECH, AND LANGUAGE PROCESSING 13 
+
+[61] G. Wichern, J. Antognini, M. Flynn, L. R. Zhu, E. McQuinn, D. Crow, E. Manilow, and J. L. Roux, “WHAM!: Extending speech separation to noisy environments,” in Proc. Interspeech , 2019, pp. 1368–1372. [62] E. Fonseca, X. Favory, J. Pons, F. Font, and X. Serra, “FSD50K: An open dataset of human-labeled sound events,” IEEE/ACM Trans. Audio, Speech, Lang. Process. , vol. 30, pp. 829–852, 2022. [63] M. Defferrard, K. Benzi, P. Vandergheynst, and X. Bresson, “FMA: A dataset for music analysis,” in Proc. ISMIR , 2017, pp. 316–323. [64] Y. Luo and R. Gu, “Fast random approximation of multi-channel room impulse response,” in Proc. ICASSP , 2024, pp. 449–454. [65] P. Søndergaard and P. Majdak, “The auditory modeling toolbox,” in The technology of binaural listening . Springer, 2013, pp. 33–56. [66] P. Majdak, C. Hollomey, and R. Baumgartner, “AMT 1.x: A toolbox for reproducible research in auditory modeling,” Acta Acust. , vol. 6, p. 19, 2022. [67] J. S. Bradley, H. Sato, and M. Picard, “On the importance of early reflections for speech in rooms,” J. Acoust. Soc. Am. , vol. 113, pp. 3233–3244, 2003. [68] N. Roman and J. Woodruff, “Speech intelligibility in reverberation with ideal binary masking: Effects of early reflections and signal-to-noise ratio threshold,” J. Acoust. Soc. Am. , vol. 133, pp. 1707–1717, 2013. [69] N. Zeghidour and D. Grangier, “Wavesplit: End-to-end speech separation by speaker clustering,” IEEE/ACM Trans. Audio, Speech, Lang. Process. ,vol. 29, pp. 2840–2849, 2021. [70] S. Choi, Y. Lee, J. Park, H. Y. Kim, B.-Y. Kim, Z.-Q. Wang, and S. Watanabe, “An empirical study of training mixture generation strategies on speech separation: Dynamic mixing and augmentation,” in Proc. APSIPA ASC , 2022, pp. 1070–1075. [71] S. Graetzer, M. A. Akeroyd, J. Barker, T. J. Cox, J. F. Culling, G. Naylor, E. Porter, and R. Viveros-Mu ˜noz, “Dataset of British English speech recordings for psychoacoustics and speech processing research: The Clarity speech corpus,” Data Br. , vol. 41, p. 107951, 2022. [72] A. Mesaros, T. Heittola, and T. Virtanen, “TUT database for acoustic scene classification and sound event detection,” in Proc. EUSIPCO , 2016, pp. 1128–1132. [73] D. P. Kingma and J. Ba, “Adam: A method for stochastic optimization,” in Proc. ICLR , 2015, pp. 1–15. [74] N. Bisgaard, M. S. Vlaming, and M. Dahlquist, “Standard audiograms for the IEC 60118-15 measurement procedure,” Trends Amplif. , vol. 14, pp. 113–120, 2010. [75] A. W. Rix, J. G. Beerends, M. P. Hollier, and A. P. Hekstra, “Perceptual evaluation of speech quality (PESQ)–A new method for speech quality assessment of telephone networks and codecs,” in Proc. ICASSP , 2001, pp. 749–752. [76] J. Jensen and C. H. Taal, “An algorithm for predicting the intelligibility of speech masked by modulated noise maskers,” IEEE/ACM Trans. Audio, Speech, Lang. Process. , vol. 24, pp. 2009–2022, 2016. [77] J. M. Kates and K. H. Arehart, “The hearing-aid speech perception index (HASPI),” Speech Commun. , vol. 65, pp. 75–93, 2014. [78] ——, “The hearing-aid speech quality index (HASQI),” J. Acoust. Soc. Am. , vol. 58, pp. 363–381, 2010. [79] D. Byrne and H. Dillon, “The National Acoustic Laboratories’ (NAL) new procedure for selecting the gain and frequency response of a hearing aid,” Ear Hear. , vol. 7, pp. 257–265, 1986. [80] J. Le Roux, S. Wisdom, H. Erdogan, and J. R. Hershey, “SDR – Half-baked or well done?” in Proc. ICASSP , 2019, pp. 626–630. [81] K. Kinoshita, T. Ochiai, M. Delcroix, and T. Nakatani, “Improving noise robust automatic speech recognition with single-channel time-domain enhancement network,” in Proc. ICASSP , 2020, pp. 7009–7013. [82] M. L. Jepsen and T. Dau, “Characterizing auditory processing and perception in individual listeners with sensorineural hearing loss,” J. Acoust. Soc. Am. , vol. 129, pp. 262–281, 2011. [83] H. Rela ˜no-Iborra and T. Dau, “Speech intelligibility prediction based on modulation frequency-selective processing,” Hear. Res. , vol. 426, p. 108610, 2022.

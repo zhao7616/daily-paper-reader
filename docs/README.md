@@ -6,58 +6,58 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-03-23
-- 运行时间：2026-03-23 20:06:48 UTC
+- 最新运行日期：2026-03-24
+- 运行时间：2026-03-24 19:43:44 UTC
 - 运行状态：成功
 - 本次总论文数：12
 - 精读区：1
 - 速读区：11
 
 ### 今日简报（AI）
-今日聚焦12项前沿进展，重点探索高能物理统计推断在无人机叶片故障检测中的跨界应用。
-核心研究证实SBI与LRT等物理算法能显著提升损伤识别精度，同时涵盖了MoE架构下的双臂协作机器人与超声大模型。
-建议优先研读物理推断在工业监测中的落地案例，并关注稀疏混合专家模型对复杂机器人任务的性能提升。
-- 详情：[/202603/23/README](/202603/23/README)
+今日聚焦 Transformer 在风险感知仪器校准中的深度应用，精选 12 篇涵盖电力、航空及 3D 视觉的 AI 诊断前沿成果。
+核心突破在于利用 Transformer 优化预测性维护精度，并展示了物理信息驱动与零样本学习在复杂系统故障预测中的潜力。
+建议优先研读高分校准论文以提升工业风险管理，同时关注跨模态模型在 3D 异常检测领域的跨界应用。
+- 详情：[/202603/24/README](/202603/24/README)
 
 ### 精读区论文标签
-1. [HEP Statistical Inference for UAV Fault Detection: CLs, LRT, and SBI Applied to Blade Damage](/202603/23/2603.18546v1-hep-statistical-inference-for-uav-fault-detection-cls-lrt-and-sbi-applied-to-blade-damage)  
-   标签：评分：8.0/10、query:phm
-   evidence：无人机螺旋桨的联合二元检测与定量故障表征
+1. [Transformer-Based Predictive Maintenance for Risk-Aware Instrument Calibration](/202603/24/2603.20297v1-transformer-based-predictive-maintenance-for-risk-aware-instrument-calibration)  
+   标签：评分：9.0/10、query:rul
+   evidence：使用NASA C-MAPSS基准进行预测性维护以估计漂移时间
 
 ### 速读区论文标签
-1. [MoE-ACT: Scaling Multi-Task Bimanual Manipulation with Sparse Language-Conditioned Mixture-of-Experts Transformers](/202603/23/2603.15265v1-moe-act-scaling-multi-task-bimanual-manipulation-with-sparse-language-conditioned-mixture-of-experts-transformers)  
+1. [Physics-Informed Graph Neural Jump ODEs for Cascading Failure Prediction in Power Grids](/202603/24/2603.20838v1-physics-informed-graph-neural-jump-odes-for-cascading-failure-prediction-in-power-grids)  
    标签：评分：7.0/10、query:phm
-   evidence：工业应用的多任务模仿学习框架
-2. [Understanding Task Aggregation for Generalizable Ultrasound Foundation Models](/202603/23/2603.18123v1-understanding-task-aggregation-for-generalizable-ultrasound-foundation-models)  
-   标签：评分：7.0/10、query:phm
-   evidence：统一临床成像模型的多任务框架
-3. [Federated Hyperdimensional Computing for Resource-Constrained Industrial IoT](/202603/23/2603.20037v1-federated-hyperdimensional-computing-for-resource-constrained-industrial-iot)  
+   evidence：同时预测故障概率和严重程度分类
+2. [High-Endurance UCAV Propulsion System: A 1-D CNN-Based Real-Time Fault Classification for Tactical-Grade IPMSM Drive](/202603/24/2603.21133v1-high-endurance-ucav-propulsion-system-a-1-d-cnn-based-real-time-fault-classification-for-tactical-grade-ipmsm-drive)  
    标签：评分：7.0/10、query:rul
-   evidence：资源受限工业物联网的预测性和规范性维护
-4. [ST-ResGAT: Explainable Spatio-Temporal Graph Neural Network for Road Condition Prediction and Priority-Driven Maintenance](/202603/23/2603.14107v1-st-resgat-explainable-spatio-temporal-graph-neural-network-for-road-condition-prediction-and-priority-driven-maintenance)  
+   evidence：利用一维卷积神经网络对电机信号进行推进系统实时故障分类
+3. [Back to Point: Exploring Point-Language Models for Zero-Shot 3D Anomaly Detection](/202603/24/2603.21511v1-back-to-point-exploring-point-language-models-for-zero-shot-3d-anomaly-detection)  
+   标签：评分：7.0/10、query:rul
+   evidence：工业检测中的零样本3D异常检测
+4. [Quantifying Uncertainty in FMEDA Safety Metrics: An Error Propagation Approach for Enhanced ASIC Verification](/202603/24/2603.21770v1-quantifying-uncertainty-in-fmeda-safety-metrics-an-error-propagation-approach-for-enhanced-asic-verification)  
+   标签：评分：7.0/10、query:phm
+   evidence：失效模式、影响与诊断分析 (FMEDA)
+5. [Multimodal Survival Analysis with Locally Deployable Large Language Models](/202603/24/2603.22158v1-multimodal-survival-analysis-with-locally-deployable-large-language-models)  
+   标签：评分：7.0/10、query:phm
+   evidence：联合估计生存概率并生成预后文本
+6. [Safe Distributionally Robust Feature Selection under Covariate Shift](/202603/24/2603.16062v1-safe-distributionally-robust-feature-selection-under-covariate-shift)  
    标签：评分：6.0/10、query:rul
-   evidence：路面退化预测与维护的时空预测模型
-5. [Progress-Based Fault Detection and Health-Aware Task Allocation for Heterogeneous Multi-Robot Systems](/202603/23/2603.14622v1-progress-based-fault-detection-and-health-aware-task-allocation-for-heterogeneous-multi-robot-systems)  
+   evidence：工业多传感器系统的分布鲁棒特征选择
+7. [Shared Representation Learning for Reference-Guided Targeted Sound Detection](/202603/24/2603.17025v1-shared-representation-learning-for-reference-guided-targeted-sound-detection)  
    标签：评分：6.0/10、query:phm
-   evidence：故障检测与健康感知任务分配
-6. [AgentTrace: Causal Graph Tracing for Root Cause Analysis in Deployed Multi-Agent Systems](/202603/23/2603.14688v1-agenttrace-causal-graph-tracing-for-root-cause-analysis-in-deployed-multi-agent-systems)  
-   标签：评分：6.0/10、query:phm
-   evidence：根因分析与故障诊断
-7. [Self-supervised Disentanglement of Disease Effects from Aging in 3D Medical Shapes](/202603/23/2603.15862v1-self-supervised-disentanglement-of-disease-effects-from-aging-in-3d-medical-shapes)  
-   标签：评分：6.0/10、query:phm
-   evidence：在形状表征中解耦疾病影响与老化过程
-8. [TinyGLASS: Real-Time Self-Supervised In-Sensor Anomaly Detection](/202603/23/2603.16451v1-tinyglass-real-time-self-supervised-in-sensor-anomaly-detection)  
-   标签：评分：6.0/10、query:phm
-   evidence：工业异常检测与质量控制
-9. [Optimal uncertainty bounds for multivariate kernel regression under bounded noise: A Gaussian process-based dual function](/202603/23/2603.16481v1-optimal-uncertainty-bounds-for-multivariate-kernel-regression-under-bounded-noise-a-gaussian-process-based-dual-function)  
+   evidence：采用多任务学习方法进行联合优化
+8. [The Phasor Transformer: Resolving Attention Bottlenecks on the Unit Circle](/202603/24/2603.17433v1-the-phasor-transformer-resolving-attention-bottlenecks-on-the-unit-circle)  
    标签：评分：6.0/10、query:rul
-   evidence：多输出核回归的不确定性边界
-10. [Interpretable AI-Assisted Early Reliability Prediction for a Two-Parameter Parallel Root-Finding Scheme](/202603/23/2603.16980v1-interpretable-ai-assisted-early-reliability-prediction-for-a-two-parameter-parallel-root-finding-scheme)  
+   evidence：全局动态的自回归时间序列预测
+9. [Understanding Task Aggregation for Generalizable Ultrasound Foundation Models](/202603/24/2603.18123v2-understanding-task-aggregation-for-generalizable-ultrasound-foundation-models)  
    标签：评分：6.0/10、query:phm
-   evidence：可靠性诊断框架与多时域早期预测
-11. [BoundAD: Boundary-Aware Negative Generation for Time Series Anomaly Detection](/202603/23/2603.18111v1-boundad-boundary-aware-negative-generation-for-time-series-anomaly-detection)  
-   标签：评分：6.0/10、query:rul
-   evidence：时间序列异常检测与重构驱动框架
+   evidence：异构任务联合学习的多任务框架
+10. [End-to-End Multi-Task Learning for Adjustable Joint Noise Reduction and Hearing Loss Compensation](/202603/24/2603.20387v1-end-to-end-multi-task-learning-for-adjustable-joint-noise-reduction-and-hearing-loss-compensation)  
+   标签：评分：6.0/10、query:phm
+   evidence：用于联合优化两个不同信号处理任务的多任务学习框架
+11. [Representation-Level Adversarial Regularization for Clinically Aligned Multitask Thyroid Ultrasound Assessment](/202603/24/2603.21095v1-representation-level-adversarial-regularization-for-clinically-aligned-multitask-thyroid-ultrasound-assessment)  
+   标签：评分：6.0/10、query:phm
+   evidence：联合预测掩码和风险类别的多任务框架
 
 
 <div class="dpr-home-promo-card">

@@ -1,0 +1,468 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-03-24T19:42:18.819787+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 1,
+    "deep_cap": 6,
+    "deep_selected": 1,
+    "quick_candidates": 15,
+    "quick_skim_target": 11,
+    "quick_selected": 11
+  },
+  "deep_dive": [
+    {
+      "id": "2603.20297v1",
+      "title": "Transformer-Based Predictive Maintenance for Risk-Aware Instrument Calibration",
+      "abstract": "Accurate calibration is essential for instruments whose measurements must remain traceable, reliable, and compliant over long operating periods. Fixed-interval programs are easy to administer, but they ignore that instruments drift at different rates under different conditions. This paper studies calibration scheduling as a predictive maintenance problem: given recent sensor histories, estimate time-to-drift (TTD) and intervene before a violation occurs. We adapt the NASA C-MAPSS benchmark into a calibration setting by selecting drift-sensitive sensors, defining virtual calibration thresholds, and inserting synthetic reset events that emulate repeated recalibration. We then compare classical regressors, recurrent and convolutional sequence models, and a compact Transformer for TTD prediction. The Transformer provides the strongest point forecasts on the primary FD001 split and remains competitive on the harder FD002--FD004 splits, while a quantile-based uncertainty model supports conservative scheduling when drift behavior is noisier. Under a violation-aware cost model, predictive scheduling lowers cost relative to reactive and fixed policies, and uncertainty-aware triggers sharply reduce violations when point forecasts are less reliable. The results show that condition-based calibration can be framed as a joint forecasting and decision problem, and that combining sequence models with risk-aware policies is a practical route toward smarter calibration planning.",
+      "authors": [
+        "Adithya Parthasarathy",
+        "Aswathnarayan Muthukrishnan Kirubakaran",
+        "Akshay Deshpande",
+        "Ram Sekhar Bodala",
+        "Suhas Malempati",
+        "Nachiappan Chockalingam",
+        "Vinoth Punniyamoorthy",
+        "Seema Gangaiah Aarella"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "published": "2026-03-19T06:32:01+00:00",
+      "link": "https://arxiv.org/pdf/2603.20297v1",
+      "tags": [
+        "keyword:PHM",
+        "query:PHM"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Predictive maintenance using NASA C-MAPSS benchmark to estimate time-to-drift",
+      "llm_evidence_cn": "使用NASA C-MAPSS基准进行预测性维护以估计漂移时间",
+      "llm_evidence": "使用NASA C-MAPSS基准进行预测性维护以估计漂移时间",
+      "canonical_evidence": "使用NASA C-MAPSS基准进行预测性维护以估计漂移时间",
+      "llm_tldr_en": "Adapts the C-MAPSS RUL benchmark for instrument calibration scheduling using Transformer models.",
+      "llm_tldr_cn": "利用Transformer模型将C-MAPSS剩余寿命基准适配于仪器校准调度。",
+      "llm_tldr": "利用Transformer模型将C-MAPSS剩余寿命基准适配于仪器校准调度。",
+      "llm_tags": [
+        "query:rul:composite"
+      ],
+      "matched_query_tag": "query:rul:composite",
+      "matched_query_text": "Papers central to 剩余寿命预测和旋转机械设备剩余寿命预测, especially work that connects or combines: Remaining Useful Life (RUL) prediction methods; Health monitoring and RUL for rotating machinery; Remaining useful life prediction for rolling element bearings; Deep learning architectures for RUL estimation; State of the art methods for remaining useful life prediction of rotating machinery; Deep learning based RUL estimation for industrial bearings and motors; Data driven vs physics informed models for RUL prediction; Real time health assessment and RUL forecasting for rotating components.",
+      "matched_requirement_id": "req-composite-rul",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2603.20838v1",
+      "title": "Physics-Informed Graph Neural Jump ODEs for Cascading Failure Prediction in Power Grids",
+      "abstract": "Cascading failures in power grids pose severe risks to infrastructure reliability, yet real-time prediction of their progression remains an open challenge. Physics-based simulators require minutes to hours per scenario, while existing graph neural network approaches treat cascading failures as static classification tasks, ignoring temporal evolution and physical laws. This paper proposes Physics-Informed Graph Neural Jump ODEs (PI-GN-JODE), combining an edge-conditioned graph neural network encoder, a Neural ODE for continuous power redistribution, a jump process handler for discrete relay trips, and Kirchhoff-based physics regularization. The model simultaneously predicts edge and node failure probabilities, severity classification, and demand not served, while an autoregressive extension enables round-by-round temporal cascade prediction. Evaluated on the IEEE 24-bus and 118-bus systems with 20,000 scenarios each, PI-GN-JODE achieves a Precision--Recall Area Under the Curve of 0.991 for edge failure detection, 0.973 for node failure detection, and a coefficient of determination of 0.951 for demand-not-served regression on the 118-bus system, outperforming a standard graph convolutional network baseline (0.948, 0.925, and 0.912, respectively). Ablation studies reveal that the four components function synergistically, with the physics-informed loss alone contributing +9.2 points to demand-not-served regression. Performance improves when scaling to larger grids, and the architecture achieves the highest balanced accuracy (0.996) on the PowerGraph benchmark using data from a different simulation framework.",
+      "authors": [
+        "Birva Sevak",
+        "Shrenik Jadhav",
+        "Van-Hai Bui"
+      ],
+      "primary_category": "eess.SY",
+      "categories": [
+        "eess.SY"
+      ],
+      "published": "2026-03-21T14:53:57+00:00",
+      "link": "https://arxiv.org/pdf/2603.20838v1",
+      "tags": [
+        "query:PHM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Simultaneous prediction of failure probabilities and severity classification",
+      "llm_evidence_cn": "同时预测故障概率和严重程度分类",
+      "llm_evidence": "同时预测故障概率和严重程度分类",
+      "canonical_evidence": "同时预测故障概率和严重程度分类",
+      "llm_tldr_en": "Uses Physics-Informed GNNs to predict cascading failure progression and severity in power grids.",
+      "llm_tldr_cn": "利用物理信息图神经网络预测电网级联故障的演变和严重程度。",
+      "llm_tldr": "利用物理信息图神经网络预测电网级联故障的演变和严重程度。",
+      "llm_tags": [
+        "query:phm:composite"
+      ],
+      "matched_query_tag": "query:phm:composite",
+      "matched_query_text": "Papers central to 同时涉及故障诊断与剩余寿命预测的研究论文, especially work that connects or combines: joint modeling of diagnosis and prognosis; multi-task learning for diagnosis and RUL; simultaneous fault diagnosis and remaining useful life prediction; integrated approach for machinery fault diagnosis and prognosis; multi task deep learning for PHM applications; joint diagnosis and RUL estimation research papers.",
+      "matched_requirement_id": "req-composite-phm",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.16062v1",
+      "title": "Safe Distributionally Robust Feature Selection under Covariate Shift",
+      "abstract": "In practical machine learning, the environments encountered during the model development and deployment phases often differ, especially when a model is used by many users in diverse settings. Learning models that maintain reliable performance across plausible deployment environments is known as distributionally robust (DR) learning. In this work, we study the problem of distributionally robust feature selection (DRFS), with a particular focus on sparse sensing applications motivated by industrial needs. In practical multi-sensor systems, a shared subset of sensors is typically selected prior to deployment based on performance evaluations using many available sensors. At deployment, individual users may further adapt or fine-tune models to their specific environments. When deployment environments differ from those anticipated during development, this strategy can result in systems lacking sensors required for optimal performance. To address this issue, we propose safe-DRFS, a novel approach that extends safe screening from conventional sparse modeling settings to a DR setting under covariate shift. Our method identifies a feature subset that encompasses all subsets that may become optimal across a specified range of input distribution shifts, with finite-sample theoretical guarantees of no false feature elimination.",
+      "authors": [
+        "Hiroyuki Hanada",
+        "Satoshi Akahane",
+        "Noriaki Hashimoto",
+        "Shion Takeno",
+        "Ichiro Takeuchi"
+      ],
+      "primary_category": "stat.ML",
+      "categories": [
+        "stat.ML",
+        "cs.LG"
+      ],
+      "published": "2026-03-17T02:11:37+00:00",
+      "link": "https://arxiv.org/pdf/2603.16062v1",
+      "tags": [
+        "keyword:PHM",
+        "query:PHM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "distributionally robust feature selection for industrial multi-sensor systems",
+      "llm_evidence_cn": "工业多传感器系统的分布鲁棒特征选择",
+      "llm_evidence": "工业多传感器系统的分布鲁棒特征选择",
+      "canonical_evidence": "工业多传感器系统的分布鲁棒特征选择",
+      "llm_tldr_en": "A robust feature selection method for industrial sensors, supporting reliable health monitoring and RUL.",
+      "llm_tldr_cn": "一种工业传感器鲁棒特征选择方法，支持可靠的健康监测和剩余寿命预测。",
+      "llm_tldr": "一种工业传感器鲁棒特征选择方法，支持可靠的健康监测和剩余寿命预测。",
+      "llm_tags": [
+        "query:rul:composite"
+      ],
+      "matched_query_tag": "query:rul:composite",
+      "matched_query_text": "Papers central to 剩余寿命预测和旋转机械设备剩余寿命预测, especially work that connects or combines: Remaining Useful Life (RUL) prediction methods; Health monitoring and RUL for rotating machinery; Remaining useful life prediction for rolling element bearings; Deep learning architectures for RUL estimation; State of the art methods for remaining useful life prediction of rotating machinery; Deep learning based RUL estimation for industrial bearings and motors; Data driven vs physics informed models for RUL prediction; Real time health assessment and RUL forecasting for rotating components.",
+      "matched_requirement_id": "req-composite-rul",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.21133v1",
+      "title": "High-Endurance UCAV Propulsion System: A 1-D CNN-Based Real-Time Fault Classification for Tactical-Grade IPMSM Drive",
+      "abstract": "High-performance propulsion for mission-critical applications demands unprecedented reliability and real-time fault resilience. Conventional diagnostic methods (signal-based analysis and standard ML models) are essential for stator/rotor fault detection but suffer from high latency and poor generalization across variable speeds. This paper proposes a 1-D Convolutional Neural Network (CNN) framework for real-time fault classification in the HPDM-350 interior permanent magnet synchronous motor (IPMSM). The proposed architecture extracts discriminative features directly from high-frequency current and speed signals, enabling sub-millisecond inference on embedded controllers. Compared to state-of-the-art long short term memory (LSTM) and classical ML approaches, the 1-D CNN achieves a superior weighted F1-score of 0.9834. Validated through high-fidelity magnetic-domain MATLAB/Simscape models, the method demonstrates robust performance across a +-2700 RPM envelope, providing a lightweight solution for mission-critical electric propulsion systems.",
+      "authors": [
+        "Tahmin Mahmud"
+      ],
+      "primary_category": "eess.SY",
+      "categories": [
+        "eess.SY"
+      ],
+      "published": "2026-03-22T09:08:28+00:00",
+      "link": "https://arxiv.org/pdf/2603.21133v1",
+      "tags": [
+        "query:PHM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "real-time fault classification for propulsion systems using 1-D CNN on motor signals",
+      "llm_evidence_cn": "利用一维卷积神经网络对电机信号进行推进系统实时故障分类",
+      "llm_evidence": "利用一维卷积神经网络对电机信号进行推进系统实时故障分类",
+      "canonical_evidence": "利用一维卷积神经网络对电机信号进行推进系统实时故障分类",
+      "llm_tldr_en": "A 1-D CNN framework for real-time fault classification in high-endurance UCAV propulsion motors.",
+      "llm_tldr_cn": "一种用于高长航时无人机推进电机实时故障分类的一维卷积神经网络框架。",
+      "llm_tldr": "一种用于高长航时无人机推进电机实时故障分类的一维卷积神经网络框架。",
+      "llm_tags": [
+        "query:rul:composite"
+      ],
+      "matched_query_tag": "query:rul:composite",
+      "matched_query_text": "Papers central to 剩余寿命预测和旋转机械设备剩余寿命预测, especially work that connects or combines: Remaining Useful Life (RUL) prediction methods; Health monitoring and RUL for rotating machinery; Remaining useful life prediction for rolling element bearings; Deep learning architectures for RUL estimation; State of the art methods for remaining useful life prediction of rotating machinery; Deep learning based RUL estimation for industrial bearings and motors; Data driven vs physics informed models for RUL prediction; Real time health assessment and RUL forecasting for rotating components.",
+      "matched_requirement_id": "req-composite-rul",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.17025v1",
+      "title": "Shared Representation Learning for Reference-Guided Targeted Sound Detection",
+      "abstract": "Human listeners exhibit the remarkable ability to segregate a desired sound from complex acoustic scenes through selective auditory attention, motivating the study of Targeted Sound Detection (TSD). The task requires detecting and localizing a target sound in a mixture when a reference audio of that sound is provided. Prior approaches, rely on generating a sound-discriminative conditional embedding vector for the reference and pairing it with a mixture encoder, jointly optimized with a multi-task learning approach. In this work, we propose a unified encoder architecture that processes both the reference and mixture audio within a shared representation space, promoting stronger alignment while reducing architectural complexity. This design choice not only simplifies the overall framework but also enhances generalization to unseen classes. Following the multi-task training paradigm, our method achieves substantial improvements over prior approaches, surpassing existing methods and establishing a new state-of-the-art benchmark for targeted sound detection, with a segment-level F1 score of 83.15% and an overall accuracy of 95.17% on the URBAN-SED dataset.",
+      "authors": [
+        "Shubham Gupta",
+        "Adarsh Arigala",
+        "B. R. Dilleswari",
+        "Sri Rama Murty Kodukula"
+      ],
+      "primary_category": "eess.AS",
+      "categories": [
+        "eess.AS",
+        "cs.AI"
+      ],
+      "published": "2026-03-17T18:05:21+00:00",
+      "link": "https://arxiv.org/pdf/2603.17025v1",
+      "tags": [
+        "keyword:PHM",
+        "query:PHM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "jointly optimized with a multi-task learning approach",
+      "llm_evidence_cn": "采用多任务学习方法进行联合优化",
+      "llm_evidence": "采用多任务学习方法进行联合优化",
+      "canonical_evidence": "采用多任务学习方法进行联合优化",
+      "llm_tldr_en": "Proposes a shared representation learning architecture using multi-task optimization.",
+      "llm_tldr_cn": "提出了一种采用多任务优化的共享表示学习架构。",
+      "llm_tldr": "提出了一种采用多任务优化的共享表示学习架构。",
+      "llm_tags": [
+        "query:phm"
+      ],
+      "matched_query_tag": "query:phm",
+      "matched_query_text": "multi task deep learning for PHM applications",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.21511v1",
+      "title": "Back to Point: Exploring Point-Language Models for Zero-Shot 3D Anomaly Detection",
+      "abstract": "Zero-shot (ZS) 3D anomaly detection is crucial for reliable industrial inspection, as it enables detecting and localizing defects without requiring any target-category training data. Existing approaches render 3D point clouds into 2D images and leverage pre-trained Vision-Language Models (VLMs) for anomaly detection. However, such strategies inevitably discard geometric details and exhibit limited sensitivity to local anomalies. In this paper, we revisit intrinsic 3D representations and explore the potential of pre-trained Point-Language Models (PLMs) for ZS 3D anomaly detection. We propose BTP (Back To Point), a novel framework that effectively aligns 3D point cloud and textual embeddings. Specifically, BTP aligns multi-granularity patch features with textual representations for localized anomaly detection, while incorporating geometric descriptors to enhance sensitivity to structural anomalies. Furthermore, we introduce a joint representation learning strategy that leverages auxiliary point cloud data to improve robustness and enrich anomaly semantics. Extensive experiments on Real3D-AD and Anomaly-ShapeNet demonstrate that BTP achieves superior performance in ZS 3D anomaly detection. Code will be available at \\href{https://github.com/wistful-8029/BTP-3DAD}{https://github.com/wistful-8029/BTP-3DAD}.",
+      "authors": [
+        "Kaiqiang Li",
+        "Gang Li",
+        "Mingle Zhou",
+        "Min Li",
+        "Delong Han",
+        "Jin Wan"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-03-23T02:59:00+00:00",
+      "link": "https://arxiv.org/pdf/2603.21511v1",
+      "tags": [
+        "keyword:PHM",
+        "query:PHM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "zero-shot 3D anomaly detection for industrial inspection",
+      "llm_evidence_cn": "工业检测中的零样本3D异常检测",
+      "llm_evidence": "工业检测中的零样本3D异常检测",
+      "canonical_evidence": "工业检测中的零样本3D异常检测",
+      "llm_tldr_en": "Explores point-language models for zero-shot 3D anomaly detection in industrial inspection scenarios.",
+      "llm_tldr_cn": "探索用于工业检测场景下零样本3D异常检测的点语言模型。",
+      "llm_tldr": "探索用于工业检测场景下零样本3D异常检测的点语言模型。",
+      "llm_tags": [
+        "query:rul:composite"
+      ],
+      "matched_query_tag": "query:rul:composite",
+      "matched_query_text": "Papers central to 剩余寿命预测和旋转机械设备剩余寿命预测, especially work that connects or combines: Remaining Useful Life (RUL) prediction methods; Health monitoring and RUL for rotating machinery; Remaining useful life prediction for rolling element bearings; Deep learning architectures for RUL estimation; State of the art methods for remaining useful life prediction of rotating machinery; Deep learning based RUL estimation for industrial bearings and motors; Data driven vs physics informed models for RUL prediction; Real time health assessment and RUL forecasting for rotating components.",
+      "matched_requirement_id": "req-composite-rul",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.17433v1",
+      "title": "The Phasor Transformer: Resolving Attention Bottlenecks on the Unit Circle",
+      "abstract": "Transformer models have redefined sequence learning, yet dot-product self-attention introduces a quadratic token-mixing bottleneck for long-context time-series. We introduce the \\textbf{Phasor Transformer} block, a phase-native alternative representing sequence states on the unit-circle manifold $S^1$. Each block combines lightweight trainable phase-shifts with parameter-free Discrete Fourier Transform (DFT) token coupling, achieving global $\\mathcal{O}(N\\log N)$ mixing without explicit attention maps. Stacking these blocks defines the \\textbf{Large Phasor Model (LPM)}. We validate LPM on autoregressive time-series prediction over synthetic multi-frequency benchmarks. Operating with a highly compact parameter budget, LPM learns stable global dynamics and achieves competitive forecasting behavior compared to conventional self-attention baselines. Our results establish an explicit efficiency-performance frontier, demonstrating that large-model scaling for time-series can emerge from geometry-constrained phase computation with deterministic global coupling, offering a practical path toward scalable temporal modeling in oscillatory domains.",
+      "authors": [
+        "Dibakar Sigdel"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "published": "2026-03-18T07:18:41+00:00",
+      "link": "https://arxiv.org/pdf/2603.17433v1",
+      "tags": [
+        "keyword:PHM",
+        "query:PHM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "autoregressive time-series prediction for global dynamics",
+      "llm_evidence_cn": "全局动态的自回归时间序列预测",
+      "llm_evidence": "全局动态的自回归时间序列预测",
+      "canonical_evidence": "全局动态的自回归时间序列预测",
+      "llm_tldr_en": "A phase-native Transformer for efficient long-context time-series prediction.",
+      "llm_tldr_cn": "一种用于高效长上下文时间序列预测的相位原生Transformer。",
+      "llm_tldr": "一种用于高效长上下文时间序列预测的相位原生Transformer。",
+      "llm_tags": [
+        "query:rul:composite"
+      ],
+      "matched_query_tag": "query:rul:composite",
+      "matched_query_text": "Papers central to 剩余寿命预测和旋转机械设备剩余寿命预测, especially work that connects or combines: Remaining Useful Life (RUL) prediction methods; Health monitoring and RUL for rotating machinery; Remaining useful life prediction for rolling element bearings; Deep learning architectures for RUL estimation; State of the art methods for remaining useful life prediction of rotating machinery; Deep learning based RUL estimation for industrial bearings and motors; Data driven vs physics informed models for RUL prediction; Real time health assessment and RUL forecasting for rotating components.",
+      "matched_requirement_id": "req-composite-rul",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.21770v1",
+      "title": "Quantifying Uncertainty in FMEDA Safety Metrics: An Error Propagation Approach for Enhanced ASIC Verification",
+      "abstract": "Accurate and reliable safety metrics are paramount for functional safety verification of ASICs in automotive systems. Traditional FMEDA (Failure Modes, Effects, and Diagnostic Analysis) metrics, such as SPFM (Single Point Fault Metric) and LFM (Latent Fault Metric), depend on the precision of failure mode distribution (FMD) and diagnostic coverage (DC) estimations. This reliance can often leads to significant, unquantified uncertainties and a dependency on expert judgment, compromising the quality of the safety analysis. This paper proposes a novel approach that introduces error propagation theory into the calculation of FMEDA safety metrics. By quantifying the maximum deviation and providing confidence intervals for SPFM and LFM, our method offers a direct measure of analysis quality. Furthermore, we introduce an Error Importance Identifier (EII) to pinpoint the primary sources of uncertainty, guiding targeted improvements. This approach significantly enhances the transparency and trustworthiness of FMEDA, enabling more robust ASIC safety verification for ISO 26262 compliance, addressing a longstanding open question in the functional safety community.",
+      "authors": [
+        "Antonino Armato",
+        "Christian Kehl",
+        "Sebastian Fischer"
+      ],
+      "primary_category": "cs.AR",
+      "categories": [
+        "cs.AR",
+        "cs.SE"
+      ],
+      "published": "2026-03-23T10:07:21+00:00",
+      "link": "https://arxiv.org/pdf/2603.21770v1",
+      "tags": [
+        "query:PHM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Failure Modes, Effects, and Diagnostic Analysis (FMEDA)",
+      "llm_evidence_cn": "失效模式、影响与诊断分析 (FMEDA)",
+      "llm_evidence": "失效模式、影响与诊断分析 (FMEDA)",
+      "canonical_evidence": "失效模式、影响与诊断分析 (FMEDA)",
+      "llm_tldr_en": "Introduces error propagation to quantify uncertainty in FMEDA safety metrics for automotive ASICs.",
+      "llm_tldr_cn": "引入误差传播理论，量化汽车芯片 FMEDA 安全指标中的不确定性。",
+      "llm_tldr": "引入误差传播理论，量化汽车芯片 FMEDA 安全指标中的不确定性。",
+      "llm_tags": [
+        "query:phm:composite"
+      ],
+      "matched_query_tag": "query:phm:composite",
+      "matched_query_text": "Papers central to 同时涉及故障诊断与剩余寿命预测的研究论文, especially work that connects or combines: joint modeling of diagnosis and prognosis; multi-task learning for diagnosis and RUL; simultaneous fault diagnosis and remaining useful life prediction; integrated approach for machinery fault diagnosis and prognosis; multi task deep learning for PHM applications; joint diagnosis and RUL estimation research papers.",
+      "matched_requirement_id": "req-composite-phm",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.18123v2",
+      "title": "Understanding Task Aggregation for Generalizable Ultrasound Foundation Models",
+      "abstract": "Foundation models promise to unify multiple clinical tasks within a single framework, but recent ultrasound studies report that unified models can underperform task-specific baselines. We hypothesize that this degradation arises not from model capacity limitations, but from task aggregation strategies that ignore interactions between task heterogeneity and available training data scale. In this work, we systematically analyze when heterogeneous ultrasound tasks can be jointly learned without performance loss, establishing practical criteria for task aggregation in unified clinical imaging models. We introduce M2DINO, a multi-organ, multi-task framework built on DINOv3 with task-conditioned Mixture-of-Experts blocks for adaptive capacity allocation. We systematically evaluate 27 ultrasound tasks spanning segmentation, classification, detection, and regression under three paradigms: task-specific, clinically-grouped, and all-task unified training. Our results show that aggregation effectiveness depends strongly on training data scale. While clinically-grouped training can improve performance in data-rich settings, it may induce substantial negative transfer in low-data settings. In contrast, all-task unified training exhibits more consistent performance across clinical groups. We further observe that task sensitivity varies by task type in our experiments: segmentation shows the largest performance drops compared with regression and classification. These findings provide practical guidance for ultrasound foundation models, emphasizing that aggregation strategies should jointly consider training data availability and task characteristics rather than relying on clinical taxonomy alone.",
+      "authors": [
+        "Fangyijie Wang",
+        "Tanya Akumu",
+        "Vien Ngoc Dang",
+        "Amelia Jiménez-Sánchez",
+        "Jieyun Bai",
+        "Guénolé Silvestre",
+        "Karim Lekadir",
+        "Kathleen M. Curran"
+      ],
+      "primary_category": "eess.IV",
+      "categories": [
+        "eess.IV",
+        "cs.AI"
+      ],
+      "published": "2026-03-18T16:43:43+00:00",
+      "link": "https://arxiv.org/pdf/2603.18123v2",
+      "tags": [
+        "keyword:PHM",
+        "query:PHM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "multi-task framework for joint learning of heterogeneous tasks",
+      "llm_evidence_cn": "异构任务联合学习的多任务框架",
+      "llm_evidence": "异构任务联合学习的多任务框架",
+      "canonical_evidence": "异构任务联合学习的多任务框架",
+      "llm_tldr_en": "Analyzes task aggregation in multi-task models to optimize joint learning of heterogeneous tasks.",
+      "llm_tldr_cn": "分析多任务模型中的任务聚合，以优化异构任务的联合学习。",
+      "llm_tldr": "分析多任务模型中的任务聚合，以优化异构任务的联合学习。",
+      "llm_tags": [
+        "query:phm"
+      ],
+      "matched_query_tag": "query:phm",
+      "matched_query_text": "multi task deep learning for PHM applications",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.22158v1",
+      "title": "Multimodal Survival Analysis with Locally Deployable Large Language Models",
+      "abstract": "We study multimodal survival analysis integrating clinical text, tabular covariates, and genomic profiles using locally deployable large language models (LLMs). As many institutions face tight computational and privacy constraints, this setting motivates the use of lightweight, on-premises models. Our approach jointly estimates calibrated survival probabilities and generates concise, evidence-grounded prognosis text via teacher-student distillation and principled multimodal fusion. On a TCGA cohort, it outperforms standard baselines, avoids reliance on cloud services and associated privacy concerns, and reduces the risk of hallucinated or miscalibrated estimates that can be observed in base LLMs.",
+      "authors": [
+        "Moritz Gögl",
+        "Christopher Yau"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "published": "2026-03-23T16:21:37+00:00",
+      "link": "https://arxiv.org/pdf/2603.22158v1",
+      "tags": [
+        "keyword:PHM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Jointly estimates survival probabilities and generates prognosis text",
+      "llm_evidence_cn": "联合估计生存概率并生成预后文本",
+      "llm_evidence": "联合估计生存概率并生成预后文本",
+      "canonical_evidence": "联合估计生存概率并生成预后文本",
+      "llm_tldr_en": "Integrates multimodal data for survival analysis and evidence-grounded prognosis generation.",
+      "llm_tldr_cn": "整合多模态数据进行生存分析并生成有证据支持的预后文本。",
+      "llm_tldr": "整合多模态数据进行生存分析并生成有证据支持的预后文本。",
+      "llm_tags": [
+        "query:phm"
+      ],
+      "matched_query_tag": "query:phm",
+      "matched_query_text": "joint modeling of diagnosis and prognosis",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.20387v1",
+      "title": "End-to-End Multi-Task Learning for Adjustable Joint Noise Reduction and Hearing Loss Compensation",
+      "abstract": "A multi-task learning framework is proposed for optimizing a single deep neural network (DNN) for joint noise reduction (NR) and hearing loss compensation (HLC). A distinct training objective is defined for each task, and the DNN predicts two time-frequency masks. During inference, the amounts of NR and HLC can be adjusted independently by exponentiating each mask before combining them. In contrast to recent approaches that rely on training an auditory-model emulator to define a differentiable training objective, we propose an auditory model that is inherently differentiable, thus allowing end-to-end optimization. The audiogram is provided as an input to the DNN, thereby enabling listener-specific personalization without the need for retraining. Results show that the proposed approach not only allows adjusting the amounts of NR and HLC individually, but also improves objective metrics compared to optimizing a single training objective. It also outperforms a cascade of two DNNs that were separately trained for NR and HLC, and shows competitive HLC performance compared to a traditional hearing-aid prescription. To the best of our knowledge, this is the first study that uses an auditory model to train a single DNN for both NR and HLC across a wide range of listener profiles.",
+      "authors": [
+        "Philippe Gonzalez",
+        "Vera Margrethe Frederiksen",
+        "Torsten Dau",
+        "Tobias May"
+      ],
+      "primary_category": "eess.AS",
+      "categories": [
+        "eess.AS",
+        "cs.SD"
+      ],
+      "published": "2026-03-20T18:05:23+00:00",
+      "link": "https://arxiv.org/pdf/2603.20387v1",
+      "tags": [
+        "keyword:PHM",
+        "query:PHM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "multi-task learning framework for joint optimization of two distinct signal processing tasks",
+      "llm_evidence_cn": "用于联合优化两个不同信号处理任务的多任务学习框架",
+      "llm_evidence": "用于联合优化两个不同信号处理任务的多任务学习框架",
+      "canonical_evidence": "用于联合优化两个不同信号处理任务的多任务学习框架",
+      "llm_tldr_en": "Proposes a multi-task DNN for joint noise reduction and hearing loss compensation with adjustable outputs.",
+      "llm_tldr_cn": "提出一种用于联合降噪和听力损失补偿的多任务深度神经网络，支持输出独立调节。",
+      "llm_tldr": "提出一种用于联合降噪和听力损失补偿的多任务深度神经网络，支持输出独立调节。",
+      "llm_tags": [
+        "query:phm"
+      ],
+      "matched_query_tag": "query:phm",
+      "matched_query_text": "multi task deep learning for PHM applications",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.21095v1",
+      "title": "Representation-Level Adversarial Regularization for Clinically Aligned Multitask Thyroid Ultrasound Assessment",
+      "abstract": "Thyroid ultrasound is the first-line exam for assessing thyroid nodules and determining whether biopsy is warranted. In routine reporting, radiologists produce two coupled outputs: a nodule contour for measurement and a TI-RADS risk category based on sonographic criteria. Yet both contouring style and risk grading vary across readers, creating inconsistent supervision that can degrade standard learning pipelines. In this paper, we address this workflow with a clinically guided multitask framework that jointly predicts the nodule mask and TI-RADS category within a single model. To ground risk prediction in clinically meaningful evidence, we guide the classification embedding using a compact TI-RADS aligned radiomics target during training, while preserving complementary deep features for discriminative performance. However, under annotator variability, naive multitask optimization often fails not because the tasks are unrelated, but because their gradients compete within the shared representation. To make this competition explicit and controllable, we introduce RLAR, a representation-level adversarial gradient regularizer. Rather than performing parameter-level gradient surgery, RLAR uses each task's normalized adversarial direction in latent space as a geometric probe of task sensitivity and penalizes excessive angular alignment between task-specific adversarial directions. On a public TI-RADS dataset, our clinically guided multitask model with RLAR consistently improves risk stratification while maintaining segmentation quality compared to single-task training and conventional multitask baselines. Code and pretrained models will be released.",
+      "authors": [
+        "Dina Salama",
+        "Mohamed Mahmoud",
+        "Nourhan Bayasi",
+        "David Liu",
+        "Ilker Hacihaliloglu"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.AI"
+      ],
+      "published": "2026-03-22T07:14:43+00:00",
+      "link": "https://arxiv.org/pdf/2603.21095v1",
+      "tags": [
+        "keyword:PHM",
+        "query:PHM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "multitask framework that jointly predicts mask and risk category",
+      "llm_evidence_cn": "联合预测掩码和风险类别的多任务框架",
+      "llm_evidence": "联合预测掩码和风险类别的多任务框架",
+      "canonical_evidence": "联合预测掩码和风险类别的多任务框架",
+      "llm_tldr_en": "A multitask framework for thyroid assessment that jointly handles segmentation and risk classification.",
+      "llm_tldr_cn": "一种用于甲状腺评估的多任务框架，联合处理分割和风险分类任务。",
+      "llm_tldr": "一种用于甲状腺评估的多任务框架，联合处理分割和风险分类任务。",
+      "llm_tags": [
+        "query:phm"
+      ],
+      "matched_query_tag": "query:phm",
+      "matched_query_text": "multi task deep learning for PHM applications",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}

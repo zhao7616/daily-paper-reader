@@ -1,0 +1,493 @@
+Title: Quantifying Uncertainty in FMEDA Safety Metrics: An Error Propagation Approach for Enhanced ASIC Verification
+
+URL Source: https://arxiv.org/pdf/2603.21770v1
+
+Published Time: Tue, 24 Mar 2026 02:33:13 GMT
+
+Number of Pages: 11
+
+Markdown Content:
+# QUANTIFYING UNCERTAINTY IN FMEDA S AFETY METRICS :AN ERROR PROPAGATION APPROACH FOR ENHANCED ASIC VERIFICATION 
+
+Antonino Armato *1 , Christian Kehl †2 , and Sebastian Fischer ‡2 1Functional Safety, Robert Bosch GmbH, Milan,Italy 
+
+> 2
+
+Functional Safety, Robert Bosch GmbH, Reutlingen, Germany March 24, 2026 
+
+# ABSTRACT 
+
+Accurate and reliable safety metrics are paramount for functional safety verification of ASICs in automotive systems. Traditional FMEDA (Failure Modes, Effects, and Diagnostic Analysis) metrics, such as SPFM (Single Point Fault Metric) and LFM (Latent Fault Metric), depend on the precision of failure mode distribution (FMD) and diagnostic coverage (DC) estimations. This reliance can often leads to significant, unquantified uncertainties and a dependency on expert judgment, compromising the quality of the safety analysis. This paper proposes a novel approach that introduces error propagation theory into the calculation of FMEDA safety metrics. By quantifying the maximum deviation and providing confidence intervals for SPFM and LFM, our method offers a direct measure of analysis quality. Furthermore, we introduce an Error Importance Identifier (EII) to pinpoint the primary sources of uncertainty, guiding targeted improvements. This approach significantly enhances the transparency and trustworthiness of FMEDA, enabling more robust ASIC safety verification for ISO 26262 compliance, addressing a longstanding open question in the functional safety community. 
+
+# 1 Introduction 
+
+1.1 Context and Problem Statement 
+
+The proliferation of Application-Specific Integrated Circuits (ASICs) in modern safety-critical automotive systems necessitates rigorous functional safety verification compliant with standards like ISO 26262 [ 1]. A cornerstone of this verification is the Failure Modes, Effects, and Diagnostic Analysis (FMEDA), a structured methodology employed to evaluate the safety level of hardware components [ 2 ]. FMEDA quantifies key safety metrics such as the Single Point Fault Metric (SPFM) and Latent Fault Metric (LFM), which are crucial for assessing residual risk [3]. However, the accuracy and reliability of these calculated safety metrics are inherently dependent on the precision of their input parameters: the failure mode distribution (FMD) and the Diagnostic Coverage (DC) of implemented safety mechanisms [ 16 ]. Current practices for estimating these parameters often involve ad-hoc data characterization, making the process subjective, inaccurate, and reliant on expert judgment [ 2 ] [ 5]. This is particularly true with the increasing of the complexity of the design likes System on Chip (SoC)[ 16 ]. Such reliance introduces significant, yet unquantified, uncertainty into the final SPFM and LFM values, potentially undermining the trustworthiness of the safety analysis. The lack of a systematic method to quantify this uncertainty has long been recognized as a major open question in the functional safety community. 
+
+> ∗
+
+antonino.armato@it.bosch.com 
+
+> †
+
+christian.kehl@de.bosch.com 
+
+> ‡
+
+sebastian.fischer4@de.bosch.com 
+
+> arXiv:2603.21770v1 [cs.AR] 23 Mar 2026
+
+The functional safety community has made substantial progress in developing methodologies for hardware safety analysis, largely driven by the demands of ISO 26262. Early efforts focused on formalizing the FMEDA process, moving from qualitative FMEA to quantitative FMEDA for hardware metrics calculation [2] [7] [8] . More recently, research has concentrated on enhancing the efficiency, scalability, and integration of these analyses within modern design flows. Model-based approaches have gained prominence, seeking to overcome the limitations of manual, spreadsheet-based FMEDAs for complex systems [ 8] [ 9 ]. Sari (2020) [ 9] provides a comprehensive overview of functional safety standards (IEC 61508 [ 17 ], ISO 26262) and their evolution, highlighting the increasing complexity of safety-related E/E systems and the need for systematic development processes. This work details how ISO 26262 addresses hazards from random hardware failures and systematic failures, and outlines the entire safety lifecycle from item definition to ASIL decomposition and dependent failure analysis (DFA). This extensive background sets the stage for understanding the sophisticated context in which FMEDA operates. Steiner et al. [ 10 ] [ 11 ] , in their "Split’n’Cover" methodology, exemplify the cutting-edge in FMEDA execution. They propose a novel SystemC-based virtual prototyping framework that allows for integrated safety and performance analysis of memory subsystems (e.g., LPDDR DRAM) in automotive applications. This approach mechanizes the calculation of SPFM and LFM using dedicated SystemC blocks that model failure propagation and diagnostic coverage. This represents an advancement in how these metrics can be computed within a unified simulation environment, enabling early analysis of safety measures’ performance impact. Other works explore similar avenues, such as SystemC-based fault injection for verification of safety requirements [ 12 ] [ 13 ] or hierarchical FMEDA modeling for scalability [ 7 ] [ 14 ]. These methods aim to improve the analysis of complex architectures, including multicore processors and domain ECUs, by leveraging advanced simulation and modeling techniques [8]. While these state-of-the-art methods, including model-based techniques, SystemC integration, detailed fault analysis, and experimental evaluations, offer powerful tools for calculating SPFM and LFM and understanding their derivation from a system-level perspective, they share a common implicit assumption: the input parameters (failure rates and diagnostic coverages) are treated as precise, single-point values. This fundamental gap—the lack of a systematic and quantitative method to understand and communicate the uncertainty inherent in the input data and propagating through the FMEDA calculation —remains. Without this, decisions regarding ASIL compliance can be based on a misleading sense of precision, potentially compromising the integrity of the safety case. 
+
+1.2 Main Contributions 
+
+This paper proposes a novel methodology to address this fundamental problem by integrating error propagation theory into the FMEDA framework. Our approach provides a direct method to: 1. Quantify the maximum deviation (or uncertainty) in calculated SPFM and LFM metrics. 2. Establish confidence intervals for these safety metrics, offering a transparent measure of the analysis quality. 3. Introduce an Error Importance Identifier (EII) to pinpoint the dominant sources of uncertainty (either FMD or DC estimation errors), thereby guiding focused improvement efforts in the safety analysis. This advancement significantly enhances the rigor, transparency, and reliability of FMEDA, directly contributing to more robust ASIC safety verification and increased confidence in ISO 26262 compliance. It provides the essential missing layer of confidence assessment for even the most sophisticated calculation methodologies currently available, allowing engineers to not only ask "What is the safety metric?" but also "How much can I trust this safety metric, and where should I focus to improve that trust?" 
+
+1.3 Paper Structure 
+
+The remainder of this paper is organized as follows: Section 2 details the sources of uncertainties, Section 3 details the proposed approach for quantifying uncertainty in FMEDA metrics using error propagation and introduces the Error Importance Identifier (EII) for prioritizing uncertainty reduction efforts. Section 4 proposes a use case. Section 5 discusses the impact of this methodology on existing workflows and its integration. Section 6 presents the conclusions of this work. 22 Identified Source of Uncertainties and Gaps 
+
+2.1 FMEDA Background and Uncertainty 
+
+FMEDA (Failure Mode, Effects, and Diagnostic Analysis) is a foundational methodology within functional safety, systematically evaluating the safety characteristics of hardware components [ 2] . Its hierarchical structure breaks down integrated circuits into parts, subparts, and ultimately specific failure modes, each assessed for its potential impact on safety goals [1] (see the example in Figure 1). 
+
+Figure 1: An Example of FMEDA focused on the execution unit of a generic CPU For each failure mode identified as relevant to safety goals, the FMEDA requires several key inputs: • Failure Rate (FR) : This represents the frequency at which a component or a specific failure mode is expected to occur over time [1] [2] . It quantifies the likelihood of hardware element failure. • Safety Mechanism (SM) : These are technical solutions, often implemented via hardware or software, designed to detect, mitigate, or tolerate faults to ensure intended functionality or achieve a safe state [1] [2]. • Diagnostic Coverage (DC) : This metric quantifies the effectiveness of an implemented safety mechanism, expressing the percentage of a failure mode’s failure rate that is either detected or controlled [1] [2]. The primary outputs of FMEDA are the hardware architectural metrics: SPFM (Single Point Fault Metric), LFM (Latent Fault Metric), and PMHF (Probabilistic Metric of Hardware Failures). These metrics are central to assessing the level of functional safety readiness of hardware components in accordance with ISO 26262 [1]. SPFM and LFM are ratio metrics that quantify the hardware’s ability to detect dangerous faults, while PMHF, typically expressed in FIT (Failure In Time), summarizes the overall risk of safety goal violations due to random hardware failures [ 2 ]. These metrics are comprehensively defined in ISO 26262-5:2011, Annex D, C.2, C.3, and 9.2 [1]: • Single Point Fault Metric: Measures the robustness of an item or function against single point faults, whether achieved through design features or by diagnostic coverage from safety procedures. • Latent Fault Metric: Reflects the robustness of an item or function against latent faults, which could be safe faults by design, covered by safety procedures, or recognized by the driver before a safety objective is violated. • Probabilistic Metric of Hardware Failures (PMHF): Provides the rationale that the residual risk of a safety goal violation due to random hardware failures is sufficiently low [8]. The accuracy of these calculated metrics at the IC level is profoundly influenced by various factors inherent in the analysis process [2] [4] [16]: • Granularity of Breakdown: The level of detail in breaking down an IC into hardware blocks and subsequent failure modes significantly impacts analysis accuracy. • Failure Mode Definition and Distribution: Correctly identifying all possible failure modes and accurately assessing their distribution (i.e., the likelihood of a fault propagating to a specific failure mode) is critical. This process is often subjective and labor-intensive, particularly for complex ICs, potentially leading to unreliable safety data and inaccurate metric calculations. For instance, estimating the proportional contribution of various failure modes often involves heuristics, such as associating output pins, which inherently simplifies a complex reality. 3• Safe/Silent Fault Identification: Accurately determining the proportion of faults that do not propagate into a failure (i.e., safe or silent faults) is essential for correct residual risk assessment. • Safety Mechanism Definition and Association: Precise definition of safety mechanisms and their correct association with the specific failure modes they are intended to mitigate are fundamental. • Diagnostic Coverage (DC) Estimation Accuracy: This is a particularly challenging aspect. An accurate DC estimation for each safety mechanism, reflecting its likelihood of correcting or detecting faults, is paramount. ISO 26262-5 [ 1] requires evidence to support the suitability of hardware architectural design concerning the detection and control of random hardware failures. Traditionally, DC values have been estimated qualitatively through expert judgment, historical data, or common practices, which inherently introduce uncertainty. Fault simulation emerges as a highly desirable technique for quantitative validation of DC, especially for higher ASILs and custom diagnostics [3]. Fault simulation, performed within the context of a specific failure mode and its corresponding safety mechanisms, monitors the functional behavior at Observation Points and SM effectiveness at Detection Points (see Figure 2) . 
+
+Figure 2: Abstraction level (digital environment) where is possible to perform the fault injection correlated with the effort and accuracy. Injected faults are then categorized into: 
+
+– Safe : Faults not propagating to observation points; functionality remains unaffected. 
+
+– Dangerous Detected : Faults observed by SM detection points, indicating the SM’s capability to detect the fault [6]. 
+
+– Dangerous Undetected : Faults not detected by any SM detection points, posing a direct safety risk. The accuracy of fault simulation relies heavily on the correct definition of observation and detection points, as well as the quality of the executed workload (controllability). An inadequately stimulating workload can produce misleading results regarding safe, dangerous detected, or dangerous undetected faults, underscoring that effective functional verification environments are prerequisite for robust functional safety verification. The inherent complexities and reliance on estimations and expert judgment in these input parameters (FMDs and DCs) for FMEDA calculations form the basis of the unquantified uncertainties that our proposed methodology addresses. 
+
+2.2 Fault Simulation and Accuracy 
+
+According to the Section 4.8 of ISO26262-11 [ 1], the fault injection at the semiconductor component level is a known methodology which can be used to support several activities of the lifecycle when the safety concept involves semiconductor components. In details, for semiconductor components, fault injection can be used for: • supporting the evaluation of the hardware architectural metrics; and • evaluating the diagnostic coverage of a safety mechanisms. • evaluating the diagnostic time interval and the fault reaction time interval; and • confirming the fault effect. • supporting the pre-silicon verification of a safety mechanism with respect to its requirements, including its capability to detect faults and control their effect (fault reaction). Drawbacks of simulation-based fault injection can be summarized as follows: • It is time-consuming due to the length of the experiments. In other words, it requires the simulation of fault-free design (Good Run) as well as simulations of the design in the presence of the enormous number of faults. 4• It may have incomplete results. For example, when there are undetected faults as a result of campaigns, this is considered a weak result of the simulation due to the fact that a different test stimulus may cause fault propagation, i.e., different results. To address the time-consuming issue, in the simulation based, the fault injection can be performed at different level of abstraction obtaining different level of accuracy. 
+
+Figure 3: Abstraction level (digital environment) where is possible to perform the fault injection correlated with the effort and accuracy. The Figure 3 (focused to the digital world) shows that the Gate Level Netlist (GLN) is the most accurate environment. Nevertheless, fault simulations at this level are time consuming due the high number of faults to inject. For this reason, safety engineers try to move to less expensive simulations with the intent to correct or re-scale the obtained result by expert judgment. In addition, values of coverage extracted from different level can be combined (e.g. GLN and ISL) to obtain average values of accuracy. Alternative solution to resolve the problem of a large simulation length is based on statistical fault simulation calculating up front a fixed confidence level correlated to a margin of error that can be compensated manually using expert judgment ISO 26262-11 in the Note 4 [ 1], proposes the possibility of using a sampling factor to reduce the fault list, if justified with respect to the specified purpose, confidence level, type/nature of the safety mechanism, and selection criteria. This approach is particularly relevant for managing the extensive fault lists encountered in complex ASIC verification. Starting from the hypothesis that the characteristics of the population follow a normal distribution, each individual in the initial population must have the same probability to be selected in the sample. Therefore, a uniform distribution must be used during the random sampling. Based on these assumptions, the sample size n , or number of faults to (randomly) select for injection, can be computed with the following formula [3]: 
+
+n = N
+
+1 + e2 · N −1
+
+> t2·p·(1 −p)
+
+(1) with respect to: • The initial population size N .• The estimated proportion p of individuals in the population having a given characteristic (e.g., the estimated probability of faults resulting in a failure). This parameter defines the standard error [3]. • The margin of error e. This is the error on the result Peval obtained during the campaign using the sample. The exact probability that individuals have the desired characteristic should be in the interval [Peval − e; Peval + e],or [Peval − e · 100%; Peval + e · 100%] if Peval is given as a percentage [3]. 5• The cut-off point (or critical value) t corresponding to the confidence level. This level is the probability that the exact value is actually within the error interval. A 90%, 95% or 99% confidence level is usually chosen (typically 95%). The cut-off point is computed with respect to the Normal distribution (quantile table) [3]. The parameter p basically corresponds to an estimate of the true value being searched (e.g., percentage of errors resulting in a failure). Since this value is a priori unknown (but between 0 and 1), a conservative approach is to use the value that will maximize the sample size. In other words, the sample size will be chosen so that it will be sufficient to ensure the expected margin of error with the expected confidence level, no matter the actual value of the proportion. It has been demonstrated that this is achieved for p = 0 .5; it is therefore sufficient to use this value in all cases [ 3]. If the expected proportion is very small or very large, refining this estimate would lead to a reduced sample size for a given margin of error, but our goal is to avoid any a priori assumption on the results. This statistical approach for fault injection directly complements our uncertainty quantification in FMEDA, providing a principled way to manage the statistical confidence in diagnostic coverage values which are a direct input to our error propagation methodology. In the Figure 4 is reported an example of application of equation(1), where the max margin error e has been select equal to 1%., significanlty reducing the number of faults to simulate. 
+
+Figure 4: An Example of sampling factor in the FMEDA table, where the number of faults (Samplig Faults column) to inject is significatly reduced. The confidence level is 95%. Nevertheless, the ISO-26262 does not provide a way to handle the level uncertainty introduced from such methodology. The proposed approach resolve the issue, introducing a clear method to consider the uncertainty added from the statistical fault injection, producing the final metrics with the max deviations. 
+
+# 3 Proposed approach 
+
+3.1 Quantifying Uncertainty in FMEDA Metrics 
+
+The core of our invention lies in applying the well-established theory of error propagation [ 15 ] to the FMEDA calculation. In FMEDA, safety metrics ( x) are functions of various measured or estimated input variables (e.g., individual Diagnostic Coverages DC i, and individual failure mode distributions λf m i). The standard formula for SPFM [1] is given as: SPFM = 1 −
+
+P(1 − DC i) · λf m i
+
+λtot 
+
+(2) where λf m i represents the failure rate of a specific failure mode i, and λtot is the total failure rate. This can be expressed as a dependent variable x = P(1 − DC i) · λf m i.For a general function x = f (u, v, ... ), where u, v, ... are measured variables with associated uncertainties ( σu, σ v , ... ), the variance of x (σ2
+
+> x
+
+) can be approximated by the error propagation equation [15]: 
+
+σ2 
+
+> x
+
+=
+
+ ∂x ∂u 
+
+2
+
+σ2 
+
+> u
+
++
+
+ ∂x ∂v 
+
+2
+
+σ2 
+
+> v
+
++ · · · + 2 
+
+ ∂x ∂u 
+
+  ∂x ∂v 
+
+
+
+σ2 
+
+> uv
+
++ · · · (3) Assuming that the uncertainties in the input variables (FMD and DC estimations) are uncorrelated, the cross-product terms ( σ2 
+
+> uv
+
+) can be neglected, simplifying Equation (3) to: 6σ2 
+
+> x
+
+≈
+
+ ∂x ∂u 
+
+2
+
+σ2 
+
+> u
+
++
+
+ ∂x ∂v 
+
+2
+
+σ2 
+
+> v
+
++ · · · (4) Applying this principle to the FMEDA, the total uncertainty ( σSP F M ) in the SPFM can be calculated by considering the partial derivatives of x = P(1 − DC i) · λf m i with respect to the uncertainties in each DC i and λf m i. Specifically, for the sum of dangerous undetected failure rates ( P(1 − DC i) · λf m i), the partial derivatives with respect to DC i
+
+and λf m i are: 
+
+∂x ∂DC i
+
+= −λf m i (5) 
+
+∂x ∂λf m i
+
+= (1 − DC i) (6) Thus, the variance of the sum, and consequently the uncertainty in SPFM ( σSP F M ), can be calculated by summing the squares of the individual uncertainties in DC i and λf m i, weighted by their respective partial derivatives. 
+
+σ2 
+
+> x
+
+≈
+
+> n
+
+X
+
+> i=1
+
+ ∂x ∂DC i
+
+2
+
+σ2 
+
+> DC i
+
++
+
+> n
+
+X
+
+> i=1
+
+ ∂x ∂λf m i
+
+2
+
+σ2
+
+> λf m i
+
+=
+
+> n
+
+X
+
+> i=1
+
+(−λf m i)2σ2 
+
+> DC i
+
++
+
+> n
+
+X
+
+> i=1
+
+(1 − DC i)2σ2
+
+> λf m i
+
+=λf m 21σ2 
+
+> DC 1
+
++ λf m 22σ2 
+
+> DC 2
+
++ · · · + λf m 2
+
+> n
+
+σ2
+
+> DC n
+
++ (1 − DC 1)2σ2 
+
+> λf m 1
+
++ (1 − DC 2)2σ2 
+
+> λf m 2
+
++ · · · + (1 − DC n)2σ2
+
+> λf m n
+
+(7) Assuming y as follow: 
+
+y = − xλtot 
+
+(8) 
+
+σ2 
+
+> y
+
+≈ σ2
+
+> x
+
+λ2
+
+> tot
+
+(9) 
+
+σSP F M =
+
+q
+
+σ2 
+
+> y
+
+=
+
+s
+
+σ2
+
+> x
+
+A2
+
+> tot
+
+= σx
+
+Atot 
+
+(10) Substituting the full expression for σ2 
+
+> x
+
+from Equation (7) into Equation (10), the complete formula for the standard deviation of SPFM becomes: 
+
+σSP F M ≈
+
+vuut 1
+
+λ2
+
+> tot
+> n
+
+X
+
+> i=1
+
+λf m 2 
+
+> i
+
+σ2 
+
+> DC i
+
++
+
+> n
+
+X
+
+> i=1
+
+(1 − DC i)2σ2
+
+> λf m i
+
+!
+
+(11) Or, in the fully expanded form: 
+
+σSPFM ≈ 1
+
+λtot 
+
+vuutλf m 21σ2 
+
+> DC 1
+
++ λf m 22σ2 
+
+> DC 2
+
++ · · · + λf m 2
+
+> n
+
+σ2
+
+> DC n
+
++ (1 − DC 1)2σ2 
+
+> λf m 1
+
++ (1 − DC 2)2σ2 
+
+> λf m 2
+
++ · · · + (1 − DC n)2σ2
+
+> λf m n
+
+(12) The equation(12) can be used to calculate the final error in the calculation of SPFm. The (12) assumes that the cross terms are uncorrelated. Addittionally, the (12) can be extended considering the cross terms in the hypothesis of correlation between the variables. For example, the same safety mechanisms can cover different failure modes creating a correlation between the two DCs. In the same way, the failure mode distribution can take into account shared area 7between different failure modes. Even in such case, there is a correlation between the two failure mode distributions. For sake of information, the failure mode distributions are linked to the overall failure rate so from mathematical point of view there is a correlation between different failure modes because a modification of one value will impact on the others. Nevertheless, a positive fluctuation of one failure mode distribution will impact to negative fluctuations of the others, then, on the average, we should expect the cross terms to vanish. However, in certain scenarios, such as when specific data for one type of uncertainty is unavailable or considered negligible, the FMEDA analysis can assume no errors in the failure mode distribution or no errors in the diagnostic coverages. In such cases, Equation (12) can be respectively simplified into Equation (13) and Equation (14) : 
+
+σSPFM ≈ 1
+
+λtot 
+
+q
+
+λf m 21σ2 
+
+> DC 1
+
++ λf m 22σ2 
+
+> DC 2
+
++ · · · + λf m 2
+
+> n
+
+σ2 
+
+> DC n
+
+(13) 
+
+σSPFM ≈ 1
+
+λtot 
+
+q
+
+(1 − DC 1)2σ2 
+
+> λf m 1
+
++ (1 − DC 2)2σ2 
+
+> λf m 2
+
++ · · · + (1 − DC n)2σ2 
+
+> λf m n
+
+(14) To be note that the failure mode distributions are linked to the overall failure rate so from mathematical point of view there is a correlation between different failure modes because a modification of one value will impact on the others. Nevertheless, a positive fluctuation of one failure mode distribution will impact to negative fluctuations of the others, then, on the average, we should expect the cross terms to vanish. In any case, the single variance can be calculated for example as follow: 
+
+ ∂x ∂λf m 1
+
+2
+
+=
+
+ 1 − DC 1
+
+λtot 
+
+2
+
+−
+
+ P ni=1 (1 − DC i)λf m i
+
+λtot 
+
+2
+
+(15) In similar way, appliying the theory of error propagation, an equation related to LFM can be achieved. 
+
+3.2 Error Importance Identifier (EII) 
+
+To efficiently guide improvements in the FMEDA process, we introduce the Error Importance Identifier (EII). The EII quantitatively identifies which input parameter contributes most significantly to the overall uncertainty in the final safety metric (SPFM or LFM). Mathematically, the EII is calculated as: EII DC n = λ2
+
+> f mn
+
+σ2
+
+> DC n
+
+λ2
+
+> tot
+
+σSPFM 
+
+(16) The EII can pinpoint whether the uncertainty in estimating a particular Diagnostic Coverage ( EII DC i ) or a specific Failure Mode Rate (EII λf m i ) is the dominant source of error. This information is invaluable for safety engineers, allowing them to: • Prioritize efforts for data collection and analysis. • Focus on refining the most uncertain input parameters. • Optimize resources to reduce the main sources of error in the safety metrics, thereby improving the overall quality and trustworthiness of the FMEDA. 
+
+# 4 Case Study: Application on Processor CORE Execution Stage 
+
+To illustrate the practical application and benefits of our proposed approach, we present a case study focusing on the 
+
+Core Execution Stage of a typical CPU architecure. The processor core is a common critical part in many automotive applications, and its functional safety assessment is paramount. The Core Execution Stage is further decomposed into subparts, including the Multiplier/Divider (MUL/DIV) unit and the Execution Stage Control logic, each with identified potential failure modes. Figure 5 provides an illustrative representation of the FMEDA analysis for this case study. For each hardware sub-part and its failure modes, we estimated the FIT rate (based on the area) and associated uncertainty σFM for the Failure Rate Distribution (FMD) (columns 1 and 2 of Figure 5). For each failure mode we 8defined the Iist of Safetyt Mechanisms to detect, the overall Diagnostic Coverage (DC) and its level of uncertainty σDC 
+
+(columns 3 and 4 of Figure 5). The blu cells (columns 4 of Figure 5) highligh where the DC has been measured by Fault Simulation with a max margin error of 1% (see Section 2.2). These levels of uncertaints are used in the columns 5 and 7 Figure 5, based on the equations (13) and Equation (14) of our error propagation model, to derive the overall uncertainty of the SPFM and to identify the dominant sources of error using the Error Importance Identifier (EII) (columns 6 and 8 of Figure 5. 
+
+Figure 5: FMEDA Analysis with Uncertainty and Error Importance Distribution for Core Execution Stage. The table includes the two uncertainties columns σDC and σλf m and their contribution to "Error Importance Distribution" (in %). The Tot Error Important Distribution (in %) column sums the individual contributions (from both σDC and σλf m for a given failure mode) to represent the total percentage on the overall SPFM attributed to that specific failure mode. Our methodology processes these uncertain inputs to yield two critical outputs that enhance the traditional FMEDA: 1. Confidence Interval for SPFM (and LFM): Beyond a single nominal SPFM value, our model provides a range (e.g., SPFM ±σSPFM ) within which the true SPFM is expected to lie with a certain confidence level. This transparently communicates the inherent uncertainty of the safety metric, preventing a false sense of precision and allowing for more robust compliance decisions. The Figure 6 shows the total σSPFM that evidences as for example in an ASIL B target, the final SPFM is affected from a level of uncertainty (0.53 %) that can consequently "nullify" the reaching of the target. 2. Error Importance Identifier (EII) Distribution: The table’s "Error Importance Distribution (in %)" columns, directly calculated from our EII (16), quantify how much each input’s uncertainty contributes to the total variance of the SPFM. For example, a high percentage in the "Contribution from σDC " column for a specific failure mode (e.g., MUL/DIV) would indicate that the uncertainty in estimating the DC for that failure mode is a primary driver of overall SPFM uncertainty. Conversely, a high percentage in the "Contribution from σFM "column would highlight the uncertainty in the failure rate estimation as more critical. The "Tot Error Important Distribution (in %)" column then sums these contributions to provide an aggregate EII for each failure mode. This granular insight allows safety engineers to make informed decisions. If a particular failure mode’s diagnostic coverage uncertainty is a major contributor to total SPFM uncertainty (high EII for σDC ), resources can be specifically allocated to more extensive fault injection campaigns or more rigorous analysis of that SM. If the FMD uncertainty dominates (high EII for σFM ), efforts can be directed towards collecting better field data, refining fault simulation campaign. This targeted approach significantly optimizes verification efforts, leading to a more efficient and trustworthy safety analysis. 
+
+Figure 6: The final SPFM and the corresponding σSPFM (in %) calculated using respectively the Equations (12) (13) and (14). 95 Discussion of Results 
+
+5.1 Impact and Workflow Integration 
+
+The integration of error propagation and the EII into the FMEDA process introduces fundamental changes to the workflow, transforming it from a point-estimate calculation into an analysis that explicitly provides a confidence interval for safety metrics. This directly answers the crucial question: "How much is the error of the FMEDA?" Furthermore, the EII enables targeted improvements, reducing manual modifications and improving the scientific rigor of the entire safety analysis. The methodology can be applied to every automotive project with ASIL requirements, significantly enhancing the quality of results, and increasing trust with external assessors and customers. This approach can also be combined with fault injection techniques [ 3] , particularly when statistical sampling introduces a quantifiable margin of error, to provide a holistic view of uncertainty throughout the verification process. The three key additional steps are: 1. Evaluation of FMD error per failure mode: Quantifying the uncertainty associated with each failure mode distribution. 2. Evaluation of DC error per failure mode: Quantifying the uncertainty associated with each diagnostic coverage. 3. Calculation of the overall error on SPFM and LFM: Applying error propagation to derive the final confidence intervals. 
+
+Figure 7: Complete Safety Analysis workflow with additional steps to consider error propagation. The flowchart would clearly distinguish between "Standard steps" (existing) FMEDA workflow) and "New steps" introduced by this methodology, highlighting their integration into the process. This systematic integration provides an unprecedented level of transparency regarding metric reliability and strengthens the foundation for achieving robust ISO 26262 compliance in complex ASIC designs. 
+
+# 6 Conclusion 
+
+The accuracy of safety metrics derived from FMEDA is paramount for establishing confidence in functional safety compliance, yet traditional methods often suffer from unquantified uncertainties. This paper presents a significant advancement by applying error propagation theory to FMEDA safety metrics, enabling the direct calculation of maximum deviation and confidence intervals for SPFM and LFM. The introduction of the Error Importance Identifier 10 (EII) further empowers engineers to efficiently target the primary sources of uncertainty, leading to optimized and more effective analysis improvements. This new approach elevates the quality of safety verification, provides unprecedented transparency regarding metric reliability, and strengthens the foundation for achieving robust ISO 26262 compliance in complex ASIC designs. This method represents a crucial step towards resolving a major open question in the safety community, offering a more scientifically rigorous basis for dependability assessment. 
+
+# References 
+
+[1] ISO 26262:2018. Road vehicles – Functional safety. International Organization for Standardization, Geneva, Switzerland (2018). [2] Nardi, A., Armato, A. Functional safety methodologies for automotive applications. In: 2017 IEEE/ACM International Conference on Computer-Aided Design (ICCAD) . IEEE (2017). [3] Leveugle, R., et al. Statistical fault injection: Quantified error and confidence. In: 2009 Design, Automation & Test in Europe Conference & Exhibition . IEEE (2009). [4] Ballan, O., Maillard, P., Arver, J., Smith, C., Petersson, R., Griessing, A., Venini, F. (2020). Evaluation of ISO 26262 and IEC 61508 metrics for transient faults of a multi-processor system-on-chip through radiation testing. Microelectronics Reliability, 107, 113601. [5] Buch, S. Micron Technology: Questions to Ask Your Memory Supplier... About Functional Safety for DRAM. (2020). [Video]. Available: https://www.youtube.com/watch?v=mzcbtXdWDcg .[6] Böhm, A. DRAM More Important Than You Think for Achieving Automotive Functional Safety. Design News , (2021). [Online]. Available: https://www.designnews.com/electronics/ dram-more-important-you-think-achieving-automotive-functional-safety .[7] Jung, M., Kraft, K., Steiner, L., Wehn, N. FMEDA with Graphical Fault Tree Representation: A Scalable Approach for ISO 26262 Hardware Metrics. IEEE Transactions on Computer-Aided Design of Integrated Circuits and Systems , 40(6), 1184-1194 (2021). [8] Sari, B. Fail-operational Safety Architecture for ADAS/AD Systems and a Model-driven Approach for Dependent Failure Analysis. Wissenschaftliche Reihe Fahrzeugtechnik , Universität Stuttgart (2020). [9] Reiter, S., Pressler, M., Viehl, A., Bringmann, O., Rosenstiel, W. Reliability assessment of safety-relevant automotive systems in a model-based design flow. In: 2013 18th Asia and South Pacific Design Automation Conference (ASP-DAC) . IEEE (2013). [10] Steiner, L., Kraft, K., Christ, D., Uecker, D., Malek, C., Jung, M., Wehn, N. Split’n’Cover: ISO 26262 Hardware Safety Analysis with SystemC. International Journal of Parallel Programming , (2025). https://doi.org/10. 1007/s10766-025-00798-z .[11] Uecker, D., Jung, M. Split’n’Cover: ISO 26262 Hardware Safety Analysis with SystemC. In: 2022 Embedded Computer Systems: Architectures, Modeling, and Simulation (SAMOS) . Springer (2022). [12] Silva, A. d., Parra, P., Polo, O. R., Sánchez, S. Runtime Instrumentation of SystemC/TLM2 Interfaces for Fault Tolerance Requirements Verification in Software Cosimulation. Modelling and Simulation in Engineering , (2014). 
+
+https://doi.org/10.1155/2014/105051 .[13] Tabacaru, B.-A., Chaari, M., Ecker, W., Kruse, T., Novello, C. Fault-effect analysis on system-level hardware modeling using virtual prototypes. In: 2016 Forum on Specification and Design Languages (FDL) . IEEE (2016). [14] Jung, M., Weis, C., Wehn, N. DRAMSys: A Flexible DRAM Subsystem Design Space Exploration Frame-work. IPSJ Transactions on System LSI Design Methodology (T-SLDM) , (2015). https://doi.org/10.2197/ ipsjtsldm.8.63 .[15] Bevington, P. R., Robinson, D. K. Data reduction and error analysis for the physical sciences. Computers in Physics , 7(4), 415-416 (1993). [16] Nardi, A., Camdzic, S., Armato, A., Lertora, F. (2019, April). Design-for-safety for automotive IC design: Challenges and opportunities. In 2019 IEEE Custom Integrated Circuits Conference (CICC) (pp. 1-8). IEEE. [17] IEC 61508:2007, ed.1.0 Functional Safety - Standards 11
