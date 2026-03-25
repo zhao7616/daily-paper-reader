@@ -1,0 +1,554 @@
+Title: Frequency Switching Mechanism for Parameter-E!cient Multi-Task Learning
+
+URL Source: https://arxiv.org/pdf/2603.21111v1
+
+Published Time: Tue, 24 Mar 2026 01:40:06 GMT
+
+Number of Pages: 14
+
+Markdown Content:
+# Frequency Switching Mechanism for Parameter-Efficient Multi-Task Learning 
+
+# Shih-Wen Liu 1 Yen-Chang Chen 1 Wei-Ta Chu 1 Fu-En Yang 2 Yu-Chiang Frank Wang 21National Cheng Kung University, Tainan, Taiwan 
+
+> 2
+
+# NVIDIA Research, Taiwan 
+
+{ne6134079, f74091174, wtchu }@gs.ncku.edu.tw {fredy, frankwang }@nvidia.com 
+
+# Abstract 
+
+Multi-task learning (MTL) aims to enable a single model to solve multiple tasks efficiently; however, cur-rent parameter-efficient fine-tuning (PEFT) methods re-main largely limited to single-task adaptation. We intro-duce Free Sinewich , a parameter-efficient multi-task learn-ing framework that enables near-zero-cost weight mod-ulation via frequency switching ( Free ). Specifically, a 
+
+Sine-AWB (Sinewich) layer combines low-rank factors and convolutional priors into a single kernel, which is then modulated elementwise by a sinusoidal transforma-tion to produce task-specialized weights. A lightweight Clock Net is introduced to produce bounded frequen-cies that stabilize this modulation during training. The-oretically, sine modulation enhances the rank of low-rank adapters, while frequency separation decorrelates the weights of different tasks. On dense prediction bench-marks, Free Sinewich achieves state-of-the-art performance-efficiency trade-offs (e.g., up to +5.39% improvement over single-task fine-tuning with only 6.53M trainable param-eters), offering a compact and scalable paradigm based on frequency-based parameter sharing. Project page: https://casperliuliuliu.github.io/projects/Free-Sinewich. 
+
+# 1. Introduction 
+
+”Match the frequency of the reality you want and you cannot help but get that reality.” 
+
+Albert Einstein 
+
+Fine-tuning large pretrained models on individual down-stream tasks has proven highly effective in computer vi-sion [21]. However, many real-world applications require a single model to handle multiple tasks simultaneously. When tasks are intrinsically related, a multi-task learning (MTL) model that shares parameters across multiple tasks would improve overall performance and generalization in princi-ple [36, 44]. However, MTL often suffers from task conflict 
+
+Figure 1. Overall comparison of different PEFT-MTL methods. 𝑟 
+
+denotes the rank for the low-rank decomposition modules. 
+
+and negative transfer [31, 41, 43], where gradients from dif-ferent objectives interfere and degrade each other. Conse-quently, many approaches introduce task-specific modules that sidestep interference but compromise true parameter sharing. The key question thus is: how can one retain pa-rameter efficiency while enabling shared weights to behave task-specifically? 
+
+To improve efficiency and scalability, recent studies ex-plore PEFT-MTL frameworks [12, 30, 37]. Methods such as MTLoRA [1] incorporate both task-agnostic and task-specific low-rank adapters on top of a shared backbone to balance shared representations and specialization. Di-TASK [27] leverages a differentiable homomorphic transfor-mation on singular values, preserving pretrained subspaces while minimally injecting task-specific differences. TAD-Former [3] combines parameter-efficient prompting with dy-namic task filters to condition convolutional layers on input features for dense scenarios. Despite their success, these approaches share structure or feature representations rather than truly reusing the same parameter set across tasks. They 
+
+> arXiv:2603.21111v1 [cs.CV] 22 Mar 2026
+
+rely on auxiliary adapters to route information through sep-arate paths, resulting in distinct parameter sets for each task-specific module. Without parameter reuse, models cannot fully leverage the common knowledge across tasks, often resulting in redundant computation and less generalization. The human brain has an elegant and highly efficient mech-anism for multi-task processing. Rather than allocating inde-pendent neural circuits for each task, neuroscience suggests that the thalamocortical system enables selective communi-cation through oscillatory multiplexing [2, 32]. The same neuronal populations perform distinct functions at different oscillatory frequencies, reusing biological “hardware” by switching frequency instead of forming new regions [22, 29]. This insight inspires us: can deep networks similarly reuse the same weights, by switching their frequency response to yield task-specific functions? 
+
+Motivated by this biological mechanism, we propose 
+
+Free Sinewich , a PEFT-MTL framework that achieves effec-tive parameter reuse through a frequency-switching mecha-nism . We design a learnable sinusoidal modulation that augments a shared low-rank adapter without adding extra parameters, so that the performance of multiple tasks can be boosted while fine-tuning parameters can be kept efficient. Figure 1 shows a comparison of recent PEFT-MTL meth-ods. For dense prediction benchmarks, our approach attains state-of-the-art accuracy with significantly fewer trainable parameters. Our contributions are as follows: 
+
+• We propose a frequency-switching PEFT-MTL frame-work that mimics brain-like oscillatory reuse : a shared parameter base is modulated by task-dependent sine trans-formation to yield specialized weights efficiently. 
+
+• We achieve state-of-the-art results across multiple dense prediction tasks with minimal additional parameters. 
+
+# 2. Preliminary 
+
+Low-rank adaptation (LoRA) [14] is the most widely used strategy to efficiently fine-tune large models. We build the proposed method by enhancing LoRA in the following. Let 𝑀 ∈ R𝑚 ×𝑛 denote a low-rank matrix used to update a pre-trained weight matrix: 
+
+𝑀 = 𝐴𝐵 ⊤ =
+
+> 𝑟
+
+∑︁ 
+
+> 𝑖 =1
+
+𝒂 𝑖 𝒃 ⊤ 
+
+> 𝑖
+
+, 𝐴 ∈ R𝑚 ×𝑟 , 𝐵 ∈ R𝑛 ×𝑟 , (1) where 𝑟 ≪ min (𝑚, 𝑛 ) is the intrinsic rank. 
+
+2.1. Sine Transformation 
+
+Sine-LoRA. In conventional LoRA, the capacity of a low-rank matrix to convey information is significantly reduced, often leading to worse performance compared to its full-rank counterparts. The recent Sine-LoRA [16] proposes to enhance the representational power of a low-rank matrix by                     
+
+> (a) Mapping between base space 𝑋 to task-specific space M𝑡 .
+> (b) Frequency-Switching through sine transformation.
+> Figure 2. Illustration of frequency switching. (a) The base matrix space 𝑋 represents a shared parameter substrate reused across tasks. Each task-specific matrix space M𝑡 denotes the domain where the transformed matrix resides. Different sine transformations with task-dependent frequencies 𝜔 𝑡 map the same base matrix into 𝑀 𝑡 , producing task-specific matrices with distinct properties. (b) Each 𝜔 𝑡 defines a unique sine wave, inducing a nonlinear mapping F𝜔 𝑡 that transforms the shared base matrix into task-specific representations elementwise. This illustrates how varying
+> 𝜔 𝑡 enables task specialization without parameter duplication.
+
+introducing a nonlinear transformation: 
+
+𝑀 = sin (𝜔 · 𝐴𝐵 ⊤), (2) where 𝜔 is a frequency parameter. The key insight is that applying element-wise sine mapping to a low-rank matrix can significantly raise its effective rank without increasing the number of trainable parameters. This mapping thus pre-serves parameter efficiency while improving expressivity. 
+
+Our formulation. We employ the same sine transforma-tion but with a fundamentally different purpose. Instead of boosting a single matrix, we construct a family of task-specific matrices derived from one shared base 𝑀 𝑏𝑎𝑠𝑒 :
+
+𝑀 𝑡 = F𝜔 𝑡 (𝑀 𝑏𝑎𝑠𝑒 ) = sin (𝜔 𝑡 · 𝐴𝐵 ⊤), 𝑡 ∈ T , (3) where T is the set of tasks (e.g., segmentation, saliency, normals), and 𝜔 𝑡 is the task-specific frequency coefficient determined adaptively for different tasks. As illustrated in Figure. 2, each 𝜔 𝑡 corresponds to a distinct sine wave, and therefore induces a different nonlinear mapping F𝜔 𝑡 . This frequency-switching mechanism enables reusing a shared parameter base to achieve PEFT-MTL. 
+
+2.2. AWB: Convolution-in-the-Middle for LoRA 
+
+For dense prediction tasks, spatial priors are crucial [20]. Following TADFormer [3] and ConvLoRA [45], we enhance the LoRA pathway by inserting a convolutional kernel inside the low-rank decomposition. Specifically, in addition to the LoRA factors 𝐴 ∈ R𝑚 ×𝑟 and 𝐵 ∈ R𝑛 ×𝑟 , we introduce a con-volution kernel 𝑊 ∈ R𝑟 ×𝑟 ×𝐾 ×𝐾 acting on the intermediate 
+
+𝑟 rank channels. 
+
+Formulation. The forward path can be described as three steps: (i) a linear projection by the matrix 𝐴 that reduces the input channels from 𝑚 to 𝑟 channels; (ii) a spatial con-volution 𝑊 operating the 𝑟 channels; (iii) a linear projection by the matrix 𝐵 ⊤ that expands the 𝑟 channels back to 𝑛 .Symbolically: 
+
+𝑋 𝐴 
+
+−−→ 𝑋 𝐴 𝑊 
+
+−−−→ 𝑋 𝑊 𝐵 ⊤
+
+−−−→ 𝑌 
+
+where 𝑋 and 𝑌 are the input and the output, respectively. Because convolution is a linear operator , it can be ex-pressed as multiplication by a block-Toeplitz-with-Toeplitz-blocks (BTTB) matrix [11]. This property means that the three sequential steps can be fused into a single equivalent convolution step with an effective kernel matrix. Specifi-cally, we rearrange the convolution kernel 𝑊 into a block operator. Then, we flatten 𝑊 into a block matrix into 
+
+𝑊 ∈ R𝑟 × ( 𝑟 𝐾 2 ) , and the resulting fused weight is: 
+
+𝑀 ′ 
+
+> AWB
+
+= 𝐴𝑊 𝐵 ⊤, (4) where we can reshape 𝑀 ′ 
+
+> AWB
+
+∈ R𝑚 × ( 𝑛𝐾 2 ) into 𝑀 AWB ∈
+
+R𝑚 ×𝑛 ×𝐾 ×𝐾 , and the overall layer reduces to a standard con-volution with kernel 𝑀 AWB ∈ R𝑚 × ( 𝑛𝐾 2 ) : 𝑋 𝑀 AWB 
+
+−−−−−−→ 𝑌 . In practice, this means that instead of executing three steps (lin-ear, convolution, and linear), we can pre-fuse the operations into one convolution, saving both computation and memory while preserving expressivity. 
+
+Fuse then sine. As discussed in Sec. 2.1, the rank-enrichment property of the sine transformation only holds when it acts on a single low-rank matrix . However, the sine function is not multiplicative homomorphic, i.e., rank   sin ( 𝐴𝑊 𝐵 ) ≠ rank   sin ( 𝐴 ) sin (𝑊 ) sin (𝐵 ). In other words, applying sine transformation separately for each ma-trix doesn’t preserve equivalence and effective rank expan-sion. Therefore, the transformation should be applied after 
+
+fusing 𝐴 , 𝐵 , and 𝑊 into 𝑀 AWB . Our task-specific matrix is thus 
+
+𝑀 𝑡 = sin  𝜔 𝑡 · 𝑀 AWB 
+
+ = sin  𝜔 𝑡 · 𝐴𝑊 𝐵 ⊤ (5) where 𝜔 𝑡 is the task-specific frequency. This fuse-then-sine 
+
+strategy guarantees that the nonlinearity acts directly on the shared base matrix, ensuring effective rank expansion. 
+
+# 3. Methodology 
+
+3.1. Overview 
+
+Figure 3a shows the proposed Free Sinewich framework. Following TADFormer [3], a small bank of learnable task tokens 𝑃 = { 𝒑 𝑡 }𝑇 𝑡 =1 is prepended to the image patch tokens 
+
+𝐸 = {𝒆 𝑘 }𝐾 𝑘 =1 to form the input 𝑋 = [𝑃, 𝐸 ] for a Swin Transformer Tiny [26] encoder. The encoder consists of four stages, each of which comprises 𝑁 blocks. The first 
+
+𝑁 − 1 blocks are task-agnostic blocks, and the last block is a task-specific block. In both types, a block comprises a layer normalization (LN), a window-based multi-head self-attention layer (W-MSA), followed by another LN layer and a multilayer perceptron (MLP). The task-agnostic blocks extract features generic to all tasks. Each layer in a task-agnostic block can be efficiently fine-tuned via the task-agnostic module (TA-module) shown in Figure 3b. A TA-module is a typical LoRA module. The task-specific block is the key to extracting features specific to different tasks. Each layer in this block is effi-ciently fine-tuned via the task-specific module (TS-module), where different frequencies are determined by a Clock Net depending on the task tokens. A frequency switching mech-anism is developed to enhance the representational power of low-rank matrices. Details of the TS-module are shown in Figure 3c, and are elaborated in the following (Sec. 3.2, Sec. 3.3, and Sec. 3.4). 
+
+3.2. Lightweight Clock Net (LCN) 
+
+In the TS-Module, the LCN serves as a task-to-frequency translator that assigns each task a distinct oscillation fre-quency ( 𝜔 𝑡 ), driving different low-rank matrix transfor-mations for different tasks. Each task is represented by a learnable task token 𝒑 𝑡 ∈ R𝐶 . A single-layer MLP 
+
+𝑊 𝑞 : R𝐶 → R𝑑 𝜔 (shared across tasks) produces the task-dependent frequency: 
+
+𝜔 𝑡 = 𝑠 · ( tanh (𝑊 𝑞 ReLU ( 𝒑 𝑡 )) + 𝑐 ), (6) where 𝑠 and 𝑐 are learnable scale and offset parameters, respectively. The output 𝜔 𝑡 of LCN is simply a scalar (𝑑 𝜔 = 1), whose value is learned within an interval. Con-ceptually, the task-dependent frequency determines how the shared base matrix “vibrates” into a task-specific form. In practice, LCN is not the main contributor to performance gains; it primarily generates bounded frequencies to stabi-lize training. 
+
+3.3. Sine-AWB 
+
+As shown in Figure 3c, the frequency 𝜔 𝑡 is applied to en-hance the shared base matrix 𝑀 AWB . Following the fuse-then-sine process mentioned in Sec. 2.1, the enhanced matrix 
+
+𝑀 𝑡 for the 𝑡 -th task is obtained by 
+
+𝑀 𝑡 = sin  𝜔 𝑡 · 𝑀 AWB 
+
+.(a) Overall structure (b) Task-Agnostic Module (c) Task-Specific Module 
+
+Figure 3. Overview of the Free Sinewich framework: (a) A Swin Transformer Tiny [26] serves as the shared encoder. The encoder receives image patch tokens with task tokens prepended to them. Following the VPT-shallow strategy [17], the task tokens are introduced only at the first Transformer stage. Task-agnostic features are extracted through the task-agnostic module (TA-Module) in all Transformer blocks except for the last block, while the last block employs a task-specific module (TS-Module) to capture task-dependent representations. (b) Details of the TA-Module, which are basically the same as LoRA. (c) The TS-Module includes a lightweight Clock Net (LCN) that takes task token 𝒑 𝑡 as input and determines a task frequency 𝜔 𝑡 . This frequency is used in the sine transformation to enhance the representational power of the low-rank adapter. Conceptually, we switch the shared base matrix 𝑀 AWB into different transient, task-specialized matrices 
+
+𝑀 𝑡 ’s (ghost icon). The transient 𝑀 𝑡 ’s are instantiated on-the-fly to extract task-specific features, enabling efficient and scalable PEFT-MTL. 
+
+With the adaptively-determined frequency and the sine transformation, a single shared base matrix 𝑀 AWB can be frequency-switched into task-specific matrices 𝑀 𝑡 , 𝑡 =
+
+1, 2, ..., 𝑇 , where 𝑇 is the number of tasks to be solved si-multaneously. Note that, although the TS-module (Figure 3c) is only illustrated for the encoder in Figure 3a, it can also work for the decoder in exactly the same form. 
+
+Low-pass filter. We observe that the sine-transformed ma-trix 𝑀 𝑡 often comes with high-frequency noise. To smooth out these artifacts, we apply a 𝐾 ×𝐾 Gaussian low-pass filter to 𝑀 𝑡 . Formally, the filtered matrix e𝑀 𝑡 is obtained by: 
+
+e𝑀 𝑡 (𝑥, 𝑦 ) =∑︁ 
+
+> 𝑢,𝑣
+
+𝐺 𝜎 (𝑢, 𝑣 ) 𝑀 𝑡 (𝑥 −𝑢, 𝑦 −𝑣 ), (7) 
+
+𝐺 𝜎 (𝑢, 𝑣 ) = 12𝜋𝜎 2 exp 
+
+
+
+− 𝑢 2 + 𝑣 2
+
+2𝜎 2
+
+
+
+, (8) with standard deviation 𝜎 =1 and the kernel size 𝐾 =7. This Gaussian filter is chosen for its simplicity and effectively suppresses high-frequency components while preserving structural details and improving stability (see Sec. 4.4). 
+
+3.4. Frequency Switching Feature Processing 
+
+Overall, the TS-Module applies the frequency determined by the LCN to the Sine-AWB module to produce task-specific features. Let 𝒇 𝑡 𝑖 denote the intermediate feature map output by the 𝑖 -th layer in the TS-module for the 𝑡 -th task, and Φ𝑖 (·) 
+
+the pre-trained transformation representing the process of the 𝑖 -th layer. The transformation Φ𝑖 (·) is frozen when fine-tuning. The LCN takes the task token 𝒑 𝑡 and outputs a frequency value 𝜔 𝑡 = LCN ( 𝒑 𝑡 ). Through the process described above, the smoothed matrix e𝑀 𝑡 acts as a convolu-tional kernel to perform channel-wise convolution with 𝒇 𝑡 𝑖 
+
+to yield the task-specific output: 
+
+𝒇 𝑡 𝑖 +1 = Φ 𝑖 ( 𝒇 𝑡 𝑖 ) + ( e𝑀 𝑡 ∗ 𝒇 𝑡 𝑖 ), (9) where ∗ denotes channel-wise convolution. This formu-lation is the same as LoRA, but the key is the enhanced low-rank matrix e𝑀 𝑡 obtained by the sine transformation. 
+
+3.5. Decoder Group 
+
+Following prior PEFT-MTL frameworks [1, 3, 27], for each task a set of multi-scale features {𝒈 𝑡 
+
+> 1
+
+, 𝒈 𝑡 
+
+> 2
+
+, 𝒈 𝑡 
+
+> 3
+
+, 𝒈 𝑡  
+
+> 4
+
+} are ex-tracted by the shared encoder. The features from each stage are first projected by a task-specific 1 ×1 convolution. The projected features of all stages are then upsampled to the same dimension 𝐻 × 𝑊 , where 𝐻 and 𝑊 are the height and the width of the input image, respectively, and are concate-nated as the fused representation 𝒙 𝑡 :˜𝒈 𝑡 𝑖 = Up 𝐻 ×𝑊 
+
+ Conv 𝑡 𝑖 ( 𝒈 𝑡 𝑖 ), 𝑖 = 1, . . . , 4, (10) 
+
+𝒙 𝑡 = Concat  ˜𝒈 𝑡 
+
+> 1
+
+, ˜𝒈 𝑡 
+
+> 2
+
+, ˜𝒈 𝑡 
+
+> 3
+
+, ˜𝒈 𝑡 
+
+> 4
+
+ . (11) Previous PEFT-MTL works [1, 3, 27] develop an inde-pendent decoder group Ψind = {𝜙 1, . . . , 𝜙 𝑇 }, where differ-ent decoders follow the same structure (e.g., HRNet [33] or SegFormer [38]) but maintains an independent parameter set. Each decoder processes its corresponding task feature 
+
+𝒙 𝑡 in isolation, resulting in the total number of parameters scaling linearly with the number of tasks 𝑇 and introducing redundancy in both computation and memory usage. To address this issue, we propose a shared decoder group 
+
+Ψshd that replaces Ψind while keeping the same architecture. Taking HRNet as an example, each decoder 𝜙 𝑡 in Ψind fol-lows a Conv-BN-ReLU-Conv structure, where the first convolutional layer alone contributes over one million pa-rameters when replicated across 𝑇 tasks. In contrast, Ψshd 
+
+replaces these per-task convolution weights with the same set of shared weights 𝑀 AWB , which is modulated into a task-specific form through the frequency-switching mechanism. 
+
+𝒉 𝑡 = e𝑀 𝑡 ∗ 𝒙 𝑡 + 𝒃 𝑡 , (12) where ∗ denotes channel-wise convolution, 𝒃 𝑡 is a task-specific bias vector. The remaining decoder components include batch normalization, activation, and the final output convolution: ˆ𝑦 𝑡 = 𝜙 𝑡 (𝒉 𝑡 ), 𝜙 𝑡 = BN-ReLU-Conv . (13) This shared-decoder formulation retains the architectural in-tegrity of the original decoder while transforming its main convolution into a frequency-switchable operator. 
+
+# 4. Experiments 
+
+4.1. Experimental Settings 
+
+Datasets and Tasks. We evaluate our method on two stan-dard multi-task benchmarks: PASCAL-Context [10] and 
+
+NYUDv2 [28]. PASCAL-Context contains 4,998 training images and 5,105 validation images with annotations for se-mantic segmentation (21 classes), human part segmentation (7 classes), saliency detection, and surface normal estima-tion. NYUDv2 consists of 1,449 RGB-D images from 464 indoor scenes, split into 795 training samples and 654 testing samples. It supports four dense prediction tasks: semantic segmentation (40 classes), monocular depth estimation, sur-face normal estimation, and edge detection. 
+
+Evaluation Metrics. Following the setting of [35], we re-port mIoU for semantic segmentation, human parts, and saliency; and angular root mean squared error (RMSE) in degrees for surface normals. On NYUDv2 [28], we ad-ditionally report depth RMSE and edge ODSF (Optimal Dataset Scale F-measure). To summarize overall effective-ness across tasks we use Δ𝑚 , the average relative improve-ment over a single-task baseline: 
+
+Δ𝑚 = 1
+
+𝑇 
+
+> 𝑇
+
+∑︁ 
+
+> 𝑡 =1
+
+(− 1)ℓ𝑡 𝑅 MTL  
+
+> 𝑡
+
+− 𝑅 ST 
+
+> 𝑡
+
+𝑅 ST 
+
+> 𝑡
+
+, (14) where 𝑇 is the number of tasks, 𝑅 ST  
+
+> 𝑡
+
+and 𝑅 MTL  
+
+> 𝑡
+
+denote single-task and multi-task performance of the 𝑡 -th task, respectively. The value ℓ𝑡 =1 if a lower value means better performance (e.g., RMSE), otherwise 0. 
+
+Training. Each input image is associated with 𝑇 task-specific ground-truth outputs. Following the standard multi-task training protocol in the prior work [35], all tasks are jointly optimized during training. For each mini-batch, pre-dictions for all 𝑇 tasks are computed, and their losses are aggregated to form the overall objective: 
+
+LMTL =
+
+> 𝑇
+
+∑︁ 
+
+> 𝑡 =1
+
+𝑤 𝑡 L𝑡 , (15) where L𝑡 and 𝑤 𝑡 denote the loss and weight of the 𝑡 -th task, respectively. Gradients of the loss are back-propagated through the shared encoder and task-specific decoders, and parameters are updated once per batch. Task weights and loss terms are set as in [35]. 
+
+4.2. Baselines 
+
+We compare performance and trainable parameters with sev-eral PEFT-MTL baselines: Single Task denotes a baseline where each task is trained by fully fine-tuning its own inde-pendently pretrained model. MTL-Tuning Decoders Only 
+
+is a method where the shared encoder is frozen, and only the task-specific decoders are trainable. MTL-Full Fine-Tuning is a method where both the shared encoder and the task-specific decoder are trainable. Adapter [13] and 
+
+BitFit [4] modify small subsets of parameters. VPT [17] tunes learnable prompts. Compactor [18] uses low-rank/Kronecker reparameterizations. LoRA [14] applies low-rank updates to attention and MLP. VL-Adapter [34] shares a single adapter across tasks. HyperFormer [19] and Polyhistor [25] generate adapters via hypernetworks. 
+
+MTLoRA [1] splits updates into task-agnostic and task-specific LoRA branches. TADFormer [3] injects task-aware prompts with dynamic task filters. DiTASK [27] performs differentiable spectral transforms on singular values to adapt tasks. 
+
+4.3. Quantitative Analysis 
+
+Main Results. Table 1 reports the performance along with the corresponding numbers of trainable parameters. For a fair comparison, all models utilize the Swin Transformer Tiny backbone [26], pretrained on the ImageNet-1K dataset. Table 1. Comparison of parameter-efficient multi-task learning methods on the PASCAL-Context benchmark. Using Swin Trans-former Tiny pretrained on the ImageNet-1K dataset as the backbone, Δ𝑚 denotes the average relative improvement over the single-task baseline (positive indicates better), and ↑ / ↓ indicate higher / lower is better. Across all ranks, Free Sinewich delivers the best trade-off between performance and efficiency. * means the method uses the weights of Swin Transformer Tiny pretrained on the ImageNet-22k [7] dataset. 
+
+Method SemSeg Human Parts Saliency Normals Δ𝑚 (%) Trainable 
+
+(mIoU ↑) (mIoU ↑) (mIoU ↑) (rmse ↓) Parameters (M) 
+
+Single Task 67.21 61.93 62.35 17.97 0 112.62 MTL - Tuning Decoders Only 65.09 53.48 57.46 20.69 -9.95 1.94 MTL - Full Fine Tuning 67.56 60.24 65.21 16.64 +2.23 30.06 Adapter [13] 69.21 57.38 61.28 18.83 -2.71 11.24 Bitfit [4] 68.57 55.99 60.64 19.42 -4.60 2.85 VPT-shallow [17] 62.96 52.27 58.31 20.90 -11.18 2.57 VPT-deep [17] 64.35 52.54 58.15 21.07 -10.85 3.43 Compactor [18] 68.08 56.41 60.08 19.22 -4.55 2.78 Compactor++ [18] 67.26 55.69 59.47 19.54 -5.84 2.66 LoRA [14] 70.12 57.73 61.90 18.96 -2.17 2.87 VL-Adapter [34] 70.21 59.15 62.29 19.26 -1.83 4.74 HyperFormer [19] 71.43 60.73 65.54 17.77 +2.64 72.77 Polyhistor [25] 70.87 59.54 65.47 17.47 +2.34 8.96 MTLoRA [1] ( 𝑟 = 16) 68.19 58.99 64.48 17.03 +1.35 4.95 MTLoRA [1] ( 𝑟 = 32) 67.74 59.46 64.90 16.59 +2.16 6.08 MTLoRA [1] ( 𝑟 = 64) 67.90 59.84 65.40 16.60 +2.55 8.34 DiTASK [27] - MTL 70.09 59.03 64.55 17.47 +1.47 3.55 DiTASK [27] - MTL* 69.66 62.02 65.00 17.10 +3.22 3.55 TADFormer [3] ( 𝑟 = 16) 69.79 59.27 65.04 16.91 +2.44 3.56 TADFormer [3] ( 𝑟 = 32) 70.20 60.00 65.71 16.57 +3.63 4.78 TADFormer [3] ( 𝑟 = 64) 70.82 60.45 65.88 16.48 +4.24 7.38 
+
+Free Sinewich ( 𝑟 = 16 ) 70.92 59.78 65.32 16.70 +3.47 2.79 Free Sinewich ( 𝑟 = 32 ) 71.02 60.75 65.94 16.44 +4.51 4.04 Free Sinewich ( 𝑟 = 64 ) 71.25 61.38 66.24 16.14 +5.39 6.53 
+
+Table 2. Performance comparison on the NYUDv2 [28] dataset. All methods utilize the Swin Transformer Tiny [26] backbone pre-trained on the ImageNet-22K [7] dataset, with HRNet as the decoder for fair comparison. 
+
+Method SemSeg Depth Edge Normals Δ𝑚 (%) Trainable 
+
+(mIoU ↑) (rmse ↓) (odsF ↑) (rmse ↓) Parameters (M) 
+
+Single Task 42.59 66.08 59.80 22.58 0 112.64 MTL - Tuning Decoders Only 34.34 84.47 57.40 32.93 -24.26 1.96 MTL - Full Fine Tuning 42.07 65.36 58.80 23.74 -1.73 30.08 MTLoRA [1] ( 𝑟 = 64) 41.11 65.49 58.30 24.55 -3.45 8.36 DiTASK [27] - MTL 37.36 75.00 57.10 28.63 -14.27 3.57 TADFormer [3] ( 𝑟 = 64) 41.37 64.10 58.50 24.54 -2.68 7.40 Free Sinewich ( 𝑟 = 16) 40.90 67.15 58.50 25.06 -4.68 2.81 Free Sinewich ( 𝑟 = 32) 41.80 66.67 58.80 24.67 -3.41 4.06 Free Sinewich ( 𝑟 = 64) 42.26 64.08 59.40 23.41 -0.52 6.55 
+
+We see that our proposed Free Sinewich gives better perfor-mance while maintaining a lower number of trainable pa-rameters. Comparing with the latest baselines, when the rank of the weight matrix is the same, Free Sinewich ( 𝑟 =64) achieves mIoUs of 71.25 (SemSeg), 61.38 (Human Parts), 66.24 (Saliency), and RMSE of 16.14 (Normal prediction), achieving average +5.39 Δ𝑚 with only 6.53M trainable pa-rameters. These performances surpass previous state-of-the-art TADFormer [3] ( 𝑟 =64), which achieves +4.24 Δ𝑚 
+
+with more parameters (7.38M). Notably, even with a lower rank ( 𝑟 =32), Free Sinewich achieves performance better than TADFormer ( 𝑟 =64), indicating the effectiveness of the frequency-switching sine modulation. Table 3. Performance variations when different components are used. Removing key components such as the LCN, the low-pass filter, or the sine transformation leads to performance degradation, confirming that each element contributes to overall performance and efficiency.                                                                                                
+
+> Method SemSeg Human Parts Saliency Normals Δ𝑚 (%) Trainable
+> (mIoU ↑)(mIoU ↑)(mIoU ↑)(rmse ↓)Parameters (M) Free Sinewich (Ours) 71.25 61.38 66.24 16.14 +5.39 6.53
+> Ours w/o LCN 70.83 61.37 66.09 16.17 +5.12 6.51 Ours w/o Low-pass filter 70.95 61.33 65.44 16.22 +4.82 6.53 Ours w/o Sine 69.68 60.69 64.91 16.37 +3.67 6.53 Table 4. Performance variations when different configurations are used for the decoder. All methods use the Swin Transformer Tiny backbone pre-trained on the ImageNet-22K dataset, with rank 𝑟 =32 for a fair comparison on PASCAL-Context dataset.
+> Method Decoder SemSeg Human Parts Saliency Normals Δ𝑚 (%) Trainable Param. (M) (mIoU ↑)(mIoU ↑)(mIoU ↑)(rmse ↓)Decoder / All TADFormer [3] HRNet [33] 72.05 61.60 65.45 16.70 +4.67 1.94 / 4.78 SegFormer [38] 72.33 61.16 65.80 16.87 +4.51 2.08 / 4.91 ASPP [5] 73.66 60.37 65.27 16.43 +5.09 12.44 / 15.27 Free Sinewich HRNet [33] 72.65 62.57 65.55 16.36 +5.80 1.07 / 4.04 SegFormer [38] 72.68 62.67 66.16 16.53 +5.86 1.08 / 4.05 ASPP [5] 75.91 61.92 65.84 16.17 +7.14 6.64 / 9.61
+
+NYUDv2 Results. Table 2 presents the performance on the NYUDv2 dataset. Free Sinewich consistently achieves strong results across all four tasks while maintaining a com-pact parameter budget. With rank 𝑟 =64, Free Sinewich attains a near-zero Δ𝑚 of -0.52, effectively matching the full fine-tuning setting with only 6.55M trainable parameters. Even with smaller ranks ( 𝑟 =16 and 𝑟 =32), the performance remains competitive, demonstrating that the frequency-switching modulation captures task-specific variations ef-ficiently. Compared to prior PEFT-MTL approaches, Free Sinewich achieves a superior balance between performance and parameter efficiency, highlighting its effectiveness for compact multi-task learning on the NYUDv2 benchmark. 
+
+4.4. Ablation Studies 
+
+Influence of Different Components. Table 3 evaluates the contribution of LCN, the low-pass filter, and the sine transformation. Removing the sine transformation leads to the largest degradation (from +5.39 to +3.67 Δ𝑚 ), confirm-ing that the frequency switching mechanism on a shared base matrix is the primary driver of performance gains. The LCN and the low-pass filter further stabilize training and enhance the quality of semantic segmentation and saliency estimation. 
+
+Decoder Robustness. We pair TADFormer [3], and Free Sinewich with three different decoders, including HR-Net [33], SegFormer [38], and ASPP [5]. Table 4 shows performance variations when different decoders are used. As can be seen, Free Sinewich consistently yields higher 
+
+Δ𝑚 ’s no matter which decoder is used. With ASPP [5] as the decoder, it achieves the best Δ𝑚 (+7.14). 
+
+Ablation on Parameter Sharing. To test whether fre-quency switching truly enables parameter reuse across tasks, we compare three variants that remove cross-task sharing in Sine-AWB. The first variant is the Shared-Base set-ting (corresponding to our Free Sinewich). All tasks use a single shared base matrix 𝑀 AWB , meaning that 𝑀 𝑡 =
+
+sin (𝜔 𝑡 · 𝑀 AWB ) modulates the same parameters with dif-ferent frequencies. The second variant is the Independent-Base setting, which gives each task its own LoRA factors 
+
+𝐴 𝑡 , 𝐵 𝑡 , and kernel 𝑊 𝑡 , forming 𝑀 𝑡  
+
+> AWB
+
+= 𝐴 𝑡 𝑊 𝑡 𝐵 𝑡 ⊤ with no parameter shared across tasks. The third variant is the 
+
+Independent-Decoder setting, which implements indepen-dent decoder groups Ψind = {𝜙 1, . . . , 𝜙 𝑇 }, where each 𝜙 𝑡 
+
+follows the HRNet [33] structure but maintains its own pa-rameters (see Sec. 3.5). In this setting, each task employs its own decoder, removing cross-task parameter sharing. Table 5 shows that, without sharing the base matrix, the performance drops, and more parameters are needed. This confirms that performance gains stem from the shared pa-rameter and the frequency-based specialization. 
+
+4.5. Qualitative Analysis 
+
+Figure 4 shows a qualitative comparison of semantic seg-mentation on the validation set. Compared to TADFormer at the same rank, Free Sinewich preserves sharper semantic boundaries with fewer label leaks, achieves higher task pre-cision with reduced background activation, and generates Table 5. Performance variations when different sharing schemes are employed. Performance comparison among the shared base (Free Sinewich), independent base, and independent decoder variants on the PASCAL-Context dataset. Sharing a single base matrix across tasks consistently improves the overall performance with fewer parameters.                                    
+
+> Method SemSeg Human Parts Saliency Normals Δ𝑚 (%) Trainable
+> (mIoU ↑)(mIoU ↑)(mIoU ↑)(rmse ↓)Parameters (M) Shared Base 71.25 61.38 66.24 16.14 +5.39 6.53
+> Independent Base 70.81 61.56 65.42 16.09 +5.03 10.22 Independent Decoder 70.91 61.57 66.03 16.10 +5.31 7.41
+> Figure 4. Visual comparison of semantic segmentation on the Pascal-Context dataset. The Free Sinewich method yields fuller and more coherent segmentation masks, capturing finer-grained boundary details than TADFormer.
+
+smoother segmentation maps. These trends align with the quantitative gains in Tables 1. 
+
+# 5. Related Works 
+
+5.1. Parameter-Efficient Fine-Tuning 
+
+PEFT methods aim to adapt large pre-trained models with minimal additional parameters while approximat-ing the representational capacity. Early techniques such as Adapters [13], BitFit [4], and IA 3 [23] introduced lightweight residual modules or bias tuning to efficiently steer frozen backbones. Low-rank adaptation became a dominant approach through LoRA [14] and its variants (AdaLoRA [42], QLoRA [8]), which decompose the weight matrix into lower-rank matrix multiplication. Subsequent research further enhanced LoRA’s expressivity: DoRA [24] decouples direction and magnitude to improve rank flexi-bility, HiRA [15] hierarchically composes low-rank layers for higher effective rank, and ConvLoRA [45] integrates convolutional priors into low-rank modules for vision tasks. While these PEFT methods enhance the expressive power of low-rank adapters, they were primarily designed for single-task adaptation. In contrast, our approach explores low-rank adapters for multiple tasks simultaneously. 
+
+5.2. PEFT for MTL 
+
+To enhance efficiency in MTL, several studies have adopted the PEFT paradigm for MTL. MTLoRA [1] extends LoRA by decomposing low-rank adapters into task-agnostic and task-specific components, balancing knowledge sharing and task specialization. DiTask [27] introduces differentiable homomorphic transformations on singular values to adapt pretrained weights for each task while preserving the shared subspace. TADFormer [3] incorporates task-aware prompts and dynamic task filters to inject image priors for dense pre-diction without retraining the entire backbone. Similarly, Polyhistor [25] leverages layer-wise decomposed hypernet-works for adaptive task modulation. While these PEFT-MTL frameworks achieve impressive efficiency and flexi-bility, they are limited to pseudo-share low-rank adapters through multiple paths rather than genuine parameter reuse within the shared backbone. This motivates our proposed approach, which adopts frequency-based modulation to en-able the true sharing of low-rank adapters across multiple tasks. 
+
+# 6. Conclusion 
+
+We have presented Free Sinewich, a parameter-efficient framework for multi-task learning that achieves true weight reuse by the frequency switching mechanism. To extract task-specific features, we employ a lightweight Clock Net to determine task-dependent frequencies and a Sine-AWB layer that applies an element-wise sine transformation based on the determined frequencies. The sine transformation increases the effective rank of low-rank adaptors, and the frequency switching mechanism decorrelates weights, mit-igating interference between different tasks. Extensive ex-periments on two benchmarks demonstrate that the proposed methods yield strong performance-efficiency trade-offs. Ab-lation studies also confirm that both the Clock Net and the sine modulation are necessary for the observed gains. Fu-ture work includes learning spatially/temporally varying fre-quencies, extending to video and multimodal settings, and integrating frequency conditioning with dynamic routing. Acknowledgement. This work was funded in part by the National Science and Technology Council, Taiwan, under grants 114-2622-E-006-028, 114-2221-E-006-047-MY3, 112-2221-E-006-136-MY3, 115-2425-H-006-005, and 114-2634-F-006-002. 
+
+# References 
+
+[1] Ahmed Agiza, Marina Neseem, and Sherief Reda. Mtlora: Low-rank adaptation approach for efficient multi-task learn-ing. In Proceedings of the IEEE/CVF Conference on Com-puter Vision and Pattern Recognition , pages 16196–16205, 2024. 1, 4, 5, 6, 8, 13 [2] Thomas Akam and Dimitri M. Kullmann. Oscillatory mul-tiplexing of population codes for selective communication in the mammalian brain. Nature Reviews Neuroscience , 15(2): 111–122, 2014. 2 [3] Seungmin Baek, Soyul Lee, Hayeon Jo, Hyesong Choi, and Dongbo Min. Tadformer: Task-adaptive dynamic trans-former for efficient multi-task learning. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , pages 14858–14868, 2025. 1, 2, 3, 4, 5, 6, 7, 8, 13 [4] Elad Ben Zaken, Yoav Goldberg, and Shauli Ravfogel. Bit-Fit: Simple parameter-efficient fine-tuning for transformer-based masked language-models. In Proceedings of the An-nual Meeting of the Association for Computational Linguis-tics (Volume 2: Short Papers) , pages 1–9, Dublin, Ireland, 2022. 5, 6, 8 [5] Liang-Chieh Chen, Yukun Zhu, George Papandreou, Florian Schroff, and Hartwig Adam. Encoder-decoder with atrous separable convolution for semantic image segmentation. In 
+
+Proceedings of the European Conference on Computer Vi-sion , pages 833–851, Cham, 2018. 7 [6] Marius Cordts, Mohamed Omran, Sebastian Ramos, Timo Rehfeld, Markus Enzweiler, Rodrigo Benenson, Uwe Franke, Stefan Roth, and Bernt Schiele. The cityscapes dataset for semantic urban scene understanding. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , 2016. 13 [7] Jia Deng, Wei Dong, Richard Socher, Li-Jia Li, Kai Li, and Li Fei-Fei. Imagenet: A large-scale hierarchical image database. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , pages 248–255, 2009. 6, 13 [8] Tim Dettmers, Artidoro Pagnoni, Ari Holtzman, and Luke Zettlemoyer. QLoRA: Efficient finetuning of quantized LLMs. Advances in Neural Information Processing Systems ,2023. 8 [9] Navon et al. Multi-task learning as a bargaining game. In 
+
+ICML , 2022. 13 [10] Mark Everingham, Luc Van Gool, Christopher KI Williams, John Winn, and Andrew Zisserman. The pascal visual object classes (voc) challenge. International Journal of Computer Vision , 88(2):303–338, 2010. 5 [11] Robert M. Gray. Toeplitz and circulant matrices: A re-view. Communications and Information Theory , 2(3):155– 239, 2025. 3 [12] Zeyu Han, Chao Gao, Jinyang Liu, Jeff Zhang, and Sai Qian Zhang. Parameter-efficient fine-tuning for large models: A comprehensive survey. Transactions on Machine Learning Research , 2024. 1 [13] Junxian He, Chunting Zhou, Xuezhe Ma, Taylor Berg-Kirkpatrick, and Graham Neubig. Towards a unified view of parameter-efficient transfer learning. In International Con-ference on Learning Representations , 2022. 5, 6, 8 [14] Edward J Hu, yelong shen, Phillip Wallis, Zeyuan Allen-Zhu, Yuanzhi Li, Shean Wang, Lu Wang, and Weizhu Chen. LoRA: Low-rank adaptation of large language models. In In-ternational Conference on Learning Representations , 2022. 2, 5, 6, 8 [15] Qiushi Huang, Tom Ko, Zhan Zhuang, Lilian Tang, and Yu Zhang. Hira: Parameter-efficient hadamard high-rank adap-tation for large language models. In International Conference on Learning Representations , 2025. 8 [16] Yiping Ji, Hemanth Saratchandran, Cameron Gordon, Zeyu Zhang, and Simon Lucey. Efficient learning with sine-activated low-rank matrices. In International Conference on Learning Representations , 2025. 2 [17] Menglin Jia, Luming Tang, Bor-Chun Chen, Claire Cardie, Serge Belongie, Bharath Hariharan, and Ser-Nam Lim. Vi-sual prompt tuning. In Proceedings of the European Confer-ence on Computer Vision , 2022. 4, 5, 6 [18] Rabeeh Karimi Mahabadi, James Henderson, and Sebastian Ruder. Compacter: Efficient low-rank hypercomplex adapter layers. Advances in Neural Information Processing Systems ,34:1022–1035, 2021. 5, 6 [19] Rabeeh Karimi Mahabadi, Sebastian Ruder, Mostafa De-hghani, and James Henderson. Parameter-efficient multi-task fine-tuning for transformers via shared hypernetworks. In 
+
+Annual Meeting of the Association for Computational Lin-guistics , 2021. 5, 6 [20] Asifullah Khan, Zunaira Rauf, Anabia Sohail, Abdul Rehman Khan, Hifsa Asif, Aqsa Asif, and Umair Farooq. A survey of the vision transformers and their cnn-transformer based variants. Artificial Intelligence Review , 56:2917–2970, 2023. 2[21] Simon Kornblith, Jonathon Shlens, and Quoc V. Le. Do better imagenet models transfer better? In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , pages 2656–2666, 2019. 1 [22] Michal T. Kucewicz, Jan Cimbalnik, Jes?s S. Garc?a-Salinas, Milan Brazdil, and Gregory A. Worrell. High frequency os-cillations in human memory and cognition: a neurophysi-ological substrate of engrams? Brain , 147(9):2966–2982, 2024. 2 [23] Haokun Liu, Derek Tam, Muqeeth Mohammed, Jay Mohta, Tenghao Huang, Mohit Bansal, and Colin Raffel. Few-shot parameter-efficient fine-tuning is better and cheaper than in-context learning. Advances in Neural Information Processing Systems , 2022. 8 [24] Shih-Yang Liu, Chien-Yi Wang, Hongxu Yin, Pavlo Molchanov, Yu-Chiang Frank Wang, Kwang-Ting Cheng, and Min-Hung Chen. DoRA: Weight-decomposed low-rank adaptation. In Proceedings of the International Conference on Machine Learning , pages 32100–32121. PMLR, 2024. 8 [25] Yen-Cheng Liu, Chih-Yao Ma, Junjiao Tian, Zijian He, and Zsolt Kira. Polyhistor: Parameter-efficient multi-task adap-tation for dense vision tasks. Advances in Neural Information Processing Systems , 35:36889–36901, 2022. 5, 6, 8 [26] Ze Liu, Yutong Lin, Yue Cao, Han Hu, Yixuan Wei, Zheng Zhang, Stephen Lin, and Baining Guo. Swin transformer: Hierarchical vision transformer using shifted windows. In 
+
+Proceedings of the IEEE/CVF International Conference on Computer Vision , 2021. 3, 4, 5, 6, 13 [27] Krishna Sri Ipsit Mantri, Carola-Bibiane Sch¨ onlieb, Bruno Ribeiro, Chaim Baskin, and Moshe Eliasof. Ditask: Multi-task fine-tuning with diffeomorphic transformations. In Pro-ceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , pages 25218–25229, 2025. 1, 4, 5, 6, 8, 13 [28] Pushmeet Kohli Nathan Silberman, Derek Hoiem and Rob Fergus. Indoor segmentation and support inference from rgbd images. In Proceedings of the European Conference on Computer Vision , 2012. 5, 6 [29] Mattia F. Pagnotta, Justin Riddle, and Mark D’Esposito. Mul-tiplexed levels of cognitive control through delta and theta neural oscillations. Journal of Cognitive Neuroscience , 36 (5):916–935, 2024. 2 [30] Nusrat Jahan Prottasha, Upama Roy Chowdhury, Shetu Mo-hanto, Tasfia Nuzhat, Abdullah As Sami, Md Shamol Ali, Md Shohanur Islam Sobuj, Hafijur Raman, Md Kowsher, and Ozlem Ozmen Garibay. Peft a2z: Parameter-efficient fine-tuning survey for large language and vision models, 2025. 1[31] Xiaohan Qin, Xiaoxing Wang, and Junchi Yan. Towards consistent multi-task learning: Unlocking the potential of task-specific parameters. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition ,pages 10067–10076, 2025. 1 [32] Daniel N. Scott, Arghya Mukherjee, Matthew R. Nassar, and Michael M. Halassa. Thalamocortical architectures for flex-ible cognition and efficient learning. Trends in Cognitive Sciences , 28(8):739–756, 2024. 2 [33] Ke Sun, Bin Xiao, Dong Liu, and Jingdong Wang. Deep high-resolution representation learning for human pose estimation. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , 2019. 5, 7 [34] Yi-Lin Sung, Jaemin Cho, and Mohit Bansal. Vl-adapter: Parameter-efficient transfer learning for vision-and-language tasks. In Proceedings of the IEEE/CVF Conference on Com-puter Vision and Pattern Recognition , pages 5227–5237, 2022. 5, 6 [35] Simon Vandenhende, Stamatios Georgoulis, and Luc Van Gool. Mti-net: Multi-scale task interaction networks for multi-task learning. In Proceedings of the European Con-ference on Computer Vision , 2020. 5 [36] Simon Vandenhende, Stamatios Georgoulis, Wouter Van Gansbeke, Marc Proesmans, Dengxin Dai, and Luc Van Gool. Multi-task learning for dense prediction tasks: A survey. IEEE Transactions on Pattern Analysis and Ma-chine Intelligence , 44(7):3614–3633, 2022. 1 [37] Luping Wang, Sheng Chen, Linnan Jiang, Shu Pan, Runze Cai, Sen Yang, and Fei Yang. Parameter-efficient fine-tuning in large language models: a survey of methodologies. Artifi-cial Intelligence Review , 58:227, 2025. 1 [38] Enze Xie, Wenhai Wang, Zhiding Yu, Anima Anandkumar, Jose M Alvarez, and Ping Luo. Segformer: Simple and efficient design for semantic segmentation with transformers. 
+
+Advances in Neural Information Processing Systems , 2021. 5, 7 [39] Hanrong Ye and Dan Xu. Taskprompter: Spatial-channel multi-task prompting for dense scene understanding. In The Eleventh International Conference on Learning Representa-tions , 2023. 13 [40] Hanrong Ye and Dan Xu. Diffusionmtl: Learning multi-task denoising diffusion model from partially annotated data. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , 2024. 13 [41] Tianhe Yu, Saurabh Kumar, Abhishek Gupta, Sergey Levine, Karol Hausman, and Chelsea Finn. Gradient surgery for multi-task learning. Advances in Neural Information Pro-cessing Systems , pages 5824–5836, 2020. 1, 13 [42] Qingru Zhang, Minshuo Chen, Alexander Bukharin, Pengcheng He, Yu Cheng, Weizhu Chen, and Tuo Zhao. Adaptive budget allocation for parameter-efficient fine-tuning. In International Conference on Learning Represen-tations , 2023. 8 [43] Wen Zhang, Lingfei Deng, Lei Zhang, and Dongrui Wu. A survey on negative transfer. IEEE/CAA Journal of Automatica Sinica , 10(2):305–329, 2023. 1 [44] Yu Zhang and Qiang Yang. A survey on multi-task learning. 
+
+IEEE Transactions on Knowledge and Data Engineering , 34 (12):5586–5609, 2022. 1 [45] Zihan Zhong, Zhiqiang Tang, Tong He, Haoyang Fang, and Chun Yuan. Convolution Meets LoRA: Parameter efficient finetuning for segment anything model. In International Con-ference on Learning Representations , 2024. 2, 8 Supplementary Material 
+
+# A. Theoretical Analysis of Task Decorrelation 
+
+In this section, we provide a theoretical analysis showing that the proposed frequency-switching sine modulation decorre-lates task-specific matrices derived from a shared low-rank base, whereas linear frequency scaling alone cannot. This analysis formally explains why the sine transformation is a necessary component for effective task specialization in our framework. 
+
+Correlation Definition. For two matrices 𝑀 𝑠 , 𝑀 𝑡 ∈
+
+R𝑚 ×𝑛 , we define their correlation as the cosine similarity of their vectorized forms: corr (𝑀 𝑠 , 𝑀 𝑡 ) = vec (𝑀 𝑠 )⊤vec (𝑀 𝑡 )∥vec (𝑀 𝑠 )∥ 2 ∥vec (𝑀 𝑡 )∥ 2
+
+. (16) A value of 0 indicates decorrelation (orthogonality), while 
+
+±1 indicates perfectly correlated matrices. 
+
+Proposition 1. Let 𝑀 AWB = 𝐴𝑊 𝐵 ⊤ be the shared base matrix. Define task-specific kernels using frequency-dependent sine modulation: 
+
+𝑀 𝑡 = sin (𝜔 𝑡 𝑀 AWB ), 𝑡 = 1, . . . , 𝑇, (17) 
+
+where the sine is applied elementwise. Assume each entry of 
+
+𝑀 AWB is a zero-mean, finite-variance random variable with symmetric density. Then for any two distinct frequencies 
+
+𝜔 𝑠 ≠ 𝜔 𝑡 , we have 
+
+corr (𝑀 𝑠 , 𝑀 𝑡 ) ≈ 0, (18) 
+
+i.e., frequency-dependent sine mapping decorrelates the re-sulting task-specific matrices. 
+
+Proof. Let 𝑋 be a scalar entry of 𝑀 AWB , and define 
+
+𝑌 𝑠 = sin (𝜔 𝑠 𝑋 ) and 𝑌 𝑡 = sin (𝜔 𝑡 𝑋 ). Using the identity sin (𝛼𝑋 ) sin (𝛽𝑋 ) = 12
+
+  cos (( 𝛼 − 𝛽 ) 𝑋 ) − cos (( 𝛼 + 𝛽 ) 𝑋 ), we obtain 
+
+E[𝑌 𝑠 𝑌 𝑡 ] = 12
+
+ E[cos (( 𝜔 𝑠 − 𝜔 𝑡 ) 𝑋 )] − E[cos (( 𝜔 𝑠 + 𝜔 𝑡 ) 𝑋 )] .
+
+Because 𝑋 has a symmetric density and finite variance, the expectation E[cos (𝑘 𝑋 )] goes to zero as |𝑘 | → ∞ . There-fore, whenever both |𝜔 𝑠 − 𝜔 𝑡 | and |𝜔 𝑠 + 𝜔 𝑡 | are large, the two cosine expectations are small, and thus 
+
+E[𝑌 𝑠 𝑌 𝑡 ] ≈ 0.
+
+Vectorizing 𝑀 𝑡 gives m𝑡 = vec (𝑀 𝑡 ), whose entries sat-isfy 𝑀 𝑡 (𝑖, 𝑗 ) ∼ 𝑌 𝑡 , where 𝑌 𝑡 = sin (𝜔 𝑡 𝑋 ) ∈ [− 1, 1]. By the law of large numbers, 
+
+m⊤ 
+
+> 𝑠
+
+m𝑡 
+
+∥m𝑠 ∥2 ∥m𝑡 ∥2
+
+−→ E[𝑌 𝑠 𝑌 𝑡 ]√︁ 
+
+E[𝑌 2 
+
+> 𝑠
+
+]√︃ E[𝑌 2 
+
+> 𝑡
+
+]≈ 0, (19) which proves corr (𝑀 𝑠 , 𝑀 𝑡 ) ≈ 0. □
+
+Proposition 2. Without sine transformation, frequency acts only as a scalar scaling and thus cannot decorrelate the AWB matrix. Define the linear-scaled task matrices 
+
+e𝑀 𝑡 = 𝜔 𝑡 𝑀 AWB . (20) 
+
+Then for any tasks 𝑠, 𝑡 we have 
+
+|corr ( e𝑀 𝑠 , e𝑀 𝑡 )| = 1, (21) 
+
+i.e., the task-specific matrices are perfectly correlated and lie in the same one-dimensional subspace. 
+
+Proof. Vectorizing yields 
+
+em𝑡 = vec ( e𝑀 𝑡 ) = 𝜔 𝑡 vec (𝑀 AWB ) = 𝜔 𝑡 m. (22) For any 𝑠, 𝑡 ,corr ( e𝑀 𝑠 , e𝑀 𝑡 ) = (𝜔 𝑠 m)⊤ (𝜔 𝑡 m)|𝜔 𝑠 |∥ m∥2 |𝜔 𝑡 |∥ m∥2
+
+= ±1. (23) Thus all e𝑀 𝑡 are collinear scalings of the same matrix and share identical singular directions. Hence frequency without sine cannot create decorrelated or task-specific variations. □
+
+Implications. Together, Propositions 1 and 2 formally establish that the sine-based frequency modulation is the key mechanism enabling task-specific decorrelation from a shared low-rank base. Frequency alone, without the sine transformation, collapses all task-specific matrices into the same parameter subspace. This theoretical result directly supports the design of our frequency-switching Sine-AWB module and explains the empirical performance gains ob-served in our experiments. 
+
+# B. Free Sinewich with Different Backbones and Pretraining Datasets 
+
+We evaluate the robustness of Free Sinewich under different backbone capacities and pretraining settings. Specifically, we examine the effect of (i) using a larger pretraining dataset and (ii) adopting a larger backbone architecture. The results are summarized in Fig. 5. (a) Effect of pretraining dataset.   
+
+> (b) Effect of backbone capacity.
+> Figure 5. Effect of backbone pretraining and model ca-pacity on Free Sinewich. (a) Comparison between Swin-T pretrained on ImageNet-1K and ImageNet-22K. (b) Perfor-mance comparison between Swin-T and Swin-B backbones (both pretrained on ImageNet-22K).
+
+As shown in Fig. 5a, pretraining on a larger dataset (ImageNet-22K) leads to a clear and consistent performance improvement over ImageNet-1K pretraining. This indicates that a stronger pretrained backbone provides a richer shared representation, which directly enhances the effectiveness of frequency switching. Since Free Sinewich reuses a single shared base matrix across tasks, the quality of the pretrained weights plays a crucial role in enabling effective task-specific modulation. Fig. 5b further shows that increasing backbone capacity from Swin-T to Swin-B also improves performance. This confirms that Free Sinewich benefits from stronger represen-tational capacity in the shared backbone. The relative gain from enlarging the backbone is bigger for Free Sinewich than for TADFormer. We attribute this to a effect: Free Sinewich already achieves strong performance by efficiently reusing shared parameters through frequency switching, this further scales up with a bigger model. These results demon-strate that Free Sinewich scales favorably with both better pretraining and larger backbones, while maintaining its core advantage of parameter-efficient task specialization through frequency-based modulation. 
+
+# C. Gaussian Low-Pass Filter Hyperparameters 
+
+We analyze the sensitivity of Free Sinewich to the hyper-parameters of the Gaussian low-pass filter applied after sine modulation. Specifically, we perform one-dimensional sweeps over the kernel size 𝐾 and the standard deviation 𝜎 ,and report the results in Table 6. We first vary the kernel size while fixing 𝜎 = 1.0. As shown in the upper block of Table 6, the performance re-mains stable across different kernel sizes. Among the tested configurations, 𝐾 = 7 achieves the best overall result, yield-ing the highest Δ𝑚 (+5.39). Both smaller ( 𝐾 = 5) and larger (𝐾 = 9) kernels produce comparable performance, indicat-ing that the method is not sensitive to the exact spatial extent of the filter. We then fix the kernel size to 𝐾 = 7 and sweep the stan-dard deviation 𝜎 . The results show that the original setting 
+
+𝜎 = 1.0 consistently achieves the best trade-off across all tasks. When 𝜎 = 1.5, the performance remains competi-tive, demonstrating robustness to moderate over-smoothing. However, when 𝜎 = 0.5, we observe a noticeable drop in performance, with Δ𝑚 decreasing from +5.39 to +4.90. We attribute this degradation to insufficient suppression of high-frequency artifacts introduced by the sine transforma-tion. With a small 𝜎 , the Gaussian filter becomes too narrow to effectively smooth oscillatory noise, which adversely af-fects feature stability and task-specific modulation. These results show that Free Sinewich is robust to a wide range of Gaussian filter hyperparameters, while the default setting (𝐾 = 7, 𝜎 = 1.0) provides the most consistent and optimal performance. 
+
+# D. Gradient Cosine Similarity Analysis 
+
+To better understand task interference, we measure the simi-larity between task gradients computed on the shared LoRA base matrices of the encoder. For a pair of tasks 𝑖 and 𝑗 ,let 𝑔 𝑖 and 𝑔 𝑗 denote the flattened gradients of the shared parameters. Their cosine similarity is computed as sim (𝑖, 𝑗 ) = 𝑔 ⊤ 
+
+> 𝑖
+
+𝑔 𝑗 
+
+∥𝑔 𝑖 ∥2 ∥𝑔 𝑗 ∥2
+
+. (24) Table 6. Ablation over low-pass filter hyperparameters. Effect of kernel size 𝐾 and standard deviation 𝜎 on performance. 
+
+Kernel Standard SemSeg Human Parts Saliency Normals Δ𝑚 (%) Size 𝑘 Deviation 𝜎 (mIoU ↑) (mIoU ↑) (mIoU ↑) (rmse ↓)
+
+Sweep over kernel size 𝐾 (fixed 𝜎 = 1.0) 
+
+𝐾 = 5 𝜎 = 1.0 71.20 61.37 66.16 16.15 +5.32 
+
+𝐾 = 7 𝜎 = 1.0 71.25 61.38 66.24 16.14 +5.39 
+
+𝐾 = 9 𝜎 = 1.0 71.06 61.46 66.07 16.11 +5.32 
+
+Sweep over 𝜎 (fixed 𝐾 = 7) 
+
+𝐾 = 7 𝜎 = 0.5 70.91 61.26 65.58 16.17 +4.90 
+
+𝐾 = 7 𝜎 = 1.0 71.25 61.38 66.24 16.14 +5.39 
+
+𝐾 = 7 𝜎 = 1.5 71.05 61.31 66.40 16.13 +5.36 
+
+Figure 6. Pairwise gradient cosine similarity measured on the shared LoRA base matrix across training epochs (x-axis). Our method maintains near-orthogonal inter-task gradients with reduced variance and lower conflict rate compared to TADFormer. 
+
+During training, gradients from different tasks are col-lected at each iteration. The similarity values are accumu-lated across iterations and averaged within each epoch: ¯𝑠 = 1
+
+𝑁 
+
+> 𝑁
+
+∑︁ 
+
+> 𝑘 =1
+
+sim 𝑘 (𝑖, 𝑗 ), (25) where 𝑁 is the number of gradient samples in the epoch. We also report the variance of these values to quantify gradient stability. Fig. 6 shows a comparison of gradient cosine similar-ity between TADFormer and Free Sinewich. Compared to TADFormer, our method exhibits lower variance and more stable, near-orthogonal inter-task gradients (similarity ≈ 0), indicating reduced interference despite shared parameters. Although we do not explicitly design a gradient optimization component, the proposed frequency-switching mechanism appears to implicitly induce task-specific subspaces within the shared base matrix. Combining our method with explicit gradient-based approaches [9, 41] remains a promising di-rection for future work. 
+
+Table 7. Results on the Cityscapes dataset. All methods use a Swin-Tiny backbone [26] pretrained on ImageNet-22K [7] with an HRNet decoder. MTL-Dec denotes training the decoder only, while MTL-Full denotes full fine-tuning. Δ𝑚 denotes the average relative improvement over the single-task baseline. 
+
+Method SemSeg Depth Δ𝑚 (%) Trainable 
+
+(mIoU ↑) (rmse ↓) Param. (M) 
+
+Single Task 63.98 5.91 0 56.00 MTL - Dec 53.30 8.54 -30.59 0.97 MTL - Full 61.03 5.76 -1.03 28.49 DiTASK [27] 56.08 6.35 -9.89 2.58 MTLoRA [1] 60.88 5.84 -1.83 7.23 TADFormer [3] 62.76 5.39 +3.44 5.97 Free Sinewich 62.62 5.14 +5.45 5.92 
+
+# E. Results on the Cityscapes Dataset 
+
+We further evaluate Free Sinewich on the Cityscapes [6] dataset to assess its generalization to large-scale urban scene understanding. Following the experimental protocols of TaskPrompter [39] and DiffusionMTL [40], we consider a two-task setting consisting of semantic segmentation and monocular depth estimation. All methods are trained and evaluated under identical settings to ensure a fair compari-son. The quantitative results are summarized in Table 7. Among parameter-efficient multi-task learning methods, Di-TASK and MTLoRA show limited improvements and re-main below the single-task baseline. TADFormer improves upon these baselines, achieving a positive Δ𝑚 of +3.44 with 5.97M trainable parameters. In contrast, Free Sinewich achieves the best overall performance, attaining a Δ𝑚 of +5.45 with only 5.92M trainable parameters. These results indicate that Free Sinewich effectively mitigates task in-terference while maintaining strong parameter efficiency in large-scale outdoor scenes.

@@ -1,0 +1,442 @@
+Title: IF-CPS: Influence Functions for Cyber-Physical Systems -- A Unified Framework for Diagnosis, Curation, and Safety Attribution
+
+URL Source: https://arxiv.org/pdf/2603.21543v1
+
+Published Time: Tue, 24 Mar 2026 02:37:35 GMT
+
+Number of Pages: 7
+
+Markdown Content:
+# IF-CPS: Influence Functions for Cyber-Physical Systems— A Unified Framework for Diagnosis, Curation, and Safety Attribution 
+
+Jiachen Li 1, Shihao Li 1, Soovadeep Bakshi 1, Jiamin Xu 1, and Dongmei Chen 1
+
+Abstract — Neural network controllers trained via behavior cloning are increasingly deployed in cyber-physical systems (CPS), yet practitioners lack tools to trace controller failures back to training data. Existing data attribution methods assume i.i.d. data and standard loss targets, ignoring CPS-specific prop-erties: closed-loop dynamics, safety constraints, and temporal trajectory structure. We propose IF-CPS, a modular influence function framework with three CPS-adapted variants: safety influence (attributing constraint violations), trajectory influence (temporal discounting over trajectories), and propagated influ-ence (tracing effects through plant dynamics). We evaluate IF-CPS on six benchmarks across diagnosis, curation, and safety attribution tasks. IF-CPS improves over standard influence functions in the majority of settings, achieving AUROC 1.00 
+
+in Pendulum (5–10% poisoning), 0.92 vs. 0.50 in HVAC (10%), and the strongest constraint-boundary correlation (Spearman 
+
+ρ = 0 .55 in Pendulum). 
+
+I. I NTRODUCTION 
+
+Neural network controllers trained on offline demonstra-tions are increasingly used in cyber-physical systems (CPS) such as autonomous vehicles [1], robotic manipulators [2], and industrial process control. Behavior cloning is a common approach due to its simplicity and data efficiency [3]. How-ever, when a cloned controller exhibits unsafe behavior in deployment, practitioners face a fundamental question: which training demonstrations caused this failure? Answering this question is essential for diagnosing failures, curating training datasets, and building safety cases for controller certification. Data attribution methods from machine learning offer a principled answer. Influence functions [4] approximate the effect of removing a training point via a Hessian-inverse-gradient product. LiSSA [5] makes this feasible for deep networks; TracIn [6] uses gradient dot products across check-points; TRAK [7] uses random projections for scalability; Data Shapley [8] provides game-theoretic valuation; and Choe et al. [9] and Hammoudeh and Lowd [10] address large-scale attribution and provide comprehensive surveys. These methods have proven effective for classification tasks, but their application to CPS control remains largely unex-plored. The challenge is that CPS controllers differ from standard supervised learning in three fundamental ways. First, closed-loop dynamics mean the controller’s output feeds back through the physical plant, so a training point’s influence propagates through system dynamics rather than affecting a single prediction. Second, safety constraints are often                  
+
+> 1All authors are with the Department of Mechanical Engineering, The University of Texas at Austin, Austin, TX 78712, USA.
+
+{jiachenli, shihaoli01301, soovadeepbakshi, jiaminxu }@utexas.edu, dmchen@me.utexas.edu 
+
+the primary concern in CPS—constraint satisfaction (e.g., staying within position or temperature bounds) matters more than loss minimization alone. Third, temporal trajectory structure means training demonstrations are trajectories, not independent samples, so errors at early timesteps compound through subsequent states. Recent work has begun extending data attribution beyond the standard supervised learning setting. In the reinforcement learning domain, Abolfazli et al. [11] propose data valuation for offline RL, while Hu et al. [12] adapt TracIn-based attribution to the online RL setting. However, neither line of work addresses CPS-specific challenges such as safety constraints or closed-loop dynamics propagation. In the controls domain, Li et al. [13] derive influence functions for linear system identification and LQR control through DARE sensitivity analysis, but their formulation is restricted to linear systems and does not accommodate safety constraints or neural network policies. CUPID [14] applies influence functions to robot imitation learning for data curation, yet does not explicitly target safety-critical CPS requirements. While existing neural network verification tools can certify controller safety using set-based reachability methods, they do not trace safety violations back to individual training demonstrations. IF-CPS complements such verification ap-proaches by providing data-level explanations for why a learned controller satisfies or violates safety specifications. We adopt standard IF [4] as the primary baseline, as it is the direct parent method from which IF-CPS derives; this first CPS-focused study is designed to isolate the value of domain-specific adaptations before benchmarking against broader data valuation families. We propose IF-CPS, a modular influence function frame-work that adapts data attribution to the CPS domain through three variants—safety influence, trajectory influence, and propagated influence—supporting diagnosis, curation, and safety attribution of learned controllers (Fig. 1). Our contri-butions are: (1) three CPS-adapted influence function variants that account for closed-loop dynamics, safety constraints, and temporal trajectory structure; (2) a modular framework with a shared inverse-Hessian computation, where variants can be applied individually or combined as a parameter-free ensemble; and (3) evaluation on six CPS benchmarks (including Quadrotor figure-8 tracking, multi-zone HVAC, and CSTR chemical process control) showing improvements over standard influence functions in the majority of settings, with ablation identifying which variant contributes most in each domain.  
+
+> arXiv:2603.21543v1 [eess.SY] 23 Mar 2026 Fig. 1. Overview of the IF-CPS framework.
+
+II. P ROBLEM FORMULATION 
+
+A. CPS Control via Behavior Cloning 
+
+We consider a discrete-time CPS with state x ∈ X ⊆
+
+Rn, action u ∈ U ⊆ Rm, and known plant dynamics 
+
+xt+1 = f (xt, u t). A neural network controller πθ : X → U is trained via behavior cloning on a dataset of expert demonstrations D = {τ1, . . . , τ N }, where each demonstra-tion τi = {(xi
+
+> 0
+
+, u i
+
+> 0
+
+), (xi
+
+> 1
+
+, u i
+
+> 1
+
+), . . . , (xiTi , u iTi )} is a state-action trajectory. The training objective minimizes: 
+
+L(θ) = 1
+
+|D| 
+
+X
+
+> τi∈D
+> Ti
+
+X
+
+> t=0
+
+ℓ(πθ (xit), u it) (1) where ℓ is a per-step loss (e.g., cross-entropy or MSE). Flattening the trajectory structure, define the full training set of state-action pairs Df lat = {(xj , u j )}Mj=1 where M =
+
+PNi=1 (Ti + 1) . The empirical risk is: 
+
+L(θ) = 1
+
+M
+
+> M
+
+X
+
+> j=1
+
+ℓ(πθ (xj ), u j ) (2) For continuous actions (MSE loss): ℓ(πθ (x), u ) = 
+
+> 1
+> m
+
+∥πθ (x) − u∥22. For discrete actions (cross-entropy on logits zθ (x) ∈ R|U| ): ℓ(πθ (x), u ) = −zθ (x)u +log P 
+
+> a∈U
+
+exp( zθ (x)a), where zθ (x)u denotes the logit cor-responding to the expert action u.
+
+B. Safety Constraints 
+
+The CPS has K safety constraints gk(x) ≤ 0 for k =1, . . . , K . A state x is safe if all constraints are satisfied. A trajectory τ has a safety violation at time t if ∃k : gk(xt) > 0.Define the safe set S = {x ∈ X : gk(x) ≤ 0, ∀k =1, . . . , K } and the constraint boundary ∂Sk = {x : gk(x) = 0}. The signed distance to the nearest constraint boundary at state x ∈ S is: 
+
+d(x) = min 
+
+> k=1 ,...,K
+
+−gk(x)
+
+∥∇ xgk(x)∥2
+
+(3) which is well-defined when ∇xgk(x)̸ = 0 on ∂Sk (constraint qualification). The maximum constraint violation along a trajectory τ is V (τ ) = max t=0 ,...,T max k=1 ,...,K gk(xt). A trajectory is safe iff V (τ ) ≤ 0.
+
+C. Data Attribution Problem 
+
+Given a trained controller πˆθ and a test scenario (trajectory 
+
+τtest ) where the controller violates safety constraints, the data attribution problem is to assign a score αi ∈ R to each training demonstration τi quantifying its responsibility for the violation. III. IF-CPS: M ETHODOLOGY 
+
+A. Standard Influence Function 
+
+We briefly review the derivation to establish notation. Consider upweighting a single training point zi = ( xi, u i)
+
+by ϵ, yielding the perturbed parameters: 
+
+ˆθϵ = arg min  
+
+> θ
+
+L(θ) + ϵ ℓ (πθ (xi), u i) (4) By the implicit function theorem applied to the first-order optimality condition ∇θ L(ˆθϵ) + ϵ∇θ ℓ(zi, ˆθϵ) = 0 , differen-tiating w.r.t. ϵ at ϵ = 0 :
+
+dˆθϵ
+
+dϵ ϵ=0 
+
+= −H−1ˆθ ∇θ ℓ(zi, ˆθ) (5) where Hˆθ = ∇2 
+
+> θ
+
+L(ˆθ) is the Hessian of the training loss. The influence of zi on any differentiable test quantity Q(θ) is then: 
+
+I(zi, Q) = −∇ θ Q(ˆθ)⊤H−1ˆθ ∇θ ℓ(zi, ˆθ) (6) The standard IF sets Q(θ) = ℓ(πθ (xtest ), u test ), the predic-tion loss at a test point. IF-CPS defines three alternative test objectives Q suited to CPS applications. 
+
+B. Safety Influence Function 
+
+Standard influence functions attribute changes in predic-tion loss. For CPS, we instead attribute safety violations. Define the smoothed safety loss for a fixed test trajectory 
+
+τtest as: 
+
+Lsaf ety (τtest , θ ) = 
+
+> T
+
+X
+
+> t=0
+> K
+
+X
+
+> k=1
+
+ϕβ (gk(xtest t , θ )) (7) where ϕβ (s) = 1 
+
+> β
+
+log(1 + eβs ) is the softplus function and gk(xtest t , θ ) := gk
+
+ f (xtest t−1 , π θ (xtest t−1 ))  for propagated states, or simply gk(xtest t ) for the fixed-trajectory setting. Setting Q = Lsaf ety in (6), the safety influence of training demonstration τi is: 
+
+Isaf ety (τi, τ test ) = −∇ θ Lsaf ety (τtest , ˆθ)⊤H−1ˆθ ∇θ L(τi, ˆθ)
+
+(8) This follows directly from (6). Since ϕβ is C∞, gk is C1, and 
+
+πθ is piecewise differentiable (ReLU), the chain rule gives: 
+
+∇θ Lsaf ety = X
+
+> t,k
+
+σ(β g k(xtest t )) 
+
+| {z }
+
+> soft indicator
+
+·∇ xg⊤ 
+
+> k
+
+· ∂f ∂u xtest t
+
+·∇ θ πθ (xtest t )
+
+(9) where σ(s) = 1 /(1 + e−s) is the sigmoid function. The sigmoid weighting σ(β g k(x)) acts as a soft indicator for constraint violation: it approaches 1 for violated states ( gk >
+
+0), decays exponentially for safe states far from the boundary, and equals ≈1/2 near the boundary. The effective sensitivity region has width ∆ = 2 /β centered on ∂Sk, so the safety gradient is dominated by timesteps where the test trajectory is near a constraint boundary. The smoothed safety loss is related to the log-barrier function used in constrained optimization. As β → ∞,
+
+ϕβ (gk) → [gk]+, recovering the exact constraint violation penalty. The choice of β controls a bias-variance trade-off: large β gives precise but noisy attribution, while small β
+
+gives smooth but less discriminative attribution. We approximate H−1v using LiSSA [5]. 
+
+C. Trajectory Influence 
+
+Standard influence functions treat training data as i.i.d. samples. In CPS, demonstrations are trajectories with tem-poral structure: errors at early timesteps compound through dynamics. For a training demonstration τi and a single test state-action pair (xtest t , u test t ), the per-timestep influence is: 
+
+It(τi) := −∇ θ ℓ(πˆθ (xtest t ), u test t )⊤H−1ˆθ ∇θ L(τi, ˆθ) (10) The trajectory influence aggregates these with geometric temporal discounting: 
+
+Itraj (τi, τ test ) = 
+
+> T
+
+X
+
+> t=0
+
+γt · It(τi) (11) where γ ∈ (0 , 1) is the discount factor. Defining the discount-weighted test gradient ˜g = PTt=0 γt∇θ ℓ(πˆθ (xtest t ), u test t ),this reduces to: 
+
+Itraj (τi, τ test ) = −˜g⊤H−1ˆθ ∇θ L(τi, ˆθ) (12) which is a standard IF with an aggregated test gradient, requiring only one LiSSA solve instead of T + 1 . The normalized discount weights form a truncated geometric distribution with effective horizon: 
+
+Tef f = γ
+
+1 − γ − (T + 1) γT +1 
+
+1 − γT +1 (13) For γ = 0 .99 and T = 200 : Tef f ≈ 85 .7 steps, placing 42% of weight on the first half of the trajectory. 
+
+D. Propagated Influence 
+
+The key insight is that in CPS, a training point’s effect propagates through the closed-loop system dynamics. The closed-loop Jacobian at state-action pair (xt, u t) along the test trajectory is: 
+
+Jcl (t) = ∂f ∂x xt,u t
+
+| {z }
+
+> A(t)
+
++ ∂f ∂u xt,u t
+
+| {z }
+
+> B(t)
+
+· ∂π θ
+
+∂x xt
+
+| {z } 
+
+> Kθ(t)
+
+(14) The cumulative state transition from time 0 to t is Φ( t, 0) = Qt−1 
+
+> k=0
+
+Jcl (k), with Φ(0 , 0) = In. The spectral norm 
+
+∥Φ( t, 0) ∥2 measures worst-case perturbation amplification over t timesteps. The propagated influence weights per-timestep attributions by this dynamical sensitivity: 
+
+Iprop (τi, τ test ) = 
+
+> T
+
+X
+
+> t=0
+
+γt ∥Φ( t, 0) ∥2 · It(τi) (15) For linear plants ( f (x, u ) = Ax + Bu ), Jcl = A + B ∂π ∂x 
+
+is constant, and the propagation reduces to powers of a fixed matrix. For nonlinear plants, we compute Jcl (t) at each timestep via first-order Taylor expansion around the current operating point. Under linear dynamics with constant controller Jacobian Kθ , the closed-loop Jacobian is time-invariant: Jcl = Acl := A+BK θ . If the closed-loop system is Schur stable ( ρ(Acl ) < 1), there exist C ≥ 1, c ∈ [ρ(Acl ), 1) 
+
+with ∥Atcl ∥2 ≤ Cc t, yielding the bound: 
+
+|Iprop (τi, τ test )| ≤ C
+
+1 − γc · max  
+
+> t
+
+|It(τi)| (16) When ρ(Acl ) → 1− (approaching the stability boundary), the total propagated IF weight diverges, automatically assigning larger attribution scores when the closed-loop system is near instability—a physically meaningful property, since a controller operating near its stability margin is most sensitive to training data quality. This parallels the approach of Li et al. [13], whose IF2 computes influence on LQR cost through DARE sensitivity with contributions scaled by ∥(A∗
+
+> cl
+
+)t∥22. Both methods weight perturbation influence by powers of the closed-loop transition matrix—Li et al. implicitly through the DARE algebraic structure (exact for LQR); IF-CPS explicitly as a scalar weight (applicable to nonlinear neural network controllers). 
+
+Assumptions. The propagated variant requires: (A1) known or identified plant dynamics f with available Jacobians ∂f /∂x , ∂f /∂u ; (A2) a differentiable controller (piecewise for ReLU networks); (A3) finite propagation horizon to bound linearization error in nonlinear systems. The Schur stability bound (16) additionally requires a stable closed-loop system. When dynamics are unavailable or poorly identified, practitioners should use the safety and trajectory variants only; the propagated variant is optional and adds value primarily when reliable dynamics models exist. 
+
+E. Modular Framework 
+
+All three IF-CPS variants share a common computational template, differing only in the per-timestep test objective Qt
+
+and the timestep weight ωt:
+
+ICP S (τi, τ test ) = −
+
+ TX
+
+> t=0
+
+ωt · ∇ θ Qt(ˆθ)
+
+⊤
+
+H−1ˆθ ∇θ L(τi, ˆθ)
+
+(17) where Qt is the per-timestep test objective and ωt is the timestep weight: 
+
+Variant Qt(θ) ωt
+
+Standard IF ℓ(πθ (xtest t ), u test t ) 1/(T +1) 
+
+Safety IF P 
+
+> k
+
+ϕβ (gk (xtest t )) 1
+
+Trajectory IF ℓ(πθ (xtest t ), u test t ) γt
+
+Propagated IF ℓ(πθ (xtest t ), u test t ) γt∥Φ( t, 0) ∥2
+
+The combined IF-CPS score is computed as a parameter-free equal-weight ensemble: 
+
+αIF -CP S i = 13
+
+ ¯Isaf ety (τi) + ¯Itraj (τi) + ¯Iprop (τi) (18) where ¯I denotes min-max normalization to [0 , 1] . Equal weighting is a deliberate parameter-free default; no optimal-ity claim is made for this aggregation rule, and practitioners may use individual variants when domain knowledge sug-gests one signal dominates (see ablation in Section IV). Each IF-CPS variant requires exactly one inverse-Hessian-vector product H−1ˆθ ∇θ L(τi, ˆθ) per training demonstration, which can be shared across all variants. Computing all three variants simultaneously costs approximately the same as computing one, plus O(3 · T · p) for the test-side gradients and O(T · n2 · p) for the Jacobian products in the propagated variant. 
+
+F. Approximation Quality Analysis 
+
+The LiSSA algorithm approximates H−1v via the Neu-mann series: 
+
+H−1v ≈
+
+> R−1
+
+X
+
+> r=0
+
+(I − αH )r (αv ) (19) With damped Hessian ˜H = H + λI , scale α = 1 /˜λp, and 
+
+R recursion steps, the approximation error is bounded by: 
+
+|Iexact (τi) − Iapprox (τi)| ≤ ∥ q∥2 · ∥∇ θ L(τi)∥2
+
+λ ·
+
+
+
+1 − λ
+
+˜λp
+
+R
+
+(20) where q = P 
+
+> t
+
+ωt∇θ Qt is the test-side gradient. The relative ranking of training points (which AUROC measures) is more robust to uniform approximation error than absolute scores. 
+
+G. Computational Complexity 
+
+Each influence function computation requires one gradient computation per training trajectory ( O(N )) and one LiSSA inverse-Hessian-vector product ( O(R · B) for R recursion steps and batch size B). The propagated influence adds 
+
+O(T · n2) per trajectory for Jacobian computation ( n = state dimension, T = propagation horizon). Total complexity per test trajectory: O(N · (R · B + T · n2)) . For typical CPS datasets ( N ≤ 200 , n ≤ 13 , T ≤ 50 ), this is dominated by the LiSSA computation and remains tractable. IV. E XPERIMENTS 
+
+A. Setup 
+
+We evaluate on six CPS benchmarks (Table I): three standard Gymnasium [15] tasks (CartPole, Pendulum, Lu-narLander) and three domain-specific environments (Quadro-tor figure-8 tracking with 6D state and 3D acceleration action; multi-zone HVAC thermal regulation with 4D state and comfort constraints 20 ≤ Ti ≤ 26 °C; CSTR chemical reactor with 3D state and safety constraints on temperature and concentration). For each environment, we train a 2-layer MLP controller (64 hidden units, ReLU) via behavior cloning on 100 expert demonstrations, using Adam (learning rate = 10 −3), batch size 128, and early stopping (patience 10). We compare Random (uniform scores), Standard IF [4], and IF-CPS (Eq. 18). The empirical claim is improvement over standard IF baselines in CPS settings; comparison against broader data                                           
+
+> TABLE I EVALUATION ENVIRONMENTS SUMMARY .
+> Environment nmAction Safety Constraints CartPole 41 (disc.) Discrete |θ|,|x|bounds Pendulum 31 (cont.) Cont. |˙θ|bound LunarLander 81 (disc.) Discrete y > 0,|θ|
+> Quadrotor 63 (cont.) Cont. z,|x|,|y|bounds HVAC 41 (cont.) Cont. Ti∈[20 ,26]
+> CSTR 31 (cont.) Cont. Tr, C Abounds
+
+valuation methods (e.g., TRAK, Data Shapley) is left to fu-ture work. We evaluate four protocols: (A) Diagnosis—inject faulty demonstrations at rates 5–20% and measure AUROC; (B) Curation—retrain on top-ranked subsets; (C) Safety attribution—correlate attribution with constraint boundary proximity (Spearman ρ); (D) Ablation—compare IF-CPS variants. All experiments use 3 seeds; LiSSA: 5 recursions, damping 0.01; propagation horizon 20 steps; γ = 0 .99 .
+
+B. Trajectory Visualization 
+
+Fig. 2 compares trajectories under the expert (green), 20% poisoned BC (red), and IF-CPS-curated BC (blue, bottom 30% removed). In CartPole, curation recovers near-expert pole stabilization. In Quadrotor, the poisoned BC diverges rapidly while curation recovers figure-8 tracking. In CSTR, the poisoned BC overshoots toward the 400 K safety bound; curation recovers smooth transient behavior. 
+
+C. Diagnosis 
+
+Table II and Fig. 3 report AUROC for identifying faulty demonstrations. As a descriptive summary across the 24 environment-rate combinations, IF-CPS outperforms Stan-dard IF in 18 cases, ties in 2, and loses in 4 (win rate 75%; note that with n = 3 seeds these are point-estimate compar-isons, not formal hypothesis tests). The largest gains appear in Pendulum (AUROC 1.00 vs. 0.72 at 5%), CartPole ( 0.90 
+
+vs. 0.63 at 10%), HVAC ( 0.92 vs. 0.50 at 10%), and CSTR (0.73 vs. 0.33 at 10%). LunarLander at 10% is a tie ( 0.67 
+
+vs. 0.68 ), and several Quadrotor settings show high variance (±0.47 ) due to the small seed count ( n = 3 ), indicating that these point estimates should be interpreted cautiously. Performance tends to be strongest at 5–10% poisoning rates and less consistent at 15–20%. We hypothesize that higher contamination degrades the Hessian estimate used by LiSSA (since the empirical risk surface shifts with corruption level), reducing attribution fidelity; verifying this mechanism is left to future work. LunarLander and Quadrotor represent stress cases for IF-CPS: LunarLander shows no gain over Standard IF at 10% poisoning, and Quadrotor exhibits high seed-to-seed variance, indicating that method robustness is environment-dependent and not uniformly reliable across all CPS domains. 
+
+D. Curation 
+
+The curation protocol removes the top-ranked demonstra-tions (highest IF-CPS score) and retrains the controller on the Fig. 2. IF-CPS data curation on CartPole, Quadrotor, and CSTR: expert (green), 20% poisoned BC (red), IF-CPS-curated BC (blue). Dashed lines show safety bounds. TABLE II DIAGNOSIS AUROC ( MEAN ± STD , 3 SEEDS ). 
+
+Env Rate Random Std. IF IF-CPS CartPole 5% .43 ±.11 .07 ±.10 .45 ±.15 10% .49 ±.11 .63 ±.34 .90 ±.10 15% .45 ±.10 .55 ±.19 .57 ±.18 20% .55 ±.05 .37 ±.21 .73 ±.15 Pendulum 5% .43 ±.11 .72 ±.23 1.00 ±.00 10% .49 ±.11 .63 ±.31 1.00 ±.00 15% .45 ±.10 .24 ±.35 .53 ±.20 20% .55 ±.05 .27 ±.38 .67 ±.15 LunarLander 5% .43 ±.11 .42 ±.38 .67 ±.20 10% .49 ±.11 .68 ±.45 .67 ±.20 15% .45 ±.10 .40 ±.42 .55 ±.25 20% .55 ±.05 .31 ±.30 .67 ±.15 Quadrotor 5% .55 ±.03 .00 ±.00 .40 ±.35 10% .43 ±.12 .33 ±.47 .67 ±.47 15% .56 ±.10 .67 ±.47 1.00 ±.00 20% .50 ±.02 .67 ±.47 .67 ±.47 HVAC 5% .61 ±.04 .34 ±.18 .73 ±.15 10% .50 ±.08 .50 ±.09 .92 ±.08 15% .49 ±.04 .56 ±.03 .73 ±.10 20% .47 ±.01 .57 ±.10 .73 ±.10 CSTR 5% .61 ±.14 .67 ±.47 .67 ±.47 10% .50 ±.07 .33 ±.47 .73 ±.25 15% .56 ±.03 .67 ±.47 .67 ±.47 20% .49 ±.01 .67 ±.47 .75 ±.25 
+
+remaining subset. The engineering action is: given a dataset suspected of containing faulty data, IF-CPS ranks demon-strations by attribution score and the practitioner removes a fixed budget before retraining. CSTR and Quadrotor benefit most from this data selection, while CartPole achieves near-expert performance even with small subsets, consistent with the simpler dynamics permitting robust cloning from fewer demonstrations.   
+
+> Fig. 3. Diagnosis AUROC vs. poisoning rate. Shaded regions: ±1 std (3 seeds).
+
+E. Safety Attribution 
+
+Table III reports Spearman ρ between attribution magni-tude and constraint boundary proximity. Safety IF achieves strong correlation in Pendulum ( ρ = 0 .48 ) and Quadrotor (ρ = 0 .35 ), validating that safety-weighted attribution con-centrates on constraint-relevant states. The combined IF-CPS score consistently achieves the highest correlation across all environments, with the strongest results in Pendulum ( ρ =0.55 ), Quadrotor ( ρ = 0 .41 ), and CSTR ( ρ = 0 .37 ), demon-strating that aggregating safety, trajectory, and propagated signals yields more complete constraint-boundary attribution than any single variant alone. HVAC shows moderate positive correlations (ρ = 0.18 for IF-CPS) because the multi-zone thermal dynamics introduce coupling between zones, partially decorrelating per-zone attribution from boundary proximity. CartPole shows modest correlations, consistent with the expert policy maintaining the pole well within its angular safety bounds during typical operation. 
+
+F. Ablation 
+
+Table IV compares IF-CPS variants at 10% poisoning. Each variant contributes complementary signal: Safety IF is strongest in Pendulum (0.93) and LunarLander (0.72), TABLE III SAFETY ATTRIBUTION SPEARMAN ρ (MEAN ± STD ). 
+
+Method CartPole Pendulum LunarLander Random −.01 ±.02 .04 ±.03 −.01 ±.03 Std. IF .08 ±.05 .27 ±.10 .11 ±.07 Safety IF .19 ±.06 .48 ±.08 .27 ±.07 IF-CPS .24 ±.05 .55 ±.07 .33 ±.06 Quadrotor HVAC CSTR Random .01 ±.02 −.01 ±.03 .02 ±.03 Std. IF .15 ±.07 .06 ±.06 .12 ±.06 Safety IF .35 ±.09 .13 ±.07 .30 ±.08 IF-CPS .41 ±.08 .18 ±.06 .37 ±.07 
+
+Propagated IF in CartPole (0.85) and Quadrotor (0.70), and Trajectory IF excels in CSTR (0.70) and HVAC (0.80). The full IF-CPS combination matches or exceeds the best individual variant in most settings, confirming the benefit of aggregating complementary attribution signals. 
+
+TABLE IV ABLATION AUROC AT 10% POISONING (MEAN ± STD ). 
+
+Variant CartPole Pendulum LunarLander IF-CPS (full) .90 ±.10 1.00 ±.00 .67 ±.20 Safety only .72 ±.12 .93 ±.06 .72 ±.15 Trajectory only .80 ±.11 .88 ±.10 .65 ±.18 Propagated only .85 ±.09 .85 ±.12 .58 ±.22 Std. IF .63 ±.34 .63 ±.31 .68 ±.45 Quadrotor HVAC CSTR IF-CPS (full) .67 ±.47 .92 ±.08 .73 ±.25 Safety only .53 ±.35 .75 ±.12 .57 ±.30 Trajectory only .60 ±.40 .80 ±.10 .70 ±.28 Propagated only .70 ±.25 .78 ±.11 .67 ±.30 Std. IF .33 ±.47 .50 ±.09 .33 ±.47 
+
+G. Attribution Score Analysis 
+
+Fig. 4 visualizes IF-CPS attribution scores for Pendulum, LunarLander, and HVAC. Table V quantifies detection rates: Quadrotor achieves perfect 20/20 detection with full score separation, and CSTR (16/20), HVAC (15/20), and CartPole (14/20) also show strong detection within the 30% removal budget. Wider score ranges generally correspond to higher detection rates, as the attribution scores provide clearer separation between poisoned and clean demonstrations. V. C ONCLUSION 
+
+We presented IF-CPS, a modular influence function frame-work that adapts data attribution to cyber-physical systems through three variants—safety, trajectory, and propagated influence—accounting for closed-loop dynamics, safety con-straints, and temporal structure. Experiments on six bench-marks show improvements over standard IF in the majority of settings, with notable gains in Pendulum, HVAC, and CSTR for diagnosis, and the strongest constraint-boundary correla-tion across all environments for safety attribution. Ablation 
+
+TABLE V IF-CPS DETECTION RATE (20% POISONING , 30% REMOVAL BUDGET )
+
+> AND SCORE RANGE
+
+.
+
+Environment Detection Score range CartPole 14/20 [0 .12 , 0.85] 
+
+Pendulum 13/20 [0 .08 , 0.91] 
+
+LunarLander 12/20 [0 .15 , 0.82] 
+
+Quadrotor 20/20 [0 .00 , 1.00] 
+
+HVAC 15/20 [0 .00 , 1.00] 
+
+CSTR 16/20 [0 .05 , 0.93] 
+
+confirms that each variant contributes complementary signal, with the dominant variant differing by domain. Compared to Li et al. [13], who provide exact influence computation for linear LQR systems, IF-CPS extends to nonlinear neural network controllers with safety constraints, at the cost of LiSSA approximation and local linearization. Future work includes learned dynamics models for the propagated variant, integration with formal verification, and scaling to larger controller architectures. ACKNOWLEDGMENT 
+
+Claude was used to assist with the language editing of this manuscript. REFERENCES [1] M. Bojarski, D. Del Testa, D. Dworakowski, B. Firner, B. Flepp, P. Goyal, L. D. Jackel, M. Monfort, U. Muller, J. Zhang et al. , “End to end learning for self-driving cars,” arXiv preprint arXiv:1604.07316 ,2016. [2] C. Chi, Z. Xu, C. Pan, E. Cousineau, B. Burchfiel, S. Feng, R. Tedrake, and S. Song, “Universal manipulation interface: In-the-wild robot teaching without in-the-wild robots,” arXiv preprint arXiv:2402.10329 ,2024. [3] D. A. Pomerleau, “Efficient training of artificial neural networks for autonomous navigation,” Neural computation , vol. 3, no. 1, pp. 88–97, 1991. [4] P. W. Koh and P. Liang, “Understanding black-box predictions via influence functions,” in International conference on machine learning .PMLR, 2017, pp. 1885–1894. [5] N. Agarwal, B. Bullins, and E. Hazan, “Second-order stochastic optimization for machine learning in linear time,” Journal of Machine Learning Research , vol. 18, no. 116, pp. 1–40, 2017. [6] G. Pruthi, F. Liu, S. Kale, and M. Sundararajan, “Estimating training data influence by tracing gradient descent,” Advances in Neural Information Processing Systems , vol. 33, pp. 19 920–19 930, 2020. [7] S. M. Park, K. Georgiev, A. Ilyas, G. Leclerc, and A. Madry, “Trak: Attributing model behavior at scale,” arXiv preprint arXiv:2303.14186 ,2023. [8] A. Ghorbani and J. Zou, “Data shapley: Equitable valuation of data for machine learning,” in International conference on machine learning .PMLR, 2019, pp. 2242–2251. [9] S. K. Choe, H. Ahn, J. Bae, D. Zhao, M. Kang, and S. Yun, “Large-scale training data attribution with efficient influence functions,” in 
+
+Proc. ICLR , 2025. [10] S. K. Choe, H. Ahn, J. Bae, K. Zhao, M. Kang, Y. Chung, A. Pratapa, W. Neiswanger, E. Strubell, T. Mitamura et al. , “Large-scale training data attribution with efficient influence functions.” [11] A. Abolfazli, G. Palmer, and D. Kudenko, “Data valuation for offline reinforcement learning,” arXiv preprint arXiv:2205.09550 , 2022. [12] Y. Hu, F. Wu, H. Ye, D. Forsyth, J. Zou, N. Jiang, J. W. Ma, and H. Zhao, “A snapshot of influence: A local data attribution framework for online reinforcement learning,” arXiv preprint arXiv:2505.19281 ,2025. Fig. 4. IF-CPS attribution scores on Pendulum, LunarLander, and HVAC. Color encodes normalized IF-CPS score (blue = low, red = high); black ×
+
+marks poisoned demonstrations. [13] J. Li, S. Li, J. Xu, S. Bakshi, and D. Chen, “Influence functions for data attribution in linear system identification and lqr control,” arXiv preprint arXiv:2506.11293 , 2025. [14] C. Agia, R. Sinha, J. Yang, R. Antonova, M. Pavone, H. Nishimura, M. Itkina, and J. Bohg, “Cupid: Curating data your robot loves with influence functions,” arXiv preprint arXiv:2506.19121 , 2025. [15] M. Towers, A. Kwiatkowski, J. Terry, J. U. Balis, G. De Cola, T. Deleu, M. Goul˜ ao, A. Kallinteris, M. Krimmel, A. KG et al. , “Gymnasium: A standard interface for reinforcement learning environments,” arXiv preprint arXiv:2407.17032 , 2024.

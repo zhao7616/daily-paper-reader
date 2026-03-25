@@ -1,0 +1,1465 @@
+Title: 2603.23265v1.pdf
+
+URL Source: https://arxiv.org/pdf/2603.23265v1
+
+Published Time: Wed, 25 Mar 2026 01:18:05 GMT
+
+Number of Pages: 21
+
+Markdown Content:
+RONGXIU CHE N, YUTING SU, LINFENG ZHENG 
+
+Abstract Online safety fault diagnosis is essential for lithium-ion batteries in electric vehicles(EVs), 
+
+particularly under complex and rare safety-critical conditions in real-world operation. In this work, we 
+
+develop an online battery fault diagnosis network based on a deep anomaly detection framework 
+
+combining kernel one-class classification and minimum-volume estimation. Mechanical constraints 
+
+and spike-timing-dependent plasticity(STDP)-based dynamic representations are introduced to 
+
+improve complex fault characterization and enable a more compact normal-state boundary. The 
+
+proposed method is validated using 8.6 million valid data points collected from 20 EVs. Compared 
+
+with several advanced baseline methods, it achieves average improvements of 7.59% in TPR, 27.92% 
+
+in PPV, 18.28% in F1 score, and 23.68% in AUC. In addition, we analyze the spatial separation of 
+
+fault representations before and after modeling, and further enhance framework robustness by 
+
+learning the manifold structure in the latent space. The results also suggest the possible presence of 
+
+shared causal structures across different fault types, highlighting the promise of integrating deep 
+
+learning with physical constraints and neural dynamics for battery safety diagnosis. 
+
+Keywords : Lithium-ion batteries, Electric vehicles, Online fault diagnosis, Deep anomaly detection, 
+
+Deep SVDD, STDP-based dynamic representation, Latent manifold structure 
+
+# Introduction 
+
+Owing to their high energy density, long cycle life and relatively low maintenance cost, 
+
+lithium-ion batteries(LiBs) have become the preferred power source for electric vehicles(EVs) 1-5 .
+
+However, because of their intrinsic electrochemical mechanisms, the capacity of LiBs inevitably fades 
+
+with increasing charge-discharge cycles. This electrochemical ageing process not only degrades 
+
+battery performance, but may also induce internal structural changes and reduced thermal stability, 
+
+thereby increasing safety risks. In particular, under the complex operating conditions encountered by 
+
+real-world vehicles, early fault prediction and real-time monitoring of battery failures remain 
+
+technically challenging. 
+
+Current studies on battery anomaly detection can be broadly categorized into four classes. 
+
+# SynForceNet: A Force-Driven Global-Local Latent Representation 
+
+# Framework for Lithium-Ion Battery Fault Diagnosis 
+
+SINO-German College of Intelligent Manufacturing, Shenzhen Technology University, Shenzhen 
+
+518118, China 
+
+CORRESPONDING AUTHOR : LINFENG ZHENG (email: zhenglinfeng@sztu.edu.cn )①Model-driven methods describe battery behaviors by constructing equivalent circuit models or 
+
+electrochemical models, and identify anomalies by comparing the residuals between model outputs 
+
+and actual measurements in conjunction with state estimation approaches such as Kalman filtering 6-8 .
+
+② Data-driven methods exploit observable signals, including voltage, current and temperature, to 
+
+learn the mapping between battery states and fault characteristics through machine learning or deep 
+
+learning models 9-11 . ③ Knowledge-driven methods develop diagnostic strategies based on expert 
+
+experience, fault mechanisms or rule bases, such as threshold rules, fault trees and empirical 
+
+degradation patterns 12-14 . ④ Hybrid-driven methods combine physical models with data-driven 
+
+approaches, improving the robustness and interpretability of anomaly detection by integrating model 
+
+residuals, expert knowledge or physical constraints 15-17 .
+
+Most existing studies on battery fault diagnosis have been conducted under experimentally 
+
+simulated conditions. In real-world operating environments, however, fault monitoring usually relies 
+
+only on the limited signals accessible from the onboard battery management system, while being 
+
+simultaneously affected by missing and noisy data, inter-vehicle variability and stochastic changes in 
+
+operating conditions. As a result, diagnostic models developed under laboratory settings are often 
+
+difficult to transfer directly to real-world scenarios. To advance deployable fault diagnosis for 
+
+lithium-ion batteries in new energy electric vehicles, there is an urgent need for systematic 
+
+investigations based on large-scale, high-quality field-operation data covering diverse operating 
+
+conditions, so as to support the development of robust and generalizable algorithms 18-20 . Using 
+
+real-world electric vehicle data collected over 18 months, Bin Kaleem et al. developed a fault 
+
+detection framework that combines segmented regression, gated recurrent units(GRU) and adaptive 
+
+thresholds to identify voltage abnormalities associated with internal short circuits, external short 
+
+circuits and capacity fade 21 . Cao et al. utilized 18.2 million valid records from 515 vehicles to propose 
+
+a model-constrained deep learning network for stochastic operating conditions, achieving online 
+
+diagnosis of faults including electrolyte leakage, thermal runaway, internal short circuit and abnormal 
+
+ageing 22 . Yang et al. established a collaborative fault early-warning framework based on 30 real 
+
+public charging stations, 10,154 vehicles and 21,175 charging sequences, demonstrating that 
+
+large-scale battery fault warning under highly heterogeneous real-world data conditions has become a
+
+feasible engineering pathway 23 .
+
+In the field of battery anomaly detection, as battery systems continue to evolve, the distribution 
+
+patterns of normal samples have become increasingly complex, making it difficult for traditional 
+
+methods based on fixed thresholds or simple statistical features to accurately characterize their 
+
+intrinsic structure. Deep SVDD addresses this challenge by learning a compact boundary enclosing 
+
+normal samples and constructing a tight geometric representation in the latent feature space, thereby 
+
+enabling sensitive detection of deviations that may indicate incipient faults. Experimental evidence 
+
+has shown that this approach is particularly effective when anomalous samples are scarce or when the 
+
+data ecosystem is highly complex 24 . Chan et al. proposed a novel unsupervised SVDD framework that 
+
+extracts more generalizable features to prevent hypersphere collapse while effectively mitigating 
+
+ambiguous class boundaries and feature distortion 25 . Liao et al. enhanced the feature extraction 
+
+capability of SVDD for complex battery data distributions by introducing a scale-learning 
+
+mechanism 26 . Cheng et al. further improved anomaly recognition under complex data structures and 
+
+limited fault samples by optimizing the decision boundary in kernel space 27 .
+
+Although existing methods have achieved substantial progress in battery anomaly detection, most 
+
+of them still rely fundamentally on similarity-based metrics as the core of relation modelling. Modern one-class classification techniques and representation learning methods typically use Euclidean 
+
+distance, Mahalanobis distance, kernel-space inner products, or their variants to quantify the deviation 
+
+of a sample from the centre of normal patterns, and then establish anomaly decision boundaries 
+
+accordingly. These approaches offer clear advantages in describing static geometric differences 
+
+among samples, but their expressive power remains limited when facing the variable coupling, state 
+
+transitions and dynamic evolutionary relationships that are pervasive in complex battery systems. In 
+
+practice, the evolution of battery anomalies is not manifested solely as the deviation of a feature point 
+
+from the normal region at a given moment, but more importantly as changes in the interaction 
+
+relationships among multiple variables and their cumulative effects over time. Although 
+
+distance-based measures can characterize the magnitude of deviation, they are insufficient to fully 
+
+capture the latent interaction mechanisms underlying anomaly formation. Motivated by this 
+
+understanding, the present study moves beyond a purely distance-constrained framework and further 
+
+introduces an interaction-modelling perspective inspired by physical dynamics. In this way, 
+
+inter-sample relationships are extended from a single static description of proximity to a richer 
+
+representation that simultaneously incorporates directionality, interaction strength and dynamic 
+
+associations. This provides a potentially more expressive modelling perspective for battery anomaly 
+
+detection under complex operating conditions, and may help overcome the limitations of traditional 
+
+distance-based formulations. 
+
+Building upon the above considerations, we designed an improved SVDD network that integrates 
+
+spiking neural encoding, disentangled latent representations and local temporal plasticity constraints, 
+
+termed SynForceNet( synaptic force network), for battery fault diagnosis under real-world complex 
+
+operating conditions. The development, training and evaluation of the proposed algorithm were all 
+
+conducted on real-vehicle datasets. Each data frame was sampled at 10-s intervals as model input, 
+
+ensuring real-time capability and broad practical applicability. The overall framework can be 
+
+summarized into four major modules: ① multi-source monitoring feature construction; ②
+
+global-local disentangled representation; ③SynForce-constrained relational learning and ④anomaly 
+
+scoring and diagnostic output. Our validation covered all datasets containing complex operating 
+
+conditions. The proposed method achieved substantial improvements in both fault point identification 
+
+and fault type diagnosis, outperforming the best-performing classical anomaly detection algorithm 
+
+with average gains of 7.59% in TPR, 27.92% in PPV, 18.28% in F1 score and 23.68% in AUC. Taken 
+
+together, SynForceNet overcomes conventional limitations in representing complex faults and 
+
+modelling latent relationships in lithium-ion batteries, enabling online diagnosis of multiple fault 
+
+types throughout the full life cycle and across diverse operating conditions. These results highlight 
+
+both its theoretical significance and its practical value for safety applications of traction batteries. 
+
+# Results 
+
+Framework overview 
+
+In addition to coping with fluctuations in online monitoring data, the construction of SynForceNet faces two further key challenges. First, under continuously varying battery states,the 
+
+model requires representations that are robust to disturbances arising from complex operating 
+
+conditions and that can stably characterize the boundary between normal patterns and anomalous 
+
+deviations. To address this issue, we organize the input as temporally structured monitoring features 
+
+and construct a global-local dual-branch latent encoding architecture,enabling joint representation of 
+
+battery states from both the perspective of overall distribution characteristics and local evolutionary 
+
+relationships. Second, model training is challenged by the severe scarcity of negative samples, which 
+
+makes it difficult to satisfy the dependence of conventional supervised learning methods on large 
+
+amounts of labelled fault data. To overcome this bottleneck, we divide the modelling objective into 
+
+two coordinated levels. At the first level, a stable latent-space structure of normal samples is 
+
+established through global compactness constraints and reconstruction-consistency learning. At the 
+
+second level, SynForce relational constraints are introduced to further characterize local dynamic 
+
+associations, thereby enhancing the model's sensitivity to deviations induced by anomalous patterns. 
+
+This strategy enables the model to be trained primarily on normal operating data, effectively reducin g
+
+its reliance on the scale of fault samples while improving detection capability under complex fault 
+
+co nditions.                                                                                                                                                                                                                                           
+
+> Fig.1 |SynForceNet Framework. Component: the global component implemented by the volume compression
+> term, enforces one-class compactness in latent space, while the local component, realized by the Hebbian and
+> diffusion terms, regularizes neighborhood correlation and local manifold smoothness. Their joint effect forms a
+> decoupled global-local latent space for robust anomaly scoring. TIME Framework: atime window xbis
+> encoded by the spiking neural encoder into two decoupled latent branches, the global latent variable zg,which
+> supports one-class compact representation, and the local latent variable zl,which captures local temporal
+> geometry. The temporal reshaping mechanism acts on zlto impose synaptic-inspired temporal modulation.
+> Finally, zgand zlare fused into the joint latent representation z=[ zg;zl],which is used as the input to the decoder. STDP: aKNN graph is first constructed in the local latent space to describe neighborhood relations,
+> and time-lagged latent differences Δzb,t,d
+> lare computed to characterize temporal interactions. These
+> lag-dependent directional terms are then modulated by STDP-inspired exponentially decaying weights and
+> aggregated into aunified local interaction term Fb,t.This mechanism injects directional temporal bias into the
+> local latent branch, enabling the model to better capture temporally evolving abnormal patterns. Diffusion terms:
+> alocal similarity graph is constructed with Gaussian-kernel affinities Aij ,from which the local density ρiis
+> estimated. The diffusion regularizer then encourages neighboring latent points to maintain consistent density,
+> leading to asmoother, more uniform, and more continuous manifold structure. In this way, the diffusion term
+> stabilizes local geometry and improves the separability of abnormal deviations.
+
+Dataset analysis 
+
+The dataset comprises 8.6 million samples collected from 20 new energy vehicles. After 
+
+preliminary data preprocessing, it was refined into 2.34 million instances under driving conditions, 
+
+1.68 million instances under parking-charging conditions, 0 instances under driving-charging 
+
+conditions, 6.16 million instances under non-charging conditions, and 40,000 instances under 
+
+charge-completed conditions. The dataset contains only 3,204 anomalous samples,accounting for 
+
+approximately 0.037% of the entire dataset. Such an extremely limited proportion poses substantial 
+
+challenges for the design of risk assessment and fault early-warning algorithms. In the experimental 
+
+investigation, eight data tables were selected as the study objects, collectively covering 95% of all 
+
+anomalous samples. In addition, to evaluate the capability of the system to handle multiple battery 
+
+monitoring tasks under a more limited data regime, we constructed a dataset termed ALL. This dataset 
+
+contains all anomalous samples together with an equal number of randomly selected normal samples. 
+
+Across all datasets, the training sets contain only normal samples and are used to learn the boundary 
+
+of normal behaviour. In contrast, the test sets include all anomalous samples together with an equal 
+
+number of randomly sampled normal instances, thereby ensuring a balanced ratio of positive and 
+
+negative examples. 
+
+The dataset contains both numerical and categorical features. Specifically, it includes seven 
+
+groups of categorical features, namely CHARGE STATUS, MAX VOLT CELL ID,MIN VOLT 
+
+CELL ID, MAX TEMP PROBE ID, MIN TEMP PROBE ID, MAX ALARM LEVEL, and 
+
+COMMON ALARM FLAG. It also contains 137 groups of numerical features, including TIME. 
+
+Using the BMS monitoring data collected during online vehicle operation as the raw input, we 
+
+constructed a multi-level feature system consisting of three categories of information: central features 
+
+describing the overall operating status of the vehicle and battery pack, cell-voltage features 
+
+characterizing cell-level differences and local distribution properties, and temperature-probe features 
+
+reflecting the spatial distribution of thermal states. The central features include charging status, 
+
+vehicle speed, cumulative mileage, total voltage, total current, state of charge(SOC), insulation 
+
+resistance, and variables related to voltage and temperature extrema; the cell-voltage and 
+
+temperature-probe features are, respectively, composed of individual cell-voltage channels and 
+
+temperature-sampling channels. For each of the three feature categories, robust denoising, 
+
+normalization, variance weighting and PCA-based dimensionality reduction were performed 
+
+separately. The principal-component representations preserving the major variance information were 
+
+then concatenated to form a unified low-dimensional input feature vector,which was finally organized into fixed-length temporal windows as the model input sequence. Fig.2| Fault Diagnosis of Power Battery Systems: Overview of four categories of battery fault diagnosis                                                                                                                                            
+
+> strategies and their representative methods.
+> Data statistics: (a) Cloud-based EV data pipeline. Data streams transmitted through the cloud infrastructure
+> undergo data governance procedures, including cleaning, filtering, and feature engineering. The processed data
+> are then fed into the fault diagnosis model for detection and classification, with the outputs delivered to the API
+> gateway and serving layer for front-end visualization. (b) Distribution of fault types across eight subsets (a-h),
+> obtained by partitioning 95% of the full dataset according to the actual test time. (C) Left, distribution of charge
+> status for each dataset. Right, statistics of samples with nonzero speed .Dataset names are abbreviated because
+> of repeated prefixes. (d) Time-frequency analysis of min_cell_volt from one representative dataset. (e,f)
+> Normalized voltage and temperature, respectively, from the same dataset. (g-i) Representative analyses from
+> four datasets, including the contribution rate and cumulative contribution rate of principal components, temporal
+> analysis of principal components, and feature histograms.
+
+Fault diagnosis 
+
+Under real-world operating conditions, battery degradation often exhibits diverse evolutionary 
+
+patterns, and the mechanisms that trigger it are highly uncertain. Consequently, during real-time 
+
+monitoring, most faulty samples do not manifest as clearly distinguishable outliers in the data 
+
+representation. Figures 3a-d and 3A-D present two-dimensional and three-dimensional visualizations 
+
+of the distributions of the complete samples and faulty samples in the low-dimensional space. The 
+
+results show that different fault types, as well as their compound forms,exhibit distinct clustering 
+
+structures and boundary ranges in the projected space. Meanwhile, the three feature groups-center, 
+
+U_edge, and T_edge-also display markedly different coverage relationships with respect to faulty 
+
+samples. In Figs. 3a-d, there is no obvious separation between faulty and normal samples, and 
+
+multiple fault types coexist within the same regions of the feature space, making faulty samples 
+
+difficult to distinguish. By contrast, in Figs. 3e-h, faulty samples are distributed mainly along the 
+
+boundaries of the mapped feature-space distribution,making them easier to identify. These 
+
+observations highlight the clear performance advantage of the proposed network in addressing the 
+
+challenges presented by the datasets in Figs. 3a-d. 
+
+Specifically, in the two real-world cases shown in Figs. 3a, 3A, 3d, and 3D, the lithium batteries 
+
+involve a relatively large number of fault clusters and a large total number of fault samples. Most 
+
+samples belonging to the same fault type tend to follow a certain common distribution,although a
+
+small portion of the same-type faults still deviate from the main distribution and form another pattern. 
+
+In addition, some envelope-like structures and interactions can be observed among different fault 
+
+distributions, which lays the groundwork for our subsequent investigation into whether different faults 
+
+may share certain common-cause structures that can be represented in a specific feature space. In 
+
+contrast, in the two real-world cases shown in Figs.3b, 3B, 3c, and 3C, although the fault categories 
+
+are relatively single, the fault samples are extremely sparse and scattered, without an obvious 
+
+clustering trend, which also poses challenges for online diagnosis. 
+
+SynForceNet enables online diagnosis of battery safety faults by generating point-wise anomaly 
+
+scores for each monitoring time step, and the temporal evolution of these scores can further 
+
+characterize the changing trend of battery health status. Figures 4a-h present the vehicle identification 
+
+results for nine types of safety faults. During fault identification, three alarm thresholds are defined 
+
+according to the degree of deviation from the model. Once the level-1alarm threshold is triggered, the fault probability at the alarm point is further calculated. To evaluate the representational differences of 
+
+different fault patterns across multiple feature groups, the proportional statistics of each feature group 
+
+further indicate that different faults do not share the same sensitivity to global statistical features, 
+
+voltage-edge features, and temperature-edge features. This suggests that a single-feature perspective is 
+
+insufficient to fully characterize complex fault patterns, whereas the multi-level joint feature network 
+
+constructed in this study helps improve fault representation capability and identification robustness Fig.3|Two-dimensional and three-dimensional visualizations of the distributions of the complete samples 
+
+and faulty samples in the low-dimensional space Fig.4|Vehicle identification results for nine types of safety faults 
+
+Performance testing 
+
+To validate the advancement of the proposed algorithm, we compared it with representative 
+
+baseline methods on the validation datasets in terms of both battery-pack status and cell-level status. 
+
+First, we compared the overall performance of four widely used machine-learning-based fault 
+
+diagnosis algorithms on the test samples. These methods include Variational Autoencoder(VAE), 
+
+Sparse Autoencoder(SAE), Deep SVDD, and DVAA-SVDD. The results show that, owing to the high 
+
+false-positive rates encountered in fault detection under full operating conditions, existing methods 
+
+often struggle to meet the requirements of practical applications. By contrast, the proposed method 
+
+achieves an average improvement of 7.59% in TPR, 27.92% in PPV, 18.28% in F1 score, and 23.68% 
+
+in AUC over the compared methods,demonstrating its substantial performance advantage and stronger 
+
+applicability. Taken together, SynForceNet exhibits clear superiority in application-oriented 
+
+battery-pack/cell-state anomaly detection as well as ROC-related performance. This favourable 
+
+performance can be attributed to the collaborative global-local latent-space modelling strategy, the 
+
+introduction of the SynForce relational constraint mechanism, and the joint optimization of 
+
+reconstruction consistency and geometric-structure regularization. Discussion 
+
+SynForceNet maintains the compactness and stability of normal-sample representations while 
+
+more effectively distinguishing hard-to-identify faults and complex operating conditions in the latent 
+
+space. Unlike conventional approaches that rely solely on the static distance between samples and the 
+
+hypersphere centre, SynForceNet further emphasizes local temporal relationships within the latent 
+
+space, inter-sample interactions, and the dynamic organization of the normal manifold. In doing so, it 
+
+alleviates issues such as blurred boundaries, distorted latent representations, and unstable anomaly 
+
+characterization. Specifically, the network first employs a spiking-neural-inspired encoder to learn 
+
+representations from the input temporal windows and decomposes the latent representation into a
+
+global component and a local component. The global component is used to establish a compact 
+
+centre-oriented description of normal samples, thereby maintaining the overall geometric boundary 
+
+required for anomaly detection; the local component, by contrast, is used to characterize short-term 
+
+dynamic variations and is reshaped through an STDP mechanism with stabilized directional 
+
+constraints, so that latent trajectories evolve more consistently along the temporal axis. Meanwhile, 
+
+reconstruction-consistency constraints, a diffusion regularizer and a volume-compression term are 
+
+introduced during training to jointly suppress latent-space collapse and excessive local discreteness, 
+
+thereby improving the structural stability of the normal manifold and the separability of anomalous 
+
+samples. During testing, the model generates anomaly scores solely from the distance between the 
+
+global latent component and the centre, thus preserving the simplicity of the detection criterion; the 
+
+local latent component and its STDP-based dynamical constraints mainly act during training to shape 
+
+the representation, thereby enhancing the deviation tendency of hard-to-identify faults in the latent 
+
+space. 
+
+By combining latent-space distribution visualization with geometric-structure analysis, we 
+
+provide a structured interpretation of how SynForceNet improves fault-detection performance. The 
+
+results show that the representations of anomalous samples in the latent space undergo an 
+
+evolutionary process from entanglement and overlap to outward boundary displacement and local 
+
+aggregation, indicating that the network enhances the geometric separability between normal and 
+
+anomalous samples. We further argue that this representational optimization does not arise solely 
+
+from boundary contraction itself, but is also related to the model's ability to capture shared driving 
+
+factors of anomalies. Although different fault types may differ in their external manifestations, their 
+
+latent representations often jointly reflect disruption of normal coupling relationships, changes in 
+
+dynamic interaction patterns, and increased local instability. By introducing an interaction-inspired 
+
+relational modelling mechanism, SynForceNet more effectively captures these anomaly factors shared 
+
+across fault types, thereby driving anomalous samples from within or near the normal distribution 
+
+boundary towards regions outside the boundary and forming clearer local aggregation structures. Methods 
+
+①Force-driven latent-space modelling 
+
+The core objective of Deep SVDD is to progressively compress the distribution volume of 
+
+normal samples in the latent space during network training, such that normal samples are compactly 
+
+clustered around a centre, whereas anomalous samples lie outside the hypersphere. The original 
+
+formulation and its corresponding optimization objective can be expressed as follows: 
+
+ℱ= z∈ℝp∣‖z−c‖2
+
+> 2
+
+≤R2 , min   
+
+> W,R
+> 1
+> ni=1
+> n
+
+‖  ϕ(xi;W)−c‖2
+
+> 2
+
++λ‖W‖2
+
+> 2
+
+.
+
+Here, cdenotes the centre of the hypersphere, and (ϕ( ⋅ ; 𝐀 )) denotes the deep feature mapping. 
+
+During the testing stage, for any sample x, its anomaly score is typically defined as d(x)= ϕ(x;W)−c 2
+
+> 2
+
+.
+
+However, characterizing the relationships among samples, as well as between samples and the 
+
+hypersphere centre, solely in terms of distance or similarity remains essentially a static geometric 
+
+description. Such a formulation is unable to explicitly capture directionality, multimodal interaction 
+
+channels, temporal derivatives, or latent causal relationships. Particularly in battery time-series 
+
+anomaly detection, relying only on the distance between a sample and the centre neglects the 
+
+interaction structure among normal samples, among anomalous samples, and between normal and 
+
+anomalous samples, as well as the dynamical constraints governing the evolution of the latent space. 
+
+To address these limitations, we attempt to extend the latent-space paradigm from a purely 
+
+distance-based formulation to a force-driven formulation. Based on this idea, we map the normal 
+
+sample distribution, the hypersphere centre, and anomalous samples in the latent space to a
+
+positive-charge-like cloud constrained within the hypersphere, a negative-charge-like source, and free 
+
+charges, respectively, thereby constructing a physically interpretable unified-field-like framework. Let 
+
+the hypersphere centre be r0∈ℝN , and let the continuous distribution density of normal samples in 
+
+the latent space be denoted by ρ+(r,t) , where r∈BN(R)= r∈ℝN∣‖r−r0‖2≤R . Anomalous samples 
+
+are represented as discrete particles (qk,rk(t)) . Under this framework, the dynamics of the normal 
+
+sample cloud reflect not only local cooperative activation, but also global volume compression and 
+
+density smoothing mechanisms. 
+
+According to the Hebbian learning principle that co-activation strengthens connectivity 28-29 , the 
+
+local correlation can be written in the following kernel-integral form: 
+
+Δρ+(r,t)∝ C  (r,r') ρ+(r', t) dr'.
+
+Here, C(r,r') is chosen as a Gaussian kernel ,
+
+C(r,r')= exp − ‖r−r'‖2 
+
+> 2
+> 2σ2
+
+,
+
+which describes the spatial decay of local cooperative activation with distance. To minimize the latent 
+
+volume occupied by normal samples and suppress distributions far from the hypersphere centre, we 
+
+define the volume potential energy as 
+
+ΦV= 1  
+
+> V( BN)BN
+
+‖  r−r0‖2 
+
+> 3
+
+ρ+(r,t) dr ,
+
+where V(BN) denotes the volume of the N -dimensional hypersphere, and the cubic term ‖r−r0‖2 
+
+> 3
+
+is 
+
+introduced to impose a stronger penalty on distributions located far from the centre. Driven by the gradient of this potential energy, density contraction further yields the volume-compression term 
+
+−λ ∇⋅ ρ+∇ΦV .
+
+To prevent unbounded density aggregation and preserve smoothness inside the latent space, we 
+
+further introduce a diffusion mechanism:  
+
+> ∂ρ+
+> ∂t
+
+=D ∇2ρ+,
+
+where D is the diffusion coefficient. Taken together, the continuous dynamics of the normal sample 
+
+cloud in the latent space can be unified as  
+
+> ∂ρ+
+> ∂t
+
+=η BN ρ+  (r',t)C( r,r') dr'                 
+
+> Hebbian term
+
+- λ∇⋅ ρ+∇ΦV             
+
+> volume −compression term
+
++ D∇2ρ+         
+
+> diffusion term
+
+.
+
+Nevertheless, directly solving the above unified-field-like continuous model during deep network 
+
+training faces three major difficulties. First, ρ+(r,t) is a continuous density in a high-dimensional 
+
+latent space, and its explicit estimation depends on high-dimensional density modelling, 
+
+spherical-domain integration, and partial differential equation solving, which are difficult to 
+
+implement stably under a mini-batch stochastic gradient descent framework 30-32 . Second, the current 
+
+anomaly detection task remains essentially a one-class learning problem, where only normal data are 
+
+used during training; therefore, anomalous particles (qk,rk) cannot directly participate in the 
+
+dynamical update in the same way as in supervised learning 33-35 . Meanwhile, coupling centre-oriented 
+
+compression, anomaly repulsion, and STDP modulation with positive and negative signs within a
+
+unified latent space essentially corresponds to multiple potentially competing optimization objectives. 
+
+Such joint constraints are prone to introducing gradient conflicts and instability in representation 
+
+learning. In one-class anomaly detection, instability in latent representations may further propagate 
+
+into bias in the normality boundary, fluctuations in the centre position, and increased threshold 
+
+sensitivity, ultimately weakening the consistency of anomaly scoring 36-38 . In light of these challenges, 
+
+while retaining the three core ideas of volume compression, local diffusion, and temporal-causal 
+
+driving, the present study reformulates the original theoretical conception into a trainable form. 
+
+②Global-local disentangled latent-variable network (SynForceNet) 
+
+Specifically, rather than directly solving the continuous density evolution equation, we discretize 
+
+it into a latent representation learning problem induced by a deep encoder. Given a normal window of 
+
+length L,
+
+Xb=[ xb,1 ,xb,2 ,…,xb,L], xb,t∈ℝd,
+
+the training set is defined as the collection containing only normal windows: 
+
+Dtr = Xb∣ t=1  
+
+> L
+
+yb,t  =0 .
+
+The encoder adopts a spiking-neural-inspired architecture and explicitly decomposes the latent 
+
+variables into a global component and a local component: 
+
+zb,t 
+
+> g
+
+=Eg(xb,t), zb,t 
+
+> l
+
+=El(xb,t), zb,t=[ zb,t 
+
+> g
+
+;zb,t 
+
+> l
+
+].
+
+The global component zg is mainly responsible for one-class description and anomaly scoring, 
+
+ensuring that normal samples are compactly contracted towards the hypersphere centre. By contrast, the local component zl is dedicated to encoding local temporal geometric relationships and is used to 
+
+introduce STDP-style directional constraints. Compared with simultaneously imposing compactness 
+
+and temporal forces in a single latent space, this decoupled strategy of' "global discrimination-local 
+
+dynamics" is more conducive to alleviating objective conflicts. 
+
+It is worth noting that, in the original conceptual design, we considered extending a variational 
+
+autoencoder(VAE) to generalize normal features so as to form a more coherent latent manifold. 
+
+However, in one-class anomaly detection, the stochastic sampling and KL regularization introduced 
+
+by VAEs tend to actively expand the latent distribution 39-40 , creating an intrinsic tension with the 
+
+compact normal-sample enclosure pursued by Deep SVDD and potentially resulting in blurred 
+
+hypersphere boundaries and threshold drift. Therefore, in the final engineering implementation, we 
+
+did not adopt an explicit VAE structure. Instead, we employed a deterministic encoder-decoder 
+
+framework and further introduced an encoding consistency constraint, so as to preserve reconstruction 
+
+capability while avoiding excessive divergence of latent representations. 
+
+Specifically, the decoder reconstructs the input from the joint latent variables: 
+
+x b,t=D(zb,t),
+
+and the corresponding reconstruction loss is 
+
+ℒrec = 1  
+
+> 𝐀𝐀 𝐀 =1
+> 𝐀
+> 𝐀 =1
+> 𝐀
+
+‖   𝐀  𝐀 ,𝐀 − 𝐀 𝐀 ,𝐀 ‖2
+
+> 2
+
+.
+
+For the one-class description branch, the actual implementation uses the unsquared Euclidean 
+
+norm. Accordingly, the global SVDD loss is written as 
+
+ℒsvdd = 1  
+
+> 𝐀𝐀 𝐀 =1
+> 𝐀
+> 𝐀 =1
+> 𝐀
+
+‖   𝐀 𝐀 ,𝐀  
+
+> 𝐀
+
+− 𝐀 𝐀 ‖2,
+
+where cg denotes the centre of the global latent space. The use of the unsquared norm reduces the 
+
+dominance of extreme outliers on the gradient, thereby leading to a more stable centre-oriented 
+
+compression during training 41 .
+
+Considering that the reconstruction results produced by the decoder may in turn alter the latent 
+
+structure, we further introduce an encoding consistency constraint. Let 
+
+(z b,t  
+
+> g
+
+, z b,t  
+
+> l
+
+) = E( x b,t ), z b,t = [ z b,t  
+
+> g
+
+; z b,t  
+
+> l
+
+], 
+
+then the consistency loss is defined as 
+
+ℒenc = 1  
+
+> 𝐀𝐀 𝐀 =1
+> 𝐀
+> 𝐀 =1
+> 𝐀
+
+𝐀  𝐀 ,𝐀 − sg (𝐀 𝐀 ,𝐀 )   2
+
+> 2
+
+.
+
+Here, sg( ⋅ ) denotes the stop-gradient operation. This term is not directly derived from the 
+
+original theoretical formulation, but is introduced in the engineering implementation as an additional 
+
+stabilizing term to ensure compatibility between "reconstruction in the input space" and "compression 
+
+in the latent space". 
+
+③Physics- and STDP- inspired structural constraints in the latent space 
+
+In the continuous-field model, the diffusion term of ρ+(r,t) is used to smooth the density 
+
+distribution in the latent space. In the discrete implementation, we construct a k-nearest-neighbour 
+
+graph on the mini-batch latent point set {zi}i=1  
+
+> m
+
+, and define 
+
+𝐀 𝐀𥠀 = exp − ‖𝐀 𝐀 −𝐀 𥠀 ‖2 
+
+> 2
+> 2𝐀 𝐀
+> 2
+
+, 𥠀 ∈ 𝐀 𝐀 (𝐀 ), 𝐀 𝐀 = 𥠀 ∈𝐀 𝐀 (𝐀 ) 𝐀 𝐀𥠀   .The diffusion regularization term is written as 
+
+ℒdiff = 𝐀 ⋅ 1  
+
+> 𝐀 𝐀 =1
+> 𝐀
+> 𥠀 ∈𝐀 𝐀 (𝐀 )
+
+𝐀 𝐀𥠀   𝐀 𥠀 − 𝐀 𝐀   2
+
+,
+
+which can be viewed as a discrete approximation to the continuous diffusion equation D∇2ρ . Its 
+
+purpose is to prevent local spikes and discontinuous collapse in the latent representation. 
+
+Corresponding to the volume potential ΦV in the theoretical formulation, we further design a
+
+surrogate term for volume compression. Let the joint latent dimension be p, and define the extended 
+
+hypersphere centre as 
+
+c =[ cg;0].
+
+For an arbitrary latent point zi, we define its radial distance to the extended centre as 
+
+di=‖zi−c ‖2,
+
+and the density surrogate based on the radial distance as 
+
+ρ i= exp − di 
+
+> 2
+> 2σv
+> 2
+
+.
+
+Let the maximum radius within the current batch be 
+
+R= max  
+
+> i
+
+di,
+
+then the corresponding hypersphere volume is approximated by 
+
+V(Bp(R))= πp/2   
+
+> Γp
+> 2+1
+
+Rp.
+
+The volume-compression term is defined as 
+
+ℒvol = 𝐀 𝐀 =1      
+
+> 𝐀 𝐀 𝐀
+> 3
+>  𝐀  𝐀
+> 𝐀 =1
+> 𝐀 𝐀   𝐀 𝐀 (𝐀 𝐀 (𝐀 ))
+
+.
+
+This term does not explicitly solve the gradient flow induced by ΦV, but instead follows the core 
+
+idea that points farther from the centre should be penalized more strongly, and that larger occupied 
+
+volume should incur a greater penalty. It can therefore be regarded as a differentiable surrogate of the 
+
+original volume-potential model. 
+
+On this basis, we further aim to use STDP to reshape the latent space temporally. The central 
+
+mechanism of STDP is that the change in synaptic weight depends on the relative timing difference 
+
+between pre- and postsynaptic spikes 42-43 . Its standard temporal window function can be written as 
+
+A( Δt)= A+ exp − Δt
+
+> τ+
+
+−A− exp Δt
+
+> τ−
+
+.
+
+When Δt>0 , the presynaptic neuron fires before the postsynaptic neuron, corresponding to 
+
+long-term potentiation; when Δt<0 , the interaction corresponds to long-term depression. To map this 
+
+causal directionality into particle interactions in the latent space, we construct a spike-induced driving 
+
+term:  
+
+> l
+
+A  (tk−tl) rk−rl
+
+> ‖rk−rl‖2
+> 3
+
+.
+
+Meanwhile, anomalous particles are also subject to the combined influence of the hypersphere 
+
+centre and the normal sample cloud. The equation of motion for a free charge can therefore be written 
+
+as  
+
+> d𝐀 k
+> dt
+
+= l A  (tk − tl) 𝐀 k−𝐀 l 
+
+> ‖𝐀 k−𝐀 l‖2
+> 3
+
++ α 𝐀 k−𝐀 0 
+
+> ‖𝐀 k−𝐀 0‖2
+> 3
+
+− BN
+
+> ρ+(𝐀 ,t)( 𝐀 k−𝐀 )
+> ‖𝐀 k−𝐀 ‖2
+> 3
+
+  dV .Furthermore, if the entire latent space is regarded as a neural field or potential field, the 
+
+following Poisson-type equation can be written: 
+
+∇2Φ(𝐀 , t) = − 1 
+
+> ϵ
+
+ρ+(𝐀 , t) − ρ−δ(𝐀 − 𝐀 0) + k qk  δ(𝐀 − 𝐀 k) .
+
+The above formulation provides a unified interpretative framework for the interactions among 
+
+the hypersphere centre, the normal sample cloud and anomalous particles. Its key contribution is to 
+
+provide a unified dynamical description for four phenomena in the latent space: compression, 
+
+diffusion, local causal interaction and anomalous deviation. 
+
+In the original theoretical conception, the STDP effect was written as a particle interaction term 
+
+with explicit temporal differences (tk−tl) , simultaneously including both long-term potentiation and 
+
+long-term depression. In the actual implementation, however, we do not directly use real spike times; 
+
+instead, we approximate the relative temporal difference using the discrete time lag d within a
+
+fixed-length window. At the same time, to avoid oscillations in the latent space caused by the 
+
+simultaneous action of positive and negative terms, we retain in the engineering implementation only 
+
+a stabilized one-sided directional constraint, acting exclusively on the local latent variable zl.
+
+Let the local latent sequence of the b-th sample window be 
+
+zb,1  
+
+> l
+
+,zb,2  
+
+> l
+
+,…,zb,L 
+
+> l
+
+,
+
+and define the local motion vector at time 𝐀 as 
+
+vb,t=zb,t+1  
+
+> l
+
+−zb,t 
+
+> l
+
+.
+
+For each lag d=1,2, …,Δmax , we first define the difference vector 
+
+Δzb,t,d=zb,t 
+
+> l
+
+−zb,t−d 
+
+> l
+
+,
+
+and the corresponding softened distance 
+
+dist b,t,d 
+
+> 2
+
+=‖Δ zb,t,d‖2
+
+> 2
+
++ε2,
+
+where ε>0 is introduced to avoid singularities in the denominator. Based on this, the local force 
+
+direction term is defined as 
+
+𝐀 𝐀 ,𝐀 ,𝐀 = Δ𝐀 𝐀 ,𝐀 ,𝐀  
+
+> dist 𝐀 ,𝐀 ,𝐀
+> 2
+
+,
+
+and the Gaussian local interaction gate is defined as 
+
+ϕ𝐀 ,𝐀 ,𝐀 = exp − ‖Δ𝐀 𝐀 ,𝐀 ,𝐀 ‖2 
+
+> 2
+> 2𝐀 𝐀
+> 2
+
+.
+
+The corresponding temporal decay weight is written as wd=A+ exp − d
+
+> τ+
+
+.
+
+The local STDP resultant force can then be approximated by 
+
+Fb,t= d=1  
+
+> Δmax
+
+wd  ϕb,t,d fb,t,d.
+
+To align the actual motion direction of the local latent sequence as closely as possible with the 
+
+STDP-induced direction, we do not directly minimize the Euclidean distance between them. Instead, 
+
+we minimize the cosine loss of the angle between the two 44 . Let 
+
+𝐀  𝐀 ,𝐀 = 𝐀 𝐀 ,𝐀  
+
+> ‖𝐀 𝐀 ,𝐀 ‖2+𝐀
+
+, 𝐀  𝐀 ,𝐀 = 𝐀 𝐀 ,𝐀 
+
+> ‖𝐀 𝐀 ,𝐀 ‖2+𝐀
+
+,
+
+then the local STDP regularization term is defined as ℒstdp = 1  
+
+> 𝐀 (𝐀 −Δmax −1) 𝐀 ,𝐀
+
+1 − 𝐀  𝐀 ,𝐀  
+
+> ⊤
+
+𝐀  𝐀 ,𝐀   .
+
+This design indicates that the STDP component in the actual implementation is no longer a strict 
+
+biological spike-based synaptic update equation, but rather a local dynamical regularizer that takes 
+
+temporal decay as a prior and directional consistency as the optimization target. The purpose is not to 
+
+reproduce all potentiation/depression mechanisms of real neural systems, but to embed a temporally 
+
+structured bias with causal directionality into the latent space 45 .
+
+In addition, considering that ℒrec , ℒsvdd and ℒenc differ substantially in numerical scale, we do 
+
+not directly combine them using fixed linear weights. Instead, we introduce learnable uncertainty 
+
+parameters (sr,ss,se), and the final total loss is written as 
+
+ℒ = 𝐀 −2𝐀 𝐀 ℒrec + 𝐀 𝐀 + 𝐀 −2𝐀 𝐀 ℒsvdd + 𝐀 𝐀 + 𝐀 −2𝐀 𝐀 ℒenc + 𝐀 𝐀 + 𝐀 diff ℒdiff + 𝐀 vol ℒvol + 𝐀 stdp ℒstdp .
+
+Here, ωdiff , ωvol and λstdp control the strengths of diffusion regularization, volume 
+
+compression and STDP directional constraints, respectively. 
+
+④Training strategy, centre update and anomaly scoring 
+
+For centre updating, we adopt a smoothed epoch-wise update strategy. Let c g 
+
+> (e)
+
+denote the global 
+
+latent mean obtained from all normal training samples at the current epoch. The centre is then updated 
+
+as 
+
+𝐀 𝐀  
+
+> (𝐀 +1)
+
+= 0.99 𝐀 𝐀  
+
+> (𝐀 )
+
++ 0.01 𝐀  𝐀 
+
+> (𝐀 )
+
+.
+
+The purpose of this strategy is to alleviate the centre mismatch caused by the rapid variation of 
+
+the encoder during the early stage of training, thereby improving the consistency between the centre 
+
+and the manifold of normal samples. 
+
+The final anomaly score is computed solely from the global latent component: 
+
+s(x)= ‖Eg(x)−cg‖2.
+
+This means that the local STDP-related latent component is intentionally not used directly for 
+
+anomaly scoring; instead, it serves during training as a mechanism for shaping local geometric 
+
+plasticity in the latent space. Such a design preserves the simplicity and interpretability of the scoring 
+
+function, while also avoiding direct interference of local dynamic information with the stable 
+
+estimation of the hypersphere boundary. 
+
+During validation, we construct a point-level balanced evaluation set with a 1:1 ratio between 
+
+normal and anomalous samples, and select the threshold corresponding to the optimal F1 score from 
+
+the Precision-Recall curve, so as to assess the overall performance of the model in separating normal 
+
+and anomalous samples. 
+
+Algorithm: Procedure of SynForceNet 
+
+1) 𝐀𠐀𝐀𝐀𝐀𝐀𝐀𝐀𝐀𝐀𝐀𝐀 ℎ𝐀 = 50 
+
+2) 𝐀𝐀𝐀𝐀𝐀𦰀𝐀𝐀𝐀𝐀𝐀 ℎ = 60, 𝐀𝐀𝐀𝐀𝐀𝐀𝐀𝐀𝐀𝐀𝐀𝐀𝐀𝐀 = 5 
+
+3) 𝐀𝐀𝐀𝐀 ℎ𝐀𝐀𝐀𝐀 = 64, 𝐀𝐀𝐀𝐀𝐀𝐀𝐀𝐀𝐀𝐀𝐀𝐀 = 1 0−4)
+
+4) 𝐀𝐀𝐀𝐀𝐀𝐀𝐀𝐀𝐀𝐀𝐀𝐀𝐀𝐀𝐀 = 6, 𦰀 ℎ𝐀𝐀𝐀 )𝐀 𝐀𝐀 = 2 𝐀𝐀𝐀 )𝐀 𝐀𝐀 = 4 
+
+5) 𝐀𝐀𝐀𝐀𝐀 𝐀𝐀𝐀𝐀 : 𝐀 𝐀𝐀𝐀𝐀𝐀 
+
+= ( 𝐀 −2𝐀 𝐀 𝐀 𝐀𝐀𝐀 + 𝐀 𝐀 ) + ( 𝐀 −2𝐀 𝐀 𝐀 𝐀𝐀𝐀𝐀 + 𝐀 𝐀 ) + ( 𝐀 −2𝐀 𝐀 𝐀 𝐀𝐀𝐀 + 𝐀 𝐀 )
+
++ 𝐀 𝐀𝐀𝐀𝐀 𝐀 𝐀𝐀𝐀𝐀 + 𝐀 𝐀𝐀𝐀 𝐀 𝐀𝐀𝐀 + 𝐀 𝐀𝐀𝐀𝐀 𝐀 𝐀𝐀𝐀𝐀 6) 𝐀 𝐀𝐀𝐀𝐀 = 0.01, 𝐀 𝐀𝐀𝐀 = 0.01, 𝐀 𝐀𝐀𝐀𝐀 = 0.0125            
+
+> 7) 𝐀 += 1.0, 𝐀 += 5.0
+> 8) 𝐀𝐀𝐀 _𝐀𝐀𝐀 = 6, 𝐀 𝐀𝐀𝐀𝐀𝐀 = 2.0, 𝐀 = 0.05
+> 9) 𝐀𝐀𝐀𝐀𝐀𝐀𝐀𝐀 𝐀𝐀𝐀𝐀𠐀𝐀𝐀𝐀𝐀𝐀 𝐀𝐀𝐀𝐀𝐀𝐀𝐀𣠀 :𝐀𝐀𝐀𝐀𝐀𝐀
+
+# Data availability 
+
+The data that support the findings of this study are not publicly available due to privacy and 
+
+confidentiality restrictions, but may be available from the corresponding author upon reasonable 
+
+request and with permission from the data provider. 
+
+# Code availability 
+
+The code used to support the findings of this study is available in a GitHub repository 
+
+at:https://github.com/jinxuanchern/battery. 
+
+# References 
+
+[1] Harper, G. et al. Recycling lithium-ion batteries from electric vehi-cles. Nature 575, 75-86 (2019). 
+
+[2] Liu, K., Liu, Y., Lin, D., Pei, A. & Cui, Y. Materials for lithium-ion battery safety. Sci. Adv. 4, 
+
+eaas9820 (2018). 
+
+[3] Shaffer, B., Auffhammer, M. & Samaras, C. Make electric vehicles lighter to maximize climate 
+
+and safety benefits. Nature 598, 254-256 (2021). 
+
+[4] Tao, Y., Rahn, C. D., Archer, L. A. & You, F. Second life and recycling: energy and 
+
+environmental sustainability perspectives for high-performance lithium-ion batteries. Sci. Adv. 
+
+7, 1-16 (2021). 
+
+[5] Grey, C. P. & Hall, D. S. Prospects for lithium-ion batteries and beyond-a 2030 vision. Nat. 
+
+Commun. 11, 2-5 (2020). 
+
+[6] Couto, L. D., Reniers, J. M., Howey, D. A. & Kinnaert, M. Detection and isolation of small faults 
+
+in lithium-ion batteries via the asymptotic local approach. IEEE Trans. Control Syst. Technol. 
+
+31, 1542-1553 (2023). 
+
+[7] Zhang, L. et al. Adaptive fault detection for lithium-ion batteries combining equivalent circuit 
+
+model and extended Kalman filter. Journal of Energy Storage 77, 109870 (2024). 
+
+[8] Xu, Y. et al. Recent advances in model-based fault diagnosis for lithium-ion battery systems. 
+
+Renewable and Sustainable Energy Reviews 202, 114673 (2025). 
+
+[9] Abdolrasol, M. G. M. et al. Advanced data-driven fault diagnosis in lithium-ion battery 
+
+management systems for electric vehicles: progress, challenges, and future perspectives. eTransportation 22, 100374 (2024). 
+
+[10] Gotz, J. D., Guerrero, G. C. de Queiroz, J. R. H., Viana, E. R. & Borsato, M. Diagnosing failures 
+
+in lithium-ion batteries with machine learning techniques. Eng. Fail. Anal. 150, 107309 (2023). 
+
+[11] Machlev, R. EV battery fault diagnostics and prognostics using deep learning: review, challenges 
+
+& opportunities. J. Energy Storage 83, 110614 (2024). 
+
+[12] Rao, K. D. et al. Fault mitigation and diagnosis for lithium-ion batteries: mechanisms, monitoring 
+
+and safety. Frontiers in Energy Research 13, 1529608 (2025). 
+
+[13] Wu, M. et al. Anomaly detection method for lithium-ion battery cells based on time-series 
+
+decomposition. ACS Omega 8, 52390-52402 (2023). 
+
+[14] Fan, Y. et al. Fault detection for Li-ion batteries of electric vehicles with improved diagnostic 
+
+framework. Scientific Reports 15, 3227 (2025). 
+
+[15] Lin, Y.-H., Ruan, S.-J., Chen, Y.-X. & Li, Y.-F. Physics-informed deep learning for lithium-ion 
+
+battery diagnostics using electrochemical impedance spectroscopy. Renew. Sustain. Energy Rev. 
+
+188, 113807 (2023). 
+
+[16] Navidi, S., Thelen, A., Li, T. & Hu, C. Physics-informed machine learning for battery 
+
+degradation diagnostics: a comparison of state-of-the-art methods. Energy Storage Mater. 68, 
+
+103343 (2024). 
+
+[17] Nazim, M. S., Jang, Y. M. & Chung, B. D. Machine learning based battery anomaly detection 
+
+using empirical data. In 2024 International Conference on Artificial Intelligence in Information 
+
+and Communication (ICAIIC), 847-850 (2024). 
+
+[18] Zhang, J., Wang, Y., Jiang, B. et al. Realistic fault detection of li-ion battery via dynamical deep 
+
+learning. Nature Communications 14, 5940 (2023). 
+
+[19] Liu, H. et al. Multi-modal framework for battery state of health evaluation using open-source 
+
+electric vehicle data. Nat. Commun. 16, 1137 (2025). 
+
+[20] Yu, Q., Wang, C., Li, J., Xiong, R. & Pecht, M. Challenges and outlook for lithium-ion battery 
+
+fault diagnosis methods from the laboratory to real world applications. eTransportation 17, 
+
+100254 (2023). 
+
+[21] Bin Kaleem, M., Zhou, Y., Jiang, F. et al. Fault detection for Li-ion batteries of electric vehicles 
+
+with segmented regression method. Sci. Rep. 14, 31922 (2024). 
+
+[22] Cao, R. et al. Model-constrained deep learning for online fault diagnosis in Li-ion batteries over 
+
+stochastic conditions. Nat. Commun. 16, 1651 (2025). 
+
+[23] Yang, H. et al. Privacy-preserving collaborative battery fault warning for massive electric 
+
+vehicles by heterogeneous data from charging stations. Nat. Commun. 17, 974 (2026). 
+
+[24] Ruff, L. et al. Deep one-class classification. In Proceedings of the 35th International Conference 
+
+on Machine Learning, 4393-4402 (2018). 
+
+[25] Chan, J., Han, T. & Pan, E. Variational autoencoder-driven adversarial SVDD for power battery 
+
+anomaly detection on real industrial data. Journal of Energy Storage 103, 114267 (2024). 
+
+[26] Liao, C., Peng, D., Tian, J., Wang, Z. & Liu, C. SL-DSVDD: Scale learning based deep support 
+
+vector data description network for EV battery anomaly detection. Journal of Energy Storage 
+
+134, 118076 (2025). 
+
+[27] Cheng, F., Li, M., Tu, H., Bennaceur, A. & Wen, Y. A novel fault detection and isolation method for electric vehicle introducing kernel differential of SVDD. Journal of Energy Storage 123, 
+
+116660 (2025). 
+
+[28] Halvagal, M. S. et al. The combination of Hebbian and predictive plasticity learns invariant 
+
+representations in deep neural networks. Nat. Neurosci. 26, 1326-1338 (2023). 
+
+[29] Hosoda, K., Nishida, K., Seno, S., Mashita, T., Kashioka, H. & Ohzawa, I. A single fast 
+
+Hebbian-like process enabling one-shot class addition in deep neural networks without 
+
+backbone modification. Front. Neurosci. 18, 1344114 (2024). 
+
+[30] Vandermeulen, R. A., Tai, W. M. & Aragam, B. Dimension-independent rates for structured 
+
+neural density estimation. In Proceedings of the 42nd International Conference on Machine 
+
+Learning, 60857-60879 (2025). 
+
+[31] Tang, X. & Ying, L. Solving high-dimensional Fokker-Planck equation with functional 
+
+hierarchical tensor. J. Comput. Phys. 511, 113110 (2024). 
+
+[32] Wang, S., Bhartari, A. K., Li, B. & Perdikaris, P. Gradient alignment in physics-informed neural 
+
+networks: a second-order optimization perspective. In Advances in Neural Information 
+
+Processing Systems (2025). 
+
+[33] Yin, J., Qiao, Y., Zhou, Z., Wang, X. & Yang, J. MCM: masked cell modeling for anomaly 
+
+detection in tabular data. In International Conference on Learning Representations (2024). 
+
+[34] Yang, M., Liu, J., Yang, Z. & Wu, Z. SLSG: Industrial image anomaly detection with improved 
+
+feature embeddings and one-class classification. Pattern Recognit. 156, 110862 (2024). 
+
+[35] Zhong, G., Liu, F., Jiang, J., Wang, B. & Chen, C. L. P. Refining one-class representation: A
+
+unified transformer for unsupervised time-series anomaly detection. Inf. Sci. 656, 119914 
+
+(2024). 
+
+[36] Liu, B., Liu, X., Jin, X., Stone, P. & Liu, Q. Conflict-averse gradient descent for multi-task 
+
+learning. In Advances in Neural Information Processing Systems 34, 18878-18890 (2021). 
+
+[37] Ky, J. R., Mathieu, B., Lahmadi, A. & Boutaba, R. CATS: contrastive learning for anomaly 
+
+detection in time series. In 2024 IEEE International Conference on Big Data, 1352-1359 (2024). 
+
+[38] Xu, H. et al. Calibrated one-class classification for unsupervised time series anomaly detection. 
+
+IEEE Trans. Knowl. Data Eng. (2024). 
+
+[39] Joas, M. J., Jurenaite, N., Prascevic, D., Scherf, N. & Ewald, J. AUTOENCODIX: a generalized 
+
+and versatile framework to train and evaluate autoencoders for biological representation learning 
+
+and beyond. Nat. Comput. Sci. 6, 96-108 (2026). 
+
+[40] Gao, Z., Nakayama, R., Hizukuri, A. & Kido, S. Anomaly detection scheme for lung CT images 
+
+using vector quantized variational auto-encoder with support vector data description. Radiol. 
+
+Phys. Technol. 18, 17-26 (2025). 
+
+[41] Terven, J., Cordova-Esparza, D. M. & Romero-Gonzalez, J. A comprehensive survey of loss 
+
+functions and metrics in deep learning. Artif. Intell. Rev. (2025). 
+
+[42] Debanne, D. & Inglebert, Y. Spike timing-dependent plasticity and memory. Curr. Opin. 
+
+Neurobiol. 81, 102707 (2023). 
+
+[43] Andrade-Talavera, Y. et al. Timing to be precise? An overview of spike timing-dependent 
+
+plasticity, brain rhythmicity, and glial cells interplay within neuronal circuits. Mol. Psychiatry 
+
+28, 3137-3158 (2023). [44] Chen, Y. et al. GraphVelo allows for accurate inference of multimodal velocities and molecular 
+
+mechanisms for single cells. Nat. Commun. 16, 7831 (2025). 
+
+[45] Karpowicz, B. M. et al. Stabilizing brain-computer interfaces through alignment of latent 
+
+dynamics. Nat. Commun. 16, 4662 (2025).
