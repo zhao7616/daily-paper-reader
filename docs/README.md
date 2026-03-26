@@ -6,61 +6,52 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-03-25
-- 运行时间：2026-03-25 20:26:04 UTC
+- 最新运行日期：2026-03-26
+- 运行时间：2026-03-26 19:44:27 UTC
 - 运行状态：成功
-- 本次总论文数：13
-- 精读区：2
-- 速读区：11
+- 本次总论文数：10
+- 精读区：1
+- 速读区：9
 
 ### 今日简报（AI）
-今日聚焦工业智能运维，深度解析了锂电池全生命周期预测与工业设备鲁棒性维护的两大核心突破。
-重点关注获满分评价的锂电池多任务学习框架，以及能显著提升工业预测性维护稳定性的 MsFormer 模型。
-建议读者从多任务学习与跨尺度建模入手，探索 AI 在能源管理与航空诊断等高可靠性场景的落地路径。
-- 详情：[/202603/25/README](/202603/25/README)
+今日深度解析锂电池健康预测的迁移学习方案，涵盖分布式电站监控与异常检测等 10 篇前沿成果。
+重点推荐保形迁移学习在应对电池制造差异中的应用，以及可解释 AI 在平衡工业检测性能与公平性上的新突破。
+建议从模块化解释信号入手，探索基础模型在提升复杂工业系统透明度方面的实际潜力。
+- 详情：[/202603/26/README](/202603/26/README)
 
 ### 精读区论文标签
-1. [A Multi-Task Targeted Learning Framework for Lithium-Ion Battery State-of-Health and Remaining Useful Life](/202603/25/2603.22323v1-a-multi-task-targeted-learning-framework-for-lithium-ion-battery-state-of-health-and-remaining-useful-life)  
-   标签：评分：10.0/10、query:rul
-   evidence：电池健康状态与剩余寿命预测的多任务学习
-2. [MsFormer: Enabling Robust Predictive Maintenance Services for Industrial Devices](/202603/25/2603.23076v1-msformer-enabling-robust-predictive-maintenance-services-for-industrial-devices)  
-   标签：评分：9.0/10、query:rul
-   evidence：工业设备的故障时间预测服务
+1. [Conformalized Transfer Learning for Li-ion Battery State of Health Forecasting under Manufacturing and Usage Variability](/202603/26/2603.24475v1-conformalized-transfer-learning-for-li-ion-battery-state-of-health-forecasting-under-manufacturing-and-usage-variability)  
+   标签：评分：8.0/10、query:rul
+   evidence：锂离子电池健康状态预测
 
 ### 速读区论文标签
-1. [Multitask-Informed Prior for In-Context Learning on Tabular Data: Application to Steel Property Prediction](/202603/25/2603.22738v1-multitask-informed-prior-for-in-context-learning-on-tabular-data-application-to-steel-property-prediction)  
+1. [Balancing Performance and Fairness in Explainable AI for Anomaly Detection in Distributed Power Plants Monitoring](/202603/26/2603.18954v1-balancing-performance-and-fairness-in-explainable-ai-for-anomaly-detection-in-distributed-power-plants-monitoring)  
    标签：评分：7.0/10、query:phm
-   evidence：工业属性预测的多任务学习
-2. [Balancing Safety and Efficiency in Aircraft Health Diagnosis: A Task Decomposition Framework with Heterogeneous Long-Micro Scale Cascading and Knowledge Distillation-based Interpretability](/202603/25/2603.22885v1-balancing-safety-and-efficiency-in-aircraft-health-diagnosis-a-task-decomposition-framework-with-heterogeneous-long-micro-scale-cascading-and-knowledge-distillation-based-interpretability)  
+   evidence：电厂异常检测以确保运营连续性
+2. [Graph-Theoretic Analysis of Residual Generation Under Computational Constraints](/202603/26/2603.24273v1-graph-theoretic-analysis-of-residual-generation-under-computational-constraints)  
    标签：评分：7.0/10、query:phm
-   evidence：将诊断解构为异常检测和故障分类
-3. [SynForceNet: A Force-Driven Global-Local Latent Representation Framework for Lithium-Ion Battery Fault Diagnosis](/202603/25/2603.23265v1-synforcenet-a-force-driven-global-local-latent-representation-framework-for-lithium-ion-battery-fault-diagnosis)  
-   标签：评分：7.0/10、query:phm
-   evidence：基于深度异常检测的锂离子电池故障诊断
-4. [EchoGen: Cycle-Consistent Learning for Unified Layout-Image Generation and Understanding](/202603/25/2603.18001v1-echogen-cycle-consistent-learning-for-unified-layout-image-generation-and-understanding)  
+   evidence：基于模型的故障诊断结构框架
+3. [FoMo X: Modular Explainability Signals for Outlier Detection Foundation Models](/202603/26/2603.17570v1-fomo-x-modular-explainability-signals-for-outlier-detection-foundation-models)  
    标签：评分：6.0/10、query:phm
-   evidence：生成与理解任务的联合训练
-5. [Finite-sample bounds for multi-output system identification](/202603/25/2603.19073v1-finite-sample-bounds-for-multi-output-system-identification)  
+   evidence：具有诊断能力的离群点检测模块化框架
+4. [FAAR: Efficient Frequency-Aware Multi-Task Fine-Tuning via Automatic Rank Selection](/202603/26/2603.20403v1-faar-efficient-frequency-aware-multi-task-fine-tuning-via-automatic-rank-selection)  
+   标签：评分：6.0/10、query:phm
+   evidence：通过自动秩选择进行多任务微调
+5. [Centrality-Based Pruning for Efficient Echo State Networks](/202603/26/2603.20684v1-centrality-based-pruning-for-efficient-echo-state-networks)  
    标签：评分：6.0/10、query:rul
-   evidence：系统动力学的多输出系统辨识
-6. [Efficient Visual Anomaly Detection at the Edge: Enabling Real-Time Industrial Inspection on Resource-Constrained Devices](/202603/25/2603.20288v1-efficient-visual-anomaly-detection-at-the-edge-enabling-real-time-industrial-inspection-on-resource-constrained-devices)  
+   evidence：非线性时间序列预测与负荷预测
+6. [A Foundation Model for Instruction-Conditioned In-Context Time Series Tasks](/202603/26/2603.22586v1-a-foundation-model-for-instruction-conditioned-in-context-time-series-tasks)  
+   标签：评分：6.0/10、query:rul
+   evidence：用于包含未来信息预测的上下文时间序列任务的基础模型
+7. [JFTA-Bench: Evaluate LLM's Ability of Tracking and Analyzing Malfunctions Using Fault Trees](/202603/26/2603.22978v1-jfta-bench-evaluate-llms-ability-of-tracking-and-analyzing-malfunctions-using-fault-trees)  
    标签：评分：6.0/10、query:phm
-   evidence：用于工业检测和质量控制的视觉异常检测
-7. [Frequency Switching Mechanism for Parameter-E!cient Multi-Task Learning](/202603/25/2603.21111v1-frequency-switching-mechanism-for-parameter-ecient-multi-task-learning)  
+   evidence：用于故障定位与追踪的故障树分析
+8. [Rao-Blackwellized Stein Gradient Descent for Joint State-Parameter Estimation](/202603/26/2603.23039v1-rao-blackwellized-stein-gradient-descent-for-joint-state-parameter-estimation)  
    标签：评分：6.0/10、query:phm
-   evidence：参数高效的多任务学习框架
-8. [NeSy-Edge: Neuro-Symbolic Trustworthy Self-Healing in the Computing Continuum](/202603/25/2603.21145v1-nesy-edge-neuro-symbolic-trustworthy-self-healing-in-the-computing-continuum)  
-   标签：评分：6.0/10、query:phm
-   evidence：计算连续体中的故障管理与自愈
-9. [RuntimeSlicer: Towards Generalizable Unified Runtime State Representation for Failure Management](/202603/25/2603.21495v1-runtimeslicer-towards-generalizable-unified-runtime-state-representation-for-failure-management)  
-   标签：评分：6.0/10、query:phm
-   evidence：用于故障管理的统一运行时状态表示，跨任务通用
-10. [IF-CPS: Influence Functions for Cyber-Physical Systems -- A Unified Framework for Diagnosis, Curation, and Safety Attribution](/202603/25/2603.21543v1-if-cps-influence-functions-for-cyber-physical-systems----a-unified-framework-for-diagnosis-curation-and-safety-attribution)  
-   标签：评分：6.0/10、query:phm
-   evidence：信息物理系统诊断与安全归因的统一框架
-11. [mSFT: Addressing Dataset Mixtures Overfitting Heterogeneously in Multi-task SFT](/202603/25/2603.21606v2-msft-addressing-dataset-mixtures-overfitting-heterogeneously-in-multi-task-sft)  
-   标签：评分：6.0/10、query:phm
-   evidence：针对异构学习动态的多任务监督微调算法
+   evidence：非线性系统中的联合状态估计与参数识别
+9. [Information-Driven Active Perception for k-step Predictive Safety Monitoring](/202603/26/2603.23450v1-information-driven-active-perception-for-k-step-predictive-safety-monitoring)  
+   标签：评分：6.0/10、query:rul
+   evidence：预测性安全监控与未来状态预测
 
 
 <div class="dpr-home-promo-card">

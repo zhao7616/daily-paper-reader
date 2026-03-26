@@ -1,0 +1,365 @@
+Title: Graph-Theoretic Analysis of Residual Generation Under Computational Constraints
+
+URL Source: https://arxiv.org/pdf/2603.24273v1
+
+Published Time: Thu, 26 Mar 2026 01:04:03 GMT
+
+Number of Pages: 6
+
+Markdown Content:
+> 1
+
+# Graph-Theoretic Analysis of Residual Generation Under Computational Constraints 
+
+Jan ˚ Aslund 
+
+Abstract —A unified structural framework is presented for model-based fault diagnosis that explicitly incorporates both fault locations and constraints imposed by the residual generation methodology. Building on the concepts of proper and minimal structurally overdetermined (PSO/MSO) sets and Test Equation Supports (TES/MTES), the framework introduces testable PSO sets, Residual Generation (RG) sets, irreducible fault signatures (IFS), and Irreducible RG (IRG) sets to characterize which submodels are suitable for residual generation under given computational restrictions. An operator M ∗ is defined to extract, from any model, the largest testable PSO subset consistent with a specified residual generation method. Using this operator, an algorithm is developed to compute all RG sets, and it is shown that irreducible fault signature sets form the join-irreducible elements of a join-semilattice of sets and fully capture the multiple-fault isolability properties in the method-constrained setting. The approach is exemplified on a semi-explicit linear DAE model, where low structural differential index can be used to define M ∗. The results demonstrate that the proposed framework generalizes MTES-based analysis to residual generation scenarios with explicit computational limitations. 
+
+Index Terms —Fault detection and isolation, Model-based di-agnosis, Structural methods 
+
+I. I NTRODUCTION 
+
+A well-established approach in model-based diagnosis is to exploit redundancy within a system model to design an-alytical tests capable of detecting inconsistencies. Numerous methods have been proposed to identify structurally redundant submodels suitable for this purpose. In [14], [9], algorithms were developed for identifying Minimal Structurally Overde-termined (MSO) sets. The method of Possible Conflicts was introduced in [17], while [20] employed Structural Analytical Redundancy Relations. A comprehensive overview of various definitions and algorithms can be found in [15]. In addition to redundancy, an important aspect is the methodology employed for test construction. Several studies have addressed this issue by proposing structural characteri-zations of equation subsets that are applicable under specific constraints imposed by the residual generation process. In [19], a method for identifying MSO sets for sequential residual gen-eration was proposed, explicitly considering the computational tools available for solving algebraic and differential equations as well as for numerical differentiation. The notion of causally computable MSO sets was later introduced in [18], where computational sequences were de-rived under the assumption that linear square subsystems are invertible, subject to causality constraints among variables. 
+
+Department of Electrical Engineering, Link¨ oping University, Link¨ oping, Sweden (e-mail: jan.aslund@liu.se). 
+
+In [6], the concept of the monitorable part was defined under derivative, integral, and mixed causality assumptions, and the implications for fault isolability were systematically analyzed. Furthermore, [16] presented a method for identifying diagnosable subsystems characterized by their suitability for observer-based residual generation and their ability to achieve maximal fault isolability. The degree of redundancy also plays a critical role in the design of diagnostic tests. For instance, in observer-based approaches, high redundancy is desirable as it enhances robustness to modeling errors and measurement noise. How-ever, increased redundancy may reduce fault isolability, since residuals derived from larger submodels tend to be sensitive to a broader set of faults. A structured approach to address this trade-off was introduced in [13], where the concept of Test Equation Supports (TESs) was defined to account for both the level of redundancy and the distribution of faults in the system model. The aim of this work is to integrate the aforementioned perspectives through a unified framework that considers both fault locations and the residual generation methodology. The analysis further investigates the implications of this integration and establishes an appropriate graph-theoretical basis. II. T HEORETICAL BACKGROUND 
+
+Graph theory provides a useful framework for analyzing structural properties of systems and for identifying submod-els with redundancy. Consider a set of equations M =
+
+{e1, . . . , e m} defined over a set of unknown variables X =
+
+{x1, . . . , x n}. A bipartite graph can then be constructed with node sets M and X, and an edge set E ⊂ M × X, where 
+
+(ei, x j ) ∈ E if the variable xj ∈ X appears in equation 
+
+ei ∈ M .As an illustrative example, consider the system of ordinary differential equations (ODEs) 
+
+˙x1 = x1 + x3,
+
+˙x2 = x2 − x3,
+
+˙x3 = x1.
+
+The corresponding bipartite graph can be represented by the bi-adjacency matrix X XX XX X
+
+
+
+where an X in position (i, j ) indicates that (ei, x j ) ∈ E. An alternative representation that explicitly incorporates differen-tial constraints is described in [3]. 
+
+> arXiv:2603.24273v1 [eess.SY] 25 Mar 2026 2
+
+The Dulmage–Mendelsohn (DM) decomposition of bipartite graphs is a powerful tool for structural analysis [3], [4]. The decomposition, illustrated for a general system in Figure 1, permutes the rows and columns of the bi-adjacency matrix so that three distinct parts of the model can be identified: an overdetermined part M + with more equations than unknowns (|M +| > |X+|), an exactly determined part M 0, which intro-duces as many new variables X0 as equations ( |M 0| = |X0|), and an underdetermined part M −, which introduces more new variables X− than equations ( |M −| < |X−|). M −     
+
+> M0
+> M+
+> X−X0X+
+> Fig. 1. Illustration of the bi-adjacency matrix in a Dulmage–Mendelsohn decomposition, where all edges lie within the shaded area
+
+The overdetermined part M + is of particular interest for diagnosis, since it contains redundant information that can be used to detect inconsistencies. A characterization that a matrix is structurally invertible 
+
+means that almost all numerical matrices with the same zero–nonzero pattern are invertible. Similar structural char-acterizations will be used later in the paper. The following definitions from [14] provide two structural characterizations of redundant subsets that are suitable for the design of diag-nostic tests. 
+
+Definition 1 (PSO set, MSO set, and redundancy φ). A set of equations M is Proper Structurally Overdetermined (PSO) if 
+
+M + = M . A PSO set is Minimal Structurally Overdetermined (MSO) if no proper subset of M is PSO. The redundancy 
+
+φ(M ) of a PSO set M is defined as the difference between the number of equations and the number of unknown variables in M .
+
+In [13], the location of faults was incorporated into the structural analysis through the following definitions. 
+
+Definition 2 (TES and MTES) . Let F (M ) denote the set of faults included in an equation set M . A PSO set M is a Test Equation Support (TES) if F (M )̸ = ∅ and for any PSO set 
+
+M ′ ⊋ M it holds that F (M ′) ⊋ F (M ). A TES is minimal (MTES) if no proper subset of M is a TES. 
+
+In the definition of MTESs, fault locations in the model are explicitly taken into account. The main objective of this paper is to generalize these structural concepts by also incorporating the residual generation method into the analysis, and thereby to identify a graph-theoretical representation that captures both fault distribution and computational constraints. For further examples, discussions, and information about implementation of MSO sets and MTESs algorithms, see [10] and [8]. III. B ASIC DEFINITIONS 
+
+The following system of linear equations will be used in the forthcoming sections to illustrate some basic ideas and to highlight the consequences of imposing restrictions on the method used in the design of diagnostic tests. 
+
+e1 : x1 + 2 x2 = u1 + v1
+
+e2 : x1 + x2 = u2 + v2
+
+e3 : y1 = x1 + 3 x2 + v3 (1) 
+
+e4 : y2 = x1 − x2 + f1 + v4
+
+e5 : y3 = x2 + f2 + v5
+
+Here ui and yi are known signals, xi are unknown variables, and the vector v = ( v1, . . . , v 5)T is gaussian random vector with zero mean and identity covariance matrix. The fault signals f1, and f2, are modeled as additive faults, and note that it is not assumed that all equations include a fault. This is often the case for basic physical equations, or faults that can be discovered by other means and therefore can be handled separately. One example of the latter is sensors with a defined behavior under fault conditions, such as a sensor that is considered healthy when its output remains within a specified fail-safe range and indicates a fault when the signal leaves this range; see e.g. Chapter 12 and 13 in [5]. 
+
+A. Restrictions on the residual generation methodology 
+
+From now on, it is assumed that variables in system (1) can only be computed by sequential back-substitution, and that no row operations to eliminate variables are allowed. The purpose of analyzing system (1) under this artificial computational constraint is to mimic situations that may arise, for example, when considering system models with non-invertible subsystems. A more natural computational constraint will be presented in Section V. 
+
+B. Residual generation 
+
+In this section, the possibility to create residual sensitive to faults in model (1) is investigated under the restriction introduced above. First, the noise signals are omitted and it is assumed that the system operates in the fault-free mode. Consider the variable x2. Under the computational restriction, the only way to compute x2 is to use equation e5 in model (1), 
+
+x2 = y3.
+
+Then x1 can be computed using, for example, equation e2,
+
+x1 = u2 − y3.
+
+By substituting x1 and x2 into the redundant equation e1,the residual 
+
+r1 = u1 − u2 − y3 = 0 3
+
+is obtained, which is equal to zero in the fault-free case. Including faults and noise in the model yields 
+
+r1 = u1 − u2 − y3 = f2 + w1,
+
+where w1 = −v1 +v2 −v5. The first expression shows how the residual is computed from the known signals u1, u2, and y3,while the second expression shows how the residual depends on the unknown fault f2 and the noise w1, which can be used to evaluate the fault-to-noise ratio of the residual. In this case, the MSO set {e1, e 2, e 5} was used to construct the residual r1. This was possible since, first, the unknown variables in the submodel could be computed under the imposed restriction and, second, there was redundancy in the model, i.e., the system was overdetermined. These two prop-erties can be read directly from a graph representation of the system and admit a straightforward structural characterization. 
+
+Definition 3 (Structurally testable) . Let a computational con-straints be specified by a structural characterization of which equation sets can be used to generate residuals that are sensitive to all faults included in the equation set. A PSO set that satisfies this structural characterization is called structurally testable. 
+
+Next, it is shown how the fault-to-noise ratio can be improved by considering a larger PSO set with more redundant equations. As a first step, the MSO set {e1, e 3, e 5}, instead of 
+
+{e1, e 2, e 5}, is used to derive the residual 
+
+r2 = y1 + y3 + u1 = f2 + w2,
+
+where w2 = v1 + v5 − v3. The residual has been scaled so that the dependence on the fault f2 is the same for both residuals. The next step is to form the affine combination 
+
+r = kr 1 + (1 − k)r2 = f2 + v, 
+
+where v = kw 1 + (1 − k)w2, and choose k to minimize the variance of v.It is straightforward to show that the covariance matrix of the random vector w =  w1 w2
+
+T is 
+
+Σw =
+
+σ211 σ12 
+
+σ21 σ222 
+
+
+
+=
+
+ 3 −1
+
+−1 3
+
+
+
+.
+
+By minimizing the variance of v with respect to k, the residual 
+
+r = σ222 − σ12 
+
+σ211 + σ222 − 2σ12 
+
+r1 + σ211 − σ12 
+
+σ211 + σ222 − 2σ12 
+
+r2
+
+= 12 r1 + 12 r2 = f2 + v
+
+is obtained for k = 1 /2, with variance 
+
+σ2 
+
+> v
+
+= k2σ211 + 2 k(1 − k)σ12 + (1 − k)2σ222 = 1 .
+
+Comparing this value with the variance of the noise in the individual residuals r1 and r2, i.e., σ211 = σ222 = 3 , shows that by using the larger testable PSO set M1 = {e1, e 2, e 3, e 5} it is possible to construct a residual with a higher fault-to-noise ratio than for either r1 or r2 alone. The technique used above to combine the two residuals is a standard example from the theory of sensor fusion [11]. Higher order of redundancy can be exploited in many dynamic and nonlinear models to further suppress model and measurement noise when designing residuals. In the MSO algorithm in [14] and the MTES algorithm in [13], a crucial step is the computation of the overdetermined part M + defined as the largest subset of M that is a PSO set. The operator M ∗,defined below, will replace the operator M + in the algorithm introduced in the Section IV. The definition of the operator M + was extened in [18] to an operator that gives the largest PSO subset of a model for which all variables can be computed under the assumption that linear square subsystems can be inverted and subject to causality constraints between variables. In [6], the monitorable part of a model was defined in an analogous way under derivative, integral, and mixed causality assumptions. The following general operator will be considered in this paper. 
+
+Definition 4 (The operator M ∗). Given a set of equations M ,the set M ∗ is defined as the largest testable PSO subset of 
+
+M .C. Fault signature 
+
+Different residuals are sensitive to different sets of faults, and the possible sets of fault signatures of the residuals are given by the following definition. 
+
+Definition 5 (Fault signature) . Let F (M ) denote the set of faults included in a model M . A set of faults F̸ = ∅ such that 
+
+F = F (M ) for some testable PSO set M is called a fault signature. 
+
+The set M1 = {e1, e 2, e 3, e 5} used above has the fault signature F (M1) = {f2}, and M1 is the largest testable PSO set with this fault signature. Hence, the fault-to-noise ratio cannot be improved further by adding more equations without increasing the set of faults which the residual is sensitive to. This makes M1 suitable for constructing a residual sensitive to f2.The following lemma shows that for any given fault signa-ture there is a largest testable PSO set with that signature. 
+
+Lemma 1. Given a fault signature F , there exists a unique testable PSO set M such that F (M ) = F and M ′ ⊂ M for all testable PSO sets M ′ satisfying F (M ′) = F .Proof. Let M be the union of all testable PSO sets M ′ such that F (M ′) = F . By Definition 5, there exists at least one testable PSO set M ′ with F (M ′) = F , so the union is non-empty. Moreover, M is a testable PSO set since it is a union of testable sets, and it clearly contains every such M ′ as a subset. It follows that the sets given by Lemma 1 are of particular interest when designing residuals, which motivates the follow-ing definition. 
+
+Definition 6 (RG set) . A testable PSO set M is called a Residual Generation set (RG set) if it is the largest testable PSO set such that F (M ) = F for a given fault signature F .4
+
+D. Fault detectability and fault isolability 
+
+The concepts structurally detectable faults and structurally isolability of multiple faults from [13] are now modified by replacing the M + operator by M ∗. It is assumed that a fault 
+
+f affects only one equation and that equation is denoted by 
+
+ef .
+
+Definition 7 (Structurally detectable) . Let F (M ) denote the set of faults included in a model M . A fault f is structurally detectable in M if f ∈ F (M ∗).
+
+A fault mode is represented by a set Fi of faults, and a fault mode Fi is isolable from a fault mode Fj if there exists a residual sensitive to some fault of Fi but insensitive to all faults in Fj . A formal definition is: 
+
+Definition 8 (Structurally isolable) . A fault mode Fi is struc-turally isolable from mode Fj in a model M if 
+
+Fi ∩ (M \ eq (Fj )) ∗̸ = ∅,
+
+where eq (Fj ) = ∪f ∈Fj {ef }.
+
+The set of all TESs forms a partially ordered set under set inclusion, where the MTESs are the minimal elements in the graph-theoretical sense. For each TES there is an associated set of faults included in the corresponding submodel given by the following definition from [13]. 
+
+Definition 9 (TS and MTS) . A subset of faults F is a test support TS if there exists a PSO set M such that F (M ) = F .A test support is a minimal test support MTS if no proper submodel is a test support 
+
+There is a one-to-one correspondence between the TESs and the TSs, and the collection of all TSs characterizes the complete multiple-fault isolability properties of the model. Hence, the MTESs and the corresponding MTSs contain all information about the multiple fault isolability properties of the model. We now turn to the corresponding results for RG sets. In general, the set of all RG sets also forms a partially ordered set under inclusion. There is again a one-to-one correspon-dence between the RG sets and all possible fault signatures, which completely characterizes the multiple-fault isolability properties of the model under the restrictions considered in this paper. The main difference between TESs and RG sets can be illustrated using model (1). In this example, there are two RG sets, M1 = {e1, e 2, e 3, e 5} and M2 = {e1, e 2, e 3, e 4, e 5}, with corresponding fault signatures F1 = {f2} and F2 = {f1, f 2},respectively. The set M1 is the only minimal element. Consequently, it is not sufficient to consider only the mini-mal RG sets when analyzing the structural fault detection and isolation properties of the model. A union of RG sets is a subset of an RG set with a fault signature that is equal to the union of the fault signatures of the individual RG sets. Hence, the union of RG sets does not provide any additional information about the fault isolability properties of the model. This motivates the following definition. 
+
+Definition 10 (Irreducible fault signature and IRG set) . A fault signature is called irreducible if it cannot be written as a union other fault signatures. An RG set is called an Irreducible RG (IRG) set if its fault signature is irreducible. 
+
+In graph-theoretical terms, the set of all fault signatures can be viewed as a join-semilattice, where the join operation is given by set union, and the irreducible fault signatures of the join-irreducible elements in this structure; see, for example, [2]. The following result summarizes the discussion and shows that, in the context of this paper, IRG sets play a role analogous to that of MTESs. 
+
+Theorem 1. There is a one-to-one correspondence between the set of all RG sets and the set of all fault signatures. Furthermore, the fault signature of any RG set can be written as as a union of irreducible fault signatures, and the set of all irreducible fault signatures is the minimal set with this property. Proof. The one-to-one correspondence follows directly from Definition 6 and Lemma 1. By Definition 10, any fault signature is either an irreducible fault signatur itself, or can be represented as a union of irreducible fault signatures. Finally, any collection of sets with this property must contain all irreducible fault signatures, which proves minimality. IV. A LGORITHM 
+
+The operator M ∗ will be used in the algorithm below. Before presenting it, three important differences compared to the MTES algorithm are highlighted, since they must be taken into account when modifying the MTES algorithm. The first difference concerns a key operation. In the MTES algorithm, a frequently used operation is to remove one equa-tion and then compute the overdetermined part, (M \ { e})+.If e is an arbitrary equation in a PSO set M , then 
+
+φ  (M \ { e})+ = φ(M ) − 1,
+
+that is, the order of redundancy decreases by one. In the algorithm below, the corresponding operation is to first remove one equation and then compute the largest testable subset (M \ { e})∗. For system (1), the order of redundancy is φ(M ) = 3 . If equation e5 is removed, the largest testable subset is empty, (M \ { e5})∗ = ∅, and thus 
+
+φ (( M \ { e5})∗) = 0 < φ (M ) − 1 = 2 .
+
+The second difference is that, for a given model, all MTESs have the same order of redundancy, which can be computed in advance; see Lemma 3 in [13]. This property is used as a stopping criterion in the MTES algorithm. In contrast, the IRG sets of model (1) have different orders of redundancy: 
+
+φ({e1, e 2, e 3, e 5}) = 2 and φ({e1, e 2, e 3, e 4, e 5}) = 3 .The third difference is related to structural isolability as defined in [12], which is symmetric: if fi is isolable from fj ,then fj is isolable from fi. In the example in Section III, the two fault signatures are {f2} and {f1, f 2}. This means that 
+
+f2 is structurally isolable from f1, but not vice versa. Without this symmetry, it is not possible to define equivalence classes as in Section V.B of [14], which were used to improve the efficiency of the MSO and MTES algorithms. Furthermore, 5
+
+due to the lack of symmetry, it is not possible to define the sets R which were used in these algorithms to prevent that the same set was found more than once. The algorithm below follows the same basic ideas as in [13]. It is initialized with the PSO sets M = M ∗ 
+
+> 0
+
+, where M0 is the model to be analyzed. Equations with faults are removed and largest testable subsets are computed alternately until the there is a set without faults reached in each branch of the recursion tree. The output of the algorithm is the set of all RG subsets of 
+
+M0. It is straightforward to identify which RG sets are IRG sets using Definition 10, so this step is not included here.  
+
+> 1
+
+function S = FindRG (M ) 
+
+> 2
+
+S = ∅; 
+
+> 3
+
+while F (R)̸ = ∅ 
+
+> 4
+
+Select an e ∈ R such that F ({e})̸ = ∅ 
+
+> 5
+
+M ′ = ( M \ { e})∗; 
+
+> 6
+
+if F (M ′)̸ = ∅ 
+
+> 7
+
+S = S ∪ { M ′}; 
+
+> 8
+
+S = S ∪ FindRG (M ′);  
+
+> 9
+
+end  
+
+> 10
+
+end  
+
+> 11
+
+end 
+
+One modification compared to [13] is that the operator M +
+
+has been replaced by M ∗ in line 5. Moreover, since the order of redundancy of the IRG sets is not known a priori, the stopping criterion in line 6 is that F (M ′) = F (( M \{ e})∗) be-comes empty, rather than reaching a precomputed redundancy level. This situation occurs, for example, if e5 is removed from system (1). The section concludes with a proof establishing the correct-ness of the algorithm. 
+
+Theorem 2. The output of the algorithm is the set of all RG 
+
+sets in the model M0.Proof. Input to the algorithm is M = M ∗ 
+
+> 0
+
+. We show that an arbitrary RG set M ′ ⊊ M is found at least once by the algorithm by constructing a branch in the recursion tree from 
+
+M to M ′.Assume that f ∈ F (M ) \ F (M ′), and define 
+
+M s = ( M \ { ef })∗.
+
+We claim that F (M ′) ⊂ F (M s). If this were not the case, then 
+
+F (M s) ⊊ F (M ′ ∪ M s) ⊂ F (M ) \ { f } = F (M \ { ef }),
+
+where M ′ ∪ M s ⊂ M is a testable PSO set, which contradicts the definition of M s.If M s = M ′, the claim follows. Otherwise, we repeat the procedure above with M replaced by M s until M ′ is reached. V. E XAMPLE : D IFFERENTIAL ALGEBRAIC EQUATIONS 
+
+In this section, semi-explicit linear differential-algebraic equations (DAEs) of the form 
+
+˙x1 = A11 x1 + A12 x2 + B1u, (2a) 
+
+0 = A21 x1 + A22 x2 + B2u, (2b) 
+
+y = C1x1 + C2x2, (2c) are be used to illustrate how the theory developed in the previous sections can be applied to identify subsystems that are compatible with a specified residual generation methodology. The following example is considered. 
+
+e1 : ˙x1 = x2 − x1
+
+e2 : ˙x2 = x1 + x2 − 2x3 + f1
+
+e3 : ˙x3 = x2 − x3
+
+e4 : y1 = x1 + f2
+
+e5 : y2 = x3 + f3
+
+e6 : y3 = x1 − x3
+
+(3) which is an ODE system. However, the analysis below con-siders subsystems of (3), which are in general semi-explicit linear DAEs. In this example, a set of equations is defined to be struc-turally testable if it has low structural differential index. The differential index can be seen as a measure of how far a DAE is from being an ordinary differential equation (ODE); an index of zero corresponds to an ODE system. Models with index zero or one are referred to as low-index DAEs and can be integrated using standard ODE solvers; see, e.g., [1]. The number of unknown signals is equal to the number of equation in the subsystem (2a), and (2b). Such a quadratic system is a low-index DAE system if A22 is invertible. In this linear case (2b) gives 
+
+x2 = −A−122 (A21 x1 + B2u)
+
+and substitution into (2a) yields an ODE system. In [7], the concept of low index was extended to a structural property of non-quadratic, structurally overdetermined PSO systems, and model (2) has low structural index if and only if the matrix A22 
+
+C2
+
+
+
+has full structural column rank. It was shown how such struc-turally overdetermined, low-index submodels can be used for residual generation for more general non-linear DAE systems, either by direct sequential residual generation with integral causality or observer based residual methods. In Section IV.B of [6], an operator was introduced that returns the largest PSO set that is structurally monitorable under integral causality, and a semi-explicit DAE has low structural index if and only if it is structurally monitorable under integral causality; see Theorem 14 in [7]. The submodel 
+
+M ∗ is defined as largest PSO subset of M that is structurally monitorable under integral causality. Applying the algorithm in Section IV with the operator M ∗
+
+defined above yields four IRG sets, and the corresponding irreducible fault signatures, as shown in Table I. 6
+
+IRG set Fault signature 
+
+{e1, e 2, e 3, e 6} {f1}{e1, e 2, e 3, e 4, e 6} {f1, f 2}{e1, e 2, e 3, e 5, e 6} {f1, f 3}{e4, e 5, e 6} {f2, f 3}
+
+TABLE I IRG SETS AND FAULT SIGNATURES OF THE MODEL (3) 
+
+Table II lists the MTESs and their corresponding test supports for the model. The following observations can be made. First, {e1, e 2, e 3, e 9} is the only IRG set that is also an MTES. Second, the faults {f1, f 5, f 6} are mutually isolable in the MTES framework, in the sense that for each fault there exists a fault signature that contains this fault but not the others, whereas under the computational constraint only f1
+
+is isolable from f5 and f6. This follows from the fact that the MTESs {e1, e 3, e 4, e 6} and {e1, e 3, e 5, e 6} are not low-index DAEs. The reason for this is that the variable x2 cannot be determined algebraically in either of the two cases. However, by adding the equation e2 to these sets, the second and third IRG sets are obtained, at the cost of increased fault sensitivity due to the inclusion of the fault f1.Finally, it can be noted that the fault mode {f5, f 6} is isolable from {f1} in the IRG framework. 
+
+MTES Test support 
+
+{e1, e 2, e 3, e 6} {f1}{e1, e 3, e 4, e 6} {f2}{e1, e 3, e 5, e 6} {f3}
+
+TABLE II MTES S AND TEST SUPPORTS OF THE MODEL (3) 
+
+VI. C ONCLUSIONS 
+
+The paper has introduced a generalized structural framework for residual generation that simultaneously accounts for fault locations and constraints imposed by a chosen residual genera-tion methodology. By extending the notions of PSO sets, MSO sets, and TES/MTES to testable PSO sets and RG sets, and by characterizing irreducible fault signature sets as the join-irreducible elements of the resulting lattice, the framework captures both fault isolability and computational limitations in a unified way. An algorithm for computing all RG sets has been proposed, obtained by replacing the overdetermined-part operator with an operator M ∗ that encodes the admissible residual generation method. The DAE example demonstrates how structural differ-ential index can be used to define M ∗ and to derive IRG sets and their associated irreducible fault signatures. The results show that IRG sets play, for method-constrained diagnosis, the same central role that MTESs play in previous works. REFERENCES [1] Uri M Ascher and Linda R Petzold. Computer methods for ordinary differential equations and differential-algebraic equations , volume 61. Siam, 1998. [2] Garrett Birkhoff. Lattice theory . Third edition. American Mathematical Society Colloquium Publications, Vol. XXV. American Mathematical Society, Providence, R.I., 1967. [3] Mogens Blanke, Michel Kinnaert, Jan Lunze, and Marcel Staroswiecki. 
+
+Diagnosis and fault-tolerant control . Springer, 3 edition, 2016. [4] A. L. Dulmage and N. S. Mendelsohn. Coverings of bipartite graphs. 
+
+Canadian Journal of Mathematics , 10:517–534, 1958. [5] William C Dunn. Fundamentals of industrial instrumentation and process control . 2005. [6] Erik Frisk, Anibal Bregon, Jan ˚ Aslund, Mattias Krysander, Belarmino Pulido, and Gautam Biswas. Diagnosability analysis considering causal interpretations for differential constraints. IEEE Transactions on Sys-tems, Man, and Cybernetics – Part A: Systems and Humans , 42(5):1216– 1229, September 2012. [7] Erik Frisk, Mattias Krysander, and Jan ˚ Aslund. Analysis and design of diagnosis systems based on the structural differential index. In IFAC World Congress , Toulouse, France, 2017. [8] Erik Frisk, Mattias Krysander, and Daniel Jung. A toolbox for analysis and design of model based diagnosis systems for large scale mod-els. IFAC-PapersOnLine , 50(1):3287–3293, 2017. 20th IFAC World Congress. [9] E.R. Gelso, S.M. Castillo, and J. Armengol. An algorithm based on structural analysis for model-based fault diagnosis. In Artificial Intel-ligence Research and Development. Frontiers in Artificial Intelligence and Applications , volume 184, pages 138–147. IOS Press, 2008. [10] Maxence Glotin, Louise Trav´ e-Massuy` es, and Elodie Chanthery. MSO Sets and MTES for Dummies. In 35th International Conference on Principles of Diagnosis and Resilient Systems (DX 2024) , volume 125 of Open Access Series in Informatics (OASIcs) , pages 13:1–13:15, Dagstuhl, Germany, 2024. [11] Steven M. Kay. Fundamentals of Statistical Signal Processing, Volume I: Estimation Theory . Prentice Hall, Englewood Cliffs, NJ, USA, 1993. [12] M. Krysander and E. Frisk. Sensor placement for fault diagnosis. IEEE Transactions on Systems, Man, and Cybernetics – Part A: Systems and Humans , 38(6):1398–1410, 2008. [13] Mattias Krysander, Jan ˚ Aslund, and Erik Frisk. A structural algorithm for finding testable sub-models and multiple fault isolability analysis. 21st International Workshop on Principles of Diagnosis (DX-10), Port-land, Oregon, USA, 2010. [14] Mattias Krysander, Jan ˚Aslund, and Mattias Nyberg. An efficient algorithm for finding minimal over-constrained sub-systems for model-based diagnosis. IEEE Transactions on Systems, Man, and Cybernetics – Part A: Systems and Humans , 38(1), 2008. [15] J. Armengol Llobet, A. Bregon, T. Escobet, E. R. Gelso, M. Krysander, M. Nyberg, X. Olive, B. Pulido, and L. Trave-Massuyes. Minimal structurally overdetermined sets for residual generation: A comparison of alternative approaches. In Proceedings of IFAC Safeprocess’09 ,Barcelona, Spain, 2009. [16] Sebastian Proell, Fabian Jarmolowitz, and Jan Lunze. A comprehensive observer-based fault isolation method with application to a hydraulic power train. In 8th IFAC Symposium on Advances in Automotive Control ,Kolm˚ arden, Sweden, 2016. [17] B. Pulido and C. Alonso-Gonz´ alez. Possible Conflicts: a compilation technique for consistency-based diagnosis. IEEE Trans. on Systems, Man, and Cybernetics. Part B: Cybernetics , 34(5):2192–2206, Octubre 2004. [18] Albert Rosich, Erik Frisk, Jan ˚ Aslund, Ramon Sarrate, and Fatiha Nej-jari. Fault diagnosis based on causal computations. IEEE Transactions on Systems, Man, and Cybernetics – Part A: Systems and Humans ,42(2):371–381, 2012. [19] Carl Sv¨ ard and Mattias Nyberg. Residual generators for fault diagnosis using computation sequences with mixed causality applied to automotive systems. IEEE Transactions on Systems, Man, and Cybernetics – Part A: Systems and Humans , 40(6):1310–1328, 2010. [20] L. Trave-Massuyes, T. Escobet, and X. Olive. Diagnosability analysis based on component-supported analytical redundancy relations. IEEE Transaction on Systems, Man, and Cybernetics – Part A , 36(6):1146– 1160, 2006.

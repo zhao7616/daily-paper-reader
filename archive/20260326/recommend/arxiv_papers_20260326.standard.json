@@ -1,0 +1,386 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-03-26T19:43:05.695303+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 1,
+    "deep_cap": 6,
+    "deep_selected": 1,
+    "quick_candidates": 9,
+    "quick_skim_target": 11,
+    "quick_selected": 9
+  },
+  "deep_dive": [
+    {
+      "id": "2603.24475v1",
+      "title": "Conformalized Transfer Learning for Li-ion Battery State of Health Forecasting under Manufacturing and Usage Variability",
+      "abstract": "Accurate forecasting of state-of-health (SOH) is essential for ensuring safe and reliable operation of lithium-ion cells. However, existing models calibrated on laboratory tests at specific conditions often fail to generalize to new cells that differ due to small manufacturing variations or operate under different conditions. To address this challenge, an uncertainty-aware transfer learning framework is proposed, combining a Long Short-Term Memory (LSTM) model with domain adaptation via Maximum Mean Discrepancy (MMD) and uncertainty quantification through Conformal Prediction (CP). The LSTM model is trained on a virtual battery dataset designed to capture real-world variability in electrode manufacturing and operating conditions. MMD aligns latent feature distributions between simulated and target domains to mitigate domain shift, while CP provides calibrated, distribution-free prediction intervals. This framework improves both the generalization and trustworthiness of SOH forecasts across heterogeneous cells.",
+      "authors": [
+        "Samuel Filgueira da Silva",
+        "Mehmet Fatih Ozkan",
+        "Faissal El Idrissi",
+        "Marcello Canova"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "eess.SY"
+      ],
+      "published": "2026-03-25T16:16:03+00:00",
+      "link": "https://arxiv.org/pdf/2603.24475v1",
+      "tags": [
+        "keyword:PHM",
+        "query:PHM"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "forecasting state-of-health for Li-ion batteries",
+      "llm_evidence_cn": "锂离子电池健康状态预测",
+      "llm_evidence": "锂离子电池健康状态预测",
+      "canonical_evidence": "锂离子电池健康状态预测",
+      "llm_tldr_en": "Develops an uncertainty-aware transfer learning framework for battery state-of-health forecasting.",
+      "llm_tldr_cn": "开发了一个用于电池健康状态预测的确定性感知迁移学习框架。",
+      "llm_tldr": "开发了一个用于电池健康状态预测的确定性感知迁移学习框架。",
+      "llm_tags": [
+        "query:rul:composite"
+      ],
+      "matched_query_tag": "query:rul:composite",
+      "matched_query_text": "Papers central to 剩余寿命预测和旋转机械设备剩余寿命预测, especially work that connects or combines: Remaining Useful Life (RUL) prediction methods; Health monitoring and RUL for rotating machinery; Remaining useful life prediction for rolling element bearings; Deep learning architectures for RUL estimation; State of the art methods for remaining useful life prediction of rotating machinery; Deep learning based RUL estimation for industrial bearings and motors; Data driven vs physics informed models for RUL prediction; Real time health assessment and RUL forecasting for rotating components.",
+      "matched_requirement_id": "req-composite-rul",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2603.18954v1",
+      "title": "Balancing Performance and Fairness in Explainable AI for Anomaly Detection in Distributed Power Plants Monitoring",
+      "abstract": "Reliable anomaly detection in distributed power plant monitoring systems is essential for ensuring operational continuity and reducing maintenance costs, particularly in regions where telecom operators heavily rely on diesel generators. However, this task is challenged by extreme class imbalance, lack of interpretability, and potential fairness issues across regional clusters. In this work, we propose a supervised ML framework that integrates ensemble methods (LightGBM, XGBoost, Random Forest, CatBoost, GBDT, AdaBoost) and baseline models (Support Vector Machine, K-Nearrest Neighbors, Multilayer Perceptrons, and Logistic Regression) with advanced resampling techniques (SMOTE with Tomek Links and ENN) to address imbalance in a dataset of diesel generator operations in Cameroon. Interpretability is achieved through SHAP (SHapley Additive exPlanations), while fairness is quantified using the Disparate Impact Ratio (DIR) across operational clusters. We further evaluate model generalization using Maximum Mean Discrepancy (MMD) to capture domain shifts between regions. Experimental results show that ensemble models consistently outperform baselines, with LightGBM achieving an F1-score of 0.99 and minimal bias across clusters (DIR $\\approx 0.95$). SHAP analysis highlights fuel consumption rate and runtime per day as dominant predictors, providing actionable insights for operators. Our findings demonstrate that it is possible to balance performance, interpretability, and fairness in anomaly detection, paving the way for more equitable and explainable AI systems in industrial power management. {\\color{black} Finally, beyond offline evaluation, we also discuss how the trained models can be deployed in practice for real-time monitoring. We show how containerized services can process in real-time, deliver low-latency predictions, and provide interpretable outputs for operators.",
+      "authors": [
+        "Corneille Niyonkuru",
+        "Marcellin Atemkeng",
+        "Gabin Maxime Nguegnang",
+        "Arnaud Nguembang Fadja"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-03-19T14:24:05+00:00",
+      "link": "https://arxiv.org/pdf/2603.18954v1",
+      "tags": [
+        "query:PHM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "anomaly detection in power plants for operational continuity",
+      "llm_evidence_cn": "电厂异常检测以确保运营连续性",
+      "llm_evidence": "电厂异常检测以确保运营连续性",
+      "canonical_evidence": "电厂异常检测以确保运营连续性",
+      "llm_tldr_en": "Proposes an explainable AI framework for anomaly detection in distributed power plant monitoring.",
+      "llm_tldr_cn": "提出一种用于分布式电厂监控异常检测的可解释人工智能框架。",
+      "llm_tldr": "提出一种用于分布式电厂监控异常检测的可解释人工智能框架。",
+      "llm_tags": [
+        "query:phm:composite"
+      ],
+      "matched_query_tag": "query:phm:composite",
+      "matched_query_text": "Papers central to 同时涉及故障诊断与剩余寿命预测的研究论文, especially work that connects or combines: joint modeling of diagnosis and prognosis; multi-task learning for diagnosis and RUL; simultaneous fault diagnosis and remaining useful life prediction; integrated approach for machinery fault diagnosis and prognosis; multi task deep learning for PHM applications; joint diagnosis and RUL estimation research papers.",
+      "matched_requirement_id": "req-composite-phm",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.17570v1",
+      "title": "FoMo X: Modular Explainability Signals for Outlier Detection Foundation Models",
+      "abstract": "Tabular foundation models, specifically Prior-Data Fitted Networks (PFNs), have revolutionized outlier detection (OD) by enabling unsupervised zero-shot adaptation to new datasets without training. However, despite their predictive power, these models typically function as opaque black boxes, outputting scalar outlier scores that lack the operational context required for safety-critical decision-making. Existing post-hoc explanation methods are often computationally prohibitive for real-time deployment or fail to capture the epistemic uncertainty inherent in zero-shot inference. In this work, we introduce FoMo-X, a modular framework that equips OD foundation models with intrinsic, lightweight diagnostic capabilities. We leverage the insight that the frozen embeddings of a pretrained PFN backbone already encode rich, context-conditioned relational information. FoMo-X attaches auxiliary diagnostic heads to these embeddings, trained offline using the same generative simulator prior as the backbone. This allows us to distill computationally expensive properties, such as Monte Carlo dropout based epistemic uncertainty, into a deterministic, single-pass inference. We instantiate FoMo-X with two novel heads: a Severity Head that discretizes deviations into interpretable risk tiers, and an Uncertainty Head that provides calibrated confidence measures. Extensive evaluation on synthetic and real-world benchmarks (ADBench) demonstrates that FoMo-X recovers ground-truth diagnostic signals with high fidelity and negligible inference overhead. By bridging the gap between foundation model performance and operational explainability, FoMo-X offers a scalable path toward trustworthy, zero-shot outlier detection.",
+      "authors": [
+        "Simon Klüttermann",
+        "Tim Katzke",
+        "Phuong Huong Nguyen",
+        "Emmanuel Müller"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "published": "2026-03-18T10:22:51+00:00",
+      "link": "https://arxiv.org/pdf/2603.17570v1",
+      "tags": [
+        "keyword:PHM",
+        "query:PHM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "modular framework for outlier detection with diagnostic capabilities",
+      "llm_evidence_cn": "具有诊断能力的离群点检测模块化框架",
+      "llm_evidence": "具有诊断能力的离群点检测模块化框架",
+      "canonical_evidence": "具有诊断能力的离群点检测模块化框架",
+      "llm_tldr_en": "Equips outlier detection foundation models with intrinsic diagnostic capabilities for safety-critical use.",
+      "llm_tldr_cn": "为离群点检测基础模型配备内在诊断能力，用于安全关键型决策。",
+      "llm_tldr": "为离群点检测基础模型配备内在诊断能力，用于安全关键型决策。",
+      "llm_tags": [
+        "query:phm:composite"
+      ],
+      "matched_query_tag": "query:phm:composite",
+      "matched_query_text": "Papers central to 同时涉及故障诊断与剩余寿命预测的研究论文, especially work that connects or combines: joint modeling of diagnosis and prognosis; multi-task learning for diagnosis and RUL; simultaneous fault diagnosis and remaining useful life prediction; integrated approach for machinery fault diagnosis and prognosis; multi task deep learning for PHM applications; joint diagnosis and RUL estimation research papers.",
+      "matched_requirement_id": "req-composite-phm",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.24273v1",
+      "title": "Graph-Theoretic Analysis of Residual Generation Under Computational Constraints",
+      "abstract": "A unified structural framework is presented for model-based fault diagnosis that explicitly incorporates both fault locations and constraints imposed by the residual generation methodology. Building on the concepts of proper and minimal structurally overdetermined (PSO/MSO) sets and Test Equation Supports (TES/MTES), the framework introduces testable PSO sets, Residual Generation (RG) sets, irreducible fault signatures (IFS), and Irreducible RG (IRG) sets to characterize which submodels are suitable for residual generation under given computational restrictions. An operator $M^*$ is defined to extract, from any model, the largest testable PSO subset consistent with a specified residual generation method. Using this operator, an algorithm is developed to compute all RG sets, and it is shown that irreducible fault signature sets form the join-irreducible elements of a join-semilattice of sets and fully capture the multiple-fault isolability properties in the method-constrained setting. The approach is exemplified on a semi-explicit linear DAE model, where low structural differential index can be used to define $M^*$. The results demonstrate that the proposed framework generalizes MTES-based analysis to residual generation scenarios with explicit computational limitations.",
+      "authors": [
+        "Jan Åslund"
+      ],
+      "primary_category": "eess.SY",
+      "categories": [
+        "eess.SY"
+      ],
+      "published": "2026-03-25T13:05:17+00:00",
+      "link": "https://arxiv.org/pdf/2603.24273v1",
+      "tags": [
+        "keyword:PHM",
+        "query:PHM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "structural framework for model-based fault diagnosis",
+      "llm_evidence_cn": "基于模型的故障诊断结构框架",
+      "llm_evidence": "基于模型的故障诊断结构框架",
+      "canonical_evidence": "基于模型的故障诊断结构框架",
+      "llm_tldr_en": "Presents a graph-theoretic framework for residual generation in model-based fault diagnosis.",
+      "llm_tldr_cn": "提出了一个用于基于模型故障诊断中残差生成的图论框架。",
+      "llm_tldr": "提出了一个用于基于模型故障诊断中残差生成的图论框架。",
+      "llm_tags": [
+        "query:phm"
+      ],
+      "matched_query_tag": "query:phm",
+      "matched_query_text": "integrated approach for machinery fault diagnosis and prognosis",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.20403v1",
+      "title": "FAAR: Efficient Frequency-Aware Multi-Task Fine-Tuning via Automatic Rank Selection",
+      "abstract": "Adapting models pre-trained on large-scale datasets is a proven way to reach strong performance quickly for down-stream tasks. However, the growth of state-of-the-art mod-els makes traditional full fine-tuning unsuitable and difficult, especially for multi-task learning (MTL) where cost scales with the number of tasks. As a result, recent studies investigate parameter-efficient fine-tuning (PEFT) using low-rank adaptation to significantly reduce the number of trainable parameters. However, these existing methods use a single, fixed rank, which may not be optimal for differ-ent tasks or positions in the MTL architecture. Moreover, these methods fail to learn spatial information that cap-tures inter-task relationships and helps to improve diverse task predictions. This paper introduces Frequency-Aware and Automatic Rank (FAAR) for efficient MTL fine-tuning. Our method introduces Performance-Driven Rank Shrink-ing (PDRS) to allocate the optimal rank per adapter location and per task. Moreover, by analyzing the image frequency spectrum, FAAR proposes a Task-Spectral Pyramidal Decoder (TS-PD) that injects input-specific context into spatial bias learning to better reflect cross-task relationships. Experiments performed on dense visual task benchmarks show the superiority of our method in terms of both accuracy and efficiency compared to other PEFT methods in MTL. FAAR reduces the number of parameters by up to 9 times compared to traditional MTL fine-tuning whilst improving overall performance. Our code is available.",
+      "authors": [
+        "Maxime Fontana",
+        "Michael Spratling",
+        "Miaojing Shi"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-03-20T18:24:06+00:00",
+      "link": "https://arxiv.org/pdf/2603.20403v1",
+      "tags": [
+        "keyword:PHM",
+        "query:PHM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "multi-task fine-tuning via automatic rank selection",
+      "llm_evidence_cn": "通过自动秩选择进行多任务微调",
+      "llm_evidence": "通过自动秩选择进行多任务微调",
+      "canonical_evidence": "通过自动秩选择进行多任务微调",
+      "llm_tldr_en": "An efficient multi-task fine-tuning method that automatically selects ranks for different tasks.",
+      "llm_tldr_cn": "一种高效的多任务微调方法，可为不同任务自动选择秩。",
+      "llm_tldr": "一种高效的多任务微调方法，可为不同任务自动选择秩。",
+      "llm_tags": [
+        "query:phm"
+      ],
+      "matched_query_tag": "query:phm",
+      "matched_query_text": "multi task deep learning for PHM applications",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.20684v1",
+      "title": "Centrality-Based Pruning for Efficient Echo State Networks",
+      "abstract": "Echo State Networks (ESNs) are a reservoir computing framework widely used for nonlinear time-series prediction. However, despite their effectiveness, the randomly initialized reservoir often contains redundant nodes, leading to unnecessary computational overhead and reduced efficiency. In this work, we propose a graph centrality-based pruning approach that interprets the reservoir as a weighted directed graph and removes structurally less important nodes using centrality measures. Experiments on Mackey-Glass time-series prediction and electric load forecasting demonstrate that the proposed method can significantly reduce reservoir size while maintaining, and in some cases improving, prediction accuracy, while preserving the essential reservoir dynamics.",
+      "authors": [
+        "Sudip Laudari"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI",
+        "math.OC"
+      ],
+      "published": "2026-03-21T06:55:50+00:00",
+      "link": "https://arxiv.org/pdf/2603.20684v1",
+      "tags": [
+        "query:PHM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "nonlinear time-series prediction and load forecasting",
+      "llm_evidence_cn": "非线性时间序列预测与负荷预测",
+      "llm_evidence": "非线性时间序列预测与负荷预测",
+      "canonical_evidence": "非线性时间序列预测与负荷预测",
+      "llm_tldr_en": "Proposes centrality-based pruning for Echo State Networks to improve time-series prediction efficiency.",
+      "llm_tldr_cn": "提出基于中心性的回声状态网络剪枝方法，提高时间序列预测效率。",
+      "llm_tldr": "提出基于中心性的回声状态网络剪枝方法，提高时间序列预测效率。",
+      "llm_tags": [
+        "query:rul:composite"
+      ],
+      "matched_query_tag": "query:rul:composite",
+      "matched_query_text": "Papers central to 剩余寿命预测和旋转机械设备剩余寿命预测, especially work that connects or combines: Remaining Useful Life (RUL) prediction methods; Health monitoring and RUL for rotating machinery; Remaining useful life prediction for rolling element bearings; Deep learning architectures for RUL estimation; State of the art methods for remaining useful life prediction of rotating machinery; Deep learning based RUL estimation for industrial bearings and motors; Data driven vs physics informed models for RUL prediction; Real time health assessment and RUL forecasting for rotating components.",
+      "matched_requirement_id": "req-composite-rul",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.22586v1",
+      "title": "A Foundation Model for Instruction-Conditioned In-Context Time Series Tasks",
+      "abstract": "In-context learning (ICL) allows a model to adapt at inference time by conditioning on examples rather than updating parameters. Existing time-series foundation models use implicit positional context, retrieval, or task-specific objectives, but rarely explicit instruction-conditioned demonstrations. We present a foundation model for instruction-conditioned in-context time-series tasks based on a quantile-regression T5 encoder-decoder. Historical examples and queries are encoded with a structured tokenization scheme that marks target series, covariates, context, and task-specific future information. A hierarchical Transformer with per-example encoding, example-level fusion, and cross-example attention conditions decoding on demonstration pairs, enabling forecasting and related tasks without task-specific fine-tuning. We train on large-scale real and synthetic time series using supervised forecasting plus self-supervised tasks, including imputation, reconstruction, classification, anomaly detection, and source demixing. This multi-task training learns a distribution over task mappings and improves adaptation to local structure at inference time. Across diverse datasets, frequencies, and horizons, our method outperforms strong foundation baselines on point and probabilistic forecasting benchmarks, including fev-bench and GIFT-Eval, while remaining competitive on classification and anomaly detection.",
+      "authors": [
+        "Anish Saha",
+        "Konstantin Shmakov"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-03-23T21:24:41+00:00",
+      "link": "https://arxiv.org/pdf/2603.22586v1",
+      "tags": [
+        "keyword:PHM",
+        "query:PHM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Foundation model for in-context time series tasks including future information prediction",
+      "llm_evidence_cn": "用于包含未来信息预测的上下文时间序列任务的基础模型",
+      "llm_evidence": "用于包含未来信息预测的上下文时间序列任务的基础模型",
+      "canonical_evidence": "用于包含未来信息预测的上下文时间序列任务的基础模型",
+      "llm_tldr_en": "A foundation model for time-series tasks using in-context learning to adapt to various forecasting scenarios.",
+      "llm_tldr_cn": "一种基于上下文学习的时间序列任务基础模型，可适应多种预测场景。",
+      "llm_tldr": "一种基于上下文学习的时间序列任务基础模型，可适应多种预测场景。",
+      "llm_tags": [
+        "query:rul:composite"
+      ],
+      "matched_query_tag": "query:rul:composite",
+      "matched_query_text": "Papers central to 剩余寿命预测和旋转机械设备剩余寿命预测, especially work that connects or combines: Remaining Useful Life (RUL) prediction methods; Health monitoring and RUL for rotating machinery; Remaining useful life prediction for rolling element bearings; Deep learning architectures for RUL estimation; State of the art methods for remaining useful life prediction of rotating machinery; Deep learning based RUL estimation for industrial bearings and motors; Data driven vs physics informed models for RUL prediction; Real time health assessment and RUL forecasting for rotating components.",
+      "matched_requirement_id": "req-composite-rul",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.22978v1",
+      "title": "JFTA-Bench: Evaluate LLM's Ability of Tracking and Analyzing Malfunctions Using Fault Trees",
+      "abstract": "In the maintenance of complex systems, fault trees are used to locate problems and provide targeted solutions. To enable fault trees stored as images to be directly processed by large language models, which can assist in tracking and analyzing malfunctions, we propose a novel textual representation of fault trees. Building on it, we construct a benchmark for multi-turn dialogue systems that emphasizes robust interaction in complex environments, evaluating a model's ability to assist in malfunction localization, which contains $3130$ entries and $40.75$ turns per entry on average. We train an end-to-end model to generate vague information to reflect user behavior and introduce long-range rollback and recovery procedures to simulate user error scenarios, enabling assessment of a model's integrated capabilities in task tracking and error recovery, and Gemini 2.5 pro archives the best performance.",
+      "authors": [
+        "Yuhui Wang",
+        "Zhixiong Yang",
+        "Ming Zhang",
+        "Shihan Dou",
+        "Zhiheng Xi",
+        "Enyu Zhou",
+        "Senjie Jin",
+        "Yujiong Shen",
+        "Dingwei Zhu",
+        "Yi Dong",
+        "Tao Gui",
+        "Qi Zhang",
+        "Xuanjing Huang"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-03-24T09:13:43+00:00",
+      "link": "https://arxiv.org/pdf/2603.22978v1",
+      "tags": [
+        "keyword:PHM",
+        "query:PHM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "fault trees for malfunction localization and tracking",
+      "llm_evidence_cn": "用于故障定位与追踪的故障树分析",
+      "llm_evidence": "用于故障定位与追踪的故障树分析",
+      "canonical_evidence": "用于故障定位与追踪的故障树分析",
+      "llm_tldr_en": "A benchmark for evaluating LLMs in tracking and analyzing malfunctions using fault trees.",
+      "llm_tldr_cn": "一个用于评估大模型利用故障树追踪和分析故障能力的基准测试。",
+      "llm_tldr": "一个用于评估大模型利用故障树追踪和分析故障能力的基准测试。",
+      "llm_tags": [
+        "query:phm:composite"
+      ],
+      "matched_query_tag": "query:phm:composite",
+      "matched_query_text": "Papers central to 同时涉及故障诊断与剩余寿命预测的研究论文, especially work that connects or combines: joint modeling of diagnosis and prognosis; multi-task learning for diagnosis and RUL; simultaneous fault diagnosis and remaining useful life prediction; integrated approach for machinery fault diagnosis and prognosis; multi task deep learning for PHM applications; joint diagnosis and RUL estimation research papers.",
+      "matched_requirement_id": "req-composite-phm",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.23039v1",
+      "title": "Rao-Blackwellized Stein Gradient Descent for Joint State-Parameter Estimation",
+      "abstract": "We present a filtering framework for online joint state estimation and parameter identification in nonlinear, time-varying systems. The algorithm uses Rao-Blackwellization technique to infer joint state-parameter posteriors efficiently. In particular, conditional state distributions are computed analytically via Kalman filtering, while model parameters including process and measurement noise covariances are approximated using particle-based Stein Variational Gradient Descent (SVGD), enabling stable real-time inference. We prove a theoretical consistency result by bounding the impact of the SVGD approximated parameter posterior on state estimates, relating the divergence between the true and approximate parameter posteriors to the total variation distance between the resulting state marginals. Performance of the proposed filter is validated on two case studies: a bioreactor with Haldane kinetics and a neural-network-augmented dynamic system. The latter demonstrates the filter's capacity for online neural network training within a dynamical model, showcasing its potential for fully adaptive, data-driven system identification.",
+      "authors": [
+        "Milad Banitalebi Dehkordi",
+        "Manas Mejari",
+        "Dario Piga"
+      ],
+      "primary_category": "eess.SY",
+      "categories": [
+        "eess.SY"
+      ],
+      "published": "2026-03-24T10:22:12+00:00",
+      "link": "https://arxiv.org/pdf/2603.23039v1",
+      "tags": [
+        "keyword:PHM",
+        "query:PHM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "joint state estimation and parameter identification in nonlinear systems",
+      "llm_evidence_cn": "非线性系统中的联合状态估计与参数识别",
+      "llm_evidence": "非线性系统中的联合状态估计与参数识别",
+      "canonical_evidence": "非线性系统中的联合状态估计与参数识别",
+      "llm_tldr_en": "A filtering framework for online joint state estimation and parameter identification.",
+      "llm_tldr_cn": "一种用于在线联合状态估计和参数识别的滤波框架。",
+      "llm_tldr": "一种用于在线联合状态估计和参数识别的滤波框架。",
+      "llm_tags": [
+        "query:phm"
+      ],
+      "matched_query_tag": "query:phm",
+      "matched_query_text": "joint modeling of diagnosis and prognosis",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.23450v1",
+      "title": "Information-Driven Active Perception for k-step Predictive Safety Monitoring",
+      "abstract": "This work studies the synthesis of active perception policies for predictive safety monitoring in partially observable stochastic systems. Operating under strict sensing and communication budgets, the proposed monitor dynamically schedules sensor queries to maximize information gain about the safety of future states. The underlying stochastic dynamics are captured by a labeled hidden Markov model (HMM), with safety requirements defined by a deterministic finite automaton (DFA). To enable active information acquisition, we introduce minimizing k-step Shannon conditional entropy of the safety of future states as a planning objective, under the constraint of a limited sensor query budget. Using observable operators, we derive an efficient algorithm to compute the k-step conditional entropy and analyze key properties of the conditional entropy gradient with respect to policy parameters. We validate the effectiveness of the method for predictive safety monitoring through a dynamic congestion game example.",
+      "authors": [
+        "Sumukha Udupa",
+        "Jie Fu"
+      ],
+      "primary_category": "eess.SY",
+      "categories": [
+        "eess.SY"
+      ],
+      "published": "2026-03-24T17:19:42+00:00",
+      "link": "https://arxiv.org/pdf/2603.23450v1",
+      "tags": [
+        "keyword:PHM",
+        "query:PHM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "predictive safety monitoring and future state forecasting",
+      "llm_evidence_cn": "预测性安全监控与未来状态预测",
+      "llm_evidence": "预测性安全监控与未来状态预测",
+      "canonical_evidence": "预测性安全监控与未来状态预测",
+      "llm_tldr_en": "Synthesizes active perception policies for k-step predictive safety monitoring in stochastic systems.",
+      "llm_tldr_cn": "合成了随机系统中k步预测性安全监控的主动感知策略。",
+      "llm_tldr": "合成了随机系统中k步预测性安全监控的主动感知策略。",
+      "llm_tags": [
+        "query:rul:composite"
+      ],
+      "matched_query_tag": "query:rul:composite",
+      "matched_query_text": "Papers central to 剩余寿命预测和旋转机械设备剩余寿命预测, especially work that connects or combines: Remaining Useful Life (RUL) prediction methods; Health monitoring and RUL for rotating machinery; Remaining useful life prediction for rolling element bearings; Deep learning architectures for RUL estimation; State of the art methods for remaining useful life prediction of rotating machinery; Deep learning based RUL estimation for industrial bearings and motors; Data driven vs physics informed models for RUL prediction; Real time health assessment and RUL forecasting for rotating components.",
+      "matched_requirement_id": "req-composite-rul",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}
