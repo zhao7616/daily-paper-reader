@@ -1,0 +1,280 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-03-27T20:07:36.120090+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 1,
+    "deep_cap": 6,
+    "deep_selected": 1,
+    "quick_candidates": 6,
+    "quick_skim_target": 11,
+    "quick_selected": 6
+  },
+  "deep_dive": [
+    {
+      "id": "2603.24903v1",
+      "title": "Self-Supervised Learning for Knee Osteoarthritis: Diagnostic Limitations and Prognostic Value of Uncurated Hospital Data",
+      "abstract": "This study assesses whether self-supervised learning (SSL) improves knee osteoarthritis (OA) modeling for diagnosis and prognosis relative to ImageNet-pretrained initialization. We compared (i) image-only SSL pretrained on knee radiographs from the OAI, MOST, and NYU cohorts, and (ii) multimodal image-text SSL pretrained on uncurated hospital knee radiographs paired with radiologist impressions. For diagnostic Kellgren-Lawrence (KL) grade prediction, SSL offered mixed results. While image-only SSL improved accuracy during linear probing (frozen encoder), it did not outperform ImageNet pretraining during full fine-tuning. Similarly, multimodal SSL failed to improve grading performance. We attribute this to severe bias in the uncurated hospital pretraining corpus (93% estimated KL grade 3), which limited alignment with the balanced diagnostic task. In contrast, this same multimodal initialization significantly improved prognostic modeling. It outperformed ImageNet baselines in predicting 4-year structural incidence and progression, including on external validation (MOST AUROC: 0.701 vs. 0.599 at 10% labeled data). Overall, while uncurated hospital image-text data may be ineffective for learning diagnosis due to severity bias, it provides a strong signal for prognostic modeling when the downstream task aligns with pretraining data distribution",
+      "authors": [
+        "Haresh Rengaraj Rajamohan",
+        "Yuxuan Chen",
+        "Kyunghyun Cho",
+        "Cem M. Deniz"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-03-26T00:33:55+00:00",
+      "link": "https://arxiv.org/pdf/2603.24903v1",
+      "tags": [
+        "keyword:PHM",
+        "query:PHM"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "modeling for diagnosis and prognosis using self-supervised learning",
+      "llm_evidence_cn": "使用自监督学习进行诊断和预后建模",
+      "llm_evidence": "使用自监督学习进行诊断和预后建模",
+      "canonical_evidence": "使用自监督学习进行诊断和预后建模",
+      "llm_tldr_en": "This study evaluates self-supervised learning for joint diagnosis and prognosis in knee osteoarthritis.",
+      "llm_tldr_cn": "本研究评估了自监督学习在膝关节骨性关节炎联合诊断和预后中的价值。",
+      "llm_tldr": "本研究评估了自监督学习在膝关节骨性关节炎联合诊断和预后中的价值。",
+      "llm_tags": [
+        "query:phm"
+      ],
+      "matched_query_tag": "query:phm",
+      "matched_query_text": "joint modeling of diagnosis and prognosis",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2603.22885v2",
+      "title": "A Task Decomposition Framework for Aircraft Health Diagnosis: Balancing Safety and Efficiency via Heterogeneous Long-Micro Scale Cascading",
+      "abstract": "Real-world aircraft health diagnosis requires balancing accuracy with computational constraints under extreme class imbalance and environmental uncertainty. This paper presents an engineering application of heterogeneous task decomposition for deployable intelligent fault diagnosis. The proposed Long-Micro Scale Diagnostician (LMSD) explicitly decouples global anomaly detection (full-sequence attention) from micro-scale fault classification (restricted receptive fields), resolving the receptive field paradox while minimizing training overhead. A knowledge distillation-based interpretability module provides physically traceable explanations for safety-critical validation. Experiments on the public National General Aviation Flight Information Database (NGAFID) dataset (28,935 flights, 36 categories) demonstrate 4-8% improvement in safety-critical metrics (MCWPM) with 4.2 times training acceleration and 46\\% model compression compared to end-to-end baselines, substantiating deployability in resource-constrained aviation environments.",
+      "authors": [
+        "Xinhang Chen",
+        "Zhihuan Wei",
+        "Yang Hu",
+        "Zhiguo Zeng",
+        "Kang Zeng",
+        "Wei Wang"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-03-24T07:35:23+00:00",
+      "link": "https://arxiv.org/pdf/2603.22885v2",
+      "tags": [
+        "keyword:PHM",
+        "query:PHM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Intelligent fault diagnosis for aircraft health monitoring using task decomposition",
+      "llm_evidence_cn": "基于任务分解的飞机健康监测智能故障诊断",
+      "llm_evidence": "基于任务分解的飞机健康监测智能故障诊断",
+      "canonical_evidence": "基于任务分解的飞机健康监测智能故障诊断",
+      "llm_tldr_en": "Proposes a task decomposition framework for aircraft fault diagnosis to balance accuracy and efficiency.",
+      "llm_tldr_cn": "提出一种飞机故障诊断任务分解框架，平衡了诊断准确性与计算效率。",
+      "llm_tldr": "提出一种飞机故障诊断任务分解框架，平衡了诊断准确性与计算效率。",
+      "llm_tags": [
+        "query:phm"
+      ],
+      "matched_query_tag": "query:phm",
+      "matched_query_text": "integrated approach for machinery fault diagnosis and prognosis",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.21606v1",
+      "title": "mSFT: Addressing Dataset Mixtures Overfiting Heterogeneously in Multi-task SFT",
+      "abstract": "Current language model training commonly applies multi-task Supervised Fine-Tuning (SFT) using a homogeneous compute budget across all sub-datasets. This approach is fundamentally sub-optimal: heterogeneous learning dynamics cause faster-learning tasks to overfit early while slower ones remain under-fitted. To address this, we introduce mSFT, an iterative, overfitting-aware search algorithm for multi-task data mixtures. mSFT trains the model on an active mixture, identifies and excludes the earliest overfitting sub-dataset, and reverts to that specific optimal checkpoint before continuing. Extensive evaluations demonstrate that mSFT consistently outperforms 4 baselines across 10 benchmarks and 6 base models. Further analysis confirms mSFT maintains robust gains across diverse dataset sizes, task granularities, and is insensitive to its single new hyperparameter (compute budget). Notably, at low compute budget, mSFT can improve performance while lowering training FLOPs. Ultimately, mSFT establishes a practical overfitting-aware algorithm for multi-task SFT that maximizes the potential of models across diverse data mixtures.",
+      "authors": [
+        "Woosung Koh",
+        "Jeyoung Jeon",
+        "Youngjin Song",
+        "Yujin Cheon",
+        "Soowon Oh",
+        "Jaehyeong Choi",
+        "Se-Young Yun"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "published": "2026-03-23T06:01:51+00:00",
+      "link": "https://arxiv.org/pdf/2603.21606v1",
+      "tags": [
+        "keyword:PHM",
+        "query:PHM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "addressing overfitting in multi-task supervised fine-tuning",
+      "llm_evidence_cn": "解决多任务监督微调中的过拟合问题",
+      "llm_evidence": "解决多任务监督微调中的过拟合问题",
+      "canonical_evidence": "解决多任务监督微调中的过拟合问题",
+      "llm_tldr_en": "mSFT optimizes multi-task learning mixtures, relevant for balancing joint diagnosis and prognosis tasks.",
+      "llm_tldr_cn": "mSFT优化了多任务学习混合比例，有助于平衡联合诊断和预后任务的训练。",
+      "llm_tldr": "mSFT优化了多任务学习混合比例，有助于平衡联合诊断和预后任务的训练。",
+      "llm_tags": [
+        "query:phm"
+      ],
+      "matched_query_tag": "query:phm",
+      "matched_query_text": "multi task deep learning for PHM applications",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.22845v1",
+      "title": "DROP: Distributionally Robust Optimization for Multi-task Learning in Graphical Models",
+      "abstract": "Gaussian Graphical Models (GGMs) are widely used to infer conditional dependence structures in high-dimensional data. However, standard precision matrix estimators are highly sensitive to data contamination, such as extreme outliers and heavy-tailed noise. In this paper, we propose DROP (Distributionally Robust Optimization), a robust estimation method formulated within a multi-task nodewise regression framework. The proposed estimator enforces structural sparsity while resisting the influence of corrupted observations. Theoretically, we establish error bounds for the DROP estimator under general contamination. Through extensive high-dimensional simulations, we demonstrate that DROP consistently controls the rate of false positive edges and outperforms conventional non-robust estimators when data deviate from standard Gaussian assumptions. Furthermore, in a functional MRI (fMRI) application, DROP maintains a stable graph structure and preserves network modularity even when subjected to severe data perturbations, whereas competing methods yield excessively dense networks. To facilitate reproducible research, the DROP R package will be made publicly available on GitHub.",
+      "authors": [
+        "Canruo Shen",
+        "Xintong Ji",
+        "Qiong Li",
+        "Wenzhi Yang",
+        "Xiaoping Shi"
+      ],
+      "primary_category": "stat.AP",
+      "categories": [
+        "stat.AP",
+        "stat.ME"
+      ],
+      "published": "2026-03-24T06:33:55+00:00",
+      "link": "https://arxiv.org/pdf/2603.22845v1",
+      "tags": [
+        "keyword:PHM",
+        "query:PHM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "robust multi-task learning framework",
+      "llm_evidence_cn": "鲁棒多任务学习框架",
+      "llm_evidence": "鲁棒多任务学习框架",
+      "canonical_evidence": "鲁棒多任务学习框架",
+      "llm_tldr_en": "Proposes a distributionally robust optimization method for multi-task learning in graphical models.",
+      "llm_tldr_cn": "提出了一种用于图模型多任务学习的分布鲁棒优化方法。",
+      "llm_tldr": "提出了一种用于图模型多任务学习的分布鲁棒优化方法。",
+      "llm_tags": [
+        "query:phm"
+      ],
+      "matched_query_tag": "query:phm",
+      "matched_query_text": "multi task deep learning for PHM applications",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.23919v1",
+      "title": "Uncertainty-Aware Vision-based Risk Object Identification via Conformal Risk Tube Prediction",
+      "abstract": "We study object importance-based vision risk object identification (Vision-ROI), a key capability for hazard detection in intelligent driving systems. Existing approaches make deterministic decisions and ignore uncertainty, which could lead to safety-critical failures. Specifically, in ambiguous scenarios, fixed decision thresholds may cause premature or delayed risk detection and temporally unstable predictions, especially in complex scenes with multiple interacting risks. Despite these challenges, current methods lack a principled framework to model risk uncertainty jointly across space and time. We propose Conformal Risk Tube Prediction, a unified formulation that captures spatiotemporal risk uncertainty, provides coverage guarantees for true risks, and produces calibrated risk scores with uncertainty estimates. To conduct a systematic evaluation, we present a new dataset and metrics probing diverse scenario configurations with multi-risk coupling effects, which are not supported by existing datasets. We systematically analyze factors affecting uncertainty estimation, including scenario variations, per-risk category behavior, and perception error propagation. Our method delivers substantial improvements over prior approaches, enhancing vision-ROI robustness and downstream performance, such as reducing nuisance braking alerts. For more qualitative results, please visit our project webpage: https://hcis-lab.github.io/CRTP/",
+      "authors": [
+        "Kai-Yu Fu",
+        "Yi-Ting Chen"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-03-25T04:13:42+00:00",
+      "link": "https://arxiv.org/pdf/2603.23919v1",
+      "tags": [
+        "keyword:PHM",
+        "query:PHM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "models risk uncertainty jointly across space and time",
+      "llm_evidence_cn": "跨时空联合建模风险不确定性",
+      "llm_evidence": "跨时空联合建模风险不确定性",
+      "canonical_evidence": "跨时空联合建模风险不确定性",
+      "llm_tldr_en": "Proposes a unified formulation for spatiotemporal risk uncertainty in intelligent driving systems.",
+      "llm_tldr_cn": "为智能驾驶系统中的时空风险不确定性提出了一种统一的公式化方法。",
+      "llm_tldr": "为智能驾驶系统中的时空风险不确定性提出了一种统一的公式化方法。",
+      "llm_tags": [
+        "query:phm:composite"
+      ],
+      "matched_query_tag": "query:phm:composite",
+      "matched_query_text": "Papers central to 同时涉及故障诊断与剩余寿命预测的研究论文, especially work that connects or combines: joint modeling of diagnosis and prognosis; multi-task learning for diagnosis and RUL; simultaneous fault diagnosis and remaining useful life prediction; integrated approach for machinery fault diagnosis and prognosis; multi task deep learning for PHM applications; joint diagnosis and RUL estimation research papers.",
+      "matched_requirement_id": "req-composite-phm",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.25103v1",
+      "title": "Layer-Specific Lipschitz Modulation for Fault-Tolerant Multimodal Representation Learning",
+      "abstract": "Modern multimodal systems deployed in industrial and safety-critical environments must remain reliable under partial sensor failures, signal degradation, or cross-modal inconsistencies. This work introduces a mathematically grounded framework for fault-tolerant multimodal representation learning that unifies self-supervised anomaly detection and error correction within a single architecture. Building upon a theoretical analysis of perturbation propagation, we derive Lipschitz- and Jacobian-based criteria that determine whether a neural operator amplifies or attenuates localized faults. Guided by this theory, we propose a two-stage self-supervised training scheme: pre-training a multimodal convolutional autoencoder on clean data to preserve localized anomaly signals in the latent space, and expanding it with a learnable compute block composed of dense layers for correction and contrastive objectives for anomaly identification. Furthermore, we introduce layer-specific Lipschitz modulation and gradient clipping as principled mechanisms to control sensitivity across detection and correction modules. Experimental results on multimodal fault datasets demonstrate that the proposed approach improves both anomaly detection accuracy and reconstruction under sensor corruption. Overall, this framework bridges the gap between analytical robustness guarantees and practical fault-tolerant multimodal learning.",
+      "authors": [
+        "Diyar Altinses",
+        "Andreas Schwung"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "published": "2026-03-26T07:22:51+00:00",
+      "link": "https://arxiv.org/pdf/2603.25103v1",
+      "tags": [
+        "keyword:PHM",
+        "query:PHM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "unifies self-supervised anomaly detection and error correction in industrial environments",
+      "llm_evidence_cn": "在工业环境中统一自监督异常检测与错误纠正",
+      "llm_evidence": "在工业环境中统一自监督异常检测与错误纠正",
+      "canonical_evidence": "在工业环境中统一自监督异常检测与错误纠正",
+      "llm_tldr_en": "A fault-tolerant multimodal representation learning framework for industrial and safety-critical environments.",
+      "llm_tldr_cn": "一种用于工业和安全关键环境的容错多模态表示学习框架。",
+      "llm_tldr": "一种用于工业和安全关键环境的容错多模态表示学习框架。",
+      "llm_tags": [
+        "query:phm:composite"
+      ],
+      "matched_query_tag": "query:phm:composite",
+      "matched_query_text": "Papers central to 同时涉及故障诊断与剩余寿命预测的研究论文, especially work that connects or combines: joint modeling of diagnosis and prognosis; multi-task learning for diagnosis and RUL; simultaneous fault diagnosis and remaining useful life prediction; integrated approach for machinery fault diagnosis and prognosis; multi task deep learning for PHM applications; joint diagnosis and RUL estimation research papers.",
+      "matched_requirement_id": "req-composite-phm",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.25166v1",
+      "title": "Efficient compressive sensing for machinery vibration signals",
+      "abstract": "Mechanical vibration monitoring often requires high sampling rates and generates large data volumes, posing challenges for storage, transmission, and power efficiency. Compressive Sensing (CS) offers a promising approach to overcome these constraints by exploiting signal sparsity to enable sub-Nyquist acquisition and efficient reconstruction. This study presents a comprehensive comparative analysis of the key components of the CS framework: sparse basis, measurement matrix, and reconstruction algorithm for machinery vibration signals. In addition, a hardware-efficient measurement matrix, the Wang matrix, originally developed for image compression, is introduced and evaluated for the first time in this context. Experimental assessment using the HUMS2023 and the CETIM gearbox datasets demonstrates that this matrix achieves superior reconstruction quality, with higher SNR, compared to conventional Gaussian and Bernoulli matrices, especially at high compression ratios.",
+      "authors": [
+        "Imen Tounsi",
+        "Fadi Karkafi",
+        "Mohammed El Badaoui",
+        "François Guillet"
+      ],
+      "primary_category": "eess.SP",
+      "categories": [
+        "eess.SP"
+      ],
+      "published": "2026-03-26T08:34:52+00:00",
+      "link": "https://arxiv.org/pdf/2603.25166v1",
+      "tags": [
+        "query:PHM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "compressive sensing for machinery vibration signals",
+      "llm_evidence_cn": "机械振动信号的压缩感知",
+      "llm_evidence": "机械振动信号的压缩感知",
+      "canonical_evidence": "机械振动信号的压缩感知",
+      "llm_tldr_en": "Evaluates compressive sensing for efficient acquisition of machinery vibration data.",
+      "llm_tldr_cn": "评估用于高效采集机械振动数据的压缩感知技术。",
+      "llm_tldr": "评估用于高效采集机械振动数据的压缩感知技术。",
+      "llm_tags": [
+        "query:rul:composite"
+      ],
+      "matched_query_tag": "query:rul:composite",
+      "matched_query_text": "Papers central to 剩余寿命预测和旋转机械设备剩余寿命预测, especially work that connects or combines: Remaining Useful Life (RUL) prediction methods; Health monitoring and RUL for rotating machinery; Remaining useful life prediction for rolling element bearings; Deep learning architectures for RUL estimation; State of the art methods for remaining useful life prediction of rotating machinery; Deep learning based RUL estimation for industrial bearings and motors; Data driven vs physics informed models for RUL prediction; Real time health assessment and RUL forecasting for rotating components.",
+      "matched_requirement_id": "req-composite-rul",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}

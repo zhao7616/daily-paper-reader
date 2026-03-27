@@ -1,0 +1,2194 @@
+Title: DROP: Distributionally Robust Optimization for Multi-task Learning in Graphical Models
+
+URL Source: https://arxiv.org/pdf/2603.22845v1
+
+Published Time: Wed, 25 Mar 2026 00:49:31 GMT
+
+Number of Pages: 42
+
+Markdown Content:
+DROP: Distributionally Robust Optimization 
+
+# DROP: Distributionally Robust Optimization for Multi-task Learning in Graphical Models 
+
+Canruo Shen canruo.shen@ubc.ca 
+
+Department of Computer Science, Mathematics, Physics and Statistics University of British Columbia Kelowna, V1V 1V7, Canada 
+
+Xintong Ji xintong.ji@connect.polyu.hk 
+
+Department of Data Science and Artificial Intelligence The Hong Kong Polytechnic University Hung Hom, Kowloon, Hong Kong SAR, China 
+
+Qiong Li qiongli@bnbu.edu.cn 
+
+Guangdong Provincial Key Laboratory of Interdisciplinary Research and Application for Data Sci-ence Beijing Normal-Hong Kong Baptist University Zhuhai, 519087, China 
+
+Wenzhi Yang wzyang@ahu.edu.cn 
+
+School of Big Data and Statistics Anhui University Hefei, 230601, China 
+
+Xiaoping Shi xiaoping.shi@ubc.ca 
+
+Department of Computer Science, Mathematics, Physics and Statistics University of British Columbia Kelowna, V1V 1V7, Canada 
+
+Editor: My editor 
+
+Abstract 
+
+Gaussian Graphical Models (GGMs) are widely used to infer conditional dependence struc-tures in high-dimensional data. However, standard precision matrix estimators are highly sensitive to data contamination, such as extreme outliers and heavy-tailed noise. In this paper, we propose DROP (Distributionally Robust Optimization), a robust estimation method formulated within a multi-task nodewise regression framework. The proposed es-timator enforces structural sparsity while resisting the influence of corrupted observations. Theoretically, we establish error bounds for the DROP estimator under general contam-ination. Through extensive high-dimensional simulations, we demonstrate that DROP consistently controls the rate of false positive edges and outperforms conventional non-robust estimators when data deviate from standard Gaussian assumptions. Furthermore, in a functional MRI (fMRI) application, DROP maintains a stable graph structure and preserves network modularity even when subjected to severe data perturbations, whereas competing methods yield excessively dense networks. To facilitate reproducible research, the DROP R package will be made publicly available on GitHub. 
+
+Keywords: Gaussian graphical model, Distributionally robust optimization, Nodewise regression, Multi-task learning, Error bounds, fMRI, Precision matrix, High-dimensional 1
+
+> arXiv:2603.22845v1 [stat.AP] 24 Mar 2026 Shen, Ji, Li, Yang, and Shi
+
+·
+
+1 Introduction 
+
+Data-driven decision-making frameworks play a central role in a wide range of domains, including machine learning (Sinha et al., 2017), finance (Zhu and Fukushima, 2009), opera-tions research (Goh and Sim, 2010), control (Van Parys et al., 2016), and statistics (Duchi et al., 2021). In many of these settings, the parameters governing the decision problem are subject to substantial uncertainty arising from limited sample sizes, measurement noise, or predictive inaccuracies (Rahimian and Mehrotra, 2019). Such uncertainty requires meth-ods that remain reliable even when the data-generating distribution deviates from nominal assumptions. To address this challenge, Distributionally Robust Optimization (DROP) pro-vides a systematic framework by optimizing performance under the worst-case distribution within a prescribed ambiguity set. In high-dimensional statistics, Gaussian graphical models (GGMs) are a standard tool for estimating graph structures. However, these models rely heavily on the assumption that the data follow a clean multivariate normal distribution. In practice, real-world data often contain outliers, heavy-tailed errors, or leverage points. When faced with these common anomalies, traditional methods like the Graphical Lasso (GLASSO) (Friedman et al., 2008) tend to break down, producing overly dense graphs with many false positive edges. To estimate more reliable graph structures, researchers have applied the DROP framework to GGMs (Cisneros-Velarde et al., 2020; Nguyen et al., 2022), though these applications have focused on estimating the entire precision matrix globally. Instead of global estimation, an alternative approach is to recast the precision matrix estimation into a series of node-wise regression tasks (Meinshausen and B¨ uhlmann, 2006). Unlike classical approaches that estimate each node’s neighborhood independently, aggre-gating these objectives through scalarization (Boyd and Vandenberghe, 2004) defines a single joint optimization problem. This formulation explicitly casts GGM estimation as a 
+
+multi-task learning problem (Zhang and Li, 2025), where each node’s regression represents a distinct but interrelated task. However, integrating DROP into this multi-task structure re-veals two critical theoretical gaps. First, while Wasserstein DROP (Mohajerin Esfahani and Kuhn, 2018) has been successfully used to robustify single-task regression models against data perturbations (Blanchet et al., 2019), its extension to a dependent multi-task structure remains largely unexplored. Second, existing statistical guarantees for multi-task regression are not formulated under DROP framework. In particular, Lounici et al. (2011) assume that the individual tasks are independent. For node-wise GGMs, this assumption fails because the regression tasks are inherently dependent on one another. As a result, current penalties for node-wise GGMs are often chosen out of convenience or empirical observation, rather than being derived from the DROP framework. To illustrate the advantage of our approach, Figure 1 presents a simulated motivating example on a sparse graph ( p = 10 , n = 5000); detailed data generation settings are deferred to Section 6. Panel (A) displays the true conditional dependence structure. When the ob-servations are perturbed by heavy-tailed noise or leverage points, the standard GLASSO estimator exhibits severe sensitivity, yielding overly dense graphs with a substantial num-ber of false positive edges (Panels (C) and (E)). In contrast, our proposed DROP estimator 
+
+> 2
+
+DROP: Distributionally Robust Optimization 
+
+(Panels B and D) accommodates these distributional shifts. Through its robust regulariza-tion, DROP recovers the underlying sparse structure without introducing additional false positive connections. 12345678 910     
+
+> (A) True Graph
+> 12345678910
+> (B) Drop (Heavy−tailed Noise)
+> 12345678910
+> (C) Glasso (Heavy−tailed Noise)
+> 12345678910
+> (D) Drop (Leverage Points)
+> 12345678910
+> (E) Glasso (Leverage Points)
+
+Figure 1: A motivating example illustrating the impact of data contamination on a sparse graph with  
+
+> p= 10 nodes. (A) The true conditional dependence structure. (B) and (D): Graphs estimated by the proposed DROP method under heavy-tailed noise and leverage points, respectively. (C) and (E): Graphs estimated by the standard GLASSO method under the same contamination scenarios, showing an increase in false positive edges.
+
+This example highlights the critical need for robust estimation procedures that can directly account for distributional uncertainty and maintain structural integrity under data contamination. To address the aforementioned gaps, our research investigates three central questions: (i) How can Wasserstein DROP principles and the multi-task nature of node-wise GGM estimation be combined to create a generalized, robust estimator? (ii) What are the fundamental statistical properties and convergence rates of parameter estimation when extending the DROP framework from single-task regression to multi-task learning setups? (iii) Does this theoretical framework translate into practical computational scalability and better empirical recovery in high-dimensional settings? In this paper, we answer these questions and make the following primary contributions: 
+
+• The DROP Estimator: We propose the DROP method, which leverages scalariza-tion to aggregate node-wise regressions into a joint multi-task learning framework. By applying Wasserstein DROP to this unified objective, the adaptive robust regularizer is systematically derived rather than chosen empirically. 
+
+• Theoretical Foundation: We establish the framework for deriving specific penalty functions that naturally arise from the DROP formulation of regression loss functions. We prove error bounds for these estimators in both single-task and multi-task learning setups with high probability. 
+
+• Empirical Performance and R Package: Through extensive simulations and an application to real-world functional MRI (fMRI) data, we demonstrate that DROP maintains robust graph recovery and computational efficiency under severe data con-tamination. To facilitate reproducibility, the proposed method is implemented in the R package DROP , which will be made publicly available on GitHub. The rest of the paper is organized as follows: Section 2 provides the background on Wasserstein DROP and a review of existing GGM estimators. Section 3 introduces the 
+
+3Shen, Ji, Li, Yang, and Shi 
+
+proposed DROP methodology for GGMs, detailing the derivation of the robust penalty. Section 4 establishes the error bounds for parameter estimators under the DROP framework in both single-task and multi-task learning setups. Section 5 details the accompanying optimization algorithm. Section 6 presents our simulation studies, followed by a real-world fMRI data application in Section 7. Finally, we conclude with a discussion in Section 8. The detailed proofs of the theorems, technical lemmas, and additional simulation results are provided in the Appendix. 
+
+2 Background and Related Work 
+
+2.1 Gaussian Graphical Model Estimation 
+
+Gaussian Graphical Models (GGMs) offer a powerful way to visualize and model conditional dependence relationships among a set of p variables. We assume these variables, denoted as the random vector X = ( X1, . . . , X p)⊤, follow a p-dimensional multivariate Gaussian distribution, N (0, Σ), where Σ ∈ Rp×p is the covariance matrix. Let the n × p-dimensional data matrix X contain n independent observations of X, so that the columns Xi correspond for all i ∈ { 1, . . . , p } to the vector of n independent observations of Xi. We assume the data matrix X has been centred so that each column has zero mean. The empirical covariance matrix corresponding to Σ is S := 1 
+
+> n
+
+X⊤X.In a GGM, the relationships between variables are represented by an undirected graph 
+
+G = ( V, E ), where the nodes V = {1, . . . , p } correspond to the variables. The absence of an edge between nodes i and j in the edge set E signifies the conditional indepen-dence of variables Xi and Xj given all other variables. The core theoretical relationship is formalized through the precision matrix, also known as the inverse covariance matrix, 
+
+K := Σ −1 ∈ Rp×p. Specifically, for variables X following a N (0, Σ) distribution, Kij = 0 if and only if Xi and Xj (i̸ = j) are conditionally independent given the remaining variables. Consequently, estimating the sparse graph structure is equivalent to estimating a sparse precision matrix K. This task becomes challenging in high-dimensional settings, where the number of variables p may exceed the sample size n. In such cases, the sample covariance matrix S is singular and cannot be directly inverted. Regularization techniques are thus essential to obtain stable and sparse estimates of K.Our discussion focuses primarily on frequentist methods for GGMs. From a method-ological viewpoint, existing frequentist approaches to sparse Gaussian graphical model esti-mation can be grouped into two complementary families (Fan et al., 2016): global penalized likelihood estimators and column-wise precision matrix estimators. 
+
+2.1.1 Global penalized likelihood estimators 
+
+A major line of frequentist methodology for GGMs is based on penalized likelihood esti-mation. These approaches estimate the entire precision matrix K jointly by optimizing a global objective of the form ˆK = arg min 
+
+> K≻0
+
+n
+
+Q(S, K ) + Pen λ(K)
+
+o
+
+, (1) where S is the empirical covariance matrix, Q(S, K ) = − log det( K) + tr( SK ) denotes the Gaussian negative log-likelihood, and Pen λ(K) is a matrix-valued regularizer promoting 
+
+> 4DROP: Distributionally Robust Optimization
+
+sparsity. The Graphical Lasso (GLASSO) (Banerjee et al., 2008; Yuan and Lin, 2007; Fried-man et al., 2008) employs the elementwise ℓ1-penalty, Pen GLASSO  
+
+> λ
+
+(K) = λ∥K∥1, yielding the convex program ˆKGLASSO = arg min  
+
+> K≻0
+
+{− log det( K) + tr( SK ) + λ∥K∥1} . (2) This joint estimator differs from column-wise methods by enforcing global symmetry and positive definiteness throughout the optimization. Efficient block coordinate descent al-gorithms (Banerjee et al., 2008) have made GLASSO a standard benchmark for sparse precision matrix estimation. To mitigate estimation bias introduced by the ℓ1-penalty, subsequent work explored a range of non-convex regularizers, including early contributions by Lam and Fan (2009) and Johnson et al. (2012), as well as folded-concave penalties such as smoothly clipped absolute deviation (SCAD) (Fan and Li, 2001) and minimax concave penalty (MCP) (Zhang, 2010). In our setting, these non-convex penalties are applied elementwise to the off-diagonal entries Kij with i̸ = j of the precision matrix. For SCAD, with regularization parameter 
+
+λ > 0 and shape parameter a > 2 (often a = 3 .7), the contribution of an individual entry is pen SCAD  
+
+> λ
+
+(|Kij |) = 
+
+
+
+λ|Kij |, 0 ≤ | Kij | ≤ λ, 
+
+−| Kij |2 + 2 aλ |Kij | − λ2
+
+2( a − 1) , λ < |Kij | ≤ aλ, 
+
+(a + 1) λ2
+
+2 , |Kij | > aλ, 
+
+(3) so that the SCAD penalty functional on the precision matrix is Pen SCAD  
+
+> λ
+
+(K) = X
+
+> i̸=j
+
+pen SCAD  
+
+> λ
+
+(|Kij |).
+
+For MCP, with shape parameter a > 1, we similarly define the penalty pen MCP  
+
+> λ
+
+(|Kij |) = 
+
+
+
+λ|Kij | − |Kij |2
+
+2a , 0 ≤ | Kij | ≤ aλ, aλ 2
+
+2 , |Kij | > aλ, 
+
+(4) and the corresponding matrix-valued penalty Pen MCP  
+
+> λ
+
+(K) = X
+
+> i̸=j
+
+pen MCP  
+
+> λ
+
+(|Kij |).
+
+These closed-form piecewise representations are obtained by integrating the standard SCAD and MCP derivatives and are given by Breheny and Huang (2011). This unified penalized-likelihood framework supports a wide class of regularizers, enabling additional structure, such as robustness considerations, to be incorporated through the design of Pen λ(·). 
+
+> 5Shen, Ji, Li, Yang, and Shi
+
+2.1.2 Column-wise precision matrix estimators 
+
+Beyond global likelihood methods, an alternative line of work constructs the precision matrix column by column. Column-wise methods can be broadly grouped into two families: (i) graphical Dantzig selector (Candes and Tao, 2007) type estimators, and (ii) Lasso type regression approaches. We first discuss the former category. Cai et al. (2011) proposed the CLIME estimator, which directly estimates the i-th column of precision matrix K, denoted by Ki, via ˆKCLIME  
+
+> i
+
+= arg min 
+
+> Ki
+
+∥Ki∥1 subject to ∥SK i − ei∥∞ ≤ ζi, i = 1 , . . . , p, (5) where ei is the i-th canonical vector and ζi is a tuning parameter. Cai et al. (2011) show that this convex program can be reformulated as a linear optimization problem. After obtaining ˆK, a secondary thresholding step is typically applied to recover the edge set of the underlying graph. In subsequent work, Liu and Luo (2015) proposed the SCIO estimator, which also estimates the i-th column of K independently. Specifically, SCIO solves the convex problem ˆKSCIO  
+
+> i
+
+= arg min 
+
+> Ki
+
+n 12 K⊤ 
+
+> i
+
+SK i − e⊤ 
+
+> i
+
+Ki + λi∥Ki∥1
+
+o
+
+, i = 1 , . . . , p, (6) where λi is a regularization parameter controlling sparsity. This quadratic objective provides a smooth surrogate for the population equation Σ Ki = ei, enabling efficient column-wise estimation. The second major family of column-wise estimators is based on Lasso type regressions, commonly referred to as node-wise regression approaches. These methods adopt a node-wise regression perspective, reconstructing the precision matrix K by solving p separate sparse regression problems. Because each regression corresponds to a distinct estimation objective, this decomposition naturally induces a multi-task optimization structure. This idea can be traced back to the Neighborhood Selection (NS) framework proposed by Meinshausen and B¨ uhlmann (2006). Instead of estimating the entire precision matrix K jointly, this method decomposes the challenge into p independent linear regression problems. For each node i,the n observations of the variable Xi form the i-th column of X, denoted Xi ∈ Rn. The goal is to predict Xi using the remaining columns X−i ∈ Rn×(p−1) (the matrix X with the i-th column removed). Based on the conditional properties of the Gaussian distribution, the non-zero coefficients in the theoretical regression of Xi onto X−i correspond to the non-zero off-diagonal elements in the i-th row (or column) of the precision matrix K.A general formulation for this class of node-wise estimators takes the form ˆβ(i) = arg min 
+
+> β(i)∈Rp−1
+
+n
+
+L
+
+
+
+Xi, X−i, β(i)
+
++ Pen λ
+
+
+
+β(i)o 
+
+, (7) where L(·) denotes a chosen loss function and Pen λ(·) is a regularization term parameterized by λ. The graph structure is then inferred by combining the estimated neighborhoods, often by declaring an edge between i and j if both ˆβ(i) 
+
+> j
+
+and ˆβ(j) 
+
+> i
+
+are non-zero. The theoretical justification relies on the identity β(i) 
+
+> j
+
+= −Kij /K ii relating the coefficients of the theoretical regression of Xi onto X−i to the elements of the precision matrix K. Our proposed method later builds upon this idea, defining a related vector β(i)(K) such that β(i) 
+
+> j
+
+(K) = −Kij /K ii 
+
+for j̸ = i.
+
+> 6DROP: Distributionally Robust Optimization
+
+Building on this node-wise regression framework, a substantial body of work has explored different specifications of the loss function L(·) and penalty Pen λ(·) for reconstructing sparse precision matrices. Neighborhood Selection (NS) (Meinshausen and B¨ uhlmann, 2006) em-ploys the classical least-squares loss to model the conditional mean of each variable and introduces sparsity through an ℓ1 penalty: 
+
+LNS (Xi, X−i, β(i)(K)) = 1
+
+n ∥Xi − X−iβ(i)(K)∥22, Pen NS  
+
+> λ
+
+(β(i)(K)) = λ∥β(i)(K)∥1. (8) Scaled-Lasso (Sun and Zhang, 2013) modifies the least-squares loss by introducing an ad-ditional scale parameter σi = ( Kii )−1/2, which is jointly optimized with the regression coefficients: 
+
+LSCALED (Xi, X−i, β(i)(K), σ i) = 12nσ i
+
+∥Xi − X−iβ(i)(K)∥22 + σi
+
+2 ,
+
+Pen SCALED  
+
+> λ
+
+(β(i)(K)) = λ∥β(i)(K)∥1.
+
+(9) Tuning-Insensitive Graph Estimation and Regression (TIGER) (Liu and Wang, 2017) fur-ther modifies the objective by replacing the quadratic loss with the Square-Root Lasso: 
+
+LTIGER (Xi, X−i, β(i)(K)) = 
+
+r 1
+
+n ∥Xi − X−iβ(i)(K)∥22,
+
+Pen TIGER  
+
+> λ
+
+(β(i)(K)) = λ∥β(i)(K)∥1.
+
+(10) Both global and column-wise estimators fundamentally assume that the underlying data follow a multivariate Gaussian distribution. However, real-world datasets frequently contain heavy-tailed noise or leverage points. Because standard methods are highly sensitive to such deviations, their estimation performance often deteriorates significantly, highlighting the need for robust alternatives. 
+
+2.2 Robust and Nonparanormal Estimators 
+
+To address the vulnerability of standard GGMs to distributional irregularities, the Nonpara-normal (NPN) framework (Liu et al., 2009, 2012; Xue and Zou, 2012) was proposed to relax the strict normality assumption using semi-parametric Gaussian copula models. The NPN model assumes that while the random vector X = ( X1, . . . , X p)⊤ may not be Gaussian, there exists a set of monotone transformation functions {fi}pi=1 such that the transformed vector f (X) = ( f1(X1), . . . , f p(Xp)) ⊤ follows a multivariate normal distribution N (0, Σ). The conditional independence structure is then encoded in the precision matrix K := Σ −1
+
+of this latent Gaussian distribution. Methodologically, estimation within the NPN framework generally follows two main strategies. The first strategy, originally introduced by Liu et al. (2009), involves an element-wise transformation that explicitly estimates the underlying transformation functions fi. A standard approach is to use the empirical cumulative distribution function (ECDF) com-bined with a normal quantile transformation: ˆfi(x) = Φ −1( ˆFi(x)) , (11) 
+
+> 7Shen, Ji, Li, Yang, and Shi
+
+where Φ −1 is the inverse standard normal CDF and ˆFi is the truncated ECDF of the i-th variable. The transformed data matrix is then denoted by ˜X, whose columns are obtained by applying the estimated transformations element-wise, such that ˜Xi = ˆfi(Xi) for each 
+
+i = 1 , . . . , p .The second strategy, explicitly referred to as the ”Nonparanormal Skeptic” (Liu et al., 2012), bypasses the explicit estimation of marginal transformations and instead estimates the latent correlation matrix directly using rank-based statistics. This approach exploits the functional relationship between rank correlation coefficients and the latent Pearson correlation. For Kendall’s τ , the element-wise robust correlation estimator, denoted as ˆRτ ,is given by: ˆRτij = sin 
+
+ π
+
+2 ˆτij 
+
+
+
+, (12) where ˆ τij is the empirical Kendall rank correlation coefficient between variables Xi and Xj .Similarly, using Spearman’s rank correlation (Xue and Zou, 2012), denoted here by η, the robust correlation matrix ˆRη can be estimated via: ˆRηij = 2 sin 
+
+ π
+
+6 ˆηij 
+
+
+
+, (13) where ˆ ηij denotes the empirical Spearman’s rank correlation. Theoretical studies (Liu et al., 2012; Xue and Zou, 2012) demonstrate that substituting the standard sample covariance matrix S with these rank-based estimators ( ˆRτ or ˆRη) in algorithms like GLASSO yields consistent graph recovery, even when the underlying data distribution is heavy-tailed. Although nonparanormal methods help relax the Gaussian assumption on marginal distributions, they are essentially element-wise preprocessing steps. Consequently, they may not fully resolve the estimation instability caused by severe outliers or complex data contamination. This limitation suggests that a robust optimization framework is needed during the model estimation stage to handle the underlying distributional uncertainty. 
+
+2.3 Distributionally Robust Optimization Formulation 
+
+A general DROP problem provides a principled way to handle distributional uncertainty (De-lage and Ye, 2010). It is formulated as: ˆθn = min  
+
+> θ∈Θ
+
+sup 
+
+> P∈D
+
+EP[l(z; θ)] , (14) where θ ∈ Θ is the model parameter, z is a random variable governed by a probability distribution P from within an ambiguity set D, and l(z; θ) is the loss function. The objective is to minimize the expected loss under the worst-case distribution P ∈ D . This formulation appears in foundational works such as Rahimian and Mehrotra (2019); Kuhn et al. (2025). Compared to classical stochastic optimization, DROP explicitly protects against model misspecification and improves generalization in the presence of data variability (Wiesemann et al., 2014; Goh and Sim, 2010). In Wasserstein DROP (Mohajerin Esfahani and Kuhn, 2018), the ambiguity set D in (14) is defined as a ball centered around a nominal distribution, typically the empirical distribution Pn derived from the observed data z1, . . . , z n. The size of this ball is mea-sured by the q-Wasserstein distance, Wq (for q ≥ 1). The q-Wasserstein distance between 
+
+> 8DROP: Distributionally Robust Optimization
+
+distributions P and Pn is defined as: 
+
+Wq(P, Pn) = 
+
+
+
+inf  
+
+> π∈Π( P,Pn)
+
+E(z, ˜z)∼π [d(z, ˜z)q]
+
+1/q 
+
+, (15) where Π( P, Pn) is the set of all couplings (joint distributions) with marginals P and Pn,and d(z, ˜z) is a chosen ground metric. This distance quantifies the minimal expected cost of transporting mass to transform one distribution into the other (Panaretos and Zemel, 2019). The core Wasserstein DROP problem involves minimizing the worst-case expected loss over this ambiguity set (Kuhn et al., 2025; Gao et al., 2024): min  
+
+> θ∈Θ
+
+sup  
+
+> P:Wq(P,Pn)≤ρ
+
+Ez∼P[l(z; θ)] (16) Here, l(·) represents the loss function and ρ > 0 is the radius dictating the level of robustness. Because the true data-generating distribution is unknown and only empirical samples are observed, Problem (16) adopts a minimax formulation centered at Pn.A foundational property of Wasserstein DROP is its deep connection to regularized optimization. Gao et al. (2024) show that, under certain conditions, the worst-case expec-tation (16) can be approximated via a first-order expansion of the loss function around Pn.This leads to a regularized empirical risk minimization problem: ˆθn ≈ arg min  
+
+> θ∈Θ
+
+{Ez∼Pn [l(z; θ)] + ρn · VPn,q ∗ (l(z; θ)) } , (17) where ρn is a scaled radius, q∗ is the H¨ older conjugate of q (1 /q +1 /q ∗ = 1), and VPn,q ∗ (l(z; θ)) is the variation of the loss defined by Gao et al. (2024). This duality becomes particularly powerful when applied to specific predictive tasks, such as linear regression, which forms the foundational building block of our node-wise GGM estimator DROP. Specifically, Blanchet et al. (2019) established that under a Wasserstein DROP framework, minimizing the worst-case expected square loss is analytically equiva-lent to a regularized regression problem. They consider a discrepancy measure Dc, where 
+
+D 1/q c corresponds to the Wasserstein distance of order q (Wq). In the specific case of the 2-Wasserstein distance ( q = 2), when the transportation cost restricts adversarial perturba-tions strictly to the predictor variables via an ℓκ∗ -norm, the DROP problem exactly reduces to the Square-root Lasso formulation. Let Y ∈ R denote a generic response variable and 
+
+X(g) ∈ Rd denote a generic predictor vector. The equivalence is given by: inf  
+
+> β∈Rd
+
+sup 
+
+> P:Dc(P,Pn)≤δ
+
+EP[( Y − β⊤X(g))2] = inf 
+
+> β∈Rd
+
+np MSE n(β) + √δ∥β∥κ∗
+
+o2
+
+, (18) where MSE n(β) = 1
+
+> n
+
+Pnk=1 (yk −β⊤x(g) 
+
+> k
+
+)2 is the empirical mean squared error computed over 
+
+n independent observations {(yk, x (g) 
+
+> k
+
+)}nk=1 . Here, δ dictates the radius of the uncertainty set, and ∥β∥κ∗ denotes the ℓκ∗ -norm. The regularization parameter λ in the corresponding penalized regression is thus explicitly given by √δ, providing a direct mapping between the level of distributional robustness and the degree of model sparsity. This link is central to precision matrix estimation. It shows that the robust penalty is not an arbitrary choice, but a direct mathematical result of protecting the model against distributional shifts. This framework allows us to develop regularizers that naturally suit the multi-task structure of GGM estimation. 
+
+> 9Shen, Ji, Li, Yang, and Shi
+
+2.4 Distributionally Robust Estimators for GGMs 
+
+Building on this equivalence, recent studies have applied DROP to address model uncer-tainty in GGMs. Unlike standard penalized likelihood or column-wise methods, which optimize an objective based solely on the empirical distribution Pn, DROP approaches find an estimator that minimizes the loss under the worst-case distribution within a neighbor-hood of Pn. This approach explicitly accounts for finite-sample distributional shifts and data contamination (Fan et al., 2016; Rahimian and Mehrotra, 2019). For global precision matrix estimation, Nguyen et al. (2022) proposed the Wasserstein Shrinkage Estimator, establishing theoretical guarantees under measure concentration con-ditions. In this setting, the radius of the Wasserstein ambiguity set determines the regu-larization parameter. Unlike standard empirical ℓ1 penalties, the regularization is directly derived from the geometry of the uncertainty set, offering inherent protection against data perturbations at the inference stage. This perspective aligns well with the nonparanormal methods discussed in Section 2.2. While NPN methods focus on transforming marginal distributions, DROP accommodates distributional ambiguity by modifying the optimization objective itself (Fan et al., 2016). By determining the penalty structure through the uncertainty set, this formulation connects data robustness with regularization (Blanchet et al., 2025; Cisneros-Velarde et al., 2020). However, while DROP has been applied to global penalized likelihood estimation, its integration into the node-wise regression framework remains largely unexplored. Specifi-cally, adapting the DROP penalty to the multi-task structure of node-wise GGM estimation represents an important gap in the literature. In the following section, we address this gap by proposing the DROP methodology and establishing its theoretical properties. 
+
+3 The DROP Methodology 
+
+Building on the distributionally robust optimization concepts reviewed in Section 2, we now formally derive the DROP methodology. In this section, we construct the robust joint estimation framework and detail its computational algorithm. The error bound theoretical guarantees underpinning this approach will be established subsequently in Section 4. 
+
+3.1 Model Overview 
+
+Building on the node-wise regression perspective reviewed in Section 1, the proposed DROP methodology aggregates p neighborhood selection (Meinshausen and B¨ uhlmann, 2006) ob-jectives through scalarization (Boyd and Vandenberghe, 2004), and incorporates robustness against distributional perturbations via Wasserstein distributionally robust optimization. Unlike classical neighborhood selection methods that estimate each node’s neighborhood independently, our formulation defines a single joint optimization problem that balances empirical fit and robustness across all nodes simultaneously. This naturally casts GGM estimation as a multi-task learning problem, where each node-wise regression represents a distinct task with its own sensitivity to distributional uncertainty. The explicit form of the objective function is derived in the following subsection by applying the scalarization principle and the Wasserstein DROP framework of Blanchet et al. (2019) to the node-wise loss functions. 
+
+> 10 DROP: Distributionally Robust Optimization
+
+3.2 Distributionally Robust Scalarized Multi-Task GGM 
+
+We begin with the general distributionally robust optimization formulation introduced in Section 2. Let ( X(g), Y ) denote a generic observation composed of predictor variables X(g)
+
+and a response Y , and let l(X(g), Y ; β) be the associated loss function. We consider the inner maximization problem sup  
+
+> P:Dc(P,Pn)≤δ
+
+EP
+
+l(X(g), Y ; β), (19) where Pn denotes the empirical distribution and Dc is an optimal transport discrepancy induced by a lower semicontinuous cost function c.Following the dual reformulation of Wasserstein distributionally robust optimization (Blanchet et al., 2019), we introduce a nonnegative Lagrange multiplier γ ≥ 0 associated with the discrepancy constraint, yielding the Lagrangian 
+
+L(P, γ ) = EP
+
+l(X(g), Y ; β) − γ Dc(P, Pn) − δ. (20) Under the regularity conditions stated in Section 2, strong duality holds, allowing the interchange of the supremum over probability measures P and the infimum over γ.To proceed, we make the structure of the optimal transport discrepancy explicit. Let 
+
+P1 and P2 be probability measures supported on Rd × R. Given a lower semicontinuous cost function c : ( Rd × R) × (Rd × R) → [0 , ∞), define 
+
+Dc(P1, P 2) = inf  
+
+> π∈Π( P1,P 2)
+
+Eπ
+
+c (U, V ), (U ′, V ′) , (21) where Π( P1, P 2) denotes the set of all couplings of P1 and P2. Generally, choosing c(( u, v ), (u′, v ′)) = 
+
+∥(u, v )−(u′, v ′)∥q induces the q-Wasserstein distance. For the distributionally robust frame-work developed in this work, we specifically require the 2-Wasserstein distance. Therefore, we restrict the transportation cost to the squared ℓκ-distance (for κ > 1). That is, for any two points ( u, v ) and ( u′, v ′) in Rd × R, we set 
+
+c (u, v ), (u′, v ′) = (u, v ) − (u′, v ′) 2
+
+> κ
+
+. (22) This representation implies that the effect of the distributional constraint Dc(P, Pn) ≤ δ
+
+can be analyzed locally around each empirical observation. In particular, the contribution of a single data point ( x(g) 
+
+> k
+
+, y k) is captured by the function ϕγ (·)
+
+ϕγ (x(g) 
+
+> k
+
+, y k; β) := sup 
+
+> (u,v )∈Rd×R
+
+n
+
+l(u, v ; β) − γ c  (u, v ), (x(g) 
+
+> k
+
+, y k)o
+
+. (23) As a result, the original infinite-dimensional optimization problem over probability measures reduces to the finite-dimensional dual problem sup  
+
+> P:Dc(P,Pn)≤δ
+
+EP
+
+l(X(g), Y ; β) = min 
+
+> γ≥0
+
+(
+
+γδ + 1
+
+n
+
+> n
+
+X
+
+> k=1
+
+ϕγ (x(g) 
+
+> k
+
+, y k; β)
+
+)
+
+. (24) 
+
+> 11
+
+Shen, Ji, Li, Yang, and Shi 
+
+Substituting this expression into the original distributionally robust regression problem yields inf  
+
+> β∈Rd
+
+sup  
+
+> P:Dc(P,Pn)≤δ
+
+EP
+
+l(X(g), Y ; β) = inf  
+
+> β∈Rd
+
+min 
+
+> γ≥0
+
+(
+
+γδ + 1
+
+n
+
+> n
+
+X
+
+> k=1
+
+ϕγ (x(g) 
+
+> k
+
+, y k; β)
+
+)
+
+. (25) We now apply the general notation ( X(g), Y ) and the associated loss l(X(g), Y ; β) to the Gaussian graphical model framework. For a given target node i ∈ { 1, . . . , p }, the generic response Y corresponds to the variable Xi, and the generic predictor vector X(g) corresponds to the remaining variables X−i. Accordingly, the loss function depends entirely on the joint random vector X = ( X1, . . . , X p)⊤. With a slight abuse of notation, we write l(X; β(i))when specializing to the node-wise neighborhood selection formulation. Previously, neighborhood selection was described from a macroscopic column-wise per-spective using the data matrix X ∈ Rn×p. In this section, to facilitate the distributionally robust analysis, we shift to an equivalent sample-wise representation. Let the k-th row of the data matrix X be denoted by x⊤ 
+
+> k
+
+, where xk ∈ Rp represents the k-th full observation vector for k ∈ { 1, . . . , n }. For our node-wise regression targeting node i, the response is the scalar xk,i (the i-th component of xk), and the predictors are the ( p − 1)-dimensional vector 
+
+xk, −i (the remaining components of xk). To express the node-wise loss more compactly, we introduce the augmented vectors for both the observations and the parameters: ¯xk,i = ( xk, −i, x k,i ), ¯β(i)(K) = ( −β(i)(K), 1) , ¯ui = ( ui, v i).
+
+Here, β(i)(K) denotes the population neighborhood selection coefficient associated with the 
+
+i-th node in the Gaussian graphical model, which is uniquely determined by the precision matrix K via β(i) 
+
+> j
+
+(K) = −Kij /K ii for j̸ = i, as reviewed in Section 2. We consider the node-wise quadratic loss 
+
+l(xk, −i, x k,i ; K) = 
+
+ ¯β(i)(K)⊤ ¯xk,i 
+
+2
+
+,
+
+and aggregate these node-wise objectives through scalarization to obtain the multi-task loss for the k-th sample: 
+
+l(xk; K) = 1
+
+p
+
+> p
+
+X
+
+> i=1
+
+ ¯β(i)(K)⊤ ¯xk,i 
+
+2
+
+.
+
+Applying equation (23) to this scalarized loss yields the robustified node-wise function for the k-th observation: 
+
+ϕγ (xk; K) = sup 
+
+> {¯ui}pi=1
+
+(
+
+1
+
+p
+
+> p
+
+X
+
+> i=1
+
+¯β(i)(K)⊤ ¯ui
+
+2
+
+− 1
+
+p
+
+> p
+
+X
+
+> i=1
+
+γi ¯xk,i − ¯ui 2
+
+> κ
+
+)
+
+, ¯ui ∈ Rp. (26) Combining the above expression with the dual representation of Wasserstein DROP, we ob-tain the following closed-form equivalence for the distributionally robust multi-task learning problem: sup  
+
+> P:Dc(P,Pn)≤δ
+
+EP
+
+l(X; K) = 1
+
+p
+
+> p
+
+X
+
+> i=1
+
+q 
+
+MSE n
+
+ β(i)(K) + √δ ¯β(i)(K) κ∗
+
+2
+
+, (27) 
+
+12 DROP: Distributionally Robust Optimization 
+
+where 1 /κ + 1 /κ ∗ = 1, MSE n(β(i)(K)) = 1
+
+> n
+
+Pnk=1 
+
+
+
+xk,i − β(i)(K)⊤xk, −i
+
+2
+
+denotes the empirical mean squared error associated with the i-th node-wise neighborhood selection regression, the parameter vector is augmented as ¯β(i)(K) = ( −β(i)(K), 1). 
+
+Proposition 1 (Distributionally Robust Scalarized Multi-Task GGM) Fix κ ∈ (1 , ∞)
+
+and let κ∗ satisfy 1/κ +1 /κ ∗ = 1 . Consider a Gaussian graphical model with precision matrix 
+
+K ≻ 0, and let {β(i)(K)}pi=1 denote the corresponding neighborhood selection coefficients. Assume that the distributional uncertainty set is defined via the second-order optimal trans-port discrepancy Dc induced by the ℓκ-norm. Then 
+
+sup  
+
+> P:Dc(P,Pn)≤δ
+
+EP
+
+l(X; K) = 1
+
+p
+
+> p
+
+X
+
+> i=1
+
+q 
+
+MSE n
+
+ β(i)(K) + √δ ¯β(i)(K) κ∗
+
+2
+
+,
+
+where MSE n(β(i)(K)) = 1
+
+> n
+
+Pnk=1 
+
+
+
+xk,i − β(i)(K)⊤xk, −i
+
+2
+
+denotes the empirical mean squared error associated with the i-th node-wise neighborhood selection regression. 
+
+The detailed proof of this proposition is provided in Appendix. This formulation extends the foundational results of Blanchet et al. (2019) from a single-task setting to a multi-task framework. 
+
+3.3 The Proposed DROP Estimator 
+
+Building on the distributionally robust formulation derived in the previous section, we now construct a tractable estimator for the precision matrix K. Minimizing the worst-case risk established in (27) poses computational challenges due to the non-smooth and non-convex nature of the squared sum of square roots. To derive an efficient estimation procedure, we first make explicit the dependence of the regression coefficients on the precision matrix via the relationship β(i) 
+
+> j
+
+(K) = −Kij /K ii for j̸ = i.Focusing on the ℓ1-norm ( κ∗ = 1) to induce sparsity on the off-diagonal elements, we substitute β(i)(K) into the objective (27). Excluding the unpenalized intercept component from the augmented vector penalty, we can expand the squared term within the minimiza-tion problem as follows: 
+
+> p
+
+X
+
+> i=1
+
+q 
+
+MSE n
+
+ β(i)(K) + pδi
+
+∥K−i,i ∥1
+
+Kii 
+
+2
+
+=
+
+> p
+
+X
+
+> i=1
+
+MSE n
+
+ β(i)(K) + 2 pδi
+
+q
+
+MSE n
+
+ β(i)(K)
+
+Kii 
+
+∥K−i,i ∥1 + δi
+
+K2
+
+> ii
+
+∥K−i,i ∥21
+
+ ,
+
+(28) where MSE n(β(i)(K)) = 1
+
+> n
+
+Pnk=1 
+
+
+
+xk,i − β(i)(K)⊤xk, −i
+
+2
+
+represents the empirical mean squared error for the i-th node-wise regression. We propose to retain the first two terms in (28) while omitting the third quadratic reg-ularization term. This approximation is theoretically justified by the asymptotic behavior of the optimal transport radius. Typically, to ensure that the true data-generating distri-bution lies within the ambiguity set with high probability, the radius δi is chosen to decay 
+
+13 Shen, Ji, Li, Yang, and Shi 
+
+with the sample size at a rate of O(n−1/2) (Blanchet et al., 2019). Consequently, the third term in (28), which scales linearly with δi, vanishes at a strictly faster rate asymptotically than the second cross-term, which scales with √δi. The second term therefore constitutes the leading-order regularization effect induced by the distributional uncertainty. By isolating this dominant term and introducing the tuning parameter λi = 2 √δi, we arrive at the proposed DROP estimator: ˆK = arg min 
+
+> K≻0
+> p
+
+X
+
+> i=1
+
+n
+
+MSE n
+
+ β(i)(K) + λiw(i)∥K−i,i ∥1
+
+o
+
+, (29) where the adaptive weights are defined as w(i) := 
+
+√MSE n(β(i)(K))  
+
+> Kii
+
+. This formulation natu-rally recovers an adaptively weighted ℓ1-penalized objective for each node. Crucially, rather than being specified arbitrarily, the weights w(i) are systematically derived from the dis-tributionally robust framework, scaling adaptively with the node-wise prediction error and the diagonal precision matrix elements. For computational tractability and notational convenience, we unify the regularization parameter as λ and symmetrize the objective function. By expressing the empirical MSE in its vectorized ℓ2-norm form, the DROP estimator can be equivalently written as the solution to the following symmetric optimization problem: ˆK = arg min 
+
+> K≻0
+
+
+
+> p
+
+X
+
+> i=1
+
+1
+
+n Xi − X−iβ(i)(K) 22 + λ X
+
+> i<j
+
+wij |Kij |
+
+ , (30) where Xi ∈ Rn denotes the i-th column of the data matrix X, X−i ∈ Rn×(p−1) is the submatrix excluding the i-th column, and the symmetric adaptive weights are defined as 
+
+wij := 
+
+q
+
+MSE n
+
+ β(i)(K)
+
+Kii 
+
++
+
+q
+
+MSE n
+
+ β(j)(K)
+
+Kjj 
+
+. (31) 
+
+4 Statistical Properties of DROP 
+
+Having introduced the DROP methodology, we now establish its theoretical foundations. In this section, we analyze the error bound properties of the foundational multi-task DROP framework that underpins our approach. To build the necessary theoretical tools, we first examine the standard single-task setting before extending our analysis to the joint multi-task problem. 
+
+4.1 Single-Task Learning 
+
+Consider the standard linear regression model: 
+
+y = Xβ∗ + ε, (32) where y ∈ Rn is the response vector, X ∈ Rn×p is the design matrix, β∗ ∈ Rp is the unknown sparse regression vector, and ε ∈ Rn represents the random noise vector. 
+
+> 14 DROP: Distributionally Robust Optimization
+
+In high-dimensional scenarios, estimating a sparse coefficient vector β∗ typically relies on ℓ1-penalized methods such as the Lasso (Lounici et al., 2011). While the standard Lasso provides a well-established baseline (provided in Appendix), it offers no inherent robustness against data contamination. To immunize the estimation process against such distributional shifts, we cast the sparse regression problem within the Wasserstein DROP framework. Applying duality equivalence, the worst-case robust formulation integrates the robustness directly into the objective, yielding our single-task DROP estimator: ˆβDROP = arg min 
+
+> β∈Rp
+
+ 1
+
+n ∥y − Xβ∥22 + λ
+
+√n ∥y − Xβ∥2∥β∥1
+
+
+
+. (33) To establish the theoretical properties of both estimators, we require the following reg-ularity conditions on the noise and the design matrix. 
+
+Assumption 1 Assume that ε ∈ Rn is a random vector with i.i.d. N (0, σ 2) Gaussian components, where σ2 > 0. There exists a constant c = c(σ2, p ) > 1 and a constant Mc
+
+such that 
+
+P
+
+ ∥ε∥2
+
+√n ≤ c
+
+
+
+≥ 1 − Mc.
+
+Assumption 2 Let X ∈ Rn×p be a fixed design matrix and denote its j-th column by 
+
+Xj , for j = 1 , . . . , p . For a coefficient vector β ∈ Rp, define the active set J(β) = 
+
+{j ∈ { 1, . . . , p } : βj̸ = 0 }. Assume that ε ∈ Rn is a random vector with i.i.d. N (0, σ 2) Gaus-sian components, where σ2 > 0. There exist a tuning parameter λ > c√n and a constant 
+
+c = c(σ2, X, p ) > 0 such that 
+
+P
+
+
+
+max 
+
+> 1≤j≤p
+
+1
+
+n X⊤ 
+
+> j
+
+ε ≤ λ
+
+2
+
+
+
+≥ 1 − Mc.
+
+Remark 2 Assumption 1 states that the noise magnitude 1√n ∥ε∥2 is bounded by a constant 
+
+c with probability at least 1 − Mc, ensuring that the overall error level is well controlled. Assumption 2 similarly requires that the empirical cross-correlation between the noise and each predictor, given by 1 
+
+> n
+
+|X⊤ 
+
+> j
+
+ε|, is strictly bounded by λ 
+
+> 2
+
+with probability at least 1 − Mc,guaranteeing that random spurious correlations remain limited. Together, these assumptions ensure that the noise does not overwhelm the estimation procedure. 
+
+As a baseline, the error bound guarantees of the standard Lasso estimator under these assumptions are well-established (Lounici et al., 2011). For completeness, we restate these foundational properties in the Appendix. Building upon this framework, we first establish the theoretical properties of the single-task DROP estimator. While our primary theoretical contribution lies in the multi-task framework presented in the subsequent section, analyzing the single-task setting serves as an essential theoretical stepping stone. 
+
+Theorem 3 Consider the model (32) and the estimator (33) . Under Assumption 1 and Assumption 2, with probability at least 1 − Mc, the following statements hold: 
+
+> 15
+
+Shen, Ji, Li, Yang, and Shi 
+
+(i) (Basic Inequality). 1
+
+n ∥y−XˆβDROP ∥22+ λ
+
+√n ∥y−XˆβDROP ∥2∥ˆβDROP ∥1 ≤ 1
+
+n ∥y−Xβ∥22+ λ
+
+√n ∥y−Xβ∥2∥β∥1.
+
+(34) 
+
+(ii) (Prediction Error Bound). 1
+
+n ∥X(β∗ − ˆβDROP )∥22 ≤ 2cλ 
+
+> p
+
+X
+
+> j=1
+
+|β∗ 
+
+> j
+
+− (ˆβDROP )j | + 2 cλ 
+
+> p
+
+X
+
+> j=1
+
+|β∗ 
+
+> j
+
+|. (35) 
+
+(iii) (Score Bound). 1
+
+n
+
+X⊤X(ˆβDROP − β∗) 
+
+> j
+
+≤ λ 32
+
+2
+
+s
+
+2c X
+
+> j∈J(β∗−ˆβDROP )
+
+|β∗ 
+
+> j
+
+− (ˆβDROP )j |
+
++ λ 32
+
+2
+
+s
+
+2c X
+
+> j∈J(β∗)
+
+|β∗ 
+
+> j
+
+| + λc. 
+
+(36) 
+
+Remark 4 For Statement (iii) (Equation (36) ), if the minimum eigenvalue of the limit 
+
+X⊤X/n is positive and max  |β∗ 
+
+> j
+
+|, |(ˆβDROP )j | ≤ c∗ with probability at least 1 − Mc∗ , then 
+
+|(ˆβDROP )j −β∗ 
+
+> j
+
+| ≤ λ3/2c1/2(2 c∗|J(β∗)|)1/2 + λ2 
+
+> 2
+
+pc ∗ +λc with probability at least 1−Mc −Mc∗ .When λ = O(n−1/2) and p = o(n), we have |(ˆβDROP )j − β∗ 
+
+> j
+
+| = o(1) . When λ = O(n−1/2)
+
+and p is fixed, |(ˆβDROP )j − β∗ 
+
+> j
+
+| = O(n−1/2).
+
+Remark 5 For Statement (ii) (Equation (35) ), if c1Ip ≤ X⊤X/n ≤ c2Ip with probability at least 1 − Mc1 and ∥β∗∥1̸ = 0 , then β∗ − ˆβDROP 2 ≤ o(λ√p) + O  p λ ∥β∗∥1
+
+ with probability at least 1−Mc −Mc1 . When p ≪ n, we have 2cλ √p/c 1 = o(λ√p) and p8cλ/c 1 =
+
+O  p λ ∥β∗∥1
+
+.
+
+The detailed proofs of Theorem 3 and its related remarks are provided in Appendix. 
+
+4.2 Multi-Task Learning 
+
+Building on the theoretical foundation of the single-task setting, we now extend our method-ology to the multi-task learning scenario. For Gaussian Graphical Models, node-wise regres-sion inherently poses a multi-task problem, where the reconstruction of the neighborhood for each node i acts as a distinct but correlated task. Let K∗ denote the true precision matrix, and define β(i)(K∗) as the target regression coefficient vector for the i-th task. Since the estimated regression coefficients collectively characterize the empirical precision matrix, we naturally denote the estimators parameter-ized by the precision matrix as β(i)(K). The general multi-task learning model is formulated 
+
+16 DROP: Distributionally Robust Optimization 
+
+as: 
+
+y1 = X1β(1) (K∗) + ε(1) ,
+
+y2 = X2β(2) (K∗) + ε(2) ,
+
+...
+
+yp = Xpβ(p)(K∗) + ε(p).
+
+(37) The standard pooled Lasso estimator for this joint multi-task problem minimizes the empirical loss across all tasks: ˆβLasso = arg min 
+
+> β
+
+1
+
+p
+
+> p
+
+X
+
+> i=1
+
+ 1
+
+n ∥yi − Xiβ(i)(K)∥22 + λ∥β(i)(K)∥1
+
+
+
+. (38) However, to strengthen this multi-task estimation robust to distributional shifts and heavy-tailed dependencies, we reformulate the problem through the Wasserstein DROP framework. This yields the foundational multi-task DROP estimator, which serves as the theoretical building block for our DROP methodology developed in Section 3: ˆβDROP = arg min 
+
+> β
+
+1
+
+p
+
+> p
+
+X
+
+> i=1
+
+ 1
+
+n ∥yi − Xiβ(i)(K)∥22 + λ
+
+√n ∥yi − Xiβ(i)(K)∥2∥β(i)(K)∥1
+
+
+
+. (39) To theoretically analyze this estimator, we generalize our previous assumptions to ac-commodate task dependence and uniform sparsity across tasks. 
+
+Assumption 3 (Multi-task noise; task dependence). Assume that E = ( ε(1) , . . . , ε(p)) ∈
+
+Rn×p is a random noise matrix. Each row of E follows a centered multivariate Gaussian distribution. In particular, the noise vectors ε(1) , . . . , ε(p) are allowed to be dependent across tasks. There exist constants c > 0 and Cε ∈ (0 , 1) , as well as a tuning parameter λ > c√n ,such that 
+
+P 1
+
+p
+
+> p
+
+X
+
+> i=1
+
+∥ε(i)∥22
+
+n ≤ c and max 
+
+> 1≤i≤p
+
+∥ε(i)∥2
+
+√n ≤ Cε
+
+!
+
+≥ 1 − Mc.
+
+Assumption 4 (Uniform score bound under task dependence). Let Xi ∈ Rn×p be a fixed design matrix for task i = 1 , . . . , p , and denote by Xi,j its j-th column. For a collection of coefficient vectors β(K) = ( β(1) (K), . . . , β(p)(K)) , define the active task set J(β(K)) = 
+
+{ i ∈ { 1, . . . , p } : β(i)(K)̸ = 0 }. There exists a tuning parameter λ > 0 and a constant 
+
+c = c(Σ , X1, . . . , Xp) > 0 such that 
+
+P
+
+
+
+max 
+
+> 1≤i≤p
+
+1
+
+n X⊤ 
+
+> i
+
+ε(i)
+
+> ∞
+
+≤ λ
+
+2
+
+
+
+≥ 1 − Mc,
+
+where ∥ · ∥ ∞ denotes the maximum absolute value over the coordinates j.
+
+Remark 6 Assumption 3 follows the noise structure considered in (Zhang and Li, 2025), where concentration bounds for Gaussian quadratic forms and sums of dependent chi-squared random variables are developed under task dependence. 
+
+17 Shen, Ji, Li, Yang, and Shi 
+
+Remark 7 Assumptions 3 and 4 are multi-task extensions of the baseline conditions used for the standard Lasso (Lounici et al., 2011). In particular, Assumption 4 plays the same role as the classic score bound (restated in Appendix), while allowing for dependence across tasks. We provide the rationale for why Assumption 4 holds under Assumption 3 when the tasks are dependent. For each task i and coordinate j, the score term 1 
+
+> n
+
+(X⊤ 
+
+> i
+
+ε(i))j =
+
+> 1
+> n
+
+Pnk=1 (Xi)kj (ε(i))k is a centered Gaussian random variable conditional on Xi, with vari-ance of order O(1 /n ) under standard normalization of the columns of Xi. Unlike the independent-task setting, the random variables {X⊤ 
+
+> i
+
+ε(i)}pi=1 are not independent across i
+
+due to the cross-task covariance structure induced by Σ.Following the approach of (Zhang and Li, 2025), the task dependence can be repre-sented by a dependency graph whose vertices correspond to tasks and whose edges encode the nonzero correlations implied by Σ. A standard graph-coloring argument partitions the set of tasks into a finite number of groups such that, within each group, the corresponding score variables are independent. Applying Gaussian tail bounds within each group and combining the results across groups yields that, for a suitable choice of λ, P  max 1≤i≤p ∥ 1 
+
+> n
+
+X⊤ 
+
+> i
+
+ε(i)∥∞ >
+
+> λ
+> 2
+
+ ≤ Mc, which establishes Assumption 4. 
+
+Assumption 5 (Restricted eigenvalue condition). Let Xi ∈ Rn×p be fixed design matrices for tasks i = 1 , . . . , p . Let K∗ be the target parameter and define Si := supp  β(i)(K∗) and 
+
+si := |Si|. There exists a constant ψ > 0 such that for all collections h = ( h(1) , . . . , h(p))
+
+satisfying the cone constraint 
+
+> p
+
+X
+
+> i=1
+
+∥h(i)
+
+> Sci
+
+∥1 ≤ 3
+
+> p
+
+X
+
+> i=1
+
+∥h(i) 
+
+> Si
+
+∥1, (40) 
+
+the following inequality holds: 
+
+1
+
+p
+
+> p
+
+X
+
+> i=1
+
+1
+
+n ∥Xih(i)∥22 ≥ ψ · 1
+
+p
+
+> p
+
+X
+
+> i=1
+
+∥h(i)∥22. (41) 
+
+Remark 8 (Relationship between Si, s i and J(β)). For each task i, Si = supp  β(i)(K∗) is the within-task support and si = |Si| measures the within-task sparsity. The active task set 
+
+J β(K∗) = { i ∈ { 1, . . . , p } : β(i)(K∗)̸ = 0 } captures task-level sparsity, i.e., the number of active tasks. Clearly, if i / ∈ J β(K∗), then β(i)(K∗) = 0, which implies Si = ∅ and 
+
+si = 0 . Consequently, the total number of nonzero coefficients across all tasks is given by Ppi=1 si = P 
+
+> i∈J(β(K∗))
+
+si.
+
+Assumption 6 (Uniform within-task sparsity). There exists an integer smax ≥ 1 such that 
+
+si = supp( β(i)(K∗)) ≤ smax , ∀i = 1 , . . . , p. 
+
+Remark 9 Assumption 6 enforces a uniform upper bound on the within-task sparsity levels. It implies that the average sparsity 1
+
+> p
+
+Ppi=1 si appearing in Lemma 10(iii) is bounded by smax ,which yields a task-uniform ℓ2 estimation error bound independent of the number of tasks 
+
+p.
+
+> 18
+
+DROP: Distributionally Robust Optimization 
+
+We first establish the baseline bounds for the standard multi-task Lasso estimator. The following lemma adapts the classic oracle inequalities established by Lounici et al. (2011) for the multi-task framework to explicitly accommodate our task-dependent assumptions. 
+
+Lemma 10 Consider the multi-task model (37) and the standard Lasso estimator ˆβLasso 
+
+defined in (38) . Let β(K∗) = ( β(1) (K∗), . . . , β(p)(K∗)) be the true parameters and denote the estimator components by ˆβLasso = ( β(1) ( ˆK), . . . , β(p)( ˆK)) . Define the active task set 
+
+J β(K∗) = {i ∈ { 1, . . . , p } : β(i)(K∗)̸ = 0}. Under Assumptions 3 and 4, with probability at least 1 − Mc, the following statements hold: (i) (Basic Inequality). 1
+
+p
+
+> p
+
+X
+
+> i=1
+
+ 1
+
+n ∥yi − Xiβ(i)( ˆK)∥22 + λ∥β(i)( ˆK)∥1
+
+
+
+≤ 1
+
+p
+
+> p
+
+X
+
+> i=1
+
+ 1
+
+n ∥yi − Xiβ(i)(K∗)∥22 + λ∥β(i)(K∗)∥1
+
+
+
+.
+
+(42) 
+
+(ii) (Prediction Error Bound). 1
+
+p
+
+> p
+
+X
+
+> i=1
+
+1
+
+n ∥Xi(β(i)(K∗) − β(i)( ˆK)) ∥22 ≤ 2λp
+
+X
+
+> i∈J(β(K∗))
+
+min 
+
+
+
+∥β(i)(K∗)∥1, ∥∆(i)∥1
+
+
+
+. (43) 
+
+(iii) (ℓ2 Error Bound). Assume further that Assumption 5 holds with constant ψ > 0. Let 
+
+Si = supp  β(i)(K∗) and si = |Si|, and define ∆(i) := β(i)( ˆK) − β(i)(K∗). Then, on the event in Assumption 4, 
+
+1
+
+p
+
+> p
+
+X
+
+> i=1
+
+∥β(i)( ˆK) − β(i)(K∗)∥22 ≤ 64 λ2
+
+ψ2 smax . (44) The detailed proof of Lemma 10 is provided in Appendix. Finally, we present the theoretical guarantees for our foundational multi-task DROP framework. 
+
+Theorem 11 Consider the multi-task model (37) and the multi-task DROP estimator 
+
+ˆβDROP defined in (39) . Let β(K∗) = ( β(1) (K∗), . . . , β(p)(K∗)) and let the resulting mini-mizer be ˆβDROP = ( β(1) ( ˆK), . . . , β(p)( ˆK)) . Let ∆(i) := β(i)( ˆK) − β(i)(K∗) for i = 1 , . . . , p ,and define the active task set J β(K∗) = {i ∈ { 1, . . . , p } : β(i)(K∗)̸ = 0}. Under Assump-tions 3 and 4, with probability at least 1 − Mc, the following statements hold: (i) (Basic Inequality). For any β = ( β(1) (K), . . . , β(p)(K)) ,
+
+> p
+
+X
+
+> i=1
+
+ 1
+
+n ∥yi − Xiβ(i)( ˆK)∥22 + λ
+
+√n ∥yi − Xiβ(i)( ˆK)∥2∥β(i)( ˆK)∥1
+
+
+
+≤
+
+> p
+
+X
+
+> i=1
+
+ 1
+
+n ∥yi − Xiβ(i)(K∗)∥22 + λ
+
+√n ∥yi − Xiβ(i)(K∗)∥2∥β(i)(K∗)∥1
+
+
+
+.
+
+(45) 
+
+19 Shen, Ji, Li, Yang, and Shi 
+
+(ii) (Prediction Error Bound). The prediction error satisfies 
+
+> p
+
+X
+
+> i=1
+
+1
+
+n ∥Xi∆(i)∥22 ≤ λ(1 + Cε)
+
+> p
+
+X
+
+> i=1
+
+∥∆(i)∥1 + λ
+
+> p
+
+X
+
+> i=1
+
+∥Xi∆(i)∥2
+
+√n ∥β(i)( ˆK)∥1. (46) 
+
+(iii) (Natural Cone Constraint). Assume further that Assumption 5 holds. Then, with probability at least 1−Mc, the error ∆ = ( ∆(1) , . . . , ∆(p)) satisfies the cone constraint 
+
+> p
+
+X
+
+> i=1
+
+∥∆(i)∥1 ≤ 21 − CεpX
+
+> i=1
+
+∥∆(i) 
+
+> Si
+
+∥1 + 11 − CεpX
+
+> i=1
+
+∥Xi∆(i)∥2
+
+√n ∥β(i)( ˆK)∥1. (47) The theoretical results in Theorem 11 characterize the error bound properties of the ro-bust multi-task framework. Statement (i) provides a deterministic basic inequality bounding the empirical loss. Statement (ii) establishes the prediction error bound, showing that the error explicitly scales with the regularization parameter λ and the maximum noise pertur-bation Cε. Finally, Statement (iii) proves that the estimation error belongs to a restricted cone, even under cross-task dependence and high dimensionality. This cone constraint is essential, as it guarantees that the error vector satisfies the restricted eigenvalue condition (Assumption 5), which allows us to translate the prediction error bound into parameter estimation consistency. 
+
+Remark 12 (Refined bounds under bounded solution size; dropping the prediction term). Consider Statements (ii) and (iii) of Theorem 11. Suppose that there exists a constant 
+
+cβ > 0 such that λ max 1≤i≤p ∥β(i)( ˆK)∥1 ≤ cβ with probability at least 1 − Mcβ . Then, on the event in Assumption 3, we have Ppi=1 1 
+
+> n
+
+∥Xi∆(i)∥22 ≤ 2λ(1 + Cε) Ppi=1 ∥∆(i)∥1 + 2 c2 
+
+> β
+
+,and the cone constraint in Theorem 11 (iii) further yields 
+
+> p
+
+X
+
+> i=1
+
+∥∆(i)∥1 ≤ 41 − CεpX
+
+> i=1
+
+∥∆(i) 
+
+> Si
+
+∥1 + 2(1 + Cε)(1 − Cε)2 + 2√21 − Cε
+
+! c2
+
+> β
+
+λ ,
+
+with probability at least 1 − Mc − Mcβ .
+
+The detailed proof of Theorem 11 is provided in Appendix. These error bound guar-antees formally establish the statistical optimality of the robust multi-task framework that underpins the DROP estimator introduced in Section 3, demonstrating its rigorous con-trol over both prediction and parameter estimation errors even under complex cross-task dependence and high dimensionality. 
+
+5 Computational Algorithm 
+
+The complete estimation procedure for the proposed DROP method is summarized in Al-gorithm 1. The algorithm proceeds in four main stages: data transformation, robust ini-tialization, alternating optimization via coordinate descent, and final support recovery. In the following subsections, we provide detailed descriptions and theoretical justifications for each component. 
+
+> 20
+
+DROP: Distributionally Robust Optimization 
+
+Algorithm 1 Distributionally Robust Optimization for Precision matrices (DROP) 
+
+Input: Data matrix X ∈ Rn×p, regularization parameter λ, convergence tolerance ϵ = 10 −4
+
+Output: Precision matrix ˆK and adjacency matrix ˆA 
+
+> 1:
+
+Step 1: Data Transformation (NPN)  
+
+> 2:
+
+Apply rank-based inverse normal transformation to each variable j: 
+
+> 3:
+
+˜Xkj ← Φ−1
+
+ rank( Xkj )−0.5
+
+> n
+
+
+
+for k = 1 , . . . , n and j = 1 , . . . , p  
+
+> 4:
+
+Step 2: Robust Initialization  
+
+> 5:
+
+Compute covariance estimator ˆΣinit using CovTools  
+
+> 6:
+
+Initialize ˆK(0) ← ( ˆΣinit )−1 
+
+> 7:
+
+Initialize iter ← 1 
+
+> 8:
+
+Step 3: Alternating Optimization  
+
+> 9:
+
+repeat  
+
+> 10:
+
+Update symmetric adaptive weights wij based on current ˆK(iter −1) via Eq. (31)  
+
+> 11:
+
+for each pair ( i, j ) with 1 ≤ i < j ≤ p do  
+
+> 12:
+
+Update ˆKij using the closed-form coordinate descent solution in Eq. (51)  
+
+> 13:
+
+ˆKji ← ˆKij  
+
+> 14:
+
+end for  
+
+> 15:
+
+iter ← iter + 1  
+
+> 16:
+
+until convergence criterion ∥ ˆK(iter) − ˆK(iter −1) ∥1 < ϵ is met  
+
+> 17:
+
+Step 4: Support Recovery  
+
+> 18:
+
+ˆAij ← I(| ˆKij | > 0)  
+
+> 19:
+
+return ˆK, ˆA
+
+5.1 Data Transformation via Nonparanormal 
+
+The first stage of our algorithm involves transforming the input data to enhance robust-ness against heavy-tailed distributions and outliers. Following the nonparanormal (NPN) framework (Liu et al., 2009), we apply a rank-based inverse normal transformation to each variable. Specifically, for the j-th variable, the transformed observation for the k-th sample is computed as: ˜Xkj = Φ −1
+
+ rank( Xkj ) − 0.5
+
+n
+
+
+
+, for k = 1 , . . . , n, (48) where Φ −1 denotes the inverse standard normal cumulative distribution function, and rank( Xkj ) is the rank of Xkj among the n observations of the j-th variable. This transformation offers several methodological advantages. First, it is distribution-free, accommodating any continuous marginal distribution without requiring parametric assumptions. Second, by relying solely on rank information, it effectively truncates the influence of extreme values, providing intrinsic protection against outliers. Theoretically, under the semiparametric Gaussian copula model (Liu et al., 2012), the transformed data matrix ˜X approximately follows a multivariate Gaussian distribution. This justifies the subsequent application of our DROP estimator while preserving the underlying conditional independence structure. In all subsequent optimization steps, we use the centered trans-formed data matrix ˜X as the input. 
+
+21 Shen, Ji, Li, Yang, and Shi 
+
+5.2 Robust Initialization 
+
+To address the computational challenges in high-dimensional settings ( p > n ), we require a well-conditioned starting point for the iterative optimization procedure. Since the standard empirical covariance matrix is singular when p > n , directly inverting it to obtain an initial precision matrix is infeasible. As indicated in Step 2 of Algorithm 1, we employ a regularized robust covariance estimator, denoted by ˆΣinit (Lee et al., 2025). The inverse of this well-conditioned estimator, 
+
+K(0) = ( ˆΣinit )−1, serves as our warm start. This strategy avoids singular matrix inversions, ensures numerical stability, and accelerates the convergence of the subsequent coordinate descent loop. 
+
+5.3 Coordinate-wise Update Rule 
+
+The core of our optimization procedure ( Step 3 ) relies on the coordinate descent method. For a given pair ( i, j ) with i < j , we update the precision matrix element Kij by minimizing the objective function while holding all other parameters fixed. Let ˜X ∈ Rn×p denote the transformed data matrix. We define the gradient component 
+
+S0 (aggregating terms independent of Kij ) and the curvature component S1 (coefficient of 
+
+Kij ) derived from the data-fitting term as: 
+
+S0 = 2 ˜X⊤ 
+
+> i
+
+˜Xj
+
+ 1
+
+Kii 
+
++ 1
+
+Kjj 
+
+
+
++ 2
+
+K2
+
+> ii
+
+˜X⊤
+
+> j
+
+X
+
+> m̸=i,j
+
+Kim ˜Xm + 2
+
+K2
+
+> jj
+
+˜X⊤
+
+> i
+
+X
+
+> m̸=i,j
+
+Kjm ˜Xm, (49) 
+
+S1 = 2
+
+K2
+
+> ii
+
+˜X⊤ 
+
+> j
+
+˜Xj + 2
+
+K2
+
+> jj
+
+˜X⊤ 
+
+> i
+
+˜Xi. (50) By analyzing the subgradient optimality condition, we obtain the closed-form update rule via the soft-thresholding operator. The optimal ˆKij is given by: ˆKij =
+
+ 
+
+> −S0+nλw ij
+> S1
+
+, if S0 > nλw ij , 
+
+> −S0−nλw ij
+> S1
+
+, if S0 < −nλw ij ,
+
+0, if |S0| ≤ nλw ij .
+
+(51) This explicit solution guarantees the descent property of the objective function at each iteration. Detailed derivations of the partial derivatives and the stationarity conditions are relegated to Appendix. 
+
+5.4 Model Selection 
+
+The selection of the regularization parameter λ dictates the sparsity of the estimated graph and is critical for high-dimensional performance. While Cross-Validation (CV) is a standard approach, it can be computationally prohibitive and prone to overfitting in high-dimensional settings (Liu et al., 2010). Information criteria such as AIC and BIC offer efficient alterna-tives; however, they tend to select overly dense graphs with excessive false positive edges when p grows with n (Foygel and Drton, 2010). Alternatively, the Stability Approach to Regularization Selection (StARS) (Liu et al., 2010) effectively controls the false discovery rate but remains computationally intensive due to repeated subsampling. 
+
+> 22 DROP: Distributionally Robust Optimization
+
+To address the consistency limitations of standard information criteria and the com-putational burden of resampling methods, we adopt the Extended Bayesian Information Criterion (EBIC) (Chen and Chen, 2008; Foygel and Drton, 2010). For our DROP frame-work, we adapt the EBIC by replacing the standard Gaussian log-likelihood with the sum of node-wise mean squared errors, aligning completely with our scalarized multi-task objective. Specifically, we select the optimal λ from a predefined grid by minimizing: EBIC γebic (λ) = n log 
+
+> p
+
+X
+
+> i=1
+
+MSE n
+
+ β(i)( ˆKλ)!
+
++ | ˆEλ| log n + 4 γebic | ˆEλ| log p, (52) where MSE n
+
+ β(i)( ˆKλ) represents the empirical mean squared error for the i-th node-wise regression evaluated at the estimated precision matrix ˆKλ, and | ˆEλ| denotes the number of non-zero edges in the estimated graph. The criterion is parameterized by γebic ∈ [0 , 1]. Following standard practice for high-dimensional sparse graph recovery, the parameter γebic 
+
+is typically set to 0 .5 to ensure selection consistency (Foygel and Drton, 2010). 
+
+6 Simulation Studies 
+
+We conduct comprehensive simulation studies to evaluate the performance of DROP com-pared to 10 competing methods across diverse graph structures and contamination scenarios. Our experimental design systematically varies dimensionality, sample size, graph type, and data contamination to assess method performance under realistic conditions. 
+
+6.1 Simulation Settings and Performance Evaluation 
+
+We generate data from a multivariate Gaussian distribution N (0, Σ) across five distinct network structures. To visualize the complexity of these structures, we provide illustrations with p = 100 nodes in Figure 2, generated using the huge package (Zhao et al., 2012). 1. Band graph: A chain-like structure where vertices i and j are connected if |i−j| ≤ 2, simulating the decay of correlation in time series data (Figure 2(A)). 2. Hub graph: The vertices are organized into disjoint stars. The center node of each star is connected to all other nodes in the cluster, creating high degree heterogeneity (Figure 2(B)). 3. Cluster graph: Vertices are divided into communities with a higher probability of within-cluster edges compared to between-cluster edges, resulting in a modular graph type (Figure 2(C)). 4. Random graph: Edges are assigned independently with probability 0 .1, following the Erd˝ os-R´ enyi model (Erd˝ os and R´ enyi, 1959) (Figure 2(D)). 5. Scale-free graph: Generated using the Barab´ asi-Albert model (Barab´ asi and Albert, 1999), characterized by a power-law degree distribution (Figure 2(E)). 
+
+> 23
+
+Shen, Ji, Li, Yang, and Shi (A) Band (B) Hub (C) Cluster (D) Random (E) Scale−free 
+
+Figure 2: Illustration of the five graph structures with p = 100 nodes. (A) Band graph; (B) Hub graph; (C) Cluster graph; (D) Random graph; (E) Scale-free graph. 
+
+To assess the robustness of different methods, we consider three contamination schemes that represent common departures from Gaussianity. For all contamination scenarios, the contamination rate is set to r = 0 .1. 1. Clean (no contamination): Data are generated from the true Gaussian graphical model xk ∼ N (0, Σ) for k = 1 , . . . , n . This scenario serves as a baseline to verify that robust methods do not sacrifice efficiency when the Gaussian assumption holds. 2. Cauchy (Heavy-tailed contamination): To evaluate robustness against extreme heavy-tailed noise, we consider an r-contamination setting in which a subset of obser-vations is corrupted by additive Cauchy noise. Specifically, 10% of randomly selected samples are replaced by 
+
+xk ← xk + ( εcauchy )k, (εcauchy )k ∼ Cauchy( 0, 5Ip).
+
+This setup corresponds to a Huber-type contamination model with a severely heavy-tailed contamination distribution (Loh and Tan, 2018; Avella-Medina et al., 2018). 3. Leverage (Leverage point contamination): To model leverage-type outliers that preserve the underlying dependence structure but exhibit substantially inflated vari-ability, we replace 10% of the observations with samples drawn from a Gaussian distribution with an inflated covariance matrix, 
+
+xk ∼ N (0, 100 Σ).
+
+This contamination mechanism generates high-leverage points that preserve the cor-relation structure of the uncontaminated data, while having substantially larger vari-ance. Such points can have a strong impact on covariance and precision matrix esti-mation (Hirose et al., 2017; Onizuka and Hashimoto, 2025). We systematically evaluate DROP against a comprehensive suite of 10 state-of-the-art estimation methods, detailed in Table 1. These baselines include standard non-robust estimators ( Glasso , MB ), non-convex penalizations ( SCAD , MCP ), alternative optimization strategies ( CLIME , TIGER , Scaled Lasso ), and traditional rank-based robust transforma-tions ( NPN , NPN-Kendall , NPN-Spearman ). 
+
+24 DROP: Distributionally Robust Optimization 
+
+Table 1: Competing methods included in the simulation studies                                           
+
+> Method Package Key Features Glasso huge Standard Gaussian graphical model with ℓ1
+> penalty (Friedman et al., 2008) MB huge Neighborhood selection via Lasso (Mein-shausen and B¨ uhlmann, 2006) Scaled Lasso scalreg Joint estimation of precision matrix and noise level (Sun and Zhang, 2012) SCAD GGMncv Nonconvex SCAD penalty to reduce estima-tion bias (Fan and Li, 2001) MCP GGMncv Minimax concave penalty (Zhang, 2010) TIGER flare Tuning-free estimator via column-wise inverse regression (Liu and Wang, 2017) CLIME flare Constrained ℓ1minimization for inverse ma-trix estimation (Cai et al., 2011)
+> Rank-based Nonparanormal Methods (Robust Baselines)
+> NPN huge Rank-based normal score transformation +Glasso (Liu et al., 2009; Zhao et al., 2012) NPN-Kendall Custom + huge Kendall’s τcorrelation matrix + Glasso (The “Skeptic”) (Liu et al., 2009) NPN-Spearman Custom + huge Spearman’s ρcorrelation matrix +Glasso (Xue and Zou, 2012)
+
+To thoroughly investigate both finite-sample properties and algorithmic scalability, the experiments are divided into two main simulation regimes based on settings established in recent literature (Li et al., 2021; Lingjærde et al., 2024): 1. Moderate-dimensional regime ( p ≤ 30 ): This setting assesses the robust struc-tural recovery of the estimators under finite samples. We consider combinations of dimension p ∈ { 10 , 20 , 30 } and sample size n ∈ { 250 , 500 , 1000 }. In this regime, DROP is rigorously compared against all 10 competing methods, yielding a comprehensive evaluation across 3 × 3 × 5 × 3 = 135 distinct experimental configurations. 2. High-dimensional regime ( p ∈ { 100 , 250 }): To demonstrate the practical scalabil-ity of our method, we extend the evaluation to larger network structures. Specifically, we set n ∈ { 100 , 1000 } for p = 100, and n ∈ { 500 , 5000 } for p = 250. The latter setting is specifically designed to parallel the scale of our subsequent real data application. Due to the heavy computational burden in high dimensions, we filter the competing methods and compare DROP exclusively against highly scalable baselines. 
+
+Simulation Procedure and Performance Metrics 
+
+For each specific configuration defined by the dimension, sample size, graph type, and contamination scheme, we strictly follow this standardized procedure: First, we generate the true graph structure K∗ using huge.generator . Second, for each of R = 100 independent Monte Carlo replicates, we: (a) generate n i.i.d. observations from N (0, (K∗)−1), 
+
+25 Shen, Ji, Li, Yang, and Shi 
+
+(b) apply the specified contamination scheme (if any) to 10% of randomly selected obser-vations, (c) fit the applicable competing methods (subject to a strict 60-second computational limit per replicate), (d) extract the estimated edge set ˆE, defined as pairs ( i, j ) where | ˆKij | > 10 −6, and compute all evaluation metrics, and (e) record the exact computational execution time. Finally, we compute the mean and standard error of the evaluation metrics across the 
+
+R = 100 replicates. Graph recovery performance is evaluated using metrics that capture different aspects of estimation accuracy. Let TP, FP, FN, and TN denote true positives, false positives, false negatives, and true negatives for edge detection. To evaluate the support recovery performance, we report Precision, Recall (Lingjærde et al., 2024), F1-score (Zheng and Allen, 2024), and the Matthews correlation coefficient (MCC) (Chen et al., 2016; Chicco and Jurman, 2020), defined as follows: 
+
+P recision = TP TP + FP , Recall = TP TP + FN 
+
+F1 = 2TP 2TP + FP + FN , M CC = TP · TN − FP · FN 
+
+p(TP + FP)(TP + FN)(TN + FP)(TN + FN) Beyond statistical accuracy, the execution time recorded in step (e) allows us to assess algorithmic scalability. To ensure computational feasibility, we imposed a 60-second execu-tion limit per replicate. Methods exceeding this threshold or failing to meet convergence criteria were recorded as non-convergent (NA). Consequently, alongside the estimation met-rics, we report the Success Rate, defined as the proportion of Monte Carlo replicates that successfully yield a valid precision matrix estimate within the time constraint. 
+
+6.2 Results for p ≤ 30 The extended simulation results, examining the performance of DROP across varying di-mensions ( p ∈ { 10 , 20 , 30 }) and sample sizes ( n ∈ { 250 , 500 , 1000 }), are detailed in the Ap-pendix. Across all examined dimensions, the relative performance rankings of the methods remain consistent. For brevity, we focus our discussion on the representative moderate-dimensional setting of p = 20, highlighting the F1-score performance as a comprehensive measure of support recovery. 
+
+> 26
+
+DROP: Distributionally Robust Optimization 0.00 0.25 0.50 0.75 1.00 
+
+> DROP NPN Kendall Spearman TIGER Scaled_Lasso MCP SCAD HUGE_Glasso CLIME HUGE_MB SCIO
+> Method
+> F1 Score  Contamination
+> cauchy
+> clean
+> leverage
+> p = 20 | n = 500 | graph = band
+
+Figure 3: F1 Score comparison of the band graph with p = 20 nodes across contamination scenarios. 
+
+Before delving into the numerical details of specific graph types, Figure 3 provides a holistic visual summary of the estimation stability using the band graph as a representative example. The most striking observation across the three data regimes (Clean, Cauchy, and Leverage) is the consistently tight interquartile range of the DROP estimator. While competing robust methods exhibit significant performance fluctuations depending on the nature of the contamination, the estimates produced by DROP remain densely concentrated within a very narrow interval. This minimal estimation variance forms the core empirical advantage of our distributionally robust approach, demonstrating high reliability across diverse data generating mechanisms. 
+
+6.2.1 Performance on Clean Data 
+
+In the absence of data contamination, our primary goal is to verify that the robust for-mulation does not sacrifice statistical efficiency. Overall, DROP demonstrates highly com-petitive support recovery. When the data are generated from a true multivariate Gaussian distribution, DROP achieves high F1-scores that are generally on par with non-convex penalization methods (SCAD, MCP). For instance, at n = 500, DROP yields excellent per-formance across Band, Hub, and Random graphs. We acknowledge that standard Glasso can yield slightly better support recovery in certain specific structures (e.g., the cluster graph at p = 30, F1 = 0.72 vs. DROP’s F1 = 0.66). However, the performance of DROP remains highly informative and comparable. This reflects a minor and acceptable efficiency-robustness trade-off, where the method sacrifices a marginal degree of accuracy under perfect Gaussianity to ensure stability against severe distributional perturbations. 
+
+6.2.2 Robustness against Heavy-tailed Contamination 
+
+The necessity of robust estimators becomes evident under Cauchy contamination, where standard methods (MB, Glasso, CLIME, SCIO) experience severe degradation, with F1-scores dropping to near-zero levels. In this regime, rank-based robust alternatives (such as NPN, Kendall, and Spearman) provide strong resilience against heavy-tailed noise. It is important to objectively acknowl-edge that in terms of the absolute mean F1-score, certain rank-based methods can outper-form DROP under Cauchy contamination for specific graph types. However, as visually 
+
+27 Shen, Ji, Li, Yang, and Shi 
+
+evidenced by the boxplots in Figure 3, DROP compensates for this by exhibiting signif-icantly higher stability. While the performance of rank transformations can occasionally spread across a wider range across Monte Carlo replicates, DROP maintains a highly con-sistent, albeit sometimes slightly lower, recovery accuracy. DROP provides a more reliable and consistent estimation performance against extreme heavy-tailed outliers. 
+
+6.2.3 Robustness against Leverage Point Contamination 
+
+Leverage point contamination presents a unique challenge: the outliers preserve the under-lying correlation structure but heavily distort the sample covariance matrix due to their extreme magnitude ( N (0, 100 Σ)). As shown in both the simulation tables and Figure 3, leverage points cause a noticeable decline in the performance of non-robust methods. This is where DROP shows its greatest advantage. Although rank-based methods are also robust because they limit the impact of extreme values, DROP consistently matches or outperforms their mean F1-scores across various graph types. More importantly, DROP achieves this high accuracy while maintaining a very low estimation variance. This combi-nation of high accuracy and low variance confirms that optimizing over a robust ambiguity set effectively protects the precision matrix estimation from outliers with inflated variances. 
+
+6.2.4 Computational Efficiency 
+
+All computational experiments were executed on a system equipped with an Apple M4 chip and 16 GB of unified memory. Evaluating the runtime for p = 20 at n = 500 under this environment, DROP requires an average of approximately 4 seconds. In contrast, the stan-dard Glasso and the robust rank-based transformations (NPN, Kendall, Spearman) require approximately 10 seconds. These results suggest that the proposed algorithm achieves a favourable balance between computational efficiency and estimation stability. 
+
+6.3 Performance on Large-scale Graphs ( p = 100 and p = 250 )
+
+To evaluate the scalability of DROP and to bridge the simulation studies with our subse-quent real data application, we extend our evaluation to larger graph structures. Specifically, we consider scenarios with p = 100 under sample sizes n ∈ { 100 , 1000 }, and p = 250 under 
+
+n ∈ { 500 , 5000 }. Due to the prohibitive computational cost in high-dimensional settings, methods that consistently exceeded the 60-second execution limit per replicate were omit-ted. Consequently, our comparison in this regime focuses on DROP alongside four scalable baselines: Glasso, MB, NPN, and Spearman. The support recovery performances for the representative cases of p = 100 ( n = 1000) and p = 250 ( n = 500) are visualized comprehen-sively in Figure 4. Detailed numerical results for all parameter configurations are provided in Appendix. 
+
+6.3.1 High-dimensional Support Recovery and Robustness 
+
+Estimating the graph structure is inherently more difficult in high-dimensional settings (p = 100 and p = 250). On clean data, DROP performs well in this regime. For standard graph structures, it achieves support recovery that matches non-robust baselines. Notably, in the specific setting of p = 250 and n = 500, DROP maintains high accuracy. This 
+
+> 28
+
+DROP: Distributionally Robust Optimization 0.00 0.25 0.50 0.75 1.00 
+
+> DROP NPN Spearman HUGE_Glasso HUGE_MB
+
+Method 
+
+> F1 Score
+
+Contamination 
+
+cauchy 
+
+clean 
+
+leverage 
+
+p = 100 | n = 1000 | graph = band 0.00 0.25 0.50 0.75 1.00 
+
+> DROP NPN Spearman HUGE_Glasso HUGE_MB
+
+Method 
+
+> F1 Score
+
+Contamination 
+
+cauchy 
+
+clean 
+
+leverage 
+
+p = 250 | n = 500 | graph = band 0.00 0.25 0.50 0.75 1.00 
+
+> DROP NPN Spearman HUGE_Glasso HUGE_MB
+
+Method 
+
+> F1 Score
+
+Contamination 
+
+cauchy 
+
+clean 
+
+leverage 
+
+p = 100 | n = 1000 | graph = hub 0.00 0.25 0.50 0.75 1.00 
+
+> DROP NPN Spearman HUGE_Glasso HUGE_MB
+
+Method 
+
+> F1 Score
+
+Contamination 
+
+cauchy 
+
+clean 
+
+leverage 
+
+p = 250 | n = 500 | graph = hub 0.00 0.25 0.50 0.75 1.00 
+
+> DROP NPN Spearman HUGE_Glasso HUGE_MB
+
+Method 
+
+> F1 Score
+
+Contamination 
+
+cauchy 
+
+clean 
+
+leverage 
+
+p = 100 | n = 1000 | graph = random 0.00 0.25 0.50 0.75 1.00 
+
+> DROP NPN Spearman HUGE_Glasso HUGE_MB
+
+Method 
+
+> F1 Score
+
+Contamination 
+
+cauchy 
+
+clean 
+
+leverage 
+
+p = 250 | n = 500 | graph = random 0.00 0.25 0.50 0.75 1.00 
+
+> DROP NPN Spearman HUGE_Glasso HUGE_MB
+
+Method 
+
+> F1 Score
+
+Contamination 
+
+cauchy 
+
+clean 
+
+leverage 
+
+p = 100 | n = 1000 | graph = cluster 0.00 0.25 0.50 0.75 1.00 
+
+> DROP NPN Spearman HUGE_Glasso HUGE_MB
+
+Method 
+
+> F1 Score
+
+Contamination 
+
+cauchy 
+
+clean 
+
+leverage 
+
+p = 250 | n = 500 | graph = cluster 0.00 0.25 0.50 0.75 1.00 
+
+> DROP NPN Spearman HUGE_Glasso HUGE_MB
+
+Method 
+
+> F1 Score
+
+Contamination 
+
+cauchy 
+
+clean 
+
+leverage 
+
+p = 100 | n = 1000 | graph = scale−free 0.00 0.25 0.50 0.75 1.00 
+
+> DROP NPN Spearman HUGE_Glasso HUGE_MB
+
+Method 
+
+> F1 Score
+
+Contamination 
+
+cauchy 
+
+clean 
+
+leverage 
+
+p = 250 | n = 500 | graph = scale−free 
+
+Figure 4: F1 score comparison across five graph structures. Left: p = 100 ( n = 1000). Right: p = 250 ( n = 500). 
+
+29 Shen, Ji, Li, Yang, and Shi 
+
+is evident in the hub graph, where DROP achieves an F1-score near 1.00. While the robust penalty induces some over-shrinkage in highly irregular structures (e.g., in the scale-free graph, Glasso achieves an F1 of 0.79 compared to DROP’s 0.53), DROP still yields structurally informative estimates, confirming its applicability in high-dimensional settings. When data contain outliers, non-robust methods (Glasso and MB) show a noticeable decrease in F1-scores across all structures (Figure 4). This outcome is expected, as these estimators are not designed to handle heavy-tailed distributions or variance inflation. For p = 100, DROP demonstrates strong performance across the band, hub, random, and cluster graphs, particularly under leverage point contamination. Under Cauchy noise, while Spearman achieves higher mean F1-scores in the hub and cluster graphs, DROP remains highly comparable and maintains a relatively smaller estimation variance. In the scale-free graph, Spearman shows better recovery; however, DROP continues to provide a reliable baseline without extreme performance degradation. As the dimension increases to p = 250, the relative advantages of the methods vary with the graph structure. Under leverage contamination, DROP performs well on the band, hub, and random graphs. In the scale-free and cluster graphs under leverage noise, the performance of DROP is comparable to Spearman and NPN, respectively. Notably, Spearman yields lower F1-scores on the hub and cluster graphs in this setting, indicating that its performance varies with the underlying graph structure. Under Cauchy noise at 
+
+p = 250, DROP performs well on the band graph, though Spearman outperforms it on the remaining structures. These detailed comparisons highlight the core advantage of DROP: its overall stability and robustness. While rank-based methods such as NPN and Spearman may excel in specific combinations of graph structures and contamination types, their performance and estima-tion variance fluctuate substantially across scenarios. DROP, conversely, avoids these severe fluctuations. By maintaining consistent structural recovery and stable behaviour across di-verse conditions, DROP provides a dependable approach for robust Gaussian graphical model estimation. This combination of stability and robustness supports its application to real-world data, where the exact nature of the structural noise is typically unknown. 
+
+6.3.2 Computational Scalability 
+
+For p = 250 and n = 500, DROP requires an average of 18 to 44 seconds to converge across the evaluated graph structures. This runtime is higher than that of Glasso, NPN, and Spearman (11 to 26 seconds), but remains within the 60-second limit. The additional execution time is a standard trade-off for the improved stability under data contamination, making the algorithm suitable for higher-dimensional datasets. 
+
+7 Real Data Application: Functional MRI Connectivity 
+
+Motivated by the strong empirical performance and scalability of DROP in the high-dimensional simulations (particularly the p = 250 setting), we apply our proposed method to a real functional magnetic resonance imaging (fMRI) dataset. In neuroimaging stud-ies, fMRI recordings are frequently confounded by physiological noise, scanner artifacts, and subject head motion, often resulting in heavy-tailed noise distributions and signal outliers. Consequently, estimating functional brain connectivity networks presents a high-
+
+> 30
+
+DROP: Distributionally Robust Optimization 
+
+dimensional challenge with inherent distributional uncertainty, making it an ideal testbed for the DROP estimator. 
+
+7.1 Dataset and Problem Setup 
+
+We utilize the publicly available Music Genre fMRI Dataset (Nakai et al., 2023), which captures the Blood Oxygenation Level Dependent (BOLD) signals of subjects listening to diverse musical stimuli. To construct the region-wise connectivity network, the brain was parcellated into p = 264 regions of interest (ROIs) based on the standard Power-264 atlas (Power et al., 2010). Original Preprocessing Spatial Parcellation ROI Extraction     
+
+> t1…... ... t492
+> ROI 1
+> ROI 2
+> ROI 3
+> ROI 4
+> ROI Extraction
+> BOLD Signal Level
+
+Figure 5: Workflow of fMRI data extraction from raw images to region-wise BOLD time series based on the Power-264 parcellation (created in https://BioRender.com) 
+
+Figure 5 provides an overview of the fMRI data extraction workflow, from raw images to region-wise BOLD time series using the Power-264 parcellation. The process begins with standard fMRI preprocessing steps, including slice-timing correction to adjust for inter-slice acquisition delays, motion correction via realignment to the mean functional image, coregistration to structural images, normalization to MNI space, and spatial smoothing with a Gaussian kernel to improve signal-to-noise ratio. Following preprocessing, the data undergo spatial parcellation into 264 regions of interest (ROIs). For each ROI, the mean BOLD signal is extracted across time, yielding region-wise time series that capture the temporal dynamics of neural activity. As illustrated in the figure, this results in a structured output where each ROI corresponds to a column vector of BOLD signal intensity across sequential 492 time points, forming the basis for subsequent connectivity analyses. Since real fMRI data lack a ground-truth graph, we assess the robustness of the es-timators by directly applying contamination to the empirical dataset. First, we estimate the baseline connectivity networks using the original, clean fMRI data. To evaluate per-formance under non-ideal conditions, we then corrupt the fMRI design matrix with the same Cauchy and leverage point contamination ( r = 0 .1) utilized in Section 6. We compare DROP against the standard GLASSO, MB, NPN, and Spearman estimators. 
+
+7.2 Sparse Connectivity and Modular Organization 
+
+To investigate the structural properties of the estimated networks, we visualize the brain connectivity matrices produced by DROP, GLASSO, MB, NPN, and Spearman. Figure 6 
+
+31 Shen, Ji, Li, Yang, and Shi 
+
+displays the estimated connectomes for three subjects under the clean data condition. Fol-lowing the thresholding practice in neuroimaging literature (Zhang et al., 2018), only edges with an absolute partial correlation strength above 0.005 are retained to highlight the most significant functional connections. Nodes corresponding to auditory regions are colored in blue, while other regions are in red. To provide a clearer anatomical perspective, Figure 7 additionally displays a 3D spatial mapping of the network estimated specifically by the proposed DROP method. L R L R L R L R L R    
+
+> drop glasso mb npn spearman
+
+(a) sub-001 L R L R L R L R L R    
+
+> drop glasso mb npn spearman
+
+(b) sub-002 L R L R L R L R L R    
+
+> drop glasso mb npn spearman
+
+(c) sub-003 
+
+Figure 6: Estimated brain connectivity networks for three subjects under the clean data scenario. Auditory regions are highlighted in blue. 
+
+As observed in Figure 6, DROP estimates a sparser network than the competing meth-ods. Statistically, inducing such sparsity helps control false positive edges and prevent overfitting in high-dimensional regimes. This conservative structural recovery is consistent with evidence in network neuroscience, which indicates that functional brain networks are intrinsically sparse (Huang et al., 2010; Ryali et al., 2012). To quantitatively evaluate the graph structure, we compare the network modularity alongside the total number of edges. Modularity measures how well a network separates into densely connected communities with sparse connections between them. Formally, the modularity score M is defined as (Newman, 2006): 
+
+M = 12|E| 
+
+> p
+
+X
+
+> i,j =1
+
+
+
+Aij − didj
+
+2|E| 
+
+
+
+I(gi = gj ), (53) 
+
+32 DROP: Distributionally Robust Optimization 
+
+Figure 7: 3D spatial visualization of the strongest 20 ROI and connectivity network estimated by the proposed DROP method. 
+
+where Aij is the adjacency matrix, di and dj denote the degrees of nodes i and j, |E| is the total number of edges in the estimated graph, and I(·) is the indicator function such that 
+
+I(gi = gj ) = 1 if nodes i and j belong to the same community, and 0 otherwise, with gi repre-senting the community assignment of node i (identified via the Louvain algorithm (Blondel et al., 2008)) and 0 otherwise. Higher values of M indicate a more pronounced community structure. Figure 8 summarizes the network sparsity and modularity scores across all data condi-tions. Under the clean setting, DROP consistently yields the sparsest networks alongside the highest modularity. For example, in Subject 001, DROP estimates fewer edges (773) than competing methods while achieving the highest modularity ( M = 0 .540). This sug-gests that the edges retained by DROP form a coherent community structure rather than a dense, unorganized graph. Under data contamination, DROP maintains stable performance. With leverage per-turbation, its edge counts and modularity values remain similar to those obtained from the clean data. In contrast, non-robust estimators like GLASSO and MB show larger vari-ations, reflecting their sensitivity to outliers. Under heavy-tailed Cauchy noise, while all methods experience performance degradation, DROP preserves a sparser graph and higher modularity than the baselines. The competing methods tend to produce denser networks with lower modularity scores, indicating the inclusion of noise-induced false positive edges. 
+
+7.3 Node Degree Distribution Across Functional Systems 
+
+To examine the behavior of the estimators across localized brain regions, we analyze the node degree distributions grouped by the functional systems defined in the Power-264 atlas. For an estimated adjacency matrix A, the degree of node i is defined as di = P  
+
+> j̸=i
+
+Aij ,representing the local connectivity density. Given the experimental context of music genre 
+
+> 33
+
+Shen, Ji, Li, Yang, and Shi 
+
+(a) Clean (Origin) 
+
+(b) Leverage Contamination 
+
+(c) Cauchy Contamination 
+
+Figure 8: Comparison of the number of estimated edges (left axis) and modularity scores (right axis) across the five estimation methods under different contamination scenarios. 
+
+34 DROP: Distributionally Robust Optimization 
+
+recognition, the auditory network is of particular interest, alongside other major functional modules. Figure 9 displays the degree distributions for Subject 001 under the clean, leverage, and Cauchy contamination scenarios. The corresponding box plots for the remaining subjects, along with the system-level mean degree comparisons across all conditions, exhibit similar patterns and are provided in Appendix. The degree distributions show that DROP yields the lowest median degrees and the narrowest interquartile ranges across all functional systems. This sparsity confirms a more conservative criterion for edge selection compared to Spearman-based networks, which pro-duce the densest graphs. Standard GLASSO, NPN, and MB estimators generally fall be-tween these two extremes. Under data contamination, the degree profiles of non-robust methods show noticeable shifts. Specifically, leverage points cause an upward shift in the degrees for several methods, while Cauchy noise increases the dispersion of the estimates, as evidenced by elongated whiskers and outliers in Figure 9. In contrast, the distributions for DROP remain stable across both perturbation schemes, reflecting its resistance to variance inflation and heavy-tailed noise. The results also capture heterogeneity across brain systems. Integrative and sensory networks, such as the Default Mode and Visual systems, exhibit higher node degrees across most methods, suggesting these regions act as connectivity hubs. The Auditory system shows lower median degrees and localized connectivity. Notably, the estimation in Sub-cortical and Uncertain regions appears more sensitive to data quality and the choice of regularization, as shown by the increased variability under contamination. Overall, the fMRI application is consistent with the simulation results in Section 6. Under clean condi-tions, DROP identifies a sparse network with modular organization, and under heavy-tailed or leverage-point contamination, it maintains structural stability while competing meth-ods are prone to noise-induced false positive edges. Taken together, the reliable network structures recovered by DROP suggest that music perception is supported by coordinated interactions across distributed functional systems, rather than isolated processing within the auditory cortex alone. 
+
+8 Discussion 
+
+In this paper, we developed DROP, a robust methodology for estimating high-dimensional Gaussian Graphical Models. Motivated by the vulnerability of standard precision matrix estimators, DROP is designed to enforce structural sparsity while maintaining robustness against general data contamination, such as extreme outliers and heavy-tailed noise. The-oretically, we established error bounds for the proposed estimator. To facilitate practical application and reproducible research, the proposed methodology is implemented in the R package DROP , which will be made publicly available on GitHub. The empirical performance of DROP was evaluated through both high-dimensional sim-ulations and a real-world fMRI application. In our simulations, DROP demonstrated an ability to control the rate of false positive edges. When the data are subjected to leverage points or heavy-tailed Cauchy noise, conventional estimators such as GLASSO and MB tend to produce denser networks with reduced modularity, reflecting their sensitivity to such perturbations. In contrast, DROP identifies a more stable graph structure, maintain-
+
+> 35
+
+Shen, Ji, Li, Yang, and Shi 
+
+Figure 9: Node degree distributions across functional systems for Subject 001 under Clean, Leverage, and Cauchy contamination. 
+
+36 DROP: Distributionally Robust Optimization 
+
+ing consistent sparsity and localized degree distributions. This reliability is beneficial for neuroimaging analyses, where scanner artifacts and physiological noise often deviate from standard Gaussian assumptions. Several directions remain open for future research. While our current implementation focuses on standard precision matrix estimation via nodewise regression, the underlying distributionally robust optimization formulation naturally extends to a broader class of graphical models. For instance, this robust approach can be adapted to models with struc-tural symmetries, such as colored Gaussian graphical models (Højsgaard and Lauritzen, 2008; Roverato and Nguyen, 2024; Li et al., 2025), which impose equality constraints on the precision matrix. Furthermore, incorporating the DROP framework into Gaussian graphi-cal regressions could enable the robust estimation of covariate-dependent precision matri-ces (Zhang and Li, 2025). This would provide a reliable tool for estimating heterogeneous networks whose edge weights are modulated by high-dimensional external covariates, even when the observed data are contaminated. 
+
+Data Availability and Reproducibility 
+
+The fMRI dataset used in this study is publicly available from the OpenNeuro repository under accession number ds003720 , version 1.0.1 ( https://openneuro.org/datasets/ds0 03720/versions/1.0.1 ). The analysis focuses on three subjects (sub-001, sub-002, and sub-003), specifically the functional runs corresponding to the task-Training phase. To reproduce the results, users should download the original BIDS-formatted dataset directly from OpenNeuro. All preprocessing pipelines, ROI time series extraction scripts, and the R code for the DROP graphical model estimation are provided in the supplementary materials (and our public GitHub repository). 
+
+Acknowledgments and Disclosure of Funding 
+
+The authors would like to thank Mengyu Xie for valuable assistance with the literature review and Yiting Chen for helpful comments on the manuscript. Qiong Li’s Research partially supported by NSFC (Grant No. 12271047) and Guangdong and Hong Kong Uni-versities “1+1+1” Joint Research Collaboration Scheme (2025A0505000010) and Guang-dong provincial key laboratory of interdisciplinary research and application for data science (2022B1212010006). Wenzhi Yang was supported by the National Natural Science Foun-dation of China (NSFC, Grant No. 12471248). Xiaoping Shi was supported by the Natural Sciences and Engineering Research Council of Canada (NSERC) Discovery Grant (RGPIN-2022-03264), the NSERC Alliance International Catalyst Grant (ALLRP-590341-23), and the University of British Columbia Okanagan (UBC-O) Vice-Principal Research in collab-oration with the Irving K. Barber Faculty of Science. 
+
+References 
+
+Marco Avella-Medina, Heather Battey, Jianqing Fan, and Qiwei Li. Robust estimation of high-dimensional covariance and precision matrices. Biometrika , 105(2):271–284, 2018. 
+
+> 37 Shen, Ji, Li, Yang, and Shi
+
+Onureena Banerjee, Laurent El Ghaoui, and Alexandre d’Aspremont. Model selection through sparse maximum likelihood estimation for multivariate gaussian or binary data. 
+
+The Journal of Machine Learning Research , 9:485–516, 2008. Albert-L´ aszl´ o Barab´ asi and R´ eka Albert. Emergence of scaling in random networks. Science ,286(5439):509–512, 1999. Jose Blanchet, Yanjun Kang, and Karthyek Murthy. Robust wasserstein profile inference and applications to machine learning. Journal of Applied Probability , 56:830–857, 2019. Jose Blanchet, Jiajin Li, Sirui Lin, and Xuhui Zhang. Distributionally robust optimization and robust statistics. Statistical Science , 40(3):351–377, 2025. Vincent D Blondel, Jean-Loup Guillaume, Renaud Lambiotte, and Etienne Lefebvre. Fast unfolding of communities in large networks. Journal of Statistical Mechanics: Theory and Experiment , 2008(10):P10008, 2008. Stephen Boyd and Lieven Vandenberghe. Convex optimization . Cambridge University Press, 2004. Patrick Breheny and Jian Huang. Coordinate descent algorithms for nonconvex penal-ized regression, with applications to biological feature selection. The Annals of Applied Statistics , 5(1):232, 2011. Tony Cai, Weidong Liu, and Xi Luo. A constrained l1 minimization approach to sparse precision matrix estimation. Journal of the American Statistical Association , 106(494): 594–607, 2011. Emmanuel Candes and Terence Tao. The dantzig selector: Statistical estimation when p is much larger than n. The Annals of Statistics , 35(6):2313 – 2351, 2007. Jiahua Chen and Zehua Chen. Extended bayesian information criteria for model selection with large model spaces. Biometrika , 95(3):759–771, 2008. Mengjie Chen, Zhao Ren, Hongyu Zhao, and Harrison Zhou. Asymptotically normal and efficient estimation of covariate-adjusted gaussian graphical model. Journal of the Amer-ican Statistical Association , 111(513):394–406, 2016. Davide Chicco and Giuseppe Jurman. The advantages of the matthews correlation coeffi-cient (mcc) over f1 score and accuracy in binary classification evaluation. BMC Genomics ,21(1):6, 2020. Pedro Cisneros-Velarde, Alexander Petersen, and Sang-Yun Oh. Distributionally robust formulation and model selection for the graphical lasso. In International Conference on Artificial Intelligence and Statistics , pages 756–765. PMLR, 2020. Erick Delage and Yinyu Ye. Distributionally robust optimization under moment uncertainty with application to data-driven problems. Operations Research , 58(3):595–612, 2010. 
+
+> 38 DROP: Distributionally Robust Optimization
+
+John C Duchi, Peter W Glynn, and Hongseok Namkoong. Statistics of robust optimization: A generalized empirical likelihood approach. Mathematics of Operations Research , 46(3): 946–969, 2021. Paul Erd˝ os and Alfr´ ed R´ enyi. On random graphs i. Publicationes Mathematicae (Debrecen) ,6:290–297, 1959. Jianqing Fan and Runze Li. Variable selection via nonconcave penalized likelihood and its oracle properties. Journal of the American Statistical Association , 96(456):1348–1360, 2001. Jianqing Fan, Yuan Liao, and Han Liu. An overview of the estimation of large covariance and precision matrices. The Econometrics Journal , 19(1):C1–C32, 2016. Rina Foygel and Mathias Drton. Extended bayesian information criteria for gaussian graph-ical models. Advances in Neural Information Processing Systems , 23, 2010. Jerome Friedman, Trevor Hastie, and Robert Tibshirani. Sparse inverse covariance estima-tion with the graphical lasso. Biostatistics , 9(3):432–441, 2008. Rui Gao, Xi Chen, and Anton J Kleywegt. Wasserstein distributionally robust optimization and variation regularization. Operations Research , 72(3):1177–1191, 2024. Joel Goh and Melvyn Sim. Distributionally robust optimization and its tractable approxi-mations. Operations Research , 58(4-part-1):902–917, 2010. Kenji Hirose, Hironori Fujisawa, and Jun Sese. Robust sparse gaussian graphical modeling. 
+
+Journal of Multivariate Analysis , 161:172–190, 2017. Søren Højsgaard and Steffen L Lauritzen. Graphical gaussian models with edge and vertex symmetries. Journal of the Royal Statistical Society Series B: Statistical Methodology , 70 (5):1005–1027, 2008. Shuai Huang, Jing Li, Liang Sun, Jieping Ye, Adam Fleisher, Teresa Wu, Kewei Chen, and Eric Reiman. Learning brain connectivity of alzheimer’s disease by sparse inverse covariance estimation. NeuroImage , 50(3):935–949, 2010. Christopher Johnson, Ali Jalali, and Pradeep Ravikumar. High-dimensional sparse inverse covariance estimation using greedy methods. In Artificial Intelligence and Statistics ,pages 574–582. PMLR, 2012. Daniel Kuhn, Soroosh Shafiee, and Wolfram Wiesemann. Distributionally robust optimiza-tion. Acta Numerica , 34:579–804, 2025. Clifford Lam and Jianqing Fan. Sparsistency and rates of convergence in large covariance matrix estimation. The Annals of Statistics , 37(6B):4254, 2009. Kyoungjae Lee, Lizhen Lin, and Kisung You. CovTools: Statistical Tools for Covariance Analysis , 2025. R package version 0.5.6. 
+
+> 39 Shen, Ji, Li, Yang, and Shi
+
+Qiong Li, Xiaoying Sun, Nanwei Wang, and Xin Gao. Penalized composite likelihood for colored graphical gaussian models. Statistical Analysis and Data Mining: The ASA Data Science Journal , 14:366–378, 2021. Qiong Li, Nanwei Wang, Xin Gao, and Jianxin Pan. Bayesian structure learning for graph-ical models with symmetry constraints. Biometrical Journal , 67(6):e70091, 2025. Camilla Lingjærde, Benjamin P Fairfax, Sylvia Richardson, and H´ el` ene Ruffieux. Scalable multiple network inference with the joint graphical horseshoe. The Annals of Applied Statistics , 18(3):1899–1923, 2024. Han Liu and Lie Wang. Tiger: A tuning-insensitive approach for optimally estimating gaussian graphical models. Electronic Journal of Statistics , 11(1):241 – 294, 2017. Han Liu, John Lafferty, and Larry Wasserman. The nonparanormal: Semiparametric esti-mation of high dimensional undirected graphs. Journal of Machine Learning Research ,10:2295–2328, 2009. Han Liu, Kathryn Roeder, and Larry Wasserman. Stability approach to regularization selection (stars) for high dimensional graphical models. Advances in Neural Information Processing Systems , 23, 2010. Han Liu, Fang Han, Ming Yuan, John Lafferty, and Larry Wasserman. High-dimensional semiparametric gaussian copula graphical models. The Annals of Statistics , 40:2293–2326, 2012. Weidong Liu and Xi Luo. Fast and adaptive sparse precision matrix estimation in high dimensions. Journal of Multivariate Analysis , 135:153–162, 2015. Po-Ling Loh and Xiaodong Tan. High-dimensional robust precision matrix estimation: Cellwise corruption under ϵ-contamination. Electronic Journal of Statistics , 12(1):1429– 1467, 2018. Karim Lounici, Massimiliano Pontil, Sara van de Geer, and Alexandre B. Tsybakov. Oracle inequalities and optimal inference under group sparsity. The Annals of Statistics , 39(4): 2164 – 2204, 2011. Nicolai Meinshausen and Peter B¨ uhlmann. High-dimensional graphs and variable selection with the lasso. The Annals of Statistics , 34(3):1436 – 1462, 2006. Peyman Mohajerin Esfahani and Daniel Kuhn. Data-driven distributionally robust opti-mization using the wasserstein metric: Performance guarantees and tractable reformula-tions. Mathematical Programming , 171(1):115–166, 2018. Tomoya Nakai, Naoko Koide-Majima, and Shinji Nishimoto. Music genre fmri dataset, 2023. Mark EJ Newman. Modularity and community structure in networks. Proceedings of the National Academy of Sciences , 103(23):8577–8582, 2006. 
+
+> 40 DROP: Distributionally Robust Optimization
+
+Viet Anh Nguyen, Soroosh Shafieezadeh-Abadeh, Daniel Kuhn, and Peyman Mohajerin Es-fahani. Distributionally robust inverse covariance estimation: The wasserstein shrinkage estimator. Operations Research , 70(1):490–515, 2022. Takahiro Onizuka and Shintaro Hashimoto. Robust bayesian graphical modeling using γ-divergence. Journal of Multivariate Analysis , 209:105461, 2025. Victor M Panaretos and Yoav Zemel. Statistical aspects of wasserstein distances. Annual Review of Statistics and Its Application , 6:405–431, 2019. J.D. Power, D.A. Fair, B.L. Schlaggar, and S.E. Petersen. The development of human functional brain networks. Neuron , 67(5):735–748, 2010. Hamed Rahimian and Sanjay Mehrotra. Distributionally robust optimization: A review. 
+
+arXiv preprint arXiv:1908.05659 , 2019. Alberto Roverato and Dung Ngoc Nguyen. Exploration of the search space of gaussian graphical models for paired data. Journal of Machine Learning Research , 25(92):1–41, 2024. Srikanth Ryali, Tianwen Chen, Kaustubh Supekar, and Vinod Menon. Estimation of func-tional connectivity in fmri data using stability selection-based sparse partial correlation with elastic net penalty. NeuroImage , 59(4):3852–3861, 2012. Aman Sinha, Hongseok Namkoong, Riccardo Volpi, and John Duchi. Certifying some distributional robustness with principled adversarial training. arXiv preprint arXiv:1710.10571 , 2017. Tingni Sun and Cun-Hui Zhang. Scaled sparse linear regression. Biometrika , 99(4):879–898, 2012. Tingni Sun and Cun-Hui Zhang. Sparse matrix inversion with scaled lasso. The Journal of Machine Learning Research , 14(1):3385–3418, 2013. Bart P Van Parys, Paul J Goulart, and Manfred Morari. Distributionally robust control of constrained stochastic systems. IEEE Transactions on Automatic Control , 61(2):430–442, 2016. Wolfram Wiesemann, Daniel Kuhn, and Melvyn Sim. Distributionally robust convex opti-mization. Operations Research , 62(6):1358–1376, 2014. Lingzhou Xue and Hui Zou. Regularized rank-based estimation of high-dimensional non-paranormal graphical models. The Annals of Statistics , 40(5):2541–2571, 2012. Ming Yuan and Yi Lin. Model selection and estimation in the gaussian graphical model. 
+
+Biometrika , 94(1):19–35, 2007. Aiying Zhang, Jian Fang, Faming Liang, Vince D Calhoun, and Yu-Ping Wang. Aberrant brain connectivity in schizophrenia detected via a fast gaussian graphical model. IEEE Journal of Biomedical and Health Informatics , 23(4):1479–1489, 2018. 
+
+> 41 Shen, Ji, Li, Yang, and Shi
+
+Cun-Hui Zhang. Nearly unbiased variable selection under minimax concave penalty. The Annals of Statistics , 38(2):894 – 942, 2010. Jingfei Zhang and Yi Li. Multi-task learning for gaussian graphical regressions with high dimensional covariates. Journal of Computational and Graphical Statistics , 34(3):961– 970, 2025. Tuo Zhao, Han Liu, Kathryn Roeder, John Lafferty, and Larry Wasserman. The huge package for high-dimensional undirected graph estimation in r. The Journal of Machine Learning Research , 13(1):1059–1062, 2012. Lili Zheng and Genevera I Allen. Graphical model inference with erosely measured data. 
+
+Journal of the American Statistical Association , 119(547):2282–2293, 2024. Sanjay Zhu and Masao Fukushima. Worst-case conditional value-at-risk with application to robust portfolio management. Operations Research , 57(5):1155–1168, 2009.

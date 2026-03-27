@@ -6,52 +6,43 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-03-26
-- 运行时间：2026-03-26 19:44:27 UTC
+- 最新运行日期：2026-03-27
+- 运行时间：2026-03-27 20:08:53 UTC
 - 运行状态：成功
-- 本次总论文数：10
+- 本次总论文数：7
 - 精读区：1
-- 速读区：9
+- 速读区：6
 
 ### 今日简报（AI）
-今日深度解析锂电池健康预测的迁移学习方案，涵盖分布式电站监控与异常检测等 10 篇前沿成果。
-重点推荐保形迁移学习在应对电池制造差异中的应用，以及可解释 AI 在平衡工业检测性能与公平性上的新突破。
-建议从模块化解释信号入手，探索基础模型在提升复杂工业系统透明度方面的实际潜力。
-- 详情：[/202603/26/README](/202603/26/README)
+今日聚焦医疗AI与多任务学习优化，深度评估了自监督学习在膝骨关节炎预后中的实战价值。
+核心结论指出，利用未清洗的医院数据进行自监督预训练，在预测病情进展上展现出比单纯诊断更强的潜力。
+建议关注如何通过任务分解与鲁棒优化技术，提升复杂系统在真实噪声环境下的诊断效率与安全性。
+- 详情：[/202603/27/README](/202603/27/README)
 
 ### 精读区论文标签
-1. [Conformalized Transfer Learning for Li-ion Battery State of Health Forecasting under Manufacturing and Usage Variability](/202603/26/2603.24475v1-conformalized-transfer-learning-for-li-ion-battery-state-of-health-forecasting-under-manufacturing-and-usage-variability)  
-   标签：评分：8.0/10、query:rul
-   evidence：锂离子电池健康状态预测
+1. [Self-Supervised Learning for Knee Osteoarthritis: Diagnostic Limitations and Prognostic Value of Uncurated Hospital Data](/202603/27/2603.24903v1-self-supervised-learning-for-knee-osteoarthritis-diagnostic-limitations-and-prognostic-value-of-uncurated-hospital-data)  
+   标签：评分：8.0/10、query:phm
+   evidence：使用自监督学习进行诊断和预后建模
 
 ### 速读区论文标签
-1. [Balancing Performance and Fairness in Explainable AI for Anomaly Detection in Distributed Power Plants Monitoring](/202603/26/2603.18954v1-balancing-performance-and-fairness-in-explainable-ai-for-anomaly-detection-in-distributed-power-plants-monitoring)  
+1. [A Task Decomposition Framework for Aircraft Health Diagnosis: Balancing Safety and Efficiency via Heterogeneous Long-Micro Scale Cascading](/202603/27/2603.22885v2-a-task-decomposition-framework-for-aircraft-health-diagnosis-balancing-safety-and-efficiency-via-heterogeneous-long-micro-scale-cascading)  
    标签：评分：7.0/10、query:phm
-   evidence：电厂异常检测以确保运营连续性
-2. [Graph-Theoretic Analysis of Residual Generation Under Computational Constraints](/202603/26/2603.24273v1-graph-theoretic-analysis-of-residual-generation-under-computational-constraints)  
-   标签：评分：7.0/10、query:phm
-   evidence：基于模型的故障诊断结构框架
-3. [FoMo X: Modular Explainability Signals for Outlier Detection Foundation Models](/202603/26/2603.17570v1-fomo-x-modular-explainability-signals-for-outlier-detection-foundation-models)  
+   evidence：基于任务分解的飞机健康监测智能故障诊断
+2. [mSFT: Addressing Dataset Mixtures Overfiting Heterogeneously in Multi-task SFT](/202603/27/2603.21606v1-msft-addressing-dataset-mixtures-overfiting-heterogeneously-in-multi-task-sft)  
    标签：评分：6.0/10、query:phm
-   evidence：具有诊断能力的离群点检测模块化框架
-4. [FAAR: Efficient Frequency-Aware Multi-Task Fine-Tuning via Automatic Rank Selection](/202603/26/2603.20403v1-faar-efficient-frequency-aware-multi-task-fine-tuning-via-automatic-rank-selection)  
+   evidence：解决多任务监督微调中的过拟合问题
+3. [DROP: Distributionally Robust Optimization for Multi-task Learning in Graphical Models](/202603/27/2603.22845v1-drop-distributionally-robust-optimization-for-multi-task-learning-in-graphical-models)  
    标签：评分：6.0/10、query:phm
-   evidence：通过自动秩选择进行多任务微调
-5. [Centrality-Based Pruning for Efficient Echo State Networks](/202603/26/2603.20684v1-centrality-based-pruning-for-efficient-echo-state-networks)  
+   evidence：鲁棒多任务学习框架
+4. [Uncertainty-Aware Vision-based Risk Object Identification via Conformal Risk Tube Prediction](/202603/27/2603.23919v1-uncertainty-aware-vision-based-risk-object-identification-via-conformal-risk-tube-prediction)  
+   标签：评分：6.0/10、query:phm
+   evidence：跨时空联合建模风险不确定性
+5. [Layer-Specific Lipschitz Modulation for Fault-Tolerant Multimodal Representation Learning](/202603/27/2603.25103v1-layer-specific-lipschitz-modulation-for-fault-tolerant-multimodal-representation-learning)  
+   标签：评分：6.0/10、query:phm
+   evidence：在工业环境中统一自监督异常检测与错误纠正
+6. [Efficient compressive sensing for machinery vibration signals](/202603/27/2603.25166v1-efficient-compressive-sensing-for-machinery-vibration-signals)  
    标签：评分：6.0/10、query:rul
-   evidence：非线性时间序列预测与负荷预测
-6. [A Foundation Model for Instruction-Conditioned In-Context Time Series Tasks](/202603/26/2603.22586v1-a-foundation-model-for-instruction-conditioned-in-context-time-series-tasks)  
-   标签：评分：6.0/10、query:rul
-   evidence：用于包含未来信息预测的上下文时间序列任务的基础模型
-7. [JFTA-Bench: Evaluate LLM's Ability of Tracking and Analyzing Malfunctions Using Fault Trees](/202603/26/2603.22978v1-jfta-bench-evaluate-llms-ability-of-tracking-and-analyzing-malfunctions-using-fault-trees)  
-   标签：评分：6.0/10、query:phm
-   evidence：用于故障定位与追踪的故障树分析
-8. [Rao-Blackwellized Stein Gradient Descent for Joint State-Parameter Estimation](/202603/26/2603.23039v1-rao-blackwellized-stein-gradient-descent-for-joint-state-parameter-estimation)  
-   标签：评分：6.0/10、query:phm
-   evidence：非线性系统中的联合状态估计与参数识别
-9. [Information-Driven Active Perception for k-step Predictive Safety Monitoring](/202603/26/2603.23450v1-information-driven-active-perception-for-k-step-predictive-safety-monitoring)  
-   标签：评分：6.0/10、query:rul
-   evidence：预测性安全监控与未来状态预测
+   evidence：机械振动信号的压缩感知
 
 
 <div class="dpr-home-promo-card">
