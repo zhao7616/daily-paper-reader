@@ -1,0 +1,415 @@
+Title: Template-Based Feature Aggregation Network for Industrial Anomaly Detection
+
+URL Source: https://arxiv.org/pdf/2603.22874v1
+
+Published Time: Wed, 25 Mar 2026 01:04:57 GMT
+
+Number of Pages: 20
+
+Markdown Content:
+# Template-Based Feature Aggregation Network for Industrial Anomaly Detection 
+
+## Wei Luo a, Haiming Yao a and Wenyong Yu b,∗
+
+> a
+
+State Key Laboratory of Precision Measurement Technology and Instruments, Tsinghua University, Beijing, 100084, China 
+
+> b
+
+State Key Laboratory of Digital Manufacturing Equipment and Technology, Huazhong University of Science and Technology, Wuhan, 430074, China 
+
+A R T I C L E I N F O 
+
+Keywords :Anomaly detection Template-based feature aggregation Vision transformer Feature reconstruction Logical anomaly detection 
+
+A B S T R A C T 
+
+Industrial anomaly detection plays a crucial role in ensuring product quality control. Therefore, proposing an effective anomaly detection model is of great significance. While existing feature-reconstruction methods have demonstrated excellent performance, they face challenges with shortcut learning, which can lead to undesirable reconstruction of anomalous features. To address this concern, we present a novel feature-reconstruction model called the Template-based Feature Aggregation Net work (TFA-Net) for anomaly detection via template-based feature aggregation. Specifically, TFA-Net first extracts multiple hierarchical features from a pre-trained convolutional neural network for a fixed template image and an input image. Instead of directly reconstructing input features, TFA-Net aggregates them onto the template features, effectively filtering out anomalous features that exhibit low similarity to normal template features. Next, TFA-Net utilizes the template features that have already fused normal features in the input features to refine feature details and obtain the reconstructed feature map. Finally, the defective regions can be located by comparing the differences between the input and reconstructed features. Additionally, a random masking strategy for input features is employed to enhance the overall inspection performance of the model. Our template-based feature aggregation schema yields a nontrivial and meaningful feature reconstruction task. The simple, yet efficient, TFA-Net exhibits state-of-the-art detection performance on various real-world industrial datasets. Additionally, it fulfills the real-time demands of industrial scenarios, rendering it highly suitable for practical applications in the industry. Code is available at https://github.com/luow23/TFA-Net 
+
+## 1. Introduction 
+
+Visual anomaly detection (VAD) is a critical process that involves the detection of anomalies [1, 2, 3] which significantly deviate from normal data. It plays a crucial role in industrial product quality control [4, 5] and ensuring an exceptional user experience, thereby making it an indispensable aspect of practical industrial production. Although the field of VAD has recently gained considerable attention, achieving accurate anomaly detection remains a challenging task. The diversity of defects in terms of size and category makes it difficult for traditional methods [6, 7, 8] to achieve adaptive optimization. Furthermore, due to the unpredictable nature of defects, collecting and annotating a dataset that encompasses all types of defects is impractical, thereby limiting the application of supervised methods [9, 10]. Therefore, VAD task is typically performed in an unsupervised manner. Unsupervised anomaly detection methods can be broadly categorized into two groups: embedding and reconstruction-based approaches. Embedding-based approaches [11, 12, 13] transform the images into a discriminative embedding space where the embedding distance between normal and anomaly is large. However, the high cost in terms of memory requirement and low inference speed of embedding-based methods limit their real-world industrial applications. In contrast, reconstruction-based methods show great potential in practical industrial applications. As a classical reconstruction model, the autoencoder (AE) [14] compresses images into latent features and utilizes them to reconstruct the images. Given that only normal samples are employed during training, a larger reconstruction error is anticipated in the defective regions while a smaller reconstruction error is expected in the normal regions during testing. Nonetheless, the high generalization ability of vanilla AE may lead to perfect reconstruction of defects, resulting in low inspection accuracy. To mitigate this issue, MemAE [15] utilizes a memory bank to store typical normal prototypes during training. During testing, the model retrieves the normal prototype from the memory bank that is most similar to the tested features 
+
+> ∗
+
+Corresponding author 
+
+luow23@mails.tsinghua.edu.cn (W. Luo); yhm22@mails.tsinghua.edu.cn (H. Yao); ywy@hust.edu.cn (W. Yu) 
+
+> ORCID
+
+(s): 0000-0003-3125-054X (W. Luo); 0000-0003-1419-5489 (H. Yao); 0000-0003-4012-1264 (W. Yu) 
+
+Wei Luo et al.: Preprint submitted to Elsevier Page 1 of 20  
+
+> arXiv:2603.22874v1 [cs.CV] 24 Mar 2026 Figure 1: The comparison between direct feature reconstruction and template-based feature aggregation. Rec. and Ano. denote the reconstructed feature and anomaly map, respectively.
+
+in order to obtain defect-free results. Numerous studies [16, 17, 18, 19, 20] have been conducted to improve memory mechanisms, yet their efficacy has been inconclusive. Recently, generative adversarial networks (GANs) [21] have gained wide popularity in anomaly detection due to their powerful generation capabilities. As an example, Yang et al .[22] proposed a GAN-based framework that edits anomalous features to reconstruct normal backgrounds. In another work, Yao et al . [23] presented a feature memory rearrangement network that leverages memory-generated features to repair anomalous features. CDO [24] employs a mask strategy to increase the margin between normal and anomaly distributions, thereby enhancing the model’s detection performance. RIAD [25] introduces the use of masks of varying sizes to transform the reconstruction task into the image inpainting task. However, the aforementioned reconstruction-based methods are still fall short in terms of detection performance, as accurately reconstructing the background is challenging and the pixel differences between input and reconstructed images do not carry semantic meaning. Therefore, many feature-reconstruction-based methods have been proposed. As an example, DFR [26] directly reconstructs the multiple hierarchical regional features extracted by a pre-trained convolutional neural network (CNN) and leverages the feature reconstruction errors to perform anomaly segmentation. Nonetheless, existing feature-reconstruction-based methods suffer from trivial solutions or shortcut learning, where the model simply reconstructs a copy of input features without considering global semantic information, This can lead to mis-inspections, as shown in Fig. 1. To address this challenge, we propose a template-based feature aggregation network (TFA-Net) that enables the model to reconstruct features by considering global semantic information, rather than simply copying the input data. Firstly, considering the similarity of features among normal samples, we select a normal sample as a fixed template image. Next, TFA-Net utilizes a pre-trained CNN to extract multiple hierarchical levels of semantic features from both the input image and the template image. The input features are used as the reconstruction target, rather than the low-level image pixels with low semantic information. Additionally, a novel template-based feature aggregation mechanism (TFAM) is proposed to address the issue of shortcut learning in existing reconstruction methods. The objective of TFAM is to aggregate the input features onto the normal template features, thereby transforming a trivial feature reconstruction task into a nontrivial and meaningful feature aggregation task. In the selection of feature aggregation networks, we opted for the vision transformer (ViT) [27] network over the CNN network. As shown in Fig. 2, the CNN network incorporates two inductive biases: locality and translation equivariance, which limit its ability to perform feature aggregation on parts with different orientations. In contrast, ViT lacks such inductive biases and is better suited for modeling global information, thereby facilitating more effective feature aggregation. Subsequently, the template features, which have already incorporated input features, are fed into the feature detail refinement module (FDRM) to obtain the reconstructed features. Finally, the feature residual between input features and reconstructed features can be utilized as a reliable anomaly score. In general, the major contributions can be listed as follows: 
+
+• TFA-Net leverages a pre-trained CNN to extract image features with diverse receptive fields. These features undergo multi-scale fusion, with the fused features serving as the reconstruction target. Due to their enriched semantic information, the fused features enable the detection of defects of varying sizes. 
+
+• We present a novel template-based feature aggregation mechanism (TFAM). TFAM aggregates normal features from the input onto the normal template feature, efficiently filtering out abnormal features, and resulting in    
+
+> Wei Luo et al.: Preprint submitted to Elsevier Page 2 of 20 Figure 2: The comparison of feature aggregation methods based on CNN and ViT. For images from various orientations, CNN models may face challenges in feature aggregation due to their translational equivariance induction bias. In contrast, ViT exhibits better feature aggregation capabilities as it lacks the inductive bias of CNN and possesses global modeling capabilities.
+
+meaningful reconstruction rather than simple data replication. This effectively addresses the problem of shortcut learning in existing reconstruction methods. 
+
+• The dual-mode anomaly segmentation method leverages both input features and reconstructed features for accurate defect localization. Notably, it employs two distinct similarity metrics, namely Euclidean distance and cosine similarity, to measure the similarity between features. This approach significantly improves the robustness of anomaly detection. 
+
+• The proposed TFA-Net demonstrates enhanced anomaly detection performance on the MVTec AD [28] benchmark, achieving the area under the receiver operating characteristic curve (AUROC) of 98.7% for anomaly detection and 98.3% for anomaly segmentation across all 15 categories. Furthermore, our proposed approach also exhibits outstanding detection performance on the recently released MVTec LOCO AD [29] dataset. The structure of the remaining article is as follows: Section II provides an overview of related work on VAD, Section III presents a detailed description of our proposed method, Section IV reports the experimental results, and the final section summarizes the entire article. 
+
+## 2. Related Work 
+
+Visual anomaly detection is a fundamental and important problem in the field of computer vision, with wide applications in industrial inspection. It has attracted a large number of scholars to conduct research in this area. In general, anomaly detection methods can be mainly classified into two categories: embedding-based methods and reconstruction-based methods. 
+
+2.1. Embedding-based Methods 
+
+Embedding-based methods establish a compressed discriminative space based on a large amount of normal data, where the difference between anomalous data and the normal center is significant. Hence, the embedding distance between them can be used as a reliable anomaly score. Deep SVDD [30] is capable of establishing normal clustering at the image level, thereby enabling anomaly detection. On the other hand, Patch SVDD [11] can establish multiple normal clusters at the patch level, enabling precise localization of anomalies. Bergmann et al . [31] employed the prior knowledge of a pre-trained network to train a student framework, with the regression error between them utilized for defect detection and localization. Padim [32] and GCPF [33] model normal features using multivariate Gaussian distributions, and calculate anomaly scores by computing the Mahalanobis distance between the test features and the Gaussian distribution. SPADE [12] and PatchCore [34] employ a memory bank to store normal features and utilize the distance between the test features and the most similar normal feature in the memory bank as the anomaly criterion. MBPFM [13] leverages a multi-level bidirectional feature mapping for accurate anomaly localization. While the aforementioned methods have demonstrated promising results in the anomaly detection field, their practical utility in industrial settings is constrained by the significant online memory requirements and low inference speed they entail.    
+
+> Wei Luo et al.: Preprint submitted to Elsevier Page 3 of 20 Figure 3: The overall architecture of TFA-Net approach. The workflow of TFA-Net can be divided into four stages: multiple hierarchical fusion feature extraction, template-based feature aggregation mechanism (TFAM), feature detail refinement module (FDRM), and dual-mode anomaly segmentation. Firstly, TFA-Net employs a pre-trained CNN to extract multi-scale features. Subsequently, TFAM is utilized to filter out anomalous features while retaining normal features. Further reconstruction of the features is performed using FDRM, resulting in reconstructed features. Finally, the defect regions are localized by leveraging both the reconstructed features and the input features.
+
+2.2. Reconstruction-based Methods 
+
+Reconstruction-based methods model the distribution of normal data by encoding and decoding it during training, and use the reconstruction error as an anomaly criterion during testing. Autoencoders (AE) [14] are a well-known type of reconstruction model, but their high generalization ability can be a drawback, as they tend to accurately reconstruct even defective data, leading to the potential for false negatives in anomaly detection. To address this issue, numerous improved AE-based models have been proposed. For instance, Bergmann et al . [35] introduced AE-SSIM, a model that enables a more targeted focus on image structural information, thus enhancing the model’s capability to detect anomalies. Dong et al . [15] proposed a sparse memory mechanism to alleviate the generalization limitation of vanilla AE. MSCDAE [36] employs denoising proxy tasks at multiple scales to enhance the performance of the model, while MSFCAE [37] performs feature clustering at multiple levels to constrain the distribution of latent features. RIAD [25] is an approach that leverages both U-net [38] and random masking strategy to transform the reconstruction task into an image inpainting task. NDP-Net [39] enhances the discriminative power of the model by utilizing artificial defect samples, thereby improving its performance in detecting unknown defects. Recently, Generative Adversarial Networks (GANs) [21] have attracted widespread attention due to their powerful generative capabilities. Schlegl et al . [40] proposed AnoGAN for detecting defects by learning the distribution of normal data with a GAN. However, AnoGAN lacks the mapping from the image domain to the feature domain, thus many methods [41, 42, 43, 44] have been proposed to address this issue. All of the aforementioned methods focus on image-level reconstruction. DFR [26] employs the features extracted by a pre-trained network as the reconstruction target. ST-MAE [45] achieves good detection accuracy by performing feature reconstruction from the perspective of complementary feature transformation. UTRAD [46] introduces a U-shaped Transformer for feature reconstruction, effectively reducing computational complexity and achieving higher detection and segmentation accuracy. In general, the aforementioned reconstruction methods have all experienced the problem of shortcut learning, which results in defects being perfectly reconstructed. 
+
+## 3. The TFA-Net Methodology 
+
+In this section, we present our proposed method in detail. Firstly, we provide an overview of the overall framework of our network. Next, we describe the extraction of multi-level semantic features. Then, we introduce the template-based feature aggregation mechanism and the feature detail optimization module. Finally, we explain the training and testing process of our model. 
+
+3.1. Overall Architecture 
+
+Fig. 3 illustrates the overall architecture of TFA-Net, a hybrid model combining CNNs and ViT [27]. Firstly, a pre-trained CNN is employed to extract multi-level input features and template features, which are then respectively     
+
+> Wei Luo et al.: Preprint submitted to Elsevier Page 4 of 20 Figure 4: Illustration of multiple hierarchical fusion feature extraction, which encompasses the process of resizing feature maps from various scales to a uniform size and subsequently concatenating them in the channel dimension to obtain multi-level fused features.
+> Figure 5: Comparison between Vanilla ViT and Template-based feature aggregation mechanism (TFAM). (a) Vanilla ViT mechanism. In the ViT mechanism, defect features exhibit the highest similarity with themselves, causing defect features to self-aggregate and consequently resulting in a perfect reconstruction of defects. (b) TFAM. In the TFAM, defect features are dissimilar to template features, making it challenging for them to aggregate onto template features.
+
+scaled to the same size and concatenated. Due to the high similarity between the input normal features and normal template features, the normal input features readily aggregate onto the template features, manifesting high aggregation. In contrast, defect features and normal template features exhibit low similarity, rendering defect features less likely to aggregate onto the template features, thereby displaying low aggregation. Therefore, the TFAM aggregates the input normal features onto the template features, effectively filtering out anomalous features and generating a meaningful and challenging task. Then, we discard the input features and perform feature refinement on the template features that have already aggregated the input features, resulting in reconstructed features. Finally, we utilize a dual-mode anomaly segmentation method to accurately detect and locate anomalies. 
+
+3.2. Multiple Hierarchical Fusion Feature Extraction 
+
+Current existing reconstruction-based methods perform image-level reconstruction and utilize pixel-wise differ-ences between input and reconstructed images as anomaly scores. However, this leads to two problems: 1) difficulty in accurately reconstructing image details. 2) pixel-wise differences between input and reconstructed images are semantically meaningless and cannot serve as a reliable anomaly criterion. Therefore, in this paper, we utilize the features extracted by a pre-trained CNN 𝜓 on the ImageNet [47] dataset as the reconstruction target. As shown in Fig. 4, given an image 𝐼 , we can obtain different hierarchical feature maps {𝜓 1(𝐼 ), 𝜓 2(𝐼 ), ⋯ , 𝜓 𝐿 (𝐼 )} through the pre-trained CNN 𝜓 , where 𝜓 𝑙 (𝐼 ) ∈ 𝑅 𝐻 𝑙 ×𝑊 𝑙 ×𝐶 𝑙 
+
+. Different hierarchical feature maps have different receptive fields, with increasing   
+
+> Wei Luo et al.: Preprint submitted to Elsevier Page 5 of 20
+
+receptive fields leading to less detailed information but richer semantic information in the feature maps. Therefore, in order to strike a balance between detail and semantic information, we scale the features from different levels to the same size and concatenate them along the channel dimension to obtain a multiple hierarchical fusion feature 𝜙 (𝐼 ).̂𝜓 𝑙 (𝐼 ) = 𝑅𝑒𝑠𝑖𝑧𝑒 (𝜓 𝑙 (𝐼 )) (1) 
+
+𝜙 (𝐼 ) = 𝑈 (̂𝜓 1(𝐼 ),̂𝜓 2(𝐼 ), ⋯ ,̂𝜓 𝐿 (𝐼 )) (2) where 𝜙 (𝐼 ) ∈ 𝑅 𝐻 ×𝑊 ×𝐶 , 𝑅𝑒𝑠𝑖𝑧𝑒 denotes the scaling operation, and 𝑈 represents the concatenation operation along the channel dimension. In the TFA-Net method, we employ Wide-Resnet50 [48] as the feature extractor, where feature maps from the 1st to 4th layers are used for fusion, resulting in the final multi-scale feature map with size of 64 × 64 
+
+and a feature dimension of 1856. Compared to image-level reconstruction, using this multi-level fusion feature as the reconstruction target can effectively improve the inspection performance of the model. 
+
+3.3. Template-based Feature Aggregation Mechanism and Feature Detail Refinement Module 
+
+Both feature reconstruction and image reconstruction methods suffer from the problem of shortcut learning, which results in defects being perfectly reconstructed and thus leading to false positive detection. To address this issue, we propose the novel template-based feature aggregation mechanism (TFAM). As shown in Fig. 3, we innovatively introduce a normal template image and utilize a pre-trained CNN 𝜓 to obtain the multi-level fused features of the input image 𝐼 and the template image 𝐼 𝑇 , which are respectively referred to as input feature map 𝜙 (𝐼 ) and template feature map 𝜙 (𝐼 𝑇 ). With the same projection heads, we utilized the patch size 𝐾 
+
+to embed 𝜙 (𝐼 ) and 𝜙 (𝐼 𝑇 ) into sequences of token embeddings 𝐸 𝜙 (𝐼 ) and 𝐸 𝜙 (𝐼 𝑇 ) of length 𝑁 and dimension 𝐷 .
+
+𝐸 𝜙 (𝐼 ) = [ 𝐸 1
+
+> 𝜙 (𝐼 )
+
+, 𝐸 2
+
+> 𝜙 (𝐼 )
+
+, ⋯ , 𝐸 𝑁 𝜙 (𝐼 )] + 𝐸 𝑝𝑜𝑠 (3) 
+
+𝐸 𝜙 (𝐼 𝑇 ) = [ 𝐸 1 
+
+> 𝜙 (𝐼 𝑇 )
+
+, 𝐸 2 
+
+> 𝜙 (𝐼 𝑇 )
+
+, ⋯ , 𝐸 𝑁 𝜙 (𝐼 𝑇 )] + 𝐸 𝑝𝑜𝑠 (4) where 𝐸 𝑖 𝜙 (𝐼 ), 𝐸 𝑖 𝜙 (𝐼 𝑇 ) ∈ 𝑅 𝐷 , 𝑁 = 𝐻 𝐾 × 𝑊 𝐾 , and 𝐸 𝑝𝑜𝑠 represents the positional embeddings. The incorporation of positional information plays a crucial role in enhancing the performance of TFA-Net. Previous studies, as referenced in [49, 50], have noted that the incorporation of positional encoding enhances the model’s capacity to capture spatial relationships, thereby yielding more accurate results in anomaly detection. As depicted in Fig. 5(a), the vanilla ViT [27] directly input 𝐸 𝜙 (𝐼 ) into the transformer blocks (TBs), which indeed lead to the problem of abnormal features being more likely to be correlated with themselves or adjacent abnormal features. As shown in Fig. 3 and Fig. 5(b), our proposed TFAM concatenates the token embeddings 𝐸 𝜙 (𝐼 ) and 𝐸 𝜙 (𝐼 𝑇 )
+
+to obtain 𝐸 𝑐𝑎𝑡 ∈ 𝑅 2𝑁 ×𝐷 , which is then input into the TBs. In this way, during the self-attention process, the normal features in 𝐸 𝜙 (𝐼 ) can be aggregated into 𝐸 𝜙 (𝐼 𝑇 ) since the normal features in 𝐸 𝜙 (𝐼 ) and 𝐸 𝜙 (𝐼 𝑇 ) are similar, while the abnormal features in 𝐸 𝜙 (𝐼 ) are difficult to be aggregated into 𝐸 𝜙 (𝐼 𝑇 ) due to the absence of abnormal features in 𝐸 𝜙 (𝐼 𝑇 ).Consequently, the TFAM effectively filters out abnormal features. After the integration of 𝐸 𝜙 (𝐼 ) and 𝐸 𝜙 (𝐼 𝑇 ) using TFAM, the normal semantic information from 𝐸 𝜙 (𝐼 ) is already aggregated in 𝐸 𝜙 (𝐼 𝑇 ). Therefore, we discard 𝐸 𝜙 (𝐼 ) and retain 𝐸 𝜙 (𝐼 𝑇 ), which is further refined to obtain reconstructed token embedding ̂ 𝐸 𝜙 (𝐼 ) using feature detail refinement module (FDRM), which consists of a serial of TBs. The final reconstructed feature map ̂ 𝜙 (𝐼 ) can be obtained through a linear projection head and the reconstructed token embeddings ̂ 𝐸 𝜙 (𝐼 ).Fig. 6 illustrates the superiority of TFAM over the vanilla ViT. The vanilla ViT can perfectly reconstruct the defective features, whereas TFAM employs normal template features to filter out the defective ones. Due to the high similarity between the normal features in the input and the normal template features, the normal features in the input are aggregated into the normal template features. Conversely, the defective features exhibit low similarity with the normal template features, leading to their filtration and the subsequent generation of a reconstructed feature map free from anomalies. The effectiveness of TFAM is further validated from the perspective of attention map visualization in Fig. 7. The attention map is obtained by calculating the sum of similarities between each input feature patch and all template feature patches. We observe that the attention map assigns smaller values to defective regions and larger values to normal regions. This observation indicates that defect features are less prone to aggregate into the template features,   
+
+> Wei Luo et al.: Preprint submitted to Elsevier Page 6 of 20
+
+Figure 6: The effect of TFAM. The features reconstructed with Vanilla ViT still exhibit defects. Conversely, those reconstructed with TFAM not only rectify the defects but also retain information about normal patterns. The red box indicates the defective region, while the green box implies the normal pattern. 
+
+Figure 7: The visualization of attention maps in TFAM. The attention map is obtained by calculating the sum of similarities between each input feature patch and all template feature patches. Wei Luo et al.: Preprint submitted to Elsevier Page 7 of 20 Algorithm 1: Feature reconstruction by TFAM and FDRM 
+
+Input: Input feature 𝜙 (𝐼 ), Template feature 𝜙 (𝐼 𝑇 )
+
+Output: Reconstructed feature ̂ 𝜙 (𝐼 ) 
+
+> 1
+
+Obtain patch embeddings: 𝐸 𝜙 (𝐼 ), 𝐸 𝜙 (𝐼 𝑇 ) = Proj. (𝜙 (𝐼 )) , Proj. (𝜙 (𝐼 𝑇 ))  
+
+> 2
+
+Concatenate 𝐸 𝜙 (𝐼 ) and 𝐸 𝜙 (𝐼 𝑇 ): 𝐸 𝑐𝑎𝑡 = { 𝐸 𝜙 (𝐼 ), 𝐸 𝜙 (𝐼 𝑇 )} 
+
+> 3
+
+Template-based feature aggregation: 𝐸 𝑐𝑎𝑡 = Trans.-Blocks (𝐸 𝑐𝑎𝑡 ) 
+
+> 4
+
+Split 𝐸 𝑐𝑎𝑡 , discard 𝐸 𝜙 (𝐼 ), and retain 𝐸 𝜙 (𝐼 𝑇 ) 
+
+> 5
+
+Feature detail refinement: ̂ 𝐸 𝜙 (𝐼 ) = Trans.-Blocks (𝐸 𝜙 (𝐼 𝑇 )) 
+
+> 6
+
+Obtain reconstructed feature: ̂ 𝜙 (𝐼 ) = Inverse-Proj. (̂ 𝐸 𝜙 (𝐼 )) 
+
+> 7
+
+return ̂ 𝜙 (𝐼 )
+
+whereas normal features tend to aggregate more readily into the template features. This finding aligns entirely with our previous explanations. Although the selection of template images appears to be crucial for TFAM, the ablative experiments conducted in Section 4.3.3 demonstrate the robustness of TFA-Net’s detection performance to template image selection. Different template images do not significantly affect the detection performance of TFA-Net. This is because, even though these template images may appear completely different in appearance, when divided into patches, patches from different positions can still correspond to each other. Furthermore, the ViT model lacks translational equivariance and local inductive biases, enabling it to establish mutual correspondences among patches from different positions. Therefore, in this study, we selected the first normal image from the training dataset as the fixed template image. In summary, our proposed TFAM, together with FDRM, effectively addresses the issue of trivial solution in existing feature reconstruction methods and leads to a more meaningful feature reconstruction task. The feature reconstruction by TFAM and FDRM is summarized in Algorithm 1.  
+
+> Figure 8: Three variants of TFA-Net. (a) Variant A: TFA-Net model variant that discards template features and retains input features. (b) Variant B: TFA-Net model variant without FDRM. (c) Variant C ( Ours ): TFA-Net model variant that discards input features and retains template features.
+
+3.4. Discussion on TFAM and FDRM 
+
+In this subsection, we delve into a more comprehensive discussion of TFAM and FDRM, primarily to address two key issues. Firstly, we explain why we choose to discard the input features after TFAM rather than the template features. Secondly, given TFAM’s capability to effectively filter defect characteristics, we explore the specific role of FDRM. These considerations led us to devise two variants of TFA-Net, as illustrated in Fig. 8. 
+
+3.4.1. The reason for discarding the input features after passing through TFAM 
+
+If we discard template features and retain the input features after TFAM, the defect features cannot be restored to normal features due to the high similarity between the defect features and themselves. Therefore, the defect features are perfectly reconstructed. On the other hand, if we discard the input features and retain the template features after TFAM, due to the low similarity between defect features and template features, defect features cannot be aggregated    
+
+> Wei Luo et al.: Preprint submitted to Elsevier Page 8 of 20 Figure 9: The reconstructed results of the three TFA-Net model variants in Fig. 8. (a) The defective image. (b) The corresponding label. (c) The defective feature map. (d) The reconstructed result of variant A in Fig. 8. (e) The reconstructed result of variant B in Fig. 8. (f) The reconstructed result of variant C in Fig. 8.
+
+into template features. Consequently, defect features cannot be reconstructed. Columns (d) and (f) in Figure 9 validate our previously stated explanation. 
+
+3.4.2. The specific effect of FDRM 
+
+While TFAM possesses the capability to filter defect features, it is noteworthy that defect features and template features consistently reside within the same latent feature space in TFAM. Consequently, even if defect features and template features exhibit low similarity, there exists a potential for a small subset of defect features to be aggregated into the template features. Therefore, we individually input the template features processed by TFAM into FDRM, aiming to refine and repair the limited defect features within the template features. Columns (e) and (f) in Fig.9 validate the efficacy of FDRM in this regard. 
+
+3.5. Training and Testing Procedures 
+
+3.5.1. Training procedure 
+
+Compared to DFR [26], our approach utilizes two similarity metrics, namely Euclidean distance and cosine similarity, to compare features. Consequently, we use a joint optimization approach that involves both the Euclidean distance loss 𝐿 𝑒𝑢𝑐 and cosine similarity loss 𝐿 𝑐𝑜𝑠 in the entire optimization process of the TFA-Net. Given an input feature 𝜙 (𝐼 ) ∈ 𝑅 𝐻 ×𝑊 ×𝐶 , TFA-Net reconstructs it into feature ̂ 𝜙 (𝐼 ) ∈ 𝑅 𝐻 ×𝑊 ×𝐶 , and the joint loss function is defined as follows: 
+
+𝐿 𝑒𝑢𝑐 = 𝔼 
+
+> 𝐼 ∼𝑃 𝐼
+
+[‖‖‖𝜙 (𝐼 ) − ̂ 𝜙 (𝐼 )‖‖‖2
+
+]
+
+(5) 
+
+𝐿 𝑐𝑜𝑠 = 𝔼 
+
+> 𝐼 ∼𝑃 𝐼
+
+⎡⎢⎢⎣
+
+1 − 𝜙 (𝐼 ) ⋅̂ 𝜙 (𝐼 )
+
+‖‖‖𝜙 (𝐼 )‖‖‖ × ‖‖‖̂ 𝜙 (𝐼 )‖‖‖⎤⎥⎥⎦
+
+(6) 
+
+𝐿 𝑟𝑒𝑐 = 𝑤 𝑒𝑢𝑐 𝐿 𝑒𝑢𝑐 + 𝑤 𝑐𝑜𝑠 𝐿 𝑐𝑜𝑠 (7) where ‖‖‖ ⋅ ‖‖‖2, ⋅, and ‖‖‖ ⋅ ‖‖‖ represent the 𝐿 2 norm, inner product, and modulus length, respectively. 𝑤 𝑒𝑢𝑐 and 𝑤 𝑐𝑜𝑠 are the weights assigned to the two types of losses. In this study, we set 𝑤 𝑒𝑢𝑐 and 𝑤 𝑐𝑜𝑠 to 1 and 5, respectively. 
+
+3.5.2. Testing procedure 
+
+After training, TFA-Net can be used for practical industrial anomaly detection. As shown in Fig. 10, given an anomalous image, TFA-Net is able to filter out the anomalous features and retain the normal features, thereby obtaining a reconstructed feature map that eliminates anomalies. Then, we use a dual-mode anomaly segmentation method for   
+
+> Wei Luo et al.: Preprint submitted to Elsevier Page 9 of 20
+
+Figure 10: Schematic diagram of dual-mode anomaly segmentation, which employs both Euclidean distance and cosine similarity to jointly measure the differences between input and reconstructed features. 
+
+defect detection and localization: 
+
+𝐴𝑆 𝑓 𝑖𝑛𝑎𝑙 = ‖‖‖𝜙 (𝐼 ) − ̂ 𝜙 (𝐼 )‖‖‖2
+
+⏟⏞⏞⏞⏞⏞⏞⏞⏟⏞⏞⏞⏞⏞⏞⏞⏟ 
+
+𝐴𝑆 𝑒𝑢𝑐 
+
+⊗ (1 − 𝜙 (𝐼 ) ⋅̂ 𝜙 (𝐼 )
+
+‖‖‖𝜙 (𝐼 )‖‖‖ × ‖‖‖̂𝜙 (𝐼 )‖‖‖
+
+)
+
+⏟⏞⏞⏞⏞⏞⏞⏞⏞⏞⏞⏞⏞⏞⏞⏟⏞⏞⏞⏞⏞⏞⏞⏞⏞⏞⏞⏞⏞⏞⏟ 
+
+𝐴𝑆 𝑐𝑜𝑠 
+
+(8) where ⊗ represents the element-wise product. Finally, the 𝐴𝑆 𝑓 𝑖𝑛𝑎𝑙 is upsampled to match the size of the input image through interpolation. A Gaussian filter is then applied to 𝐴𝑆 𝑓 𝑖𝑛𝑎𝑙 for smoothing. Similar to [51], we calculate the standard deviation of the smoothed 𝐴𝑆 𝑓 𝑖𝑛𝑎𝑙 as image-level anomaly score. 
+
+Table 1 
+
+The image/pixel level AUROC results on MVTec AD dataset Reconstruction-based methods Embedding-based methods Category TrustMAE RIAD DFR Draem Intra SPADE Pacth SVDD GCPF MBPFM TFA-Net 
+
+Carpet 97.4/98.5 84.2/94.2 -/97.0 97.0/95.5 98.9/99.2 92.8/97.5 92.9/92.6 -/98.9 100 /99.2 99.8/ 99.3 
+
+Grid 99.1/97.5 99.6/96.3 -/98.0 99.9/ 99.3 100 /98.8 47.3/93.7 94.6/96.2 -/97.8 98.0/98.8 99.7/99.0 Leather 95.1/98.1 100 /99.4 -/98.0 100 /98.6 100 /99.5 95.4/97.6 90.9/97.4 -/99.3 100 /99.4 100 /99.4 Tile 97.3/82.5 98.7/89.1 -/87.0 99.6/ 99.2 98.2/94.4 96.5/87.4 97.8/91.4 -/96.1 99.6/96.2 100 /95.9 Wood 99.8 /92.6 93.0/85.8 -/94.0 99.1/ 96.8 97.5/88.7 95.8/88.5 96.5/90.8 -/95.1 99.5/95.6 99.7/95.8 Bottle 97.0/93.4 99.9/98.4 -/97.0 99.2/ 99.1 100 /97.1 97.2/98.4 98.6/98.1 -/97.5 100 /98.4 100 /98.5 Cable 85.1/92.9 81.9/84.2 -/92.0 91.8/94.7 70.3/91.0 84.8/97.2 90.3/96.8 -/95.7 98.8 /96.7 96.5/ 98.1 
+
+Capsule 78.8/87.4 88.4/92.8 -/ 99.0 98.5 /94.3 86.5/97.7 91.0/ 99.0 76.7/95.8 -/97.2 94.5/98.3 94.8/ 99.0 
+
+Hazelnut 98.5/98.5 83.3/96.1 -/99.0 100 /92.9 95.7/98.3 88.1/ 99.1 92.0/97.5 -/98.1 100 /99.1 100 /98.9 Metal nut 76.1/91.8 88.5/92.5 -/93.0 98.7/96.3 96.9/93.3 71.0/ 98.1 94.0/98.0 -/95.9 100 /97.2 99.1/96.8 Pill 83.3/89.9 83.8/95.7 -/97.0 98.9 /97.6 90.2/98.3 80.1/96.5 86.1/95.1 -/97.3 96.5/97.2 96.8/ 98.4 
+
+Screw 83.4/97.6 84.5/98.8 -/99.0 93.9/97.6 95.7/ 99.5 66.7/98.9 81.3/95.7 -/97.4 91.8/98.7 98.0 /99.3 Toothbrush 96.9/98.1 100 /98.9 -/98.1 100 /98.1 100 /98.9 88.9/97.9 100 /98.1 -/97.2 88.6/98.6 100 /99.1 
+
+Transistor 87.5/92.7 90.9/87.7 -/80.0 93.1/90.9 95.8/96.1 90.3/94.1 91.5/97.0 -/90.6 97.8/87.8 99.8 /97.7 
+
+Zipper 87.5/97.8 98.1/97.8 -/96.0 100 /98.8 99.4/ 99.2 96.6/96.5 97.9/95.1 -/98.2 97.4/98.2 96.0/98.8 Average 90.9/94.0 91.7/94.2 93.8/95.5 98.0/97.3 95.0/96.6 85.5/96.5 92.1/95.7 93.1/96.9 97.5/97.3 98.7 /98.3  
+
+> 1
+
+The highest image/pixel level AUROC values are in bold , and the second highest values are underlined. 
+
+## 4. Experiments 
+
+In this section, we validate the overall performance of our proposed TFA-Net on the MVTec AD [28] and MVTec LOCO AD [29] datasets, and conduct ablation experiments on key parameters and main modules in TFA-Net. 
+
+Wei Luo et al.: Preprint submitted to Elsevier Page 10 of 20 Figure 11: Segmentation results of our proposed TFA-Net on the MVTec AD dataset. 
+
+4.1. Experimental Setup 
+
+4.1.1. Dataset Configuration 
+
+In our experiments, we employed two datasets: MVTec AD and MVTec LOCO AD. The former is widely used for unsupervised anomaly detection and localization and comprises 15 categories, with 3629 normal samples for training and 498 normal samples and 1982 abnormal samples for testing. The latter was recently proposed for detecting logical defects and comprises 5 categories, with 1772 normal samples for training and 575 normal, 432 structural abnormal, and 561 logical abnormal samples for testing. 
+
+4.1.2. Implement Details 
+
+The default feature extractor in TFA-Net is the Wide-Resnet50 [48] pre-trained on ImageNet [47]. The 1st to 4th layers of the pre-trained CNN are used in the feature extractor. The multi-scale feature map has a resolution of 64 × 64 ,with a feature dimension of 1856. The default patch size 𝐾 is 4. TFAM consists of 12 transformer blocks with hidden dimension of 768 and 12 attention heads, while FDRM contains 8 transformer blocks with hidden dimension of 512 and 16 attention heads. The implementation of the transformer block is identical to that in ViT [27]. The complete TFA-Net is trained for 400 epochs using an AdamW optimizer with a learning rate of 0.001 and a batch size of 4. Each image is resized to 256 × 256 and normalized using the mean and standard deviation of the ImageNet dataset. All experiments are conducted on a computer equipped with a Intel(R) Core(TM) i5-6500 CPU running at 3.20 GHz and an NVIDIA GeForce GTX 3060 GPU with a memory size of 12 GB. 
+
+4.1.3. Evaluation Metrics 
+
+We utilize the widely-used the area under the receiver operating characteristic (AUROC) at image and pixel level to evaluate the detection performance of our proposed method and compared methods. Moreover, the normalized area under the saturated per-region overlap curve (sPRO) [29] when the false postive rate is lower than 0.05 is employed for the MVTec LOCO AD dataset. All the aforementioned metrics indicate that higher values correspond to better performance. 
+
+4.1.4. Comparative methods 
+
+In our experiments, we compare our proposed TFA-Net with the following state-of-the-art (SOTA) methods: f-AnoGAN [41], TrustMAE [17], RIAD [25], DFR [26], Draem [52], Intra [53], MNAD [54], SPADE [12], Patch SVDD [11], GCPF [33], MBPFM [13], PatchCore [34], PaDiM [32], STPM [55], FastFlow [56], and GCAD [29]. f-AnoGAN utilizes a generative adversarial network to generate more realistic reconstructed images for anomaly detection. TrustMAE employs a memory module within trust regions to reconstruct images and uses perceptual distance for anomaly detection and localization. RIAD uses a masking strategy and an image inpainting network to transform the reconstruction task into an image inpainting task. Draem proposes using natural images to synthesize artificial defect images and then employs a U-Net to predict and locate defect areas. Intra utilizes surrounding normal information to repair masked areas, resulting in defect-free reconstructed images. MNAD leverages memory-guided normality for defect detection. Patch SVDD can establish multiple normal clusters at the patch level, enabling precise anomaly localization. Both PaDiM and GCPF model normal features using multivariate Gaussian distributions, and they calculate anomaly scores by measuring the Mahalanobis distance between the test features and the Gaussian    
+
+> Wei Luo et al.: Preprint submitted to Elsevier Page 11 of 20 Figure 12: Reconstruction and segmentation results of our proposed TFA-Net on MVTec LOCO AD dataset.
+
+distribution. SPADE and PatchCore employ a memory bank to store normal features and determine anomalies based on the distance between test features and the most similar normal feature in the memory bank. MBPFM utilizes a multi-level bidirectional feature mapping for precise anomaly localization. STPM employs multi-scale student-teacher feature correspondence for anomaly detection. FastFlow employs probability distributions to model normal data and detects anomalies by assessing deviations from the learned distribution. GCAD enhances the model’s ability to recognize logical defects by incorporating an autoencoder branch into the traditional student-teacher network. 
+
+4.2. Overall Comparative Experiments on MVTec AD and MVTec LOCO AD 
+
+4.2.1. Experiment on MVTec AD 
+
+To verify the performance of our proposed method, we compared its detection performance with that of several SOTA methods on the MVTec AD dataset, including reconstruction-based methods such as TrustMAE[17], RIAD [25], DFR [26], Draem [52], and Intra [53], as well as embedding-based methods such as SPADE [12] and Patch SVDD [11], GCPF [33], and MBPFM [13]. Table 1 presents the quantitative comparison results between our proposed method and other SOTA methods. Our proposed TFA-Net achieves the best results in the average of 15 categories, with 98.7% image-level AUROC and 98.3% pixel-level AUROC, which outperformed the second best results by 0.7% and 1.0%, respectively. Notably, our method achieves an image-level AUROC of 100% in the categories of Leather, Tile, Bottle, Hazelnut, and Toothbrush, highlighting its superior performance. Furthermore, for the challenging category of Transistor, our method achieves the best performance with an image-level AUROC of 99.8% and a pixel-level AUROC of 97.7%, which are 2.0% and 0.7% higher than the second-best results, respectively. The qualitative results of TFA-Net are presented in Fig. 11. It is evident that our method is capable of precisely localizing defects in all 15 categories. Notably, in the Cable and Transistor categories, our method is able to detect defects with object disappearance effectively, which can be attributed to the challenging and meaningful feature reconstruction task generated by our proposed TFAM, as opposed to simply replicating the input data. 
+
+4.2.2. Experiment on MVTec LOCO AD 
+
+The MVTec LOCO AD dataset contains logical and structural defects, where the detection of logical defects is challenging and requires high semantic information. Therefore, to further validate the effectiveness of our proposed   
+
+> Wei Luo et al.: Preprint submitted to Elsevier Page 12 of 20 Table 2
+> The quantitative results of different methods on MVTec LOCO AD dataset.The experimental results of the comparative methods are sourced from [29] and [57].
+
+method, we compared our method with several SOTA methods on the MVTec LOCO AD dataset, including f-AnoGAN [41], MNAD [54], SPADE [12], PatchCore [34], Draem [52], PaDIM [32], STPM [55], FastFlow[56], and GCAD [29]. Table 2 presents the quantitative comparison results of the experiments. TFA-Net outperforms the other methods in detecting structural anomalies, achieving image AUROC of 85.4% and pixel sPRO of 72.3%. In detecting logical anomalies, TFA-Net ranks second, following GCAD. Nonetheless, it should be emphasized that GCAD is an approach specifically tailored for the MVTec LOCO AD dataset, and it only achieves an image AUROC of 93.1% on the MVTec AD dataset, which is significantly lower than the performance of our proposed TFA-Net. The qualitative experimental results are presented in Fig. 12. Our proposed method showcases its ability to effectively repair both logical and structural defects with precise localization. This performance is largely attributed to the innovative introduction of TFAM, which facilitates the consideration of global semantic information and allows the model to obtain meaningful reconstruction results, instead of merely replicating the input feature. 
+
+4.3. Ablation Experiments on MVTec AD 
+
+4.3.1. The influence of feature extractor 
+
+TFA-Net adopts a pre-trained feature extractor to extract multiple hierarchical fused features, which serve as the reconstruction target. The goal is to obtain features that are rich in semantic information, preserve spatial details, and possess the ability to discriminate defects. The discriminative power of pre-trained networks can vary. Therefore, the impact of this feature extractor is extensively examined in the following analysis. Table 3 presents the impact of different feature extractors (MobileNet, VGG19, WideResnet50, and WideRes-net101) on the performance and efficiency of the proposed model. Using WideResnet101 as the feature extractor yields the best detection results, as its extracted features contain rich semantic information. Notably, the detection performance obtained using WideResnet50 is only slightly inferior to the best result, while offering a higher FPS than WideResnet101 by 5.2 and significantly reducing parameter and computational complexity. Therefore, to achieve a better balance between detection performance and speed, we choose to use WideResnet50 as the feature extractor. 
+
+4.3.2. The influence of patch size 𝐾 
+
+TFA-Net partitions the multi-scale fused feature map into a series of local semantic descriptors using patch size 
+
+𝐾 . The size of 𝐾 can affect the detection performance and inference speed of the model. Therefore, a detailed analysis of the size of 𝐾 is presented in the following. The influence of different sizes of 𝐾 (2, 4, 8, and 16) is shown in Fig. 13. When 𝐾 is small, the granularity of the local semantic descriptors is finer, allowing for better feature aggregation and more precise reconstruction results. However, this also leads to longer sequences and significantly increased computational complexity, resulting in slower inference speed of the model. When 𝐾 is too large, it not only leads to coarse reconstruction results but also increases the number of parameters in the linear projection head of ViT [27], resulting in a decrease in inference speed. To strike a balance between inference time and detection performance, we set the value of 𝐾 to 4. 
+
+4.3.3. The robustness to template images 
+
+TFA-Net demonstrates robustness in template image selection, indicating that different template images do not significantly affect the performance of TFA-Net. To validate the robustness of model performance in template image               
+
+> Wei Luo et al.: Preprint submitted to Elsevier Page 13 of 20 Figure 13: The impact of patch size 𝐾 on the performance and inference time of the model.
+> Table 3
+> The impact of feature extractors on the performance and efficiency of the model
+> 1The units for FLOPs and Params are 𝐺 and 𝑀 , where 1𝐺 = 10 9and 1𝑀 = 10 6.
+
+selection, we conducted ablation experiments using three datasets with pose diversity from the MVTec AD dataset: Hazelnut, Screw, and Metal nut. For each dataset, we selected 10 normal images with different poses as template images and performed end-to-end training using the corresponding templates. The selected template images quantitative experimental results are presented above and below, respectively, in Fig. 14. Notably, even when opting for entirely different normal images as templates, TFA-Net maintains excellent performance on the Hazelnut, Screw, and Metal Nut datasets. In more detail, on the Hazelnut dataset, the model exhibits a maximum fluctuation of only 0/0.09% in Image/Pixel level AUROC. On the Screw dataset, the model shows a maximum fluctuation of merely 0.9/0.21% in Image/Pixel level AUROC. Similarly, on the Metal nut dataset, the model demonstrates a maximum fluctuation of only 0.6/0.37% in Image/Pixel level AUROC. The fluctuation in the model’s performance on the Screw and Metal Nut datasets is noticeably greater than its fluctuation on the Hazelnut dataset. This discrepancy is attributed to the fact that, in comparison to the Hazelnut dataset, the Screw and Metal Nut datasets exhibit significantly greater diversity, resulting in larger fluctuations in the model’s performance. In general, in the three data sets with pose diversity, the variations in model performance remain below 1%. We consider such minor fluctuations to be within an acceptable range. These results provide substantial evidence for the robustness of TFA-Net in template image selection. 
+
+4.3.4. The influence of TFAM 
+
+TFAM is designed to aggregate normal information from input features into template features and filter out abnormal information, transforming the simple feature reconstruction task into a challenging feature aggregation task and producing meaningful reconstruction results. To validate the effectiveness of TFAM, we compare it with the vanilla ViT (without TFAM). Fig. 15 presents the quantitative comparison experimental results. The results show that TFAM outperforms the model without TFAM in terms of average image/pixel AUROC across 15 categories on MVTec AD dataset. It is worth noting that in image-level detection (as shown in Fig. 15(a)), TFAM significantly improved the performance by 6.8%, 5.6%, and 9.6% for Cable, Screw, and Transistor categories, respectively, compared to the model without TFAM. In pixel-level detection (as shown in Fig. 15(b)), TFAM also showed significant improvements by 3.3% and 7.9% for Cable and Transistor categories, respectively, compared to the model without TFAM. Overall, model with    
+
+> Wei Luo et al.: Preprint submitted to Elsevier Page 14 of 20 Figure 14: The impact of template image selection on the performance of the model for Hazelnut, Screw, and Metal nut in the MVTec AD dataset.
+> Table 4
+> The impact of dual-mode anomaly segmentation on the performance of the model
+
+TFAM demonstrates a significant improvement in anomaly detection and localization performance on datasets such as Transistor and Cable compared to model without TFAM. This is attributed to TFAM enabling the model to learn more semantically rich information, allowing for the detection of global defects in datasets like Transistor and Cable, such as object omissions, which require a high level of semantic information for accurate detection. However, model with TFAM exhibits a slight decrease in detection performance on datasets like Metal Nut and Pill compared to model without TFAM. This is because the introduction of TFAM may lead to the loss of some details in the reconstructed feature map, resulting in the emergence of noise in the anomaly map and consequently causing a reduction in detection performance. Fig. 1 and Fig. 16 illustrate examples showcasing the impact of TFAM. The model without TFAM achieves impeccable reconstruction of defect features, while the model integrated with TFAM effectively filters out defect features, yielding reconstructed features that are devoid of anomalies. Consequently, this augmentation significantly bolsters the detection accuracy of the model. 
+
+4.3.5. The influence of dual-mode anomaly segmentation 
+
+The dual-mode anomaly segmentation method is crucial for accurately localizing anomalous regions based on input and reconstructed features. Therefore, in the following, we analyze its impact in detail. Table 4 presents the influence of the dual-mode anomaly segmentation on the model’s detection performance.     
+
+> Wei Luo et al.: Preprint submitted to Elsevier Page 15 of 20 Figure 15: The influence of TFAM on the performance of the model. (a) Image-level AUROC results. (b) Pixel-level AUROC results.
+> Figure 16: Some examples of the influence of template-based feature aggregation mechanism (TFAM).
+
+Compared to using solely Euclidean distance or cosine similarity, the dual-mode anomaly segmentation method im-proves the image/pixel AUROC by 1.0%/0.5% and 0.9%/0.3%, respectively. Fig. 17 showcases qualitative comparison results, demonstrating that the dual-mode anomaly segmentation method accurately localizes defects and effectively suppresses noise. 
+
+4.4. Analysis of Failure Cases 
+
+The above-mentioned ablation experiments and comparative analyses convincingly establish the superiority of our proposed method compared to existing approaches. Nevertheless, it is crucial to recognize that our method is not without limitations. As illustrated in Fig. 18, our method may encounter instances of both false positives and false negatives during the     
+
+> Wei Luo et al.: Preprint submitted to Elsevier Page 16 of 20 Figure 17: Some examples of the effect of the dual-mode anomaly segmentation method.
+> Figure 18: Some failure cases of the TFA-Net method.
+
+detection process. Specifically, when interference is present in the background, our method might erroneously identify it as a defect, leading to false positive occurrences, as observed in the Wood, Screw, and Metal nut datasets. Moreover, when the contrast between the defects and the background is low, the occurrence of false negatives becomes evident, as seen in the Wood and Zipper datasets. This phenomenon can be attributed to the utilization of a pre-trained network on the ImageNet [47] dataset as a feature extractor in our model, which may lack optimal discriminative capabilities for specific textures and objects present in these datasets. Furthermore, our method exhibits limitations in detecting complex logical defects, as evidenced in the Breakfast box and Splicing connectors datasets. This emphasizes the importance of devising more meaningful training tasks for anomaly detection methods to enable the model to learn deeper semantic information. The above-mentioned observations underscore the necessity for further research, highlighting the importance of improving the model’s discriminative capacity and refining the learning tasks to enhance its robustness and efficacy. 
+
+## 5. Conclusion 
+
+This paper presents a novel feature reconstruction network, named TFA-Net, that aims to achieve accurate anomaly detection and segmentation. The key innovation of this network lies in the introduction of TFAM, which utilizes a fixed normal image as a template and applies the multi-head self-attention mechanism of ViT to aggregate normal information from the input features onto the template features. This process effectively filters out abnormal information   
+
+> Wei Luo et al.: Preprint submitted to Elsevier Page 17 of 20
+
+and produces meaningful reconstruction results that go beyond mere duplication of the input data. Subsequently, a dual-mode anomaly segmentation approach is employed to compute the discrepancies between the input features and the reconstructed features. Overall, TFA-Net offers a promising solution for the detection and segmentation of anomalies, and our results demonstrate its effectiveness and potential for future applications. In the future, we will investigate further enhancements of the performance of this network on logical anomalies. 
+
+## CRediT authorship contribution statement 
+
+Wei Luo : Conceptualization, Methodology, Formal analysis, Investigation, Writingoriginal draft, Writingreview & editing, Visualization. 
+
+Haiming Yao : Methodology, Writingreview & editing, Validation, Supervision. 
+
+Wenyong Yu : Methodology, Writing-review & editing. 
+
+## Declaration of competing interest 
+
+The authors declare that they have no known competing financial interests or personal relationships that could have appeared to influence the work reported in this paper. 
+
+## Data availability 
+
+The data is available online. 
+
+## Acknowledgments 
+
+This study was financially supported by the National Natural Science Foundation of China (Grant No. 52375494). 
+
+## References 
+
+[1] Minghui Yang, Peng Wu, and Hui Feng. Memseg: A semi-supervised method for image surface defect detection using differences and commonalities. Engineering Applications of Artificial Intelligence , 119:105835, 2023. [2] Xiangyu Cai, Ruliang Xiao, Zhixia Zeng, Ping Gong, and Youcong Ni. Itran: A novel transformer-based approach for industrial anomaly detection and localization. Engineering Applications of Artificial Intelligence , 125:106677, 2023. [3] Cangning Fan, Ye Jin, Peng Liu, and Wei Zhao. Transferable visual pattern memory network for domain adaptation in anomaly detection. 
+
+Engineering Applications of Artificial Intelligence , 121:106013, 2023. [4] Yalin Wang, Silong Li, Chenliang Liu, Kai Wang, Xiaofeng Yuan, Chunhua Yang, and Weihua Gui. Multiscale feature fusion and semi-supervised temporal-spatial learning for performance monitoring in the flotation industrial process. IEEE Transactions on Cybernetics , pages 1–14, 2023. [5] Diju Liu, Yalin Wang, Chenliang Liu, Kai Wang, Xiaofeng Yuan, and Chunhua Yang. Blackout missing data recovery in industrial time series based on masked-former hierarchical imputation framework. IEEE Transactions on Automation Science and Engineering , pages 1–13, 2023. [6] Xie Xianghua and Majid Mirmehdi. Texems: Texture exemplars for defect detection on random textured surfaces. IEEE Transactions on Pattern Analysis and Machine Intelligence , 2007. [7] Du-Ming Tsai and Tse-Yun Huang. Automated surface inspection for statistical textures. Image and Vision Computing , 2003. [8] Dror Aiger and Hugues Talbot. The phase only transform for unsupervised surface defect detection. computer vision and pattern recognition ,2010. [9] Hongwen Dong, Kechen Song, Yu He, Jing Xu, Yunhui Yan, and Qinggang Meng. Pga-net: Pyramid feature fusion and global context attention network for automated surface defect detection. IEEE Transactions on Industrial Informatics , 2020. [10] Xun Cheng and Jianbo Yu. Retinanet with difference channel attention and adaptively spatial feature fusion for steel surface defect detection. 
+
+IEEE Transactions on Instrumentation and Measurement , 2021. [11] Jihun Yi and Sungroh Yoon. Patch svdd: Patch-level svdd for anomaly detection and segmentation. asian conference on computer vision ,2020. [12] Tal Reiss, Niv Cohen, Liron Bergman, and Yedid Hoshen. Panda: Adapting pretrained features for anomaly detection and segmentation. 
+
+computer vision and pattern recognition , 2020. [13] Qian Wan, Liang Gao, Xinyu Li, and Long Wen. Unsupervised image anomaly detection and segmentation based on pre-trained feature mapping. IEEE Transactions on Industrial Informatics , 2022. [14] Geoffrey E. Hinton and Ruslan Salakhutdinov. Reducing the dimensionality of data with neural networks. Science , 2006. [15] Dong Gong, Lingqiao Liu, Vuong Le, Budhaditya Saha, Moussa Reda Mansour, Svetha Venkatesh, and Anton van den Hengel. Memorizing normality to detect anomaly: Memory-augmented deep autoencoder for unsupervised anomaly detection. international conference on computer vision , 2019. 
+
+Wei Luo et al.: Preprint submitted to Elsevier Page 18 of 20 [16] Jinlei Hou, Yingying Zhang, Qiaoyong Zhong, Di Xie, Shiliang Pu, and Hong Zhou. Divide-and-assemble: Learning block-wise memory for unsupervised anomaly detection. In Proceedings of the IEEE/CVF International Conference on Computer Vision , pages 8791–8800, 2021. [17] Daniel Stanley Tan, Yi-Chun Chen, Trista Pei-Chun Chen, and Wei-Chao Chen. Trustmae: A noise-resilient defect classification framework using memory-augmented auto-encoders with trust regions. workshop on applications of computer vision , 2021. [18] Kun Wu, Lei Zhu, Weihang Shi, Wenwu Wang, and Jin Wu. Self-attention memory-augmented wavelet-cnn for anomaly detection. IEEE Transactions on Circuits and Systems for Video Technology , 2022. [19] Peng Xing and Zechao Li. Visual anomaly detection via partition memory bank module and error estimation. IEEE Transactions on Circuits and Systems for Video Technology , 2023. [20] Wei Luo, Tongzhi Niu, Haiming Yao, Lixin Tang, Wenyong Yu, and Bin Li. Unsupervised defect segmentation via forgetting-inputting-based feature fusion and multiple hierarchical feature difference. IEEE Sensors Journal , pages 1–1, 2023. [21] Ian Goodfellow, Jean Pouget-Abadie, Mehdi Mirza, Bing Xu, David Warde-Farley, Sherjil Ozair, Aaron Courville, and Yoshua Bengio. Generative adversarial nets. neural information processing systems , 2014. [22] Hua Yang, Qinyuan Zhou, Kaiyou Song, and Zhouping Yin. An anomaly feature-editing-based adversarial network for texture defect visual inspection. IEEE Transactions on Industrial Informatics , 2021. [23] Haiming Yao, Wenyong Yu, and Xue Wang. A feature memory rearrangement network for visual inspection of textured surface defects toward edge intelligent manufacturing. IEEE Transactions on Automation Science and Engineering , 2022. [24] Yunkang Cao, Xiaohao Xu, Zhaoge Liu, and Weiming Shen. Collaborative discrepancy optimization for reliable image anomaly localization. 
+
+IEEE Transactions on Industrial Informatics , 19(11):10674–10683, 2023. [25] Vitjan Zavrtanik, Matej Kristan, and Danijel Skočaj. Reconstruction by inpainting for visual anomaly detection. Pattern Recognition ,112:107706, 2021. [26] Yong Shi, Jie Yang, and Zhiquan Qi. Unsupervised anomaly segmentation via deep feature reconstruction. Neurocomputing , 2021. [27] Alexey Dosovitskiy, Lucas Beyer, Alexander Kolesnikov, Dirk Weissenborn, Xiaohua Zhai, Thomas Unterthiner, Mostafa Dehghani, Matthias Minderer, Georg Heigold, Sylvain Gelly, et al. An image is worth 16x16 words: Transformers for image recognition at scale. arXiv preprint arXiv:2010.11929 , 2020. [28] Paul Bergmann, Michael Fauser, David Sattlegger, and Carsten Steger. Mvtec ad a comprehensive real-world dataset for unsupervised anomaly detection. computer vision and pattern recognition , 2019. [29] Paul Bergmann, Kilian Batzner, Michael Fauser, David Sattlegger, and Carsten Steger. Beyond dents and scratches: Logical constraints in unsupervised anomaly detection and localization. International Journal of Computer Vision , 130(4):947–969, 2022. [30] Lukas Ruff, Robert Vandermeulen, Nico Goernitz, Lucas Deecke, Shoaib Ahmed Siddiqui, Alexander Binder, Emmanuel Müller, and Marius Kloft. Deep one-class classification. In International conference on machine learning , pages 4393–4402. PMLR, 2018. [31] Paul Bergmann, Michael Fauser, David Sattlegger, and Carsten Steger. Uninformed students: Student-teacher anomaly detection with discriminative latent embeddings. computer vision and pattern recognition , 2019. [32] Defard Thomas, Setkov Aleksandr, Loesch Angelique, and Audigier Romaric. Padim: A patch distribution modeling framework for anomaly detection and localization. Lecture Notes in Computer Science , 2021. [33] Qian Wan, Liang Gao, Xinyu Li, and Long Wen. Industrial image anomaly localization based on gaussian clustering of pre-trained feature. 
+
+IEEE Transactions on Industrial Electronics , 2021. [34] Karsten Roth, Latha Pemula, Joaquin Zepeda, Bernhard Schölkopf, Thomas Brox, and Peter Gehler. Towards total recall in industrial anomaly detection. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , pages 14318–14328, 2022. [35] Paul Bergmann, Sindy Löwe, Michael Fauser, David Sattlegger, and Carsten Steger. Improving unsupervised defect segmentation by applying structural similarity to autoencoders. arXiv preprint arXiv:1807.02011 , 2018. [36] Shuang Mei, Hua Yang, and Zhouping Yin. An unsupervised-learning-based approach for automated defect inspection on textured surfaces. 
+
+IEEE Transactions on Instrumentation and Measurement , 2018. [37] Hua Yang, Yifan Chen, Kaiyou Song, and Zhouping Yin. Multiscale feature-clustering-based fully convolutional autoencoder for fast accurate visual inspection of texture surface defects. IEEE Transactions on Automation Science and Engineering , 2019. [38] Olaf Ronneberger, Philipp Fischer, and Thomas Brox. U-net: Convolutional networks for biomedical image segmentation. In Medical Image Computing and Computer-Assisted Intervention–MICCAI 2015: 18th International Conference, Munich, Germany, October 5-9, 2015, Proceedings, Part III 18 , pages 234–241. Springer, 2015. [39] Wei Luo, Haiming Yao, and Wenyong Yu. Normal reference attention and defective feature perception network for surface defect detection. 
+
+IEEE Transactions on Instrumentation and Measurement , 72:1–14, 2023. [40] Thomas Schlegl, Philipp Seeböck, Sebastian M. Waldstein, Ursula Schmidt-Erfurth, and Georg Langs. Unsupervised anomaly detection with generative adversarial networks to guide marker discovery. information processing in medical imaging , 2017. [41] Thomas Schlegl, Philipp Seeböck, Sebastian M Waldstein, Georg Langs, and Ursula Schmidt-Erfurth. f-anogan: Fast unsupervised anomaly detection with generative adversarial networks. Medical image analysis , 54:30–44, 2019. [42] Pramuditha Perera, Ramesh Nallapati, and Bing Xiang. Ocgan: One-class novelty detection using gans with constrained latent representations. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , pages 2898–2906, 2019. [43] Samet Akcay, Amir Atapour-Abarghouei, and Toby P. Breckon. Ganomaly: Semi-supervised anomaly detection via adversarial training. asian conference on computer vision , 2018. [44] Samet Akçay, Amir Atapour-Abarghouei, and Toby P Breckon. Skip-ganomaly: Skip connected and adversarially trained encoder-decoder anomaly detection. In 2019 International Joint Conference on Neural Networks (IJCNN) , pages 1–8. IEEE, 2019. [45] Haiming Yao, Xue Wang, and Wenyong Yu. Siamese transition masked autoencoders as uniform unsupervised visual anomaly detector. arXiv preprint arXiv:2211.00349 , 2022. [46] Liyang Chen, Zhiyuan You, Nian Zhang, Juntong Xi, and Xinyi Le. Utrad: Anomaly detection and localization with u-transformer. Neural Networks , 147:53–62, 2022. 
+
+Wei Luo et al.: Preprint submitted to Elsevier Page 19 of 20 [47] Olga Russakovsky, Jia Deng, Hao Su, Jonathan Krause, Sanjeev Satheesh, Sean Ma, Zhiheng Huang, Andrej Karpathy, Aditya Khosla, Michael S. Bernstein, Alexander C. Berg, and Li Fei-Fei. Imagenet large scale visual recognition challenge. International Journal of Computer Vision , 2014. [48] Sergey Zagoruyko and Nikos Komodakis. Wide residual networks. arXiv preprint arXiv:1605.07146 , 2016. [49] Qian Wan, Yunkang Cao, Liang Gao, Weiming Shen, and Xinyu Li. Position encoding enhanced feature mapping for image anomaly detection. In 2022 IEEE 18th International Conference on Automation Science and Engineering (CASE) , pages 876–881, 2022. [50] Denis Gudovskiy, Shun Ishizaka, and Kazuki Kozuka. Cflow-ad: Real-time unsupervised anomaly detection with localization via conditional normalizing flows. In Proceedings of the IEEE/CVF Winter Conference on Applications of Computer Vision , pages 98–107, 2022. [51] Yi Yan, Deming Wang, Guangliang Zhou, and Qijun Chen. Unsupervised anomaly segmentation via multilevel image reconstruction and adaptive attention-level transition. IEEE Transactions on Instrumentation and Measurement , 70:1–12, 2021. [52] Vitjan Zavrtanik, Matej Kristan, and Danijel Skočaj. Draem-a discriminatively trained reconstruction embedding for surface anomaly detection. In Proceedings of the IEEE/CVF International Conference on Computer Vision , pages 8330–8339, 2021. [53] Jonathan Pirnay and Keng Chai. Inpainting transformer for anomaly detection. In Image Analysis and Processing–ICIAP 2022: 21st International Conference, Lecce, Italy, May 23–27, 2022, Proceedings, Part II , pages 394–406. Springer, 2022. [54] Hyunjong Park, Jongyoun Noh, and Bumsub Ham. Learning memory-guided normality for anomaly detection. In Proceedings of the IEEE/CVF conference on computer vision and pattern recognition , pages 14372–14381, 2020. [55] Guodong Wang, Shumin Han, Errui Ding, and Di Huang. Student-teacher feature pyramid matching for unsupervised anomaly detection. 
+
+arXiv: Computer Vision and Pattern Recognition , 2021. [56] Jiawei Yu, Ye Zheng, Xiang Wang, Wei Li, Yushuang Wu, Rui Zhao, and Liwei Wu. Fastflow: Unsupervised anomaly detection and localization via 2d normalizing flows. arXiv preprint arXiv:2111.07677 , 2021. [57] Guoyang Xie, Jinbao Wang, Jiaqi Liu, Jiayi Lyu, Yong Liu, Chengjie Wang, Feng Zheng, and Yaochu Jin. Im-iad: Industrial image anomaly detection benchmark in manufacturing. arXiv preprint arXiv:2301.13359 , 2023. 
+
+Wei Luo et al.: Preprint submitted to Elsevier Page 20 of 20

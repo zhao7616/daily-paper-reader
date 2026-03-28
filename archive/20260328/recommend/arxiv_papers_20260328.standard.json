@@ -1,0 +1,130 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-03-28T19:10:41.046758+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 0,
+    "deep_cap": 6,
+    "deep_selected": 0,
+    "quick_candidates": 3,
+    "quick_skim_target": 11,
+    "quick_selected": 3
+  },
+  "deep_dive": [],
+  "quick_skim": [
+    {
+      "id": "2603.21612v1",
+      "title": "Towards Multimodal Time Series Anomaly Detection with Semantic Alignment and Condensed Interaction",
+      "abstract": "Time series anomaly detection plays a critical role in many dynamic systems. Despite its importance, previous approaches have primarily relied on unimodal numerical data, overlooking the importance of complementary information from other modalities. In this paper, we propose a novel multimodal time series anomaly detection model (MindTS) that focuses on addressing two key challenges: (1) how to achieve semantically consistent alignment across heterogeneous multimodal data, and (2) how to filter out redundant modality information to enhance cross-modal interaction effectively. To address the first challenge, we propose Fine-grained Time-text Semantic Alignment. It integrates exogenous and endogenous text information through cross-view text fusion and a multimodal alignment mechanism, achieving semantically consistent alignment between time and text modalities. For the second challenge, we introduce Content Condenser Reconstruction, which filters redundant information within the aligned text modality and performs cross-modal reconstruction to enable interaction. Extensive experiments on six real-world multimodal datasets demonstrate that the proposed MindTS achieves competitive or superior results compared to existing methods. The code is available at: https://github.com/decisionintelligence/MindTS.",
+      "authors": [
+        "Shiyan Hu",
+        "Jianxin Jin",
+        "Yang Shu",
+        "Peng Chen",
+        "Bin Yang",
+        "Chenjuan Guo"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-03-23T06:18:23+00:00",
+      "link": "https://arxiv.org/pdf/2603.21612v1",
+      "tags": [
+        "keyword:PHM",
+        "query:PHM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "multimodal time series anomaly detection",
+      "llm_evidence_cn": "多模态时间序列异常检测",
+      "llm_evidence": "多模态时间序列异常检测",
+      "canonical_evidence": "多模态时间序列异常检测",
+      "llm_tldr_en": "A multimodal time series anomaly detection model using semantic alignment and interaction.",
+      "llm_tldr_cn": "一种利用语义对齐和交互的多模态时间序列异常检测模型。",
+      "llm_tldr": "一种利用语义对齐和交互的多模态时间序列异常检测模型。",
+      "llm_tags": [
+        "query:phm"
+      ],
+      "matched_query_tag": "query:phm",
+      "matched_query_text": "multi task deep learning for PHM applications",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.22874v1",
+      "title": "Template-Based Feature Aggregation Network for Industrial Anomaly Detection",
+      "abstract": "Industrial anomaly detection plays a crucial role in ensuring product quality control. Therefore, proposing an effective anomaly detection model is of great significance. While existing feature-reconstruction methods have demonstrated excellent performance, they face challenges with shortcut learning, which can lead to undesirable reconstruction of anomalous features. To address this concern, we present a novel feature-reconstruction model called the \\textbf{T}emplate-based \\textbf{F}eature \\textbf{A}ggregation \\textbf{Net}work (TFA-Net) for anomaly detection via template-based feature aggregation. Specifically, TFA-Net first extracts multiple hierarchical features from a pre-trained convolutional neural network for a fixed template image and an input image. Instead of directly reconstructing input features, TFA-Net aggregates them onto the template features, effectively filtering out anomalous features that exhibit low similarity to normal template features. Next, TFA-Net utilizes the template features that have already fused normal features in the input features to refine feature details and obtain the reconstructed feature map. Finally, the defective regions can be located by comparing the differences between the input and reconstructed features. Additionally, a random masking strategy for input features is employed to enhance the overall inspection performance of the model. Our template-based feature aggregation schema yields a nontrivial and meaningful feature reconstruction task. The simple, yet efficient, TFA-Net exhibits state-of-the-art detection performance on various real-world industrial datasets. Additionally, it fulfills the real-time demands of industrial scenarios, rendering it highly suitable for practical applications in the industry. Code is available at https://github.com/luow23/TFA-Net.",
+      "authors": [
+        "Wei Luo",
+        "Haiming Yao",
+        "Wenyong Yu"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-03-24T07:17:57+00:00",
+      "link": "https://arxiv.org/pdf/2603.22874v1",
+      "tags": [
+        "keyword:PHM",
+        "query:PHM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "industrial anomaly detection via template-based feature aggregation",
+      "llm_evidence_cn": "通过基于模板的特征聚合进行工业异常检测",
+      "llm_evidence": "通过基于模板的特征聚合进行工业异常检测",
+      "canonical_evidence": "通过基于模板的特征聚合进行工业异常检测",
+      "llm_tldr_en": "Presents a feature-reconstruction model for industrial anomaly detection to ensure product quality control.",
+      "llm_tldr_cn": "提出一种用于工业异常检测的特征重构模型，旨在确保产品质量控制。",
+      "llm_tldr": "提出一种用于工业异常检测的特征重构模型，旨在确保产品质量控制。",
+      "llm_tags": [
+        "query:phm"
+      ],
+      "matched_query_tag": "query:phm",
+      "matched_query_text": "integrated approach for machinery fault diagnosis and prognosis",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.23576v1",
+      "title": "Wafer-Level Etch Spatial Profiling for Process Monitoring from Time-Series with Time-LLM",
+      "abstract": "Understanding wafer-level spatial variations from in-situ process signals is essential for advanced plasma etching process monitoring. While most data-driven approaches focus on scalar indicators such as average etch rate, actual process quality is determined by complex two-dimensional spatial distributions across the wafer. This paper presents a spatial regression model that predicts wafer-level etch depth distributions directly from multichannel in-situ process time series. We propose a Time-LLM-based spatial regression model that extends LLM reprogramming from conventional time-series forecasting to wafer-level spatial estimation by redesigning the input embedding and output projection. Using the BOSCH plasma-etching dataset, we demonstrate stable performance under data-limited conditions, supporting the feasibility of LLM-based reprogramming for wafer-level spatial monitoring.",
+      "authors": [
+        "Hyunwoo Kim",
+        "Munyoung Lee",
+        "Seung Hyub Jeon",
+        "Kyu Sung Lee"
+      ],
+      "primary_category": "stat.AP",
+      "categories": [
+        "stat.AP",
+        "cs.AI",
+        "cs.LG"
+      ],
+      "published": "2026-03-24T13:38:19+00:00",
+      "link": "https://arxiv.org/pdf/2603.23576v1",
+      "tags": [
+        "query:PHM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "process monitoring and spatial estimation from time-series",
+      "llm_evidence_cn": "基于时间序列的过程监控与空间估计",
+      "llm_evidence": "基于时间序列的过程监控与空间估计",
+      "canonical_evidence": "基于时间序列的过程监控与空间估计",
+      "llm_tldr_en": "Predicts wafer-level etch distributions from in-situ time series for advanced process monitoring.",
+      "llm_tldr_cn": "通过原位时间序列预测晶圆级蚀刻分布，用于先进的过程监控。",
+      "llm_tldr": "通过原位时间序列预测晶圆级蚀刻分布，用于先进的过程监控。",
+      "llm_tags": [
+        "query:rul:composite"
+      ],
+      "matched_query_tag": "query:rul:composite",
+      "matched_query_text": "Papers central to 剩余寿命预测和旋转机械设备剩余寿命预测, especially work that connects or combines: Remaining Useful Life (RUL) prediction methods; Health monitoring and RUL for rotating machinery; Remaining useful life prediction for rolling element bearings; Deep learning architectures for RUL estimation; State of the art methods for remaining useful life prediction of rotating machinery; Deep learning based RUL estimation for industrial bearings and motors; Data driven vs physics informed models for RUL prediction; Real time health assessment and RUL forecasting for rotating components.",
+      "matched_requirement_id": "req-composite-rul",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}
