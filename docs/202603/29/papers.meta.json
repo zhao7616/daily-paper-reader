@@ -1,0 +1,93 @@
+{
+  "label": "2026-03-29",
+  "date": "2026-03-29",
+  "generated_at": "2026-03-29T20:10:41",
+  "count": 6,
+  "papers": [
+    {
+      "paper_id": "202603/29/2603.21678v1-conbonet-conformalized-neuroscience-inspired-bayesian-operator-network-for-reliability-analysis",
+      "section": "quick",
+      "title_en": "CoNBONet: Conformalized Neuroscience-inspired Bayesian Operator Network for Reliability Analysis",
+      "authors": "Shailesh Garg, Souvik Chakraborty",
+      "date": "2026-03-23",
+      "pdf": "https://arxiv.org/pdf/2603.21678v1",
+      "score": "6.0",
+      "evidence": "非线性动力系统的可靠性分析",
+      "tldr": "针对非线性动力系统在随机激励下的时间相关可靠性分析计算成本高的问题，本文提出CoNBONet。该模型结合了受神经科学启发的神经元模型与深度算子网络，实现了快速、低功耗的推理。通过引入分裂共形预测，CoNBONet 提供了具有理论保证的不确定性量化。实验证明，该方法在保持预测精度的同时，能有效评估失效概率，为工程设计中的鲁棒可靠性分析提供了高效、可扩展的替代方案。",
+      "tags": "query:rul",
+      "abstract_en": "Time-dependent reliability analysis of nonlinear dynamical systems under stochastic excitations is a critical yet computationally demanding task. Conventional approaches, such as Monte Carlo simulation, necessitate repeated evaluations of computationally expensive numerical solvers, leading to significant computational bottlenecks. To address this challenge, we propose \\textit{CoNBONet}, a neuroscience-inspired surrogate model that enables fast, energy-efficient, and uncertainty-aware reliability analysis, providing a scalable alternative to techniques such as Monte Carlo simulations. CoNBONet, short for \\textbf{Co}nformalized \\textbf{N}euroscience-inspired \\textbf{B}ayesian \\textbf{O}perator \\textbf{Net}work, leverages the expressive power of deep operator networks while integrating neuroscience-inspired neuron models to achieve fast, low-power inference. Unlike traditional surrogates such as Gaussian processes, polynomial chaos expansions, or support vector regression, that may face scalability challenges for high-dimensional, time-dependent reliability problems, CoNBONet offers \\textit{fast and energy-efficient inference} enabled by a neuroscience-inspired network architecture, \\textit{calibrated uncertainty quantification with theoretical guarantees} via split conformal prediction, and \\textit{strong generalization capability} through an operator-learning paradigm that maps input functions to system response trajectories. Validation of the proposed CoNBONet for various nonlinear dynamical systems demonstrates that CoNBONet preserves predictive fidelity, and achieves reliable coverage of failure probabilities, making it a powerful tool for robust and scalable reliability analysis in engineering design.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202603/29/2603.21724v1-fisformer-replacing-self-attention-with-a-fuzzy-inference-system-in-transformer-models-for-time-series-forecasting",
+      "section": "quick",
+      "title_en": "FISformer: Replacing Self-Attention with a Fuzzy Inference System in Transformer Models for Time Series Forecasting",
+      "authors": "Bulent Haznedar, Levent Karacan",
+      "date": "2026-03-23",
+      "pdf": "https://arxiv.org/pdf/2603.21724v1",
+      "score": "6.0",
+      "evidence": "具有不确定性建模的时间序列预测",
+      "tldr": "针对Transformer在时间序列预测中难以建模不确定性和非线性依赖的问题，本文提出FISFormer。该模型创新性地利用模糊推理系统（FIS）替代传统的点积注意力机制，通过可学习的隶属度函数和规则推理来估算Token间的关联强度。FISFormer成功融合了模糊逻辑的强解释性与Transformer的高效表征能力，在多个基准数据集上显著提升了预测精度和对噪声的鲁棒性。",
+      "tags": "query:rul",
+      "abstract_en": "Transformers have achieved remarkable progress in time series forecasting, yet their reliance on deterministic dot-product attention limits their capacity to model uncertainty and nonlinear dependencies across multivariate temporal dimensions. To address this limitation, we propose FISFormer, a Fuzzy Inference System-driven Transformer that replaces conventional attention with a FIS Interaction mechanism. In this framework, each query-key pair undergoes a fuzzy inference process for every feature dimension, where learnable membership functions and rule-based reasoning estimate token-wise relational strengths. These FIS-derived interaction weights capture uncertainty and provide interpretable, continuous mappings between tokens. A softmax operation is applied along the token axis to normalize these weights, which are then combined with the corresponding value features through element-wise multiplication to yield the final context-enhanced token representations. This design fuses the interpretability and uncertainty modeling of fuzzy logic with the representational power of Transformers. Extensive experiments on multiple benchmark datasets demonstrate that FISFormer achieves superior forecasting accuracy, noise robustness, and interpretability compared to state-of-the-art Transformer variants, establishing fuzzy inference as an effective alternative to conventional attention mechanisms.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202603/29/2603.21935v1-chronological-contrastive-learning-few-shot-progression-assessment-in-irreversible-diseases",
+      "section": "quick",
+      "title_en": "Chronological Contrastive Learning: Few-Shot Progression Assessment in Irreversible Diseases",
+      "authors": "Clemens Watzenböck, Daniel Aletaha, Michaël Deman, Thomas Deimel, Jana Eder, Ivana Janickova, Robert Janiczek, Peter Mandl, Philipp Seeböck, Gabriela Supp, Paul Weiser, Georg Langs",
+      "date": "2026-03-23",
+      "pdf": "https://arxiv.org/pdf/2603.21935v1",
+      "score": "6.0",
+      "evidence": "用于纵向数据进展评估的时间序列对比学习",
+      "tldr": "针对不可逆疾病（如类风湿性关节炎）医学影像评分成本高、标注少的问题，本文提出 ChronoCon 对比学习方法。该方法利用患者纵向扫描的时间顺序作为自然排序信号，在无需专家标注的情况下学习疾病进展特征。实验表明，ChronoCon 在极低标注样本下表现优异，仅用5名患者的数据微调即可达到86%的组内相关系数，显著提升了标注效率并减少了对专家标注的依赖。",
+      "tags": "query:rul",
+      "abstract_en": "Quantitative disease severity scoring in medical imaging is costly, time-consuming, and subject to inter-reader variability. At the same time, clinical archives contain far more longitudinal imaging data than expert-annotated severity scores. Existing self-supervised methods typically ignore this chronological structure. We introduce ChronoCon, a contrastive learning approach that replaces label-based ranking losses with rankings derived solely from the visitation order of a patient's longitudinal scans. Under the clinically plausible assumption of monotonic progression in irreversible diseases, the method learns disease-relevant representations without using any expert labels. This generalizes the idea of Rank-N-Contrast from label distances to temporal ordering. Evaluated on rheumatoid arthritis radiographs for severity assessment, the learned representations substantially improve label efficiency. In low-label settings, ChronoCon significantly outperforms a fully supervised baseline initialized from ImageNet weights. In a few-shot learning experiment, fine-tuning ChronoCon on expert scores from only five patients yields an intraclass correlation coefficient of 86% for severity score prediction. These results demonstrate the potential of chronological contrastive learning to exploit routinely available imaging metadata to reduce annotation requirements in the irreversible disease domain. Code is available at https://github.com/cirmuw/ChronoCon.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202603/29/2603.23215v2-posedriver-a-unified-approach-to-multi-category-skeleton-detection-for-autonomous-driving",
+      "section": "quick",
+      "title_en": "PoseDriver: A Unified Approach to Multi-Category Skeleton Detection for Autonomous Driving",
+      "authors": "Yasamin Borhani, Taylor Mordan, Yihan Wang, Reyhaneh Hosseininejad, Javad Khoramdel, Alexandre Alahi",
+      "date": "2026-03-24",
+      "pdf": "https://arxiv.org/pdf/2603.23215v2",
+      "score": "6.0",
+      "evidence": "统一检测架构的多任务学习",
+      "tldr": "PoseDriver是一个专为自动驾驶设计的统一自底向上多类别骨架检测框架。它通过将不同类别建模为独立任务，解决了多任务学习中的挑战，实现了对车道线、自行车等多种目标的结构化信息提取。该研究不仅在OpenLane数据集上达到了SOTA性能，还推出了新的自行车骨架数据集，并证明了框架在处理新类别时的迁移能力。",
+      "tags": "query:phm",
+      "abstract_en": "Object skeletons offer a concise representation of structural information, capturing essential aspects of posture and orientation that are crucial for autonomous driving applications. However, a unified architecture that simultaneously handles multiple instances and categories using only the input image remains elusive. In this paper, we introduce PoseDriver, a unified framework for bottom-up multi-category skeleton detection tailored to common objects in driving scenarios. We model each category as a distinct task to systematically address the challenges of multi-task learning. Specifically, we propose a novel approach for lane detection based on skeleton representations, achieving state-of-the-art performance on the OpenLane dataset. Moreover, we present a new dataset for bicycle skeleton detection and assess the transferability of our framework to novel categories. Experimental results validate the effectiveness of the proposed approach.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202603/29/2603.25274v1-feature-selection-for-fault-prediction-in-distribution-systems",
+      "section": "quick",
+      "title_en": "Feature Selection for Fault Prediction in Distribution Systems",
+      "authors": "Georg Kordowich, Julian Oelhaf, Siming Bayer, Andreas Maier, Matthias Kereit, Johann Jaeger",
+      "date": "2026-03-26",
+      "pdf": "https://arxiv.org/pdf/2603.25274v1",
+      "score": "6.0",
+      "evidence": "配电系统的故障预测",
+      "tldr": "本研究针对配电系统故障预测中现场数据稀缺和特征选择困难的问题，提出了一种基于仿真数据的代理任务方法。通过生成包含2万次仿真和34类事件的大规模数据集，从1556个候选特征中筛选出374个最优特征。实验表明，该代理任务与实际预测性能高度相关（r=0.92），在变电站案例研究中取得了0.80的F1分数，显著优于传统的频域和子波变换方法。",
+      "tags": "query:phm",
+      "abstract_en": "While conventional power system protection isolates faulty components only after a fault has occurred, fault prediction approaches try to detect faults before they can cause significant damage. Although initial studies have demonstrated successful proofs of concept, development is hindered by scarce field data and ineffective feature selection. To address these limitations, this paper proposes a surrogate task that uses simulation data for feature selection. This task exhibits a strong correlation (r = 0.92) with real-world fault prediction performance. We generate a large dataset containing 20000 simulations with 34 event classes and diverse grid configurations. From 1556 candidate features, we identify 374 optimal features. A case study on three substations demonstrates the effectiveness of the selected features, achieving an F1-score of 0.80 and outperforming baseline approaches that use frequency-domain and wavelet-based features.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202603/29/2603.25670v1-uncertainty-guided-label-rebalancing-for-cps-safety-monitoring",
+      "section": "quick",
+      "title_en": "Uncertainty-Guided Label Rebalancing for CPS Safety Monitoring",
+      "authors": "John Ayotunde, Qinghua Xu, Guancheng Wang, Lionel C. Briand",
+      "date": "2026-03-26",
+      "pdf": "https://arxiv.org/pdf/2603.25670v1",
+      "score": "6.0",
+      "evidence": "使用时间序列遥测进行CPS安全监控",
+      "tldr": "针对信息物理系统（CPS）中不安全事件稀少导致的类别极度不平衡问题，本文提出U-Balance框架。该方法利用CPS行为不确定性与安全性的相关性，通过GatedMLP预测不确定性得分，并采用uLNR机制将高不确定性的“安全”样本重标记为“不安全”，从而在不合成数据的情况下丰富少数类。在无人机基准测试中，该方法显著提升了安全监测的F1分数，优于现有重平衡技术。",
+      "tags": "query:rul",
+      "abstract_en": "Safety monitoring is essential for Cyber-Physical Systems (CPSs). However, unsafe events are rare in real-world CPS operations, creating an extreme class imbalance that degrades safety predictors. Standard rebalancing techniques perform poorly on time-series CPS telemetry, either generating unrealistic synthetic samples or overfitting on the minority class. Meanwhile, behavioral uncertainty in CPS operations, defined as the degree of doubt or uncertainty in CPS decisions , is often correlated with safety outcomes but unexplored in safety monitoring. To that end, we propose U-Balance, a supervised approach that leverages behavioral uncertainty to rebalance imbalanced datasets prior to training a safety predictor. U-Balance first trains a GatedMLP-based uncertainty predictor that summarizes each telemetry window into distributional kinematic features and outputs an uncertainty score. It then applies an uncertainty-guided label rebalancing (uLNR) mechanism that probabilistically relabels \\textit{safe}-labeled windows with unusually high uncertainty as \\textit{unsafe}, thereby enriching the minority class with informative boundary samples without synthesizing new data. Finally, a safety predictor is trained on the rebalanced dataset for safety monitoring. We evaluate U-Balance on a large-scale UAV benchmark with a 46:1 safe-to-unsafe ratio. Results confirm a moderate but significant correlation between behavioral uncertainty and safety. We then identify uLNR as the most effective strategy to exploit uncertainty information, compared to direct early and late fusion. U-Balance achieves a 0.806 F1 score, outperforming the strongest baseline by 14.3 percentage points, while maintaining competitive inference efficiency. Ablation studies confirm that both the GatedMLP-based uncertainty predictor and the uLNR mechanism contribute significantly to U-Balance's effectiveness.",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}

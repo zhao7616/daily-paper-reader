@@ -1,0 +1,250 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-03-29T20:09:54.061623+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 0,
+    "deep_cap": 6,
+    "deep_selected": 0,
+    "quick_candidates": 6,
+    "quick_skim_target": 11,
+    "quick_selected": 6
+  },
+  "deep_dive": [],
+  "quick_skim": [
+    {
+      "id": "2603.21678v1",
+      "title": "CoNBONet: Conformalized Neuroscience-inspired Bayesian Operator Network for Reliability Analysis",
+      "abstract": "Time-dependent reliability analysis of nonlinear dynamical systems under stochastic excitations is a critical yet computationally demanding task. Conventional approaches, such as Monte Carlo simulation, necessitate repeated evaluations of computationally expensive numerical solvers, leading to significant computational bottlenecks. To address this challenge, we propose \\textit{CoNBONet}, a neuroscience-inspired surrogate model that enables fast, energy-efficient, and uncertainty-aware reliability analysis, providing a scalable alternative to techniques such as Monte Carlo simulations. CoNBONet, short for \\textbf{Co}nformalized \\textbf{N}euroscience-inspired \\textbf{B}ayesian \\textbf{O}perator \\textbf{Net}work, leverages the expressive power of deep operator networks while integrating neuroscience-inspired neuron models to achieve fast, low-power inference. Unlike traditional surrogates such as Gaussian processes, polynomial chaos expansions, or support vector regression, that may face scalability challenges for high-dimensional, time-dependent reliability problems, CoNBONet offers \\textit{fast and energy-efficient inference} enabled by a neuroscience-inspired network architecture, \\textit{calibrated uncertainty quantification with theoretical guarantees} via split conformal prediction, and \\textit{strong generalization capability} through an operator-learning paradigm that maps input functions to system response trajectories. Validation of the proposed CoNBONet for various nonlinear dynamical systems demonstrates that CoNBONet preserves predictive fidelity, and achieves reliable coverage of failure probabilities, making it a powerful tool for robust and scalable reliability analysis in engineering design.",
+      "authors": [
+        "Shailesh Garg",
+        "Souvik Chakraborty"
+      ],
+      "primary_category": "stat.ML",
+      "categories": [
+        "stat.ML",
+        "cs.LG"
+      ],
+      "published": "2026-03-23T08:09:34+00:00",
+      "link": "https://arxiv.org/pdf/2603.21678v1",
+      "tags": [
+        "keyword:PHM",
+        "query:PHM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "reliability analysis of nonlinear dynamical systems",
+      "llm_evidence_cn": "非线性动力系统的可靠性分析",
+      "llm_evidence": "非线性动力系统的可靠性分析",
+      "canonical_evidence": "非线性动力系统的可靠性分析",
+      "llm_tldr_en": "A Bayesian Operator Network for fast and uncertainty-aware reliability analysis of dynamical systems.",
+      "llm_tldr_cn": "一种用于动力系统快速且感知不确定性的可靠性分析贝叶斯算子网络。",
+      "llm_tldr": "一种用于动力系统快速且感知不确定性的可靠性分析贝叶斯算子网络。",
+      "llm_tags": [
+        "query:rul:composite"
+      ],
+      "matched_query_tag": "query:rul:composite",
+      "matched_query_text": "Papers central to 剩余寿命预测和旋转机械设备剩余寿命预测, especially work that connects or combines: Remaining Useful Life (RUL) prediction methods; Health monitoring and RUL for rotating machinery; Remaining useful life prediction for rolling element bearings; Deep learning architectures for RUL estimation; State of the art methods for remaining useful life prediction of rotating machinery; Deep learning based RUL estimation for industrial bearings and motors; Data driven vs physics informed models for RUL prediction; Real time health assessment and RUL forecasting for rotating components.",
+      "matched_requirement_id": "req-composite-rul",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.21724v1",
+      "title": "FISformer: Replacing Self-Attention with a Fuzzy Inference System in Transformer Models for Time Series Forecasting",
+      "abstract": "Transformers have achieved remarkable progress in time series forecasting, yet their reliance on deterministic dot-product attention limits their capacity to model uncertainty and nonlinear dependencies across multivariate temporal dimensions. To address this limitation, we propose FISFormer, a Fuzzy Inference System-driven Transformer that replaces conventional attention with a FIS Interaction mechanism. In this framework, each query-key pair undergoes a fuzzy inference process for every feature dimension, where learnable membership functions and rule-based reasoning estimate token-wise relational strengths. These FIS-derived interaction weights capture uncertainty and provide interpretable, continuous mappings between tokens. A softmax operation is applied along the token axis to normalize these weights, which are then combined with the corresponding value features through element-wise multiplication to yield the final context-enhanced token representations. This design fuses the interpretability and uncertainty modeling of fuzzy logic with the representational power of Transformers. Extensive experiments on multiple benchmark datasets demonstrate that FISFormer achieves superior forecasting accuracy, noise robustness, and interpretability compared to state-of-the-art Transformer variants, establishing fuzzy inference as an effective alternative to conventional attention mechanisms.",
+      "authors": [
+        "Bulent Haznedar",
+        "Levent Karacan"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "published": "2026-03-23T09:12:47+00:00",
+      "link": "https://arxiv.org/pdf/2603.21724v1",
+      "tags": [
+        "keyword:PHM",
+        "query:PHM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "time series forecasting with uncertainty modeling",
+      "llm_evidence_cn": "具有不确定性建模的时间序列预测",
+      "llm_evidence": "具有不确定性建模的时间序列预测",
+      "canonical_evidence": "具有不确定性建模的时间序列预测",
+      "llm_tldr_en": "Introduces FISformer, a Transformer variant using fuzzy inference for improved time series forecasting and uncertainty.",
+      "llm_tldr_cn": "引入了 FISformer，一种使用模糊推理改进时间序列预测和不确定性建模的 Transformer 变体。",
+      "llm_tldr": "引入了 FISformer，一种使用模糊推理改进时间序列预测和不确定性建模的 Transformer 变体。",
+      "llm_tags": [
+        "query:rul:composite"
+      ],
+      "matched_query_tag": "query:rul:composite",
+      "matched_query_text": "Papers central to 剩余寿命预测和旋转机械设备剩余寿命预测, especially work that connects or combines: Remaining Useful Life (RUL) prediction methods; Health monitoring and RUL for rotating machinery; Remaining useful life prediction for rolling element bearings; Deep learning architectures for RUL estimation; State of the art methods for remaining useful life prediction of rotating machinery; Deep learning based RUL estimation for industrial bearings and motors; Data driven vs physics informed models for RUL prediction; Real time health assessment and RUL forecasting for rotating components.",
+      "matched_requirement_id": "req-composite-rul",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.21935v1",
+      "title": "Chronological Contrastive Learning: Few-Shot Progression Assessment in Irreversible Diseases",
+      "abstract": "Quantitative disease severity scoring in medical imaging is costly, time-consuming, and subject to inter-reader variability. At the same time, clinical archives contain far more longitudinal imaging data than expert-annotated severity scores. Existing self-supervised methods typically ignore this chronological structure. We introduce ChronoCon, a contrastive learning approach that replaces label-based ranking losses with rankings derived solely from the visitation order of a patient's longitudinal scans. Under the clinically plausible assumption of monotonic progression in irreversible diseases, the method learns disease-relevant representations without using any expert labels. This generalizes the idea of Rank-N-Contrast from label distances to temporal ordering. Evaluated on rheumatoid arthritis radiographs for severity assessment, the learned representations substantially improve label efficiency. In low-label settings, ChronoCon significantly outperforms a fully supervised baseline initialized from ImageNet weights. In a few-shot learning experiment, fine-tuning ChronoCon on expert scores from only five patients yields an intraclass correlation coefficient of 86% for severity score prediction. These results demonstrate the potential of chronological contrastive learning to exploit routinely available imaging metadata to reduce annotation requirements in the irreversible disease domain. Code is available at https://github.com/cirmuw/ChronoCon.",
+      "authors": [
+        "Clemens Watzenböck",
+        "Daniel Aletaha",
+        "Michaël Deman",
+        "Thomas Deimel",
+        "Jana Eder",
+        "Ivana Janickova",
+        "Robert Janiczek",
+        "Peter Mandl",
+        "Philipp Seeböck",
+        "Gabriela Supp",
+        "Paul Weiser",
+        "Georg Langs"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.AI"
+      ],
+      "published": "2026-03-23T12:53:04+00:00",
+      "link": "https://arxiv.org/pdf/2603.21935v1",
+      "tags": [
+        "keyword:PHM",
+        "query:PHM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Chronological contrastive learning for progression assessment in longitudinal data",
+      "llm_evidence_cn": "用于纵向数据进展评估的时间序列对比学习",
+      "llm_evidence": "用于纵向数据进展评估的时间序列对比学习",
+      "canonical_evidence": "用于纵向数据进展评估的时间序列对比学习",
+      "llm_tldr_en": "Uses visitation order in longitudinal scans to learn disease progression without expert labels.",
+      "llm_tldr_cn": "利用纵向扫描的访问顺序在无专家标签的情况下学习疾病进展。",
+      "llm_tldr": "利用纵向扫描的访问顺序在无专家标签的情况下学习疾病进展。",
+      "llm_tags": [
+        "query:rul:composite"
+      ],
+      "matched_query_tag": "query:rul:composite",
+      "matched_query_text": "Papers central to 剩余寿命预测和旋转机械设备剩余寿命预测, especially work that connects or combines: Remaining Useful Life (RUL) prediction methods; Health monitoring and RUL for rotating machinery; Remaining useful life prediction for rolling element bearings; Deep learning architectures for RUL estimation; State of the art methods for remaining useful life prediction of rotating machinery; Deep learning based RUL estimation for industrial bearings and motors; Data driven vs physics informed models for RUL prediction; Real time health assessment and RUL forecasting for rotating components.",
+      "matched_requirement_id": "req-composite-rul",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.23215v2",
+      "title": "PoseDriver: A Unified Approach to Multi-Category Skeleton Detection for Autonomous Driving",
+      "abstract": "Object skeletons offer a concise representation of structural information, capturing essential aspects of posture and orientation that are crucial for autonomous driving applications. However, a unified architecture that simultaneously handles multiple instances and categories using only the input image remains elusive. In this paper, we introduce PoseDriver, a unified framework for bottom-up multi-category skeleton detection tailored to common objects in driving scenarios. We model each category as a distinct task to systematically address the challenges of multi-task learning. Specifically, we propose a novel approach for lane detection based on skeleton representations, achieving state-of-the-art performance on the OpenLane dataset. Moreover, we present a new dataset for bicycle skeleton detection and assess the transferability of our framework to novel categories. Experimental results validate the effectiveness of the proposed approach.",
+      "authors": [
+        "Yasamin Borhani",
+        "Taylor Mordan",
+        "Yihan Wang",
+        "Reyhaneh Hosseininejad",
+        "Javad Khoramdel",
+        "Alexandre Alahi"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.HC"
+      ],
+      "published": "2026-03-24T13:56:35+00:00",
+      "link": "https://arxiv.org/pdf/2603.23215v2",
+      "tags": [
+        "keyword:PHM",
+        "query:PHM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "multi-task learning for unified detection architecture",
+      "llm_evidence_cn": "统一检测架构的多任务学习",
+      "llm_evidence": "统一检测架构的多任务学习",
+      "canonical_evidence": "统一检测架构的多任务学习",
+      "llm_tldr_en": "Introduces PoseDriver, a multi-task learning framework for unified skeleton detection in autonomous driving.",
+      "llm_tldr_cn": "引入了 PoseDriver，这是一个用于自动驾驶中统一骨架检测的多任务学习框架。",
+      "llm_tldr": "引入了 PoseDriver，这是一个用于自动驾驶中统一骨架检测的多任务学习框架。",
+      "llm_tags": [
+        "query:phm"
+      ],
+      "matched_query_tag": "query:phm",
+      "matched_query_text": "multi task deep learning for PHM applications",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.25274v1",
+      "title": "Feature Selection for Fault Prediction in Distribution Systems",
+      "abstract": "While conventional power system protection isolates faulty components only after a fault has occurred, fault prediction approaches try to detect faults before they can cause significant damage. Although initial studies have demonstrated successful proofs of concept, development is hindered by scarce field data and ineffective feature selection. To address these limitations, this paper proposes a surrogate task that uses simulation data for feature selection. This task exhibits a strong correlation (r = 0.92) with real-world fault prediction performance. We generate a large dataset containing 20000 simulations with 34 event classes and diverse grid configurations. From 1556 candidate features, we identify 374 optimal features. A case study on three substations demonstrates the effectiveness of the selected features, achieving an F1-score of 0.80 and outperforming baseline approaches that use frequency-domain and wavelet-based features.",
+      "authors": [
+        "Georg Kordowich",
+        "Julian Oelhaf",
+        "Siming Bayer",
+        "Andreas Maier",
+        "Matthias Kereit",
+        "Johann Jaeger"
+      ],
+      "primary_category": "eess.SY",
+      "categories": [
+        "eess.SY"
+      ],
+      "published": "2026-03-26T10:10:47+00:00",
+      "link": "https://arxiv.org/pdf/2603.25274v1",
+      "tags": [
+        "query:PHM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "fault prediction in distribution systems",
+      "llm_evidence_cn": "配电系统的故障预测",
+      "llm_evidence": "配电系统的故障预测",
+      "canonical_evidence": "配电系统的故障预测",
+      "llm_tldr_en": "Develops a feature selection method using simulation data to improve fault prediction in power systems.",
+      "llm_tldr_cn": "开发了一种利用模拟数据进行特征选择的方法，以改进电力系统的故障预测。",
+      "llm_tldr": "开发了一种利用模拟数据进行特征选择的方法，以改进电力系统的故障预测。",
+      "llm_tags": [
+        "query:phm"
+      ],
+      "matched_query_tag": "query:phm",
+      "matched_query_text": "integrated approach for machinery fault diagnosis and prognosis",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.25670v1",
+      "title": "Uncertainty-Guided Label Rebalancing for CPS Safety Monitoring",
+      "abstract": "Safety monitoring is essential for Cyber-Physical Systems (CPSs). However, unsafe events are rare in real-world CPS operations, creating an extreme class imbalance that degrades safety predictors. Standard rebalancing techniques perform poorly on time-series CPS telemetry, either generating unrealistic synthetic samples or overfitting on the minority class. Meanwhile, behavioral uncertainty in CPS operations, defined as the degree of doubt or uncertainty in CPS decisions , is often correlated with safety outcomes but unexplored in safety monitoring. To that end, we propose U-Balance, a supervised approach that leverages behavioral uncertainty to rebalance imbalanced datasets prior to training a safety predictor. U-Balance first trains a GatedMLP-based uncertainty predictor that summarizes each telemetry window into distributional kinematic features and outputs an uncertainty score. It then applies an uncertainty-guided label rebalancing (uLNR) mechanism that probabilistically relabels \\textit{safe}-labeled windows with unusually high uncertainty as \\textit{unsafe}, thereby enriching the minority class with informative boundary samples without synthesizing new data. Finally, a safety predictor is trained on the rebalanced dataset for safety monitoring. We evaluate U-Balance on a large-scale UAV benchmark with a 46:1 safe-to-unsafe ratio. Results confirm a moderate but significant correlation between behavioral uncertainty and safety. We then identify uLNR as the most effective strategy to exploit uncertainty information, compared to direct early and late fusion. U-Balance achieves a 0.806 F1 score, outperforming the strongest baseline by 14.3 percentage points, while maintaining competitive inference efficiency. Ablation studies confirm that both the GatedMLP-based uncertainty predictor and the uLNR mechanism contribute significantly to U-Balance's effectiveness.",
+      "authors": [
+        "John Ayotunde",
+        "Qinghua Xu",
+        "Guancheng Wang",
+        "Lionel C. Briand"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.SE"
+      ],
+      "published": "2026-03-26T17:26:02+00:00",
+      "link": "https://arxiv.org/pdf/2603.25670v1",
+      "tags": [
+        "query:PHM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "safety monitoring for CPS using time-series telemetry",
+      "llm_evidence_cn": "使用时间序列遥测进行CPS安全监控",
+      "llm_evidence": "使用时间序列遥测进行CPS安全监控",
+      "canonical_evidence": "使用时间序列遥测进行CPS安全监控",
+      "llm_tldr_en": "Leverages behavioral uncertainty to rebalance imbalanced datasets for CPS safety monitoring.",
+      "llm_tldr_cn": "利用行为不确定性来重新平衡CPS安全监控中的失衡数据集。",
+      "llm_tldr": "利用行为不确定性来重新平衡CPS安全监控中的失衡数据集。",
+      "llm_tags": [
+        "query:rul:composite"
+      ],
+      "matched_query_tag": "query:rul:composite",
+      "matched_query_text": "Papers central to 剩余寿命预测和旋转机械设备剩余寿命预测, especially work that connects or combines: Remaining Useful Life (RUL) prediction methods; Health monitoring and RUL for rotating machinery; Remaining useful life prediction for rolling element bearings; Deep learning architectures for RUL estimation; State of the art methods for remaining useful life prediction of rotating machinery; Deep learning based RUL estimation for industrial bearings and motors; Data driven vs physics informed models for RUL prediction; Real time health assessment and RUL forecasting for rotating components.",
+      "matched_requirement_id": "req-composite-rul",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}
