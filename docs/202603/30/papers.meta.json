@@ -1,0 +1,93 @@
+{
+  "label": "2026-03-30",
+  "date": "2026-03-30",
+  "generated_at": "2026-03-30T20:03:24",
+  "count": 6,
+  "papers": [
+    {
+      "paper_id": "202603/30/2603.22885v3-a-heterogeneous-long-micro-scale-cascading-architecture-for-general-aviation-health-management",
+      "section": "deep",
+      "title_en": "A Heterogeneous Long-Micro Scale Cascading Architecture for General Aviation Health Management",
+      "authors": "Xinhang Chen, Zhihuan Wei, Yang Hu, Zhiguo Zeng, Kang Zeng, Wei Wang",
+      "date": "2026-03-24",
+      "pdf": "https://arxiv.org/pdf/2603.22885v3",
+      "score": "9.0",
+      "evidence": "航空健康管理中的智能健康监测与诊断",
+      "tldr": "针对通用航空机队健康监测中计算受限与感受野矛盾的问题，本文提出一种异构长微尺度级联架构（LMSD）。该架构通过解耦全局异常检测与微观故障分类，在解决感受野矛盾的同时降低了训练开销，并引入知识蒸馏增强可解释性。实验证明，该方法在提升安全指标的同时显著加快了训练速度并压缩了模型体积，适用于资源受限的航空环境。",
+      "tags": "query:phm",
+      "abstract_en": "BACKGROUND: General aviation fleet expansion demands intelligent health monitoring under computational constraints. Real-world aircraft health diagnosis requires balancing accuracy with computational constraints under extreme class imbalance and environmental uncertainty. Existing end-to-end approaches suffer from the receptive field paradox: global attention introduces excessive operational heterogeneity noise for fine-grained fault classification, while localized constraints sacrifice critical cross-temporal context essential for anomaly detection. METHODS: This paper presents an AI-driven heterogeneous cascading architecture for general aviation health management. The proposed Long-Micro Scale Diagnostician (LMSD) explicitly decouples global anomaly detection (full-sequence attention) from micro-scale fault classification (restricted receptive fields), resolving the receptive field paradox while minimizing training overhead. A knowledge distillation-based interpretability module provides physically traceable explanations for safety-critical validation. RESULTS: Experiments on the public National General Aviation Flight Information Database (NGAFID) dataset (28,935 flights, 36 categories) demonstrate 4--8% improvement in safety-critical metrics (MCWPM) with 4.2 times training acceleration and 46% model compression compared to end-to-end baselines. CONCLUSIONS: The AI-driven heterogeneous architecture offers deployable solutions for aviation equipment health management, with potential for digital twin integration in future work. The proposed framework substantiates deployability in resource-constrained aviation environments while maintaining stringent safety requirements.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202603/30/2603.26155v1-aging-states-estimation-and-monitoring-strategies-of-li-ion-batteries-using-incremental-capacity-analysis-and-gaussian-process-regression",
+      "section": "deep",
+      "title_en": "Aging States Estimation and Monitoring Strategies of Li-Ion Batteries Using Incremental Capacity Analysis and Gaussian Process Regression",
+      "authors": "Moritz Landwehr, Patrick Hoher, Johannes Reuter",
+      "date": "2026-03-27",
+      "pdf": "https://arxiv.org/pdf/2603.26155v1",
+      "score": "9.0",
+      "evidence": "锂离子电池的健康状态和剩余寿命预测",
+      "tldr": "针对实际应用中电池老化数据稀疏的问题，本研究利用牛津电池老化数据集，提出了一种结合增量容量分析（ICA）特征提取与多模型高斯过程回归（GPRn）的方法，用于估计锂离子电池的健康状态（SoH）和剩余使用寿命（RUL）。该方法不仅能实现高精度的状态评估，还提供了不确定性量化，并推导出一种仅需少量诊断测量即可实现全生命周期安全运行的监测策略，显著降低了数据采集成本。",
+      "tags": "query:rul",
+      "abstract_en": "Existing approaches for battery health forecasting often rely on extensive cycling histories and continuously monitored cells. In contrast, many real-world scenarios provide only sparse information, e.g. a single diagnostic cycle. In our study, we investigate state of health (SoH)- and remaining useful life (RUL) estimation of previously unseen lithium-ion cells, relying on cycling data from begin of life (BOL) to end of life (EOL) of multiple similar cells by using the publicly available Oxford battery aging dataset. The estimator applies incremental capacity analysis (ICA)-based feature extraction in combination with data-efficient regression methods. Particular emphasis is placed on a multi-model Gaussian process regression ensemble approach (GPRn), which also provides uncertainty quantification. Due to a rather cell invariant behaviour, the mapping of ICA features to SoH estimation is highly precise and points out a normalized mean absolute error (NMAE) of 1.3%. The more cell variant mapping to RUL estimation is challenging, reflecting in a NMAE of 5.3%. Using the estimation results, a RUL monitoring strategy is derived. The objective is to safely operate a battery cell from BOL to EOL by only taking sparse diagnostic measurements. On average, only four diagnostic measurements are required during a cell's lifetime of 3300 to 5000 cycles.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202603/30/2603.25955v1-enginead-a-real-world-vehicle-engine-anomaly-detection-dataset",
+      "section": "deep",
+      "title_en": "EngineAD: A Real-World Vehicle Engine Anomaly Detection Dataset",
+      "authors": "Hadi Hojjati, Christopher Roth, Rory Woods, Ken Sills, Narges Armanfard",
+      "date": "2026-03-26",
+      "pdf": "https://arxiv.org/pdf/2603.25955v1",
+      "score": "8.0",
+      "evidence": "用于早期故障的真实车辆发动机异常检测数据集",
+      "tldr": "本研究针对交通等安全关键领域缺乏大规模真实异常检测基准的问题，推出了EngineAD数据集。该数据集包含25辆商用车在六个月内的高分辨率传感器遥测数据，并由专家标注了真实的发动机故障。研究者将数据预处理为多变量时间序列片段，并利用九种模型建立基准。结果显示，传统方法在性能上往往优于深度学习，且跨车辆泛化仍具挑战。该数据集为汽车行业开发鲁棒且可部署的异常检测方案提供了重要资源。",
+      "tags": "query:rul",
+      "abstract_en": "The progress of Anomaly Detection (AD) in safety-critical domains, such as transportation, is severely constrained by the lack of large-scale, real-world benchmarks. To address this, we introduce EngineAD, a novel, multivariate dataset comprising high-resolution sensor telemetry collected from a fleet of 25 commercial vehicles over a six-month period. Unlike synthetic datasets, EngineAD features authentic operational data labeled with expert annotations, distinguishing normal states from subtle indicators of incipient engine faults. We preprocess the data into $300$-timestep segments of $8$ principal components and establish an initial benchmark using nine diverse one-class anomaly detection models. Our experiments reveal significant performance variability across the vehicle fleet, underscoring the challenge of cross-vehicle generalization. Furthermore, our findings corroborate recent literature, showing that simple classical methods (e.g., K-Means and One-Class SVM) are often highly competitive with, or superior to, deep learning approaches in this segment-based evaluation. By publicly releasing EngineAD, we aim to provide a realistic, challenging resource for developing robust and field-deployable anomaly detection and anomaly prediction solutions for the automotive industry.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202603/30/2603.25906v1-shared-representation-for-3d-pose-estimation-action-classification-and-progress-prediction-from-tactile-signals",
+      "section": "quick",
+      "title_en": "Shared Representation for 3D Pose Estimation, Action Classification, and Progress Prediction from Tactile Signals",
+      "authors": "Isaac Han, Seoyoung Lee, Sangyeon Park, Ecehan Akan, Yiyue Luo, Joseph DelPreto, Kyung-Joong Kim",
+      "date": "2026-03-26",
+      "pdf": "https://arxiv.org/pdf/2603.25906v1",
+      "score": "7.0",
+      "evidence": "使用共享表示进行分类和进度预测的多任务学习",
+      "tldr": "针对视觉感知在人机交互中面临的遮挡和隐私问题，本文提出了一种名为 SCOTTI 的共享卷积 Transformer 模型。该模型利用无线鞋垫传感器采集的足底压力信号，通过多任务学习框架同时实现 3D 人体姿态估计、动作分类和动作进度预测。这是首个利用足底触觉信号进行动作进度预测的研究，并发布了一个包含 15 人、7 小时、8 种活动的全新数据集，显著提升了多任务处理性能。",
+      "tags": "query:phm",
+      "abstract_en": "Estimating human pose, classifying actions, and predicting movement progress are essential for human-robot interaction. While vision-based methods suffer from occlusion and privacy concerns in realistic environments, tactile sensing avoids these issues. However, prior tactile-based approaches handle each task separately, leading to suboptimal performance. In this study, we propose a Shared COnvolutional Transformer for Tactile Inference (SCOTTI) that learns a shared representation to simultaneously address three separate prediction tasks: 3D human pose estimation, action class categorization, and action completion progress estimation. To the best of our knowledge, this is the first work to explore action progress prediction using foot tactile signals from custom wireless insole sensors. This unified approach leverages the mutual benefits of multi-task learning, enabling the model to achieve improved performance across all three tasks compared to learning them independently. Experimental results demonstrate that SCOTTI outperforms existing approaches across all three tasks. Additionally, we introduce a novel dataset collected from 15 participants performing various activities and exercises, with 7 hours of total duration, across eight different activities.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202603/30/2603.26317v1-label-free-cross-task-lora-merging-with-null-space-compression",
+      "section": "quick",
+      "title_en": "Label-Free Cross-Task LoRA Merging with Null-Space Compression",
+      "authors": "Wonyoung Lee, Wooseong Jeong, Kuk-Jin Yoon",
+      "date": "2026-03-27",
+      "pdf": "https://arxiv.org/pdf/2603.26317v1",
+      "score": "6.0",
+      "evidence": "合并跨越分类和回归的任务",
+      "tldr": "本研究针对独立微调的LoRA模型合并问题，提出了一种名为零空间压缩（NSC）的合并方法。现有方法在处理分类与回归等异构任务时表现不佳，且在大语言模型上计算成本高昂。NSC通过分析LoRA中下投影矩阵A的几何特性，利用其对零空间的压缩程度作为优化信号来确定合并权重，实现了无需标签且与输出类型无关的合并。实验证明，NSC在视觉、自然语言推理及多模态任务中均优于现有方法，展现了极强的跨任务泛化能力和可扩展性。",
+      "tags": "query:phm",
+      "abstract_en": "Model merging combines independently fine-tuned checkpoints without joint multi-task training. In the era of foundation-model, fine-tuning with Low-Rank Adaptation (LoRA) is prevalent, making LoRA merging a promising target. Existing approaches can work in homogeneous settings where all target tasks are classification but often fail when tasks span classification and regression. Approaches using entropy-based surrogates do not apply to regression and are costly for large language models due to long token sequences. We introduce Null-Space Compression (NSC) Merging, a label-free, output-agnostic method that sets merge weights from adapter geometry. Our key observation is that during LoRA finetuning the down-projection factor $A$ in $ΔW = BA$ compresses its null space, and the compression correlates with performance. NSC uses this as an optimization signal for merging that can generalize across classification, regression, and sequence generation. NSC achieves state-of-the-art performance across twenty heterogeneous vision tasks with balanced gains where prior methods overfit subsets of tasks. It also outperforms baselines on six NLI benchmarks and on vision-language evaluations for VQA and image captioning, demonstrating scalability and effectiveness.",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202603/30/2603.26629v1-context-specific-credibility-aware-multimodal-fusion-with-conditional-probabilistic-circuits",
+      "section": "quick",
+      "title_en": "Context-specific Credibility-aware Multimodal Fusion with Conditional Probabilistic Circuits",
+      "authors": "Pranuthi Tenali, Sahil Sidheekh, Saurabh Mathur, Erik Blasch, Kristian Kersting, Sriraam Natarajan",
+      "date": "2026-03-27",
+      "pdf": "https://arxiv.org/pdf/2603.26629v1",
+      "score": "6.0",
+      "evidence": "针对传感器退化和可靠性的多模态融合",
+      "tldr": "针对多模态融合中静态可靠性假设难以应对传感器退化或特定类别损坏导致的冲突问题，本文提出C²MF框架。该框架利用条件概率电路（CPC）建模实例级源可靠性，并定义了基于KL散度的上下文特定信息可信度（CSIC）。通过在Conflict基准测试上的评估，C²MF在处理跨模态冲突时表现优异，显著提升了高噪声环境下的预测准确性，同时保持了概率电路的可解释性。",
+      "tags": "query:phm",
+      "abstract_en": "Multimodal fusion requires integrating information from multiple sources that may conflict depending on context. Existing fusion approaches typically rely on static assumptions about source reliability, limiting their ability to resolve conflicts when a modality becomes unreliable due to situational factors such as sensor degradation or class-specific corruption. We introduce C$^2$MF, a context-specfic credibility-aware multimodal fusion framework that models per-instance source reliability using a Conditional Probabilistic Circuit (CPC). We formalize instance-level reliability through Context-Specific Information Credibility (CSIC), a KL-divergence-based measure computed exactly from the CPC. CSIC generalizes conventional static credibility estimates as a special case, enabling principled and adaptive reliability assessment. To evaluate robustness under cross-modal conflicts, we propose the Conflict benchmark, in which class-specific corruptions deliberately induce discrepancies between different modalities. Experimental results show that C$^2$MF improves predictive accuracy by up to 29% over static-reliability baselines in high-noise settings, while preserving the interpretability advantages of probabilistic circuit-based fusion.",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}
