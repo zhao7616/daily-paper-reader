@@ -6,40 +6,46 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-03-30
-- 运行时间：2026-03-30 20:03:13 UTC
+- 最新运行日期：2026-03-31
+- 运行时间：2026-03-31 20:18:59 UTC
 - 运行状态：成功
-- 本次总论文数：6
+- 本次总论文数：8
 - 精读区：3
-- 速读区：3
+- 速读区：5
 
 ### 今日简报（AI）
-今日聚焦通用航空与锂电池的健康管理，深度解析异构级联架构与高斯过程回归的实战效能。
-重点推荐通过长微尺度建模提升航空安全，以及利用增量容量分析实现高精度的电池老化监测。
-建议关注工业级预测性维护技术，并同步留意触觉信号处理与多模态融合的最新进展。
-- 详情：[/202603/30/README](/202603/30/README)
+今日深度解析 8 篇前沿论文，重点聚焦工业预测性维护与多模态融合技术。
+混合深度学习结合时序增强将锂电池寿命预测推向新高度，Transformer 架构则为光纤网络监控提供了高效方案。
+建议关注时序增强与大模型架构在硬件健康管理（PHM）领域的跨界落地实践。
+- 详情：[/202603/31/README](/202603/31/README)
 
 ### 精读区论文标签
-1. [A Heterogeneous Long-Micro Scale Cascading Architecture for General Aviation Health Management](/202603/30/2603.22885v3-a-heterogeneous-long-micro-scale-cascading-architecture-for-general-aviation-health-management)  
-   标签：评分：9.0/10、query:phm
-   evidence：航空健康管理中的智能健康监测与诊断
-2. [Aging States Estimation and Monitoring Strategies of Li-Ion Batteries Using Incremental Capacity Analysis and Gaussian Process Regression](/202603/30/2603.26155v1-aging-states-estimation-and-monitoring-strategies-of-li-ion-batteries-using-incremental-capacity-analysis-and-gaussian-process-regression)  
+1. [Hybrid Deep Learning with Temporal Data Augmentation for Accurate Remaining Useful Life Prediction of Lithium-Ion Batteries](/202603/31/2603.27186v1-hybrid-deep-learning-with-temporal-data-augmentation-for-accurate-remaining-useful-life-prediction-of-lithium-ion-batteries)  
+   标签：评分：10.0/10、query:rul
+   evidence：锂离子电池剩余寿命（RUL）预测
+2. [Transformer-Based Prognostics: Enhancing Network Availability by Improved Monitoring of Optical Fiber Amplifiers](/202603/31/2603.28081v1-transformer-based-prognostics-enhancing-network-availability-by-improved-monitoring-of-optical-fiber-amplifiers)  
    标签：评分：9.0/10、query:rul
-   evidence：锂离子电池的健康状态和剩余寿命预测
-3. [EngineAD: A Real-World Vehicle Engine Anomaly Detection Dataset](/202603/30/2603.25955v1-enginead-a-real-world-vehicle-engine-anomaly-detection-dataset)  
-   标签：评分：8.0/10、query:rul
-   evidence：用于早期故障的真实车辆发动机异常检测数据集
+   evidence：通过状态监测预测光纤放大器寿命
+3. [Self-Supervised Learning for Knee Osteoarthritis: Diagnostic Limitations and Prognostic Value of Hospital Data](/202603/31/2603.24903v2-self-supervised-learning-for-knee-osteoarthritis-diagnostic-limitations-and-prognostic-value-of-hospital-data)  
+   标签：评分：8.0/10、query:phm
+   evidence：用于联合诊断和预后的自监督学习
 
 ### 速读区论文标签
-1. [Shared Representation for 3D Pose Estimation, Action Classification, and Progress Prediction from Tactile Signals](/202603/30/2603.25906v1-shared-representation-for-3d-pose-estimation-action-classification-and-progress-prediction-from-tactile-signals)  
-   标签：评分：7.0/10、query:phm
-   evidence：使用共享表示进行分类和进度预测的多任务学习
-2. [Label-Free Cross-Task LoRA Merging with Null-Space Compression](/202603/30/2603.26317v1-label-free-cross-task-lora-merging-with-null-space-compression)  
+1. [AdaLTM: Adaptive Layer-wise Task Vector Merging for Categorical Speech Emotion Recognition with ASR Knowledge Integration](/202603/31/2603.25041v1-adaltm-adaptive-layer-wise-task-vector-merging-for-categorical-speech-emotion-recognition-with-asr-knowledge-integration)  
    标签：评分：6.0/10、query:phm
-   evidence：合并跨越分类和回归的任务
-3. [Context-specific Credibility-aware Multimodal Fusion with Conditional Probabilistic Circuits](/202603/30/2603.26629v1-context-specific-credibility-aware-multimodal-fusion-with-conditional-probabilistic-circuits)  
+   evidence：多任务学习与任务向量合并
+2. [Missing-Aware Multimodal Fusion for Unified Microservice Incident Management](/202603/31/2603.25538v1-missing-aware-multimodal-fusion-for-unified-microservice-incident-management)  
    标签：评分：6.0/10、query:phm
-   evidence：针对传感器退化和可靠性的多模态融合
+   evidence：事件管理与异常检测的联合优化
+3. [Missing-Aware Multimodal Fusion for Unified Microservice Incident Management](/202603/31/2603.25538v2-missing-aware-multimodal-fusion-for-unified-microservice-incident-management)  
+   标签：评分：6.0/10、query:phm
+   evidence：事件管理联合优化的统一框架
+4. [Data-Driven Probabilistic Fault Detection and Identification via Density Flow Matching](/202603/31/2603.25982v1-data-driven-probabilistic-fault-detection-and-identification-via-density-flow-matching)  
+   标签：评分：6.0/10、query:phm
+   evidence：概率故障检测与识别
+5. [Physics-Embedded Feature Learning for AI in Medical Imaging](/202603/31/2603.28057v1-physics-embedded-feature-learning-for-ai-in-medical-imaging)  
+   标签：评分：6.0/10、query:phm
+   evidence：联合多类分类与生长动力学建模
 
 
 <div class="dpr-home-promo-card">
