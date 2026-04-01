@@ -1,0 +1,629 @@
+Title: template CMMNO2012
+
+URL Source: https://arxiv.org/pdf/2603.25166v1
+
+Published Time: Fri, 27 Mar 2026 00:42:46 GMT
+
+Number of Pages: 10
+
+Markdown Content:
+Efficient compressive sensing for machinery 
+
+# vibration signals 
+
+Imen Tounsi 1,2 , Fadi Karkafi 1, Mohammed El Badaoui 1,2 , François Guillet 2    
+
+> 1Safran Tech, Rue des Jeunes Bois –Châteaufort 78772 Magny –les –Hameaux, France
+> 2UJM -St -Etienne, LASPI, UR3059, F -42023, Saint -Etienne, France
+
+Abstract . Mechanical  vibration monitoring  often  requires high sampling rates 
+
+and generates large data volumes , posing challenges for storage, transmission, and 
+
+power efficiency. Compressive Sensing (CS) offers a promising approach to over-
+
+come these constraints by exploiting signal sparsity to enable sub -Nyquist acquisi-
+
+tion and efficient reconstruction. This study  presents a comprehensive comparative 
+
+analysis of the key components of the CS  framework : sparse basis, measurement 
+
+matrix, and reconstruction algo rithm  for  machinery  vibration signals.  In addition , a
+
+hardware -efficient  measurement  matrix, the Wang matrix,  originally developed for 
+
+image compression , is introduced and evaluated for the first time in this context. 
+
+Experimental  assessment  using the HUMS2023  and the CETIM  gearbox  dataset s
+
+demonstrates  that  this matrix  achieves superior reconstruction quality, with  higher 
+
+SNR , compared to conventional Gaussian and Bernoulli matrices, especially at high 
+
+compression ratios. 
+
+Keywords:  Compressive sensing,  Mechanical  vibration, Measurement matrix, 
+
+Wang matrix, Vibration signal compression 
+
+# 1 Introduction 
+
+Mechanical components  play a vital role in  propulsion and actuation systems, 
+
+ensuring efficient power transmission, load management, and motion control [1]. 
+
+Their reliability is critical, as failures can compromise safety, increase maintenance 
+
+costs, and disrupt missions [2]. Vibration analysis is  a widely used technique for 
+
+health monitoring [3], but extracting fault features  remains  challenging due to high -
+
+frequency noise and large data volumes from high sampling rates and multiple sen-
+
+sors [4].  In many practical environments , such as aerospace ap plications , strict lim-
+
+itations on bandwidth, storage, and power further highlight the need for efficient 
+
+data compression to ensure reliable and resource -efficient condition monitoring. 2 Imen Tounsi, Fadi Karkafi, Mohammed El Badaoui, Françoi s Guillet 
+
+Compressive sensing (CS) offers an effective solution to the se  challenges. By 
+
+exploiting signal sparsity in appropriate transform domains, CS enables sub -
+
+Nyquist sampling while preserving key fault features [5]. This reduces data redun-
+
+dancy and resource demands, making it well -suited for real -time applications. Re-
+
+search on CS for rotating machinery has mainly focused on three components: the 
+
+sparse basis, measurement matrix, and reconstruction algorithm. Early studies used 
+
+analytical bases such as the Discr ete Cosine Transform (DCT), Discrete Fourier 
+
+Transform (DFT), and wavelets for their simplicity and energy compaction (e.g., 
+
+Wang et al., 2015 [6]; Bai et al., 2022 [7]). To enhance adaptability, Chen et al. 
+
+(2014) [8] introduced  K–Singular Value Decomposition ( K-SVD ) dictionary learn-
+
+ing, and Kida and Shinozaki (2019) [9] proposed the Order -Ratio Basis (ORB) to 
+
+capture rotational periodicity. Measurement matrices are often Gaussian or Ber-
+
+noulli due to their theoretical guarantees under the Restricted Isomet ry Property 
+
+(RIP) (Wu et al., 2019, 2021 [10,11]), while Wang and Xia (2024) [2] developed a 
+
+noise -robust random convolution matrix using a generative flow model. For recon-
+
+struction, greedy algorithms such as Orthogonal Matching Pursuit (OMP) and Com-
+
+pressi ve Sampling Matching Pursuit (CoSaMP) are popular for their efficiency (Bai 
+
+et al., 2022; Wu et al., 2019 [7,10]), whereas recent generative and learning -based 
+
+models, such as GLOW (Wang & Xia, 2024 [4]), achieve higher fidelity at the cost 
+
+of greater comp utational complexity.  Overall, prior studies demonstrate the promise 
+
+of CS for mechanical vibration analysis but also expose key limitations. Most works 
+
+assess only a single combination of sparse basis, measurement matrix, and recon-
+
+struction algorithm, lacking systematic evalua tion of their joint influence on perfor-
+
+mance. Moreover, many recent methods rely on dataset -specific or learned repre-
+
+sentations that may not generalize across machines or operating conditions. 
+
+Although Gaussian and Bernoulli matrices  offer strong theoretical guarantees, their 
+
+computational demands limit real -time or embedded aerospace applications requir-
+
+ing hardware simplicity and energy efficiency  [12] . Gaussian matrices employ ran-
+
+domly distributed real -valued elements, requiring numerous multiplications and 
+
+summations during measurement acquisition. This increases computational com-
+
+plexity and power consumption  and  risks exceeding the dynamic range of the ana-
+
+log -to -digital converter (ADC)  [12] . Bernoulli matrices, composed solely of  +1 and 
+
+-1 entries, eliminate multiplications but still involve extensive summations that can 
+
+produce large measurement magnitudes. 
+
+To address these limitations,  a novel measurement matrix , the Wang matrix  [12] ,
+
+originally proposed for image applications and optimized for hardware implemen-
+
+tation, is introduced for the first time in this context. The results demonstrate that 
+
+this matrix not only enhances hardware efficiency but also achieves superior recon-
+
+structio n quality compared to  conventional  Gaussian and Bernoulli  random meas-
+
+urement matrices . The proposed method  is  further evaluated using two real -world 
+
+datasets from HUMS2023 and CETIM  gearbox  dataset s, demonstrating  its  robust-
+
+ness across different operating conditions. Efficient compressive sensing for machinery vibration signals 3
+
+# 2 Compressive sensing framework 
+
+CS  provides a  powerful  framework for efficient signal acquisition and recon-
+
+struction.  Unlike traditional Nyquist -based sampling, CS exploits the inherent spar-
+
+sity of signals in an appropriate transform domain  to recover them accurately from 
+
+a smaller  number of measurements.  This recovery is achieved through nonlinear 
+
+optimization techniques.  Fig . 1 provides a schematic representation of the  CS  work-
+
+flow  showing  three key components: sparse representation  𝑠  , compressed  sampling 
+
+𝑦  , and signal reconstructio n 𝑥 ̂ .
+
+Fig. 1 Schematic diagram  of the  compressi ve sensing algorithm 
+
+2. 1 Sparsity and  incoherence in  compressive  sensing 
+
+Sparsity refers to the property of a signal whose representation in an appropri-
+
+ate basis contains only a few informative coefficients that stand out significantly 
+
+from the background noise, while the remaining coefficients are negligible or 
+
+close to zero  [5]. This means  that  the  signal can  be expressed with only  𝐾  non -
+
+zero  coefficients , where  𝐾  ≪ 𝑁  , and  𝑁  denotes the dimensionality  of the original 
+
+signal . I n a chosen basis  𝝍  ∈ ℝ𝑁 ×𝑁 , t he signal  is said to be  𝐾 -sparse and  can be 
+
+represented as: 
+
+𝑥  = 𝝍  𝑠  (1) 
+
+𝑠  denotes  the sparse representation of the original signal in the transform domain. 
+
+CS reduces sampling requirements by capturing a signal’s key information via a 
+
+designed measurement matrix  𝝓  ∈ ℝ𝑀 ×𝑁 , where  M is the number of compressed 
+
+measurements  [5]. Then,  the compressed measurement  vector can  be expressed as 
+
+follows: 
+
+𝑦  = 𝝓  𝑥  = 𝝓  𝝍  𝑠  (2) 
+
+To ensure efficient CS, the Wang matrix must exhibit low coherence with the 
+
+sparsity basis . The coherence  [13] between these two matrices is given by: 
+
+𝜇 (𝝓 , 𝝍 ) = √𝑁  max  
+
+> 𝑗 ,𝑘
+
+|⟨𝜙 𝑗 , Ψ𝑘 ⟩| (3)
+
+where  𝜙 𝑗  is the  j-th row of  𝝓  and  𝜓 𝑘  is the  k-th  column of  𝝍 .
+
+The compression ratio (CR) represents the percentage of measurements retained 
+
+after compression and is defined as: 
+
+𝐶𝑅  = 𝑀  
+
+> 𝑁
+
+× 100  (4)4 Imen Tounsi, Fadi Karkafi, Mohammed El Badaoui, Françoi s Guillet 
+
+2. 2 Proposed methodology 
+
+The Wang matrix, introduced in [12], is a hardware -efficient  measurement  ma-
+
+trix specifically designed to simplify the image acquisition process in CS. Unlike 
+
+Gaussian and Bernoulli matrices, which require extensive multiplications and sum-
+
+mations, the Wang matrix is constructed through a random subsampling of the iden-
+
+tity matri x. In other words, a subset of the rows of the identity matrix is randomly 
+
+selected without replacement,  as shown in (5),  ensuring that each measurement cor-
+
+responds to a unique element of the original signal. This structure means that each 
+
+measurement dire ctly captures one element of the input without any linear combi-
+
+nation or additional computation. Consequently,  it  offers a  simple and low -power 
+
+implementation that is particularly suitable for hardware -based CS systems. 
+
+Then, t he  CS  reconstruction process using the Wang matrix follows the general 
+
+optimization problem defined in ( 6) [5].
+
+𝑚𝑖𝑛  
+
+> 𝑠
+
+||𝑠 ||1
+
+𝑠 . 𝑡  𝝓  𝝍  𝑠  = 𝑦  (6) 
+
+The recovered signal is then obt ained as:  𝑥 ̂ = 𝝍  𝑠 . This work  employs  the Orthog-
+
+onal Matching Pursuit (OMP) algorithm due to its balance between accuracy and 
+
+computational cost, making it suitable for real -time vibration signal analysis.  The 
+
+performance of the CS algorithm is  then  evaluated using the Signal -to -Noise Ratio 
+
+(SNR), defined as follows: 
+
+𝑆𝑁𝑅  = 10  log 10  ( ∑ 𝑥 𝑖   
+
+> 2𝑁
+> 𝑖 =1
+> ∑(𝑥 𝑖 −x̂𝑖 )2𝑁
+> 𝑖 =1
+
+) (7)
+
+Where  𝑥 𝑖  is the i -th sample point of  the original signal  𝑥  , and  x̂ 𝑖  is the i -th sample 
+
+point of  the reconstructed signal  𝑥 ̂ .
+
+# 3 Experimenta l evaluation and  results 
+
+3.1  Case Study 1: HUMS2023 Gearbox Dataset 
+
+3.1.1 Data description 
+
+The vibration data used in this study come from the HUMS2023  data  challenge 
+
+[14]  by the  defence  science and  technology  group, Australia. The dataset was rec-
+
+orded from  the main rotor gearbox of  a Bell Kiowa 206B -1 (OH -58) helicopter. The 
+
+gearbox has two reduction stages (a spiral pinion/bevel gear stage and a planetary 
+
+stage) with an input speed of 6000 RPM and an output speed of 344 RPM. Vibration 
+
+signals were collected from four accelerometers  mounted on the gearbox housing 
+
+(5) Efficient compressive sensing for machinery vibration signals 5
+
+and a once -per -revolution tachometer. The dataset includes 526 four -channel re-
+
+cordings representing the last seven days of testing under 125% torque (379 Nm). 
+
+The input pinion speed was 100 Hz, and the output shaft speed was 5.73 Hz.  Key 
+
+gear -mesh frequencies include 1900 Hz for the input pinion/bevel gear and 568 Hz 
+
+for the planetary -stage sun, planet, and ring gears. 
+
+3. 1. 2 Sparsity and  incoherence  analysis 
+
+As a first step, the sparsity of the vibration signals was evaluated in different 
+
+transform domains: DCT, DFT, and Daubechies wavelets (Db2 and Db8). The spar-
+
+sity was quantified as the percentage of coefficients whose absolute values are lower 
+
+than 1% of t he maximum coefficient magnitude in the corresponding transformed 
+
+signal. Fig. 2 illustrates the sparsity values obtained for each domain using the data 
+
+from day 22. The DCT and DFT domains exhibit the highest sparsity (≈ 0.99), while 
+
+the wavelet domains a re less sparse, with Db8 performing better than Db2. These 
+
+results confirm that the DCT and DFT are the most suitable candidates for CS of 
+
+gearbox vibrations, as they enable efficient energy compaction. 
+
+Fig.  2 Sparsity values of the vibration signal from day 22 in different 
+
+transform domains (DCT,  DFT , Db2, Db8). 
+
+Following the sparsity analysis, the incoherence between the measurement ma-
+
+trix and the sparse basis was evaluated to assess their suitability for CS. Table 1 
+
+summarizes the coherence values obtained for Gaussian, Bernoulli, and Wang 
+
+measurement matrices i n combination with the DCT and  DFT  domains.             
+
+> Table 1. Coherence values between different measurement matrices and sparse basis
+> matrices .
+> Parameters DCT DFT
+> Gaussian 5.57 4.19
+> Bernoulli 5.52 4.15
+> Wang 1.41 1.00
+
+As shown  in the table , the  Gaussian and Bernoulli matrices exhibit relatively 
+
+high  coherence  with the DFT and DCT bases. In contrast, the Wan g matrix achieves 
+
+the lowest coherence values (≈ 1.0 -1.4) with these  transform  domains,  indicating 
+
+strong mutual independence.  A comparative performance analysis is conducted in 
+
+the following section to further validate and confirm these preliminary observations. 6 Imen Tounsi, Fadi Karkafi, Mohammed El Badaoui, Françoi s Guillet 
+
+3. 1. 3 Comparative  evaluation of  measurement  matrices 
+
+To assess the impact of the measurement matrix on reconstruction quality, CS 
+
+experiments were performed using DFT and DCT bases with the OMP algorithm. 
+
+The three measurement matrices were compared  in  Fig . 3 by showing  the variation 
+
+of SNR between the original and reconstructed signal s from day 22 across different 
+
+CRs. 
+
+Fig.  3 SNR vs . CR  for a signal from day 22  using OMP in DFT ( left) and 
+
+DCT ( right)  domains with three measurement matrices  (Bernoulli, Gaussian, 
+
+Wang) 
+
+Among the tested matrices, the Wang matrix consistently achieved superior re-
+
+construction performance. It provided higher SNR values across all CRs compared 
+
+to the other matrices. This indicates that it offers a more effective sampling struc-
+
+ture for preserv ing signal information during the compression process. 
+
+Fig . 4 compares the original and reconstructed signal s from day 22 (left), ob-
+
+tained using the DFT basis, Wang matrix, and OMP algorithm at a CR of 3%, 
+
+demonstrating the high reconstruction accuracy of the CS approach. It also com-
+
+pares the effectiveness of the RMS health indicator on the original and recon-
+
+stru cted signal sets from day 22. As shown, the RMS values preserve the same 
+
+overall trend, and the two peaks indicating the  structure changes  are clearly re-
+
+tained in the reconstructed signals. 
+
+Fig.  4 Comparison of original and reconstructed signal s from day 22  (left) 
+
+and RMS values of each signal from day 22 (right), with the original (blue) 
+
+and reconstructed (orange) signals. 
+
+An overall average SNR of  8.29  dB  ± 0.31  dB,  computed across all channels 
+
+and days, underscores the robustness and reliability of the proposed reconstruction 
+
+approach under a very low CR. Efficient compressive sensing for machinery vibration signals 7
+
+3.2 Case  Study 2: CETIM Gearbox Dataset 
+
+3.2.1 Data description 
+
+The second set of experiments relies on the CETIM vibration dataset, which pro-
+
+vides measurements acquired from a gearbox subjected to a gradual degradation 
+
+process. The dataset  includes twelve vibration signals, each corresponding to a dis-
+
+tinct day of acquisition, thus capturing the evolution from a healthy to a faulty op-
+
+erating condition. The signals were sampled at 20 kHz over a duration of 3 seconds 
+
+per acquisition. The domina nt component in the vibration spectra is the gear mesh-
+
+ing frequency, which  vari es  slightly between 330 Hz and 346 Hz depending on the 
+
+rotational speed. 
+
+3.2.2 Sparsity  analysis 
+
+The sparsity of the CETIM vibration signals was evaluated in the same transform 
+
+domains: DCT, DFT, Db2 and Db8. Fig . 5  presents the sparsity results for the sig-
+
+nals acquired on  day 1 (healthy) and  day 12 (faulty). The DCT and DFT domains 
+
+exhibit the highest sparsity in both conditions, confirming their strong ability to 
+
+compact signal energy into a few dominant coefficients. However, when the defect 
+
+develops ( day 12), sparsity in these domains slightly decreases due to the appear-
+
+ance of impulsive and broadba nd components associated with the fault. 
+
+Fig.  5 Sparsity values of the vibration signal from day 1  (in blue)  and day 
+
+12  (in red)  in different transform domains (DCT,  DFT , Db2, Db8). 
+
+3.2.3  Comparative evaluation of measurement matrices 
+
+To assess the effect of the measurement matrix on reconstruction quality, CS 
+
+experiments were performed on the CETIM data using DFT and DCT bases with 
+
+the OMP algorithm. The three measurement matrices were compared, and Fig . 6 
+
+shows the variation of SNR between the original and reconstructed signal s from day 
+
+1 across different CRs.  As observed, the Wang matrix consistently outperformed 
+
+the other two measurement matrices , providing higher SNR values across all CRs. 8 Imen Tounsi, Fadi Karkafi, Mohammed El Badaoui, Françoi s Guillet 
+
+Fig. 6  SNR vs. CR for a signal from day 1 using OMP in DFT ( left) and 
+
+DCT ( right)  domains with three measurement matrices (Bernoulli, Gaussian, 
+
+Wang) 
+
+Fig . 7 illustrates the comparison between the original and reconstructed vibration 
+
+signals from day s 1 and 12 , obtained using the DFT basis, Wang matrix, and OMP 
+
+algorithm at a CR of  10 %. The reconstructed waveforms closely follow the origi-
+
+nals, preserving key temporal and spectral features.  Notably, the reconstructed spec-
+
+trum exhibits a thresholding -like behavior, which results in the suppression of minor 
+
+noise components. This behavior can be interpreted as the inherent denoising effect 
+
+of the  CS  process.  The average SNR across all reconstructed signals is 6.34 dB  ±
+
+0.29 dB , indicating satisfactory reconstruction performance. 
+
+Fig.  7 Comparison of  original and  reconstructed  signals and  spectra (Day 
+
+1 and Day 12 )
+
+Furthermore, the kurtosis of each daily signal was computed for both the original 
+
+and reconstructed datasets. As shown in Fig. 8, the reconstructed signals closely 
+
+follow the same trend as the original set, demonstrating strong consistency in sta-
+
+tistical b ehavior. Notably, both datasets exhibit a significant rise in kurtosis during 
+
+the last two days, clearly indicating the onset of a fault. This confirms that kurtosis 
+
+remains a reliable indicator of signal anomalies even after  CS  reconstruction  using 
+
+the sa me parameters (DFT, Wang matrix, OMP, CR = 10%). Efficient compressive sensing for machinery vibration signals 9
+
+Fig. 8  Kurtosis comparison between original and reconstructed signals 
+
+across 12 days 
+
+# 4 Conclusion 
+
+This study presented a comprehensive evaluation of compressive sensing (CS) 
+
+techniques for mechanical vibration signal acquisition. Experiments conducted on 
+
+the HUMS2023 and CETIM gearbox datasets showed that vibration signals are 
+
+highly sparse in the DCT  and DFT domains, enabling efficient CS -based acquisi-
+
+tion. The Wang  measurement  matrix, introduced for the first time in this context, 
+
+consistently outperformed conventional Gaussian and Bernoulli matrices by deliv-
+
+ering higher SNR, especially at high CRs ac ross both datasets. In addition to its 
+
+superior reconstruction accuracy, the matrix’s hardware -friendly structure enables 
+
+efficient real -time implementation, making it well -suited for embedded monitoring 
+
+systems. 
+
+# Acknowledgements 
+
+Imen  Tounsi  gratefully acknowledge s the European Commission for its support 
+
+of the Marie Sklodowska Curie program through the Horizon Europe DN PATRON 
+
+project (GA 101120172) 
+
+# References 
+
+[1]  Vardar M, Erdogan F, Yildirim N (2018) Recent developments in aerospace 
+
+gears and gearbox designs. Int J Sci Technol Res 4(10):145 –154. 
+
+[2]  Nithin SK, Hemanth K, Shamanth V, Mahale RS, Sharath PC, Patil A (2021) 
+
+Importance of condition monitoring in mechanical domain. Mater Today Proc. 
+
+doi:10.1016/j.matpr.2021.08.299 .10 Imen Tounsi, Fadi Karkafi, Mohammed El Badaoui, Françoi s Guillet 
+
+[3]  Sait AS, Sharaf -Eldeen YI (2011) A review of gearbox condition monitoring 
+
+based on vibration analysis techniques, diagnostics and prognostics. In: Proulx T 
+
+(ed) Rotating Machinery, Structural Health Monitoring, Shock and Vibration, Vol-
+
+ume 5. Conference Pro ceedings of the Society for Experimental Mechanics Series, 
+
+Springer, New York. doi:10.1007/978 -1-4419 -9428 -8_25 
+
+[4]  Wang T, Xia T (2024) A gearbox vibration signal compressed sensing method 
+
+based on the improved GLOW flow model. Precis Mech Digit Fabr 1(4):201 –215. 
+
+doi:10.56578/pmdf010402 
+
+[5] Brunton  SL, Kutz JN (2019) Singular value decomposition (SVD). In: Data -
+
+Driven Science & Engineering: Machine Learning, Dynamical Systems, and Con-
+
+trol.  Cambridge  University Press, Cambridge. doi:10.1017/9781108380690.002 
+
+[6]  Wang Y, Xiang J, Mo Q, He S (2015) Compressed sparse time –frequency fea-
+
+ture representation via compressive sensing and its applications in fault diagnosis. 
+
+Measurement 68:70 –81. doi:10.1016/j.measurement.2015.02.046 
+
+[7]  Bai H, Yan H, Zhan X, Wen L, Jia X (2022) Fault diagnosis method of planetary 
+
+gearbox based on compressed sensing and transfer learning. Electronics 11:1708. 
+
+doi:10.3390/electronics11111708 
+
+[8]  Chen X, Du Z, Li J, Li X, Zhang H (2014) Compressed sensing based on dic-
+
+tionary learning for extracting impulse components. Signal Process 96:94 –109. 
+
+doi:10.1016/j.sigpro.2013.04.018 
+
+[9]  Kato Y, Otaka M (2025) Compressed sensing of vibration signal for fault diag-
+
+nosis of bearings, gears, and propellers under speed variation conditions. Sensors 
+
+25:3167. doi:10.3390/s25103167 
+
+[10]  Wu Z, Zhang Q, Cheng L, Tan S (2019) A new method of two -stage planetary 
+
+gearbox fault detection based on multi -sensor information fusion. Appl Sci 9:5443. 
+
+doi:10.3390/app9245443 
+
+[11]  Wu Z, Zhang Q, Ma Z, Lu J, Qin Z (2021) A new health condition detection 
+
+method for planetary gears based on modified distributed compressed sensing and 
+
+multiscale symbol dynamic entropy. Shock Vib 2021:6681894. 
+
+doi:10.1155/2021/6681894 
+
+[12]  Wang Y, Bermak  A, Boussaid F (2010) FPGA implementation of compressive 
+
+sampling for sensor network applications. In: Proc 2nd Asia Symposium on Quality 
+
+Electronic Design (ASQED 2010), IEEE, pp 5–10. 
+
+doi:10.1109/ASQED.2010.5540068 
+
+[13]  Stanković L, Mandic D, Daković M, Kišil I (2019) An intuitive derivation of 
+
+the coherence index relation in compressive sensing. arXiv preprint 
+
+arXiv:1903.11136 
+
+[14]  Peeters C, Wang W, Blunt D, Verstraeten T, Helsen J (2023) Fatigue crack 
+
+detection in planetary gears: insights from the HUMS2023 Data Challenge.  Pre-
+
+print  available at SSRN:4623472. doi:10.2139/ssrn.4623472

@@ -1,0 +1,30 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2603.23076v1/fig-001.webp",
+      "caption": "Fig. 1. The overall architecture of the MsFormer.",
+      "page": 4,
+      "index": 1,
+      "width": 579,
+      "height": 291
+    },
+    {
+      "url": "assets/figures/arxiv/2603.23076v1/fig-002.webp",
+      "caption": "Table 3. Performance comparison on the NASA Dataset, with values scaled by 102.",
+      "page": 9,
+      "index": 2,
+      "width": 700,
+      "height": 211
+    },
+    {
+      "url": "assets/figures/arxiv/2603.23076v1/fig-003.webp",
+      "caption": "Table 2. Performance comparison of other methods on the C-MAPSS dataset.",
+      "page": 9,
+      "index": 3,
+      "width": 656,
+      "height": 311
+    }
+  ]
+}

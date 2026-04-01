@@ -1,0 +1,54 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2603.24475v1/fig-001.webp",
+      "caption": "Figure 5: Conformal prediction for target cells",
+      "page": 10,
+      "index": 1,
+      "width": 889,
+      "height": 551
+    },
+    {
+      "url": "assets/figures/arxiv/2603.24475v1/fig-002.webp",
+      "caption": "Table 3: Comparison of models under testing in source and target domains",
+      "page": 10,
+      "index": 2,
+      "width": 586,
+      "height": 206
+    },
+    {
+      "url": "assets/figures/arxiv/2603.24475v1/fig-003.webp",
+      "caption": "Figure 1: Joint distribution of negative and positive electrode active material volume fractions across batches.",
+      "page": 4,
+      "index": 3,
+      "width": 519,
+      "height": 481
+    },
+    {
+      "url": "assets/figures/arxiv/2603.24475v1/fig-004.webp",
+      "caption": "Figure 2: SOH trajectories for each batch.",
+      "page": 4,
+      "index": 4,
+      "width": 598,
+      "height": 358
+    },
+    {
+      "url": "assets/figures/arxiv/2603.24475v1/fig-005.webp",
+      "caption": "Figure 4: Predictive performance under target domain",
+      "page": 9,
+      "index": 5,
+      "width": 431,
+      "height": 429
+    },
+    {
+      "url": "assets/figures/arxiv/2603.24475v1/fig-006.webp",
+      "caption": "Figure 3: Proposed transfer learning framework combining LSTM-based encoder–decoder with MMD-based domain adaptation.",
+      "page": 5,
+      "index": 6,
+      "width": 648,
+      "height": 473
+    }
+  ]
+}

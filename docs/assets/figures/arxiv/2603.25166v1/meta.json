@@ -1,0 +1,30 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2603.25166v1/fig-001.webp",
+      "caption": "Fig. 3 SNR vs. CR for a signal from day 22 using OMP in DFT (left) and DCT (right) domains with three measurement matrices (Bernoulli, Gaussian, Wang)",
+      "page": 6,
+      "index": 1,
+      "width": 695,
+      "height": 212
+    },
+    {
+      "url": "assets/figures/arxiv/2603.25166v1/fig-002.webp",
+      "caption": "Fig. 6 SNR vs. CR for a signal from day 1 using OMP in DFT (left) and DCT (right) domains with three measurement matrices (Bernoulli, Gaussian, Wang)",
+      "page": 8,
+      "index": 2,
+      "width": 695,
+      "height": 220
+    },
+    {
+      "url": "assets/figures/arxiv/2603.25166v1/fig-003.webp",
+      "caption": "Fig. 7 Comparison of original and reconstructed signals and spectra (Day 1 and Day 12)",
+      "page": 8,
+      "index": 3,
+      "width": 710,
+      "height": 275
+    }
+  ]
+}

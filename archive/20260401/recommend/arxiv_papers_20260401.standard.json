@@ -1,0 +1,520 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-04-01T21:07:02.169382+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 5,
+    "deep_cap": 6,
+    "deep_selected": 5,
+    "quick_candidates": 8,
+    "quick_skim_target": 11,
+    "quick_selected": 8
+  },
+  "deep_dive": [
+    {
+      "id": "2603.26155v1",
+      "source": "arxiv",
+      "title": "Aging States Estimation and Monitoring Strategies of Li-Ion Batteries Using Incremental Capacity Analysis and Gaussian Process Regression",
+      "abstract": "Existing approaches for battery health forecasting often rely on extensive cycling histories and continuously monitored cells. In contrast, many real-world scenarios provide only sparse information, e.g. a single diagnostic cycle. In our study, we investigate state of health (SoH)- and remaining useful life (RUL) estimation of previously unseen lithium-ion cells, relying on cycling data from begin of life (BOL) to end of life (EOL) of multiple similar cells by using the publicly available Oxford battery aging dataset. The estimator applies incremental capacity analysis (ICA)-based feature extraction in combination with data-efficient regression methods. Particular emphasis is placed on a multi-model Gaussian process regression ensemble approach (GPRn), which also provides uncertainty quantification. Due to a rather cell invariant behaviour, the mapping of ICA features to SoH estimation is highly precise and points out a normalized mean absolute error (NMAE) of 1.3%. The more cell variant mapping to RUL estimation is challenging, reflecting in a NMAE of 5.3%. Using the estimation results, a RUL monitoring strategy is derived. The objective is to safely operate a battery cell from BOL to EOL by only taking sparse diagnostic measurements. On average, only four diagnostic measurements are required during a cell's lifetime of 3300 to 5000 cycles.",
+      "authors": [
+        "Moritz Landwehr",
+        "Patrick Hoher",
+        "Johannes Reuter"
+      ],
+      "primary_category": "eess.SY",
+      "categories": [
+        "eess.SY"
+      ],
+      "published": "2026-03-27T08:12:33+00:00",
+      "link": "https://arxiv.org/pdf/2603.26155v1",
+      "tags": [
+        "query:PHM"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "state of health and remaining useful life estimation",
+      "llm_evidence_cn": "健康状态与剩余寿命估计",
+      "llm_evidence": "健康状态与剩余寿命估计",
+      "canonical_evidence": "健康状态与剩余寿命估计",
+      "llm_tldr_en": "Investigates SoH and RUL estimation for batteries using incremental capacity analysis and Gaussian process regression.",
+      "llm_tldr_cn": "研究了利用增量容量分析和高斯过程回归对电池进行健康状态和剩余寿命的估计。",
+      "llm_tldr": "研究了利用增量容量分析和高斯过程回归对电池进行健康状态和剩余寿命的估计。",
+      "llm_tags": [
+        "query:rul:composite"
+      ],
+      "matched_query_tag": "query:rul:composite",
+      "matched_query_text": "Papers central to 剩余寿命预测和旋转机械设备剩余寿命预测, especially work that connects or combines: Remaining Useful Life (RUL) prediction methods; Health monitoring and RUL for rotating machinery; Remaining useful life prediction for rolling element bearings; Deep learning architectures for RUL estimation; State of the art methods for remaining useful life prediction of rotating machinery; Deep learning based RUL estimation for industrial bearings and motors; Data driven vs physics informed models for RUL prediction; Real time health assessment and RUL forecasting for rotating components.",
+      "matched_requirement_id": "req-composite-rul",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.27186v1",
+      "source": "arxiv",
+      "title": "Hybrid Deep Learning with Temporal Data Augmentation for Accurate Remaining Useful Life Prediction of Lithium-Ion Batteries",
+      "abstract": "Accurate prediction of lithium-ion battery remaining useful life (RUL) is essential for reliable health monitoring and data-driven analysis of battery degradation. However, the robustness and generalization capabilities of existing RUL prediction models are significantly challenged by complex operating conditions and limited data availability. To address these limitations, this study proposes a hybrid deep learning model, CDFormer, which integrates convolutional neural networks, deep residual shrinkage networks, and Transformer encoders extract multiscale temporal features from battery measurement signals, including voltage, current, and capacity. This architecture enables the joint modeling of local and global degradation dynamics, effectively improving the accuracy of RUL prediction.To enhance predictive reliability, a composite temporal data augmentation strategy is proposed, incorporating Gaussian noise, time warping, and time resampling, explicitly accounting for measurement noise and variability. CDFormer is evaluated on two real-world datasets, with experimental results demonstrating its consistent superiority over conventional recurrent neural network-based and Transformer-based baselines across key metrics. By improving the reliability and predictive performance of RUL prediction from measurement data, CDFormer provides accurate and reliable forecasts, supporting effective battery health monitoring and data-driven maintenance strategies.",
+      "authors": [
+        "Yun Tian",
+        "Guili Wang",
+        "Jian Bi",
+        "Kaixin Han",
+        "Chenglu Wu",
+        "Zhiyi Lu",
+        "Chenhao Li",
+        "Liangwang Sun",
+        "Minyu Zhou",
+        "Chenchen Xu"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-03-28T08:19:28+00:00",
+      "link": "https://arxiv.org/pdf/2603.27186v1",
+      "tags": [
+        "keyword:PHM",
+        "query:PHM"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "remaining useful life prediction using hybrid deep learning",
+      "llm_evidence_cn": "使用混合深度学习进行剩余寿命预测",
+      "llm_evidence": "使用混合深度学习进行剩余寿命预测",
+      "canonical_evidence": "使用混合深度学习进行剩余寿命预测",
+      "llm_tldr_en": "Introduces CDFormer, a hybrid deep learning model for accurate RUL prediction of lithium-ion batteries.",
+      "llm_tldr_cn": "引入了CDFormer混合深度学习模型，用于锂离子电池剩余寿命的精确预测。",
+      "llm_tldr": "引入了CDFormer混合深度学习模型，用于锂离子电池剩余寿命的精确预测。",
+      "llm_tags": [
+        "query:rul:composite"
+      ],
+      "matched_query_tag": "query:rul:composite",
+      "matched_query_text": "Papers central to 剩余寿命预测和旋转机械设备剩余寿命预测, especially work that connects or combines: Remaining Useful Life (RUL) prediction methods; Health monitoring and RUL for rotating machinery; Remaining useful life prediction for rolling element bearings; Deep learning architectures for RUL estimation; State of the art methods for remaining useful life prediction of rotating machinery; Deep learning based RUL estimation for industrial bearings and motors; Data driven vs physics informed models for RUL prediction; Real time health assessment and RUL forecasting for rotating components.",
+      "matched_requirement_id": "req-composite-rul",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.28081v1",
+      "source": "arxiv",
+      "title": "Transformer-Based Prognostics: Enhancing Network Availability by Improved Monitoring of Optical Fiber Amplifiers",
+      "abstract": "We enhance optical network availability and reliability through a lightweight transformer model that predicts optical fiber amplifier lifetime from condition-based monitoring data, enabling real-time, edge-level predictive maintenance and advancing deployable AI for autonomous network operation.",
+      "authors": [
+        "Dominic Schneider",
+        "Lutz Rapp",
+        "Christoph Ament"
+      ],
+      "primary_category": "eess.SP",
+      "categories": [
+        "eess.SP",
+        "cs.LG"
+      ],
+      "published": "2026-03-30T06:35:09+00:00",
+      "link": "https://arxiv.org/pdf/2603.28081v1",
+      "tags": [
+        "query:PHM"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "predicts optical fiber amplifier lifetime from monitoring data",
+      "llm_evidence_cn": "根据监测数据预测光纤放大器寿命",
+      "llm_evidence": "根据监测数据预测光纤放大器寿命",
+      "canonical_evidence": "根据监测数据预测光纤放大器寿命",
+      "llm_tldr_en": "Uses a transformer model to predict optical fiber amplifier RUL for predictive maintenance.",
+      "llm_tldr_cn": "使用Transformer模型预测光纤放大器的剩余寿命，以实现预测性维护。",
+      "llm_tldr": "使用Transformer模型预测光纤放大器的剩余寿命，以实现预测性维护。",
+      "llm_tags": [
+        "query:rul:composite"
+      ],
+      "matched_query_tag": "query:rul:composite",
+      "matched_query_text": "Papers central to 剩余寿命预测和旋转机械设备剩余寿命预测, especially work that connects or combines: Remaining Useful Life (RUL) prediction methods; Health monitoring and RUL for rotating machinery; Remaining useful life prediction for rolling element bearings; Deep learning architectures for RUL estimation; State of the art methods for remaining useful life prediction of rotating machinery; Deep learning based RUL estimation for industrial bearings and motors; Data driven vs physics informed models for RUL prediction; Real time health assessment and RUL forecasting for rotating components.",
+      "matched_requirement_id": "req-composite-rul",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.23076v1",
+      "source": "arxiv",
+      "title": "MsFormer: Enabling Robust Predictive Maintenance Services for Industrial Devices",
+      "abstract": "Providing reliable predictive maintenance is a critical industrial AI service essential for ensuring the high availability of manufacturing devices. Existing deep-learning methods present competitive results on such tasks but lack a general service-oriented framework to capture complex dependencies in industrial IoT sensor data. While Transformer-based models show strong sequence modeling capabilities, their direct deployment as robust AI services faces significant bottlenecks. Specifically, streaming sensor data collected in real-world service environments often exhibits multi-scale temporal correlations driven by machine working principles. Besides, the datasets available for training time-to-failure predictive services are typically limited in size. These issues pose significant challenges for directly applying existing models as robust predictive services. To address these challenges, we propose MsFormer, a lightweight Multi-scale Transformer designed as a unified AI service model for reliable industrial predictive maintenance. MsFormer incorporates a Multi-scale Sampling (MS) module and a tailored position encoding mechanism to capture sequential correlations across multi-streaming service data. Additionally, to accommodate data-scarce service environments, MsFormer adopts a lightweight attention mechanism with straightforward pooling operations instead of self-attention. Extensive experiments on real-world datasets demonstrate that the proposed framework achieves significant performance improvements over state-of-the-art methods. Furthermore, MsFormer outperforms across industrial devices and operating conditions, demonstrating strong generalizability while maintaining a highly reliable Quality of Service (QoS).",
+      "authors": [
+        "Jiahui Zhou",
+        "Dan Li",
+        "Ruibing Jin",
+        "Jian Lou",
+        "Yanran Zhao",
+        "Zhenghua Chen",
+        "Zigui Jiang",
+        "See-Kiong Ng"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-03-24T11:12:50+00:00",
+      "link": "https://arxiv.org/pdf/2603.23076v1",
+      "tags": [
+        "keyword:PHM",
+        "query:PHM"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Deep learning architectures for time-to-failure predictive services and RUL estimation",
+      "llm_evidence_cn": "用于故障时间预测服务和剩余寿命估计的深度学习架构",
+      "llm_evidence": "用于故障时间预测服务和剩余寿命估计的深度学习架构",
+      "canonical_evidence": "用于故障时间预测服务和剩余寿命估计的深度学习架构",
+      "llm_tldr_en": "MsFormer uses a multi-scale Transformer to improve time-to-failure prediction for industrial IoT sensor data.",
+      "llm_tldr_cn": "MsFormer利用多尺度Transformer改进了工业物联网传感器数据的故障时间预测性能。",
+      "llm_tldr": "MsFormer利用多尺度Transformer改进了工业物联网传感器数据的故障时间预测性能。",
+      "llm_tags": [
+        "query:rul:composite"
+      ],
+      "matched_query_tag": "query:rul:composite",
+      "matched_query_text": "Papers central to 剩余寿命预测和旋转机械设备剩余寿命预测, especially work that connects or combines: Remaining Useful Life (RUL) prediction methods; Health monitoring and RUL for rotating machinery; Remaining useful life prediction for rolling element bearings; Deep learning architectures for RUL estimation; State of the art methods for remaining useful life prediction of rotating machinery; Deep learning based RUL estimation for industrial bearings and motors; Data driven vs physics informed models for RUL prediction; Real time health assessment and RUL forecasting for rotating components.",
+      "matched_requirement_id": "req-composite-rul",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.29354v1",
+      "source": "arxiv",
+      "title": "ARC: Alignment-based RPM Estimation with Curvature-adaptive Tracking",
+      "abstract": "Tacho-less rotational speed estimation is critical for vibration-based prognostics and health management (PHM) of rotating machinery, yet traditional methods--such as time-domain periodicity, cepstrum, and harmonic comb matching--struggle under noise, non-stationarity, and inharmonic interference. Probabilistic tracking offers a principled way to fuse multiple estimators, but a major challenge is that heterogeneous estimators produce evidence on incompatible axes and scales. We address this with ARC (Alignment-based RPM Estimation with Curvature-adaptive Tracking) by unifying the observation representation. Each estimator outputs a one-dimensional evidence curve on its native axis, which is mapped onto a shared RPM grid and converted into a comparable grid-based log-likelihood via robust standardization and a Gibbs-form energy shaping. Standard recursive filtering with fixed-variance motion priors can fail under multi-modal or ambiguous evidence. To overcome this, ARC introduces a curvature-informed, state-dependent motion prior, where the transition variance is derived from the local discrete Hessian of the previous log-posterior. This design enforces smooth tracking around confident modes while preserving competing hypotheses, such as octave alternatives. Experiments on synthetic stress tests and real vibration-table data demonstrate stable, physically plausible trajectories with interpretable uncertainty, and ablations confirm that these gains arise from uncertainty-aware temporal propagation rather than per-frame peak selection or ad hoc rules.",
+      "authors": [
+        "Weiheng Hua",
+        "Changyu Hao"
+      ],
+      "primary_category": "eess.SP",
+      "categories": [
+        "eess.SP",
+        "eess.SY",
+        "stat.ME"
+      ],
+      "published": "2026-03-31T07:26:26+00:00",
+      "link": "https://arxiv.org/pdf/2603.29354v1",
+      "tags": [
+        "query:PHM"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "RPM estimation for vibration-based PHM of rotating machinery",
+      "llm_evidence_cn": "用于旋转机械振动PHM的转速估计",
+      "llm_evidence": "用于旋转机械振动PHM的转速估计",
+      "canonical_evidence": "用于旋转机械振动PHM的转速估计",
+      "llm_tldr_en": "A curvature-adaptive tracking method for robust RPM estimation in rotating machinery health management.",
+      "llm_tldr_cn": "一种用于旋转机械健康管理中鲁棒转速估计的曲率自适应跟踪方法。",
+      "llm_tldr": "一种用于旋转机械健康管理中鲁棒转速估计的曲率自适应跟踪方法。",
+      "llm_tags": [
+        "query:rul:composite"
+      ],
+      "matched_query_tag": "query:rul:composite",
+      "matched_query_text": "Papers central to 剩余寿命预测和旋转机械设备剩余寿命预测, especially work that connects or combines: Remaining Useful Life (RUL) prediction methods; Health monitoring and RUL for rotating machinery; Remaining useful life prediction for rolling element bearings; Deep learning architectures for RUL estimation; State of the art methods for remaining useful life prediction of rotating machinery; Deep learning based RUL estimation for industrial bearings and motors; Data driven vs physics informed models for RUL prediction; Real time health assessment and RUL forecasting for rotating components.",
+      "matched_requirement_id": "req-composite-rul",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2603.22885v3",
+      "source": "arxiv",
+      "title": "A Heterogeneous Long-Micro Scale Cascading Architecture for General Aviation Health Management",
+      "abstract": "BACKGROUND: General aviation fleet expansion demands intelligent health monitoring under computational constraints. Real-world aircraft health diagnosis requires balancing accuracy with computational constraints under extreme class imbalance and environmental uncertainty. Existing end-to-end approaches suffer from the receptive field paradox: global attention introduces excessive operational heterogeneity noise for fine-grained fault classification, while localized constraints sacrifice critical cross-temporal context essential for anomaly detection. METHODS: This paper presents an AI-driven heterogeneous cascading architecture for general aviation health management. The proposed Long-Micro Scale Diagnostician (LMSD) explicitly decouples global anomaly detection (full-sequence attention) from micro-scale fault classification (restricted receptive fields), resolving the receptive field paradox while minimizing training overhead. A knowledge distillation-based interpretability module provides physically traceable explanations for safety-critical validation. RESULTS: Experiments on the public National General Aviation Flight Information Database (NGAFID) dataset (28,935 flights, 36 categories) demonstrate 4--8% improvement in safety-critical metrics (MCWPM) with 4.2 times training acceleration and 46% model compression compared to end-to-end baselines. CONCLUSIONS: The AI-driven heterogeneous architecture offers deployable solutions for aviation equipment health management, with potential for digital twin integration in future work. The proposed framework substantiates deployability in resource-constrained aviation environments while maintaining stringent safety requirements.",
+      "authors": [
+        "Xinhang Chen",
+        "Zhihuan Wei",
+        "Yang Hu",
+        "Zhiguo Zeng",
+        "Kang Zeng",
+        "Wei Wang"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-03-24T07:35:23+00:00",
+      "link": "https://arxiv.org/pdf/2603.22885v3",
+      "tags": [
+        "keyword:PHM",
+        "query:PHM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "aircraft health diagnosis and anomaly detection",
+      "llm_evidence_cn": "飞机健康诊断与异常检测",
+      "llm_evidence": "飞机健康诊断与异常检测",
+      "canonical_evidence": "飞机健康诊断与异常检测",
+      "llm_tldr_en": "A cascading architecture for aviation health management balancing fine-grained diagnosis and anomaly detection.",
+      "llm_tldr_cn": "一种平衡细粒度故障诊断与异常检测的通用航空健康管理级联架构。",
+      "llm_tldr": "一种平衡细粒度故障诊断与异常检测的通用航空健康管理级联架构。",
+      "llm_tags": [
+        "query:phm"
+      ],
+      "matched_query_tag": "query:phm",
+      "matched_query_text": "integrated approach for machinery fault diagnosis and prognosis",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.25166v1",
+      "source": "arxiv",
+      "title": "Efficient compressive sensing for machinery vibration signals",
+      "abstract": "Mechanical vibration monitoring often requires high sampling rates and generates large data volumes, posing challenges for storage, transmission, and power efficiency. Compressive Sensing (CS) offers a promising approach to overcome these constraints by exploiting signal sparsity to enable sub-Nyquist acquisition and efficient reconstruction. This study presents a comprehensive comparative analysis of the key components of the CS framework: sparse basis, measurement matrix, and reconstruction algorithm for machinery vibration signals. In addition, a hardware-efficient measurement matrix, the Wang matrix, originally developed for image compression, is introduced and evaluated for the first time in this context. Experimental assessment using the HUMS2023 and the CETIM gearbox datasets demonstrates that this matrix achieves superior reconstruction quality, with higher SNR, compared to conventional Gaussian and Bernoulli matrices, especially at high compression ratios.",
+      "authors": [
+        "Imen Tounsi",
+        "Fadi Karkafi",
+        "Mohammed El Badaoui",
+        "François Guillet"
+      ],
+      "primary_category": "eess.SP",
+      "categories": [
+        "eess.SP"
+      ],
+      "published": "2026-03-26T08:34:52+00:00",
+      "link": "https://arxiv.org/pdf/2603.25166v1",
+      "tags": [
+        "query:PHM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "machinery vibration signals monitoring and health assessment",
+      "llm_evidence_cn": "机械振动信号监测与健康评估",
+      "llm_evidence": "机械振动信号监测与健康评估",
+      "canonical_evidence": "机械振动信号监测与健康评估",
+      "llm_tldr_en": "Analyzes compressive sensing for efficient machinery vibration signal acquisition and reconstruction.",
+      "llm_tldr_cn": "分析了用于机械振动信号高效采集与重构的压缩感知技术。",
+      "llm_tldr": "分析了用于机械振动信号高效采集与重构的压缩感知技术。",
+      "llm_tags": [
+        "query:rul:composite"
+      ],
+      "matched_query_tag": "query:rul:composite",
+      "matched_query_text": "Papers central to 剩余寿命预测和旋转机械设备剩余寿命预测, especially work that connects or combines: Remaining Useful Life (RUL) prediction methods; Health monitoring and RUL for rotating machinery; Remaining useful life prediction for rolling element bearings; Deep learning architectures for RUL estimation; State of the art methods for remaining useful life prediction of rotating machinery; Deep learning based RUL estimation for industrial bearings and motors; Data driven vs physics informed models for RUL prediction; Real time health assessment and RUL forecasting for rotating components.",
+      "matched_requirement_id": "req-composite-rul",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.24475v1",
+      "source": "arxiv",
+      "title": "Conformalized Transfer Learning for Li-ion Battery State of Health Forecasting under Manufacturing and Usage Variability",
+      "abstract": "Accurate forecasting of state-of-health (SOH) is essential for ensuring safe and reliable operation of lithium-ion cells. However, existing models calibrated on laboratory tests at specific conditions often fail to generalize to new cells that differ due to small manufacturing variations or operate under different conditions. To address this challenge, an uncertainty-aware transfer learning framework is proposed, combining a Long Short-Term Memory (LSTM) model with domain adaptation via Maximum Mean Discrepancy (MMD) and uncertainty quantification through Conformal Prediction (CP). The LSTM model is trained on a virtual battery dataset designed to capture real-world variability in electrode manufacturing and operating conditions. MMD aligns latent feature distributions between simulated and target domains to mitigate domain shift, while CP provides calibrated, distribution-free prediction intervals. This framework improves both the generalization and trustworthiness of SOH forecasts across heterogeneous cells.",
+      "authors": [
+        "Samuel Filgueira da Silva",
+        "Mehmet Fatih Ozkan",
+        "Faissal El Idrissi",
+        "Marcello Canova"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "eess.SY"
+      ],
+      "published": "2026-03-25T16:16:03+00:00",
+      "link": "https://arxiv.org/pdf/2603.24475v1",
+      "tags": [
+        "keyword:PHM",
+        "query:PHM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "State of health forecasting and uncertainty quantification for battery life",
+      "llm_evidence_cn": "电池健康状态预测与寿命预测的不确定性量化",
+      "llm_evidence": "电池健康状态预测与寿命预测的不确定性量化",
+      "canonical_evidence": "电池健康状态预测与寿命预测的不确定性量化",
+      "llm_tldr_en": "Proposes an uncertainty-aware transfer learning framework for battery state-of-health forecasting using LSTM and CP.",
+      "llm_tldr_cn": "提出一种结合LSTM和符合预测的领域自适应框架，用于电池健康状态预测及不确定性量化。",
+      "llm_tldr": "提出一种结合LSTM和符合预测的领域自适应框架，用于电池健康状态预测及不确定性量化。",
+      "llm_tags": [
+        "query:rul:composite"
+      ],
+      "matched_query_tag": "query:rul:composite",
+      "matched_query_text": "Papers central to 剩余寿命预测和旋转机械设备剩余寿命预测, especially work that connects or combines: Remaining Useful Life (RUL) prediction methods; Health monitoring and RUL for rotating machinery; Remaining useful life prediction for rolling element bearings; Deep learning architectures for RUL estimation; State of the art methods for remaining useful life prediction of rotating machinery; Deep learning based RUL estimation for industrial bearings and motors; Data driven vs physics informed models for RUL prediction; Real time health assessment and RUL forecasting for rotating components.",
+      "matched_requirement_id": "req-composite-rul",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.26888v1",
+      "source": "arxiv",
+      "title": "Statistical modeling of breast cancer radiomic features and hazard using image registration-aided longitudinal CT data",
+      "abstract": "Patients with metastatic breast cancer (mBC) undergo repeated computed tomography (CT) imaging during treatment to monitor disease progression. Accurate longitudinal tracking of individual lesions across scans from multiple radiologists is essential for reliable radiomic analysis and clinical decision-making. We conducted a retrospective study using serial chest CT scans from the Phase III MONALEESA-3 and MONALEESA-7 trials and developed statistical models for multi-source data integration and survival analysis. First, we introduced a Registration-based Automated Matching and Correspondence (RAMAC) algorithm to establish lesion correspondence across annotations from different radiologists and imaging time points using the Hungarian algorithm. Second, using the RAMAC-processed dataset, we developed interpretable radiomic survival models for progression-free survival prediction by combining baseline radiomic features, post-treatment changes at Weeks 8, 16, and 24, and demographic variables. To address the high dimensionality of longitudinal radiomic data, feature reduction was performed using an L1-penalized additive Cox proportional hazards model and best subset selection followed by Cox modeling. Model performance was evaluated using the concordance index (C-index). Incorporating additional imaging time points improved predictive performance, increasing the mean C-index from 0.58 at baseline to 0.64. Joint modeling further showed significant associations between longitudinal radiomic features and survival outcomes over time.",
+      "authors": [
+        "Subrata Mukherjee",
+        "Qian Cao",
+        "Thibaud Coroller",
+        "Ravi K. Samala",
+        "Nicholas Petrick",
+        "Berkman Sahiner"
+      ],
+      "primary_category": "stat.AP",
+      "categories": [
+        "stat.AP"
+      ],
+      "published": "2026-03-27T18:05:35+00:00",
+      "link": "https://arxiv.org/pdf/2603.26888v1",
+      "tags": [
+        "keyword:PHM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Joint modeling of radiomic features and survival hazard",
+      "llm_evidence_cn": "放射组学特征与生存风险的联合建模",
+      "llm_evidence": "放射组学特征与生存风险的联合建模",
+      "canonical_evidence": "放射组学特征与生存风险的联合建模",
+      "llm_tldr_en": "Statistical models for longitudinal data integration and survival analysis to monitor disease progression.",
+      "llm_tldr_cn": "用于纵向数据整合和生存分析的统计模型，以监测疾病进展。",
+      "llm_tldr": "用于纵向数据整合和生存分析的统计模型，以监测疾病进展。",
+      "llm_tags": [
+        "query:phm:composite"
+      ],
+      "matched_query_tag": "query:phm:composite",
+      "matched_query_text": "Papers central to 同时涉及故障诊断与剩余寿命预测的研究论文, especially work that connects or combines: joint modeling of diagnosis and prognosis; multi-task learning for diagnosis and RUL; simultaneous fault diagnosis and remaining useful life prediction; integrated approach for machinery fault diagnosis and prognosis; multi task deep learning for PHM applications; joint diagnosis and RUL estimation research papers.",
+      "matched_requirement_id": "req-composite-phm",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.25103v1",
+      "source": "arxiv",
+      "title": "Layer-Specific Lipschitz Modulation for Fault-Tolerant Multimodal Representation Learning",
+      "abstract": "Modern multimodal systems deployed in industrial and safety-critical environments must remain reliable under partial sensor failures, signal degradation, or cross-modal inconsistencies. This work introduces a mathematically grounded framework for fault-tolerant multimodal representation learning that unifies self-supervised anomaly detection and error correction within a single architecture. Building upon a theoretical analysis of perturbation propagation, we derive Lipschitz- and Jacobian-based criteria that determine whether a neural operator amplifies or attenuates localized faults. Guided by this theory, we propose a two-stage self-supervised training scheme: pre-training a multimodal convolutional autoencoder on clean data to preserve localized anomaly signals in the latent space, and expanding it with a learnable compute block composed of dense layers for correction and contrastive objectives for anomaly identification. Furthermore, we introduce layer-specific Lipschitz modulation and gradient clipping as principled mechanisms to control sensitivity across detection and correction modules. Experimental results on multimodal fault datasets demonstrate that the proposed approach improves both anomaly detection accuracy and reconstruction under sensor corruption. Overall, this framework bridges the gap between analytical robustness guarantees and practical fault-tolerant multimodal learning.",
+      "authors": [
+        "Diyar Altinses",
+        "Andreas Schwung"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "published": "2026-03-26T07:22:51+00:00",
+      "link": "https://arxiv.org/pdf/2603.25103v1",
+      "tags": [
+        "keyword:PHM",
+        "query:PHM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "fault-tolerant multimodal representation learning for industrial environments",
+      "llm_evidence_cn": "工业环境下的容错多模态表示学习",
+      "llm_evidence": "工业环境下的容错多模态表示学习",
+      "canonical_evidence": "工业环境下的容错多模态表示学习",
+      "llm_tldr_en": "Introduces a Lipschitz-based framework for fault-tolerant multimodal learning and anomaly detection in industrial systems.",
+      "llm_tldr_cn": "引入了一种基于Lipschitz的框架，用于工业系统中的容错多模态学习和异常检测。",
+      "llm_tldr": "引入了一种基于Lipschitz的框架，用于工业系统中的容错多模态学习和异常检测。",
+      "llm_tags": [
+        "query:phm"
+      ],
+      "matched_query_tag": "query:phm",
+      "matched_query_text": "multi task deep learning for PHM applications",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.27176v1",
+      "source": "arxiv",
+      "title": "MEDIC-AD: Towards Medical Vision-Language Model's Clinical Intelligence",
+      "abstract": "Lesion detection, symptom tracking, and visual explainability are central to real-world medical image analysis, yet current medical Vision-Language Models (VLMs) still lack mechanisms that translate their broad knowledge into clinically actionable outputs. To bridge this gap, we present MEDIC-AD, a clinically oriented VLM that strengthens these three capabilities through a stage-wise framework. First, learnable anomaly-aware tokens (<Ano>) encourage the model to focus on abnormal regions and build more discriminative lesion centered representations. Second, inter image difference tokens (<Diff>) explicitly encode temporal changes between studies, allowing the model to distinguish worsening, improvement, and stability in disease burden. Finally, a dedicated explainability stage trains the model to generate heatmaps that highlight lesion-related regions, offering clear visual evidence that is consistent with the model's reasoning. Through our staged design, MEDIC-AD steadily boosts performance across anomaly detection, symptom tracking, and anomaly segmentation, achieving state-of-the-art results compared with both closed source and medical-specialized baselines. Evaluations on real longitudinal clinical data collected from real hospital workflows further show that MEDIC-AD delivers stable predictions and clinically faithful explanations in practical patient-monitoring and decision-support workflows",
+      "authors": [
+        "Woohyeon Park",
+        "Jaeik Kim",
+        "Sunghwan Steve Cho",
+        "Pa Hong",
+        "Wookyoung Jeong",
+        "Yoojin Nam",
+        "Namjoon Kim",
+        "Ginny Y. Wong",
+        "Ka Chun Cheung",
+        "Jaeyoung Do"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-03-28T07:26:40+00:00",
+      "link": "https://arxiv.org/pdf/2603.27176v1",
+      "tags": [
+        "keyword:PHM",
+        "query:PHM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "joint lesion detection and temporal change tracking in medical studies",
+      "llm_evidence_cn": "医学研究中的病灶检测与时间变化联合追踪",
+      "llm_evidence": "医学研究中的病灶检测与时间变化联合追踪",
+      "canonical_evidence": "医学研究中的病灶检测与时间变化联合追踪",
+      "llm_tldr_en": "A medical VLM that jointly performs anomaly detection and temporal disease progression tracking.",
+      "llm_tldr_cn": "一种能够联合执行异常检测和疾病进展时间追踪的医学视觉语言模型。",
+      "llm_tldr": "一种能够联合执行异常检测和疾病进展时间追踪的医学视觉语言模型。",
+      "llm_tags": [
+        "query:phm"
+      ],
+      "matched_query_tag": "query:phm",
+      "matched_query_text": "joint modeling of diagnosis and prognosis",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.25955v1",
+      "source": "arxiv",
+      "title": "EngineAD: A Real-World Vehicle Engine Anomaly Detection Dataset",
+      "abstract": "The progress of Anomaly Detection (AD) in safety-critical domains, such as transportation, is severely constrained by the lack of large-scale, real-world benchmarks. To address this, we introduce EngineAD, a novel, multivariate dataset comprising high-resolution sensor telemetry collected from a fleet of 25 commercial vehicles over a six-month period. Unlike synthetic datasets, EngineAD features authentic operational data labeled with expert annotations, distinguishing normal states from subtle indicators of incipient engine faults. We preprocess the data into $300$-timestep segments of $8$ principal components and establish an initial benchmark using nine diverse one-class anomaly detection models. Our experiments reveal significant performance variability across the vehicle fleet, underscoring the challenge of cross-vehicle generalization. Furthermore, our findings corroborate recent literature, showing that simple classical methods (e.g., K-Means and One-Class SVM) are often highly competitive with, or superior to, deep learning approaches in this segment-based evaluation. By publicly releasing EngineAD, we aim to provide a realistic, challenging resource for developing robust and field-deployable anomaly detection and anomaly prediction solutions for the automotive industry.",
+      "authors": [
+        "Hadi Hojjati",
+        "Christopher Roth",
+        "Rory Woods",
+        "Ken Sills",
+        "Narges Armanfard"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-03-26T22:47:45+00:00",
+      "link": "https://arxiv.org/pdf/2603.25955v1",
+      "tags": [
+        "query:PHM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "real-world engine fault detection and health monitoring dataset",
+      "llm_evidence_cn": "真实发动机故障检测与健康监测数据集",
+      "llm_evidence": "真实发动机故障检测与健康监测数据集",
+      "canonical_evidence": "真实发动机故障检测与健康监测数据集",
+      "llm_tldr_en": "Introduces a large-scale real-world vehicle engine anomaly detection dataset with expert annotations.",
+      "llm_tldr_cn": "发布了一个包含真实车辆发动机传感器数据的异常检测数据集，用于识别早期故障。",
+      "llm_tldr": "发布了一个包含真实车辆发动机传感器数据的异常检测数据集，用于识别早期故障。",
+      "llm_tags": [
+        "query:phm:composite"
+      ],
+      "matched_query_tag": "query:phm:composite",
+      "matched_query_text": "Papers central to 同时涉及故障诊断与剩余寿命预测的研究论文, especially work that connects or combines: joint modeling of diagnosis and prognosis; multi-task learning for diagnosis and RUL; simultaneous fault diagnosis and remaining useful life prediction; integrated approach for machinery fault diagnosis and prognosis; multi task deep learning for PHM applications; joint diagnosis and RUL estimation research papers.",
+      "matched_requirement_id": "req-composite-phm",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.29755v1",
+      "source": "arxiv",
+      "title": "CausalPulse: An Industrial-Grade Neurosymbolic Multi-Agent Copilot for Causal Diagnostics in Smart Manufacturing",
+      "abstract": "Modern manufacturing environments demand real-time, trustworthy, and interpretable root-cause insights to sustain productivity and quality. Traditional analytics pipelines often treat anomaly detection, causal inference, and root-cause analysis as isolated stages, limiting scalability and explainability. In this work, we present CausalPulse, an industry-grade multi-agent copilot that automates causal diagnostics in smart manufacturing. It unifies anomaly detection, causal discovery, and reasoning through a neurosymbolic architecture built on standardized agentic protocols. CausalPulse is being deployed in a Robert Bosch manufacturing plant, integrating seamlessly with existing monitoring workflows and supporting real-time operation at production scale. Evaluations on both public (Future Factories) and proprietary (Planar Sensor Element) datasets show high reliability, achieving overall success rates of 98.0% and 98.73%. Per-criterion success rates reached 98.75% for planning and tool use, 97.3% for self-reflection, and 99.2% for collaboration. Runtime experiments report end-to-end latency of 50-60s per diagnostic workflow with near-linear scalability (R^2=0.97), confirming real-time readiness. Comparison with existing industrial copilots highlights distinct advantages in modularity, extensibility, and deployment maturity. These results demonstrate how CausalPulse's modular, human-in-the-loop design enables reliable, interpretable, and production-ready automation for next-generation manufacturing.",
+      "authors": [
+        "Chathurangi Shyalika",
+        "Utkarshani Jaimini",
+        "Cory Henson",
+        "Amit Sheth"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-03-31T13:54:34+00:00",
+      "link": "https://arxiv.org/pdf/2603.29755v1",
+      "tags": [
+        "query:PHM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "unifies anomaly detection, causal discovery, and reasoning in manufacturing",
+      "llm_evidence_cn": "统一制造业中的异常检测、因果发现与推理",
+      "llm_evidence": "统一制造业中的异常检测、因果发现与推理",
+      "canonical_evidence": "统一制造业中的异常检测、因果发现与推理",
+      "llm_tldr_en": "An industrial-grade multi-agent copilot for automated causal diagnostics and anomaly detection in smart manufacturing.",
+      "llm_tldr_cn": "一种用于智能制造中自动因果诊断和异常检测的工业级多智能体助手。",
+      "llm_tldr": "一种用于智能制造中自动因果诊断和异常检测的工业级多智能体助手。",
+      "llm_tags": [
+        "query:phm:composite"
+      ],
+      "matched_query_tag": "query:phm:composite",
+      "matched_query_text": "Papers central to 同时涉及故障诊断与剩余寿命预测的研究论文, especially work that connects or combines: joint modeling of diagnosis and prognosis; multi-task learning for diagnosis and RUL; simultaneous fault diagnosis and remaining useful life prediction; integrated approach for machinery fault diagnosis and prognosis; multi task deep learning for PHM applications; joint diagnosis and RUL estimation research papers.",
+      "matched_requirement_id": "req-composite-phm",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    }
+  ]
+}

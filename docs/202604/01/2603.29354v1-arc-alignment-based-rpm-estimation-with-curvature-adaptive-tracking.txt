@@ -1,0 +1,794 @@
+Title: ARC: Alignment-based RPM Estimation with Curvature-adaptive Tracking
+
+URL Source: https://arxiv.org/pdf/2603.29354v1
+
+Published Time: Wed, 01 Apr 2026 00:38:11 GMT
+
+Number of Pages: 8
+
+Markdown Content:
+# ARC: Alignment-based RPM Estimation with Curvature-adaptive Tracking 
+
+Weiheng Hua, Changyu Hao 
+
+Blue Aspirations 
+
+Hangzhou, China 
+
+{weiheng.hua, changyu.hao }@blue-aspirations.com 
+
+Abstract —Tacho-less rotational speed estimation is critical for vibration-based prognostics and health management (PHM) of rotating machinery, yet traditional methods—such as time-domain periodicity, cepstrum, and harmonic comb match-ing—struggle under noise, non-stationarity, and inharmonic in-terference. Probabilistic tracking offers a principled way to fuse multiple estimators, but a major challenge is that heterogeneous estimators produce evidence on incompatible axes and scales. We address this with ARC (Alignment-based RPM Estimation with Curvature-adaptive Tracking) by unifying the observation representation. Each estimator outputs a one-dimensional evi-dence curve on its native axis, which is mapped onto a shared RPM grid and converted into a comparable grid-based log-likelihood via robust standardization and a Gibbs-form energy shaping. Standard recursive filtering with fixed-variance motion priors can fail under multi-modal or ambiguous evidence. To overcome this, ARC introduces a curvature-informed, state-dependent motion prior, where the transition variance is derived from the local discrete Hessian of the previous log-posterior. This design enforces smooth tracking around confident modes while preserving competing hypotheses, such as octave alternatives. Experiments on synthetic stress tests and real vibration-table data demonstrate stable, physically plausible trajectories with interpretable uncertainty, and ablations confirm that these gains arise from uncertainty-aware temporal propagation rather than per-frame peak selection or ad hoc rules. 
+
+Index Terms —tacho-less speed estimation, heterogeneous ev-idence fusion, curve-to-grid alignment, RPM grid, recursive tracking, curvature-adaptive motion prior 
+
+I. I NTRODUCTION 
+
+Rotational speed (RPM) is a fundamental prerequisite for vibration-based diagnostics and prognostics of rotating ma-chinery. Techniques such as order analysis and angular re-sampling require an accurate speed reference to decouple the spectral content from speed fluctuations [1]. However, in industrial deployments, installing tachometers or encoders is often impractical due to cost, space constraints, and reliability concerns [1], [2]. This motivates tacho-less speed estimation: recovering the time-varying RPM trajectory directly from vibration signals to enable downstream Prognostics and Health Management (PHM). Extracting a robust speed trajectory from industrial vibra-tion data is challenging. Many existing approaches rely on framewise estimators that derive local evidence from short-time snapshots, e.g., lag-domain periodicity costs (YIN) [3], quefrency-domain peaks (cepstrum), harmonic comb matching scores, or time–frequency ridge evidence [2]. Although effec-tive under favorable conditions, such snapshot-based evidence can be fragile in the presence of strong interharmonics, res-onance amplification, and broadband disturbances. A typical failure mode is octave ambiguity—locking onto a sub- or super-harmonic—which invalidates downstream order analy-sis. To improve robustness, a natural idea is to exploit multiple cues over time [4], [5]. However, most existing pipelines com-bine information under a largely homogeneous representation. A common practice is to produce one speed estimate per frame (for example by selecting a ridge or a dominant candidate in a time–frequency map) and then enforce temporal conti-nuity using a tracking or smoothing stage [6]. Another line constructs a single cost surface in a chosen analysis domain and extracts a globally consistent trajectory by dynamic pro-gramming or Viterbi-style search [5], [7], [8]. While effective for cues sharing a common coordinate system, these strategies struggle to fuse fundamentally different estimators—a practical necessity since no single representation is universally reliable. Such estimators output evidence on incompatible axes and with incomparable scales: time-domain methods produce cost curves on a lag axis, cepstrum produces peak prominence on a quefrency axis, and spectral or time–frequency methods yield scores on frequency- or speed-related coordinates. Without a principled way to reconcile these heterogeneous evidence curves, ad hoc normalization or collapsing them into a single confidence value may distort the relative evidence structure, suppress multi-modality, and lead to over-confident yet incor-rect decisions, especially under octave ambiguity [2]. To address the above gap, we propose ARC (Alignment-based RPM estimation with Curvature-adaptive tracking) and first introduce its alignment component, termed C2G (Curve-to-Grid). Rather than outputting a single point estimate, each estimator produces a dense 1-D evidence curve on its na-tive axis. C2G deterministically maps these curves onto a shared RPM grid, applies robust standardization to remove estimator-specific offsets and scales, and converts the aligned 
+
+> arXiv:2603.29354v1 [eess.SP] 31 Mar 2026
+
+evidence into grid-based log-likelihoods via a Gibbs-form energy shaping. This unified RPM-grid representation en-ables principled multi-estimator fusion while preserving multi-modal hypotheses (e.g., competing octave candidates) for downstream decision-making. In this work, we instantiate the framework with three representative and complementary esti-mators—YIN, cepstrum, and comb matching—which provide evidence on distinct axes (lag/quefrency/frequency) and thus expose the core difficulty of heterogeneous fusion. Importantly, the C2G component is estimator-agnostic and can accommo-date additional evidence sources. Furthermore, to balance trajectory smoothness and respon-siveness, ARC performs curvature-adaptive recursive tracking with a state-dependent motion prior. Instead of relying on a fixed-variance motion prior—which is often either too stiff (missing genuine speed changes) or too loose (inviting jitter and mode hopping)—we adapt the transition variance using the local curvature of the previous log-posterior, estimated via a discrete Hessian and motivated by a Laplace-approximation intuition. Consequently, the tracker automatically tightens around confident modes during steady operation and widens its search under ambiguous multi-modal evidence. This mech-anism supports rapid recovery from octave traps and enables accurate tracking of abrupt speed changes without requiring ad hoc rules. The main contributions of this article are summarized as follows:  
+
+> •
+
+C2G Observation Alignment: A systematic Curve-to-Grid (C2G) protocol that aligns heterogeneous 1-D ev-idence curves—originating from distinct domains such as lag, quefrency, and frequency—onto a shared RPM grid. This establishes a unified hypothesis space for fus-ing incompatible observations without collapsing multi-modality.  
+
+> •
+
+RPM-Grid Likelihood Construction: A robust stan-dardization and Gibbs-form energy shaping that converts aligned RPM-grid evidence into comparable RPM-grid log-likelihoods by removing estimator-specific offsets and scales, thereby avoiding arbitrary range normalization.  
+
+> •
+
+ARC Curvature-adaptive Recursive Tracking: An on-line grid-based recursive tracker with a state-dependent motion prior whose transition variance is modulated by the local curvature of the previous log-posterior (esti-mated via a discrete Hessian). This mechanism yields stable RPM trajectories under strong interference and enables recovery from octave ambiguity without ad hoc rules. II. P ROBLEM FORMULATION 
+
+Let x[n] be a measured vibration signal sampled at rate fs.We process x[n] using a sliding window of length N and hop size H. The t-th frame is the vector 
+
+xt ≜ [x[nt], x [nt +1] , . . . , x [nt +N −1]] ⊤, nt = ( t−1) H. 
+
+(1) The rotational speed at frame t is denoted by rt (RPM) and lies within a physical range R = [ rmin , r max ].In a tacho-less setting, the true speed rt is unobserved. For each frame, we obtain a set of estimator outputs in the form of one-dimensional evidence curves (defined on estimator-native axes such as lag, quefrency, or frequency). Let I index the set of estimators and let E(i) 
+
+> t
+
+denote the evidence curve produced by estimator i at frame t. We denote the collection of all curves at frame t as Et ≜ {E (i) 
+
+> t
+
+}i∈I .The goal is to estimate a speed trajectory and its uncertainty without tachometer input. Specifically, we aim to recursively infer the posterior distribution of the speed given the history of observed evidence curves, denoted as p(rt | E 1: t). Based on this posterior (computed on an RPM grid as detailed in Sec. III), we output a trajectory estimate ˆrt together with an uncertainty summary ˆσt for each frame t.III. P ROPOSED METHOD : A LIGNMENT -BASED RPM ESTIMATION WITH CURVATURE -ADAPTIVE TRACKING 
+
+A. Overview 
+
+ARC consists of three core stages: (i) Likelihood construc-tion (C2G): Convert each estimator curve into an RPM-grid log-likelihood on a shared RPM grid; (ii) Fusion: Integrate per-estimator evidence in the log domain while preserving multi-modality; and (iii) Bayesian-inspired recursive fil-tering: Propagate uncertainty over time using a curvature-informed, state-dependent motion prior to generate stable tra-jectories. Note that while we adopt Bayesian terminology for clarity, the likelihoods are heuristic constructions; the approach is Bayesian-inspired rather than fully Bayesian. 
+
+B. RPM Grid and Notation 
+
+We discretize the feasible RPM range R = [ rmin , r max ] into a uniform grid of G points: 
+
+RG ≜ {r(g)}Gg=1 , r(g) = rmin + ( g − 1)∆ r, (2) where ∆r = ( rmax −rmin )/(G−1) denotes the grid resolution. All probabilistic quantities used by the tracker are represented on this discrete grid. We denote the posterior probability mass at frame t as 
+
+πt(g) ≜ p(rt = r(g) | E 1: t), (3) and the predicted (prior) mass before incorporating frame-t
+
+observations as π− 
+
+> t
+
+(g).C. Heterogeneous Evidence Curves 
+
+We use three representative tacho-less estimators as obser-vation sources: YIN, cepstrum, and comb matching. Unlike point-estimate pipelines, ARC retains each estimator’s full 1-D search curve per frame. For each estimator i ∈ I , the observation tuple is 
+
+E(i) 
+
+> t
+
+≜  z(i) 
+
+> t
+
+, c(i) 
+
+> t
+
+, ψ (i), κ (i), (4) where z(i) 
+
+> t
+
+is the native axis, c(i) 
+
+> t
+
+is the raw curve, ψ(i) ∈{Lag , Quefrency , Hz , RPM } is the axis type, and κ(i) ∈{+1 , −1} denotes score ( +1 ) or cost ( −1). 
+
+1) YIN (Lag-domain cost curve): YIN provides a lag-domain periodicity error curve cYIN  
+
+> t
+
+= {d′(τ )} on zYIN  
+
+> t
+
+= {τ }
+
+with ψYIN = Lag and κYIN = −1. Lag candidates map to RPM via r = 60 fs/τ .
+
+2) Cepstrum (Quefrency-domain score curve): Cepstrum [2] provides a quefrency-domain periodicity strength curve 
+
+cCep  
+
+> t
+
+= {c(τ )} on zCep  
+
+> t
+
+= {τ } with ψCep = Quefrency and κCep = +1 . Quefrency candidates map to RPM via 
+
+r = 60 fs/τ .
+
+3) Comb matching (Frequency-domain score curve): 
+
+Comb matching [2] provides a frequency-domain harmonic-alignment score curve cComb  
+
+> t
+
+= {h(f )} on zComb  
+
+> t
+
+= {f } with 
+
+ψComb = Hz and κComb = +1 . Frequency candidates map linearly to RPM via r = 60 f .
+
+D. Likelihood Construction from Heterogeneous Curves 
+
+To fuse the heterogeneous observations, we convert each tuple E(i) 
+
+> t
+
+into a grid-based log-likelihood log pi(r(g) | E (i) 
+
+> t
+
+)
+
+on the shared RPM grid RG. Here, pi(·) denotes a normalized pseudo-likelihood constructed from estimator evidence, rather than a likelihood derived from an explicit generative signal model. This process involves domain mapping, robust stan-dardization, and energy-based probabilistic shaping. 
+
+Step 1: Domain Mapping. We first define a mapping function 
+
+r = gi(z) that transforms the native axis z (Lag, Quefrency, or Hz) to RPM based on the axis type ψ(i):
+
+gi(z) = 
+
+
+
+60 fs/z, if ψ(i) ∈ { Lag , Quefrency },
+
+60 · z, if ψ(i) = Hz ,z, if ψ(i) = RPM .
+
+(5) 
+
+Step 2: Robust Standardization and Energy Formulation. 
+
+Raw curve values c(i) 
+
+> t
+
+exhibit heterogeneous dynamic ranges and often contain heavy-tailed outliers caused by resonance or broadband disturbances. Because standard Z-score normal-ization is highly sensitive to such multi-modal distributions, we employ robust standardization based on the median and interquartile range (IQR). This effectively suppresses outliers while preserving the relative peak structure required for fusion. Let c[m] denote the m-th element of the raw curve vector c(i) 
+
+> t
+
+.We compute the normalized value ˜c[m] as: 
+
+˜c[m] = c[m] − median( c(i) 
+
+> t
+
+)IQR( c(i) 
+
+> t
+
+) + ϵ , (6) where median( ·) and IQR( ·) denote the median and interquar-tile range operators, respectively. To unify costs (where lower is better) and scores (where higher is better), we define the energy function E[m] using the polarity κ(i):
+
+E[m] = −κ(i) · ˜c[m]. (7) Under this formulation, lower energy always indicates higher compatibility, regardless of the original estimator type. 
+
+Step 3: Energy-Based Likelihood via Kernel Aggregation. 
+
+We define a Gibbs-form pseudo-likelihood from the energy, 
+
+p ∝ exp( −βE ). Since energies are robustly standardized (median/IQR) in Eq. (6), we set β = 1 in all experiments and do not tune it. This formulation converts estimator-specific mismatch energies into observation likelihoods without requir-ing an explicit generative signal model. Since the mapping 
+
+r = gi(z) is generally non-uniform, we aggregate likelihood contributions onto the uniform RPM grid using a kernel density approach. The unnormalized likelihood on grid point 
+
+r(g) is: 
+
+˜pi
+
+
+
+r(g) | E (i)
+
+> t
+
+
+
+∝ X
+
+> m
+
+exp   − β E [m] K
+
+ r(g) − gi(z[m]) 
+
+hbw 
+
+
+
+,
+
+(8) where z[m] is the coordinate of the m-th point on the native axis z(i) 
+
+> t
+
+, K(·) is a kernel function (e.g., Gaussian), and hbw 
+
+is the kernel bandwidth. Finally, we normalize over the grid to obtain the observation likelihood: 
+
+pi
+
+
+
+r(g) | E (i)
+
+> t
+
+
+
+=˜pi
+
+
+
+r(g) | E (i)
+
+> t
+
+PGj=1 ˜pi
+
+
+
+r(j) | E (i)
+
+> t
+
+ , (9) Note that this normalized quantity serves as a heuristic obser-vation likelihood; a fully generative treatment is deferred to future work (see Sec. VI). 
+
+E. Multi-Estimator Fusion 
+
+Given the per-estimator log-likelihoods, we fuse them via a weighted log-linear pool on the shared RPM grid: 
+
+Lt(g) ≜ Y
+
+> i∈I
+
+pi(r(g) | E (i) 
+
+> t
+
+)λi , (10) equivalently, 
+
+log Lt(g) = X
+
+> i∈I
+
+λi log pi(r(g) | E (i) 
+
+> t
+
+), (11) where λi weights the relative reliability of different estimators (default λi = 1 ). F. Curvature-Informed State-Dependent Motion Prior 
+
+To balance steady-state smoothness and rapid adaptation to sudden RPM changes, we employ a state-dependent Gaussian transition model. Unlike standard random walks with fixed process noise, our transition variance adapts to the local certainty of the estimate: 
+
+p(rt = r(g) | rt−1 = r(j)) = N  r(g); r(j), σ 2
+
+> m,t
+
+(j), (12) where the variance σ2
+
+> m,t
+
+(j) is inversely modulated by the local curvature of the previous log-posterior at state r(j).Let ℓt−1(j) = log( πt−1(j) + ϵ) denote the log-posterior mass. We approximate the local curvature (Hessian) [9] using a second-order central finite difference: 
+
+ℓ′′ 
+
+> t−1
+
+(j) ≈ ℓt−1(j + 1) − 2ℓt−1(j) + ℓt−1(j − 1) (∆ r)2 . (13) For numerical stability, we pre-smooth ℓt−1(j) with a fixed 3-point moving average before applying the above finite-difference operator. For boundary indices, we replicate the nearest interior curvature: 
+
+ℓ′′ 
+
+> t−1
+
+(1) ≜ ℓ′′ 
+
+> t−1
+
+(2) , ℓ′′ 
+
+> t−1
+
+(G) ≜ ℓ′′ 
+
+> t−1
+
+(G − 1) . (14) We define a proxy for local precision (sharpness) as qt−1(j) = max(0 , −ℓ′′ 
+
+> t−1
+
+(j)) . The transition variance is then adapted via a bounded inverse mapping: 
+
+σ2
+
+> m,t
+
+(j) = clip 
+
+ 1
+
+qt−1(j) + ϵc
+
+, σ 2min , σ 2max 
+
+
+
+, (15) where ϵc prevents division by zero, and [σ2min , σ 2max ] are the physical bounds for frame-to-frame RPM variation. Mathemat-ically, this mechanism acts as a curvature-based regularizer: it tightens the transition kernel (low σ2) when the tracker is locked onto a sharp peak, and widens it (high σ2) to re-acquire targets during transient or uncertain phases. 
+
+G. Grid-Based Recursive Filtering 
+
+The core tracking loop recursively maintains the posterior probability mass πt(g) ≜ p(rt = r(g) | E1: t) on the discrete RPM grid. We perform a recursive update inspired by Bayesian filtering, combining the heuristic likelihood with the motion prior. This recursion proceeds in three steps: prediction (diffusion), update (fusion), and state estimation. 
+
+(1) Predict (Time Propagation). First, we propagate the previous posterior πt−1 forward using the state-dependent transition model derived in Sec. III-F. This operation diffuses the probability mass based on the local uncertainty σ2
+
+> m,t
+
+(j),yielding the predicted (prior) mass π− 
+
+> t
+
+:
+
+π− 
+
+> t
+
+(g) = 
+
+> G
+
+X
+
+> j=1
+
+πt−1(j) N  r(g); r(j), σ 2
+
+> m,t
+
+(j). (16) 
+
+(2) Update (Measurement Fusion). Next, we incorporate the fused observation likelihood Lt(g) from Eqs. (10)–(11). 
+
+Algorithm 1 ARC: Alignment-based RPM Estimation with Curvature-adaptive Tracking                                                                                  
+
+> Require: Frames {xt}Tt=1 , Estimators I, RPM Grid RG={r(g)}Gg=1
+> Ensure: Posteriors {πt}Tt=1 and Estimates {ˆrMAP
+> t,ˆrMMSE
+> t,ˆσt}Tt=1
+> 1: Initialize posterior π0(g)←1/G for all g= 1 , . . . , G
+> 2: for t= 1 to Tdo
+> 3: Stage I & II: C2G and Multi-Estimator Fusion
+> 4: for each estimator i∈ I do
+> 5: Construct observation tuple E(i)
+> t▷Eq. (4) 6: Compute grid likelihood pi(r(g)| E (i)
+> t)▷Eqs. (5)–(8) 7: end for
+> 8: Integrate evidence to obtain fused log-likelihood log Lt(g)▷Eq. (11) 9: Stage III: Curvature-Adaptive Recursive Tracking
+> 10: Calculate curvature proxy qt−1(j)via finite difference ▷Eq. (13) 11: Adapt transition variance σ2
+> m,t (j)based on curvature ▷Eq. (15) 12: Predict: Propagate posterior to obtain prior π−
+> t(g)▷Eq. (16) 13: Update: Incorporate Lt(g)and normalize to get πt(g)▷Eqs. (17)– (18) 14: Estimation: Extract ˆrMAP
+> t,ˆrMMSE
+> tand compute uncertainty ˆσt
+> ▷Eqs. (19)–(20) 15: end for
+
+To ensure numerical stability and prevent underflow, this multiplication is performed as summation in the log domain: 
+
+log ˜ πt(g) = log( π− 
+
+> t
+
+(g) + ϵ) + log Lt(g), (17) 
+
+πt(g) = exp(log ˜ πt(g)) 
+
+PGk=1 exp(log ˜ πt(k)) , (18) where the normalization ensures that the updated posterior mass πt(g) sums to unity. 
+
+(3) Estimation. Finally, we compute the Maximum A Pos-teriori (MAP) and Minimum Mean Square Error (MMSE) estimates from the posterior: 
+
+ˆrMAP  
+
+> t
+
+= arg max 
+
+> r(g)
+
+πt(g), ˆrMMSE  
+
+> t
+
+=
+
+> G
+
+X
+
+> g=1
+
+r(g)πt(g). (19) The MMSE serves as the primary smoothed trajectory, while the MAP is reserved for analyzing dominant modes or con-flicts. The estimation uncertainty is quantified by the posterior standard deviation: 
+
+ˆσt =
+
+vuut GX
+
+> g=1
+
+πt(g) r(g) − ˆrMMSE 
+
+> t
+
+2. (20) 
+
+H. Algorithm Summary 
+
+Algorithm 1 summarizes the full pipeline. IV. E XPERIMENTS 
+
+A. Experimental Goals and Evaluation Protocol 
+
+We evaluate ARC using a question-driven protocol de-signed to isolate the contributions of (i) multi-estimator fusion, (ii) temporal tracking, and (iii) real-world feasibility without tachometer reference. Specifically, we ask: 
+
+(Q1) Fusion: Can C2G fusion on a shared RPM grid resolve conflicts among heterogeneous estimators and reduce catas-trophic (tail) errors? (Q2) Tracking: Beyond static fusion, does temporal recursion (predict/update) reduce jitter and failure propagation compared with a framewise (no-prediction) variant? 
+
+(Q3) Real-Data Validation: On a real vibration-table record-ing with mixed phenomena, when an independent tachometer reference is available only for evaluation (not used by ARC during inference), does ARC produce an accurate and physi-cally plausible trajectory with interpretable uncertainty? Across both synthetic and real tests, we report accuracy and tail robustness (RMSE and P95). For real data, we addition-ally report stability metrics computed from successive-frame RPM increments (jitter and max-jump) to assess trajectory smoothness regardless of ground truth availability. We organize the evidence as follows: (i) a concise synthetic benchmark (Table II); (ii) posterior visualizations explaining conflict res-olution (Fig. 1); (iii) a tracking ablation contrasting framewise fusion vs. full tracking (Fig. 2); and (iv) a real case study demonstrating uncertainty quantification (Fig. 3). 
+
+B. Synthetic Stress Tests (Failure-Mode Coverage) 
+
+To rigorously validate ARC, we generate synthetic signals by modulating a harmonic series according to a prescribed ground-truth speed trajectory {rt}, yielding an instantaneous fundamental frequency f0(t) = rt/60 . Crucially, rather than applying generic noise, each stress test is designed to isolate a single failure mechanism commonly observed in industrial vibration. We select four representative scenarios ( S1–S4 ) for the main quantitative benchmark (Table II), while reserving the transient step-change scenario ( S5 ) specifically to visualize tracking dynamics in the ablation study. Table I details the physical origin and difficulty of each scenario. 
+
+C. Real Vibration-Table Case Study 
+
+To address Q3 , we evaluate ARC on a vibration-table recording characterized by realistic broadband noise and struc-tural resonance. The test is conducted at an approximately constant operating speed around 1500 RPM. An independent tachometer measurement is available and is used only as a reference for evaluation but it is not provided to any estimator or to ARC during inference, preserving the strict tacho-less 
+
+setting. We report quantitative errors against the tachometer speed for this case study. In addition, to keep the evaluation protocol applicable even when a tachometer is unavailable, we also report stability metrics computed from successive-frame incre-ments ∆ˆ rt (jitter and max-jump; Sec. IV-E), which quantify short-term smoothness and detect implausible jumps regardless of ground truth availability. 
+
+D. Methods Compared (Baselines and Variants) 
+
+We compare against three single-estimator baselines, one internal ablation variant to isolate the contribution of temporal                      
+
+> TABLE I SYNTHETIC STRESS TESTS USED IN THIS PAPER . S1–S4 ARE USED FOR THE MAIN QUANTITATIVE BENCHMARK ; S5 IS USED FOR TRACKING ABLATION (F IG . 2). ID Stress mechanism (Definition) Typical physical origin
+> S1 Octave ambiguity
+> Subharmonic strength : Amplitude ratio of 0.5×component to fundamental. Looseness, rub (subharmonics), strong 2×excitation, oil-whirl-like components
+> S2 Low signal-to-noise ratio (SNR)
+> SNR : Additive broadband noise level relative to signal power. Weak excitation, poor mounting, background vibration, electro-magnetic noise
+> S3 Periodic interference
+> Interference level : Amplitude of non-harmonic component fint =
+> αf 0, α / ∈Z.Gear mesh, blade-pass, electromagnetic (EM) periodicity, spurious spectral peaks
+> S4 Inharmonicity
+> Spectral deviation : Detuning factor
+> δmshifting harmonics to mf 0(1+
+> δm).Torsional slip, stiff spectral structures, resonance-dominated transfer paths
+> S5 Step change
+> Jump magnitude : Instantaneous RPM step ∆rbetween segments. Variable Frequency Drive (VFD) speed command step, load transient
+
+recursion, and one additional real-data baseline representing a classical time–frequency trajectory-extraction pipeline. 
+
+Single-estimator baselines: YIN, cepstrum, and comb match-ing. Each baseline produces a framewise RPM point estimate by selecting the most plausible candidate on its native search axis, without multi-estimator fusion or temporal recursion. 
+
+C2G-Fusion (Tracking Ablation): A fusion-only variant that performs curve-to-grid likelihood construction and multi-estimator fusion on the shared RPM grid (Sec. III), followed by MMSE estimation, but omits temporal prediction and recursion (i.e., no use of Eq. (16)). This isolates the benefit of heterogeneous fusion (C2G + log-pooling) while removing uncertainty-aware temporal propagation. 
+
+ARC (Proposed): The complete pipeline including C2G likelihood construction, heterogeneous fusion, and curvature-adaptive recursive filtering, producing an online RPM trajec-tory with posterior uncertainty. 
+
+Viterbi-STFT (Real-data baseline): For the real vibration-table case study only, we additionally include a classical time–frequency baseline that extracts a framewise candidate sequence from a short-time Fourier transform (STFT)-based representation and enforces temporal continuity via Viterbi-style dynamic programming. 
+
+E. Evaluation Metrics 
+
+Accuracy metrics. We denote the reference RPM trajectory as 
+
+rref  
+
+> t
+
+, which represents the prescribed ground truth in synthetic scenarios and the independent tachometer measurement in real-world cases. We report the following metrics: • RMSE (Root Mean Square Error): 
+
+RMSE = 
+
+vuut 1
+
+T
+
+> T
+
+X
+
+> t=1
+
+ ˆrt − rref 
+
+> t
+
+2. (21)  
+
+> •
+
+P95 (95th-Percentile Absolute Error): 
+
+P95 = percentile 95 
+
+|ˆrt − rref  
+
+> t
+
+| Tt=1 
+
+
+
+. (22) 
+
+Stability metrics. To quantify trajectory smoothness with-out requiring any reference, we compute successive-frame increments ∆ˆ rt = ˆ rt − ˆrt−1 for t = 2 , . . . , T : 
+
+> •
+
+Jitter: std(∆ˆ rt). 
+
+> •
+
+Max-Jump: max t |∆ˆ rt|, highlighting abrupt, physically implausible jumps. 
+
+F. Implementation Details 
+
+Unless otherwise stated, synthetic stress tests use fs =12 ,800 Hz, while the real vibration-table recording is sampled at fs = 8 ,000 Hz. All experiments use the same framing parameters (frame length N = 8192 samples and hop size 
+
+H = 128 samples) and apply the curve-to-grid mapping with the corresponding fs in (5). Each trial uses a 5-s signal segment, resulting in T frames determined by N , H,and the signal length. We use a uniform RPM grid over 
+
+[rmin , r max ] = [300 , 4000] RPM with resolution ∆r = 1 RPM. Robust standardization in (6) uses ϵ = 10 −10 . For kernel-based likelihood aggregation in (8), we use a Gaussian kernel with bandwidth hbw = 0 .5 RPM and a fixed β = 1 . For curvature-adaptive motion modeling in (15), we set σmin = 40 RPM, 
+
+σmax = 150 RPM (i.e., σ2min = 1600 RPM 2, σ2max =22500 RPM 2), ϵc = 10 −12 . For conflict-frame selection in visualizations, we automatically choose the frames based on maximum posterior entropy to avoid cherry-picking. V. R ESULTS AND DISCUSSION 
+
+A. Main Quantitative Analysis 
+
+Table II reports RMSE and P95 on four representative synthetic stress tests (S1–S4), aggregated over 20 random seeds. The results highlight a key trade-off: while single estimators act as “specialists” that excel when their specific assumptions hold, they exhibit brittleness in other regimes. For instance, YIN achieves the best tail performance in inhar-monicity scenarios (S4, P95=19.5) but degrades significantly in the presence of octave ambiguity (S1, P95=51.3) and periodic interference (S3, P95=59.0). Similarly, while Comb matching dominates in the low-SNR regime (S2), it is less robust to interference (S3), where ARC reduces the P95 error by approximately 25% (25.3 → 18.9). In contrast, ARC functions as a robust “generalist”. It consistently achieves low P95 errors across diverse scenarios, avoiding the catastrophic failures observed in the baselines (e.g., YIN in S3 or cepstrum in S1/S2) and delivering the most reliable performance across diverse failure modes.                                                   
+
+> TABLE II MAIN RESULTS ON SYNTHETIC STRESS TESTS (S1–S4). RMSE AND P95
+> ARE REPORTED IN RPM AND AGGREGATED OVER 20 RANDOM SEEDS .
+> Method S1 S2 S3 S4 RMSE P95 RMSE P95 RMSE P95 RMSE P95 YIN 40.2 51.3 26.6 52.4 53.7 59.0 16.5 19.5
+> Cepstrum 213.0 330.8 174.2 326.1 115.2 270.5 91.7 226.9 Comb 12.6 31.1 8.5 20.5 14.8 25.3 15.3 28.3 ARC 14.3 27.5 11.5 22.2 10.1 18.9 16.1 22.2
+
+B. (Q1) Fusion: Visualization of Conflict Resolution 
+
+Claim: C2G-based fusion in ARC resolves structural dis-agreement among heterogeneous estimators on a shared RPM grid: it strengthens mutually supported hypotheses while sup-pressing estimator-specific outliers, avoiding spurious “mid-point” compromises. Fig. 1 visualizes this mechanism at frames selected by maximum posterior entropy. 
+
+Left Column (Incompatibility): In (a,d), after C2G, each estimator yields a likelihood-like shape on the same RPM axis, yet their dominant modes can be incompatible—for example, periodicity-based cues may favor octave-related candidates, while spectral cues introduce interference-induced peaks. This shows the core difficulty is not a mere scale mismatch but a disagreement over which RPM regions are plausible .
+
+Middle Column (Consensus): In (b,e), log-domain pooling (Eq. (11)) performs a consistency-seeking fusion: since evi-dence is combined multiplicatively in probability space, only RPM regions that are simultaneously supported by multiple estimators are amplified, whereas isolated peaks are natu-rally down-weighted. Importantly, this mechanism does not “average” peak locations, hence it avoids creating artificial midpoints between incompatible modes. 
+
+Right Column (Update): In (c,f), the ARC tracking update further integrates the fused evidence with the predicted prior. Crucially, in the real-data case (f), the resulting posterior effectively resolves the octave conflict seen in (d) and aligns with the tachometer reference. The posterior shape provides a stable MMSE estimate while retaining residual multi-modality rather than collapsing into an over-confident point decision. Overall, Fig. 1 demonstrates that fusion in ARC acts as a hypothesis filter: it preserves multi-modality when warranted, but removes estimator-specific artifacts without hand-tuned rules. 
+
+C. (Q2) Tracking: Benefit Beyond Fusion (Ablation) 
+
+Claim: Temporal recursion improves robustness beyond per-frame fusion by rejecting short-lived outliers and enforcing 
+
+physically plausible temporal continuity , at the cost of acontrolled transient lag around abrupt changes. 1400 1500 1600 1700 1800                           
+
+> RPM
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> Relative density (max-normalized)
+> (a) Synthetic: Per-estimator evidences after C2G
+> YIN peak
+> Cep peak
+> Comb peak
+> Ground truth (1521.9)
+> 1400 1500 1600 1700 1800
+> RPM
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> Relative density (max-normalized)
+> (b) Synthetic: C2G-Fusion likelihood
+> C2G-Fusion likelihood
+> C2G-Fusion MAP (1500.0)
+> Ground truth (1521.9)
+> 1400 1500 1600 1700 1800
+> RPM
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> Relative density (max-normalized)
+> (c) Synthetic: ARC tracking update
+> Prior
+> C2G-Fusion likelihood
+> Posterior
+> ARC (1521.9)
+> Ground truth (1521.9)
+> 400 600 800 1000 1200 1400 1600
+> RPM
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> Relative density (max-normalized)
+> (d) Vibration-table: Per-estimator evidences after C2G
+> YIN peak
+> Cep peak
+> Comb peak
+> Tachometer reference (1500.0)
+> 400 600 800 1000 1200 1400 1600
+> RPM
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> Relative density (max-normalized)
+> (e) Vibration-table: C2G-Fusion likelihood
+> C2G-Fusion likelihood
+> C2G-Fusion MAP (1495.0)
+> Tachometer reference (1500.0)
+> 400 600 800 1000 1200 1400 1600
+> RPM
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> Relative density (max-normalized)
+> (f) Vibration-table: ARC tracking update
+> Prior
+> C2G-Fusion likelihood
+> Posterior
+> ARC (1494.7)
+> Tachometer reference (1500.0)
+
+Fig. 1. Top row (a–c): synthetic frame with ground-truth speed. Bottom row (d–f): vibration-table frame with tachometer reference (evaluation only). (a,d) 
+
+Per-estimator C2G evidences on the shared RPM grid. (b,e) Fused likelihood; C2G-Fusion reports MAP. (c,f) ARC posterior update; ARC reports MMSE with uncertainty. Curves are max-normalized. Conflict frames selected by maximum posterior entropy. 
+
+Fig. 2 compares C2G-Fusion (Framewise) and ARC. Both variants use the same per-frame fusion likelihood on the RPM grid; the only difference is whether we run the recursive filtering loop , i.e., applying the prediction in Eq. (16) before the update. Thus, any performance gap directly reflects the effect of temporal propagation. 
+
+(a) Synthetic step-change (S5). Around the jump, C2G-Fusion (Framewise) reacts prematurely and spreads error over a longer transition interval. In contrast, ARC stays on the pre-jump hypothesis until the evidence becomes decisive. This yields a typical trade-off: the tracker incurs a higher global RMSE (26.0 → 38.5 RPM) due to the localized lag, yet it suppresses large deviations and reduces the tail error (P95) by over 50% (23.7 → 10.7 RPM). This behavior is expected because RMSE is dominated by a few large squared errors concentrated near the jump, whereas P95 reflects the typical tail deviation over the whole segment. 
+
+(b) Vibration-table segment. The key failure mode of C2G-Fusion (Framewise) is failure propagation : a short-lived con-flict triggers a catastrophic dip (see t ≈ 2.7 s), causing massive errors. In contrast, ARC leverages the predicted prior to down-weight this transient outlier and remains locked to the previously consistent mode (which aligns with the tachometer reference). Quantitatively, tracking reduces instability metrics by an order of magnitude (Jitter: 9.6 → 0.6 RPM; Max-Jump: 59.4 → 6.5 RPM), and eliminates the massive error caused by the dropout (RMSE: 77.2 → 3.0 RPM). 0 1 2 3 4
+
+Time (s)      
+
+> 1500
+> 1600
+> 1700
+> 1800
+> 1900
+> RPM
+> Step
+> Metrics:
+> RMSE P95
+> C2G-Fusion 26.0 23.7
+> ARC 38.5 10.7
+
+(a) Synthetic: Step change (S5)       
+
+> Ground Truth
+> C2G-Fusion (framewise)
+> ARC
+> 1.0 1.5 2.0 2.5 3.0 3.5 4.0
+
+Time (s)            
+
+> 1200
+> 1300
+> 1400
+> 1500
+> 1600
+> RPM
+> Metrics:
+> RMSE P95 Jitter MaxJump
+> C2G-Fusion 77.2 226.3 9.6 59.4
+> ARC 3.0 6.9 0.6 6.5
+
+(b) Vibration-table 
+
+> Tachometer reference
+> ARC uncertainty ±
+> C2G-Fusion (framewise)
+> ARC
+
+Fig. 2. Tracking ablation: C2G-Fusion (Framewise) vs. ARC . (a) Synthetic step-change (S5) with ground-truth speed. (b) Vibration-table segment with tachometer reference. Shaded band: ±σ. Inset: RMSE/P95/Jitter/Max-Jump. 
+
+D. (Q3) Real Deployment: Industrial-Grade Trajectory &Confidence 
+
+Claim: Under realistic spectral ambiguity where single-cue estimators become unstable, ARC produces a stable RPM trajectory and an interpretable uncertainty signal that reflects evidence coherence, enabling reliable downstream monitoring. Fig. 3 evaluates a challenging vibration-table segment. A tachometer reference is available for evaluation only .
+
+Environmental challenge (a–b): Panel (a) shows a short raw acceleration segment (0.2 s) with heavy broadband noise and impulsive disturbances. Panel (b) shows the order spectrum, where energy is distributed across dense harmonics and inter-ference components rather than being dominated by a single clean 1X peak. This multi-peak structure creates multiple plausible RPM candidates at the frame level and commonly induces octave-related confusions. 
+
+Trajectory robustness (c): Panel (c) compares the raw framewise outputs of the constituent estimators (dashed lines: YIN/cepstrum/comb matching) with ARC (red). The single-estimator traces frequently jump among octave-related or interference-induced candidates, producing physically implau-sible RPM swings. In contrast, by pooling evidence on the RPM grid and applying recursive Bayesian-inspired filtering, ARC suppresses short-lived outliers and maintains a coherent trajectory around the 1500 RPM mode. Quantitatively, this segment achieves low error and high stability (e.g., RMSE and Jitter reported in the inset table). 
+
+Actionable confidence signal: The tracker additionally out-puts an uncertainty band (±σ, shaded), which acts as areliability indicator: it broadens during ambiguous/conflicting evidence and contracts when the posterior becomes sharply concentrated. This enables downstream pipelines to identify low-confidence periods without ad hoc rules. 
+
+Error analysis (d): Panel (d) shows the tracking error for both ARC and Viterbi-STFT. ARC maintains a near-zero error throughout the segment with a tight uncertainty band, while Viterbi-STFT exhibits larger deviations (up to ±30 RPM) during intervals of spectral ambiguity. This confirms that curvature-adaptive temporal recursion provides more consis-tent accuracy than trajectory-level dynamic programming. VI. C ONCLUSION 
+
+We presented a tacho-less speed tracking framework that converts heterogeneous estimator curves into unified grid log-likelihood observations on the RPM axis and performs Bayesian-inspired multi-modal fusion on a discrete RPM grid. By calibrating evidence directly on the RPM axis (instead of arbitrary metric normalization) and using a curvature-informed state-dependent transition derived from the previous log-posterior (discrete Hessian intuition), the method avoids in-valid midpoint averaging, reduces octave-error-induced catas-trophes, and removes the need for case-specific jump patching. The framework is estimator-agnostic: any tacho-less estimator that can provide a per-frame search curve can be integrated by mapping and converting it into an RPM-grid log-likelihood. While the posterior uncertainty reported in this work pro-vides a practical confidence indicator, a more rigorous treat-ment via Bayesian model averaging—explicitly accounting for the possibility that all estimators may be uninformative—could further improve its calibration; this extension will be explored in future work. 0.000 0.025 0.050 0.075 0.100 0.125 0.150 0.175                                          
+
+> Time (s)
+> 10
+> 5
+> 0
+> 5
+> 10
+> Acceleration (m/s²)
+> (a) Raw vibration data (the first 0.2s)
+> 1X 10X 20X 30X
+> Order (harmonics of rotation)
+> 0.00
+> 0.05
+> 0.10
+> 0.15
+> 0.20
+> Magnitude (normalized)  Harmonic markers: 1× 10×, 20×, 30×
+> (b) Order spectrum
+> 1.0 1.5 2.0 2.5 3.0 3.5 4.0
+> Time (s)
+> 500
+> 1000
+> 1500
+> 2000
+> 2500
+> 3000
+> RPM
+> Method RMSE P95 Jitter MaxJump
+> -------------------------------------------------------
+> YIN 754.3 1174.4 224.9 1218.5
+> Cepstrum 623.8 1125.6 386.6 2467.9
+> Comb 760.3 1488.0 164.0 1494.0
+> Viterbi-STFT 25.4 42.0 2.4 16.0
+> ARC 3.0 6.9 0.6 6.5
+> (c) RPM tracking comparison
+> Tachometer reference
+> YIN
+> Cepstrum
+> Comb
+> Viterbi-STFT
+> ARC uncertainty (± )
+> ARC
+> 1.0 1.5 2.0 2.5 3.0 3.5 4.0
+> Time (s)
+> 100
+> 50
+> 0
+> 50
+> 100
+> RPM (Est. - Ref.)
+> (d) Tracking error relative to tachometer reference
+> ARC uncertainty (± ) ARC Viterbi-STFT
+
+Fig. 3. Real vibration-table case study. (a) Raw acceleration (0.2 s). (b) Order spectrum. (c) RPM trajectories: YIN/cepstrum/comb (dashed) and Viterbi-STFT vs. ARC (MMSE, with ±σ band); inset: metrics. (d) Tracking error vs. tachometer reference. 
+
+REFERENCES [1] S. Lu, R. Yan, Y. Liu, and Q. Wang, “Tacholess speed estimation in order tracking: A review with application to rotating machine fault diagnosis,” 
+
+IEEE Transactions on Instrumentation and Measurement , vol. 68, no. 7, pp. 2315–2332, 2019. [2] C. Peeters, Q. Lecl` ere, J. Antoni, P. Lindahl, J. Donnal, S. Leeb, and J. Helsen, “Review and comparison of tacholess instantaneous speed estimation methods on experimental vibration data,” Mechanical Systems and Signal Processing , vol. 129, pp. 407–436, 2019. [3] A. de Cheveign´ e and H. Kawahara, “Yin, a fundamental frequency estimator for speech and music,” The Journal of the Acoustical Society of America , vol. 111, no. 4, pp. 1917–1930, 2002. [4] D. Peng, Y. Chen, M. J. Zuo, and C. K. Mechefske, “Assessment and improvement of the accuracy of tacholess instantaneous speed estimation,” 
+
+Mechanical Systems and Signal Processing , vol. 202, p. 110706, 2023. [5] J. Yoo, J. Park, T. Kim, J. M. Ha, and B. D. Youn, “Weighted multi-order viterbi algorithm (wmova): Instantaneous angular speed estimation under harsh conditions,” Mechanical Systems and Signal Processing , vol. 211, p. 111187, 2024. [6] K. Feng, J. C. Ji, and Q. Ni, “A novel adaptive bandwidth selection method for vold–kalman filtering and its application in wind turbine planetary gearbox diagnostics,” Structural Health Monitoring , vol. 22, no. 2, pp. 1027–1048, 2023. [7] D. Zhang, Z. Idrus, and R. Hamzah, “An automatic ridge estimation method for tacholess order tracking of wind turbine gearbox under varying-speed operation,” Measurement Science and Technology , vol. 36, no. 8, 2025. [8] Q. Lecl` ere, H. Andr´ e, and J. Antoni, “A multi-order probabilistic approach for instantaneous angular speed tracking: Debriefing of the cmmno’14 diagnosis contest,” Mechanical Systems and Signal Processing , vol. 81, pp. 375–386, 2016. [9] D. J. C. MacKay, Information Theory, Inference and Learning Algorithms .Cambridge: Cambridge University Press, 2003.

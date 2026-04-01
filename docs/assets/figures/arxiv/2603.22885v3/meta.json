@@ -1,0 +1,94 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2603.22885v3/fig-001.webp",
+      "caption": "Table 1: Variable descriptions in the dataset",
+      "page": 6,
+      "index": 1,
+      "width": 942,
+      "height": 526
+    },
+    {
+      "url": "assets/figures/arxiv/2603.22885v3/fig-002.webp",
+      "caption": "Table 2: Hyperparameters of experimental models",
+      "page": 15,
+      "index": 2,
+      "width": 1014,
+      "height": 645
+    },
+    {
+      "url": "assets/figures/arxiv/2603.22885v3/fig-003.webp",
+      "caption": "Figure 1: Data characteristics: (a) raw sensor profiles showing non-stationarity; (b) PCA revealing fault features in minor components (12th–18th); (c) AltMSL/NormAc dynamics across flight phases; (d) cross-phase correlation demonstrating temporal coupling.",
+      "page": 7,
+      "index": 3,
+      "width": 954,
+      "height": 760
+    },
+    {
+      "url": "assets/figures/arxiv/2603.22885v3/fig-004.webp",
+      "caption": "Figure 5: Dual-stage keyness analysis: Rocker Cover Leak/Damage vs. healthy reference. Solid: fault sample; Dashed: healthy baseline.",
+      "page": 19,
+      "index": 4,
+      "width": 956,
+      "height": 535
+    },
+    {
+      "url": "assets/figures/arxiv/2603.22885v3/fig-005.webp",
+      "caption": "Figure 6: Sample stability distribution across 10 validation rounds. Samples are classified into four categories: Always Correctly Classified (correct in all 10 rounds, green), Generally Correctly Classified (correct in >5 but <10 rounds, blue), Frequently Misclassified (correct in >0 but <5 rounds, yellow), and Always Misclassified (incorrect in all 10 rounds, red).",
+      "page": 19,
+      "index": 5,
+      "width": 1018,
+      "height": 418
+    },
+    {
+      "url": "assets/figures/arxiv/2603.22885v3/fig-006.webp",
+      "caption": "Figure 4: Temporal keyness visualization. (a) Health Analyzer concentrates on takeoff preparation and landing phases; (b)-(c) Fault Analyzer isolates fault-specific local segments (flattened variations for intake leakage, synchronous thermal fluctuations for baffle damage).",
+      "page": 17,
+      "index": 6,
+      "width": 1006,
+      "height": 1201
+    },
+    {
+      "url": "assets/figures/arxiv/2603.22885v3/fig-007.webp",
+      "caption": "Figure 3: Detailed architectures of LMSD heterogeneous components: (a) ConvTokMHSA with convolutional tokenization and global MHSA; (b) MMK Net with multi-scale micro-convolution and LayerNorm.",
+      "page": 12,
+      "index": 7,
+      "width": 968,
+      "height": 706
+    },
+    {
+      "url": "assets/figures/arxiv/2603.22885v3/fig-008.webp",
+      "caption": "Figure 2: Workflow comparison between DDF and end-to-end pattern: (a) Conventional end-to-end diagnosis; (b) DDF-based heterogeneous cascading; (c) Two-stage decoupled training data flow.",
+      "page": 9,
+      "index": 8,
+      "width": 922,
+      "height": 1410
+    },
+    {
+      "url": "assets/figures/arxiv/2603.22885v3/fig-009.webp",
+      "caption": "Figure 7: Cosine similarity distribution to healthy class center revealing decision boundary characteristics. False Negatives exhibit extreme similarity to healthy centroids (0.9746±0.0039) compared to normal samples (0.9751± 0.0052), while False Positives show significantly lower similarity (0.9533± 0.0084).",
+      "page": 20,
+      "index": 9,
+      "width": 1018,
+      "height": 313
+    },
+    {
+      "url": "assets/figures/arxiv/2603.22885v3/fig-010.webp",
+      "caption": "Table 4: Diagnosis Performance and Efficiency (Overall Dataset)",
+      "page": 16,
+      "index": 10,
+      "width": 840,
+      "height": 258
+    },
+    {
+      "url": "assets/figures/arxiv/2603.22885v3/fig-011.webp",
+      "caption": "Table 3: Task Adaptability: AD vs FC Performance on Overall Dataset. Best results in bold.",
+      "page": 16,
+      "index": 11,
+      "width": 740,
+      "height": 231
+    }
+  ]
+}

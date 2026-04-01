@@ -1,0 +1,118 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2603.25103v1/fig-001.webp",
+      "caption": "Table 1: Train and test performances (in 10−2) of the failure correction using the mean over the final 250 batches of 10 trials. The reconstruction performance of the camera, the sensor, and both combined within the MuJoCo dataset.",
+      "page": 15,
+      "index": 1,
+      "width": 560,
+      "height": 442
+    },
+    {
+      "url": "assets/figures/arxiv/2603.25103v1/fig-002.webp",
+      "caption": "Figure 12: Pareto trade-off between the unweighted self-supervised loss components. As the weighting ratio λsim/λcon increases, the similarity loss (blue) decreases, indicating better reconstruction, while the contrastive loss (red) rises, indicating reduced latent separability. The dashed lines illustrate the opposing linear trends of these competing objectives.",
+      "page": 21,
+      "index": 2,
+      "width": 492,
+      "height": 244
+    },
+    {
+      "url": "assets/figures/arxiv/2603.25103v1/fig-003.webp",
+      "caption": "Figure 11: Dual-axis plot showing the Correction Loss (left y-axis, blue, scale ×10−3) and Detection Accuracy (right y-axis, orange, scale ×10−1) as a function of the λsim/λcon ratio (x-axis, logarithmic scale). The blue line with error bars represents the correction loss, and the orange line with square markers represents the detection accuracy.",
+      "page": 21,
+      "index": 3,
+      "width": 492,
+      "height": 247
+    },
+    {
+      "url": "assets/figures/arxiv/2603.25103v1/fig-004.webp",
+      "caption": "Figure 4: Several randomly applied augmentation techniques on one random camera sample.",
+      "page": 14,
+      "index": 4,
+      "width": 982,
+      "height": 708
+    },
+    {
+      "url": "assets/figures/arxiv/2603.25103v1/fig-005.webp",
+      "caption": "Figure 7: Training dynamics of the failure detector. (a) The model converges rapidly to a stable high-performance regime. (b) While clean states are identified immediately, the model progressively improves its sensitivity to sensor and camera faults, eventually plateauing at robust recall levels.",
+      "page": 18,
+      "index": 5,
+      "width": 477,
+      "height": 267
+    },
+    {
+      "url": "assets/figures/arxiv/2603.25103v1/fig-006.webp",
+      "caption": "Figure 2: Operational pipeline for robust industrial deployment. Heterogeneous inputs are encoded into a joint latent space. The representation is analyzed for faults: clean data bypasses the correction block for efficiency, while faulty data is rectified via the Lipschitz-controlled module before executing downstream tasks.",
+      "page": 13,
+      "index": 6,
+      "width": 875,
+      "height": 216
+    },
+    {
+      "url": "assets/figures/arxiv/2603.25103v1/fig-007.webp",
+      "caption": "Figure 3: Three image modality samples of the three distinct multimodal datasets [41].",
+      "page": 13,
+      "index": 7,
+      "width": 976,
+      "height": 276
+    },
+    {
+      "url": "assets/figures/arxiv/2603.25103v1/fig-008.webp",
+      "caption": "Figure 8: Normalized confusion matrix aggregated over 250 batches. The dominant diagonal confirms high classification accuracy. Off-diagonal errors are almost exclusively false negatives, identifying the detection threshold for subtle anomalies as the limiting factor.",
+      "page": 19,
+      "index": 8,
+      "width": 492,
+      "height": 509
+    },
+    {
+      "url": "assets/figures/arxiv/2603.25103v1/fig-009.webp",
+      "caption": "Figure 9: Latent error heatmaps for dense (a) and convolutional (b) encoders.",
+      "page": 19,
+      "index": 9,
+      "width": 944,
+      "height": 268
+    },
+    {
+      "url": "assets/figures/arxiv/2603.25103v1/fig-010.webp",
+      "caption": "Figure 6: Training dynamics and spectral properties of MMSSL. (a) Both contrastive and similarity losses converge rapidly, with test losses (dashed) closely tracking training curves. (b) Reconstruction errors for both modalities decrease monotonically, confirming stable learning. (c) The anomaly detection loss stabilizes after an initial adaptation phase. (d) The spectral norm of the Corrector (green) is strictly bounded (< 0.03), ensuring a contractive mapping, while the Detector (red) maintains high sensitivity (> 2.0).",
+      "page": 17,
+      "index": 10,
+      "width": 979,
+      "height": 279
+    },
+    {
+      "url": "assets/figures/arxiv/2603.25103v1/fig-011.webp",
+      "caption": "Table 3: Train and test performances (in 10−2) of the failure correction using the mean over the final 250 batches of 10 trials. The reconstruction performance of the camera (C), the sensor (S), and both combined (B) within the dual-robot welding station dataset.",
+      "page": 17,
+      "index": 11,
+      "width": 560,
+      "height": 443
+    },
+    {
+      "url": "assets/figures/arxiv/2603.25103v1/fig-012.webp",
+      "caption": "Figure 1: Overview of the proposed fault-tolerant approach for robotic systems. The architecture includes encoding, correction with contrastive learning and detection modules, and decoding stages to reconstruct the original signal.",
+      "page": 9,
+      "index": 12,
+      "width": 976,
+      "height": 402
+    },
+    {
+      "url": "assets/figures/arxiv/2603.25103v1/fig-013.webp",
+      "caption": "Figure 5: Visualization of the learned latent feature space using t-SNE. (a) Distribution of clean (purple) versus corrupted (yellow) samples before correction. (b) Distribution of clean (purple) versus corrected (yellow) samples.",
+      "page": 16,
+      "index": 13,
+      "width": 477,
+      "height": 265
+    },
+    {
+      "url": "assets/figures/arxiv/2603.25103v1/fig-014.webp",
+      "caption": "Table 2: Train and test performances (in 10−2) of the failure correction using the mean over the final 250 batches of 10 trials. The reconstruction performance of the camera, the sensor, and both combined within the single-robot welding station dataset.",
+      "page": 16,
+      "index": 14,
+      "width": 560,
+      "height": 443
+    }
+  ]
+}

@@ -1,0 +1,78 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2603.29755v1/fig-001.webp",
+      "caption": "Table 1: Predefined workflows in CausalPulse as paths through the canonical agent pipeline in Figure 6. Steps marked ∗ may reuse cached results if available.",
+      "page": 6,
+      "index": 1,
+      "width": 490,
+      "height": 408
+    },
+    {
+      "url": "assets/figures/arxiv/2603.29755v1/fig-002.webp",
+      "caption": "Figure 1: High-level overview of CausalPulse system architecture and components.",
+      "page": 2,
+      "index": 2,
+      "width": 452,
+      "height": 356
+    },
+    {
+      "url": "assets/figures/arxiv/2603.29755v1/fig-003.webp",
+      "caption": "Figure 2: CausalPulse four-layer framework: user-facing, agent, utility, and data, connected through standardized protocols (MCP, A2A, and LangGraph).",
+      "page": 2,
+      "index": 3,
+      "width": 500,
+      "height": 301
+    },
+    {
+      "url": "assets/figures/arxiv/2603.29755v1/fig-004.webp",
+      "caption": "Figure 8: End-to-end deployment pipeline of CausalPulse",
+      "page": 7,
+      "index": 4,
+      "width": 498,
+      "height": 384
+    },
+    {
+      "url": "assets/figures/arxiv/2603.29755v1/fig-005.webp",
+      "caption": "Table 2: Criterion success and aggregated criterion success per stage across datasets, workflow stages, and agentic criteria",
+      "page": 8,
+      "index": 5,
+      "width": 1050,
+      "height": 493
+    },
+    {
+      "url": "assets/figures/arxiv/2603.29755v1/fig-006.webp",
+      "caption": "Table 3: Representative PRORCA root-cause attribution outcomes on the PSE dataset, illustrating (top) a partial match where only one of three ground-truth causes appears in the top-2 positions, (middle) a high-recall but noisy case where all ground-truth causes are recovered along with several false positives, and (bottom) a strong match where both groundtruth causes are ranked in the top-2 positions.",
+      "page": 8,
+      "index": 6,
+      "width": 1056,
+      "height": 257
+    },
+    {
+      "url": "assets/figures/arxiv/2603.29755v1/fig-007.webp",
+      "caption": "Figure 3: Illustration of domain-specific rules for a grinding process. Control parameters (rectangles) may cause observation parameters (circles) at the same or later grinding stage (Rules R1, R2, R5), observation parameters may only cause later observations (Rules R3, R4), and edges violating type or temporal order are explicitly disallowed (dashed red arrows).",
+      "page": 4,
+      "index": 7,
+      "width": 472,
+      "height": 459
+    },
+    {
+      "url": "assets/figures/arxiv/2603.29755v1/fig-008.webp",
+      "caption": "Figure 4: Agentic task orchestration and workflow execution in CausalPulse: (a) Query interpretation and planning by the LangGraph-based workflow engine, (b-I) Agent card registration and central server coordination, (b-II) Agent interactions and data flow during execution, and (b-III) Postprocess chaining with the Recommender Agent.",
+      "page": 5,
+      "index": 8,
+      "width": 840,
+      "height": 473
+    },
+    {
+      "url": "assets/figures/arxiv/2603.29755v1/fig-009.webp",
+      "caption": "Figure 5: Root cause analysis results: (a) ranked root-cause paths ordered by causal significance for the anomaly in E 8 in the PSE dataset (refer to ”Datasets Descriptions” Section), and (b) visual representation of the corresponding causal graph, highlighting identified root causes and propagation paths. The legend on the right lists variable names and their hierarchical levels, where levels represent the sequential order of grinding steps in the PSE use case.",
+      "page": 5,
+      "index": 9,
+      "width": 844,
+      "height": 233
+    }
+  ]
+}
