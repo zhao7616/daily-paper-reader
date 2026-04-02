@@ -1,0 +1,1025 @@
+Title: Data-Driven Probabilistic Fault Detection and Identification via Density Flow Matching
+
+URL Source: https://arxiv.org/pdf/2603.25982v1
+
+Published Time: Mon, 30 Mar 2026 00:17:52 GMT
+
+Number of Pages: 8
+
+Markdown Content:
+# Data-Driven Probabilistic Fault Detection and Identification via Density Flow Matching 
+
+Joshua D. Ibrahim ∗ Mahdi Taheri ∗ Soon-Jo Chung ∗
+
+Fred Y. Hadaegh ∗∗ Division of Engineering and Applied Science, California Institute of Technology, Pasadena, CA 91106 USA (e-mail: jdibrahi, mtaheri, sjchung, hadaegh@caltech.edu). 
+
+Abstract: Fault detection and identification (FDI) is critical for maintaining the safety and reliability of systems subject to actuator and sensor faults. In this paper, the problem of FDI for nonlinear control-affine systems under simultaneous actuator and sensor faults is studied. We model fault signatures through the evolution of the probability density flow along the trajectory and characterize detectability using the 2-Wasserstein metric. In order to introduce quantifiable guarantees for fault detectability based on system parameters and fault magnitudes, we derive upper bounds on the distributional separation between nominal and faulty dynamics. The latter is achieved through a stochastic contraction analysis of probability distributions in the 2-Wasserstein metric. A data-driven FDI method is developed by means of a conditional flow-matching scheme that learns neural vector fields governing density propagation under different fault profiles. To generalize the data-driven FDI method across continuous fault magnitudes, Gaussian bridge interpolation and Feature-wise Linear Modulation (FiLM) conditioning are incorporated. The effectiveness of our proposed method is illustrated on a spacecraft attitude control system, and its performance is compared with an augmented Extended Kalman Filter (EKF) baseline. The results confirm that trajectory-based distributional analysis provides improved discrimination between fault scenarios and enables reliable data-driven FDI with a lower false alarm rate compared with the augmented EKF. 
+
+Keywords: Fault detection and identification, data-driven, flow matching, contraction theory, density space. 1. INTRODUCTION Fault detection and identification (FDI) is fundamental to ensuring the safety, reliability, and resilience of safety-critical systems. Applications such as spacecraft attitude control, autonomous ground and aerial vehicles, industrial automation, and robotic systems require rapid detection of actuator and sensor degradations to maintain closed-loop stability and prevent mission-critical failures O’Connell et al. (2024); Ragan et al. (2024). Analytical redundancy methods, including parity relations, observer-based resid-ual generation, and model-based FDI approaches, form the basis of most classical solutions Chen and Patton (2012); Isermann (2005). These techniques have been widely adopted due to their interpretability and real-time feasibility, and remain essential in aerospace and automo-tive onboard FDI systems. Despite the extensive literature on the problem of FDI, significant challenges remain when dealing with nonlinear systems under uncertainty. Classical and model-based FDI methods often assume linear dynamics or focus on isolated fault scenarios (i.e., non-simultaneous faults); hence, their performance degrades when facing simultaneous actuator and sensor faults, and stochastic disturbances Venkata-subramanian et al. (2003); Patton et al. (2013). Learning-based FDI methods address some of these challenges, but typically focus on reconstructing fault parameters along in-dividual trajectories rather than characterizing how faults modify the underlying probability distributions of the  
+
+> ⋆This research is funded in part by the Technology Innovation Institute and DARPA Learning Introspective Control (LINC).
+
+system states Bakhtiaridoust et al. (2023); Talebi et al. (2008). On the other hand, tools from stochastic analysis, such as the Fokker-Planck equation (FPE), provide a principled description of the evolution of state densities under uncer-tainties Pavliotis (2014); Risken (1989). However, these tools have not been extensively incorporated into FDI frameworks. Moreover, contraction theory has emerged as a powerful methodology for incremental stability in non-linear deterministic and stochastic systems Lohmiller and Slotine (1998); Tsukamoto and Chung (2020); Tsukamoto et al. (2020, 2021); Bouvrie and Slotine (2019), yet its implications for distinguishing nominal and faulty dynam-ics at the distributional level remain largely unexplored. Restricted to linear systems under Gaussian density as-sumptions, Eriksson et al. (2013); Jung et al. (2020); Fu et al. (2018) have developed density-based methods for detectability and distinguishability of faults. This work addresses these gaps by proposing a distribution-based framework for FDI in nonlinear stochastic systems subject to simultaneous actuator and sensor faults. In this work, we propose a probabilistic framework to address the problem of FDI that operates on trajectory-level probability densities rather than individual state measurements. The core idea is to characterize each fault scenario by how it shapes the distribution of system trajec-tories over time. Under nominal conditions, an ensemble of initial states evolves according to a baseline probability density governed by the FPE, while under faulty condi-tions, the same ensemble follows a perturbed density flow that diverges from the nominal behavior. By comparing 
+
+> arXiv:2603.25982v1 [eess.SY] 26 Mar 2026
+
+Fig. 1. The illustration shows the relationship between the nominal trajectory xΘ0 and the fault trajectory 
+
+xΘr and their induced densities of the nominal pΘ0
+
+> t
+
+and fault pΘr 
+
+> t
+
+systems (foreground) with the learned density pθ adapting toward the fault system (back-ground). the densities of the dynamics, we can characterize fault profiles in a manner more robust than single-trajectory analysis. Using the Wasserstein distance allows for addi-tional consideration of the geometric discrepancy between the density flows (Villani et al. (2008)), together leading to improved discrimination and greater reliability in fault detection and identification. In order to utilize the availability of data in modern systems, we develop a data-driven approach based on a neural network-based conditional flow matching methodol-ogy that learns to predict how state densities evolve under different fault conditions. Specifically, we train a neural network conditioned on fault parameters to model the transition dynamics between consecutive states in trajec-tories. When the trained neural network is deployed, given an observed trajectory with unknown faults, we estimate the fault parameters by minimizing the trajectory-level negative log-likelihood across all candidate fault profiles, effectively inverting the learned density flows to infer which fault scenario best explains the observations. The aforementioned neural network-based inference frame-work enables generalization to unseen fault combinations via continuous interpolation in the fault parameter space, which allows the model to estimate fault magnitudes that were not explicitly present in the training data. The gradient-based optimization during inference (i.e., neu-ral network deployment) exploits the smoothness of the learned density model, converging to accurate fault pa-rameter estimates within a few hundred iterations without requiring explicit retraining or combinatorial search over discrete fault hypotheses. To summarize, the main contributions of this work are as follows. First, we establish formal theoretical guarantees on fault detectability and identifiability by extending con-traction theory to the distributional setting, quantifying the separation between nominal and faulty system behav-iors in the 2-Wasserstein metric. We formally provide an explicit upper bound on the Wasserstein distance between probability measures under different fault profiles, which enables rigorous assessment of when and how faults can be detected and distinguished through their differences in trajectory-level density flows. Second, we develop a data-driven FDI framework based on conditional flow matching that learns neural vector fields to characterize the evolution of probability densities under different fault scenarios. By leveraging Gaussian bridge interpolation and Feature-wise Linear Modulation (FiLM) conditioning, our approach enables generalization across fault profiles while maintaining computational tractability through trajectory-level negative log-likelihood optimiza-tion. 2. PROBLEM FORMULATION 
+
+2.1 System Model 
+
+Let us consider the following nonlinear system under actuator and sensor faults 
+
+˙x = f (x, t ) + G(x, t )Ξ u,
+
+y = Γ h(x, t ), (1) where x : R≥0 → Rn is the state, u : Rn × R≥0 → Rm is the control input, y : R≥0 → Rp is the output. Moreover, 
+
+f : Rn × R≥0 → Rn, t ∈ R≥0, G : Rn × R≥0 → Rn×m, and 
+
+h : Rn × R≥0 → Rp are known smooth functions. The un-known matrices Ξ = diag( η1(t), . . . , η m(t)) ∈ Rm×m and 
+
+Γ = diag( γ1(t), . . . , γ p(t)) ∈ Rp×p denote multiplicative actuator and sensor faults, respectively, with ηi, γ j ∈ [0 , 1] ,for i = 1 , . . . , m and j = 1 , . . . , p . The parameters ηi and 
+
+γj represent the level of degradation (or effectiveness) of the i-th actuator and the j-th sensor, respectively, where 
+
+ηi = 1 and γj = 1 indicate nominal operation, while 
+
+ηi = 0 and γj = 0 indicate complete failure. We denote the r-th possible instance of actuator and sensor faults for 
+
+r ∈ { 0, . . . , N f } as fault profile Θr = ( η, γ) ∈
+
+F where 
+
+F := [0 , 1] m × [0 , 1] p. We denote Θ0 as the nominal, i.e., fault-free, behavior where Θ0 = ( 1m, 1p).When necessary, we denote FΘr (x, t ) := f (x, t ) + 
+
+G(x, t )Ξ ucl where u = ucl is some closed-loop controller used to drive the system to some desired behavior. The nonlinear system (1) in the presence of stochastic distur-bances can be described by the Itô stochastic differential equation (SDE) in the following form: 
+
+dx = FΘr (x, t )dt + σ(x, t )dW1(t),
+
+ydt = Γ h(x, t )dt + dW2(t), (2) where σ : Rn ×R≥0 → Rn×d and W1(t), W2(t) are standard Wiener processes of dimensions d and p, respectively. The stochastic system (2) can be seen as the perturbed version of (1). We assume that ∃L1, L 2 > 0 such that 
+
+‖FΘr (x, t ) − FΘr (y, t )‖ + ‖σ(x, t ) − σ(y, t )‖ ≤ L1‖x − y‖,
+
+‖FΘr (x, t )‖2 + ‖σ(x, t )‖2 
+
+> F
+
+≤ L2(1 + ‖x‖2),
+
+(3) 
+
+∀x, y, t , which ensure the existence and uniqueness of strong solutions to (2) (see Karatzas and Shreve (2014)). Moreover, ‖ · ‖ and ‖ · ‖ F denote the Euclidean and Frobenius norms, respectively. 
+
+2.2 Density Propagation 
+
+Along with the deterministic and stochastic formulations of the system dynamics, one can also describe the con-centration of states for an ensemble of trajectories from the evolution of the state probability density function (PDF). Formally, let μt, ν t ∈ P2(Rn) be the time-evolving probability measures (laws) of the state and P2(Rn) be the space of probability measures on Rn with finite second moments. We assume that μt is absolutely continuous w.r.t the Lebesgue measure which implies by the Radon– Nikodym theorem that there exists a density p(x, t ) ∈
+
+L1(Rn, d x) such that dμ t(x) = p(x, t )dx (see Pavliotis (2014)) where L1 is the Banach space of integrable func-tions. For the unperturbed system (1), the density p(x, t ) ≥ 0
+
+with initial condition p(x, 0) = p0(x) evolves according to the Liouville equation as 
+
+∂p ∂t = −∇ x · (p(x, t )FΘr (x, t )) , (4) where p : Rn × R≥0 → R≥0 and ∇x· := ∑ni=1 ∂∂x i is the divergence operator w.r.t x. For the perturbed system (2), the density p(x, t ) evolves according to the Fokker-Planck equation (FPE) as 
+
+∂p ∂t = −∇ x · (p(x, t )FΘr (x, t )) + 12 ∇x · ∇ x · (p(x, t )D(x, t )) ,
+
+(5) where D(x, t ) = σ(x, t )σ(x, t )⊤ is known as the diffusion matrix and ∇x · ∇ x· is the second order differential opera-tor defined as ∇x ·∇ x· := ∑ni=1 
+
+∑nj=1 ∂2 
+
+> ∂x i∂x j
+
+. The Liouville equation (4) is a special case of the FPE (5) with zero diffusion D(x, t ) = 0 .
+
+2.3 Problem Statement 
+
+This paper addresses the problem of fault detection and identification (FDI) for nonlinear stochastic systems sub-ject to simultaneous actuator and sensor faults with stochastic disturbances. We consider the system given by (2), where ηi ∈ [0 , 1] and γj ∈ [0 , 1] are multi-plicative actuator and sensor faults in the fault profile 
+
+Θ = ( η, γ), respectively. Rather than analyzing individual trajectories, we approach FDI through the evolution of probability density functions. In particular, we consider an ensemble of initial conditions x(0) ∼ p0(x) under fault profile Θr that generates a time-varying density p(x, t )
+
+and evolves according to (5). We aim to develop a data-driven framework that detects faults by quantifying distri-butional separation between nominal and faulty behaviors via the 2-Wasserstein metric W2
+
+(
+
+μΘr 
+
+> t0:tN
+
+, μ Θ0
+
+> t0:tN
+
+)
+
+, identifies fault profiles by learning probability flows through condi-tional flow matching with a network 
+
+Fθ conditioned on 
+
+c = [η⊤, γ⊤]⊤, and estimates the fault magnitudes ηi
+
+and γj by minimizing the negative log-likelihood over the observed trajectory. 3. FAULT DETECTABILITY AND IDENTIFIABILITY IN THE DENSITY SPACE Considering the fault profile Θr for the perturbed system (2), the density p(x, t ) is the solution to (5) with the initial condition p(x, 0) = p0(x) at time t. For any finite horizon {t0, . . . , t N }, this induces the joint density 
+
+pt0:tN (xt0 , . . . , xtN ) ∈ L1 ((Rn)(N +1) , d xt0 · · · dxtN
+
+). This is the space of joint densities over N + 1 timepoints. We denote pΘr 
+
+> t0:tN
+
+as the the joint density of states at times 
+
+{t0, . . . , t N } under fault profile Θr .Evaluating the joint density over the full horizon rather than at a single time instance allows one to compare en-tire trajectory signatures and consequently expose sharper distinctions between different fault profiles. Intuitively, a single-time snapshot pt may not distinguish fault profiles if their state distributions overlap significantly at that instant. However, the entire trajectory signature pt0:tN
+
+encodes how the system evolves dynamically, amplifying differences between fault modes through cumulative di-vergence over time. To quantify the degree of detectability and identifiability between various fault profiles, we de-fine measures based on distance metrics to compute the separation between densities. 
+
+Definition 1. (ε-Detectability). Fix any statistical distance metric D : P2(Rn(N +1) ) × P2(Rn(N +1) ) → R≥0, where 
+
+P2(·) denotes the space of probability measures. For any fault profile Θr ∈
+
+F such that Θr 6 = Θ0 and r ∈{1, . . . , N f }, the fault profiles are ε-detectable on the hori-zon {t0, . . . , t N } if 
+
+D
+
+(
+
+μΘr 
+
+> t0:tN
+
+, μ Θ0
+
+> t0:tN
+
+)
+
+≥ ε, (6) where μΘr 
+
+> t0:tN
+
+and μΘ0 
+
+> t0:tN
+
+are the joint probability measures associated with joint densities pΘ 
+
+> t0:tN
+
+and pΘ0 
+
+> t0:tN
+
+over the horizon {t0, . . . , t N } under fault profile Θr and nominal profile Θ0, respectively, and ε > 0.
+
+Definition 2. (ε-Identifiability). Fix any statistical dis-tance metric D : P2(Rn(N +1) ) × P2(Rn(N +1) ) → R≥0.For any two fault profiles Θ
+
+> i
+
+, Θ 
+
+> j
+
+∈
+
+F, where Θ 
+
+> i
+
+6 = Θ  
+
+> j
+
+and 
+
+i,
+
+j ∈ { 1, . . . , N f }, the fault profiles are ε-identifiable on the horizon {t0, . . . , t N } if 
+
+D
+
+(
+
+μΘ 
+
+> i
+> t0:tN
+
+, μ Θ
+
+> j
+> t0:tN
+
+)
+
+≥ ε, (7) where μΘ 
+
+> i
+> t0:tN
+
+and μΘ 
+
+> j
+> t0:tN
+
+are the joint probability measures associated with joint densities pΘ 
+
+> i
+> t0:tN
+
+and pΘ 
+
+> j
+> t0:tN
+
+over the horizon {t0, . . . , t N } under fault profile Θ 
+
+> i
+
+and Θ
+
+> j
+
+, respec-tively, and ε > 0.Since there are various distance metrics defined on the space of probability measures, the choice of metric D
+
+can be made based on computational tractability and application requirements. In this work, we consider the 2-Wasserstein distance (see Definition 4) as our statistical distance metric D and compare it to other metrics like the Kullback-Leibler divergence. For the specific choice of 2-Wasserstein distance, one can quantify ε by performing the contraction analysis between (1) under Θ0 and (2) when a fault profile Θr is active. The latter is investigated in the next section. 4. CONTRACTION THEORY IN DENSITY SPACE Contraction theory is a tool for analyzing the incremental stability of nonlinear systems by studying the convergence of neighboring trajectories. In this section, we first review contraction analysis for deterministic systems and stochas-tic systems. Consequently, we extend the contraction anal-ysis to distributions in the 2-Wasserstein metric. 
+
+4.1 Contraction of Trajectories 
+
+Consider the closed-loop dynamics of (1) under nominal profile Θ0, i.e., 
+
+˙x = FΘ0 (x, t ), δ ˙x = ∂FΘ0
+
+∂x δx, x(0) = x0, (8) where δx := x − xd is the virtual displacement of any two trajectories, xd is some desired trajectory, and FΘ0 (x, t ) is the closed-loop vector field under some nominal controller 
+
+u = ucl . The dynamics (8) is contracting if all trajectories converge exponentially to each other (see Lohmiller and Slotine (1998) for more details). 
+
+Lemma 3. (Deterministic Contraction). System (8) is con-tracting (i.e., all the solution trajectories exponentially converge to a single trajectory globally from any initial condition), if there exists a uniformly positive definite metric M(x, t ) = H(x, t )⊤H(x, t ), M(x, t )  0, ∀x, t ,with a smooth coordinate transformation of the virtual displacement δz = H(x, t )δx, such that 
+
+˙M(x, t ) + 2 sym 
+
+(
+
+M(x, t ) ∂FΘ0
+
+∂x
+
+)
+
+ − 2αM(x, t ), ∀x, t, 
+
+(9) where α > 0. If (8) is contracting, one has 
+
+‖δz(t)‖ = ‖H(x, t )δx(t)‖ ≤ ‖ δz(0) ‖e−αt . (10) 
+
+Proof. See Lohmiller and Slotine (1998). 2
+
+Similarly, the closed-loop perturbed system (8) under the fault profile Θ0 and a stochastic disturbance is described by 
+
+dx = FΘ0 (x, t ) dt + σ (x, t ) dW (t), x(0) = x0, (11) where we utilize the same nominal controller u = ucl . Con-sidering (3), there exists a unique strong solution to (11). Suppose a(t), b(t) are two solutions to (11) driven by independent Wiener processes W (1) (t), W (2) (t), starting from initial conditions independent of the noise with initial distributions a(0) ∼ μ0 and b(0) ∼ ν0, respectively. One has 
+
+dz =
+
+[ FΘ0 (a, t )
+
+FΘ0 (b, t )
+
+]
+
+dt +
+
+[ σ1 (a, t ) 00 σ2 (b, t )
+
+] [ dW (1) 
+
+dW (2) 
+
+]
+
+,
+
+where z(t) = [a(t)⊤, b(t)⊤]⊤ ∈ R2n, and μt and νt are the marginals of a(t) and b(t), respectively. Consider the state-dependent Riemannian metric M(x(λ, t ), t ) for λ ∈ [0 , 1] ,where x(λ, t ) is a geodesic curve connecting a(t) and b(t)
+
+such that x(0 , t ) = a(t) and x(1 , t ) = b(t). Moreover, 
+
+σ1(a, t ) and σ2(b, t ) are defined as σ(x(0 , t ), t ) = σ1(a, t )
+
+and σ(x(1 , t ), t ) = σ2(b, t ).
+
+4.2 Contraction of Distributions 
+
+Contraction theory provides formal guarantees about the behavior of states of a nonlinear system. However, to analyze the distribution of states, a metric that relates distances in a distributional sense must be employed. To achieve this, we consider the 2-Wasserstein distance between μt and νt as it captures the underlying geome-try of the probability flow, remains finite even for non-overlapping supports, and captures differences in location, spread, and shape that KL-type divergences fail to reflect (see Arjovsky et al. (2017); Villani et al. (2008)). 
+
+Definition 4. (2-Wasserstein Distance). Let P2(Rn) be the space of probability measures on Rn with finite second moments. Let Π( μ, ν ) be the set of the joint probability measures π with marginals μ and ν. The 2-Wasserstein metric between two measures μ, ν ∈ P2(Rn) is defined as 
+
+W2(μ, ν ) = 
+
+(
+
+inf 
+
+> π∈Π( μ,ν )
+
+∫
+
+> Rd×Rd
+
+‖x − y‖2 dπ (x, y)
+
+)1/2
+
+=
+
+(
+
+inf  
+
+> π∈Π( μ,ν )
+
+Eπ [‖x − y‖2]
+
+)1/2
+
+,
+
+such that (x, y) ∼ π ∈ Π( μ, ν ) and the infimum is taken over the set of all joint measures on Rn ×Rn with marginals 
+
+μ and ν.
+
+Theorem 5. (Wasserstein Contraction). Suppose that there exist bounded positive constants m, m, g 1, g 2, m x, and 
+
+mx2 , such that m ≤ ‖ M(x, t )‖ ≤ m, ‖σ1(x, t )‖F ≤ g1,
+
+‖σ2(x, t )‖F ≤ g2, ‖∂ (Mij ) /∂ x‖ ≤ mx, and 
+
+∥∥∂2 (Mij ) /∂ x2∥∥ ≤ mx2 , ∀x, t. 
+
+Suppose that the hypothesis of Lemma 3 holds, i.e., the deterministic system (8) is contracting. Consider the generalized squared length with respect to a Riemannian metric M(x(λ, t ), t ) defined by 
+
+V (x, δ x, t ) = δx⊤M(x, t )δx =
+
+∫ 10
+
+∂x
+
+∂λ 
+
+> ⊤
+
+M(x, t ) ∂x
+
+∂λ dλ, 
+
+(12) where δx = a − b is the virtual displacement, such that 
+
+m‖a − b‖2 ≤ V (x, δ x, t ) ≤ m‖a − b‖2 holds. One has 
+
+E
+
+[
+
+‖a(t) − b(t)‖2]
+
+≤ Cc
+
+2γ1
+
++ 1
+
+m E [V (x(0) , δ x(0) , 0)] e−2γ1t,
+
+(13) for γ1 = α − (( g21 + g22
+
+) /2m) (εcmx + mx2 /2) and Cc =(m/m + mx/ (εcm)) (g21 + g22
+
+), where α is the contraction rate of (8) and εc > 0 is a constant. In the 2-Wasserstein metric, one has 
+
+W22(μt, ν t) ≤ Cc
+
+2γ1
+
++ mm W22(μ0, ν 0)e−2γ1t. (14) 
+
+Proof. Following the computation of the infinitesimal generator L of V , we have L V ≤ − 2γ1V + mC c. Taking the expectations of both sides with Dynkin’s formula yields the desired mean-squared bound. From the upper bounds V (x, δ x, t ) ≤ m‖a−b‖2 and E[V (x(0) , δ x(0) , 0)] ≤
+
+mE[‖a(0) − b(0) ‖2] the mean-squared bound in (13) can be derived as 
+
+E
+
+[
+
+‖a(t) − b(t)‖2]
+
+≤ Cc
+
+2γ1
+
++ mm E [‖a(0) − b(0) ‖2] e−2γ1t.
+
+(15) See Tsukamoto et al. (2021) for further details. Since 
+
+W22(μt, ν t) ≤ E
+
+[
+
+‖a(t) − b(t)‖2]
+
+holds for any (a(0) , b(0)) 
+
+with marginals μ0 and ν0, taking the infimum over all such couplings yields the desired bound for the 2-Wasserstein (squared) distance as 
+
+W22(μt, ν t) ≤ Cc
+
+2γ1
+
++ mm e−2γ1tW22(μ0, ν 0). 2
+
+By choosing ν0 equal to the stationary distribution of (11), we see that Theorem 5 suggests exponentially fast conver-gence of μt to a ball with the radius 
+
+√ Cc 
+
+> 2γ1
+
+.
+
+Theorem 6. (Wasserstein FDI). Let the nominal system be described by (1) as ˙x = FΘ0 (x, t ) and Θ0 = ( 1m, 1p)
+
+which we will denote by trajectory a(t). Let the per-turbed system be described by (2) as dx = FΘr (x, t )dt +
+
+σ(x, t )dW1(t) and Θr 6 = ( 1m, 1p) which we will denote with trajectory b(t), i.e., 
+
+dz =
+
+[ f (a, t ) + G(a, t )u
+
+f (b, t ) + G(b, t )Ξ u
+
+]
+
+dt +
+
+[ 0
+
+σ2(b, t )
+
+] [ 0
+
+dW
+
+]
+
+,
+
+where z(t) = [a(t)⊤, b(t)⊤]⊤ ∈ R2n. Moreover, μt and νt
+
+are the measures of a(t) and b(t), respectively. The state-dependent Riemannian metric M(x(λ, t ), t ) for λ ∈ [0 , 1] 
+
+and x(λ, t ) is a geodesic curve connecting a(t) and b(t)
+
+such that x(0 , t ) = a(t) and x(1 , t ) = b(t) with V (x, δ x, t ) = δx⊤M (x, t )δx =
+
+∫ 10
+
+∂x⊤
+
+∂λ M (x(λ, t ), t ) ∂x
+
+∂λ dλ. 
+
+Let m ≤ ‖ M(x, t )‖ ≤ m, ‖σ2(x, t )‖F ≤ g2, ‖∂Mij /∂ x‖ ≤ 
+
+mx, ∥∥∂2Mij /∂ x2∥∥ ≤ mx2 as per Theorem 5, but in addition uniform bounds on ‖G(x, t )‖ ≤ ¯G, ‖u(t)‖ ≤ ¯u,and ‖Ξ − I‖ ≤ ¯∆. One has 
+
+W22 (μt, ν t) ≤ ˜Cc
+
+2˜ γ1
+
++ ˜Cd
+
+2˜ γ1m + mm W22 (μ0, ν 0) e−2˜ γ1t, (16) where ˜γ1 = ˜α − εf /4 − (g22 /2m) (εcmx + mx2 /2) is a positive constant, ˜Cd = 2m2 ¯G2 ¯∆2 ¯u2/(εf m) > 0 is a constant (a function of ¯G, ¯∆, and ¯u), ˜α is the contraction rate of ˙x = f (x, t ) + G(x, t )u, and 
+
+˜Cc = ( m/m + mx/ (εcm)) (g22
+
+) .
+
+Proof. To compute the infinitesimal generator L V for the coupled system, we decompose the drift term as: 
+
+∂V ∂a · FΘ0 (a, t ) + ∂V ∂b · FΘr (b, t ) = 
+
+∂V ∂a ·FΘ0 (a, t )+ ∂V ∂b ·FΘ0 (b, t )+ ∂V ∂b ·[FΘr (b, t )−FΘ0 (b, t )] .
+
+The nominal dynamics contribution yields −2˜ αV by the contraction of ˙x = f (x, t ) + G(x, t )u. For the fault term, note that FΘr (b, t ) − FΘ0 (b, t ) = G(b, t )(Ξ − I)u. Using 
+
+‖∂V /∂ b‖ ≤ 2m‖δx‖ and ‖δx‖ ≤ √V /m , we have: 
+
+∣∣∣∣
+
+∂V ∂b · [G(b, t )(Ξ − I)u]
+
+∣∣∣∣ ≤ 2m
+
+√
+
+Vm · ¯G ¯∆¯ u
+
+≤ εf
+
+2 V + 2m2 ¯G2 ¯∆2 ¯u2
+
+εf m = εf
+
+2 V + ˜Cd
+
+by Young’s inequality with εf > 0, where ˜Cd =2m2 ¯G2 ¯∆2 ¯u2/(εf m) and ¯∆ = ‖Ξ − I‖. The noise contribu-tion (with g1 = 0 ) yields: 
+
+12 Tr 
+
+[
+
+σ2σ⊤
+
+> 2
+
+∂2V∂b2
+
+]
+
+≤ g22
+
+2m
+
+(
+
+εcmx + mx2
+
+2
+
+)
+
+V + m ˜Cc
+
+where ˜Cc = ( m/m + mx/(εcm)) g22 . Combining all terms: 
+
+L V ≤ − 2˜ γ1V + m ˜Cc + ˜Cd
+
+with ˜γ1 = ˜ α − εf /4 − (g22 /2m)( εcmx + mx2 /2) > 0 for 
+
+εf > 0. Applying Dynkin’s formula and following the arguments in Theorem 5 yields (16). 2
+
+In light of Theorem 6, for any horizon {t0, . . . , t N }, one can investigate ε-detectability between the nominal fault-free profile Θ0 and any faulty profile Θr . The right-hand side of (16) in Theorem 6 provides an upper bound on the Wasserstein separation between the nominal and faulty laws, which can be compared with empirical distances in simulations. empirical values of W2 strictly greater than zero then certify detectability for that specific fault scenario. In a similar manner, ε-identifiability between any two fault profiles Θr and Θj can be established by performing the same analysis between their respective perturbed dynamics in (2). 5. FLOW MATCHING ON TRAJECTORIES FOR FDI Now that we have established formal guarantees on fault detectability and identifiability via Theorem 6, we present a data-driven FDI method based on density flow matching along trajectories. Consider a set of Nf + 1 fault profiles 
+
+{Θ0, . . . , ΘNf } ∈ 
+
+F, where Θ0 is the nominal fault-free profile. Let xΘr (t) := {xΘr 
+
+> t0
+
+, . . . , x Θr 
+
+> tN
+
+} ∈ Rn denote a trajectory of states from fault profile Θr for arbitrary timepoints tt0:tN := {t0, . . . , t N }. We aim to deduce the fault profile by inferring the dynamics generating xΘr (t)
+
+that best explains the observed trajectory. 
+
+5.1 Neural Flows 
+
+In this subsection, we utilize flow matching to learn a vector field that transforms a simple base density into a target density. Let ˙xΘr = FΘr (xΘr , t ) from (1) be the true dynamics generating the trajectory xΘr (t) under fault profile Θr . For a single timestep, let p0 = p(x, t = 0) be a simple base density and p1 = p(x, t = 1) be the target density from the FPE in (5). The flow matching objective is to learn a vector field vθ (x, t ) parameterized by neural network weights θ such that the density p(x, t ) evolving under the learned dynamics matches the target density p1
+
+at time t = 1 when initialized from p0 at time t = 0 . The flow matching loss is given by 
+
+LFM (θ) = Et∼   
+
+> U(0 ,1) ,xΘr∼pt
+
+[‖vθ (x, t )
+
+− FΘr (xΘr , t )‖2]. (17) However, this loss is intractable since there is no closed-form expression for the true dynamics FΘr (x, t ). To over-come this, Lipman et al. (2022); Albergo and Vanden-Eijnden (2022) propose using a conditional vector field 
+
+f (xΘr , t | c) where c is a latent variable sampled from some prior distribution q(c), such that pt(x) = Ec∼q(c)[pt(xΘr |
+
+c)] . In our setting, for Type 1 faults that model actuator faults with time-delayed offsets, c = [η⊤, t⊤
+
+> start
+
+]⊤, and for Type 2 faults that model to simultaneous persistent unknown actuator and sensor faults, c = [ η⊤, γ⊤]⊤. This is known as Conditional Flow Matching (CFM) with the tractable loss 
+
+LCFM (θ) = Et, xΘr ,c
+
+[∥∥vθ (x, t ) − f (xΘr , t | c)∥∥2]
+
+, (18) where the expectation is taken over t ∼
+
+U(0 , 1) , xΘr ∼
+
+pt(xΘr |c), and c ∼ q(c). By minimizing this loss, as studied by Lipman et al. (2022), it can be shown that the learned vector field vθ (x, t ) satisfies the FPE of (5) and thus the marginal density p(x, t ) evolving under vθ (x, t )
+
+matches the target density p1 at time t = 1 .For each consecutive state pair (xΘr 
+
+> tk
+
+, xΘr 
+
+> tk+1
+
+) in the tra-jectory xΘr (t), we adopt a Gaussian Bridge model (see Zhang et al. (2024); Albergo and Vanden-Eijnden (2022)), where for any point xτ between xk and xk+1 we model the conditional density as p(xτ | xk, xk+1 ) ∼
+
+N(μtk , Σtk ) with 
+
+μtk = (1 − τ )xΘr 
+
+> tk
+
++ τ xΘr 
+
+> tk+1
+
+,
+
+Σtk = σ2bridge τ (1 − τ )In, (19) where τ ∈ [0 , 1] , and σbridge > 0 is a hyperparameter that controls the variance of the bridge, chosen to balance between noise regularization and trajectory fidelity. This construction also ensures that xk and xk+1 match the dynamics (1) almost surely while providing a smooth probabilistic interpolation between the two states. We parameterize a neural network 
+
+Fθ : Rnfeat → Rn × Rn
+
+that predicts the next state distribution conditioned on current and historical information. The model outputs a predicted mean and log-standard deviation 
+
+[μθ , log σθ ] = 
+
+Fθ (Φk,τ ) (20) where μθ ∈ Rn and σθ ∈ Rn represent the diagonal Gaussian prediction for xk+1 . Moreover, the feature vector 
+
+Φk,τ at time step k and interpolation parameter τ is constructed as 
+
+Φk,τ = [tk/t N , τ, x⊤ 
+
+> τ
+
+, x⊤
+
+> k−1
+
+, . . . , x⊤ 
+
+> k−M
+
+, c⊤]⊤ , (21) where tk/t N is the normalized absolute time, τ is the local interpolation time, xτ is sampled from the Gaussian bridge, and Mmemory ≥ 1 is the memory horizon. To effectively incorporate the fault conditioning vector c
+
+into the neural network, we utilize Feature-wise Linear Modulation (FiLM) layers developed by Perez et al. (2018) that apply affine transformations to intermediate feature maps based on c. For a hidden activation h ∈ Rdh FiLM computes 
+
+FiLM( h | c) = γ(c) h + β(c), (22) where γ : Rdc → Rdh and β : Rdc → Rdh are learned neural networks that map the fault parameters to scale and shift vectors, respectively. This modulation allows the network to adapt its internal representations dynamically according to the fault characteristics encoded in c.Since γ(c) and β(c) vary smoothly with c, the model can interpolate between fault profiles during inference. This means that for any intermediate fault parameter 
+
+c∗ = λc( 
+
+> i)
+
++ (1 − λ)c( 
+
+> j)
+
+with λ ∈ [0 , 1] , the network can generalize to unseen fault combinations that were not explicitly present in the training set. Consequently, we can train on a selected subset of fault profiles while maintaining generalizability across the continuous fault parameter space 
+
+F = [0 , 1] m × [0 , 1] p.
+
+5.2 Neural Network Training and Fault Estimation 
+
+Since we approximate each density by a Gaussian Bridge between consecutive states in the trajectory, the CFM loss in (18) reduces to minimizing the negative log-likelihood (NLL) loss over a dataset of trajectories 
+
+D =
+
+{( x(Θ j ), c(j))} Ntrain  
+
+> j=1
+
+. Thus, the loss function is 
+
+LNLL (θ) = E [− log pθ (xk+1 | xk, c)] . (23) Since pθ (xk+1 | xk, c) is Gaussian with mean μθ and diagonal covariance Σθ = diag( σ2 
+
+> θ
+
+), the negative log-likelihood loss can be derived as 
+
+LNLL (θ) = E
+
+ 12
+
+> n
+
+∑
+
+> ℓ=1
+
+(
+
+x(ℓ) 
+
+> k+1
+
+− μ(ℓ)
+
+> θ
+
+)2
+
+σ(ℓ)2 
+
+> θ
+
++ log σ(ℓ)2 
+
+> θ
+
+ .
+
+(24) We also include a mean-squared error (MSE) regularizer to stabilize learning. Hence, the total loss function can be expressed by 
+
+L(θ) = 
+
+LNLL (θ) + λMSE ‖xk+1 − μθ ‖2 , (25) where λMSE > 0 is a hyperparameter. Once the neural network is deployed, given an observed trajectory xobs (t) = {xobs 0 , . . . , xobs  
+
+> K
+
+}, we evaluate the trained model across all fault profiles {Θ0, . . . , ΘNf } by computing the total negative log-likelihood of the observed trajectory under each fault profile’s conditioning vector 
+
+c(r). The fault profile that minimizes this negative log-likelihood is selected as the inferred fault, i.e., we find 
+
+ˆΘ = arg min 
+
+> Θ
+> K−1
+
+∑
+
+> k=0
+
+− log pθ
+
+(
+
+xobs  
+
+> k+1
+
+| xobs  
+
+> k
+
+, c(r))
+
+, (26) where each Θr corresponds to the conditioning vector c(r).Together, these components establish a unified probabilis-tic formulation in which each fault hypothesis induces a distinct, parameterized density flow in which observed trajectories can be evaluated against. Because the mapping from fault parameters to density dynamics is continuous, the framework generalizes across the entire space of faults without requiring exhaustive training, enabling accurate detection and estimation across a wide range of actuator and sensor fault scenarios. 6. NUMERICAL CASE STUDY We demonstrate the effectiveness of our FDI approach on a spacecraft attitude control system with four reac-tion wheels in a tetrahedral configuration. The system state is x = [θ⊤, ω ⊤, ω ⊤
+
+> w
+
+]⊤ ∈ R10 containing Euler angles (i.e., roll, pitch, and yaw), body angular veloci-ties, and wheel speeds. We use the parameters outlined in Lee et al. (2017) as follows: the spacecraft has in-ertia I = diag(1 .0, 1.0, 0.8)kg · m2, wheel inertia Jw =0.01 kg · m2, and uses a PD controller with gains Kp =diag(22 .5, 18 .0, 15 .0) and Kd = diag(12 .0, 9.0, 7.5) to track sinusoidal references over T = 60 s horizons and a sam-pling time of ∆t = 0 .02 s . The nominal tracking controller is designed to follow the reference trajectory θd(t) =[0 .05 sin(0 .2πt ), 0.05 cos(0 .2πt ), (π/ 250) t]⊤ via the control law unom = −Kp(θ − θd) − Kdω, which is mapped to wheel torques through uw = sat (A†unom , 0.14 ), where 
+
+sat( ·) denotes the saturation function, i.e., the maximum generated torque is 0.14 N .m.We consider two fault scenarios: Type 1 investigates actu-ator faults with time-delayed offsets through effectiveness parameters ηi ∈ [0 , 1] for each wheel. Type 2 extends to persistent simultaneous actuator and sensor faults by adding sensor multiplicative fault parameters γj ∈ [0 , 1] 
+
+for seven measurements: three Euler angle sensors γ1:3 and four wheel speed sensors γ4:7 , where the controller receives faulty measurements ˜yθ = Γ θ θ with Γθ = diag ( γ1, γ 2, γ 3)
+
+while gyroscopes are assumed to be fault-free. For Type 1 faults, each wheel transitions from nominal to degraded at randomly sampled times tstart ,i ∼ Uniform(8 , 42) . Fault parameters are sampled from ηi ∼ Beta(0 .7, 0.7) and 
+
+γj ∼ Beta(1 .0, 1.0) with 30 − 35% probability of nominal operation per channel. We generate Ntrain = 1000 train-ing and Nval = 200 validation trajectories with additive Gaussian noise (σ = 0 .001 − 0.002) plus initial condition uncertainty (σ0 = 0 .01) .Our conditional flow matching network 
+
+Fθ takes input features [ tk/t N , τ, xτ , xk−1: k−4, c ] where c adapts to the fault scenario. For Type 1 time-delayed faults, c =
+
+[
+
+η⊤, (tstart /t N )⊤]⊤
+
+∈ R8 includes normalized onset times. For Type 2 persistent simultaneous actuator and sensor faults, c = [η⊤, γ⊤]⊤ ∈ R11 contains all actuator-sensor parameters. The architecture consists of two hidden layers of dimension 256 with FiLM conditioning, where each FiLM module applies learned affine transformations h 7 →
+
+h·(1+ γ(c))+ β(c) based on fault parameters. The network outputs diagonal Gaussian parameters (μθ , σ θ ) ∈ R10 ×
+
+R10 for the next state prediction. We use a Gaussian bridge with variance σ2 
+
+> bridge
+
+= 0 .03 2 and memory horizon 
+
+Mmemory = 4 steps. Training uses Adam optimizer with learning rate 10 −3 and batch size 256 over 15 epochs. For the deployed neural network 
+
+Fθ , given an observed tra-jectory xobs with unknown fault parameters, we estimate effectiveness by minimizing trajectory-level negative log likelihood. For Type 1 (i.e., the actuator faults scenario), we optimize 
+
+ˆη = arg min 
+
+> η
+> K−1
+
+∑
+
+> k=0
+
+− log pθ
+
+(xobs  
+
+> k+1
+
+| xobs  
+
+> k
+
+, c)+0 .01 ∑
+
+> i
+
+(1 − ηi)2
+
+using Adam with 300 iterations starting from η(0) =[0 .95] 4. For Type 2 simultaneous actuator and sensor faults, we jointly optimize 
+
+(ˆ η, ˆγ) = arg min 
+
+> η,γ
+> K−1
+
+∑
+
+> k=0
+
+− log pθ
+
+(xobs  
+
+> k+1
+
+| xobs  
+
+> k
+
+, c)
+
++ 0 .01 
+
+∑
+
+> i
+
+(1 − ηi)2 + ∑
+
+> j
+
+(1 − γj )2
+
+ ,
+
+using Adam with 350 iterations from near-nominal initial-ization η(0) = [0 .9] 4 and γ(0) = [0 .9] 7.
+
+6.1 Performance Evaluation 
+
+Figure 2 demonstrates the performance of our flow match-ing approach on actuator faults, i.e., Type 1. For actu-ator effectiveness estimation, the method achieves high accuracy with element-wise absolute errors of |η − ˆη| =[0 .012 , 0.039 , 0.054 , 0.059] , corresponding to a mean pa-rameter estimation error of approximately 4.1% . The largest error occurs for η4 at 5.9% , likely due to its near-complete degradation (η4 = 0 .15) , which makes the pa-rameter estimation more challenging. In Fig. 2, the ac-tuator effectiveness estimates are obtained using the aug-mented Extended Kalman Filter (EKF) baseline, where fault parameters are added as additional parameters to the EKF (e.g., Vettori et al. (2023)). Compared to our proposed FDI framework, the EKF exhibits slower con-vergence and reduced accuracy in estimating the fault magnitudes. For the Type 2 scenario, we evaluate 10 different random actuator and sensor fault profiles ΘE 
+
+> i
+
+for 
+
+i ∈ { 0, . . . , 9},and Table 1 presents comprehensive performance met-rics on fault profile ΘE1 = ( η = [0 .3, 0.9, 0.7, 1.0] , γ =[0 .9, 0.8, 0.5, 0.6, 1.0, 0.7, 0.9]) . As shown in Table 1, our flow matching methodology achieves accurate parame-ter estimation in RMSE and L2 Error where we com-pute the RMSE = 
+
+√ 1
+
+> tN
+
+∫ tN 
+
+> 0
+
+‖Θtrue − Θpred ‖2dt and the 
+
+L2 Error = 1
+
+> tN
+
+∫ tN 
+
+> 0
+
+‖Θtrue − Θpred ‖dt for all 10 fault hy-potheses. For example, fault profiles E1, E 3, E 5, E 6, and 
+
+E9 achieve an RMSE = 0.000 and L2 Error = 0.000 .The confusion matrix results, shown in Fig. 3 and Ta-ble 1, across 10 fault hypotheses with 10 noisy trajec-tories, demonstrate an overall classification accuracy of 
+
+67% , with a precision of 62 .81% , and a false alarm rate of 3.67% . In comparison, the augmented EKF achieves an overall accuracy of 70% , a precision of 47% , and a high false alarm rate of 31% . Critically, the empirical Wasserstein distance W2
+
+(μΘE1 , μ Θ0
+
+) = 0 .0717 between the faulty and the nominal distributions is well below the theoretical upper bound of 0.7383 from Theorem 6 (computed with ¯∆max = max i |1 − ηi| = 0 .7), which vali-dates our contraction-based detectability analysis. The KL divergence DKL 
+
+(μΘE1 ‖μΘ0
+
+) = 44 .119 further confirms substantial distributional separation. 0 10 20 30 40 50 60                   
+
+> 00.5 1
+> 1
+> Wheel 1 Effectiveness Estimate
+> True
+> Augmented EKF
+> Our Method
+> 010 20 30 40 50 60
+> 00.5 1
+> 2
+> Wheel 2 Effectiveness Estimate
+> True
+> Augmented EKF
+> Our Method
+> 010 20 30 40 50 60
+> 00.5 1
+> 3
+> Wheel 3 Effectiveness Estimate
+> True
+> Augmented EKF
+> Our Method
+> 010 20 30 40 50 60
+> Time [s]
+> 00.5 1
+> 4
+> Wheel 4 Effectiveness Estimate
+> True
+> Augmented EKF
+> Our Method
+
+Fig. 2. Plot of Type 1 faults comparing true actuator effectiveness η = [0 .20 , 0.65 , 0.40 , 0.15] and onset times tstart = [7 .0, 18 .0, 29 .0, 36 .0] with estimated ˆη =[0 .188 , 0.689 , 0.454 , 0.209] and ˆt = [8 .1, 39 .8, 29 , 39 .6] 
+
+using our method and augmented EKF estimates. E0                                                                                          
+
+> E1
+> E2
+> E3
+> E4
+> E5
+> E6
+> E7
+> E8
+> E9
+> Predicted
+> E0
+> E1
+> E2
+> E3
+> E4
+> E5
+> E6
+> E7
+> E8
+> E9
+> True
+> 0000010 0000010 00000000008000002000010 0000000000100009
+> 0000010 000000000010 000010 00000000000002008000000000010
+> Confusion Matrix for ( η, γ )
+> 0246810
+> Count
+
+Fig. 3. Plot of confusion matrix of Type 2 faults comparing 10 different random fault hypotheses with 10 trajec-tories for each with noise. 7. CONCLUSION In this paper, we studied and developed a data-driven fault detection and identification (FDI) method for non-linear control-affine systems. The proposed method em-Table 1. Performance Metrics for the Flow Matching-Based FDI Method 
+
+Metric Value 
+
+DKL 
+
+(μΘE1 ∥ μΘ0
+
+) 44 .1190 
+
+W2
+
+(μΘE1 , μ Θ0
+
+) 0.0717 
+
+Theoretical W2 Bound ( ¯∆max ) 0.7383 
+
+Overall Accuracy (All E
+
+> i
+
+) 67 .00% 
+
+Avg Precision (All E
+
+> i
+
+) 62 .81% 
+
+Avg False Alarm Rate (All E
+
+> i
+
+) 3.67% 
+
+Overall RMSE (All E
+
+> i
+
+) 0.3104 
+
+Overall L2 (All E
+
+> i
+
+) 0.2629 ploys a probabilistic approach, where the impact of faults is modeled through a trajectory-level density evolution. Moreover, explicit bounds on the detectability and iden-tifiability of faults were provided through the Wasserstein metric. Our approach combines theoretical bounds de-rived via contraction analysis with a practical data-driven implementation using conditional flow matching to learn fault-conditioned probability flows, thereby facilitating generalization to unseen fault combinations. Evaluation of our FDI approach on a nonlinear spacecraft attitude control system showed reliable actuator and sensor fault estimation and a lower false alarm rate compared to an augmented Extended Kalman Filter (EKF) FDI method. We also showed that the empirical Wasserstein separations are consistent with theoretical predictions. REFERENCES Albergo, M.S. and Vanden-Eijnden, E. (2022). Building normalizing flows with stochastic interpolants. arXiv preprint arXiv:2209.15571 .Arjovsky, M., Chintala, S., and Bottou, L. (2017). Wasser-stein generative adversarial networks. In International conference on machine learning , 214–223. PMLR. Bakhtiaridoust, M., Yadegar, M., and Meskin, N. (2023). Data-driven fault detection and isolation of nonlinear systems using deep learning for koopman operator. ISA transactions , 134, 200–211. Bouvrie, J. and Slotine, J.J. (2019). Wasserstein con-traction of stochastic nonlinear systems. arXiv preprint arXiv:1902.08567 .Chen, J. and Patton, R.J. (2012). Robust model-based fault diagnosis for dynamic systems , volume 3. Springer Science & Business Media. Eriksson, D., Frisk, E., and Krysander, M. (2013). Amethod for quantitative fault diagnosability analysis of stochastic linear descriptor models. Automatica , 49(6), 1591–1600. Fu, F., Wang, D., Li, W., and Liu, P. (2018). Evaluation of fault diagnosability for dynamic systems with unknown uncertainties. IEEE Access , 6, 16737–16745. Isermann, R. (2005). Fault-diagnosis systems: an intro-duction from fault detection to fault tolerance . Springer Science & Business Media. Jung, D., Dong, Y., Frisk, E., Krysander, M., and Biswas, G. (2020). Sensor selection for fault diagnosis in un-certain systems. International journal of control , 93(3), 629–639. Karatzas, I. and Shreve, S. (2014). Brownian motion and stochastic calculus . springer. Lee, D.Y., Gupta, R., Kalabić, U.V., Di Cairano, S., Bloch, A.M., Cutler, J.W., and Kolmanovsky, I.V. (2017). Geometric mechanics based nonlinear model predictive spacecraft attitude control with reaction wheels. Journal of Guidance, Control, and Dynamics , 40(2), 309–319. Lipman, Y., Chen, R.T., Ben-Hamu, H., Nickel, M., and Le, M. (2022). Flow matching for generative modeling. 
+
+arXiv preprint arXiv:2210.02747 .Lohmiller, W. and Slotine, J. (1998). On contraction analysis for nonlinear systems. Automatica . doi: 10.1016/S0005-1098(98)00019-3. O’Connell, M., Cho, J., Anderson, M., and Chung, S.J. (2024). Learning-based minimally-sensed fault-tolerant adaptive flight control. IEEE Robotics and Automation Letters , 9(6), 5198–5205. doi: 10.1109/LRA.2024.3389414. Patton, R.J., Frank, P.M., and Clark, R.N. (2013). Issues of fault diagnosis for dynamic systems . Springer Science & Business Media. Pavliotis, G.A. (2014). Stochastic processes and applica-tions. Texts in applied mathematics , 60. Perez, E., Strub, F., De Vries, H., Dumoulin, V., and Courville, A. (2018). Film: Visual reasoning with a general conditioning layer. In Proceedings of the AAAI conference on artificial intelligence , volume 32. Ragan, J., Riviere, B., Hadaegh, F.Y., and Chung, S.J. (2024). Online tree-based planning for active space-craft fault estimation and collision avoidance. Science Robotics , 9(93), eadn4722. Risken, H. (1989). Fokker-planck equation. In The Fokker-Planck equation: methods of solution and applications ,63–95. Springer. Talebi, H.A., Khorasani, K., and Tafazoli, S. (2008). A re-current neural-network-based sensor and actuator fault detection and isolation for nonlinear systems with ap-plication to the satellite’s attitude control subsystem. 
+
+IEEE transactions on neural networks , 20(1), 45–60. Tsukamoto, H. and Chung, S.J. (2020). Neural contraction metrics for robust estimation and control: A convex optimization approach. IEEE Control Systems Letters ,5(1), 211–216. Tsukamoto, H., Chung, S.J., and Slotine, J.J.E. (2020). Neural stochastic contraction metrics for robust control and estimation. IEEE Control Syst. Lett. 
+
+Tsukamoto, H., Chung, S.J., and Slotine, J.J.E. (2021). Contraction theory for nonlinear stability analysis and learning-based control: A tutorial overview. Annual Reviews in Control , 52, 135–169. Venkatasubramanian, V., Rengaswamy, R., Yin, K., and Kavuri, S.N. (2003). A review of process fault detection and diagnosis: Part i: Quantitative model-based meth-ods. Computers & chemical engineering , 27(3), 293–311. Vettori, S., Di Lorenzo, E., Peeters, B., Luczak, M., and Chatzi, E. (2023). An adaptive-noise augmented kalman filter approach for input-state estimation in structural dynamics. Mechanical Systems and Signal Processing ,184, 109654. Villani, C. et al. (2008). Optimal transport: old and new ,volume 338. Springer. Zhang, X.N., Pu, Y., Kawamura, Y., Loza, A., Bengio, Y., Shung, D., and Tong, A. (2024). Trajectory flow match-ing with applications to clinical time series modelling. 
+
+Advances in Neural Information Processing Systems , 37, 107198–107224.

@@ -1,0 +1,336 @@
+Title: Explainable Functional Relation Discovery for Battery State-of-Health Using Kolmogorov-Arnold Network
+
+URL Source: https://arxiv.org/pdf/2604.00400v1
+
+Published Time: Thu, 02 Apr 2026 00:26:50 GMT
+
+Number of Pages: 12
+
+Markdown Content:
+# Explainable Functional Relation Discovery for Battery State-of-Health Using Kolmogorov–Arnold Network 
+
+A P REPRINT 
+
+Sanchita Ghosh 1 and Tanushree Roy 11Department of Mechanical Engineering, Texas Tech University, Lubbock, TX 79409, US. Emails: sancghos@ttu.edu, tanushree.roy@ttu.edu .April 2, 2026 
+
+# ABSTRACT 
+
+Battery health management is heavily dependent on reliable State-of-Health (SoH) estimation to ensure battery safety with maximized energy utilization. Although SoH estimation can effectively track battery degradation, it requires continuous battery data acquisition. In addition, model-based SoH estimation methods rely on accurate battery model knowledge, whereas data-driven approaches often suffer from limited interpretability. In contrast, analytical characterization of SoH will offer a direct and tractable handle on battery performance degradation, while also establishing a foundation for further analytical studies toward effective battery health management. Thus, in this work, we propose a Kolmogorov–Arnold Network (KAN)-based data-driven pipeline to establish a functional relationship for SoH degradation using battery temperature data. Specifically, we learn long-term battery thermal dynamics and battery heat generation via learnable activation functions of our KAN model. We utilize the learned mapping to obtain an explicit functional relationship between SoH degradation and cycle number. The proposed pipeline was validated using real-world data, yielding a closed-form analytical formula of SoH degradation with high accuracy. 
+
+# 1 Introduction 
+
+Lithium-ion batteries have become the preferred energy storage technology for applications ranging from consumer electronics and electric vehicles to grid-scale systems. However, repeated charge–discharge cycles produce irreversible power and capacity loss of the battery that can cause substantial degradation of performance. [1] defines the state-of-health (SoH) as the extent of battery degradation and capacity fade, and calculates SoH as the ratio between the usable capacity and the nominal capacity of the battery. Furthermore, [2] defines a power-based SoH as the percentage of discharge energy retention during each cycle, and this SoH can be calculated as the ratio of present and initial discharge energy of the battery. [3] showed that the risk of safety-critical incidents increases significantly when the battery SoH drops below 70% − 80% . Particularly, [4] highlights the need for reliable SoH estimation to ensure safe and effective battery operations. Researchers have utilized measurable battery variables that are sensitive to variation in SoH to develop data-driven models for SoH estimation. For example, [5] developed a gated-recurrent-unit (GRU)-based SoH estimator that utilizes a gradually decreasing current in the constant voltage (CV) charging phase to extract features with double correlation analysis. Similarly, [6] proposes an adaptive observer with online parameterization to track the long-term variation of the internal resistance for SoH estimation. [7] adopts the Gaussian Process Regression (GPR) method with particle swarm optimization (PSO) for SoH estimation, while using partial charging voltage and current curves for health in-dicator extraction. [3] utilizes constant current (CC) charging time-span, discharge duration, and incremental capacity curve to obtain “health factors” and subsequently implements a long short-term memory network (LSTM)-PSO model to estimate SoH from them. 
+
+> arXiv:2604.00400v1 [eess.SY] 1 Apr 2026
+
+Apart from the battery voltage and current characteristics, temperature characteristics have also been leveraged for SoH estimation. [8] uses the change in battery surface temperature during the specific charge voltage interval to cap-ture degradation in battery capacity. Similarly, [1] adopts support vector regression to obtain a health indicator from differential temperature curves in a voltage range during CC charging for SoH estimation. [9] proposed an attentional-feature-fusion integrated LSTM framework that uses differential temperature as the feature to estimate SoH with high accuracy under different operating temperatures. Moreover, [10] proposed a multi-task learning framework to combine health indicators from surface temperature and electrical characteristics to show the improved generalization capabil-ities of temperature-based health indicators. [11] utilizes the battery surface temperature measurements to estimate a normalized heat generation term during CC charging and considers this normalized heat generation term as the health indicator for SoH estimation. In recent years, Kolmogorov–Arnold Network (KAN) has been widely adopted in battery research due to its improved nonlinearity extraction capability and inherent interpretability ( [12]). In particular, KAN has been used for state-of-charge estimation ( [13]), core temperature prediction ( [14]), and diagnostics of battery thermal anomalies ( [15]). Researchers have also explored KAN-based estimation of SoH. For instance, [16] proposes a Convolutional Neural Network (CNN)-KAN model to estimate SoH from the capacity–power curve and battery temperature during CC-CV charging. Similarly, [12] develops a CNN-KAN-based SoH estimator using the charging time, current, and tempera-ture from the CV charging phase that can adapt to varying charging current rates. [17] utilizes partial discharge curve data for SoH estimation with a CNN-GRU-KAN model and shows that the model consistently performs well across various operating conditions. [18] develops a Transformer-integrated KAN model for SoH estimation from historical charge–discharge data and shows that the model can better capture the long-term temporal dependencies in the data. Similarly, [19] proposes an LSTM-KAN model where the LSTM module captures the long-term temporal dependen-cies and the KAN module better approximates the nonlinearity in the data. Moreover, [20] combined the dynamic graph generator with KAN to estimate SoH for battery packs and shows that the incorporation of KAN improves the accuracy for capacity decline inflection point identification. These works highlight KAN’s effectiveness in captur-ing the battery dynamics for estimation or prediction of battery states and its applicability for improved accuracy in SoH estimation. However, existing works combine KAN with Transformer or deep network-based modules such as CNN, GRU, or LSTM, and such integration loses the interpretability of KAN due to the complex architecture of the integrated modules. Thus, there is a research gap in utilizing the inherent interpretability of KAN to quantify battery degradation based on SoH estimation over the life-cycle of the battery. From a practitioner’s perspective, while online SoH estimation from operational measurements remains important, developing a reliable, use-case-specific empirical model can provide a tractable quantification of battery degradation that is readily applicable to downstream analysis. Even though trends in SoH degradation can be inferred from online battery state estimation and subsequently modeled using parametric or non-parametric regression, such fitted func-tions often remain weakly grounded in the underlying battery degradation mechanisms. Model-based estimation also relies on accurate identification of battery parameters. For example, a recent work by [11] leveraged the connection between progressive changes in heat generation and battery degradation to estimate SoH using a model-based online observer. However, the exact mapping between these terms remains implicit and can only be estimated based on con-tinual measurement of battery temperature. In contrast, degradation quantification using data-driven techniques lacks interpretability and fails to provide analytical quantification of degradation trends. Therefore, there exists a research gap to obtain closed-form representations of SoH that are grounded in battery physics to preserve the interpretability of estimated battery degradation. To address these research gaps, the main contributions of this paper are as follows: 1. we provide a data-driven pipeline for utilizing battery temperature measurement to derive an analytical SoH characterization, 2. we quantify the increased heat generation in the battery in terms of the cycle number by learning the long-term thermal dynamics of the battery using Kolmogorov-Arnold Networks, and 3. we obtain an explicit functional relationship between SoH degradation and charging cycles by embedding the quantified heat generation. The rest of the paper is organized as follows: Section 2 describes the impact of battery degradation on battery thermal dynamics and presents the proposed strategy to utilize long-term variation in thermal dynamics for analytical SoH characterization. In Section 3, we explain the details of the KAN structure with learnable activation functions that can capture the progressive increase in battery heat generation due to degradation. Next, we discuss our results and findings in Section 4. Finally, Section 5 concludes our paper. 2 Characterizing Battery Degradation from Temperature 
+
+In this section, we first describe how the battery thermal dynamics capture the impact of progressive battery degrada-tion with aging. Then, we present our proposed strategy to utilize the heat generation to obtain an explicit functional relation of SoH. 
+
+2.1 Long-horizon battery thermal model 
+
+Battery degradation with aging leads to a continual increase in the battery internal resistance, which in turn increases the heat generation in the battery over the cycles. Hence, battery thermal dynamics essentially captures signature of battery degradation. Thus, in this work, we utilize the long-term variation in battery thermal dynamics to investigate the relationship between SoH degradation and charging cycles. Now, for a small-dimension single-cell batteries with a small Biot number, heat conduction inside the battery is much smaller than heat convection at the surface, such that temperature gradient is negligible inside the battery [21]. Hence, the thermal dynamics of a cell, assuming a small Biot number, can be written as [21] 
+
+dT dt = I2R − hA (T − T∞)
+
+ρc pν , ∀t ∈ [0 , TE ], (1) where Ts is the lumped battery temperature measured at the surface, T∞ is the ambient temperature, I is the battery current, and R is the equivalent series resistance of the battery. The parameters h, A, ρ, cp, and ν denote the convective heat transfer coefficient, battery cell surface area, battery density, specific heat capacity, and battery specific volume, respectively. Learning the data-driven representation of the lumped thermal model requires identifying the discretized model for (1) in terms of normalized variables. Let {T k}E−1 
+
+> k=1
+
+be a non-uniform distribution of points within [0 , TE ], where 0 < T0 <
+
+T1 < · · · < TE , such that each interval [Tk−1, Tk) denote the k-th battery cycling time interval, ∀k ∈ { 1, . . . , E }. TE
+
+here represents the time to reach the end-of-life of the battery after the E-th cycle. We will represent three sets of time samples from each of these cycling intervals 
+
+Itrain = {tk : tk ∈ [Tk−1, Tk), ∀k ∈ { 0, . . . , E }} , (2) 
+
+Ivalidation = {tk : tk ∈ [Tk−1, Tk), ∀k ∈ { 0, . . . , E }} , (3) 
+
+Itest = {˜tk : ˜ tk ∈ [Tk−1, Tk), ∀k ∈ { 0, . . . , E }} , (4) that represent the data samples for training, validation, and testing, respectively. Here, T−1 = 0 .To analyze the training process, we will write (1) in terms of min-max normalization, where the normalized battery temperature is given by 
+
+T (t) = T (t)−Tmin  
+
+> Tmax −Tmin
+
+, ∀t ∈ [0 , TE ], (5) where 
+
+Tmax = max 
+
+> t∈Itrain
+
+[T (t)] and Tmin = min 
+
+> t∈Itrain
+
+[T (t)] , (6) are the maximum and minimum temperatures over the training dataset. Since Tmax , T min are constants, we can write  
+
+> dT dt
+
+= 1∆T 
+
+> dT dt
+
+, where, ∆T = Tmax − Tmin . Then, using the definition of normalized temperature from (5) in (1), we can write the T (t) dynamics ∀t ∈ [0 , TE ] as: 
+
+dT dt = − hA ρc pν T + I2Rρc pν∆T
+
++ hA ρc pν∆T
+
+(T∞ − Tmin ) . (7) In discrete form, (7) can then be represented as 
+
+T (i + 1) = γT (i) + τ I 2R(i)
+
+ρc pν∆T
+
++ ξ, (8) where τ denotes the sampling time, T (i + 1) represents the subsequent temperature measurement at a time τ seconds later than the measured temperature T (i). Here, constants γ := 
+
+
+
+1 − hAτ ρc pν
+
+
+
+and ξ := hAτ ρc pν∆T (T∞ − Tmin ).In (8), the I2R term represents the battery heat generation that captures how the increase in equivalent series resistance impacts the thermal behavior of the cell as it ages. Therefore, to represent the aging behavior of the battery, the series resistance is assumed to change progressively with battery cycling during constant-current (CC) charging scenarios. In other words, we assume here that the heat generation term I2R remains constant over any k-th CC charging cycle of the battery. Therefore, the discrete lumped thermal model for normalized temperature (8) can be rewritten in terms of 
+
+Dk := τρc pν∆T I2R(t), t ∈ [Tk, Tk+1 ). (9) We will use this model to derive the long-term evolution of battery temperature over a fixed time horizon of H ≪
+
+min k |T k − T k−1|. Thus, for any k-th CC charging cycle and ik, i k + H ∈ [Tk, Tk+1 ), this hybrid model can be written in a discrete form as 
+
+T (ik + H) = γN T (ik) + DkN −1X
+
+> j=0
+
+γj + ξ 
+
+> N−1
+
+X
+
+> j=0
+
+γj , (10) where H = N τ . We will use this long-term prediction formula of T (ik + H) to construct the architecture of KAN and subsequently isolate the increased heat generation over charging cycles due to battery degradation. 
+
+2.2 SoH characterization using variation in heat generation 
+
+Power-based state-of-health metric, SoH P , characterizes the degradation of the battery’s capability to provide power due to the increase in the internal resistance. [22] showed that a small capacity fade due to the loss of an electro-chemically active electrode surface is related to the loss of conductance ( or inversely related to resistance). This enables us to write the normalized inverse equivalent series resistance formula for SoH p
+
+SoH p% = RBOL 
+
+R × 100% , (11) where RBOL represents the resistance at the beginning of battery life. This can be equivalently written in terms of Dk
+
+for any cycle k using (9) as 
+
+SoH p(k)% = DB
+
+Dk
+
+× 100% , (12) where DB corresponds to the heat generation at the beginning of the battery life. Our goal in the next section is identify functions A1 and A2 such that (10) can be written as 
+
+T (ik + H) = A1(T (ik)) + A2(k), (13) 
+
+A1(T (ik)) = γN T (ik) + ξ 
+
+> N−1
+
+X
+
+> j=0
+
+γj , (14) 
+
+A2(k) = DkN −1X
+
+> j=0
+
+γj . (15) Therefore, SoH p in (12) can be written in terms of the functions A2(k)SoH p(k)% = A2(0) 
+
+A2(k) × 100% . (16) In our work, we specifically focus on learning A2 to explicitly write the functional relation between SoH p with the cycle number k. Fig 1 illustrates the proposed data-driven pipeline for obtaining an explicit functional relation between SoH degradation and battery cycling number, while utilizing the learnable activation function of KAN structure to capture the increased heat generation with degradation. In the next section, we will discuss how we leverage the KAN architecture to learn (15). 
+
+# 3 Kolmogorov-Arnold Network For SoH Estimation 
+
+In this section, we first present a brief overview of the KAN structure. Next, we describe the details of learning a one-layer KAN model from battery temperature and cycle data, and subsequently, we explain the advantages of the interpretable KAN structure in the context of analytical characterization of SoH. Figure 1: Overview of the data-driven pipeline used for discovering the functional relationship between battery degra-dation and battery cycle number. 
+
+3.1 Preliminaries on KAN 
+
+The Kolmogorov-Arnold network (KAN), proposed by [23], is constructed as an N -layer deep network structure with Wn width in each layer n ∈ Nkan , Nkan = {1, . . . , N } , such that each node in a layer n correspond-ing to a single input variable xn,w , ∀w ∈ W n, where Wn = {1, . . . , W n}, ∀n ∈ N kan . This architecture is built on the Kolmogorov–Arnold representation theorem, which states that any continuous multivariate function de-fined on a bounded domain can be represented as a finite sum of compositions of continuous univariate functions. For a nonlinear continuous function f (z1, . . . , z m), this theorem guarantees the existence of univariate functions 
+
+Ap,q , Aq , p ∈ { 1, . . . , m }, q = {1, . . . , 2m + 1 } such that 
+
+f (z1, . . . , z m) = 
+
+> 2m+1
+
+X
+
+> q=1
+
+Aq
+
+> m
+
+X
+
+> p=1
+
+Ap,q (zp)
+
+!
+
+. (17) Despite the guarantee of the existence of these univariate functions, their explicit construction remained challenging until the introduction of learning based deep architecture proposed by [23]. Specifically, KAN is trained to learn “activation functions” Al, ˆw,w , ∀w ∈ W n, ˆw ∈ W n+1 as a proxy for this univariate functions that map any input variables xn,w at a node w to its output at node ˆw in the consecutive layer n + 1 . These learnable activations with fixed additive operation at the nodes mark the primary difference between KAN and other standard neural networks, where the latter learns a linear weight combination of nodes with fixed activations. Mathematically, the output at each node of KAN is given by 
+
+xn+1 , ˆw =
+
+> Wn
+
+X
+
+> w=1
+
+An, ˆw,w (xn,w ), ∀ ˆw ∈ W n+1 . (18) In a compact matrix form, it can be expressed as, 
+
+xn+1 =
+
+
+
+An, 1,1(·) . . . An, 1,W n (·)
+
+... . . . ...
+
+An,W n+1 ,1(·) . . . An,W n+1 ,W n (·)
+
+| {z }
+
+> 𝔸 n
+
+xn, (19) where activation function matrix 𝔸 n denotes the mapping between the inputs xn = [ xn, 1, . . . , x n,W n ]T at layer n and outputs xn+1 = [ xn+1 ,1, . . . , x n+1 ,W n+1 ]T at the layer n + 1 . The input features to the KAN are often denoted as 
+
+x0 ∈ ℝMi and the outputs of the KAN are denoted by xN +1 ∈ ℝM0 . In other words, the KAN architecture utilizes these activation functions 𝔸 n ∀n ∈ N to capture the relationship between the Mi input variables or features and M0
+
+output or target variables as 
+
+xN +1 = KAN (x0) = ( 𝔸 N ◦ 𝔸 N −1 ◦ . . . ◦ 𝔸 1)x0. (20) However, the above KAN architecture can be simplified if the function f in (17) is known to be a sum of univariate functions such as 
+
+y = f (z1, . . . , z m) = 
+
+> m
+
+X
+
+> p=1
+
+Ap(zp), (21) which obviates the need for a N deep architecture. A function defined as in (21) can be represented in theory by a KAN architecture with a vector activation function 𝔸 1 mapping z = [ z1, . . . , z m]T to y as 
+
+y = 𝔸 1z = ( A1,1,1(·) . . . A1,1,m (·)) z, (22) 
+
+3.2 Description of KAN training 
+
+We utilize the VAH17 battery dataset from [24] to learn the KAN model. [24] provides battery aging data under electric vertical takeoff and landing (EVTOL) current profiles. The VAH17 battery was charged with a 1C-rate CC at 23 ◦C
+
+ambient temperature for all cycles. The battery reached EOL at 70% capacity after 997 cycles. From (10), we can observe that the long-term prediction of the normalized battery temperature over a cycle depends on the initial normalized temperature, ambient temperature, and the cycle number. We use a simple KAN to capture this mapping from the battery data during the CC charging phase. 
+
+Training Dataset: To capture the long-term evolution of the normalized temperature, we first uniformly subsample the normalized surface temperature measurements from training sample interval Itrain over a long-horizon H within the CC charging phase of each cycle. Then, we use the ith normalized temperature and cycle number k as input feature to predict the (i + H)th normalized temperature of this kth cycle. We define a normalized cycle number as k = kE .Then, we create the input dataset Dx and the corresponding target dataset Dy for KAN training as below. 
+
+Dx = {x(0) , x(1) , · · · , x (E)}, (23) 
+
+Dy = {T (i0 + H), T (i1 + H), · · · , T (iE + H)}, (24) where, x(k) = [ T (ik) k]T . (25) 
+
+Validation Dataset: We similarly create the validation datasets Dx and Dy by sub-sampling the normalized surface temperature measurements from the validation sample interval Ivalidation over a long-horizon H.
+
+Dx = {x(0) , · · · , x (E)}, (26) 
+
+Dy = {T (i0 + H), · · · , T (iE + H)}, (27) where, x(k) = [ T (ik) k]T . (28) 
+
+Testing Dataset: We sub-sample the normalized surface temperature measurements from testing sample interval Itest 
+
+over a long-horizon H of CC battery charging to create the datasets ˜Dx and ˜Dy for testing of the learned KAN model. 
+
+˜Dx = {˜x(0) , · · · , ˜x(E)}, (29) 
+
+˜Dy = {T (˜ i0 + H), · · · , T (˜ iE + H)}, (30) where, ˜x(k) = [ T (˜ ik) k]T . (31) We use the training datasets Dx, Dy along with the validation datasets Dx and Dy to train a KAN of width [[2 , 1]] .This KAN structure has an activation function vector 𝔸 = {A 1, A2}. We represent these activation functions A1
+
+and A2 with a sum of silu functions and a linear combination of 3rd -order B-splines over 4 grid points. To effectively learn these functions, we minimize the loss function ℓtotal (32) during training. 
+
+ℓtotal = ℓpred + λ ν1|𝔸 |l1 + ν2S(𝔸 )
+
+!
+
+, (32) 
+
+|𝔸 |l1 = |A 1|l1 + |A 2|l1 , (33) 
+
+S(𝔸 ) = −
+
+> 2
+
+X
+
+> i=1
+
+|A i|l1
+
+|𝔸 |l1
+
+log 
+
+ |A i|l1
+
+|𝔸 |l1
+
+
+
+, (34) Figure 2: Plot shows the converging training and validation losses during the training of the KAN model. Here, ℓpred captures the mean squared prediction error between the predicted and true outputs. |𝔸 |l1 in (33) is the 
+
+l1-norm of the activation function and S(𝔸 l) is a self-entropy term defined in (34). The KAN model is trained over 400 steps with λ = 0 .001 , ν1 = 0 .12 , ν2 = 0 .15 , and a batch size of 128 data points. Fig 2 shows the convergence of training and validation over the 400 training steps during KAN model training. We test the KAN model using datasets ˜Dx. Fig 3 shows the true and predicted battery temperature. The KAN prediction exhibits an overestimation bias, as shown in Fig 3. Most importantly, Fig 3 indicates that the KAN model effectively learned the progressive increase in temperature with aging, due to the battery degradation. The KAN model exhibits a root-mean-square-error of 0.67 ◦C for the test scenario. 
+
+Figure 3: Plot shows the true and predicted long-term prediction of lumped battery temperature, measured at the surface. 
+
+3.3 Relevance of KAN as an interpretable model 
+
+Model interpretability is the measure of the understanding of the model’s reasoning behind its prediction for a given input. Thus, a model is considered interpretable if we can comprehend the mapping from the model’s input to its prediction. The KAN architecture is inherently interpretable, since it learns the functional relation between the input features and the output data as a composition of activation functions. These activation functions, learned as a linear combination of silu-base functions and k-order B-splines over G grid points, can be isolated to identify the contribution of each feature to the final output or prediction. Specifically, for the KAN structure of width [[2 , 1]] chosen in our study, we learn two activation functions, each cor-responding to one input feature. The first function A1 maps the initial normalized temperature T (ik) to the next step normalized temperature T (ik + H), and A2 captures the functional mapping from the normalized cycle number 
+
+k to the normalized temperature T (ik + H). Moreover, the KAN training also incorporates regularization to avoid overfitting the B-splines and reduce model complexity. While this constraint in training encourages learning simpler functional relations, the piecewise nature of the B-splines may still make them intractable. Thus, we identify functions that closely approximate these learned splines using a broad range of functional dictionaries containing polynomial, exponential, trigonometric, logarithmic, and similar standard basis functions. Although these advantages highlight the relevance of KAN as an interpretable model, we now present the reasons for selecting it as our preferred approach over other comparable data-driven methods. 
+
+I. Parametric Regression: These regression methods can be utilized to explicitly learn the functional relations be-tween SoH p and cycle number k ( [25]). However, such mapping lacks any insight regarding battery degradation. In contrast, with KAN, we can capture the impact of battery degradation through the increased heat generation in the battery. 
+
+II. Neural Networks (NN): NN-based models learn the data pattern by successively applying nonlinear transforma-tions to linear combinations of weights such that the underlying data structures get embedded into relatively larger representations. This model complexity decreases model interpretability, and the nonlinear transformation at each node impedes the isolation of the individual contribution of input features, even for simpler models ( [23]). Thus, traditional NN-models such as MLP, LSTM, and RNN will not be suitable for our objective. 
+
+III. Tree-based Learners: The tree-based models such as random forest, XGBoost, light gradient boosting machine utilize rule-based split to capture the underlying data structures ( [26]). However, it is difficult to trace each split to understand the mapping of tree-based model’s input to output and often requires post-analysis tools ( [27]. Thus, these models remain less interpretable and fail to provide compact representations for the learned functions. Moreover, they also lack the ability to isolate the feature-specific impact on the model output. 
+
+IV. Gaussian Process Regression (GPR): GPR method adopts a kernel-based learning strategy to identify the prob-ability distribution over all possible functions to fit the training data. GPR can provide insight about the underlying patterns in data, however it fails to provide closed-form representations of the learned functions ( [28]). 
+
+V. Generalized Additive Models (GAMs): GAMs, like KAN, learns the patterns in data using compositions of univariate functions. However, GAMs only consider the spline function as the basis, while the KAN utilizes a sum of silu and spline functions. Incorporating the silu basis function helps the KAN to identify the dominant trend in the input contribution, and the KAN framework also supports improved scalability both in terms of grid size and depth of the network compared to GAMs ( [29]). 
+
+# 4 Results and Discussions 
+
+We utilize the voltage and current measurement data for the VAH17 battery from [24] to calculate the baseline SoH p
+
+using (11). We obtain the resistance R for each cycle with the IR drop method as R = ∆V 
+
+> ∆I
+
+. Thus, we use the instantaneous voltage jump corresponding to one current step at the beginning of the CC charging phase for each cycle. Fig 4 shows the baseline SoH p plotted with a black line. This baseline SoH p exhibits a degradation of 69 .14% 
+
+at EOL and 70% degradation at 967 th cycle. We first estimate the SoH p using the A2(k) from our KAN model that is learned as a composition of silu and B-spline functions. Hence, we directly evaluate the learned activation function A2(k) over the range k ∈ [0 , · · · , E ]. From (13) and (15), we observe that these A2(k) values maps the heat generation term Dk. Hence, using (16), we calculate the SoH p, and this estimated SoH p is shown in Fig 4 plotted with a purple line. Fig 5 shows the error in this B-spline-
+
+SoH p estimation. Fig 4 and Fig 5 indicate that this B-spline-based A2(k) representation overestimates the battery degradation during the first 200 and last 300 cycles of the battery, leading to lower values for SoH p compared to the baseline. The SoH p estimation better matches the baseline SoH p from 200 th to 500 th cycle with slightly higher SoH p
+
+values than the baseline for the next 200 cycles. This B-spline-based A2(k) provides a conservative SoH p estimation and exhibits 70% degradation at 895 th cycle, which is 72 cycle earlier compared to the baseline. The B-splines-based A2(k) form provides us with insight into battery condition by capturing the extent of degradation through the heat generation term Dk. Nonetheless, it is difficult to comprehend or conduct further analysis with the Figure 4: Plot shows the baseline and three estimated SoH p. The true SoH p is calculated using the drop in resistance. The SoH p estimations are calculated from B-spline, quadratic, cubic, and quartic-based A2(k) representation. piece-wise learned B-spline functional representation of A2(k). Thus, to improve the interpretability of this learned function A2(k), we utilize symbolic mathematics to extract an explicit form for A2(k) as A2(k) as A2(k) = ( r−sk )2.We obtain these parameters r = 11 .56 and s = 3 .10 with a R2 score of 0.984. R2 score is a statistical measure that reflects the proportion of variability of the dependent variable captured by the model, and a higher value of R2 score implies effective regression. We calculate the SoH p using this explicit A2(k) representation as: Quadratic: SoH p(k)% = r2
+
+(r − sk )2 × 100% . (35) Fig 4 and Fig 5, respectively, show this SoH p estimation and the error in estimation plotted with a green lines. Fig 4 highlights that this lower-order quadratic A2(k) generates highly conservative SoH p estimation and exhibits 70% 
+
+degradation 177 cycles earlier than the baseline at 790 th cycle. Next, we extract a 3rd-order representation of the function A2(k) = ( p − qk )3. For our KAN model, we obtain 
+
+p = 8 .65 and q = 1 .15 with a R2 score of 0.997. The higher R2 in the cubic formula extraction suggests that the cubic analytical expression better fits the A2(k) function. Then, we calculate the SoH p using these p and q values as: Cubic: SoH p(k)% = p3
+
+(p − qk )3 × 100% . (36) This cubic-SoH p estimation is plotted with a blue line in Fig 4. The estimation error is shown in Fig 5. This cubic 
+
+A2(k) overestimates SoH p for 200 to 700 cycles and underestimates otherwise. Fig 4 and Fig 5 also highlight that this cubic-A2(k) closely matches the baseline and B-spline SoH p, compared to quadratic and quartic analytical represen-tations of A2(k). Consequently, the median error stays close to zero for the cubic-SoH p estimation, as shown in the bottom plot of Fig 5. Additionally, it exhibits 70% degradation at 948 th cycle, only 19 cycles before the baseline. We obtain a 4th-order closed-form analytical expression of the second activation function as A2(k) = ( u − vk )4 such that u = 10 .13 and s = 0 .65 with a R2 score of 0.991. For this quartic A2(k), we calculate the SoH p as: Quartic: SoH p(k)% = u4
+
+(u − vk )4 × 100% . (37) Fig 4 shows this quartic-SoH p estimation plotted with a brown line. The SoH p estimation error is plotted with a brown line in Fig 5. Fig 4 and Fig 5 indicate that this higher-order A2(k) overestimates the SoH p, which implies it underestimates the battery degradation. Consequently, it estimates 72 .4% degradation of SoH p at the battery EOL. Such aggressive SoH p estimation impacts the battery energy utilization and also increases the risk of a safety-critical incident. Figure 5: The top plot shows the error in SoH p estimations, and the bottom plot compares the estimation error distri-bution using boxplots for B-spline, quadratic, cubic, and quartic-based A2(k) representations. 
+
+# 5 Conclusion & Future Work 
+
+In this work, we propose a KAN-based data-driven pipeline to obtain a closed-form analytical representation of SoH degradation with the charging cycle number using battery temperature data. We show that a simple one-layer KAN structure can be utilized to learn and analytically represent the mapping from charging cycle number to battery heat generation, while only using the lumped battery temperature data. This heat generation expression can be utilized to obtain a closed-form analytical representation of SoH degradation as a function of the charging cycle number. We compare the SoH estimation performance for four different functional representations based on B-splines, quadratic, cubic, and quartic. Among these four functional representations, cubic estimation of SoH p closely follows the base-line SoH p calculated using current and voltage measurements. Moreover, the lower-order functional mappings with B-splines and quadratic exhibit more conservative SoH p estimation, while the quartic mapping provides a more ag-gressive SoH p estimation. Such analytical insights into SoH degradation can offer a more tractable basis for effective battery management. The proposed method thus presents a novel and explainable analytical representation of SoH that can be further explored and refined to capture the influence of other battery degradation factors. Since cycle number alone is often an incomplete aging indicator, to generalize the applicability of our proposed method, we will expand and fine-tune this baseline predictor to produce a robust and transferable SOH estimation model, based on external stressors. In the future, we want to explore how battery degradation can be quantified under non-uniform charging and varying ambient temperatures throughout the life-cycle. We will also explore the scalability of the proposed approach to battery packs to ensure practical application in electric vehicles or grid-scale energy storage systems. References 
+
+[1] Jinpeng Tian, Rui Xiong, and Weixiang Shen. State-of-health estimation based on differential temperature for lithium ion batteries. IEEE Transactions on Power Electronics , 35(10):10363–10373, 2020. [2] Yuliya Preger, Reed Wittman, Stephen J Harris, and Matthieu Dubarry. Are capacity and energy loss equivalent metrics for battery aging reporting? Journal of Electrochemical Energy Conversion and Storage , 23(2):021109, 2026. [3] Yadong Gong, Xiaoyong Zhang, Dianzhu Gao, Heng Li, Lisen Yan, Jun Peng, and Zhiwu Huang. State-of-health estimation of lithium-ion batteries based on improved long short-term memory algorithm. Journal of Energy Storage , 53:105046, 2022. [4] Litao Zhou, Yang Zhao, Da Li, and Zhenpo Wang. State-of-health estimation for lifepo 4 battery system on real-world electric vehicles considering aging stage. IEEE Transactions on Transportation Electrification , 8(2):1724– 1733, 2021. [5] Chaolong Zhang, Laijin Luo, Zhong Yang, Shaishai Zhao, Yigang He, Xiao Wang, and Hongxia Wang. Battery soh estimation method based on gradual decreasing current, double correlation analysis and gru. Green Energy and Intelligent Transportation , 2(5):100108, 2023. [6] Xinfan Lin, Hector E Perez, Jason B Siegel, Anna G Stefanopoulou, Yonghua Li, R Dyche Anderson, Yi Ding, and Matthew P Castanier. Online parameterization of lumped thermal dynamics in cylindrical lithium ion batter-ies for core temperature estimation and health monitoring. IEEE Transactions on Control Systems Technology ,21(5):1745–1755, 2012. [7] Renjing Gao, Yunfei Zhang, and Zhiqiang Lyu. A soh estimation method of lithium-ion batteries based on partial charging data. Journal of Energy Storage , 103:114309, 2024. [8] Jufeng Yang, Yingfeng Cai, and Chris Mi. Lithium-ion battery capacity estimation based on battery surface temperature change under constant-current charge scenario. Energy , 241:122879, 2022. [9] Yiwen Sun, Hengwei Xie, Qi Diao, Hongzhang Xu, Xiaojun Tan, Yuqian Fan, and Liangliang Wei. A novel soh estimation method with attentional feature fusion considering differential temperature features for lithium-ion batteries. IEEE Transactions on Instrumentation and Measurement , 73:1–11, 2024. [10] Chaolong Zhang, Liang Tu, Zhong Yang, Bolun Du, Ziheng Zhou, Ji Wu, and Liping Chen. A cmmog-based lithium-battery soh estimation method using multi-task learning framework. Journal of Energy Storage ,107:114884, 2025. [11] Nitisha Ahuja, Jihoon Moon, Kiran Bhaskar, and Christopher D Rahn. Lithium-ion battery state of health esti-mation based solely on temperature sensing. Journal of Power Sources , 666:239068, 2026. [12] Zhao Zhang, Xin Liu, Runrun Zhang, Xu Ming Liu, Shi Chen, Zhexuan Sun, and Heng Jiang. Lithium-ion battery soh estimation method based on multi-feature and cnn-kan. Frontiers in Energy Research , 12:1494473, 2024. [13] Mohd Herwan Sulaiman, Zuriani Mustaffa, Amir Izzani Mohamed, Ahmad Salihin Samsudin, and Muhammad Ikram Mohd Rashid. Battery State Of Charge Estimation For Electric Vehicle Using Kolmogorov-Arnold Net-works. Energy , 311:133417, 2024. [14] Soumyoraj Mallick, Faysal Ahamed, Sanchita Ghosh, and Tanushree Roy. Kan-therm: A lightweight battery thermal model using kolmogorov-arnold network. arXiv preprint arXiv:2509.09145 , 2025. [15] Sanchita Ghosh and Tanushree Roy. Kan-koopman based rapid detection of battery thermal anomalies with diagnostics guarantees. arXiv preprint arXiv:2602.21155 , 2026. [16] Kaixin Cheng, Chaolong Zhang, Kui Shao, Jin Tong, Anxiang Wang, Yujie Zhou, Zhao Zhang, and Yan Zhang. A soh estimation method for lithium-ion batteries based on cpa and cnn-kan. Batteries , 11(7):238, 2025. [17] Shengfeng He, Wenhu Qin, Zhonghua Yun, Chao Wu, and Chongbin Sun. Soh estimation method for lithium-ion batteries using partial discharge curves based on cgkan. Batteries , 11(5):167, 2025. [18] Zaojun Chen, Jingjing Lu, Qi Wei, Jiayan Wen, Yuewu Wang, Kene Li, and Ao Xu. Estimation of lithium-ion battery soh based on a hybrid transformer–kan model. Electronics , 14(24):4859, 2025. [19] Imen Jarraya, Safa Ben Atitallah, Fatimah Alahmed, Mohamed Abdelkader, Maha Driss, Fatma Abdelhadi, and Anis Koubaa. Soh-klstm: A hybrid kolmogorov-arnold network and lstm model for enhanced lithium-ion battery health monitoring. Journal of Energy Storage , 122:116541, 2025. [20] Han Liu, Yiming Wang, Jiaju Wang, Ao Zhang, and Haiqiang Yang. Soh prediction of battery packs using dynamic graph convolution combined with kan-driven methods. In 2025 4th International Conference on Green Energy and Power Systems (ICGEPS) , pages 129–134. IEEE, 2025. [21] Luigi Mattia, Hamzeh Beiranvand, Walter Zamboni, and Marco Liserre. Lithium-ion battery thermal modelling and characterisation: a comprehensive review. Journal of Energy Storage , 129:117114, 2025. [22] Thomas Christen and Felipe Macedo. Theory of fokker–planck equations for reliability and remaining useful lifetime prognostics. IEEE Transactions on Reliability , 73(1):344–356, 2023. [23] Ziming Liu, Yixuan Wang, Sachin Vaidya, Fabian Ruehle, James Halverson, Marin Soljaˇ ci´ c, Thomas Y Hou, and Max Tegmark. Kan: Kolmogorov-arnold Networks. arXiv preprint arXiv:2404.19756 , 2024. [24] Alexander Bills, Mauro Salazar, Dong Zhang, and Venkatasubramanian Viswanathan. A model predictive control scheme for fast charging via accurate quadratic battery models. In 2022 American Control Conference (ACC) ,pages 1794–1800. IEEE, 2022. [25] Guangwei Chen. Residual useful life prediction of lithium-ion battery based on accuracy soh estimation. Scien-tific Reports , 15(1):6010, 2025. [26] Shipu Yang. Prediction method of remaining service life of li-ion batteries based on xgboost and lightgbm. In 2022 2nd International Conference on Algorithms, High Performance Computing and Artificial Intelligence (AHPCAI) , pages 324–327. IEEE, 2022. [27] Zhenghao Xiao, Bo Jiang, Jiangong Zhu, Xuezhe Wei, and Haifeng Dai. State of health estimation for lithium-ion batteries using an explainable xgboost model with parameter optimization. Batteries , 10(11):394, 2024. [28] Jianfang Jia, Jianyu Liang, Yuanhao Shi, Jie Wen, Xiaoqiong Pang, and Jianchao Zeng. Soh and rul prediction of lithium-ion batteries based on gaussian process regression with indirect health indicators. Energies , 13(2):375, 2020. [29] Lianzeng Zhang and Yuan Zhuang. What kan mortality say: smooth and interpretable mortality modeling using kolmogorov- arnold networks. ASTIN Bulletin: The Journal of the IAA , pages 1–28, 2026.

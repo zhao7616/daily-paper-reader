@@ -1,0 +1,46 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.00400v1/fig-001.webp",
+      "caption": "Figure 2: Plot shows the converging training and validation losses during the training of the KAN model.",
+      "page": 7,
+      "index": 1,
+      "width": 590,
+      "height": 296
+    },
+    {
+      "url": "assets/figures/arxiv/2604.00400v1/fig-002.webp",
+      "caption": "Figure 3: Plot shows the true and predicted long-term prediction of lumped battery temperature, measured at the surface.",
+      "page": 7,
+      "index": 2,
+      "width": 590,
+      "height": 498
+    },
+    {
+      "url": "assets/figures/arxiv/2604.00400v1/fig-003.webp",
+      "caption": "Figure 1: Overview of the data-driven pipeline used for discovering the functional relationship between battery degradation and battery cycle number.",
+      "page": 5,
+      "index": 3,
+      "width": 736,
+      "height": 371
+    },
+    {
+      "url": "assets/figures/arxiv/2604.00400v1/fig-004.webp",
+      "caption": "Figure 5: The top plot shows the error in SoHp estimations, and the bottom plot compares the estimation error distribution using boxplots for B-spline, quadratic, cubic, and quartic-based A2(k) representations.",
+      "page": 10,
+      "index": 4,
+      "width": 590,
+      "height": 712
+    },
+    {
+      "url": "assets/figures/arxiv/2604.00400v1/fig-005.webp",
+      "caption": "Figure 4: Plot shows the baseline and three estimated SoHp. The true SoHp is calculated using the drop in resistance. The SoHp estimations are calculated from B-spline, quadratic, cubic, and quartic-based A2(k) representation.",
+      "page": 9,
+      "index": 5,
+      "width": 590,
+      "height": 517
+    }
+  ]
+}
