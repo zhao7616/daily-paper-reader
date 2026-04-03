@@ -1,0 +1,62 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2603.25538v2/fig-001.webp",
+      "caption": "Figure 1: Overview of the multimodal incident management pipeline. Diverse observability data (metrics, logs, and traces) drives three sequential tasks: AD, FT, and RCL.",
+      "page": 2,
+      "index": 1,
+      "width": 500,
+      "height": 274
+    },
+    {
+      "url": "assets/figures/arxiv/2603.25538v2/fig-002.webp",
+      "caption": "Figure 8: Sensitivity analysis of four core hyperparameters (Layers of High Dim Blocks, Layers of Low Dim Blocks, Layers of GAT, and Window Sizes) across AD, FT, and RCL on datasets𝒟1 and𝒟2.",
+      "page": 10,
+      "index": 2,
+      "width": 883,
+      "height": 243
+    },
+    {
+      "url": "assets/figures/arxiv/2603.25538v2/fig-003.webp",
+      "caption": "Figure 2: The generation of missing modalities in production environments. This timeline illustrates how vulnerabilities in the observability infrastructure (e.g., agent crashes or aggressive sampling) cause abrupt data loss, even while the underlying microservice operates normally and outputs logs.",
+      "page": 3,
+      "index": 3,
+      "width": 493,
+      "height": 351
+    },
+    {
+      "url": "assets/figures/arxiv/2603.25538v2/fig-004.webp",
+      "caption": "Table 1: Overall performance comparison of AD, FT, and RCL on datasets 𝒟1 and 𝒟2 under complete data conditions. The best results are highlighted in bold. Hyphens indicate that the method does not support the corresponding task.",
+      "page": 8,
+      "index": 4,
+      "width": 1048,
+      "height": 236
+    },
+    {
+      "url": "assets/figures/arxiv/2603.25538v2/fig-005.webp",
+      "caption": "Figure 4: The impact of static imputation on latent feature distributions. A t-SNE visualization demonstrates how nonadaptive default values force the features of anomalous instances into the normal cluster, creating spurious correlations that suppress actual diagnostic signals.",
+      "page": 4,
+      "index": 5,
+      "width": 418,
+      "height": 296
+    },
+    {
+      "url": "assets/figures/arxiv/2603.25538v2/fig-006.webp",
+      "caption": "Table 3: Ablation study on datasets𝒟1 and𝒟2. Variants A1-A9 evaluate the encoder and global fusion components. Variants B1-B3 evaluate task-specific unified representation strategies. Hyphens indicate that the variant evaluates a specific downstream task and remains identical to the base model for the other tasks. The best results are highlighted in bold.",
+      "page": 9,
+      "index": 6,
+      "width": 498,
+      "height": 284
+    },
+    {
+      "url": "assets/figures/arxiv/2603.25538v2/fig-007.webp",
+      "caption": "Figure 5: Overview of the proposed missing-aware incident management framework. It comprises three core modules: (1) Modality-Specific Status Learning, extracting intra-modality features via an asymmetric encoder; (2) Missing-Aware Global Fusion, integrating isolated embeddings through an attention-guided gating mechanism and a topology-aware graph network; and (3) Diagnostic Tasks, optimizing the network via offline self-supervised reconstruction and executing online AD, FT, and RCL using the unified representations.",
+      "page": 5,
+      "index": 7,
+      "width": 1048,
+      "height": 220
+    }
+  ]
+}

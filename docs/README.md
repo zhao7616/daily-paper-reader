@@ -6,73 +6,70 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-04-02
-- 运行时间：2026-04-02 19:55:15 UTC
+- 最新运行日期：2026-04-03
+- 运行时间：2026-04-03 20:04:34 UTC
 - 运行状态：成功
-- 本次总论文数：17
-- 精读区：6
+- 本次总论文数：16
+- 精读区：5
 - 速读区：11
 
 ### 今日简报（AI）
-今日精选17篇前沿论文，重点攻克锂电池剩余寿命（RUL）与健康状态（SOH）的高精度预测难题。
-结合时序增强的混合深度学习与保形迁移学习，为应对制造差异及复杂工况下的电池预测提供了满分级解决方案。
-建议关注数据增强与可解释性模型（如KAN）在能源管理系统中的跨场景落地应用。
-- 详情：[/202604/02/README](/202604/02/README)
+今日深度解析 16 篇工业 AI 论文，聚焦锂电池寿命预测突破与工业维护智能体基准。
+重点推荐时序增强混合模型及 PHMForge 框架，前者刷新了电池 RUL 预测精度，后者定义了资产维护的 Agent 评测新标准。
+建议关注神经符号系统与可解释网络（KAN）在智能制造诊断中的跨界应用潜力。
+- 详情：[/202604/03/README](/202604/03/README)
 
 ### 精读区论文标签
-1. [Hybrid Deep Learning with Temporal Data Augmentation for Accurate Remaining Useful Life Prediction of Lithium-Ion Batteries](/202604/02/2603.27186v1-hybrid-deep-learning-with-temporal-data-augmentation-for-accurate-remaining-useful-life-prediction-of-lithium-ion-batteries)  
+1. [Hybrid Deep Learning with Temporal Data Augmentation for Accurate Remaining Useful Life Prediction of Lithium-Ion Batteries](/202604/03/2603.27186v1-hybrid-deep-learning-with-temporal-data-augmentation-for-accurate-remaining-useful-life-prediction-of-lithium-ion-batteries)  
    标签：评分：10.0/10、query:rul
-   evidence：用于电池RUL预测的混合深度学习
-2. [Conformalized Transfer Learning for Li-ion Battery State of Health Forecasting under Manufacturing and Usage Variability](/202604/02/2603.24475v1-conformalized-transfer-learning-for-li-ion-battery-state-of-health-forecasting-under-manufacturing-and-usage-variability)  
+   evidence：使用深度学习进行锂离子电池剩余寿命预测
+2. [PHMForge: A Scenario-Driven Agentic Benchmark for Industrial Asset Lifecycle Maintenance](/202604/03/2604.01532v1-phmforge-a-scenario-driven-agentic-benchmark-for-industrial-asset-lifecycle-maintenance)  
+   标签：评分：10.0/10、query:phm
+   evidence：包含剩余寿命预测和故障诊断的PHM任务基准
+3. [Aging States Estimation and Monitoring Strategies of Li-Ion Batteries Using Incremental Capacity Analysis and Gaussian Process Regression](/202604/03/2603.26155v1-aging-states-estimation-and-monitoring-strategies-of-li-ion-batteries-using-incremental-capacity-analysis-and-gaussian-process-regression)  
    标签：评分：9.0/10、query:rul
-   evidence：电池健康状态预测与不确定性量化
-3. [Aging States Estimation and Monitoring Strategies of Li-Ion Batteries Using Incremental Capacity Analysis and Gaussian Process Regression](/202604/02/2603.26155v1-aging-states-estimation-and-monitoring-strategies-of-li-ion-batteries-using-incremental-capacity-analysis-and-gaussian-process-regression)  
+   evidence：电池剩余寿命 (RUL) 预测
+4. [ARC: Alignment-based RPM Estimation with Curvature-adaptive Tracking](/202604/03/2603.29354v1-arc-alignment-based-rpm-estimation-with-curvature-adaptive-tracking)  
    标签：评分：9.0/10、query:rul
-   evidence：电池健康状态与剩余寿命预测
-4. [Transformer-Based Prognostics: Enhancing Network Availability by Improved Monitoring of Optical Fiber Amplifiers](/202604/02/2603.28081v1-transformer-based-prognostics-enhancing-network-availability-by-improved-monitoring-of-optical-fiber-amplifiers)  
-   标签：评分：9.0/10、query:rul
-   evidence：通过状态监测数据预测光纤放大器寿命
-5. [ARC: Alignment-based RPM Estimation with Curvature-adaptive Tracking](/202604/02/2603.29354v1-arc-alignment-based-rpm-estimation-with-curvature-adaptive-tracking)  
-   标签：评分：9.0/10、query:rul
-   evidence：旋转机械PHM的转速估计
-6. [CausalPulse: An Industrial-Grade Neurosymbolic Multi-Agent Copilot for Causal Diagnostics in Smart Manufacturing](/202604/02/2603.29755v1-causalpulse-an-industrial-grade-neurosymbolic-multi-agent-copilot-for-causal-diagnostics-in-smart-manufacturing)  
-   标签：评分：8.0/10、query:phm
-   evidence：统一智能制造中的异常检测与因果诊断
+   evidence：用于振动PHM的无转速计转速估计
+5. [Transformer-Based Prognostics: Enhancing Network Availability by Improved Monitoring of Optical Fiber Amplifiers](/202604/03/2603.28081v1-transformer-based-prognostics-enhancing-network-availability-by-improved-monitoring-of-optical-fiber-amplifiers)  
+   标签：评分：8.0/10、query:rul
+   evidence：根据监测数据预测光纤放大器寿命
 
 ### 速读区论文标签
-1. [Explainable Functional Relation Discovery for Battery State-of-Health Using Kolmogorov-Arnold Network](/202604/02/2604.00400v1-explainable-functional-relation-discovery-for-battery-state-of-health-using-kolmogorov-arnold-network)  
-   标签：评分：8.0/10、query:rul
-   evidence：用于电池退化跟踪的健康状态估计
-2. [Data-Driven Probabilistic Fault Detection and Identification via Density Flow Matching](/202604/02/2603.25982v1-data-driven-probabilistic-fault-detection-and-identification-via-density-flow-matching)  
+1. [Statistical modeling of breast cancer radiomic features and hazard using image registration-aided longitudinal CT data](/202604/03/2603.26888v1-statistical-modeling-of-breast-cancer-radiomic-features-and-hazard-using-image-registration-aided-longitudinal-ct-data)  
    标签：评分：7.0/10、query:phm
-   evidence：非线性系统的概率故障检测与识别
-3. [Quantifying Cross-Modal Interactions in Multimodal Glioma Survival Prediction via InterSHAP: Evidence for Additive Signal Integration](/202604/02/2603.29977v1-quantifying-cross-modal-interactions-in-multimodal-glioma-survival-prediction-via-intershap-evidence-for-additive-signal-integration)  
+   evidence：疾病进展的纵向追踪与生存分析
+2. [CausalPulse: An Industrial-Grade Neurosymbolic Multi-Agent Copilot for Causal Diagnostics in Smart Manufacturing](/202604/03/2603.29755v1-causalpulse-an-industrial-grade-neurosymbolic-multi-agent-copilot-for-causal-diagnostics-in-smart-manufacturing)  
+   标签：评分：7.0/10、query:phm
+   evidence：统一了智能制造中的异常检测和因果诊断
+3. [Explainable Functional Relation Discovery for Battery State-of-Health Using Kolmogorov-Arnold Network](/202604/03/2604.00400v1-explainable-functional-relation-discovery-for-battery-state-of-health-using-kolmogorov-arnold-network)  
    标签：评分：7.0/10、query:rul
-   evidence：用于癌症预后和生存预测的多模态深度学习
-4. [Efficient compressive sensing for machinery vibration signals](/202604/02/2603.25166v1-efficient-compressive-sensing-for-machinery-vibration-signals)  
+   evidence：电池健康管理的健康状态评估
+4. [NeuroVLM-Bench: Evaluation of Vision-Enabled Large Language Models for Clinical Reasoning in Neurological Disorders](/202604/03/2603.24846v1-neurovlm-bench-evaluation-of-vision-enabled-large-language-models-for-clinical-reasoning-in-neurological-disorders)  
+   标签：评分：6.0/10、query:phm
+   evidence：同时生成诊断和临床推理输出
+5. [Efficient compressive sensing for machinery vibration signals](/202604/03/2603.25166v1-efficient-compressive-sensing-for-machinery-vibration-signals)  
    标签：评分：6.0/10、query:rul
    evidence：机械振动信号与健康监测
-5. [Missing-Aware Multimodal Fusion for Unified Microservice Incident Management](/202604/02/2603.25538v1-missing-aware-multimodal-fusion-for-unified-microservice-incident-management)  
+6. [Missing-Aware Multimodal Fusion for Unified Microservice Incident Management](/202604/03/2603.25538v2-missing-aware-multimodal-fusion-for-unified-microservice-incident-management)  
    标签：评分：6.0/10、query:phm
-   evidence：事件管理中联合优化的统一框架
-6. [MUST: Modality-Specific Representation-Aware Transformer for Diffusion-Enhanced Survival Prediction with Missing Modality](/202604/02/2603.26071v1-must-modality-specific-representation-aware-transformer-for-diffusion-enhanced-survival-prediction-with-missing-modality)  
+   evidence：事件管理中用于联合优化的多模态融合
+7. [EngineAD: A Real-World Vehicle Engine Anomaly Detection Dataset](/202604/03/2603.25955v1-enginead-a-real-world-vehicle-engine-anomaly-detection-dataset)  
    标签：评分：6.0/10、query:rul
-   evidence：生存预测与模态特定表示建模
-7. [HAD: Heterogeneity-Aware Distillation for Lifelong Heterogeneous Learning](/202604/02/2603.26192v1-had-heterogeneity-aware-distillation-for-lifelong-heterogeneous-learning)  
+   evidence：包含传感器遥测数据的真实车辆发动机异常检测数据集
+8. [SPECTRA: An Efficient Spectral-Informed Neural Network for Sensor-Based Activity Recognition](/202604/03/2603.26482v1-spectra-an-efficient-spectral-informed-neural-network-for-sensor-based-activity-recognition)  
+   标签：评分：6.0/10、query:rul
+   evidence：基于传感器时序信号的频谱感知神经网络
+9. [Feature Reconstruction and Monitoring of Load Test Data under Varying Environmental Conditions](/202604/03/2604.00662v1-feature-reconstruction-and-monitoring-of-load-test-data-under-varying-environmental-conditions)  
+   标签：评分：6.0/10、query:rul
+   evidence：结构健康监测与多变工况下的损伤检测
+10. [LiteInception: A Lightweight and Interpretable Deep Learning Framework for General Aviation Fault Diagnosis](/202604/03/2604.01725v1-liteinception-a-lightweight-and-interpretable-deep-learning-framework-for-general-aviation-fault-diagnosis)  
    标签：评分：6.0/10、query:phm
-   evidence：跨具有不同输出结构的异构任务的终身学习
-8. [Neuro-Symbolic Process Anomaly Detection](/202604/02/2603.26461v2-neuro-symbolic-process-anomaly-detection)  
+   evidence：航空维修工作流程的故障诊断框架
+11. [A Novel Multi-view Mixture Model Framework for Longitudinal Clustering with Application to ANCA-Associated Vasculitis](/202604/03/2604.01734v1-a-novel-multi-view-mixture-model-framework-for-longitudinal-clustering-with-application-to-anca-associated-vasculitis)  
    标签：评分：6.0/10、query:phm
-   evidence：集成符号知识和神经网络的异常检测
-9. [Gaussian Joint Embeddings For Self-Supervised Representation Learning](/202604/02/2603.26799v1-gaussian-joint-embeddings-for-self-supervised-representation-learning)  
-   标签：评分：6.0/10、query:phm
-   evidence：用于多模态预测架构的生成式联合建模
-10. [Neuro-Symbolic Learning for Predictive Process Monitoring via Two-Stage Logic Tensor Networks with Rule Pruning](/202604/02/2603.26944v1-neuro-symbolic-learning-for-predictive-process-monitoring-via-two-stage-logic-tensor-networks-with-rule-pruning)  
-   标签：评分：6.0/10、query:phm
-   evidence：通过神经符号学习进行预测性过程监控
-11. [JEPA-MSAC: A Joint-Embedding Predictive Architecture for Multimodal Sensing-Assisted Communications](/202604/02/2603.29796v1-jepa-msac-a-joint-embedding-predictive-architecture-for-multimodal-sensing-assisted-communications)  
-   标签：评分：6.0/10、query:phm
-   evidence：用于动态环境下多任务的联合嵌入预测架构
+   evidence：整合纵向轨迹用于疾病进展和风险预测
 
 
 <div class="dpr-home-promo-card">

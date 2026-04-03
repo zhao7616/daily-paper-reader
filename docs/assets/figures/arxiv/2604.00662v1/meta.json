@@ -1,0 +1,46 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.00662v1/fig-001.webp",
+      "caption": "Figure 2. Original strain data (left) and the reconstructed strain data using the unsupervised (center left), partial (center right), and conditional (right) method of the Vahrendorfer Stadtweg. The vertical dashed line separates Phase I from Phase II. The data is colored according to the measured temperature.",
+      "page": 7,
+      "index": 1,
+      "width": 979,
+      "height": 1096
+    },
+    {
+      "url": "assets/figures/arxiv/2604.00662v1/fig-002.webp",
+      "caption": "Table 1. False alarms and probability of detection (POD) per method and varying smoothing parameter κ for the bridge Vahrendorfer Stadtweg. The respective control limits h4 were calculated using block bootstrapping.",
+      "page": 10,
+      "index": 2,
+      "width": 729,
+      "height": 234
+    },
+    {
+      "url": "assets/figures/arxiv/2604.00662v1/fig-003.webp",
+      "caption": "Figure 1. Vahrendorfer Stadtweg bridge view from the north (top-left). Three additional masses at the middle of the bridge (top-right). Overview of sensor positions (bottom).",
+      "page": 3,
+      "index": 3,
+      "width": 976,
+      "height": 504
+    },
+    {
+      "url": "assets/figures/arxiv/2604.00662v1/fig-004.webp",
+      "caption": "Figure 3. Conditional correlations (top) and variances (bottom) as functions of temperature, together with approximate, pointwise 95% confidence intervals, of the reconstructed strain data from the Vahrendorfer Stadtweg if using the unsupervised (left), partial (middle), or conditional (right) approach.",
+      "page": 8,
+      "index": 4,
+      "width": 926,
+      "height": 594
+    },
+    {
+      "url": "assets/figures/arxiv/2604.00662v1/fig-005.webp",
+      "caption": "Figure 4. MEWMA control chart (with κ = 0.2) on log scale for the unsupervised (h4 = 175.93), partial (h4 = 165.90), and conditional (h4 = 125.00) approach for feature reconstruction for the Vahrendorfer Stadtweg strain data. The control limits h4 are calculated using block bootstrapping. The dashed line separates Phase I from Phase II, with the three load test scenarios highlighted in color.",
+      "page": 9,
+      "index": 5,
+      "width": 941,
+      "height": 865
+    }
+  ]
+}
