@@ -1,0 +1,30 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2603.26629v1/fig-001.webp",
+      "caption": "Fig. 1: Credibility-Aware Fusion using Latent Context. Unlike static fusion methods, the C2MF framework extracts a joint neural embedding that serves as a context for a Conditional Probabilistic Circuit. The circuit dynamically evaluates the credibility of each source based on its position in the latent space (i.e., identifying when one modality is unreliable), ensuring that the final prediction is dominated by the most reliable information source for that specific instance.",
+      "page": 1,
+      "index": 1,
+      "width": 481,
+      "height": 383
+    },
+    {
+      "url": "assets/figures/arxiv/2603.26629v1/fig-002.webp",
+      "caption": "TABLE I: Mean test performance (%) at varying levels of cross-modal conflict λtest ∈ {0%, 50%, 75%, 100%} under decoupled",
+      "page": 6,
+      "index": 2,
+      "width": 1026,
+      "height": 1144
+    },
+    {
+      "url": "assets/figures/arxiv/2603.26629v1/fig-003.webp",
+      "caption": "Fig. 2: Mean test RMIS under decoupled training across varying test conflict levels λtest. Top row: overall RMIS across all methods. Bottom row: RMIS broken down by corrupted modality for CWM vs. C2WM, revealing whether credibility estimates adapt to the identity of the corrupted source or remain biased toward a single modality.",
+      "page": 7,
+      "index": 3,
+      "width": 1048,
+      "height": 424
+    }
+  ]
+}

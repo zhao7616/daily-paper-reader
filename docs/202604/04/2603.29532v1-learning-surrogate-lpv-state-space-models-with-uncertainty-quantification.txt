@@ -1,0 +1,633 @@
+Title: Learning Surrogate LPV State-Space Models with Uncertainty Quantification
+
+URL Source: https://arxiv.org/pdf/2603.29532v1
+
+Published Time: Wed, 01 Apr 2026 00:50:45 GMT
+
+Number of Pages: 8
+
+Markdown Content:
+# Learning Surrogate LPV State-Space Models with Uncertainty Quantification* 
+
+E. Javier Olucha, Valentin Preda, Amritam Das and Roland T´ oth 
+
+Abstract —The linear parameter-varying (LPV) framework en-ables the construction of surrogate models of complex nonlinear and high-dimensional systems, facilitating efficient stability and performance analysis together with controller design. Despite significant advances in data-driven LPV modelling, existing approaches do not quantify the uncertainty of the obtained LPV models. Consequently, assessing model reliability for analysis and control or detecting operation outside the training regime requires extensive validation and user expertise. This paper proposes a Bayesian approach for the joint estimation of LPV state-space models together with their scheduling, providing a characterization of model uncertainty and confidence bounds on the predicted model response directly from input–output data. Both aleatoric uncertainty due to measurement noise and epistemic uncertainty arising from limited training data and structural bias are considered. The resulting model preserves the LPV structure required for controller synthesis while enabling computationally efficient simulation and uncertainty propagation. The approach is demonstrated on the surrogate modelling of a two-dimensional nonlinear interconnection of mass-spring-damper systems. 
+
+Index Terms —Uncertainty Quantification, Linear Parameter-Varying Models, System Identification, Surrogate Modelling 
+
+I. I NTRODUCTION 
+
+Surrogate models are low-complexity representations that retain essential dynamic information of a system for a given utilization objective. In modern engineering workflows, they play a key role in enabling efficient simulation, analysis of the system behaviour together with and controller design. For example, surrogate models can drastically reduce simulation time when high-fidelity models are computationally expen-sive [1]. Alternatively, when the available models are overly complex or partially unknown, surrogate representations can be identified from system trajectory data, enabling the use of existing tools for analysis or controller design. Despite their efficacy, assessing the reliability of surrogate models remains a critical challenge. In practice, surrogate models are often used under operating conditions different from those observed during training, where their predictions may significantly deviate from the true system response.      
+
+> *This research was supported by the European Space Agency (grant num-ber: 4000145530) and The MathWorks Inc. Opinions, findings, conclusions or recommendations expressed in this paper are those of the authors and do not necessarily reflect the views of The MathWorks Inc. or the European Space Agency. E.J. Olucha, A. Das and R. T´ oth are with the Control Systems Group, Eindhoven University of Technology, The Netherlands. V. Preda is with the European Space Agency, ESTEC, The Netherlands. R. T´ oth is also with the Systems and Control Laboratory, HUN-REN Institute for Computer Science and Control, Hungary. Email addresses:
+
+{e.j.olucha.delgado, am.das, r.toth }@tue.nl, valentin.preda@esa.int 
+
+> Corresponding author: E. Javier Olucha
+
+Without explicit uncertainty quantification (UQ) detecting such situations, extensive validation campaigns with several iterations are required. UQ is therefore crucial to quantify the confidence in the surrogate model response by accounting for aleatoric and epistemic uncertainties. Obtaining uncertainty certificates for surrogate models is therefore essential for their safe and reliable deployment in engineering applications. Extensive research on UQ for data-driven modelling has been conducted in the machine learning community, particu-larly from a Bayesian perspective. Bayesian neural networks 
+
+(NNs) and related formulations have been proposed to capture model uncertainty and confidence bounds on the predicted model response [2]–[7]. More recently, these ideas have been extended to dynamical systems, including nonlinear state-space (SS) models [8]–[12] and neural ordinary differential equations [13]. Despite these advances, such models remain limited in their usefulness for control-oriented applications. In particular, NN models rely on general nonlinear parametriza-tions that do not provide a structure directly suitable for analysis or controller design with the existing tools. Moreover, the lack of structure prevents the systematic use of local linear approximations for parameter initialisation or the specification of informative priors based on engineering insight. In contrast, the linear parameter-varying (LPV) frame-work [14] offers a general model structure that can represent nonlinear system behaviour via a scheduling map, while remaining linear for fixed values of the scheduling variables. In particular, self-scheduled LPV models generate the scheduling trajectory based on their own state and input signals, eliminat-ing the need for exogenous scheduling variables. This enables efficient simulation and the use of existing tools for LPV analysis and controller design [15], [16]; nevertheless, UQ for LPV models remains largely unexplored. The only existing ap-proach [17] characterizes epistemic model uncertainty in LPV– SS identification using Bayesian NNs. Despite its excellent results, it only partly addresses the problem, since it assumes the availability of pre-selected exogenous scheduling variables, which are typically not available in surrogate modelling. Moreover, it employs nonlinear parametrizations of the LPV matrices that do not explicitly enforce the structural properties required for analysis and controller design, and confidence bounds on the model response are not systematically char-acterized. The problem addressed in this paper is the identification of self-scheduled LPV–SS surrogate models with UQ from input-output data. To this end, we propose a Bayesian approach that enables the joint estimation of the scheduling map, an LPV–SS model affinely dependent on the scheduling variables, and the 
+
+> arXiv:2603.29532v1 [eess.SY] 31 Mar 2026
+
+associated model uncertainty together with confidence bounds on the predicted model response. Both aleatoric uncertainty due to measurement noise and epistemic uncertainty arising from limited training data and structural bias are explicitly accounted for under an output-error noise setting, and the approach directly handles multi-input multi-output systems. The proposed formulation allows estimation of models di-rectly suitable for control-oriented applications together with uncertainty certificates, addressing a gap in the current lit-erature. It enables computationally efficient characterization of the predicted output response in terms of the mean and confidence intervals with complexity that scales linearly with the prediction horizon. Moreover, the LPV structure allows the incorporation of informative parameter priors based on linear approximations. The paper is structured as follows. In Section II, the problem of identifying self-scheduled LPV–SS models with UQ from input-output data is formulated. For this problem, the proposed approach for the joint learning of the model parameters and the scheduling together with UQ is presented in Section III. In Section IV, the capabilities of the method are demonstrated on the surrogate modelling problem of a two-dimensional nonlinear interconnection of mass-spring-damper systems. Finally, in Section V, the main conclusions on the achieved results and further research directions are discussed. 
+
+Notation: The sets of real numbers and integers are denoted as R and Z, respectively. The row-wise vectorization of a matrix M ∈ Ra×b is denoted by vec ( M ) ∈ R1×ab . An index set is denoted by Iba := {i ∈ Z | a ≤ i ≤ b}. The weighted squared 2-norm of a vector x ∈ Rnx with weight matrix W ∈ Rnx×nx is defined as ∥x∥2 
+
+> W
+
+:= x⊤W x .II. P ROBLEM DEFINITION 
+
+Consider a discrete-time (DT) data-generating system de-fined in terms of the SS representation: 
+
+S =
+
+(xk+1 = f (xk, u k),yk = h(xk, u k) + ek, (1) where k ∈ Z denotes the DT step, xk ∈ Rnx is the state, 
+
+uk ∈ Rnu is the input, yk ∈ Rny is the measured output of the system, and ek ∈ Rny is assumed to be a realization of an i.i.d. Gaussian noise process with zero mean and covariance 
+
+Σe ∈ Rny ×ny , i.e., ek ∼ N (0 , Σe). The functions f : Rnx ×
+
+Rnu → Rnx and h : Rnx × Rnu → Rny are considered to be real-valued and deterministic. We assume that an input-output dataset DN = {(uk, y k)}Nk=0 is recorded from (1) for an input sequence u0: N , where u0: N := {uk}Nk=0 , and possibly unknown initial state x0 ∈ Rnx .The considered surrogate model for S is sought in an LPV– SS form with affine dependency on scheduling variables, given by 
+
+Sθ :
+
+
+
+ˆxk+1 = A(ρk, θ M )ˆ xk + B(ρk, θ M )uk,
+
+ˆyk = C(ρk, θ M )ˆ xk + D(ρk, θ M )uk,ρk = η(ˆ xk, u k, θ η ),
+
+(2) where ˆxk ∈ Rˆnx is the state with ˆnx < n x, ρk ∈ Rnp is the scheduling variable and η : Rˆnx × Rnu × Rnθη → Rnp is the 
+
+scheduling map , parametrized by a feedforward neural net-work (FNN), while the matrix functions A, . . . , D , collected as 
+
+M (ρk, θ M ) = 
+
+A(ρk, θ M ) B(ρk, θ M )
+
+C(ρk, θ M ) D(ρk, θ M ),
+
+
+
+depend affinely on ρk:
+
+M (ρk, θ M ) = M0(θM ) + 
+
+> np
+
+X
+
+> i=1
+
+ρikMi(θM ), (3) and the parameters θM are the elements of the matrices in (3). Therefore, the parameter vector to learn becomes 
+
+θ = vec ([ M0 M1 · · · Mnp ], θ η ) ∈ Rnθ .Due to the additive noise in (1), the output can be expressed as 
+
+yk = ˆ y(k | k − 1, θ ) + ek,
+
+where ˆy(k | k − 1, θ ) is the one-step-ahead predictor obtained recursively from (2), i.e., ˆy(k | k − 1, θ ) = ˆ y(k | u0: k, ˆx0, θ ).Under the assumption ek ∼ N (0 , Σe), the likelihood of a single observation yk is 
+
+p(yk | u0: k, ˆx0, θ, Σe) = N (0 | yk − ˆy(k | k − 1, θ ), Σe), (4) which is equivalently written as 
+
+p(yk | u0: k, ˆx0, θ, Σe) = N (yk | ˆy(k | k − 1, θ ), Σe). (5) Further, assuming that {ek}Nk=0 is i.i.d., the likelihood of the dataset DN is 
+
+p(DN | θ, Σe) = 
+
+> N
+
+Y
+
+> k=0
+
+p(yk | u0: k, ˆx0, θ, Σe). (6) For θ, we take the prior parameter distribution to be Gaussian: 
+
+p(θ | μo, Σo) = N (θ | μo, Σo),
+
+where μo ∈ Rnθ and Σo ∈ Rnθ ×nθ are the prior mean and covariance matrix for θ, respectively. By Bayes rule, the 
+
+parameter posterior distribution is given by 
+
+p(θ | D N , μ o, Σo, Σe) = p(DN | θ, Σe) p(θ | μo, Σo)
+
+p(DN | μo, Σo, Σe) , (7) where the denominator in (7) is the normalization constant. The predictive distribution , which characterizes the confidence in the predicted model response for a given input sequence 
+
+u0: k, is obtained by marginalizing (7): 
+
+p(yk | u0: k, DN ) = 
+
+Z
+
+p(yk | u0: k, θ ) p(θ | D N , μ o, Σo, Σe) d θ. 
+
+(8) However, this integral is analytically intractable due to the nonlinear dependence of ˆy(k | k − 1, θ ) on θ, and sampling-based approximations are computationally expensive and scale poorly with model dimension, making them unsuitable for the intended surrogate modelling setting. Given a dataset DN , our objective is therefore twofold: (i) to estimate θ of the surrogate (2), and (ii) to compute an efficient approximation of the predictive distribution (8). In the next section, we develop a computationally efficient approximation of the predictive distribution together with the associated parameter estimation procedure. III. M ETHOD 
+
+In this section, we address the estimation of the LPV– SS model parameters using a Maximum a Posteriori (MAP) formulation. Based on the MAP estimate, a Gaussian approx-imation of the parameter distribution p(θ | D N , μ o, Σo, Σe) is derived, which is then used to derive a Gaussian approximation of the predictive distribution p(yk | u0: k, DN ). Finally, compu-tational aspects of the proposed approach are discussed. 
+
+A. Maximum a Posteriori point estimate of the parameters 
+
+To estimate the model parameters we consider the parameter posterior distribution (7). Since the normalization constant is independent of θ, it can be expressed as 
+
+p(θ | D N , μ o, Σo, Σe) ∝ p(DN | θ, Σe) p(θ | μo, Σo). (9) Taking the logarithm of (9) yields the objective function 
+
+L(θ, ˆx0) = cnst − 12
+
+> N
+
+X
+
+> k=0
+
+∥ε(k | θ)∥2Σ−1e
+
+− 12 ∥θ −μo∥2Σ−1o
+
+, (10) where ε(k | θ) = yk − ˆy(k | k − 1, θ ), and the constant term cnst = − (N + 1) 2 ln((2 π)ny det Σ e) − 12 ln((2 π)nθ det Σ o).
+
+is independent of θ and can therefore be omitted in the cost. Maximizing (10) yields the MAP estimate 
+
+vec ( θMAP , ˆx0) = arg max 
+
+> θ, ˆx0
+
+L(θ, ˆx0), (11) subject to 
+
+ˆxk+1 = A(ρk, θ M )ˆ xk + B(ρk, θ M )uk,
+
+ˆyk = C(ρk, θ M )ˆ xk + D(ρk, θ M )uk,ρk = η(ˆ xk, u k, θ η ).
+
+Note that in the special case of Σ−1o → 0, the MAP estimate reduces to the classical maximum likelihood estimate. 
+
+B. Gaussian approximation of the parameter distribution 
+
+The parameter posterior p(θ | D N , μ o, Σo, Σe) characterizes the model uncertainty associated with the identified parame-ters. Due to the nonlinear dependence of ˆy(k | k − 1, θ ) on θ,this distribution is non-Gaussian. To obtain a tractable approx-imation, we employ the Laplace method and approximate the parameter posterior with 
+
+q(θ | D N , μ o, Σo, Σe) = N (θ | μap , Σap ).
+
+To this end, consider a second-order Taylor expansion of the logarithm of (9) around a linearization point θ∗:
+
+ln p(θ | D N , μ o, Σo, Σe) ≈ ln p(θ∗ | D N , μ o, Σo, Σe)
+
+− Q(θ − θ∗) − 12 (θ − θ∗)⊤P (θ − θ∗), (12) where 
+
+Q = − ∂ ln p(θ | D N , μ o, Σo, Σe)
+
+∂θ θ=θ∗ , Q ∈ R1×nθ ,P = − ∂2 ln p(θ | D N , μ o, Σo, Σe)
+
+∂θ∂θ ⊤ θ=θ∗
+
+, P ∈ Rnθ ×nθ .
+
+A natural choice is θ∗ = θMAP , since it maximizes the pa-rameter posterior, implying that the gradient term Q vanishes, and is available from (11). Exponentiating (12) yields 
+
+p(θ) ≈ p(θMAP ) exp( − 12 ∥θ − θMAP ∥2 
+
+> P
+
+),
+
+where the conditioning on DN , μ o, Σo, Σe is omitted for read-ability. Since this expression is not normalized, enforcing the standard normalization of multivariate Gaussian distributions leads to 
+
+p(θ | D N , μ o, Σo, Σe) ≈ det( P )1/2
+
+(2 π)nθ /2 exp( − 12 ∥θ − θMAP ∥2 
+
+> P
+
+).
+
+(13) The Hessian P is given by 
+
+P = Σ −1o +
+
+> k
+
+X 
+
+> τ=0
+
+J⊤ 
+
+> τ
+
+Σ−1e Jτ +
+
+> k
+
+X 
+
+> τ=0
+> ny
+
+X
+
+> i=1
+
+Σ−1e ε(k | θ)iHτ,i , (14) where 
+
+Jk = ∂ ˆy(k | k − 1, θ )
+
+∂θ θ=θMAP ∈ Rny ×nθ , (15) and Hk,i ∈ Rnθ ×nθ denotes the Hessian of the i-th component of ˆy(k | k − 1, θ ):
+
+Hk,i = ∂2 ˆy(k | k − 1, θ )i
+
+∂θ∂θ ⊤ θ=θMAP , i = 1 , . . . , n y.
+
+As in the Gauss–Newton method, (14) is approximated by neglecting second-order derivative terms, leading to 
+
+P ≈ Σ−1o +
+
+> k
+
+X 
+
+> τ=0
+
+J⊤ 
+
+> τ
+
+Σ−1e Jτ . (16) This approximation is generally accurate, for instance, when 
+
+ε(k | θ) is small and uncorrelated with the second-order terms, which is expected at θ∗ = θMAP . Thus, the Gaussian approximation q(θ | D N , μ o, Σo, Σe) is given by 
+
+μap = θMAP , Σap = P −1.
+
+C. Gaussian approximation of the predictive distribution 
+
+As discussed above, the predictive distribution (8) is analytically intractable and we seek a computationally efficient approximation suitable for surrogate modelling. Following standard approaches in Bayesian learning [18, Chapter 5.7] and recent applications to dynamical systems [12], we approx-imate the predictive distribution as a Gaussian. To this end, we combine the Gaussian approximation of the parameter posterior p(θ | D N , μ o, Σo, Σe) provided in Subsec-tion III-B with a linearization of the surrogate Sθ . The later is obtained through a first-order Taylor series expansion of Sθ
+
+around θMAP :
+
+p(yk | u0: k, θ, Σe) ≈ N (yk | ˆy(k | k − 1, θ MAP )+ Jk(θ − θMAP ), Σe), (17) where Jk denotes the Jacobian defined in (15). Using the stan-dard Gaussian marginalization result given in the Appendix leads to 
+
+p(yk|u0: k, DN ) ≈ N  yk|ˆy(k|k − 1, θ MAP ), σ 2
+
+> k
+
+(u0: k, ˆx0) ,
+
+(18) where the variance is given by 
+
+σ2
+
+> k
+
+(u0: k, ˆx0) = Σ e + JkΣap J⊤ 
+
+> k
+
+, (19) and the dependence of Jk on u0: k and ˆx0 is implicit through 
+
+ˆy(k | k − 1, θ MAP ).The approximation (18) constitutes the main result, as it pro-vides both the predictive mean and its associated uncertainty. The variance in (19) naturally decomposes into aleatoric Σe
+
+and epistemic JkΣap J⊤ 
+
+> k
+
+uncertainty terms. Finally, the Gaus-sian approximation (18) enables the construction of confidence regions for the predicted output. For yk ∼ N (ˆ yk, Σk), where 
+
+Σk = σ2
+
+> k
+
+(u0: k, ˆx0), and a confidence level α ∈ (0 , 1) , the 
+
+α-confidence region is given by 
+
+(yk − ˆyk)⊤Σ−1 
+
+> k
+
+(yk − ˆyk) ≤ χ2 
+
+> ny
+
+(α),
+
+where χ2 
+
+> ny
+
+(α) denotes the inverse cumulative distribution function of the chi-squared distribution. 
+
+D. Computational details 
+
+The computation of the Jacobians Jk can be executed recursively as proposed in [19], leading to a computational cost that scales linearly in the simulation horizon. For this, let the state sensitivity be denoted by sk = ∂ ˆxk/∂θ . By taking the partial derivatives of (2) w.r.t. the parameters θ, the evolution of sk is described by 
+
+∂ ˆyk
+
+∂θ = ∂h ∂ ˆxk
+
+sk + ∂h ∂θ , sk+1 = ∂f ∂ ˆxk
+
+sk + ∂f ∂θ , (20) where 
+
+∂h k
+
+∂θ = ϕk( ∂∂θ M
+
+(H0 +
+
+> np
+
+X
+
+> i=1
+
+ρikHi) + 
+
+> np
+
+X
+
+> i=1
+
+Hi
+
+∂ρ ik
+
+∂θ η
+
+) ∈ Rny ×nθ ,
+
+(21) 
+
+∂h k
+
+∂ ˆxk
+
+= C0 +
+
+> np
+
+X
+
+> i=1
+
+Ciρik +
+
+> np
+
+X
+
+> i=1
+
+(Ci ˆxk + Diuk) ∂ρ ik
+
+∂ ˆxk
+
+∈ Rny ×ˆnx ,
+
+(22) with Hi = vec ([ Ci, D i]) , ϕk = [ˆ x⊤ 
+
+> k
+
+u⊤ 
+
+> k
+
+]⊗Iny , ⊗ denoting the Kronecker product and In being an identity matrix of size n.The partial derivatives of f are obtained in a similar manner, and ∂ρ k/∂θ η , ∂ρ k/∂ ˆxk can be computed via backpropagation. Then, a single evaluation of (20) scales asymptotically as 
+
+Jcost = O(np ˆn2x + ˆ n2xnθ + np ˆnxnθη + ny ˆnxnθ )+ O(∂ρ k/∂θ η ) + O(∂ρ k/∂ ˆxk).
+
+and its recursive evaluation over T steps scales O(T J cost ),which is linear in the time horizon T and in the number of parameters nθ , and quadratic in the state dimension ˆnx.The Hessian approximation in (16) can be computed offline as it depends on DN . Since Σap = P −1, only its inverse is required in (19). However, direct computation of P −1 becomes increasingly ill-conditioned as the data grows. Instead, P −1
+
+can be computed recursively using numerically stable updates based on the Woodbury matrix identity [20]. Specifically, for 
+
+τ ∈ INτ =0 with P0 = Σ −1o :
+
+P −1  
+
+> τ+1
+
+= P −1 
+
+> τ
+
+− P −1 
+
+> τ
+
+J⊤ 
+
+> τ
+
+(Λ −1 + Jτ P −1 
+
+> τ
+
+J⊤ 
+
+> τ
+
+)−1Jτ P −1 
+
+> τ
+
+. (23) Each update incorporates the information from one data point in DN , yielding the final approximation Σap = P −1 
+
+> N+1
+
+.IV. S IMULATION RESULTS 
+
+In this section, the proposed method is demonstrated on a surrogate model identification problem for a two-dimensional, neighbour-coupled interconnection of mass-spring-damper 
+
+(MSD) systems. Such a structure may represent a mechanical truss, a cantilever or a discrete approximation of continuous medium. Then, our objective is to learn a reduced-order surro-gate LPV model together with UQ from measured input-output data, rather than the true system dynamics. The implementa-tion of the method and the code to reproduce these results is available at https://gitlab.com/Javi-Olucha/lpv-sysid-uq. 
+
+A. System description 
+
+We consider a two-dimensional interconnection of MSD systems, depicted in Fig. 1. The system consists of six point masses of 0.5 kg each, arranged in a 2 × 3 rectangular grid. For each mass, the state vector [qx qy ˙qx ˙qy]⊤ represents the respective position and velocity in the horizontal and vertical directions, accounting for a total of 24 states. The masses are interconnected via possibly nonlinear spring–damper elements that generate forces based on the relative displacements and velocities. For notational compactness, we directly specify these forces. The masses in the first column are attached to an infinitely rigid wall through horizontally and vertically constrained elements with forces 
+
+f wall  
+
+> x
+
+= qx, f wall  
+
+> y
+
+= 2 qy, f wall  
+
+> d,x
+
+= ˙ qx, f wall  
+
+> d,y
+
+= ˙ qy.
+
+Each mass is connected to its immediate Cartesian neighbours, with the corresponding interaction forces given by 
+
+fx = qx,i,j , f y = qy,i,j + q3y,i,j , f d,x = ˙ qx,i,j , f d,y = ˙ qy,i,j ,M1
+
+M2
+
+M3
+
+M4
+
+M5
+
+M6  
+
+> ux(t)
+> uy(t)
+> qx(t)
+> qy(t)
+
+Fig. 1: Graphic representation of the two-dimensional inter-connection of mass-spring-damper systems. Fig. 2: Input and output trajectories of the training data set. where qi,j = qj −qi denotes the relative displacement between masses Mj and Mi. In addition, diagonal neighbours are coupled through nonlinear elements with forces 
+
+f diag = 5 tanh ( ri,j ), f diag  
+
+> d
+
+= 0 .5 sin ( ˙ ri,j ),
+
+where ri,j =
+
+q
+
+q2x,i,j + q2y,i,j is the Euclidean distance be-tween the connected masses. An external input force u(t) = [ux,1 uy,1]⊤ is applied to mass M1, and the system out-put is defined as the position of mass M6, i.e., w(t) =[qx,6 qy,6]⊤. Under these considerations, the dynamics of the two-dimensional MSD interconnection are discretized using a fourth-order Runge–Kutta (RK4) method with sampling time Ts = 0 .05 s , where the input is kept constant during the sampling period by a zero order hold. The resulting DT representation of the system, in the form of (1), is given by 
+
+xk+1 = f (xk, u k),wk = h(xk, u k), (24) where xk ∈ R24 is the state, uk ∈ R2 is the input and wk ∈ R2
+
+is the noise-free output. 
+
+B. Experiment design 
+
+Two data sets are generated from (24), denoted by Dtrain 
+
+and Dtest , used for training and testing the surrogate models, respectively. For Dtrain the DT model is simulated with 
+
+utrain (k) = 
+
+2φ1,x(k) + φ2,x(k)2φ1,y(k) + φ2,y(k)
+
+
+
+, (25) from zero initial conditions, resulting in 3460 data points (172 .95 s ). The components φ1,• are chirp input forces φ1,• =sin ((1 .4π)k/ 90 k + ϕ•), active for 0 ≤ kT s ≤ 90 , where ϕx =0 and ϕy = π/ 2. The components φ2,• are multi-sine random phase input forces φ2,• = Pnr 
+
+> j=1
+
+0.1 sin (2 πω j Ts k + ϕj )
+
+Fig. 3: Input and output trajectories of the test data set. active in kT s ∈ I•, where Ix = [96 , 116] ∪ [148 , 168] 
+
+and Iy = [122 , 142] ∪ [148 , 168] . The frequencies {ωj }nr
+
+> j=1
+
+lie in [0 , 1.4π) with resolution of 0.05 Hz and the phases satisfy ϕj ∼ U(0 , 2π). The measured output is obtained by adding white noise to the noise-free output wk, i.e., 
+
+yk = wk + ek, where ek ∼ N (0 , Σe) with covariance Σe =diag(0 .3795 , 0.262) corresponds to a signal-to-noise (SNR) ratio of 35 dB. The resulting input and output trajectories of 
+
+Dtrain are shown in Fig. 2. The train dataset Dtrain is then scaled and normalized. For Dtest the DT model is simulated with 
+
+utest (k) = 
+
+φ1,x(k) + φ2,x(k)
+
+φ1,y(k)
+
+
+
+, (26) from zero initial conditions, resulting in 600 data points (29 .95 s ). The input components are defined as φ1,x(k) = 2 sin (1 .6πT sk + π/ 3) , φ2,x(k) is a step of magnitude 
+
+2 over the interval kT s ∈ [1 , 4] , and φ1,y(k) =sin (2 π0.1Tsk + π/ 2) − 2 sin (2 π0.05 Tsk + π/ 7) . The mea-sured output is defined as yk = wk +ek, where ek ∼ N (0 , Σe)
+
+is included with covariance Σe = diag(0 .1483 , 0.1919) ,corresponding to a SNR ratio of 35 dB . Under these set-tings, Dtest also challenges the extrapolation capability of the learned surrogate. In particular, φ1,x contains higher-frequency components than those present in utrain , while φ2,x induces a step response, exciting dynamics of different nature. Lastly, as shown in Fig. 3, the resulting output trajectories of Dtest 
+
+explore further on the lower region of the output space. 
+
+C. Selection of informative parameter priors 
+
+The selection of parameter prior distributions is a critical and non-trivial aspect of Bayesian estimation. For NN-based model structures, incorporating engineering insights into in-formative priors is generally difficult, limiting the effective TABLE I: BFR of the estimated LTI models          
+
+> BFR (%) Sssest Sn4sid Sjpem
+> utrain 37.40 25.28 85.38
+> utest -265.62 -175.39 67.84
+
+Fig. 4: Frequency response of the estimated LTI models 
+
+Sssest and Sn4sid where the shaded area shows the uncertainty interval for confidence level 95%. use of the Bayesian framework. The considered LPV model structure partially alleviates this issue, as priors for the LTI part of the LPV model, characterized by M0, can be obtained systematically via linear system identification. Specifically, we use a best linear approximation [21] (BLA) as the prior mean of M0, while the associated covariance is chosen heuristically to reflect the uncertainty in this estimate. To this end, three linear DT LTI–SS models are identified using Dtrain . First, the M ATLAB functions SSEST and N4SID ,implementing the prediction error minimization (PEM) and subspace methods [22], are used to obtain the models Sssest 
+
+and Sn4sid , respectively. A third model Sjpem is estimated using the J AX -based [23] PEM approach detailed in [24]. In all cases, the sampling time is set to Ts = 0 .05 s , the state dimension to ˆnx = 6, the feedthrough matrix is fixed to zero, the initial state ˆx0 is estimated, and the estimation of a noise model is disabled. For Sssest and Sn4sid , the identification focus is set to simulation. For Sjpem , parameter optimization is performed using ADAM [25] for 2000 iterations, followed by L-BFGS [26] with a maximum of 2000 iterations. The obtained models are evaluated in simulation using their respective estimated initial conditions, both for the train input utrain and the test input utest . As a measure of model quality, the simulation best fit rate 1 (BFR) is reported in Tab. I. Additionally, the confidence region corresponding to one standard deviation in the frequency response of Sssest 
+
+and Sn4sid is shown in 4, and the simulation results for 
+
+utest are displayed in Fig. 5. The results show that Sjpem 
+
+significantly outperforms the other models for utrain and is the only model that accurately approximates the true output 
+
+> 1
+
+BFR = 
+
+
+
+1 −
+
+r PNk=0 ∥y(k)−ˆy(k)∥22PNk=0 ∥y(k)−ymean ∥22
+
+
+
+· 100% , where y is the data sequence, ymean is the sample mean of y, and ˆy is the predicted response of the model. 
+
+Fig. 5: Simulated output trajectories of the estimated LTI models for utest .for utest . Moreover, the confidence regions of Sssest and 
+
+Sn4sid fail to reflect the performance degradation on the test data, highlighting the limitations of classical LTI uncertainty estimates and motivating the use of surrogate models with UQ. 
+
+D. Learning an LPV State-Space model with UQ 
+
+Now, an LPV-SS model with UQ, denoted by Slpv -uq , is identified using the proposed approach, which is implemented in P YTHON with the J AX library. We define a discrete-time LPV model structure in the form of (2) with sampling time 
+
+Ts = 0 .05 s and a state, input, output and scheduling variable dimensions of ˆnx = 6, nu = 2, ny = 2 and np = 1,respectively. The feedthrough matrix is constrained to zero, and the scheduling map η(ˆ xk, u k) is parametrized by a FNN with two hidden layers and three fully connected neurons per The resulting LPV model contains a total of nθ = 168 to-be-trained parameters. The prior mean μM0 associated with the LTI part is se-lected from the BLA model Sjpem identified in Section IV-C. The corresponding covariance is chosen as Σo,M 0 = 0 .25 I,where I denotes an identity matrix of appropriate dimensions, reflecting the high confidence indicated by the results in Tab. I. For the remaining parameters, the prior mean is set to zero and the covariance to 10 I, reflecting the absence of prior structural knowledge while providing mild regularization toward the origin. The measurement noise prior covariance is set to Σe = 100 I. The model parameters are initialized accordingly: the elements of M0 are set to the values of Sjpem ,the entries of the scheduling-dependent matrices Mi are drawn from a zero-mean normal distribution, and the weights of the FNN are initialized using the Xavier method [27]. Then, the model parameters are first estimated as detailed in Section III-A by solving (11) using the strategy in [24], with 2000 ADAM iterations followed by up to 6000 L-BFGS iterations. The optimization is repeated 16 times from different random initial guesses, resulting in a total training time 2 of 
+
+≈ 51 s. Next, the parameter posterior is approximated via the Laplace method from Section III-B, and the covariance Σap 
+
+is computed using (23), requiring ≈ 1 s. Using the resulting model Slpv -uq and covariance Σap , the predictive distribution 
+
+> 2On a laptop with an i7-13850HX (2.10 GHz) CPU and 64 GB RAM.
+
+TABLE II: BFR and computation time of the simulated model response together with the 2σ uncertainty bounds.        
+
+> Dataset BFR (%) Computation time (s)
+> utrain 96.46 0.287
+> utest 86.96 0.254
+
+Fig. 6: Simulation results of the estimated Slpv -uq model for 
+
+utrain . The predicted mean and the computed ±2σ confidence interval of the model response are shown with the true measured train output. in (18) is evaluated to propagate the model response ˆy(k | k −
+
+1, θ MAP ) and the associated variance σ2
+
+> k
+
+. For visualization, the diagonal entries of σ2 
+
+> k
+
+are used to construct ±2σk confidence bounds around the predicted response at each time step. The simulation performance of the surrogate is evaluated for both utrain and utest , and the computation time and simulation BFR are reported in Tab. II. The results indicate that the iden-tified LPV model achieves superior simulation performance compared to linear counterparts, while maintaining a compu-tational cost that scales linearly with the prediction horizon. The simulation results with confidence intervals corresponding to two standard deviations for utrain and utest are displayed in Fig. 6 and Fig. 7, respectively. The predicted confidence intervals increase at time instances with larger prediction error, indicating the estimated uncertainty appropriately reflects the model reliability. V. C ONCLUSION 
+
+This paper introduced a novel Bayesian approach for learning LPV-SS surrogate models that jointly estimate the scheduling map, the system dynamics, and the model uncer-tainty. Both aleatoric uncertainty, arising from measurement noise, and epistemic uncertainty due to limited training data and structural bias are considered. The model uncertainty is used to generate confidence bounds of the predicted model response. The experimental results show that, as it is well-known is system identification, uncertainty estimates obtained from linear identification approaches are not reliable when the 
+
+Fig. 7: Simulation results of the estimated Slpv -uq model for 
+
+utest . The predicted mean and the computed ±2σ confidence interval of the model response are shown with the true measured test output. underlying data-generating system, in this case a nonlinear system, can not be fully represented by the model structure. In contrast, the proposed method yields meaningful uncer-tainty characterization while achieving superior prediction performance. For future research, we plan to investigate more accurate approximations of the posterior predictive distribution to further improve the accuracy of the characterization of confidence bound on the model response. APPENDIX 
+
+Let p(x) = N (x | μ, Σx) and p(y | x) = N (y | Ax + b, Σc).Then, the marginal distribution of y is given by 
+
+p(y) = 
+
+Z
+
+p(y | x) p(x) d x = N (y | Aμ + b, Σc + AΣxA⊤).
+
+REFERENCES [1] C. K. J. Hou and K. Behdinan, “Dimensionality Reduction in Surro-gate Modeling: A Review of Combined Methods,” Data Science and Engineering , vol. 7, pp. 402–427, Dec. 2022. [2] D. Heckerman, “A tutorial on learning with bayesian networks,” in              
+
+> Innovations in Bayesian Networks: Theory and Applications (D. E. Holmes and L. C. Jain, eds.), pp. 33–82, Berlin: Springer, 2008. [3] Y. Kwon, J. H. Won, B. J. Kim, and M. C. Paik, “Uncertainty quan-tification using Bayesian neural networks in classification: Application to biomedical image segmentation,” Computational Statistics & Data Analysis , vol. 142, p. 106816, 2020. [4] L. Kong, J. Sun, and C. Zhang, “SDE-Net: Equipping deep neural networks with uncertainty estimates,” in Proc. of the 37th Int. Conf. on Machine Learning , ICML20, JMLR.org, 2020. [5] L. V. Jospin, H. Laga, F. Boussaid, W. Buntine, and M. Bennamoun, “Hands-on bayesian neural networks—a tutorial for deep learning users,”
+> IEEE Comp. Intelligence Magazine , vol. 17, no. 2, pp. 29–48, 2022. [6] J. Gawlikowski, C. R. N. Tassi, M. Ali, J. Lee, M. Humt, J. Feng, A. Kruspe, R. Triebel, P. Jung, R. Roscher, M. Shahzad, W. Yang, R. Bamler, and X. X. Zhu, “A survey of uncertainty in deep neural networks,” A.I. Review , vol. 56, pp. 1513–1589, Oct. 2023. [7] W. He, Z. Jiang, T. Xiao, Z. Xu, and Y. Li, “A survey on uncertainty quantification methods for deep learning,” Acm Computing Surveys ,vol. 58, Feb. 2026. [8] Y. Shapovalova, Bayesian Inference in Multivariate Nonlinear State-Space Models .PhD thesis, ProefschriftMaken Maastricht / Maastricht University, Netherlands, 2019.
+
+[9] R. Bhusal and K. Subbarao, “Uncertainty Quantification Using Gener-alized Polynomial Chaos Expansion for Nonlinear Dynamical Systems With Mixed State and Parameter Uncertainties,” Journal of Computa-tional and Nonlinear Dynamics , vol. 14, Jan. 2019. [10] J. Courts, A. G. Wills, T. B. Sch¨ on, and B. Ninness, “Variational system identification for nonlinear state-space models,” Automatica , vol. 147, p. 110687, Jan. 2023. [11] Y. Bao and J. M. Velni, “Adaptive uncertainty quantification for scenario-based control using meta-learning of bayesian neural networks,” IFAC-PapersOnLine , vol. 58, no. 28, pp. 486–491, 2024. [12] M. B. Dehkordi, M. Forgione, and D. Piga, “Uncertainty quantifica-tion in neural state-space models: Applications for experiment design and uncertainty-aware MPC,” European Journal of Control , vol. 85, p. 101359, 2025. [13] Z. Zou, X. Meng, A. F. Psaros, and G. E. Karniadakis, “NeuralUQ: A comprehensive library for uncertainty quantification in neural differential equations and operators,” SIAM Review , vol. 66, no. 1, pp. 161–190, 2024. [14] R. T´ oth, Modeling and Identification of Linear Parameter-Varying Systems , vol. 403 of Lecture Notes in Control and Information Sciences .Germany: Springer, 2010. [15] C. Hoffmann and H. Werner, “A Survey of Linear Parameter-Varying Control Applications Validated by Experiments or High-Fidelity Sim-ulations,” IEEE Transactions on Control Systems Technology , vol. 23, no. 2, pp. 416–433, 2015. [16] P. J. W. Koelewijn, Analysis and Control of Nonlinear Systems with Stability and Performance Guarantees: A Linear Parameter-Varying Approach . PhD thesis, Eindhoven University of Technology, Feb. 2023. [17] Y. Bao, J. M. Velni, and M. Shahbakhti, “Epistemic uncertainty quan-tification in state-space LPV model identification using bayesian neural networks,” IEEE Control Systems Letters , vol. 5, no. 2, pp. 719–724, 2021. [18] C. M. Bishop, Pattern Recognition and Machine Learning . Information Science and Statistics, New York: Springer, 2006. [19] M. Forgione, A. Muni, D. Piga, and M. Gallieri, “On the adaptation of recurrent neural networks for system identification,” Automatica ,vol. 155, p. 111092, 2023. [20] N. J. Higham, Accuracy and Stability of Numerical Algorithms . Society for Industrial and Applied Mathematics, 2 ed., 2002. [21] M. Schoukens and R. T´ oth, “On the initialization of nonlinear LFR model identification with the best linear approximation,” IFAC-PapersOnLine , vol. 53, no. 2, pp. 310–315, 2020. [22] L. Ljung, System Identification: Theory for the User . Prentice Hall Information and System Sciences Series, Prentice Hall PTR, 1999. [23] J. Bradbury, R. Frostig, P. Hawkins, M. J. Johnson, C. Leary, D. Maclau-rin, G. Necula, A. Paszke, J. VanderPlas, S. Wanderman-Milne, and Q. Zhang, “JAX: Composable transformations of Python+NumPy pro-grams,” 2018. [24] A. Bemporad and R. T´ oth, “Efficient identification of linear, parameter-varying, and nonlinear systems with noise models,” 2025. [25] D. P. Kingma and J. Ba, “Adam: A method for stochastic optimization,” 2017. [26] R. H. Byrd, P. Lu, J. Nocedal, and C. Zhu, “A limited memory algo-rithm for bound constrained optimization,” SIAM Journal on Scientific Computing , vol. 16, no. 5, pp. 1190–1208, 1995. [27] X. Glorot and Y. Bengio, “Understanding the difficulty of training deep feedforward neural networks,” in Proc. 13th Int. Conference on Artificial Intelligence and Statistics (Y. W. Teh and M. Titterington, eds.), vol. 9 of Proceedings of Machine Learning Research , (Italy), pp. 249–256, PMLR, 2010.

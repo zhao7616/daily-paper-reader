@@ -1,0 +1,458 @@
+Title: Context-specific Credibility-aware Multimodal Fusion with Conditional Probabilistic Circuits
+
+URL Source: https://arxiv.org/pdf/2603.26629v1
+
+Published Time: Mon, 30 Mar 2026 01:18:04 GMT
+
+Number of Pages: 9
+
+Markdown Content:
+# Context-specific Credibility-aware Multimodal Fusion with Conditional Probabilistic Circuits 
+
+Pranuthi Tenali †∗ , Sahil Sidheekh †∗ , Saurabh Mathur §∗ , Erik Blasch ‡, Kristian Kersting §, Sriraam Natarajan ††The University of Texas at Dallas 
+
+{Sahil.Sidheekh, Pranuthi.Tenali, Sriraam.Natarajan }@utdallas.edu 
+
+§Department of Computer Science , TU Darmstadt saurabh.mathur@tu-darmstadt.de, kersting@cs.tu-darmstadt.de 
+
+‡Air Force Research Lab erik.blasch.1@us.af.mil 
+
+Abstract —Multimodal fusion requires integrating information from multiple sources that may conflict depending on context. Existing fusion approaches typically rely on static assumptions about source reliability, limiting their ability to resolve conflicts when a modality becomes unreliable due to situational factors such as sensor degradation or class-specific corruption. We introduce C 2MF, a context-specfic credibility-aware multimodal fusion framework that models per-instance source reliability using a Conditional Probabilistic Circuit (CPC). We formalize instance-level reliability through Context-Specific Information Credibility (CSIC), a KL-divergence–based measure computed exactly from the CPC. CSIC generalizes conventional static credibility estimates as a special case, enabling principled and adaptive reliability assessment. To evaluate robustness under cross-modal conflicts, we propose the Conflict benchmark, in which class-specific corruptions deliberately induce discrepancies between different modalities. Experimental results show that C2MF improves predictive accuracy by up to 29% over static-reliability baselines in high-noise settings, while preserving the interpretability advantages of probabilistic circuit-based fusion. 
+
+Index Terms —Multimodal fusion, reliability, robustness, prob-abilistic circuits 
+
+I. I NTRODUCTION 
+
+Decision making in real-world domains requires fusing in-formation from diverse modalities of available data for robust and reliable reasoning [1], [2]. In safety-critical domains such as autonomous navigation, industrial robotics, and medical decision support, the redundancy provided by multiple sensors is expected to mitigate the failure of any single modality. However, the presence of multiple sources can also introduce a fundamental challenge in determining which modality to trust, when the sources provide conflicting in-formation .A common strategy for resolving such conflicts is to model meta-information about each source’s reliability [3], [4]. In such fusion methods, each modality is assigned a weight reflecting the expected credibility or trustworthiness of its information, and the final predictions are aggregated accord-ingly. These reliability estimates are typically learned from data and treated as global properties of the modality. While effective under stationary conditions, this global assumption 
+
+* - Equal contribution "Four"  
+
+> Unimodal
+> Predictor
+> : Image
+> Unimodal
+> Encoder
+> Unimodal
+> Predictor
+> Unimodal
+> Encoder
+> Multimodal
+> Context
+> Aggregator
+> x
+> x
+> x
+> +
+> Conditional
+> Probabilistic
+> Circuit x
+> : Audio
+
+Fig. 1: Credibility-Aware Fusion using Latent Context .Unlike static fusion methods, the C 2MF framework extracts a joint neural embedding that serves as a context for a Condi-tional Probabilistic Circuit. The circuit dynamically evaluates the credibility of each source based on its position in the latent space (i.e., identifying when one modality is unreliable), ensuring that the final prediction is dominated by the most reliable information source for that specific instance. breaks down in real-world settings where the reliability of a modality is inherently context-dependent [5], [6]. For example, a high-resolution camera may be highly reli-able in daylight but quite untrustworthy in a low-light tunnel. Similarly, a microphone may provide clear signals in a quiet room but fail in a crowded street. When two highly confident sources disagree, a static reliability model has no principled way to resolve the conflict, increasing the risk of errors. This observation motivates the central question of our work: How can a fusion system dynamically infer the context-specific credibility of a modality at an instance level, while retaining principled probabilistic reasoning and semantics? Addressing this question effectively requires building a multimodal fusion system that satisfies the following desiderata: 
+
+> arXiv:2603.26629v1 [cs.LG] 27 Mar 2026
+
+(D1) It must infer the context directly from the data. 
+
+(D2) It must dynamically adapt source reliability on an instance-by-instance basis, based on the inferred context. 
+
+(D3) It must remain tractable, providing exact and explainable reasons for its decisions. Recent deep learning based fusion architectures often rely on attention or gating mechanisms to reweight modalities. While powerful, these approaches typically produce opaque intermediate representations and do not provide an explicit probabilistic interpretation of modality credibility. In contrast, probabilistic circuit (PC) based fusion [7] has emerged as a promising way to combine information from multiple modali-ties effectively, while also enabling principled and probabilistic credibility measures via exact and tractable inference over predictive distributions. Such systems have also been shown to be more robust and reliable compared to neural counterparts, yielding well-calibrated classifiers, especially in noisy settings [8]. However, existing PC-based approaches model reliability as a static property, independently of any contextual variables, and are therefore unable to resolve context-specific conflicts. In this work, we extend credibility-aware fusion to the 
+
+context-conditional setting and propose C2MF (Context-Specific Credibility Aware Multimodal Fusion) , a hybrid framework that combines deep neural unimodal encoders with Conditional Probabilistic Circuits (CPCs) [9] as the fusion function. Our approach extracts a joint neural embedding from the input modalities, which serves as a latent context. This context is then used to parameterize the weights of the PC using a hyper-network, allowing the fusion logic to adapt dynamically for making reliable predictions, while preserving tractability for exact probabilistic inference and instance-specific credibility assessment. Figure 1 illustrates the overall architecture. We also generalize the PC-based credibility measure from [7] to the context-conditional setting. We define Context-Specific Information Credibility (CSIC) as the KL divergence between the full multimodal posterior and the posterior with a modality marginalized out, both conditioned on the joint context z. This recovers the prior static credibility measure [7] as a special case when the context carries no additional information about modality reliability. To evaluate our C 2MF framework, we identify a lack of existing benchmarks for context-dependent conflict resolution and introduce the Conflict benchmark. In this benchmark, we intentionally corrupt specific modalities based on class labels to induce structured cross-modal disagreement. We also propose the Reliable Modality Identification Score (RMIS) ,a metric that directly measures whether a model correctly identifies the more reliable modality under conflict. Thus, overall we make the following key contributions: (1) We introduce C 2MF, a CPC-based fusion framework that dynamically conditions credibility inference on a learned latent context, enabling dynamic instance-level reliability modeling while preserving exact probabilistic semantics. (2) We gen-eralize the probabilistic divergence-based credibility measure definitions to this conditional setting. (3) We propose a struc-tured corruption framework and introduce a new benchmark for evaluating fusion approaches on their ability to handle context-specific corruptions and cross-modal conflicts. (4) We propose RMIS, a new evaluation metric that directly quantifies a model’s ability to identify the reliable modality under conflict. (5) We demonstrate through extensive experiments that C 2MF substantially improves predictive performance and reliable modality identification compared to static baselines. II. B ACKGROUND AND RELATED WORK 
+
+A. Multimodal fusion and reliability 
+
+Multimodal fusion [1], [10], [11] aims to integrate informa-tion from M distinct sources, X = {X1, . . . , X M } to improve the accuracy and robustness of a target prediction Y ∈ Y . For-mally, given a labelled dataset D = {(x(i)1 , . . . , x (i) 
+
+> M
+
+, y (i))}Ni=1 
+
+these methods aim to learn a function f to model the condi-tional distribution over the target given multimodal data, i.e., 
+
+P (Y | x1, . . . , x M ) = f (x1, . . . , x M ). Fusion architectures are commonly classified as early (data-level), intermediate (feature-level), and late (decision-level). 
+
+Early/Signal Fusion [12], [13] integrates raw features or input data at the earliest stage, typically by concatenating 
+
+(x1, . . . , x M ) into a single input vector and learning P (Y |
+
+x) = f (x1 ⊕· · ·⊕ xM ). While this allows the model to capture low-level correlations between sensors, it is highly sensitive to noise and makes reasoning about the contribution of individual sources difficult. 
+
+Late/Decision Fusion processes each modality indepen-dently through unimodal predictors fm ∈ F, producing predictive distribution pm(y) = fm(xm), aggregating only the final decisions or logit scores [14]–[16] (e.g., via averaging or voting) [17]–[19], yielding P (Y | x) = f (p1, . . . , p M ). The explicit separation of unimodal predictions makes late fusion well-suited for assessing per-modality credibility. It is also more robust to individual modality failures, but can fail to capture complex inter-modality interactions. 
+
+Intermediate/Feature Fusion [20] offers a middle ground by first extracting latent representations hm = Em(xm) from each modality and then fusing them through shared neural layers [21]–[23]. This is currently the dominant paradigm in deep learning, as it enables the learning of joint embed-dings that represent high-level cross-modal concepts. Recent advancements have moved toward Hybrid Fusion , which combines elements of multiple strategies—for instance, using intermediate fusion for feature extraction while maintaining separate decision branches for redundancy. These approaches construct an additional “pseudo view” by combining features from two input modalities, and pass this as an auxiliary input for the fusion module [24], [25]. However, the primary challenge in any fusion scheme is the presence of modality conflict, where sensors provide contradictory evidence. To resolve these conflicts, existing methods [6] often incor-porate meta-information regarding source reliability. This is typically achieved through credibility-aware frameworks that assign a weight Ci to each modality based on its historical performance on a training set. [7] formalizes credibility as the divergence between the full multimodal posterior P (Y |p1, . . . , p M ) and the posterior obtained by excluding modality 
+
+m, and uses a Probabilistic Circuits (PC) to estimate this quantity tractably. Such approaches assume that reliability is a stationary property. As a result, it cannot adapt to situations where the modality reliability varies with the input context. 
+
+B. Probabilistic Circuits as fusion functions 
+
+Reliable multimodal fusion requires a combination func-tion that can jointly model the predictive distributions from multiple sources and support efficient reasoning about their dependencies. Probabilistic Circuits (PCs) [26] are a class of generative models that are well suited to this role: they are expressive enough to capture complex dependencies between variables while supporting exact and efficient inference for a broad class of probabilistic queries [27]. Formally, a PC represents a joint distribution P (X) over a set of random variables X as a rooted Directed Acyclic Graph (DAG), whose leaf nodes represent simple univariate distribu-tions and whose internal nodes are either sum nodes (rep-resenting weighted mixtures) or product nodes (representing factorizations over disjoint subsets of variables). Under mild structural constraints, marginal and conditional distributions can be computed in time linear in the size of the circuit [28]. This tractability is the key property that distinguishes PCs from general neural models. In the context of late fusion, a PC can be used as the combination function by modeling the joint distribution over the unimodal predictive distributions 
+
+{pm}Mm=1 and the target Y [7]. The fused prediction is then obtained by conditional inference: P (Y | p1, . . . , p M ) =
+
+P (Y, p 1, . . . , p M )/P (p1, . . . , p M ), which the PC computes exactly. Crucially, the same inference routines that yield the fused prediction also support the computation of credibility measures: the influence of modality m can be quantified by comparing the full posterior P (Y | p1, . . . , p M ) against the posterior obtained by marginalizing pm out of the PC [7]. This marginalization is handled natively by the circuit without requiring imputation or retraining, which also makes PCs naturally robust to missing modalities. PC-based fusion has been shown empirically to yield well-calibrated and reliable classifiers, particularly in noisy and incomplete data settings [8]. In practice, PCs are instantiated using random tensorized structures [29], [30] which are differentiable and support GPU-accelerated learning, making them straightforward to integrate into end-to-end deep learning pipelines alongside neural unimodal encoders. A key limitation of standard PCs in the fusion setting is that their parameters are fixed after training, yielding a static fusion function. A growing line of work extends PCs to conditional distributions by allowing the circuit parameters to depend on an external input. Conditional SPNs (CSPNs [9]) formalize this by predicting the sum-node weights from a conditioning variable z via a neural gate function, yielding a tractable model of P (Y | X, z ) that preserves exact inference. Related architectures include HyperSPNs [31], which use hy-pernetworks to parameterize circuit weights, and χ-SPNs [32] and Interventional SPNs [33], which extend this framework to causal settings. We refer to this family collectively as 
+
+Conditional Probabilistic Circuits (CPCs). In this work, we use a CPC as the fusion function, parameterized by context-conditioned weights, so that the fusion logic and the credibility estimates derived from it adapt dynamically to each input. III. C ONTEXT -S PECIFIC CREDIBILITY -A WARE 
+
+MULTIMODAL FUSION 
+
+While multimodal fusion can yield more robust predictions, combining information from multiple modalities requires rea-soning about their reliability. Source reliability [34] in real-world settings is often complex and context-dependent, yet existing approaches typically model reliability using static weights. We first formalize the problem of learning a fusion function robust to context-specific degradations in one or more modal-ities: 
+
+Given: A dataset D = {(x(i), y (i))}Ni=1 with inputs 
+
+x(i) = {x(i)1 , . . . , x (i) 
+
+> M
+
+} drawn from M modal-ities and a discrete target Y ∈ Y .
+
+To Do: Learn an accurate and explainable fusion function P that estimates P (Y | x1, . . . , x M )
+
+while remaining robust to context-dependent corruptions. We address this through a hybrid framework C2MF =
+
+⟨E , F, M, P⟩ , consisting of a set of unimodal encoders 
+
+E = {E1, . . . , E M }, a set of unimodal predictors F =
+
+{f1, . . . , f M }, a joint context aggregator M, and a context-specific late fusion module P. We describe each component below in detail, followed by the learning procedure. 
+
+A. Unimodal Encoders and Predictors. 
+
+Each modality m is first processed by a dedicated encoder 
+
+Em ∈ E with parameters ψm, producing a latent embedding 
+
+hm = Em(xm). This representation is passed to a unimodal predictor fm ∈ F with parameters ωm, yielding the unimodal predictive distribution over the target: pm = fm(hm). The unimodal predictors are trained jointly with the rest of the framework via auxiliary supervision, ensuring that each pm
+
+carries discriminative information before fusion. 
+
+B. Joint Context Embedding. 
+
+To satisfy (D1), i.e., inferring the operational context directly from the observed data, the framework must extract arepresentational summary that captures inter-modality correlations and the presence of situational corruptions .Thus, we introduce a joint context aggregator M, which operates on the collection of unimodal embeddings and pro-duces: z = M(h1, . . . , h M ). Unlike the unimodal predictors, which learn modality-specific discriminative features, M is designed to capture how features in one modality may indicate the unreliability of another. For example, how high-frequency noise in an audio embedding implies that the audio stream should be down-weighted. The resulting embedding z serves as the conditioning input for the CPC fusion stage. In practice, we implement M as a lightweight MLP applied to the concatenation of unimodal embeddings. 
+
+C. Fusion via Conditional Probabilistic Circuits. 
+
+To enable instance-specific reliability modeling (D2), we use the joint context z to parameterize the fusion logic. We map this context to the internal parameters of a Condi-tional Probabilistic Circuit (CPC) through a hyper-network, 
+
+gϕ. Specifically, the hyper-network computes the sum-node weights Θ for the CPC as Θ = gϕ(z). In this architecture, the CPC acts as a differentiable and tractable fusion operator 
+
+that models the joint distribution over the unimodal predic-tions {pm}Mm=1 and the target variable Y . While its product nodes encode independence assumptions between unimodal predictions, its sum nodes represent mixtures over them. By conditioning the sum weights Θ on the joint context z, 
+
+the hyper-network can “gate” the circuit’s branches in real-time. For example, if the joint context z indicates significant corruption in one modality, gϕ generates weights that attenuate its influence and prioritize the other modalities. Crucially, this mechanism satisfies D3 (Tractable and Explainable Rea-soning). Unlike neural intermediate fusion functions, which are black-box models, the resulting Conditional Probabilistic Circuit (CPC) represents a valid probability distribution. This allows the framework to perform exact inference of the global posterior P (Y | X, z ) by propagating the unimodal predictions 
+
+{p1, . . . , p n} through the circuit in a single bottom-up pass. 
+
+D. Context-specific Information credibility 
+
+A critical requirement for high-stakes applications is the ability to audit why a specific decision was reached (D3). To provide this transparency, we introduce Context-Specific Information Credibility (CSIC) . This metric quantifies the influence of each modality’s information on the final prediction under the current environmental context .Formally, we define the CSIC for information obtained from modality i as the Kullback-Leibler (KL) divergence between the full multimodal posterior distribution over the target and the posterior where modality i has been marginalized out, both conditioned on the joint context z:
+
+CSIC i(x, z) = DKL (P (Y |x, z) || P (Y |x \ xi, z)) ,
+
+which can be computed exactly using the CPC’s tractable inference routines. The relative CSIC score normalizes these values across modalities: 
+
+CSIC i(x, h) = CSIC i(x, h)
+
+PMj=1 CSIC j (x, h) ,
+
+which satisfies CSIC m ∈ [0 , 1] and P 
+
+> m
+
+CSIC m = 1,giving a normalized instance-level credibility distribution over modalities. CSIC generalizes the static credibility measure of [7] which is recovered as a special case when the joint context z provides no additional information about information credibility, i.e., a domain without context-specific corruption. 
+
+Algorithm 1: C2MF Training                                                                                    
+
+> In :Dataset D; Encoders E={Em}Mm=1 with parameters
+> ψ; Predictors F={fm}Mm=1 with parameters ωF;Context aggregator M; Hyper-network gϕ; CPC PΘ
+> Out: Parameters Ω = {ψ, ϕ, ω F}
+> while not converged do
+> Sample batch B={(x(i), y (i))}Bi=1 ∼ D ;
+> for m= 1 to Mdo
+> hm←Em(xm);// Unimodal embeddings
+> pm←fm(hm);// Unimodal predictions
+> end
+> z← M (h1, . . . , h M);// Joint context
+> Θ←gϕ(z);// Context-conditioned weights
+> ˆy← P (Y|p1, . . . , p M; Θ) ;// Fused output
+> Lf←1
+> B
+> P
+> i∈B ℓ(ˆ y(i), y (i));
+> Lu←1
+> B
+> P
+> i∈B
+> PMm=1 ℓ(p(i)
+> m, y (i));
+> Ltotal ← L f+μLu;
+> Ω←Ω−η∇ΩLtotal ;// Update all parameters
+> end
+
+E. Learning 
+
+To ensure that the joint context aggregator and the CPC-based fusion logic work in harmony, we optimize the entire framework end-to-end. The learning objective must encourage the unimodal encoders to extract discriminative features while simultaneously training the hyper-network to recognize which features signify unreliability. We thus define a joint training objective that combines the multimodal fusion loss with auxil-iary unimodal supervision: arg min 
+
+> Ω
+
+Ltotal = Lf +μ Lu, where 
+
+Lf = 1
+
+|D| 
+
+X
+
+> (x,y )∈D
+
+ℓ(y, P (Y | X = x)) , (1) 
+
+Lu = 1
+
+|D| 
+
+X
+
+> (x,y )∈D
+> M
+
+X
+
+> m=1
+
+ℓ(y, p m) , (2) 
+
+ℓ denotes the cross-entropy loss, and μ is a weighting hyperpa-rameter. The set of all learnable parameters is Ω = {ψ, ϕ, ω F },where ψ = {ψm}Mm=1 are the encoder parameters, ϕ are the hyper-network parameters, and ωF = {ωm}Mm=1 are the unimodal predictor parameters. The gradient ∇L total is backpropagated through the CPC to the hyper-network gϕ, the context aggregator M, and the encoders E. This allows the context aggregator to learn a latent space where situational corruptions are easily identifiable. As a result, the hyper-network learns to map these “noisy” regions of the latent space to sum-node weights that down-weight the unreliable modality. The complete optimization procedure is detailed in Alg. 1. IV. E XPERIMENTAL SETUP 
+
+We design our evaluation around two key research questions: 
+
+(Q1) Does context-specific credibility-aware fusion yield more accurate predictions than static credibility-aware fusion? 
+
+(Q2) In the presence of cross-modal conflicts, can C2MF correctly distinguish between a unimodal predictor being confident and the modality being reliable? A. The Conflict Benchmark 
+
+To systematically evaluate the model’s ability to identify the reliable modality under cross-modal disagreement, we first introduce a controlled conflict generation framework. This framework explicitly injects conflicts into multimodal datasets by corrupting one modality while keeping the other intact. Formally, for each modality m, we define a subset of classes 
+
+cm whose samples are designated for corruption. For each class c ∈ cm, we select a fraction λ ∈ [0 , 1] of its example, and corrupt each example by replacing part (or the entirety) of the modality-specific information with that of another example sampled from a predefined target class c′ /∈ cm. This procedure introduces controlled inconsistency between the modalities, thereby deliberately decreasing the credibility of the information belonging to the corrupted modality, rendering it unreliable. Although the framework is generally applicable to any multimodal dataset, we currently provide support for the following datasets: AV-MNIST and NYUD. 
+
+1) Conflict-AV-MNIST: AV-MNIST (Audio-Visual MNIST) [35] is a multimodal benchmark constructed from handwritten digit images (0–9) from MNIST [36] paired with correspond-ing audio recordings from the Free Spoken Digit Dataset (FSDD) [37]. Each audio clip is converted into a Mel-Frequency Cepstral Coefficient (MFCC) representation of size 
+
+112 × 112 . This dataset contains 55,000 training, 5,000 vali-dation, and 10,000 test examples. We construct Conflict-AV-MNIST by introducing noise into class sets cimage = {5, 8, 1}
+
+and caudio = {6, 0, 7} for image and audio modalities respec-tively. We set a fixed conflict ratio of λ = 0 .7 on the train data. That is, 70% of the images from classes cimage = {5, 8, 1} are replaced with that of train examples from classes c′ /∈ cimage .Similarly, for each class c ∈ caudio , 70% of its audio samples are replaced with audio drawn from classes c′ /∈ caudio .
+
+2) Conflict-NYUD: NYU Depth (NYUD) [38] is an RGB-D indoor scene classification benchmark consisting of paired RGB and depth images. Following [15], we use a subset of this dataset restricted to 10 classes, comprising 1,863 RGB-depth image pairs split into 795 train, 414 validation, and 654 test examples. We construct the conflict version of NYUD by setting λtrain to 0.7, cRGB = {0, 5, 7} and cDepth = {2, 6, 9}.
+
+B. Baselines 
+
+We consider the naive context-agnostic late fusion methods [7] as baselines for our experimental evaluation. We describe each of them very briefly here. 
+
+1) Direct-PC: Direct-PC (DPC) [7] is the context-agnostic fusion method that uses a Probabilistic Circuit as a fusion func-tion. It takes the unimodal predictions as input and computes the joint P (Y, p 1..p m). The multimodal predictive distribution is computed via conditional inference as 
+
+P (Y | p1..p m) = P (Y, p 1..p m)
+
+P (p1..p m)
+
+2) Credbility Weighted Mean: Credibility Weighted Mean (CWM) derives the per-modality credibility scores from the joint distribution learned by the static PC as 
+
+Ci = DKL (P (Y |x) || P (Y |x \ xi),
+
+and the relative credibility as 
+
+Ci = Ci
+
+PMi Ci
+
+The multimodal predictive distribution is computed as acredibility-weighted average of the unimodal predictive dis-tributions, i.e. 
+
+P (Y | p1..p m) = 
+
+> M
+
+X
+
+> i
+
+Cipi
+
+Correspondingly, we define our context-specific variations 
+
+of the above baselines as C2DPC and C2WM , where C 2DPC extends DPC and C 2WM generalizes CWM by replacing the static PC with a CPC parameterized by Θ = gϕ(h1, . . . , h M ),enabling credibility estimates to adapt dynamically. 
+
+C. Metrics 
+
+We measure each model’s performance using the classifi-cation accuracy, precision, recall, and F1 score. To measure the ability of the models to correctly identify the reliable modality under conflict, we introduce the Reliable Modality Identification Score (RMIS) as follows: 
+
+RM IS i =
+
+(
+
+0, CM IC imcorrupt > CM IC imclean 
+
+1, otherwise where mcorrupt and mclean denote the corrupted and clean modalities for instance i respectively. A model achieves 
+
+RMIS = 1 on an instance, if and only if it assigns lower credibility to the corrupted modality than to the clean one. 
+
+D. Results a) Q1: Predictive performance under conflict : We con-figure our experimental setup as follows. For each domain, we introduce conflict noise of λtrain = 0 .7 into the training set. For the test split, we vary the level of conflict test noise λtest 
+
+from 0 (no corruption) to 1.0 (fully corrupted), and evaluate each model at λ ∈ { 0, 0.5, 0.75 , 1.0}. This setup enables the assessment of robustness under progressively increasing cross-modal conflict. We conduct experiments under two distinct training setups: 
+
+(1) Decoupled Training : In this setting, the unimodal en-coders and their corresponding classifiers are first trained independently using their respective unimodal losses. The fu-sion module is then trained separately, keeping the unimodals frozen, optimizing only the multimodal loss. 
+
+(2) Joint Training : In this setting, we use the joint training objective Ltotal and train the entire architecture end-to-end. We present the results from both the training setups here. Table I shows the mean test accuracy, precision, recall, and F1-score, respectively, in both domains. On Conflict-AV-MNIST, the overall test performance decreases as the Training Method Conflict-AV-MNIST Conflict-NYUD 0% 50% 75% 100% 0% 50% 75% 100% 
+
+Decoupled CWM 98.91 84.73 77.61 70.51 54.13 53.52 53.01 52.65 
+
+C2WM 97.65 (-1.26) 97.38 (12.65) 97.25 (19.64) 97.04 (26.53) 53.77 (-0.36) 53.16 (-0.36) 53.31 (0.30) 53.31 (0.66) 
+
+DPC 98.92 84.40 77.24 70.09 49.90 50.00 49.34 49.13 
+
+C2DPC 99.14 (0.22) 99.04 (14.64) 98.99 (21.75) 98.95 (28.86) 55.86 (5.96) 59.38 (9.38) 61.52 (12.18) 64.22 (15.09) 
+
+Joint CWM 98.74 84.35 77.29 70.09 55.15 54.18 54.33 53.98 
+
+C2WM 98.64 (-0.10) 97.91 (13.56) 97.70 (20.41) 97.42 (27.33) 58.00 (2.85) 57.34 (3.16) 56.83 (2.50) 56.07 (2.09) 
+
+DPC 99.00 84.56 77.44 70.05 50.15 52.50 52.70 53.67 
+
+C2DPC 99.24 (0.24) 99.46 (14.90) 99.53 (22.09) 99.61 (29.56) 59.28 (9.13) 60.14 (7.64) 59.89 (7.19) 61.01 (7.34) 
+
+(a) Accuracy 
+
+Training Method Conflict-AV-MNIST Conflict-NYUD 0% 50% 75% 100% 0% 50% 75% 100% 
+
+Decoupled CWM 98.89 83.60 74.00 61.43 40.56 39.93 39.54 39.22 
+
+C2WM 97.63 (-1.26) 97.36 (13.76) 97.21 (23.21) 97.00 (35.57) 41.76 (1.20) 40.09 (0.16) 40.80 (1.26) 40.29 (1.07) 
+
+DPC 98.88 83.53 74.72 63.83 38.33 38.14 38.27 37.28 
+
+C2DPC 99.10 (0.22) 99.01 (15.48) 98.97 (24.25) 98.93 (35.10) 50.40 (12.07) 53.14 (15.00) 55.46 (17.19) 58.53 (21.25) 
+
+Joint CWM 98.72 83.37 74.29 62.65 42.59 40.81 40.09 39.76 
+
+C2WM 98.60 (-0.12) 97.85 (14.48) 97.62 (23.33) 97.31 (34.66) 44.43 (1.84) 43.24 (2.43) 41.88 (1.79) 41.86 (2.10) 
+
+DPC 98.98 83.59 74.48 62.39 37.19 39.10 39.61 40.06 
+
+C2DPC 99.22 (0.24) 99.45 (15.86) 99.52 (25.04) 99.60 (37.21) 53.50 (16.31) 53.27 (14.17) 53.11 (13.50) 52.70 (12.64) 
+
+(b) F1-Score 
+
+Training Method Conflict-AV-MNIST Conflict-NYUD 0% 50% 75% 100% 0% 50% 75% 100% 
+
+Decoupled CWM 98.94 88.77 84.31 68.34 40.49 39.52 39.24 39.10 
+
+C2WM 97.77 (-1.17) 97.49 (8.72) 97.37 (13.06) 97.20 (28.86) 46.04 (5.55) 40.77 (1.25) 42.41 (3.17) 40.93 (1.83) 
+
+DPC 98.93 86.90 81.26 67.76 44.04 44.23 44.88 42.63 
+
+C2DPC 99.14 (0.21) 99.05 (12.15) 99.03 (17.77) 99.01 (31.25) 53.23 (9.19) 55.31 (11.08) 58.04 (13.16) 61.03 (18.40) 
+
+Joint CWM 98.79 87.88 83.01 66.46 46.79 41.42 39.15 38.96 
+
+C2WM 98.64 (-0.15) 97.95 (10.07) 97.80 (14.79) 97.62 (31.16) 46.95 (0.16) 43.93 (2.51) 41.75 (2.60) 43.14 (4.18) 
+
+DPC 99.00 87.73 82.64 66.52 41.96 46.96 45.94 46.77 
+
+C2DPC 99.25 (0.25) 99.46 (11.73) 99.53 (16.89) 99.61 (33.09) 55.59 (13.63) 55.90 (8.94) 54.53 (8.59) 54.94 (8.17) 
+
+(c) Precision 
+
+Training Method Conflict-AV-MNIST Conflict-NYUD 0% 50% 75% 100% 0% 50% 75% 100% 
+
+Decoupled CWM 98.88 84.20 76.85 69.50 41.71 41.50 40.99 40.82 
+
+C2WM 97.60 (-1.28) 97.35 (13.15) 97.22 (20.37) 97.01 (27.51) 41.97 (0.26) 40.69 (-0.81) 41.54 (0.55) 41.58 (0.76) 
+
+DPC 98.89 84.06 76.78 69.47 39.29 39.53 39.55 38.85 
+
+C2DPC 99.11 (0.22) 99.01 (14.95) 98.97 (22.19) 98.92 (29.45) 49.23 (9.94) 53.35 (13.82) 56.60 (17.05) 60.63 (21.78) 
+
+Joint CWM 98.70 83.93 76.71 69.30 43.07 42.38 42.09 41.95 
+
+C2WM 98.60 (-0.10) 97.86 (13.93) 97.64 (20.93) 97.36 (28.06) 44.84 (1.77) 44.13 (1.75) 43.50 (1.41) 43.46 (1.51) 
+
+DPC 98.99 84.21 76.95 69.39 38.49 40.87 41.26 41.96 
+
+C2DPC 99.22 (0.23) 99.45 (15.24) 99.52 (22.57) 99.61 (30.22) 52.86 (14.37) 53.31 (12.44) 53.21 (11.95) 53.45 (11.49) 
+
+(d) Recall 
+
+TABLE I: Mean test performance (%) at varying levels of cross-modal conflict λtest ∈ { 0% , 50% , 75% , 100% } under decoupled and joint training. Amber and blue cells show the CWM-based and DPC-based comparison respectively. Within each group, darker shades indicate higher performance. Absolute gain of the context-specific method over its static baseline in parentheses. noise increases. Across all noise settings, our methods C 2WM and C 2DPC show better performance than their respective baselines. Moreover, this performance gap widens as the 
+
+λtest increases which indicates superior robustness of the context-aware fusion methods over their respective baselines. In contrast to Conflict-AV-MNIST, the results from Conflict-NYUD exhibit a less regular trend as λtest increases. While our methods still outperform their respective baselines, the 0 20 40 60 80 100                             
+
+> 0.7
+> 0.8
+> 0.9
+> 1
+> Noise (%)
+> RMIS
+> DPC
+> C2DPC
+> 020 40 60 80 100
+> Noise (%)
+> CWM
+> C2WM
+> 020 40 60 80 100
+> 0.8
+> 0.9
+> 1
+> Noise (%)
+> RMIS
+> DPC
+> C2DPC
+> 020 40 60 80 100
+> Noise (%)
+> CWM
+> C2WM
+> 50 75 100
+> Audio
+> Image 0.83 0.83 0.83
+> 0.17 0.17 0.18
+> Test Noise (%)
+> Modality  CWM
+> 50 75 100
+> 1.00 1.00 1.00
+> 1.00 1.00 1.00
+> Test Noise (%)
+> C2WM
+> 0.0
+> 0.5
+> 1.0
+> Mean RMIS
+
+(a) Conflict-AV-MNIST              
+
+> 50 75 100
+> Depth
+> RGB 0.37 0.36 0.39
+> 0.63 0.61 0.62
+> Test Noise (%)
+> Modality  CWM
+> 50 75 100
+> 0.53 0.55 0.55
+> 0.67 0.66 0.61
+> Test Noise (%)
+> C2WM
+> 0.0
+> 0.5
+> 1.0
+> Mean RMIS
+
+(b) Conflict-NYUD 
+
+Fig. 2: Mean test RMIS under decoupled training across varying test conflict levels λtest . Top row: overall RMIS across all methods. Bottom row: RMIS broken down by corrupted modality for CWM vs. C 2WM, revealing whether credibility estimates adapt to the identity of the corrupted source or remain biased toward a single modality. performance gap doesn’t increase as noise increases. We hypothesize that this behaviour arises from the intrinsic noise in the dataset. Increasing the synthetic conflict noise does not necessarily degrade performance, but acts as a regularizer that disrupts the pre-existing modality dominance patterns. 
+
+b) Q2: Reliable modality identification : Figure 2 re-ports the mean test RMIS across varying levels of test conflict, 
+
+λtest . As expected, the mean RMIS value decreases as the test noise increases. Despite this degradation, our methods still consistently achieve higher RMIS values than their respective baselines across all the test noise levels, with C 2WM out-performing all the methods. This is because, in C 2WM, the computed CSIC values are directly used to weigh the uni-modal predictive distributions when computing the multimodal predictions. Since the multimodal predictive loss is obtained from this CSIC-weighted fusion output, the CSIC scores tend to have a strong influence on the multimodal objective. Thus, modalities assigned higher CSIC values contribute more to the objective function. Ideally, as the model converges, the CSIC score associated with the corrupted modality should approach zero, marking the clean modality as the reliable one, thus explaining the consistently better RMIS values for C 2WM. The bottom row of Figure 2 further breaks down the mean RMIS scores computed on the corrupted examples by the corrupted modality. In Conflict-AV-MNIST, we observe that CWM frequently predicts the image modality as corrupted, even in instances where the audio modality is the one actually corrupted. This misidentification leads to lower RMIS scores, as the model fails to correctly attribute unreliability to the audio modality. A similar pattern is observed in Conflict-NYUD, where CWM consistently struggles to identify cor-ruption in the RGB modality across all test noise levels. This behavior suggests that CWM tends to favor one of the modalities as inherently more reliable. This behavior likely arises from its static reliability modelling, which limits its ability to reassess the reliability dynamically. In contrast, C2WM demonstrates more balanced and accurate identifica-tion of the reliable modality across all corrupted modalities and test noise settings. The improved RMIS scores indicate that incorporating additional contextual information enables more adaptive and robust fusion. V. C ONCLUSION AND FUTURE WORK 
+
+In this work, we addressed the challenge of multimodal fusion in environments characterized by context-dependent source corruptions. We introduced C2MF, a neurosymbolic framework that combines neural unimodal encoders with a Conditional Prob-abilistic Circuit as the fusion function, satisfying the need for dynamic, instance-specific reliability modeling without sacrificing the rigorous guarantees of probabilistic inference. We also introduced the Conflict benchmark and the RMIS metric, providing the first controlled evaluation framework for studying the efficacy of fusion approaches in cross-modal conflict resolution. Our experimental results demonstrated that C 2MF signifi-cantly outperforms static fusion baselines as cross-modal cor-ruption increases. Beyond predictive performance, our frame-work also provides a mathematically grounded audit trail through the Context-Specific Information Credibility (CSIC) metric, enabling an exact calculation of each modality’s influ-ence on a per-instance basis. This makes it particularly suited for high-stakes domains, such as clinical decision support and autonomous navigation, where sensor reliability is non-stationary. There are several directions for future work. First, while our benchmarks serve as a diagnostic tool for evaluating context-specific credibility, the corruptions are synthetic and class-aligned. Real-world conflicts (e.g., sensor degradation due to physical wear) may be more stochastic. Evaluating the framework on large-scale, real-world multimodal datasets with naturally occurring sensor failures is an important next step for validating the generalizability of our framework. Second, while our framework achieves better predictive performance than the static PC-based models, it loses the ability to deal with missing data, as C 2MF currently requires all modalities to be present for inferring the joint context. Future work should explore ways to adapt C 2MF to the missing modality case, such as by replacing the neural models in the context aggregator with a PC [39]. Since C 2MF operates well in a decoupled training setting, it can also potentially be extended to combine outputs from multiple pretrained foundation mod-els in a probabilistic manner. Evaluating the context-specific reliability of these models, and fusing the information by weighing their CSIC values is a future direction. Finally, integrating domain knowledge about the relationship between the context and reliability into our framework would further improve performance and remains an important direction for future work. REFERENCES [1] T. Baltruˇ saitis, C. Ahuja, and L.-P. Morency, “Multimodal machine learning: A survey and taxonomy,” IEEE transactions on pattern anal-ysis and machine intelligence , vol. 41, no. 2, pp. 423–443, 2018. [2] E. Blasch, ´ E. Boss´ e, and D. A. Lambert, High-level information fusion management and systems design . Artech House, 2012. [3] G. L. Rogova and V. Nimier, “Reliability in information fusion: literature survey,” in Proceedings of the seventh international conference on information fusion , vol. 2, 2004, pp. 1158–1165. [4] E. Blasch, K. B. Laskey, A.-L. Jousselme, V. Dragos, P. C. Costa, and J. Dezert, “Urref reliability versus credibility in information fusion (stanag 2511),” in Proceedings of the 16th International Conference on Information Fusion . IEEE, 2013, pp. 1600–1607. [5] E. Blasch, A. Jøsang, J. Dezert, P. C. Costa, and A.-L. Jousselme, “Urref self-confidence in information fusion trust,” in 17th International Conference on Information Fusion (FUSION) . IEEE, 2014, pp. 1–8. [6] L. Snidaro, J. Garcia-Herrera, J. Llinas, and E. Blasch, “Context-enhanced information fusion,” Boosting Real-World Performance with Domain Knowledge , 2016. [7] S. Sidheekh, P. Tenali, S. Mathur, E. Blasch, K. Kersting, and S. Natara-jan, “Credibility-aware multimodal fusion using probabilistic circuits,” in International Conference on Artificial Intelligence and Statistics .PMLR, 2025, pp. 2305–2313. [8] S. Sidheekh, P. Tenali, S. Mathur, E. Blasch, and S. Natarajan, “On the robustness and reliability of late multi-modal fusion using probabilistic circuits,” in 2024 27th International Conference on Information Fusion (FUSION) . IEEE, 2024, pp. 1–8. [9] X. Shao, A. Molina, A. Vergari, K. Stelzner, R. Peharz, T. Liebig, and K. Kersting, “Conditional sum-product networks: Imposing structure on deep probabilistic architectures,” in International Conference on Probabilistic Graphical Models . PMLR, 2020, pp. 401–412. [10] D. Hall and J. Llinas, “An introduction to multisensor data fusion,” 
+
+Proceedings of the IEEE , vol. 85, no. 1, pp. 6–23, 1997. [11] P. P. Liang, A. Zadeh, and L.-P. Morency, “Foundations & trends in mul-timodal machine learning: Principles, challenges, and open questions,” 
+
+ACM computing surveys , vol. 56, no. 10, pp. 1–42, 2024. [12] C. G. Snoek, M. Worring, and A. W. Smeulders, “Early versus late fusion in semantic video analysis,” in Proceedings of the 13th annual ACM international conference on Multimedia , 2005, pp. 399–402. [13] K. Gadzicki, R. Khamsehashari, and C. Zetzsche, “Early vs late fusion in multimodal convolutional neural networks,” in 2020 IEEE 23rd international conference on information fusion (FUSION) . IEEE, 2020, pp. 1–6. [14] C. Xu, J. Si, Z. Guan, W. Zhao, Y. Wu, and X. Gao, “Reliable conflictive multi-view learning,” in Proceedings of the AAAI conference on artificial intelligence , vol. 38, no. 14, 2024, pp. 16 129–16 137. [15] Q. Zhang, H. Wu, C. Zhang, Q. Hu, H. Fu, J. T. Zhou, and X. Peng, “Provable dynamic fusion for low-quality multimodal data,” in Proceed-ings of the 40th International Conference on Machine Learning , ser. ICML’23. JMLR.org, 2023. [16] Z. Han, C. Zhang, H. Fu, and J. T. Zhou, “Trusted multi-view classi-fication,” in 9th International Conference on Learning Representations, ICLR 2021, Virtual Event, Austria, May 3-7, 2021 . OpenReview.net, 2021. [17] J. Kittler, M. Hatef, R. P. Duin, and J. Matas, “On combining classifiers,” 
+
+IEEE transactions on pattern analysis and machine intelligence , vol. 20, no. 3, pp. 226–239, 2002. [18] S. Natarajan, P. Tadepalli, E. Altendorf, T. G. Dietterich, A. Fern, and A. C. Restificar, “Learning first-order probabilistic models with combining rules,” in Machine Learning, Proceedings of the Twenty-Second International Conference (ICML 2005), Bonn, Germany, August 7-11, 2005 , ser. ACM International Conference Proceeding Series, L. D. Raedt and S. Wrobel, Eds., vol. 119. ACM, 2005, pp. 609–616. [19] J. Tian, W. Cheung, N. Glaser, Y.-C. Liu, and Z. Kira, “Uno: Uncertainty-aware noisy-or multimodal fusion for unanticipated input degradation,” in 2020 IEEE International Conference on Robotics and Automation (ICRA) . IEEE, 2020, pp. 5716–5723. [20] J. Ngiam, A. Khosla, M. Kim, J. Nam, H. Lee, A. Y. Ng et al. ,“Multimodal deep learning.” in Icml , vol. 11, 2011, pp. 689–696. [21] H. R. V. Joze, A. Shaban, M. L. Iuzzolino, and K. Koishida, “MMTM: multimodal transfer module for CNN fusion,” in 2020 IEEE/CVF Conference on Computer Vision and Pattern Recognition, CVPR 2020, Seattle, WA, USA, June 13-19, 2020 . IEEE, 2020, pp. 13 286–13 296. [22] C. Zhang, Z. Han, Y. Cui, H. Fu, J. T. Zhou, and Q. Hu, “Cpm-nets: Cross partial multi-view networks,” in Advances in Neural Information Processing Systems 32: Annual Conference on Neural Information Pro-cessing Systems 2019, NeurIPS 2019, December 8-14, 2019, Vancouver, BC, Canada , H. M. Wallach, H. Larochelle, A. Beygelzimer, F. d’Alch´ e-Buc, E. B. Fox, and R. Garnett, Eds., 2019, pp. 557–567. [23] J.-M. P´ erez-R´ ua, V. Vielzeuf, S. Pateux, M. Baccouche, and F. Jurie, “Mfas: Multimodal fusion architecture search,” in Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition ,2019, pp. 6966–6975. [24] Z. Han, C. Zhang, H. Fu, and J. T. Zhou, “Trusted multi-view classi-fication with dynamic evidential fusion,” IEEE transactions on pattern analysis and machine intelligence , vol. 45, no. 2, pp. 2551–2566, 2022. [25] H. Ma, Z. Han, C. Zhang, H. Fu, J. T. Zhou, and Q. Hu, “Trust-worthy multimodal regression with mixture of normal-inverse gamma distributions,” in Advances in Neural Information Processing Systems ,M. Ranzato, A. Beygelzimer, Y. Dauphin, P. Liang, and J. W. Vaughan, Eds., vol. 34. Curran Associates, Inc., 2021, pp. 6881–6893. [26] Y. Choi, A. Vergari, and G. Van den Broeck, “Lecture notes: Probabilistic circuits: Representation and inference,” 2020. [27] S. Sidheekh and S. Natarajan, “Building expressive and tractable proba-bilistic generative models: A review,” in Proceedings of the Thirty-Third International Joint Conference on Artificial Intelligence, IJCAI 2024, 3rd-9th August 2024, Jeju Island, South Korea , 2024. [28] H. Poon and P. M. Domingos, “Sum-product networks: A new deep architecture,” in UAI 2011, Proceedings of the Twenty-Seventh Confer-ence on Uncertainty in Artificial Intelligence, Barcelona, Spain, July 14-17, 2011 , F. G. Cozman and A. Pfeffer, Eds. AUAI Press, 2011, pp. 337–346. [29] R. Peharz, A. Vergari, K. Stelzner, A. Molina, M. Trapp, X. Shao, K. Kersting, and Z. Ghahramani, “Random sum-product networks: A simple and effective approach to probabilistic deep learning,” in 
+
+Proceedings of the Thirty-Fifth Conference on Uncertainty in Artificial Intelligence, UAI 2019, Tel Aviv, Israel, July 22-25, 2019 , ser. Proceed-ings of Machine Learning Research, A. Globerson and R. Silva, Eds., vol. 115. AUAI Press, 2019, pp. 334–344. [30] R. Peharz, S. Lang, A. Vergari, K. Stelzner, A. Molina, M. Trapp, G. V. den Broeck, K. Kersting, and Z. Ghahramani, “Einsum networks: Fast and scalable learning of tractable probabilistic circuits,” in Proceedings of the 37th International Conference on Machine Learning, ICML 2020, 13-18 July 2020, Virtual Event , ser. Proceedings of Machine Learning Research, vol. 119. PMLR, 2020, pp. 7563–7574. [31] A. Shih, D. Sadigh, and S. Ermon, “Hyperspns: Compact and expres-sive probabilistic circuits,” Advances in neural information processing systems , vol. 34, pp. 8571–8582, 2021. [32] H. Poonia, M. Willig, Z. Yu, M. Zeˇ cevi´ c, K. Kersting, and D. S. Dhami, “χ spn: Characteristic interventional sum-product networks for causal inference in hybrid domains,” in Fortieth Conference on Uncertainty in Artificial Intelligence (UAI) , 2024. [33] M. Zeˇ cevi´ c, D. Dhami, A. Karanam, S. Natarajan, and K. Kersting, “Interventional sum-product networks: Causal inference with tractable probabilistic models,” Advances in neural information processing sys-tems , vol. 34, pp. 15 019–15 031, 2021. [34] P. Costa, A.-L. Jousselme, K. B. Laskey, E. Blasch, V. Dragos, J. Ziegler, P. De Villiers, and G. Pavlin, “Urref: Uncertainty representation and reasoning evaluation framework for information fusion,” Journal of Advances in Information Fusion , vol. 13, no. 2, pp. 137–157, 2019. [35] V. Vielzeuf, A. Lechervy, S. Pateux, and F. Jurie, “Centralnet: a multi-layer approach for multimodal fusion,” in Proceedings of the European Conference on Computer Vision (ECCV) Workshops , 2018, pp. 0–0. [36] L. Deng, “The mnist database of handwritten digit images for machine learning research [best of the web],” IEEE signal processing magazine ,vol. 29, no. 6, pp. 141–142, 2012. [37] Z. Jackson, C. Souza, J. Flaks, Y. Pan, H. Nicolas, and A. Thite, “Jakobovski/free-spoken-digit-dataset: v1.0.8,” Aug. 2018. [Online]. Available: https://doi.org/10.5281/zenodo.1342401 [38] N. Silberman, D. Hoiem, P. Kohli, and R. Fergus, “Indoor segmentation and support inference from rgbd images,” in European conference on computer vision . Springer, 2012, pp. 746–760. [39] S. Braun, S. Sidheekh, A. Vergari, M. Mundt, S. Natarajan, and K. Kerst-ing, “Tractable representation learning with probabilistic circuits,” arXiv preprint arXiv:2507.04385 , 2025.

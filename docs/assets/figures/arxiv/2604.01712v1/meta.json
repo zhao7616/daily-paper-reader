@@ -1,0 +1,230 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.01712v1/fig-001.webp",
+      "caption": "Fig. 8. Time-domain forecasting for 𝑥-axis (axial).",
+      "page": 6,
+      "index": 1,
+      "width": 1069,
+      "height": 458
+    },
+    {
+      "url": "assets/figures/arxiv/2604.01712v1/fig-002.webp",
+      "caption": "Fig. 6. Overview of the Hardanger bridge monitoring system showing the accelerometers (H1–H11), the anemometers (A1–A9), the Wi-Fi/GPS units, and the dataloggers [90].",
+      "page": 6,
+      "index": 2,
+      "width": 713,
+      "height": 377
+    },
+    {
+      "url": "assets/figures/arxiv/2604.01712v1/fig-003.webp",
+      "caption": "Fig. 14. Zoomed results and comparison for the median Welch power spectral densities on the East/West sides for the 𝑥-axis.",
+      "page": 11,
+      "index": 3,
+      "width": 835,
+      "height": 1242
+    },
+    {
+      "url": "assets/figures/arxiv/2604.01712v1/fig-004.webp",
+      "caption": "Table 7 Error comparison by RMSE, MAE, and win rate (%).",
+      "page": 15,
+      "index": 4,
+      "width": 362,
+      "height": 435
+    },
+    {
+      "url": "assets/figures/arxiv/2604.01712v1/fig-005.webp",
+      "caption": "Table 6 Error comparison by 𝜇, 𝜎, and 𝑝(> 3𝜎Acc).",
+      "page": 15,
+      "index": 5,
+      "width": 424,
+      "height": 433
+    },
+    {
+      "url": "assets/figures/arxiv/2604.01712v1/fig-006.webp",
+      "caption": "Fig. 1. Three-dimensional Theodorsen bridge deck representation of Section 2, incorporating aerodynamic loads, structural deformation, and airflow interac tions.",
+      "page": 2,
+      "index": 6,
+      "width": 519,
+      "height": 296
+    },
+    {
+      "url": "assets/figures/arxiv/2604.01712v1/fig-007.webp",
+      "caption": "Fig. 9. Time-domain forecasting for 𝑦-axis (lateral).",
+      "page": 7,
+      "index": 7,
+      "width": 1067,
+      "height": 462
+    },
+    {
+      "url": "assets/figures/arxiv/2604.01712v1/fig-008.webp",
+      "caption": "Fig. 10. Time-domain forecasting for 𝑧-axis (vertical).",
+      "page": 7,
+      "index": 8,
+      "width": 1067,
+      "height": 463
+    },
+    {
+      "url": "assets/figures/arxiv/2604.01712v1/fig-009.webp",
+      "caption": "Fig. 13. Results and comparison for the median Welch power spectral densities on the East/West sides for the 𝑥-axis.",
+      "page": 10,
+      "index": 9,
+      "width": 1064,
+      "height": 685
+    },
+    {
+      "url": "assets/figures/arxiv/2604.01712v1/fig-010.webp",
+      "caption": "Table 5 Frequency-domain error comparison (median across shared 𝑦∕𝑧 core modes).",
+      "page": 14,
+      "index": 10,
+      "width": 527,
+      "height": 258
+    },
+    {
+      "url": "assets/figures/arxiv/2604.01712v1/fig-011.webp",
+      "caption": "Fig. 17. Error residual–distribution for the last 20,000 samples across all steps and modes.",
+      "page": 14,
+      "index": 11,
+      "width": 1062,
+      "height": 1004
+    },
+    {
+      "url": "assets/figures/arxiv/2604.01712v1/fig-012.webp",
+      "caption": "Table 3 Stability properties, numerical error estimates, and imperfect wind–input modeling details.",
+      "page": 3,
+      "index": 12,
+      "width": 754,
+      "height": 256
+    },
+    {
+      "url": "assets/figures/arxiv/2604.01712v1/fig-013.webp",
+      "caption": "Table 1 Parameter values used in the Theodorsen bridge deck model of the Section 2 analysis.",
+      "page": 3,
+      "index": 13,
+      "width": 346,
+      "height": 381
+    },
+    {
+      "url": "assets/figures/arxiv/2604.01712v1/fig-014.webp",
+      "caption": "Fig. 22. Comparison of transformer and convolutional neural network approaches for 𝑧-axis (vertical).",
+      "page": 18,
+      "index": 14,
+      "width": 1069,
+      "height": 475
+    },
+    {
+      "url": "assets/figures/arxiv/2604.01712v1/fig-015.webp",
+      "caption": "Fig. 21. Comparison of transformer and convolutional neural network approaches for 𝑦-axis (lateral).",
+      "page": 18,
+      "index": 15,
+      "width": 1069,
+      "height": 473
+    },
+    {
+      "url": "assets/figures/arxiv/2604.01712v1/fig-016.webp",
+      "caption": "Fig. 16. Zoomed results and comparison for the median Welch power spectral densities on the East/West sides for the 𝑧-axis.",
+      "page": 13,
+      "index": 16,
+      "width": 833,
+      "height": 1242
+    },
+    {
+      "url": "assets/figures/arxiv/2604.01712v1/fig-017.webp",
+      "caption": "Fig. 11. Results and comparison for the median Welch power spectral densities on the East/West sides for the 𝑦-axis.",
+      "page": 8,
+      "index": 17,
+      "width": 1064,
+      "height": 684
+    },
+    {
+      "url": "assets/figures/arxiv/2604.01712v1/fig-018.webp",
+      "caption": "Fig. 2. Comparison of aerodynamic response estimations under accurate and perturbed wind conditions in the Section 2 Theodorsen bridge deck model, where each case refers to a different simulation comparison.",
+      "page": 4,
+      "index": 18,
+      "width": 713,
+      "height": 769
+    },
+    {
+      "url": "assets/figures/arxiv/2604.01712v1/fig-019.webp",
+      "caption": "Fig. 3. Error and accumulated error for the aerodynamic response estimations under accurate and perturbed wind conditions in the Section 2 Theodorsen bridge deck model.",
+      "page": 4,
+      "index": 19,
+      "width": 889,
+      "height": 475
+    },
+    {
+      "url": "assets/figures/arxiv/2604.01712v1/fig-020.webp",
+      "caption": "Table 8 Model and training hyperparameters (RayTune-best reported runs).",
+      "page": 17,
+      "index": 20,
+      "width": 771,
+      "height": 308
+    },
+    {
+      "url": "assets/figures/arxiv/2604.01712v1/fig-021.webp",
+      "caption": "Table 9 Validation protocol and evaluation settings (explicit, compact; applied consistently across all reported models).",
+      "page": 17,
+      "index": 21,
+      "width": 1091,
+      "height": 452
+    },
+    {
+      "url": "assets/figures/arxiv/2604.01712v1/fig-022.webp",
+      "caption": "Fig. 20. Comparison of transformer and convolutional neural network approaches for 𝑥-axis (axial).",
+      "page": 17,
+      "index": 22,
+      "width": 1067,
+      "height": 473
+    },
+    {
+      "url": "assets/figures/arxiv/2604.01712v1/fig-023.webp",
+      "caption": "Fig. 15. Zoomed results and comparison for the median Welch power spectral densities on the East/West sides for the 𝑦-axis.",
+      "page": 12,
+      "index": 23,
+      "width": 835,
+      "height": 1242
+    },
+    {
+      "url": "assets/figures/arxiv/2604.01712v1/fig-024.webp",
+      "caption": "Fig. 12. Results and comparison for the median Welch power spectral densities on the East/West sides for the 𝑧-axis.",
+      "page": 9,
+      "index": 24,
+      "width": 1064,
+      "height": 690
+    },
+    {
+      "url": "assets/figures/arxiv/2604.01712v1/fig-025.webp",
+      "caption": "Fig. 4. Encoder of the multimodal transformer of Section 3. Wind features are embedded with positional encoding, and passed through N stacked encoder blocks to produce a memory tensor M for cross-modal conditioning in the decoder.",
+      "page": 5,
+      "index": 25,
+      "width": 1067,
+      "height": 391
+    },
+    {
+      "url": "assets/figures/arxiv/2604.01712v1/fig-026.webp",
+      "caption": "Fig. 5. Decoder of the multimodal transformer of Section 3. Given the past acceleration sequence, the decoder applies masked self-attention and cross-attention over the encoder memory M. A linear head maps the decoded states to accelerations, generating autoregressively the future sequence.",
+      "page": 5,
+      "index": 26,
+      "width": 1067,
+      "height": 373
+    },
+    {
+      "url": "assets/figures/arxiv/2604.01712v1/fig-027.webp",
+      "caption": "Fig. 19. Vibration response for both the multimodal and the acceleration-only forecasting scenarios of Section 7 under low wind excitation (upper plot), and corresponding instantaneous prediction error at each time-step (bottom plot).",
+      "page": 16,
+      "index": 27,
+      "width": 1069,
+      "height": 567
+    },
+    {
+      "url": "assets/figures/arxiv/2604.01712v1/fig-028.webp",
+      "caption": "Fig. 18. Vibration response for the both the multimodal and the acceleration-only forecasting scenarios of Section 7 under strong wind excitation (upper plot), and corresponding instantaneous prediction error at each time-step (bottom plot).",
+      "page": 16,
+      "index": 28,
+      "width": 1069,
+      "height": 570
+    }
+  ]
+}
