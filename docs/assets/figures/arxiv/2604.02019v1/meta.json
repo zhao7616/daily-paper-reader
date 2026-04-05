@@ -1,0 +1,70 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.02019v1/fig-001.webp",
+      "caption": "Fig. 4. Performance of the seven single-task ALR algorithms on the EECooling dataset with λ ∈ {0.01, 0.1, 1, 10}, averaged over 100 runs.",
+      "page": 11,
+      "index": 1,
+      "width": 495,
+      "height": 852
+    },
+    {
+      "url": "assets/figures/arxiv/2604.02019v1/fig-002.webp",
+      "caption": "Fig. 5. Effect of different number of initially labeled samples, nmin (averaged over 100 runs). (a) Yacht, where d = 6; and, (b) autoMPG, where d = 9.",
+      "page": 11,
+      "index": 2,
+      "width": 498,
+      "height": 803
+    },
+    {
+      "url": "assets/figures/arxiv/2604.02019v1/fig-003.webp",
+      "caption": "TABLE I SUMMARY OF THE 11 SINGLE-TASK REGRESSION DATASETS.",
+      "page": 7,
+      "index": 3,
+      "width": 496,
+      "height": 453
+    },
+    {
+      "url": "assets/figures/arxiv/2604.02019v1/fig-004.webp",
+      "caption": "Fig. 2. Normalized AUCs of the nine single-task ALR algorithms on the 11 datasets. (a) RMSE; and, (b) CC. The last group shows the average over the 11 datasets.",
+      "page": 10,
+      "index": 4,
+      "width": 525,
+      "height": 740
+    },
+    {
+      "url": "assets/figures/arxiv/2604.02019v1/fig-005.webp",
+      "caption": "Fig. 9. Performance of the five multi-task ALR algorithms on the VAM dataset, averaged over 100 runs.",
+      "page": 14,
+      "index": 5,
+      "width": 495,
+      "height": 826
+    },
+    {
+      "url": "assets/figures/arxiv/2604.02019v1/fig-006.webp",
+      "caption": "Fig. 10. Performance of the five multi-task ALR algorithms on the EE dataset, averaged over 100 runs.",
+      "page": 14,
+      "index": 6,
+      "width": 496,
+      "height": 769
+    },
+    {
+      "url": "assets/figures/arxiv/2604.02019v1/fig-007.webp",
+      "caption": "Fig. 6. Performance of different initialization approaches on the EE-Cooling dataset, averaged over 100 runs. iGS (iRDM) and FW-iGS (iRDM) used iRDM [29] to select the first 5 samples to label. iGS (IRD) and FW-iGS (IRD) used IRD [30] to select the first 5 samples to label.",
+      "page": 12,
+      "index": 7,
+      "width": 495,
+      "height": 366
+    },
+    {
+      "url": "assets/figures/arxiv/2604.02019v1/fig-008.webp",
+      "caption": "TABLE II NORMALIZED AUCS OF RMSES AND CCS OF DIFFERENT ALR ALGORITHMS ON THE 11 DATASETS.",
+      "page": 9,
+      "index": 8,
+      "width": 1044,
+      "height": 268
+    }
+  ]
+}

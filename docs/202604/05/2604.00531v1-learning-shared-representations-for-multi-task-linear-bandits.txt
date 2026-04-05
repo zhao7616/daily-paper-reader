@@ -1,0 +1,2135 @@
+Title: Learning Shared Representations for Multi-Task Linear Bandits
+
+URL Source: https://arxiv.org/pdf/2604.00531v1
+
+Published Time: Thu, 02 Apr 2026 00:42:32 GMT
+
+Number of Pages: 7
+
+Markdown Content:
+# Learning Shared Representations for Multi-Task Linear Bandits 
+
+Jiabin Lin and Shana Moothedath 
+
+Abstract — Multi-task representation learning is an approach that learns shared latent representations across related tasks, facilitating knowledge transfer and improving sample efficiency. This paper introduces a novel approach to multi-task represen-tation learning in linear bandits. We consider a setting with T
+
+concurrent linear bandit tasks, each with feature dimension d,that share a common latent representation of dimension r ≪
+
+min {d, T }, capturing their underlying relatedness. We propose a new Optimism in the Face of Uncertainty Linear (OFUL) algorithm that leverages shared low-rank representations to enhance decision-making in a sample-efficient manner. Our algorithm first collects data through an exploration phase, estimates the shared model via spectral initialization, and then conducts OFUL based learning over a newly constructed confidence set. We provide theoretical guarantees for the confidence set and prove that the unknown reward vectors lie within the confidence set with high probability. We derive cumulative regret bounds and show that the proposed approach achieves eO(√drNT ), a significant improvement over solving the 
+
+T tasks independently, resulting in a regret of eO(dT √N). We performed numerical simulations to validate the performance of our algorithm for different problem sizes. 
+
+I. I NTRODUCTION 
+
+Multi-task representation learning (MTRL) is an emerging paradigm that leverages the observation that related tasks share common structure, enabling the learning of a unified representation that mitigates data scarcity for individual tasks [ 1], [ 2 ], [ 3]. Identifying shared patterns, MTRL improves overall learning performance while reducing data require-ments. MTRL has been used with great success in natural language processing (GPT-2, GPT-3, GPT-4, Bert), computer vision (CLIP), and recommendation systems [ 4], [ 5], [ 6]. MTRL has been well studied within the linear regression framework [ 7], [ 8], [ 3], and more recently, its analysis has been extended to dynamic learning environments, particularly in bandit settings [2], [9], [10]. Stochastic bandit learning is a well-studied problem in online sequential decision-making, applicable in diverse fields, including robotics, clinical trials, communications, and recommendation systems. In each round, the learner chooses an action and receives a stochastic reward. The main goal is to select actions that maximize the cumulative reward over time. A key challenge in bandit problem is balancing exploration for accurate reward estimation and exploitation for maximizing immediate rewards based on acquired knowledge. This paper presents a provable framework for multi-task representation learning in linear bandits, where T tasks, each 
+
+> ∗
+> J. Lin is with the Department of Computer Science and Technology, Qingdao University, China, and S. Moothedath is with Department of Electrical and Computer Engineering, Iowa State University, USA. Email: linjiabinapply@163.com,mshana@iastate.edu. This work was supported in part by the U.S. National Science Foundation under Grant NSF CAREER 2440455.
+
+associated with d-dimensional features, share a common r-dimensional latent representation. Thus the reward parameters of the T tasks lie in an unknown r-dimensional subspace of 
+
+Rd , where r ≪ min {d, T }. Our goal is to develop an OFUL algorithm that exploits the problem structure for efficient learning. By leveraging task dependencies, we aim to achieve a tighter regret bound than solving tasks independently. Our proposed approach begins with an exploration phase to collect data, followed by spectral initialization [ 11 ] to estimate the shared model, addressing the non-convexity of the regression problem. We then construct a confidence set for each task that, with high probability, contains the true reward parameters, forming the foundation for our OFUL decision-making strategy. We make the following contributions. 
+
+Contributions: We propose an upper confidence bound (UCB) algorithm based on the OFUL principle for multi-task low-dimensional bandits. Our approach utilizes a spectral initialization approach to learn the shared model of the tasks with guarantees. We then develop a novel approach to construct the confidence set for each task. We prove in Theorem III.2 that the reward parameters of the tasks are within the set, with high probability. Our bound is tighter compared to the standard UCB approach in [ 12 ], as we utilize the structure of the problem. We prove the regret guarantees for our proposed algorithm in Theorem III.3. We show that, under suitable noise-to-signal ratio conditions, the regret over 
+
+N rounds scales as eO(√drNT ), significantly outperforming the eO(dT √N) regret when solving tasks independently using standard UCB. Here, the eO notation hides the logarithmic factors. We evaluated the proposed approach via numerical simulation for different problem sizes. 
+
+Related Work: Multi-task bandit learning has been investi-gated in prior studies [ 2], [ 13 ], [ 10 ], [ 9 ], aiming to address 
+
+T related tasks of dimension d that share a common r
+
+dimensional linear representation within a concurrent learning framework. Specifically, [ 9 ] utilizes a trace-norm relaxation method to estimate the reward matrix. However, the solution obtained from the trace-norm relaxation does not necessarily solve the original problem. The study in [ 10 ] builds on [ 7], exploring finite and infinite action settings. They propose an explore-then-commit algorithm; however, their approach assumes that the optimal solution is known, with the primary focus on sample complexity. [ 14 ] considered a non-stationary and infinite action setting; the actions are constrained to be from an ellipsoid, and the chosen actions must be independent and span the action space. [ 13 ] introduced an OFUL-based algorithm similar to ours. Their approach constructs a confidence set, which requires solving a non-convex optimization problem. However, they assume that the optimal solution to the non-conves estimation problem is 
+
+> arXiv:2604.00531v1 [cs.LG] 1 Apr 2026
+
+known. Our earlier work, [ 2], proposed an alternating gradient descent and minimization algorithm for solving the multi-task bandit problem. The episodic algorithm employs a window-based approach, in which it collects data over each window and subsequently updates the reward matrix estimate through alternating steps of gradient descent and minimization. The algorithm relies on independent and identically distributed (i.i.d.) data in both exploration and commit phases, which becomes restrictive specifically during the commit episodes where actions are chosen greedily. In a recent work [ 15 ] we proposed an explore-then-commit algorithm for representation learning followed by an OFUL approach to transfer the learned representation to a new target task. The focus in [ 15 ]is transfer learning to a new task. In contrast to these works, the focus of this work is to develop a provable UCB approach based on the for multi-task representation learning. A UCB approach in multi-task learning balances exploration and exploitation while exploiting shared representations, thereby accelerating learning across tasks. 
+
+Organization: In Section II, we present the problem setting. In Section III, we present the proposed UCB algorithm and its guarantees. In Section IV, we present the simulation results. In Section V, we present the conclusions. II. P ROBLEM FORMULATION AND NOTATIONS 
+
+Notations: For any positive integer n, the set [n] denotes 
+
+{1, 2, · · · , n}. For any vector x, ∥x∥ represents the ℓ2 norm, and |x| indicates the element-wise absolute value. For any matrix A, ∥A∥ denotes the 2-norm and ∥A∥F denotes the Frobenius norm. ⊤ represents the transpose of a matrix or vector. The notation In (or sometimes just I) represents the 
+
+n × n identity matrix, while ek denotes the k−th canonical basis vector. For basis matrices B1 and B2, we define Subspace Distance (SD) as SD (B1, B2) := ∥(I − B1B⊤ 
+
+> 1
+
+)B2∥F .
+
+Problem Setting: Let X represent the action set, with the environment defined by a fixed but unknown reward function 
+
+y : X → R. We consider a scenario with T different tasks, each representing a related but distinct sequential decision-making problem. In each round n, each task t ∈ [T ] independently chooses an action xn,t ∈ X . The task t receives a noisy reward 
+
+yn,t ∈ R from the environment, where 
+
+yn,t = x⊤ 
+
+> n,t
+
+θ ⋆ 
+
+> t
+
++ ηn,t ,
+
+where θ ⋆ 
+
+> t
+
+is the fixed but unknown reward parameter for task t, while ηn,t denotes reward noise. The expected reward is defined as rn,t = x⊤ 
+
+> n,t
+
+θ ⋆ 
+
+> t
+
+, where rn,t = E[yn,t ]. The goal is to choose actions that maximize the cumulative reward ∑Tt=1 ∑Nn=1 yn,t , which is equivalent to minimizing the cumulative (pseudo) regret, defined as 
+
+RN,T :=
+
+> T
+
+# ∑
+
+> t=1
+> N
+
+# ∑
+
+> n=1
+
+x⋆⊤ 
+
+> n,t
+
+θ ⋆ 
+
+> t
+
+− x⊤ 
+
+> n,t
+
+θ ⋆ 
+
+> t
+
+,
+
+where x⋆ 
+
+> n,t
+
+denotes the optimal action at round n for task t.We define the reward parameter matrix as Θ⋆ := [ θ ⋆ 
+
+> 1
+
+· · · θ ⋆ 
+
+> T
+
+]
+
+and assume that the rank( Θ⋆) ≪ min {d, T }. This low-rank structure enables us to take advantage of similarities between different tasks, thus improving our learning efficiency. An example of multi-task bandit problems with a low-rank model is recommender systems. For instance, different streaming platforms (tasks) aim to suggest movies (actions) to users to maximize views. While each platform differs, they address the same core problem, leading to related tasks with low-rank reward matrices. We have the following standard assumptions. 
+
+Assumption II.1. (Common Feature Extractor). We assume the existence of a matrix B⋆ ∈ Rd×r, denoted as the common feature extractor, along with a set of linear coefficient vectors {w⋆ 
+
+> t
+
+}Tt=1. Hence, the reward parameter matrix can be expressed as Θ⋆ = B⋆W ⋆, where W ⋆ = [ w⋆
+
+> 1
+
+, · · · , w⋆ 
+
+> T
+
+].This assumption captures the relatedness among tasks and is widely applied in representation learning literature [ 2], [ 3], [ 13 ], [ 10 ], [ 9 ], [ 7 ], [ 16 ], [ 8 ]. Let Θ⋆ SVD 
+
+= B⋆ΣV ⋆ := B⋆W ⋆
+
+denote its reduced (rank r) singular value decomposition, where B⋆ ∈ Rd×r and V ⋆ ∈ Rr×T are matrices with orthonor-mal columns, and Σ ∈ Rr×r is a diagonal matrix containing non-negative singular values. The matrix W ⋆ is defined as 
+
+W ⋆ := ΣV ⋆. Let σ ⋆ 
+
+> max
+
+and σ ⋆ 
+
+> min
+
+denote the maximum and minimum singular values of Σ, respectively, and we define the condition number κ := σ ⋆ 
+
+> max
+> σ⋆
+> min
+
+.
+
+Assumption II.2. We assume that the noise ηn,t s are inde-pendent 1 sub-Gaussian random variables and that ∥xn,t ∥ ⩽ L
+
+for a constant L > 0. Assumption II.2 is a standard data model assumed in the bandit literature [12]. 
+
+Assumption II.3. We assume the existence of constants l
+
+and u, where 0 < l ⩽ u such that l ⩽ ∥w⋆ 
+
+> t
+
+∥2 ⩽ u for all t ∈ [T ].Assumption II.3 implies the incoherence of the reward matrix Θ⋆. Details of incoherence are presented in the Appendix of the paper. III. P ROPOSED REPRESENTATION LEARNING -B ASED 
+
+OFUL A LGORITHM AND REGRET ANALYSIS 
+
+Our approach consists of three key steps: (i) random exploration, (ii) spectral initialization, and (iii) OFUL update (principle of optimism in the face of uncertainty). In step (i), we collect data samples via a random exploration. During each round n ∈ [N1], each task t independently selects a random action xn,t and observes the corresponding reward based on the chosen action. At the end of the exploration, the goal of our algorithm is to minimize the cost function 
+
+f ( bB, bW ) = 
+
+> N1
+
+# ∑
+
+> n=1
+> T
+
+# ∑
+
+> t=1
+
+yn,t − x⊤ 
+
+> n,t
+
+bB bwt
+
+> 2
+
+, (1) where bB ∈ Rd×r and bW = [ bw1, · · · , bwT ] ∈ Rr×T . Due to the non-convex nature of the cost function f ( bB, bW ), a carefully designed initialization is essential to ensure efficient opti-mization and convergence to a desirable solution. Hence, in step (ii), we perform a truncated spectral initialization to obtain an estimate of the shared representation. We utilize the result from [17] for the spectral initialization. Algorithm III.1 OFUL for Multi-Task Low-Rank Linear Bandits  
+
+> 1:
+
+Parameters: Total number of rounds, N; Number of rounds for exploration, N1; Multiplier in specifying α
+
+for init step, ˜C; bθt ← 0, ¯ V0,t = λ I for all t ∈ [T ] 
+
+> 2:
+
+for n ← 1, · · · , N1 do  
+
+> 3:
+
+For t ∈ [T ], randomly select action xn,t , observe yn,t 
+
+> 4:
+
+end for  
+
+> 5:
+
+For t ∈ [T ], Yt = [ y1,t , · · · , yN1,t ]⊤, Φt = [ x1,t , · · · , xN1,t ]⊤ 
+
+> 6:
+
+Spectral Initialization  
+
+> 7:
+
+Set α = ˜CN1T ∑N1,Tn=1,t=1 y2 
+
+> n,t
+> 8:
+
+Yt,trunc (α) := Yt ◦ 1{| Yt |⩽√α} 
+
+> 9:
+
+bΘ0 := 1 
+
+> N1
+
+∑Tt=1 Φ⊤ 
+
+> t
+
+Yt,trunc (α)e⊤ 
+
+> t
+> 10:
+
+Set bB ← top-r-singular-vectors of bΘ0 
+
+> 11:
+
+for n ← N1 + 1, · · · , N do  
+
+> 12:
+
+for t ← 1, · · · , T do  
+
+> 13:
+
+Construct the confidence ellipsoid βn,t by Eq. (2)  
+
+> 14:
+
+(xn,t , ˜θn,t ) = arg max x∈Xn,t ,θ ∈βn,t ⟨x, θ ⟩ 
+
+> 15:
+
+Update ¯ Vn,t = ¯Vn−1,t + xn,t x⊤ 
+
+> n,t
+
+, 
+
+> 16:
+
+Update bwn,t = ( bB⊤ ¯Vn,t bB)−1 n
+
+# ∑
+
+> m=N1+1
+
+bB⊤xm,t ym,t 
+
+> 17:
+
+Update bθn,t = bB bwn,t 
+
+> 18:
+
+end for  
+
+> 19:
+
+end for 
+
+As described in line 6-line 10 of Algorithm III.1, we calculate the top r singular vectors of the matrix 
+
+bΘ = 1
+
+N1
+
+> T
+
+# ∑
+
+> t=1
+> N1
+
+# ∑
+
+> n=1
+
+xn,t yn,t e⊤ 
+
+> t
+
+1{y2  
+
+> n,t⩽α}
+
+= 1
+
+N1
+
+> T
+
+# ∑
+
+> t=1
+
+xn,t yt,trunc (α)e⊤ 
+
+> t
+
+,
+
+where α = ˜CN1T ∑N1,Tn=1,t=1 y2 
+
+> n,t
+
+, ˜C = 9κ2μ2, and yt,trunc (α) :=
+
+Yt ◦ 1{| Yt |⩽√α}. Here, 1{g} represents the indicator function, which takes a value of 1 if condition g holds and 0 otherwise. For initialization, we assume that the feature vector xn,t
+
+follows a standard Gaussian distribution, and that the noise 
+
+ηn,t is an i.i.d. Gaussian variable with zero mean and variance 
+
+σ 2, for n ∈ [N1]. Unlike the standard linear bandit problem (linear regression estimation), the multi-task problem is inherently non-convex. The Gaussian model assumption on the feature vectors has been studied in linear bandit works, including [ 2], [ 13 ], [ 10 ], [ 18 ], [ 19 ]. The i.i.d. Gaussian noise model has been utilized in [ 20 ], [ 21 ], [ 22 ]. Relaxing the Gaussian model for the initial exploration phase is part of our future work. Under this, we have the following initialization guarantee, Theorem 2.2 from [ 17 ], presented below in Proposition III.1. 
+
+Proposition III.1 (Theorem 2.2, [ 17 ]) . Pick a δ0 < 0.1.Define the noise-to-signal ratio as NSR : = T σ 2 
+
+> σ⋆2min
+
+. If N1T >
+
+Cμ2κ2
+
+
+
+dr κ2 
+
+> δ20
+
++ d 
+
+> δ20
+
+NSR 
+
+
+
+, then with probability at least 1 −
+
+exp (−c(d + T )) , subspace distance SD ( bB, B⋆) ⩽ δ0.
+
+After estimating the shared model bB, we proceed to step (iii), under the principle of optimism in the face of uncertainty, to estimate the reward parameter. 
+
+A. Construction of Confidence Sets: This section details the construction of the confidence set for each task t.The reward parameter for task t is given by θ ⋆ 
+
+> t
+
+= B⋆w⋆ 
+
+> t
+
+.In each round n ∈ [N1 + 1, N], each task t ∈ [T ] constructs a confidence ellipsoid βn,t that contains the unknown reward parameter θ ⋆ 
+
+> t
+
+with high probability. It then computes an optimistic estimate ˜θn,t = arg max θ ∈βn,t (max x∈X x⊤θ ) and selects the action xn,t = arg max x∈X x⊤ ˜θn,t . Equivalently, task 
+
+t chooses the pair (xn,t , ˜θn,t ) = arg max x∈X ,θ ∈βn,t ⟨x, θ ⟩, maxi-mizing the expected reward collaboratively. Upon selecting the action xn,t , task t observes the corresponding reward yn,t
+
+and updates its confidence ellipsoid using Eq. (2). For all n ∈ [N1 + 1, N], let Φn,t := [ xN1+1,t · · · xn,t ]⊤, Yn,t =[yN1+1,t · · · yn,t ]⊤, and Hn,t = [ ηN1+1,t · · · ηn,t ]⊤. For λ > 0 ,define the matrices Vn,t = λ I + bB⊤Φ⊤ 
+
+> n,t
+
+Φn,t bB and ¯Vn,t = λ I +
+
+Φ⊤ 
+
+> n,t
+
+Φn,t . Here Vn,t = bB⊤ ¯Vn,t bB. Below we present the guarantee on the confidence set. 
+
+Theorem III.2. Suppose Assumptions II.1, II.2 and II.3 hold. Pick δ0 < 0.1 and any δ > 0. If N1T >
+
+Cμ2κ2
+
+
+
+dr κ2 
+
+> δ20
+
++ d 
+
+> δ20
+
+NSR 
+
+
+
+, then for all tasks t ∈ [T ] and n ∈ [N1 + 1, N], it is guaranteed with probability at least 
+
+1 − δ − exp (−c(d + T )) that θ ⋆ 
+
+> t
+
+is contained within the set 
+
+βn,t =
+
+
+
+θ ∈ Rd : ∥bθn,t − θ ∥ ¯Vn,t ⩽ (1 + δ0)√λ μ 
+
+r rT σ ⋆
+
+> max
+
+σ
+
+vuut2 log det (Vn,t ) 12 det (λ I)− 12
+
+δ
+
+!
+
++ 2√n − N1Lδ0μ
+
+r rT σ ⋆
+
+> max
+
+
+
+. (2) 
+
+Furthermore, if N1T > Cμ2κ2L2d(N −N1)  rκ2 + NSR , then with probability at least 1 − δ − exp (−c(d + T )) , for all t ∈
+
+[T ] and n ⩾ 0, θ ⋆ 
+
+> t
+
+is contained within the set 
+
+β ′ 
+
+> n,t
+
+=
+
+(
+
+θ ∈ Rd : ∥bθn,t − θ ∥ ¯Vn,t ⩽ σ
+
+s
+
+r log 
+
+ 1 + ( n − N1)L2/λδ
+
+
+
++ √λ +
+
+√λ
+
+L√N − N1
+
++ 2
+
+!
+
+μ
+
+r rT σ ⋆
+
+> max
+
+)
+
+.
+
+Proof. Let bwn,t be the least squares estimate of w⋆ 
+
+> t
+
+with ℓ2
+
+regularization, where the regularization parameter λ > 0. 
+
+bwn,t = V −1 
+
+> n,t
+
+(Φn,t bB)⊤Yn,t
+
+= V −1 
+
+> n,t
+
+(Φn,t bB)⊤(Φn,t B⋆w⋆ 
+
+> t
+
++ Hn,t )= V nt −1 bB⊤Φ⊤ 
+
+> n,t
+
+Hn,t +V −1 
+
+> n,t
+
+bB⊤Φ⊤ 
+
+> n,t
+
+Φn,t bB bB⊤B⋆w⋆
+
+> t
+
++V −1 
+
+> n,t
+
+bB⊤Φ⊤ 
+
+> n,t
+
+Φn,t (I − bB bB⊤)B⋆w⋆
+
+> t
+
+= V −1 
+
+> n,t
+
+bB⊤Φ⊤ 
+
+> n,t
+
+Hn,t + bB⊤B⋆w⋆ 
+
+> t
+
+− λV −1 
+
+> n,t
+
+bB⊤B⋆w⋆
+
+> t
+
++V −1 
+
+> n,t
+
+bB⊤Φ⊤ 
+
+> n,t
+
+Φn,t (I − bB bB⊤)B⋆w⋆ 
+
+> t
+
+.
+
+By multiplying bB on both sides, we derive 
+
+bB bwn,t = bBV −1 
+
+> n,t
+
+bB⊤Φ⊤ 
+
+> n,t
+
+Hn,t + bB bB⊤B⋆w⋆ 
+
+> t
+
+− λ bBV −1 
+
+> n,t
+
+bB⊤B⋆w⋆
+
+> t
+
++ bBV −1 
+
+> n,t
+
+bB⊤Φ⊤ 
+
+> n,t
+
+Φn,t (I − bB bB⊤)B⋆w⋆
+
+> t
+
+= bBV −1 
+
+> n,t
+
+bB⊤Φ⊤ 
+
+> n,t
+
+Hn,t + B⋆w⋆ 
+
+> t
+
++ ( bB bB⊤ − I)B⋆w⋆
+
+> t
+
++ bBV −1 
+
+> n,t
+
+bB⊤Φ⊤ 
+
+> n,t
+
+Φn,t (I − bB bB⊤)B⋆w⋆ 
+
+> t
+
+− λ bBV −1 
+
+> n,t
+
+bB⊤B⋆w⋆ 
+
+> t
+
+.
+
+(3) Consider a vector z ∈ Rd . Multiplying both sides of Eq. (3), 
+
+z⊤ bB bwn,t − z⊤B⋆w⋆
+
+> t
+
+= z⊤ bBV −1 
+
+> n,t
+
+bB⊤Φ⊤ 
+
+> n,t
+
+Hn,t − λ z⊤ bBV −1 
+
+> n,t
+
+bB⊤B⋆w⋆
+
+> t
+
++ z⊤ bBV −1 
+
+> n,t
+
+bB⊤Φ⊤ 
+
+> n,t
+
+Φn,t (I − bB bB⊤)B⋆w⋆ 
+
+> t
+
++ z⊤( bB bB⊤ − I)B⋆w⋆
+
+> t
+
+= ⟨(z⊤ bB)⊤, bB⊤Φ⊤ 
+
+> n,t
+
+Hn,t ⟩V −1 
+
+> n,t
+
+− λ ⟨(z⊤ bB)⊤, bB⊤B⋆w⋆ 
+
+> t
+
+⟩V −1
+
+> n,t
+
++ z⊤( bB bB⊤ − I)B⋆w⋆ 
+
+> t
+
++ ⟨ bB⊤z, bB⊤Φ⊤ 
+
+> n,t
+
+Φn,t (I − bB bB⊤)B⋆w⋆ 
+
+> t
+
+⟩V −1 
+
+> n,t
+
+.
+
+Analyzing the absolute value, the upper bound is given as 
+
+|z⊤ bB bwn,t − z⊤B⋆w⋆ 
+
+> t
+
+|
+
+⩽ ∥(z⊤ bB)⊤∥V −1 
+
+> n,t
+
+∥ bB⊤Φ⊤ 
+
+> n,t
+
+Φn,t (I − bB bB⊤)B⋆w⋆ 
+
+> t
+
+∥V −1
+
+> n,t
+
++ |z⊤( bB bB⊤ − I)B⋆w⋆ 
+
+> t
+
+| + ∥(z⊤ bB)⊤∥V −1 
+
+> n,t
+
+∥ bB⊤Φ⊤ 
+
+> n,t
+
+Hn,t ∥V −1
+
+> n,t
+
++ λ ∥(z⊤ bB)⊤∥V −1 
+
+> n,t
+
+∥ bB⊤B⋆w⋆ 
+
+> t
+
+∥V −1 
+
+> n,t
+
+. (4) Now we bound each of the terms in Eq. (4) . To upper bound 
+
+∥ bB⊤Φ⊤ 
+
+> n,t
+
+Hn,t ∥V −1 
+
+> n,t
+
+, we apply the method from Theorem 1 in [12], which gives us with probability at least 1 − δ ,
+
+∥ bB⊤Φ⊤ 
+
+> n,t
+
+Hn,t ∥2 
+
+> V−1
+> n,t
+
+⩽ 2σ 2 log   det (Vn,t ) 12 det (λ I)− 12
+
+δ
+
+. (5) To upper bound the term ∥ bB⊤B⋆w⋆ 
+
+> t
+
+∥V −1 
+
+> n,t
+
+, we have 
+
+∥ bB⊤B⋆w⋆ 
+
+> t
+
+∥2 
+
+> V−1
+> n,t
+
+= w⋆⊤ 
+
+> t
+
+B⋆⊤ bBV −1 
+
+> n,t
+
+bB⊤B⋆w⋆
+
+> t
+
+⩽ ∥ bB⊤B⋆w⋆ 
+
+> t
+
+∥22∥V −1 
+
+> n,t
+
+∥2 ⩽ ∥ bB⊤∥22∥B⋆w⋆ 
+
+> t
+
+∥22∥V −1 
+
+> n,t
+
+∥2
+
+⩽ ∥B⋆w⋆ 
+
+> t
+
+∥2
+
+λmin (Vn,t ) ⩽ 1
+
+λ ∥w⋆ 
+
+> t
+
+∥2. (6) To upper bound the term ∥ bB⊤Φ⊤ 
+
+> n,t
+
+Φn,t (I − bB bB⊤)B⋆w⋆ 
+
+> t
+
+∥V −1 
+
+> n,t
+
+, we have with probability at least 1 − exp (−c(d + T )) ,
+
+∥ bB⊤Φ⊤ 
+
+> n,t
+
+Φn,t (I − bB bB⊤)B⋆w⋆ 
+
+> t
+
+∥V −1 
+
+> n,t
+
+⩽ ∥Φn,t (I − bB bB⊤)B⋆w⋆ 
+
+> t
+
+∥
+
+⩽ ∥Φn,t ∥∥ (I − bB bB⊤)B⋆∥∥ w⋆ 
+
+> t
+
+∥ ⩽ √n − N1Lδ0∥w⋆ 
+
+> t
+
+∥, (7) where the first inequality follows from Φn,t bB(λ I +
+
+bB⊤Φ⊤ 
+
+> n,t
+
+Φn,t bB)−1 bB⊤Φ⊤ 
+
+> n,t
+
+⩽ I. The second inequality follows from the Cauchy–Schwarz inequality. The last inequality follows from ∥Φn,t ∥ ⩽ √n − N1L and Proposition III.1. Here, n denotes rounds from {N1 + 1, . . . , N}. Consider 
+
+z = ¯Vn,t ( bB bwn,t − B⋆w⋆ 
+
+> t
+
+). To upper bound |z⊤( bB bB⊤ − I)B⋆w⋆ 
+
+> t
+
+|,we have with probability at least 1 − exp (−c(d + T )) ,
+
+|z⊤( bB bB⊤ − I)B⋆w⋆ 
+
+> t
+
+| = |( bB bwn,t − B⋆w⋆ 
+
+> t
+
+)⊤ ¯Vn,t ( bB bB⊤ − I)B⋆w⋆ 
+
+> t
+
+|
+
+= ⟨ bB bwn,t − B⋆w⋆ 
+
+> t
+
+, ( bB bB⊤ − I)B⋆w⋆ 
+
+> t
+
+⟩ ¯Vn,t
+
+⩽ ∥ bB bwn,t − B⋆w⋆ 
+
+> t
+
+∥ ¯Vn,t ∥( bB bB⊤ − I)B⋆w⋆ 
+
+> t
+
+∥ ¯Vn,t
+
+⩽ √λ ∥ bB bwn,t − B⋆w⋆ 
+
+> t
+
+∥ ¯Vn,t ∥( bB bB⊤ − I)B⋆w⋆ 
+
+> t
+
+∥
+
++ ∥ bB bwn,t − B⋆w⋆ 
+
+> t
+
+∥ ¯Vn,t ∥Φn,t ( bB bB⊤ − I)B⋆w⋆ 
+
+> t
+
+∥
+
+⩽ (√λ + √n − N1L)δ0∥w⋆ 
+
+> t
+
+∥∥ bB bwn,t − B⋆w⋆ 
+
+> t
+
+∥ ¯Vn,t . (8) To determine the upper bound of ∥(z⊤ bB)⊤∥2 
+
+> V−1
+> n,t
+
+, we have 
+
+∥ bB⊤z∥2 
+
+> V−1
+> n,t
+
+= z⊤ bBV −1 
+
+> n,t
+
+bB⊤z
+
+= ( bB bwn,t − B⋆w⋆ 
+
+> t
+
+)⊤ ¯Vn,t bBV −1 
+
+> n,t
+
+bB⊤ ¯Vn,t ( bB bwn,t − B⋆w⋆ 
+
+> t
+
+)= ( bB bwn,t − B⋆w⋆ 
+
+> t
+
+)⊤ ¯V 12 
+
+> n,t
+
+¯V 12 
+
+> n,t
+
+bBV −1 
+
+> n,t
+
+bB⊤ ¯V 12 
+
+> n,t
+
+¯V 12 
+
+> n,t
+
+( bB bwn,t − B⋆w⋆ 
+
+> t
+
+)
+
+⩽ ∥ bB bwn,t − B⋆w⋆ 
+
+> t
+
+∥2¯Vn,t ∥ ¯V 12 
+
+> n,t
+
+bBV −1 
+
+> n,t
+
+bB⊤ ¯V 12 
+
+> n,t
+
+∥
+
+= ∥ bB bwn,t − B⋆w⋆ 
+
+> t
+
+∥2¯Vn,t , (9) where the last step is derived from ∥ ¯V 12 
+
+> n,t
+
+bBV −1 
+
+> n,t
+
+bB⊤ ¯V 12 
+
+> n,t
+
+∥ =
+
+∥ ¯V 12 
+
+> n,t
+
+bBV − 12 
+
+> n,t
+
+∥2 = λmax (V − 12 
+
+> n,t
+
+bB⊤ ¯V 12 
+
+> n,t
+
+¯V 12 
+
+> n,t
+
+bBV − 12 
+
+> n,t
+
+) =
+
+λmax (V − 12 
+
+> n,t
+
+Vn,tV − 12 
+
+> n,t
+
+) = λmax (V − 12 
+
+> n,t
+
+V 12
+
+> n,t
+
+V 12
+
+> n,t
+
+V − 12 
+
+> n,t
+
+) = 1 . To bound |z⊤ bB bwn,t − z⊤B⋆w⋆ 
+
+> t
+
+|, we have 
+
+|z⊤ bB bwn,t − z⊤B⋆w⋆ 
+
+> t
+
+| = |z⊤( bB bwn,t − B⋆w⋆ 
+
+> t
+
+)|
+
+= ( bB bwn,t − B⋆w⋆ 
+
+> t
+
+)⊤ ¯Vn,t ( bB bwn,t − B⋆w⋆ 
+
+> t
+
+)= ∥ bB bwn,t − B⋆w⋆ 
+
+> t
+
+∥2¯Vn,t . (10) Substituting Eqs. (5)-(10) in Eq. (4) gives 
+
+∥ bB bwn,t − B⋆w⋆ 
+
+> t
+
+∥2¯Vn,t ⩽ ∥ bB bwn,t − B⋆w⋆ 
+
+> t
+
+∥ ¯Vn,t
+
+√λ ∥w⋆ 
+
+> t
+
+∥
+
++ σ
+
+s
+
+2 log   det (Vn,t ) 12 det (λ I)− 12
+
+δ
+
+ + ( √λ + 2√n − N1L)δ0∥w⋆ 
+
+> t
+
+∥
+
+
+
+.
+
+Thus, by using Assumption II.3, with probability at least 1 − δ − exp (−c(d + T )) ,
+
+∥ bB bwn,t − B⋆w⋆ 
+
+> t
+
+∥ ¯Vn,t ⩽ σ
+
+s
+
+2 log 
+
+ det (Vn,t ) 12 det (λ I)− 12
+
+δ
+
+
+
++ ( 1 + δ0)√λ μ 
+
+r rT σ ⋆ 
+
+> max
+
++ 2√n − N1Lδ0μ
+
+r rT σ ⋆
+
+> max
+
+.
+
+Furthermore, det (Vn,t ) = det (λ I + bB⊤Φ⊤ 
+
+> n,t
+
+Φn,t bB) = ∏ri=1(λ +
+
+λi), where λi denote the eigenvalue values of the positive semi-definite matrix bB⊤Φ⊤ 
+
+> n,t
+
+Φn,t bB. Given that 
+
+λi ⩽ Trace ( bB⊤Φ⊤ 
+
+> n,t
+
+Φn,t bB) = Trace (
+
+> n
+
+# ∑
+
+> m=N1+1
+
+bB⊤xm,t x⊤ 
+
+> m,t
+
+bB)=
+
+> n
+
+# ∑
+
+> m=N1+1
+
+Trace (( bB⊤xm,t )( bB⊤xm,t )⊤)=
+
+> n
+
+# ∑
+
+> m=N1+1
+
+( bB⊤xm,t )⊤( bB⊤xm,t ) = 
+
+> n
+
+# ∑
+
+> m=N1+1
+
+∥ bB⊤xm,t ∥22
+
+⩽
+
+> n
+
+# ∑
+
+> m=N1+1
+
+∥xm,t ∥22 ⩽ (n − N1)L2
+
+we conclude that det (Vn,t ) ⩽
+
+> r
+
+# ∏
+
+> i=1
+
+(λ + ( n − N1)L2) = ( λ + ( n − N1)L2)r
+
+= λ r 1 + (n − N1)L2
+
+λ
+
+r. (11) By setting δ0 = 1√n−N1L , it is essential to ensure that N1T >
+
+Cμ2κ2L2d(N − N1)  rκ2 + NSR . Consequently, we show that with probability at least 1 − δ − exp (−c(d + T )) ,
+
+∥ bB bwn,t − B⋆w⋆ 
+
+> t
+
+∥ ¯Vn,t ⩽ σ
+
+r
+
+r log 1 + ( n − N1)L2/λδ
+
++  √λ +
+
+√λ
+
+L√n − N1
+
++ 2μ
+
+r rT σ ⋆
+
+> max
+
+.
+
+Thus, we complete the proof. 
+
+Remark: Theorem III.2 ensures that the true reward parameter 
+
+θ ⋆ 
+
+> t
+
+consistently lie within this confidence set. Using this guarantee, we will analyze the regret guarantee of the proposed UCB-based algorithm. Theorem 2 in [ 12 ] constructs the confidence set for the true reward parameter for the single-task setting. Upon comparison, we observe that our results scale with √r, while the result in [ 12 ] scales with √d, thereby demonstrating the advantage of learning the shared model since r ≪ d. In contrast to the single-bandit problem [ 12 ], where the estimation is a linear regression, we assume the feature vector follows a standard Gaussian distribution to achieve a good initialization for the non-convex problem. The Gaussian model is essential in the spectral initialization phase to ensure that the subspace distance SD ( bB, B⋆) remains bounded with high probability, thereby facilitating the construction of our confidence sets. Relaxing the Gaussian model will be part of our future work. 
+
+B. Regret Analysis: In this subsection, we analyze the regret of our proposed algorithm. We use the Azuma-Hoeffding in-equality in our analysis. Let us define Mj := ∑ jm=1 ∑Tt=1(x⋆ 
+
+> m,t
+
+−
+
+xm,t )⊤θ ⋆ 
+
+> t
+
+. It is observed that E[Mj|M1, · · · , Mj−1] = Mj−1
+
+and E[|Mj|] < ∞ constitutes a martingale. Given Assump-tion II.2, the feature vector x⋆ 
+
+> m,t
+
+follows the standard Gaussian distribution when m ∈ [N1]. Hence, x⋆⊤ 
+
+> m,t
+
+θ ⋆ 
+
+> t
+
+∼ N (0, ∥θ ⋆ 
+
+> t
+
+∥2).Applying Gaussian tail bounds and the union bound over 
+
+T tasks and N1 rounds, with probability at least 1 − δ ,
+
+x⋆⊤ 
+
+> m,t
+
+θ ⋆ 
+
+> t
+
+⩽
+
+q
+
+2 log N1T 
+
+> δ
+
+∥θ ⋆ 
+
+> t
+
+∥. Thus, for j ∈ [N1] we have 
+
+|Mj − Mj−1| =
+
+> T
+
+# ∑
+
+> t=1
+
+(x⋆ 
+
+> j,t
+
+− x j,t )⊤θ ⋆
+
+> t
+
+⩽
+
+> T
+
+# ∑
+
+> t=1
+
+x⋆⊤ 
+
+> j,t
+
+θ ⋆ 
+
+> t
+
+⩽
+
+> T
+
+# ∑
+
+> t=1
+
+r
+
+2 log N1T
+
+δ ∥θ ⋆ 
+
+> t
+
+∥
+
+=
+
+> T
+
+# ∑
+
+> t=1
+
+r
+
+2 log N1T
+
+δ ∥w⋆ 
+
+> t
+
+∥. (12) Below, we present the cumulative regret bound. 
+
+Theorem III.3. Suppose Assumptions II.1, II.2 and II.3 hold. Pick δ0 < 0.1 and NSR : = T σ 2 
+
+> σ⋆2min
+
+is the noise-to-signal ratio. If N1T > Cμ2κ2L2d(N − N1)  rκ2 + NSR , then with probability at least 1 − 2δ − exp (−c(d + T )) , the cumulative regret of our proposed algorithm is bound by RN,T =
+
+eO
+
+σ ⋆
+
+> min
+
+√drNT 
+
+√NSR + ( √λ +
+
+s
+
+λ
+
+N − N1
+
++ 1)κ
+
+ .
+
+Proof. We start the analysis by bounding the cumulative regret for the random exploration step, R1 
+
+> N,T
+
+. We have 
+
+R1 
+
+> N,T
+
+=
+
+> N1
+
+# ∑
+
+> m=1
+> T
+
+# ∑
+
+> t=1
+
+(x⋆ 
+
+> m,t
+
+− xm,t )⊤θ ⋆
+
+> t
+
+Using the Azuma-Hoeffding inequality, the union bound, Assumption II.3 and Eq. (12) , we have that with probability at least 1 − 2δ ,
+
+R1 
+
+> N,T
+
+⩽ 2μσ ⋆
+
+> max
+
+r
+
+rN 1T log 1
+
+δ log N1T
+
+δ . (13) We then bound the cumulative regret R2 
+
+> N,T
+
+for the subsequent step. With probability at least 1 − δ , we have 
+
+R2 
+
+> N,T
+
+=
+
+> N
+
+# ∑
+
+> m=N1+1
+> T
+
+# ∑
+
+> t=1
+
+x⋆⊤ 
+
+> m,t
+
+θ ⋆ 
+
+> t
+
+− x⊤ 
+
+> m,t
+
+θ ⋆
+
+> t
+
+⩽
+
+> N
+
+# ∑
+
+> m=N1+1
+> T
+
+# ∑
+
+> t=1
+
+x⊤ 
+
+> m,t
+
+eθm,t − x⊤ 
+
+> m,t
+
+θ ⋆ 
+
+> t
+
+(14) 
+
+=
+
+> N
+
+# ∑
+
+> m=N1+1
+> T
+
+# ∑
+
+> t=1
+
+x⊤ 
+
+> m,t
+
+(eθm,t − bθm,t ) + x⊤ 
+
+> m,t
+
+(bθm,t − θ ⋆ 
+
+> t
+
+)
+
+⩽
+
+> N
+
+# ∑
+
+> m=N1+1
+> T
+
+# ∑
+
+> t=1
+
+∥eθm,t − bθm,t ∥ ¯Vm−1,t ∥xm,t ∥ ¯V −1
+
+> m−1,t
+
++ ∥bθm,t − θ ⋆ 
+
+> t
+
+∥ ¯Vm−1,t ∥xm,t ∥ ¯V −1
+
+> m−1,t
+
+⩽
+
+vuut N
+
+# ∑
+
+> m=N1+1
+> T
+
+# ∑
+
+> t=1
+
+(∥eθm,t − bθm,t ∥ ¯Vm−1,t + ∥bθm,t − θ ⋆ 
+
+> t
+
+∥ ¯Vm−1,t )2
+
+·
+
+vuut N
+
+# ∑
+
+> m=N1+1
+> T
+
+# ∑
+
+> t=1
+
+∥xm,t ∥2¯V −1
+
+> m−1,t
+
+(15) 
+
+⩽ 2σ
+
+r
+
+r log 1 + ( N − N1)L2/λδ
+
+s
+
+2(N − N1)T
+
+> T
+
+# ∑
+
+> t=1
+
+log 
+
+ det ( ¯Vn,t )
+
+det (λ I)
+
+
+
++ 2(√λ +
+
+√λ
+
+L√N − N1
+
++ 2)μσ ⋆
+
+> max
+
+s
+
+2(N − N1)r
+
+> T
+
+## ∑
+
+> t=1
+
+log 
+
+ det ( ¯Vn,t )
+
+det (λ I)
+
+
+
+(16) 
+
+⩽ σ
+
+r
+
+r log 1 + NL 2/λδ + ( √λ +
+
+√λ
+
+L√N − N1
+
++ 2)μ
+
+r rT σ ⋆
+
+> max
+
+!
+
+· 2√NT ·
+
+s
+
+2dT log 
+
+
+
+1 + (N − N1)L2
+
+λ
+
+
+
+(17) 
+
+⩽
+
+r
+
+NSR log 1 + NL 2/λδ + ( √λ +
+
+√λ
+
+L√N − N1
+
++ 2)μκ 
+
+!
+
+· 2σ ⋆
+
+> min
+
+√2drNT 
+
+r
+
+log (1 + NL 2
+
+λ ), (18) where Eq. (14) follows by x⋆⊤ 
+
+> m,t
+
+θ ⋆ 
+
+> t
+
+⩽ x⊤ 
+
+> m,t
+
+eθm,t . Eq. (15) follows by ∑i aibi ⩽
+
+q
+
+∑i a2
+
+> i
+
+q
+
+∑i b2 
+
+> i
+
+. Eq. (16) follows by Theorem III.2 and Lemma 11 in [ 12 ] and Eq. (17) follows from applying similar approach as in Eq. (11) for ¯Vn,t . Finally, Eq. (18) uses the definition of NSR . Combining the bound for 
+
+R1 
+
+> N,T
+
+and R2 
+
+> N,T
+
+and using the union bound, with probability 0 100 200 300 400 500 600         
+
+> Round, N
+> 0
+> 50
+> 100
+> 150
+> 200
+> 250
+> 300
+> Per-Task Cumulative Regret,  Rn
+> Synthetic data: T= 100, r= 2, N1= 20, N2= 600
+> d = 100
+> d = 200
+> d = 300
+
+(a) 0 100 200 300 400 500 600          
+
+> Round, N
+> 0
+> 50
+> 100
+> 150
+> 200
+> 250
+> 300
+> 350
+> Per-Task Cumulative Regret,  Rn
+> Synthetic data: d= 100, T= 100, N1= 20, N2= 600
+> r = 2
+> r = 4
+> r = 8
+
+(b) 0 100 200 300 400 500 600          
+
+> Round, N
+> 0
+> 20
+> 40
+> 60
+> 80
+> 100
+> 120
+> 140
+> Per-Task Cumulative Regret,  Rn
+> Synthetic data: d= 100, r= 2, N1= 20, N2= 600
+> T = 200
+> T = 400
+> T = 800
+
+(c) 
+
+Fig. 1: Plots present the per-task cumulative regret vs. round. Figure 1a presents plot varying the feature dimension d as {100 , 20 , 300 }. Figure 1b presents plot by varying rank r as {2, 4, 8}. Figure 1c presents plot varying the number of tasks T as {200 , 400 , 800 }. The parameters are set as 
+
+d = 100 , T = 100 , r = 2, N1 = 20 , N = 600. 
+
+at least 1 − 2δ − exp (−c(d + T )) ,
+
+RN,T = R1
+
+N,T + R2
+
+N,T ⩽ Eq . (13) + Eq . (18) 
+
+= eO
+
+
+
+σ ⋆
+
+min 
+
+√drNT  √NSR + ( √λ + 1)κ
+
+.
+
+Remark: We compare the regret bound in Theorem III.3 with the baseline approach to validate the effectiveness of our algorithm. Treating σ ⋆
+
+max , σ ⋆
+
+min , and λ as constants, the cumulative regret is bounded by eO
+
+√drNT (√NSR + 1)
+
+
+
+.In comparison, if we use the OFUL approach from [ 12 ]to independently solve T tasks, the cumulative regret is 
+
+eO(dT √N). Given that r ≪ min {d, T }, and the noise-to-signal ratio ( NSR ) is assumed to be small, this comparison demonstrates the efficiency of our algorithm, illustrating a significant improvement in cumulative regret, specifically when the number of tasks T is large. IV. S IMULATIONS 
+
+This section evaluates the efficacy of our proposed algo-rithm. We set the parameters as follows: d = 100 , T = 100 ,
+
+r = 2, N1 = 20 , N = 600 , δ = 10 −3, λ = 1. Our proposed algorithm consists of two main phases: an exploration phase followed by an OFUL phase. In the exploration phase, to sim-ulate the true representation matrix B⋆ ∈ Rd×r, we produce an i.i.d. standard Gaussian matrix and orthonormalize its columns. The task-specific parameter matrix W ⋆ ∈ Rr×T is generated with i.i.d. standard Gaussian entries. The feature vectors 
+
+xn,t s are sampled from the standard Gaussian distribution, while the additive noise is i.i.d. from a Gaussian distribution with a mean of zero and a variance of 0.01 . During this phase, each task performs random exploration by randomly selecting actions and obtaining the corresponding rewards, which are subsequently utilized to estimate the representation matrix via spectral initialization. Upon learning the ˆB estimate, the algorithm proceeds to the OFUL phase. During this phase, feature vectors xn,t s are generated randomly, while the noise remains i.i.d. Gaussian with zero mean and variance 0.01 . In each round, each task constructs its own confidence ellipsoid and chooses an optimistic action-parameter pair that maximizes the expected reward. The parameters are then updated based on the chosen action and the observed rewards. All results are averaged across 100 independent trials. Figure 1 illustrates the per-task cumulative regret of our proposed algorithm. We vary the feature dimension d =
+
+100 , 200 , 300 , the rank of the representation matrix r = 2, 4, 8,and the number of tasks T = 200 , 400 , 800 . Our results show that our proposed algorithm converges and achieves sublinear per-task cumulative regret. Furthermore, the per-task cumulative regret decreases as the dimension and rank decrease, while the number of tasks increases, aligning with our expectations. V. C ONCLUSION 
+
+In this paper, we introduced a novel OFUL-based multi-task representation learning algorithm for linear bandits. By leveraging the underlying low-dimensional representation of the bandits, we proposed a novel approach to construct the confidence set such that the reward parameter lies in it with high probability. Using the confidence set, we proposed a UCB algorithm based on the OFUL principle. We proved the regret guarantees for the proposed approach and experimentally validated via numerical simulations. REFERENCES [1] K. K. Thekumparampil, P. Jain, P. Netrapalli, and S. Oh, “Sam-ple efficient linear meta-learning by alternating minimization,” 
+
+arxiv:2105.08306 , 2021. [2] J. Lin, S. Moothedath, and N. Vaswani, “Fast and sample efficient multi-task representation learning in stochastic contextual bandits,” in 
+
+Proceedings of the 41st International Conference on Machine Learning ,ser. Proceedings of Machine Learning Research, vol. 235. PMLR, 21–27 Jul 2024, pp. 30 227–30 251. [3] L. Collins, H. Hassani, A. Mokhtari, and S. Shakkottai, “Exploiting shared representations for personalized federated learning,” in Interna-tional conference on machine learning . PMLR, 2021, pp. 2089–2099. [4] S. Wang, L. Yu, and J. Li, “Lora-ga: Low-rank adaptation with gradient approximation,” Advances in Neural Information Processing Systems ,vol. 37, pp. 54 905–54 931, 2024. [5] A. Bose, Z. Xiong, Y. Chi, S. S. Du, L. Xiao, and M. Fazel, “Lore: Personalizing llms via low-rank reward modeling,” arXiv preprint arXiv:2504.14439 , 2025. [6] S. Schotthöfer, H. L. Yang, and S. Schnake, “Dynamical low-rank compression of neural networks with robustness under adversarial attacks,” arXiv preprint arXiv:2505.08022 , 2025. [7] S. S. Du, W. Hu, S. M. Kakade, J. D. Lee, and Q. Lei, “Few-shot learning via learning the representation, provably,” in International Conference on Learning Representations (ICLR) , 2021. [8] N. Tripuraneni, C. Jin, and M. Jordan, “Provable meta-learning of linear representations,” in International Conference on Machine Learning .PMLR, 2021, pp. 10 434–10 443. [9] L. Cella, K. Lounici, G. Pacreau, and M. Pontil, “Multi-task representa-tion learning with stochastic linear bandits,” in International Conference on Artificial Intelligence and Statistics , 2023, pp. 4822–4847. [10] J. Yang, W. Hu, J. D. Lee, and S. S. Du, “Impact of representation learning in linear bandits,” arXiv:2010.06531 , 2020. [11] E. J. Candes and B. Recht, “Exact matrix completion via convex optimization,” Found. of Comput. Math , vol. 9, pp. 717–772, 2008. [12] Y. Abbasi-Yadkori, D. Pál, and C. Szepesvári, “Improved algorithms for linear stochastic bandits,” Advances in Neural Information Processing Systems , vol. 24, pp. 2312–2320, 2011. [13] J. Hu, X. Chen, C. Jin, L. Li, and L. Wang, “Near-optimal representation learning for linear bandits and linear rl,” in International Conference on Machine Learning , 2021, pp. 4349–4358. [14] Y. Qin, T. Menara, S. Oymak, S. Ching, and F. Pasqualetti, “Non-stationary representation learning in sequential linear bandits,” IEEE Open Journal of Control Systems , vol. 1, pp. 41–56, 2022. [15] J. Lin and S. Moothedath, “Provably efficient multi-task meta bandit learning via shared representations,” in Conference on Neural Informa-tion Processing Systems , 2025. [16] Y. Chen, K. Jamieson, and S. Du, “Active multi-task representation learning,” in International Conference on Machine Learning . PMLR, 2022, pp. 3271–3298. [17] A. P. Singh and N. Vaswani, “Noisy low rank column-wise sensing,” 
+
+arxiv:2409.08384 , 2024. [18] Y. Han, Z. Zhou, Z. Zhou, J. Blanchet, P. W. Glynn, and Y. Ye, “Sequential batch learning in finite-action linear contextual bandits,” 
+
+arXiv:2004.06321 , 2020. [19] W. Kong, E. Brunskill, and G. Valiant, “Sublinear optimal policy value estimation in contextual bandits,” in International conference on artificial intelligence and statistics . PMLR, 2020, pp. 4377–4387. [20] J. Scarlett, I. Bogunovic, and V. Cevher, “Lower bounds on regret for noisy gaussian process bandit optimization,” in Conference on Learning Theory . PMLR, 2017, pp. 1723–1742. [21] J. Djolonga, A. Krause, and V. Cevher, “High-dimensional gaussian process bandits,” Advances in neural information processing systems ,vol. 26, 2013. [22] J. Gornet and B. Sinopoli, “Restless bandits with rewards generated by a linear gaussian dynamical system,” in 6th Annual Learning for Dynamics & Control Conference . PMLR, 2024, pp. 1791–1802. [23] S. Nayer and N. Vaswani, “Fast and sample-efficient federated low rank matrix recovery from column-wise linear and quadratic projections,” 
+
+IEEE Transactions on Infomation Theory , 2023. 
+
+APPENDIX 
+
+A. Preliminaries: We define column-wise incoherence and demonstrate that Assumption II.3 inherently implies a column-wise incoherence on the true reward matrix Θ⋆.
+
+Definition .1. (Incoherence) A rank-r matrix M ∈ Rd1×d2 is defined as μ-column-wise incoherent if for every column 
+
+mi ∈ Rd1 of M, max i∈[d2] ∥mi∥2 ⩽ μ
+
+q d1 
+
+> d2
+
+∥M∥2, where μ ⩾ 1is a constant that remains invariant with respect to d1, d2, r.Under Assumption II.3, we derive that ∥W ⋆∥F =q
+
+∑Tt=1 ∥w⋆ 
+
+> t
+
+∥22 ⩾ √T l . Furthermore, the Frobenius norm of 
+
+W ⋆ satisfies ∥W ⋆∥ =
+
+q
+
+∑ri=1 σ 2 
+
+> i
+
+(W ⋆) ⩽ √rσ ⋆
+
+> max
+
+. By defin-ing μ = ul ⩾ 1 , we conclude that ∥w⋆ 
+
+> t
+
+∥2 ⩽ u = ul 
+
+> √T l √T
+
+⩽
+
+> ul
+
+p rT σ ⋆ 
+
+> max
+
+= μp rT σ ⋆
+
+> max
+
+. According to Definition .1, W ⋆ is 
+
+μ-column-wise incoherent. The incoherence guarantees that the energy of Θ⋆ is spread out rather than concentrated in a few columns, which is essential when individual observations 
+
+yn,t relate only to specific columns. This structural property facilitates reliable interpolation across columns utilizing only localized data. Incoherence is essential for matrix recovery under partial observation and is widely used in representation learning [1], [3], [8]. 
+
+B. Spectral Initialization: Consider the matrix 
+
+bΘ f ull := 1
+
+N1
+
+[( Φ⊤ 
+
+> 1
+
+Y1), · · · , (Φ⊤ 
+
+> T
+
+YT )] = 1
+
+N1
+
+> T
+
+# ∑
+
+> t=1
+> N1
+
+# ∑
+
+> n=1
+
+xn,t yn,t e⊤ 
+
+> t
+
+,
+
+where Φt ∈ Rd×T denotes the feature matrix constructed by stacking all feature vectors {xn,t }N1 
+
+> n=1
+
+for task t, and Yt
+
+represents the reward vector built from the rewards {yn,t }N1
+
+> n=1
+
+for task t. From the definition of bΘ f ull , we have E[bΘ f ull ] = Θ⋆,and that bΘ f ull is a summand of sub-exponential random variables with a maximum norm max t ∥θ ⋆ 
+
+> t
+
+∥ ⩽ μp rT σ ⋆
+
+> max
+
+(from incoherence). This magnitude limits the ability to bound ∥bΘ f ull − Θ⋆∥
+
+with the desired sample complexity. To resolve this, we implement a truncation strategy [ 2 ], [ 23 ], [ 17 ] to improve the estimation of B⋆, using the top r left singular vectors of a truncated matrix defined as 
+
+bΘ = 1
+
+N1
+
+> T
+
+# ∑
+
+> t=1
+> N1
+
+# ∑
+
+> n=1
+
+xn,t yn,t e⊤ 
+
+> t
+
+1{y2  
+
+> n,t⩽α}
+
+= 1
+
+N1
+
+> T
+
+# ∑
+
+> t=1
+
+xn,t yt,trunc (α)e⊤ 
+
+> t
+
+,
+
+where α = ˜CN1T ∑N1,Tn=1,t=1 y2 
+
+> n,t
+
+, ˜C = 9κ2μ2, and yt,trunc (α) :=
+
+Yt ◦ 1{| Yt |⩽√α}. Here, 1{g} represents the indicator function, which takes a value of 1 if condition g holds and 0 otherwise. This truncation filters out excessively large measurements. Theoretically, this converts the summands into sub-Gaussian random variables, which exhibit lighter tails than the untrun-cated ones. This enables us to prove the desired concentration bound. We compute the initial estimate bB of the true B⋆ as the top r left singular vectors from bΘ in Algorithm III.1.

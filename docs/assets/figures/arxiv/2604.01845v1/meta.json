@@ -1,0 +1,78 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.01845v1/fig-001.webp",
+      "caption": "Table 6: Performance comparison across different hidden dimensions h. As h decreases, the number of additional parameters is reduced, with a moderate trade-off in performance for SMD 1-8 and SMD 2-4. The first row shows the performance of the frozen pre-trained anomaly detector without TTA.",
+      "page": 11,
+      "index": 1,
+      "width": 890,
+      "height": 229
+    },
+    {
+      "url": "assets/figures/arxiv/2604.01845v1/fig-002.webp",
+      "caption": "Figure 6: Comparison of test scores with and without CANDI (α = 5.0); red shaded regions indicate true anomalies. CANDI lowers scores for normal samples, reducing false positives.",
+      "page": 15,
+      "index": 2,
+      "width": 1017,
+      "height": 772
+    },
+    {
+      "url": "assets/figures/arxiv/2604.01845v1/fig-003.webp",
+      "caption": "Figure 4: Receiver Operating Characteristic (ROC) and Precision-Recall (PR) curves for anomaly detection. The value in parentheses indicates the area under each curve.",
+      "page": 7,
+      "index": 3,
+      "width": 485,
+      "height": 330
+    },
+    {
+      "url": "assets/figures/arxiv/2604.01845v1/fig-004.webp",
+      "caption": "Table 3: Comparison of different adaptation sample configurations on SMD 1-8 and SMD 2-1. “Mod.” and “Hard” refer to the difficulty levels of the samples used. “Ano.” refers to anomaly. “Total Adapt” denotes the number of adaptation samples.",
+      "page": 7,
+      "index": 4,
+      "width": 1060,
+      "height": 238
+    },
+    {
+      "url": "assets/figures/arxiv/2604.01845v1/fig-005.webp",
+      "caption": "Table 5: Summary of the statistical characteristics of MTSAD datasets: the number of variables, the total time steps of train and test data, the ratio of anomalous time steps in test data, and the degree of stationarity measured using Augmented Dickey-Fuller (ADF) test statistics and the corresponding p-value.",
+      "page": 10,
+      "index": 5,
+      "width": 826,
+      "height": 186
+    },
+    {
+      "url": "assets/figures/arxiv/2604.01845v1/fig-006.webp",
+      "caption": "Table 8: Robustness of CANDI to learning rate and gating parameter initialization on SMD 1-8.",
+      "page": 13,
+      "index": 6,
+      "width": 448,
+      "height": 275
+    },
+    {
+      "url": "assets/figures/arxiv/2604.01845v1/fig-007.webp",
+      "caption": "Table 10: Performance comparison of test-time adaptation methods across three SMD benchmarks for different model architectures.",
+      "page": 13,
+      "index": 7,
+      "width": 1044,
+      "height": 219
+    },
+    {
+      "url": "assets/figures/arxiv/2604.01845v1/fig-008.webp",
+      "caption": "Table 7: Standard deviation and p-values of test-time adaptation performance across three random seeds. Pre. denotes a pretrained model without test-time adaptation. Pretrained and M2N2 are deterministic (std = 0.000). p-values indicate the statistical significance of CANDI’s performance over M2N2.",
+      "page": 12,
+      "index": 8,
+      "width": 990,
+      "height": 493
+    },
+    {
+      "url": "assets/figures/arxiv/2604.01845v1/fig-009.webp",
+      "caption": "Table 1: Performance of test-time adaptation methods for multivariate time-series anomaly detection under test-time distribution shift. Bold denotes the best result for each metric and threshold level. Each threshold is determined by the α-percentile of validation anomaly scores.",
+      "page": 5,
+      "index": 9,
+      "width": 968,
+      "height": 486
+    }
+  ]
+}

@@ -1,0 +1,102 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2603.27325v1/fig-001.webp",
+      "caption": "Figure 2. YOLOv11 architecture showing the backbone–neck–head pipeline for multi-scale feature extraction and unified prediction across detection, segmentation, pose estimation, and classification tasks [47].",
+      "page": 6,
+      "index": 1,
+      "width": 933,
+      "height": 391
+    },
+    {
+      "url": "assets/figures/arxiv/2603.27325v1/fig-002.webp",
+      "caption": "Table 3. Performance comparison of YOLOv11 model variants on wound boundary segmentation and classification using the augmented dataset.",
+      "page": 11,
+      "index": 2,
+      "width": 979,
+      "height": 470
+    },
+    {
+      "url": "assets/figures/arxiv/2603.27325v1/fig-003.webp",
+      "caption": "Figure 7. Visual examples of wound classifcation using YOLOv11x showing original and detection image side by side.",
+      "page": 15,
+      "index": 3,
+      "width": 983,
+      "height": 802
+    },
+    {
+      "url": "assets/figures/arxiv/2603.27325v1/fig-004.webp",
+      "caption": "Table 2. Normalized accurate prediction scores obtained from confusion matrices for wound boundary segmentation and five-class wound classification tasks across five folds.",
+      "page": 10,
+      "index": 4,
+      "width": 979,
+      "height": 391
+    },
+    {
+      "url": "assets/figures/arxiv/2603.27325v1/fig-005.webp",
+      "caption": "Figure 6. Confusion matrices of five YOLOv11 model variants for multi-class wound classification across BI, DFU, PI, SW, and VU categories.",
+      "page": 14,
+      "index": 5,
+      "width": 976,
+      "height": 1139
+    },
+    {
+      "url": "assets/figures/arxiv/2603.27325v1/fig-006.webp",
+      "caption": "Table 1. Distribution of training and validation samples across five folds for wound boundary segmentation and wound classification tasks.",
+      "page": 8,
+      "index": 6,
+      "width": 977,
+      "height": 338
+    },
+    {
+      "url": "assets/figures/arxiv/2603.27325v1/fig-007.webp",
+      "caption": "Figure 3. 5-fold cross-validation process where each fold serves once as the test set to compute the model’s average performance score.",
+      "page": 8,
+      "index": 7,
+      "width": 993,
+      "height": 416
+    },
+    {
+      "url": "assets/figures/arxiv/2603.27325v1/fig-008.webp",
+      "caption": "Table 4. Performance comparison of classification and instance segmentation models based on precision, recall, F1-score, and key architectural features.",
+      "page": 17,
+      "index": 8,
+      "width": 979,
+      "height": 1315
+    },
+    {
+      "url": "assets/figures/arxiv/2603.27325v1/fig-009.webp",
+      "caption": "Figure 5. Visualization of the YOLOv11m model’s training and evaluation for wound classification: (a) training and validation loss curves, (b) performance metrics, (c) precision-confidence curve, (d) recallconfidence curve, and (e) precision-recall curve.",
+      "page": 12,
+      "index": 9,
+      "width": 1004,
+      "height": 904
+    },
+    {
+      "url": "assets/figures/arxiv/2603.27325v1/fig-010.webp",
+      "caption": "Figure 4. Bounding box statistics of wounds— (a) 2D histogram of center coordinates (x, y); and (b) 2D histogram of width and height.",
+      "page": 9,
+      "index": 10,
+      "width": 941,
+      "height": 593
+    },
+    {
+      "url": "assets/figures/arxiv/2603.27325v1/fig-011.webp",
+      "caption": "Figure 1. Workflow of the proposed system illustrating (a) data collection, (b) dataset generation, (c) model training and evaluation pipeline, and (d) inference outputs for WBS and WC.",
+      "page": 5,
+      "index": 11,
+      "width": 956,
+      "height": 604
+    },
+    {
+      "url": "assets/figures/arxiv/2603.27325v1/fig-012.webp",
+      "caption": "Figure 8. Multiclass ROC curve of the YOLOv11x model for wound classification, illustrating the tradeoff between true positive rate and false positive rate for each wound type",
+      "page": 16,
+      "index": 12,
+      "width": 602,
+      "height": 422
+    }
+  ]
+}

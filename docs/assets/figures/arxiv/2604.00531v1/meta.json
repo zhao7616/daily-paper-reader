@@ -1,0 +1,14 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.00531v1/fig-001.webp",
+      "caption": "Fig. 1: Plots present the per-task cumulative regret vs. round. Figure 1a presents plot varying the feature dimension d as {100,20,300}. Figure 1b presents plot by varying rank r as {2,4,8}. Figure 1c presents plot varying the number of tasks T as {200,400,800}. The parameters are set as d = 100,T = 100,r = 2,N1 = 20,N = 600.",
+      "page": 6,
+      "index": 1,
+      "width": 1008,
+      "height": 242
+    }
+  ]
+}

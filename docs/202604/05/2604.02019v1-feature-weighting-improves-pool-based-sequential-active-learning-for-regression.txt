@@ -1,0 +1,1495 @@
+Title: Feature Weighting Improves Pool-Based Sequential Active Learning for Regression
+
+URL Source: https://arxiv.org/pdf/2604.02019v1
+
+Published Time: Fri, 03 Apr 2026 00:56:20 GMT
+
+Number of Pages: 15
+
+Markdown Content:
+> 1
+
+# Feature Weighting Improves Pool-Based Sequential Active Learning for Regression 
+
+Dongrui Wu, Fellow, IEEE 
+
+Abstract —Pool-based sequential active learning for regression (ALR) optimally selects a small number of samples sequentially from a large pool of unlabeled samples to label, so that a more accurate regression model can be constructed under a given labeling budget. Representativeness and diversity, which involve computing the distances among different samples, are important considerations in ALR. However, previous ALR approaches do not incorporate the importance of different features in inter-sample distance computation, resulting in sub-optimal sample selection. This paper proposes three feature weighted single-task ALR approaches and two feature weighted multi-task ALR approaches, where the ridge regression coefficients trained from a small amount of previously labeled samples are used to weight the corresponding features in inter-sample distance computation. Experiments showed that this easy-to-implement enhancement almost always improves the performance of four existing ALR approaches, in both single-task and multi-task regression prob-lems. The feature weighting strategy may also be easily extended to stream-based ALR, and classification algorithms. 
+
+Index Terms —Active learning, ridge regression, feature weight-ing, greedy sampling 
+
+I. I NTRODUCTION 
+
+In many real-world machine learning problems, acquiring a large amount of unlabeled data is relatively easy, but obtaining their labels is challenging, as it may be: 1) Labor intensive . For example, in affective computing [1], [2], it is easy to collect affective input signals such as sound, images, videos, etc., but labelling each piece of such signals may require the aggregation of individual labels from tens or more evaluators, due to the uncer-tainty and subtleness of emotions: the VAM ( Vera am Mittag in German, Vera at Noon in English) corpus [3] used 6-17 evaluators for each speech utterance, the DEAP (Database for Emotion Analysis using Physiolog-ical Signals) dataset [4] used 14-16 assessors for each video clip, the SEED-IV (Shanghai Jiao Tong University Emotion EEG Dataset) dataset [5] used 44 evaluators for each film clip, the GAPED (Geneva Affective Pic-ture Database) dataset [6] used 60 college students for each picture, and the IADS-2 (International Affective Digitized Sound, 2nd Edition) dataset [7] used over 110 assessors for each piece of sound. 2) Time consuming . For example, in fracturing based en-hanced oil recovery in the oil and gas industry [8], 
+
+Dongrui Wu is with the Ministry of Education Key Laboratory of Image Processing and Intelligent Control, and Hubei Key Laboratory of Brain-inspired Intelligent Systems, School of Artificial Intelligence and Automation, Huazhong University of Science and Technology, Wuhan, 430074 China. Email: drwu09@gmail.com. 
+
+180-day post-fracturing cumulative oil production is usually used as a performance measure. The fracturing parameters of an oil well, e.g., location, length of perforations, number of zones/holes, volumes of injected slurry/water/sand, etc., can be easily recorded; however, to get the groundtruth output (180-day post-fracturing cumulative oil production), one has to wait at least 180 days, which is very time consuming. 3) Expensive . Usually one needs to pay to recruit tens or hundreds of evaluators for the affective sound/images/videos, so there is considerable cost to label each piece of affective input. Fracturing an oil well and observing its 180-day cumulative oil production is even more expensive. So, an important and realistic question is: how to achieve the best possible learning performance from a small number of labeled samples? 
+
+Different strategies have been proposed for this purpose, e.g., active learning [9], transfer learning [10], [11], self-supervised learning [12], their combinations [13]–[16], and so on. This paper considers pool-based sequential active learning, which optimally and sequentially selects a small number of samples from a large pool of unlabeled samples to label, so that a more accurate machine learning model can be constructed under a given (small) labeling budget. There have been many pool-based sequential active learning approaches proposed for classification problems [9], [17], e.g., uncertainty sampling, expected model change maximiza-tion, query-by-committee, etc. However, pool-based sequential active learning for regression (ALR) problem is much less studied. As an evidence, the deep active learning survey [17] published in 2025 includes 205 references, among which only one is on ALR. This paper focuses on the under-explored pool-based sequential ALR problem. Previous research [18] has proposed three important criteria to be considered in pool-based sequential ALR for selecting the next unlabeled sample to label: 1) Informativeness , i.e., the selected sample must contain rich information, which could be measured by the dis-agreement among multiple learners [19], or expected model change [20], etc. 2) Representativeness , i.e., the selected sample should rep-resent a large population, instead of being an outlier. 3) Diversity , i.e., all selected samples together should scat-ter across the full input space, instead of occupying only a small local region. Based on these three criteria, several ALR approaches 
+
+> arXiv:2604.02019v1 [cs.LG] 2 Apr 2026 2
+
+have been proposed, e.g., query-by-committee [19], greedy sampling [21], expected model change maximization [20], representativeness-diversity (RD) [18], greedy sampling in the input space (GSx) [22], greedy sampling in the output space [22], improved greedy sampling (iGS) in both input and output spaces [22], and the multi-task iGS (MT-iGS) [23]. Many of them, e.g., RD, GSx, iGS and MT-iGS, need to compute the distances among different samples when calculating the representativeness and/or diversity measures. However, their distance computation does not consider the weights associated with the input features (which can be estimated from the small amount of labeled samples), resulting in sub-optimal performance. This paper proposes a simple yet effective remedy, showing that by incorporating the estimated feature weights in distance computation, ALR performance can be consistently improved. Our main contributions are: 1) We propose three feature weighted (FW) single-task ALR approaches, i.e., FW-RD, FW-GSx and FW-iGS, to improve RD, GSx and iGS, respectively. 2) We propose two feature weighted multi-task (FW-MT) ALR approaches, i.e., FW-MT-GSx and FW-MT-iGS, to improve GSx (which can be used in both single task ALR and multi-task ALR) and MT-iGS, respectively. 3) We perform extensive experiments to demonstrate that each of the five feature weighted ALR approaches outperformed its corresponding unweighted version, and feature weighting benefits both linear and nonlinear prediction models. The remainder of this paper is organized as follows: Sec-tion II introduces four existing pool-based sequential ALR approaches, i.e., RD, GSx, iGS and MT-iGS, which need to compute the distances among different samples. Section III proposes five feature weighted ALR approaches, FW-RD, FW-GSx, FW-iGS, FW-MT-GSx, and FW-MT-iGS. Sections IV and V perform experiments to demonstrate the effective-ness and robustness of the single-task and multi-task feature weighted ALR approaches, respectively. Finally, Section VI draws conclusions and points out future research directions. II. R ELATED WORK 
+
+This section introduces four existing pool-based sequential ALR approaches, RD [18], GSx [22], iGS [22], and MT-iGS [23], which involve inter-sample distance computation in sample selection. As in previous work [18], we assume the pool consists of 
+
+N d -dimensional samples {xn}Nn=1 , xn ∈ Rd. Initially, none of the samples are labeled. An ALR algorithm first selects 
+
+d + 1 samples to label, so that a ridge regression model 1 can be properly initialized. It then selects a new sample to label in each iteration, until M samples are labeled.  
+
+> 1Other (nonlinear) regression models, e.g., neural networks and regression trees, may also be constructed. However, when the number of labeled samples is very small, which is intrinsic in active learning, ridge regression achieves the most efficient, stable and generalizable performance. So, ridge regression is used in this paper.
+
+A. RD 
+
+RD [18] considers both representativeness and diversity, as its name suggests. It first selects simultaneously d+1 unlabeled samples from the pool to label, so that a ridge regression model can be initialized. Then, it selects one sample to label in each subsequent iteration, and updates the ridge regression model accordingly, until M samples have been selected. In initialization, RD performs k-means ( k = d + 1 ) cluster-ing on the N unlabeled samples, and then selects from each cluster (to achieve diversity) the sample closest to its centroid (to achieve representativeness) for labeling. Assume m (m ≥ d + 1 ) samples have been selected and labeled. To select the (m + 1) -th sample to label, RD first performs k-means ( k = m + 1 ) clustering on all N samples. Since there are only m labeled samples, there must exist at least one cluster that does not contain any labeled samples. RD then identifies the largest such cluster (to achieve diversity), and selects the sample closest to its centroid (to achieve representativeness) for labeling. This process is repeated until 
+
+M samples are selected and labeled. The pseudo-code of RD is given in Algorithm 1. 
+
+Algorithm 1: The RD ALR algorithm [18]. 
+
+Input: N unlabeled samples, {xn}Nn=1 , xn ∈ Rd;
+
+M , the maximum number of samples to label. 
+
+Output: A ridge regression model f (x).
+
+// Select the first d + 1 samples to label 
+
+Perform k-means ( k = d + 1 ) clustering on {xn}Nn=1 ;Select from each cluster the sample closest to its centroid to label; 
+
+// Iteratively select the next 
+
+M − d − 1 samples to label 
+
+for m = d + 2 , ..., M do 
+
+Perform k-means ( k = m) clustering on {xn}Nn=1 ;Identify the largest cluster that does not contain any labeled samples; Select the sample closest to the cluster centroid to label; 
+
+end 
+
+Construct a ridge regression model f (x) from the M
+
+labeled samples. 
+
+B. GSx 
+
+GSx [22] considers the representativeness in first sample initialization, and then uses greedy sampling [21] to consider the diversity in the input space in sequential sample selection. It selects the first sample as the one closest to the centroid of all N samples, and the remaining M − 1 samples iteratively. Assume the first m (m ≥ 1) samples have been selected, and they form a labeled set L = {(xi, y i)}mi=1 , where yi is the label for xi. The remaining N − m unlabeled samples form an unlabeled set U = {xj }N −mj=1 . GSx needs to select a sample from U to label next. For each xj ∈ U , GSx computes first its distance to each xi ∈ L:
+
+dx 
+
+> ij
+
+= || xi − xj || , ∀xi ∈ L, ∀xj ∈ U, (1) 3
+
+then dx 
+
+> j
+
+, the shortest distance from xj to all m labeled samples in L:
+
+dx 
+
+> j
+
+= min  
+
+> i
+
+dx 
+
+> ij
+
+, ∀xj ∈ U (2) and selects the sample with the maximum dx 
+
+> j
+
+to label, to achieve diversity in the input space. The pseudo-code of GSx is given in Algorithm 2. 
+
+Algorithm 2: The GSx ALR algorithm [22]. 
+
+Input: N unlabeled samples, {xn}Nn=1 , xn ∈ Rd;
+
+M , the maximum number of samples to label. 
+
+Output: A ridge regression model f (x).
+
+// Select the first sample to label 
+
+Set U = {xn}Nn=1 , and L = ∅;Identify x∗, the sample closest to the centroid of U , to label; Move x∗ from U to L;
+
+// Iteratively select the next M − 1
+
+samples to label 
+
+for m = 1 , ..., M − 1 do 
+
+Compute dx 
+
+> j
+
+in (2) for each xj ∈ U ;Select x∗ with the largest dx 
+
+> j
+
+to label; Move x∗ from U to L;
+
+end 
+
+Construct a ridge regression model f (x) from the M
+
+labeled samples in L.
+
+Another very popular active learning strategy is core-set [24], whose sequential sample selection strategy is identical to greedy sampling [21]. So, the iterative sample selection strategy of GSx and core-set are also identical; however, GSx and core-set have two differences: 1) GSx selects the first sample by considering the representativeness (closest to the centroid of all unlabeled samples), whereas core-set selects the first sample (or first few samples) randomly; and, 2) GSx was original proposed for regression problems, whereas core-set was originally proposed for classification problems, although both can be used in both regression and classification. 
+
+C. iGS 
+
+iGS [22] considers the diversity in both the input space and the output space. iGS uses GSx to select the first d + 1 samples to label. Let L = {(xi, y i)}mi=1 be the set of m (m ≥ d + 1 ) samples that have already been labeled, and U = {xj }N −mj=1 be the set of N −m unlabeled samples. iGS constructs a ridge regression model f (x) from L. Then, for each xj ∈ U , iGS computes 
+
+dx 
+
+> ij
+
+in (1), and dyij below: 
+
+dyij = |f (xj ) − yi|, ∀xi ∈ L, ∀xj ∈ U, (3) and then dxyj :
+
+dxyj = min  
+
+> i
+
+dx 
+
+> ij
+
+· dyij , ∀xj ∈ U. (4) It next selects the sample with the maximum dxyj to label, to achieve diversity in simultaneously the input space and the output space. The pseudo-code of iGS is given in Algorithm 3. 
+
+Algorithm 3: The iGS ALR algorithm [22]. 
+
+Input: N unlabeled samples, {xn}Nn=1 , xn ∈ Rd;
+
+M , the maximum number of samples to label. 
+
+Output: A ridge regression model f (x).
+
+// Select the first sample to label, using GSx 
+
+Set U = {xn}Nn=1 , and L = ∅;Identify x∗, the sample closest to the centroid of U , to label; Move x∗ from U to L;
+
+// Iteratively select the next d
+
+samples to label, using GSx 
+
+for m = 2 , ..., d + 1 do 
+
+Compute dx 
+
+> j
+
+in (2) for each xj ∈ U ;Select x∗ with the largest dx 
+
+> j
+
+to label; Move x∗ from U to L;
+
+end 
+
+Construct a ridge regression model f (x) from the 
+
+d + 1 labeled samples in L;
+
+// Iteratively select the next 
+
+M − d − 1 samples to label 
+
+for m = d + 2 , ..., M do 
+
+Compute dxyj in (4) for each xj ∈ U ;Select x∗ with the largest dxyj to label; Move x∗ from U to L;Update f (x) using the m labeled samples in L.
+
+end 
+
+D. MT-iGS 
+
+MT-iGS [23] extends iGS from single-task ALR to multi-task ALR, by considering also simultaneously the diversity in the input and output spaces. More specifically, it considers the scenario that T different regression tasks share the same input, e.g., three separate tasks to estimate the valence, arousal and dominance of emotions from the same speech utterance. Its goal is to optimally select some unlabeled samples to label, so that all T tasks can be benefited simultaneously. The average performance of the T tasks is a typical performance measure. MT-iGS [23] uses GSx to select the first d + 1 samples to label (note that each sample has T labels, each corresponding to a different task). It then selects the remaining M − d −
+
+1 samples to achieve diversity in both the input and output spaces. Let L = {(xi, y i, 1, ..., y i,T )}mi=1 be the set of m (m ≥ d+1 )samples that have already been labeled, where yi,t is the label for the t-th task. and U = {xj }N −mj=1 be the set of N − m
+
+unlabeled samples. T ridge regression models {ft(x)}Tt=1 can be constructed from L, each for a different task. For each of the remaining N − m unlabeled samples in U , MT-iGS computes dx 
+
+> ij
+
+in (1) and dy 
+
+> ij,t
+
+below: 
+
+dy 
+
+> ij,t
+
+= || ft(xj ) − yi,t || ∀xi ∈ L, ∀xj ∈ U (5) and then dxy  
+
+> j
+
+:
+
+dxy  
+
+> j
+
+= min  
+
+> i
+
+dx 
+
+> ij
+
+·
+
+> T
+
+∏
+
+> t=1
+
+dy
+
+> ij,t
+
+, ∀xj ∈ U. (6) 4
+
+It next selects the sample with the maximum dxy  
+
+> j
+
+to label, to achieve diversity in simultaneously the input space and the output spaces for all tasks. The pseudo-code of MT-iGS is given in Algorithm 4. 
+
+Algorithm 4: The MT-iGS multi-task ALR algorithm [23]. 
+
+Input: N unlabeled samples, {xn}Nn=1 , xn ∈ Rd;
+
+M , the maximum number of samples to label. 
+
+Output: T ridge regression models {ft(x)}Tt=1 .
+
+// Select the first sample to label, using GSx 
+
+Set U = {xn}Nn=1 , and L = ∅;Identify x∗, the sample closest to the centroid of U ;Move x∗ from U to L;
+
+// Iteratively select the next d
+
+samples to label, using GSx 
+
+for m = 2 , ..., d + 1 do 
+
+Compute dx 
+
+> j
+
+in (2) for each xj ∈ U ;Select x∗ with the largest dx 
+
+> j
+
+to label; Move x∗ from U to L;
+
+end 
+
+Construct T regression models {ft(x)}Tt=1 from L,one for each task; 
+
+// Iteratively select the next 
+
+M − d − 1 samples to label 
+
+for m = d + 2 , ..., M do 
+
+Compute dxy  
+
+> j
+
+in (6) for each xj ∈ U ;Select x∗ with the largest dxy  
+
+> j
+
+to label; Move x∗ from U to L;Update {ft(x)}Tt=1 using the m labeled samples in 
+
+L;
+
+end 
+
+III. F EATURE WEIGHTED ALR The four approaches introduced in the previous section all involve computing the distances among the samples, e.g., in 
+
+k-means clustering and in (1); however, they do not take the importance of different features into consideration. As a result, the distances may be problematic: 1) Within a single feature, its value changes with differ-ent units, and hence the distances between two sam-ples also changes with units, which should not be the case. For example, in the UCI autoMPG dataset used in our experiments, the weight of a car can be measured in pounds or kilograms or tons (e.g., 3504 pounds = 1589.39 kilograms = 1.58939 tons) , which does not change its characteristics at all; however, us-ing 3504/1589.39/1.58939 in computing the distances among different cars gives significantly different results (when other features keep the same), hence dramatically different representativeness and/or diversity values, and finally different sample selections. 2) Among different features, those with large magnitudes dominate the distance computation, whereas they may not be the most important features. 3) Some features may be redundant or irrelevant in real-world machine learning problems. Blindly using all features in distance computation is misleading, resulting in wrong representativeness and/or diversity values, and also suboptimal sample selections. So, we argue that the feature weights, which can be estimated from ridge regression or tree models, should be used to more accurately computing the distances, and hence to improve sample selection: 1) Within a single feature, when feature weight is con-sidered in distance computation, i.e., the value of the feature is replaced by (feature weight × feature value), the distances no longer change with the units of the features, and hence are more reasonable. 2) Among different features, when (feature weight × fea-ture value) is used in distance computation, the contri-butions of unimportant features with large magnitudes is suppressed by their small feature weights, avoiding misleading distances. 3) The contributions of redundant or irrelevant features to the distances may also be automatically adjusted by the feature weights, minimizing their negative impacts to sample selection. This section introduces our proposed five feature weighted ALR algorithms. 
+
+A. FW-RD 
+
+FW-RD also considers simultaneously diversity and repre-sentativeness. As in the original RD algorithm in Section II-A, FW-RD first selects d + 1 unlabeled samples from the pool to label, so that a ridge regression model can be initialized. Then, it selects one sample to label in each iteration, and updates the ridge regression model accordingly, until M samples have been selected. In initialization, FW-RD performs k-means ( k = d + 1 )clustering on the N unlabeled samples, and then selects from each cluster (to achieve diversity) the sample closest to its centroid (to achieve representativeness) for labeling. Assume m (m ≥ d + 1 ) samples have been selected and labeled. A ridge regression model can then be constructed from them. To select the (m + 1) -th sample to label, FW-RD first multiplies each dimension of xn (n = 1 , ..., N ) by the corresponding regression coefficient in ridge regression, and denotes the feature weighted xn as xw 
+
+> n
+
+. FW-RD then performs k-means ( k = m + 1 ) clustering on {xw 
+
+> n
+
+}Nn=1 . Since there are only m labeled samples, there must exist at least one cluster that does not contain any labeled samples. FW-RD next identifies the largest such cluster (to achieve diversity), and selects the sample closest to its centroid (to achieve representativeness) for labeling. This process is repeated until 
+
+M samples are selected and labeled. The pseudo-code of FW-RD is given in Algorithm 5. It is very similar to the pseudo-code of RD in Algorithm 1, except that the feature weighted samples are used in k-means clustering when m > d + 1 .5
+
+Algorithm 5: The FW-RD ALR algorithm. 
+
+Input: N unlabeled samples, {xn}Nn=1 , xn ∈ Rd;
+
+M , the maximum number of samples to label. 
+
+Output: A ridge regression model f (x).
+
+// Select the first d + 1 samples to label 
+
+Perform k-means ( k = d + 1 ) clustering on {xn}Nn=1 ;Select from each cluster the sample closest to its centroid to label; Construct a ridge regression model f (x) from the 
+
+d + 1 labeled samples; 
+
+// Iteratively select the next 
+
+M − d − 1 samples to label 
+
+for m = d + 2 , ..., M do 
+
+Multiply each dimension of xn by the corresponding regression coefficient in ridge regression, and denote the result as xw 
+
+> n
+
+,
+
+n = 1 , ..., N ;Perform k-means ( k = m) clustering on {xw 
+
+> n
+
+}Nn=1 ;Identify the largest cluster that does not contain any labeled samples; Select the sample closest to the cluster centroid to label; Update f (x) using the m labeled samples; 
+
+end 
+
+B. FW-GSx 
+
+Similar to GSx, FW-GSx emphasizes diversity in the input space. During initialization, FW-GSx uses GSx to select the first 
+
+d + 1 samples for labeling. Assume the first m (m ≥ d + 1 ) samples have been selected, and they form a labeled set L = {(xi, y i)}mi=1 . A ridge regression model can then be constructed from L. The remaining N − m unlabeled samples form an unlabeled set 
+
+U = {xj }N −mj=1 . FW-GSx first multiplies each dimension of each xn ∈ L ∪ U by the corresponding regression coefficient in ridge regression, and denotes the feature weighted xn as 
+
+xw 
+
+> n
+
+. FW-GSx then needs to select a sample from U to label next. For each xj ∈ U , FW-GSx computes first its feature weighted distance to each xi ∈ L:
+
+dxw 
+
+> ij
+
+= || xw 
+
+> i
+
+− xw 
+
+> j
+
+|| , ∀xi ∈ L, ∀xj ∈ U, (7) then dx 
+
+> j
+
+, the shortest feature weighted distance from xj to all 
+
+m labeled samples in L:
+
+dxw 
+
+> j
+
+= min  
+
+> i
+
+dxw 
+
+> ij
+
+, ∀xj ∈ U. (8) FW-GSx next selects the sample with the maximum dxw 
+
+> j
+
+to label, to achieve diversity in the input space. The pseudo-code of FW-GSx is given in Algorithm 6. It is very similar to the pseudo-code of GSx in Algorithm 2, except that the feature weights are used in computing the inter-sample distances when m > d + 1 .As pointed out in Section II-B, the iterative sample selection strategy of GSx and core-set are identical; hence, feature 
+
+Algorithm 6: The FW-GSx ALR algorithm. 
+
+Input: N unlabeled samples, {xn}Nn=1 , xn ∈ Rd;
+
+M , the maximum number of samples to label. 
+
+Output: A ridge regression model f (x).
+
+// Select the first sample to label, using GSx 
+
+Set U = {xn}Nn=1 , and L = ∅;Identify x∗, the sample closest to the centroid of U , to label; Move x∗ from U to L;
+
+// Iteratively select the next d
+
+samples to label, using GSx 
+
+for m = 2 , ..., d + 1 do 
+
+Compute dx 
+
+> j
+
+in (2) for each xj ∈ U ;Select x∗ with the largest dx 
+
+> j
+
+to label; Move x∗ from U to L;
+
+end 
+
+Construct a ridge regression model f (x) from the 
+
+d + 1 labeled samples; 
+
+// Iteratively select the next 
+
+M − d − 1 samples to label 
+
+for m = d + 2 , ..., M do 
+
+Multiply each dimension of each xn ∈ L ∪ U by the corresponding regression coefficient in ridge regression, and denote the result as xw 
+
+> n
+
+;Compute dxw 
+
+> j
+
+in (8) for all xj ∈ U ;Select x∗ with the largest dxw 
+
+> j
+
+to label; Move x∗ from U to L;Update f (x) using the m labeled samples in L;
+
+end 
+
+weighted core-set can be easily modified from FW-GSx, by selecting the first sample (or the first few samples) randomly, instead of by GSx as in FW-GSx. 
+
+C. FW-iGS 
+
+Similar to iGS, FW-iGS also considers simultaneously the diversity in the input space and output space. During initialization, FW-iGS uses GSx to select the first 
+
+d + 1 samples to label. Let L = {(xi, y i)}mi=1 be the set of m (m ≥ d + 1 ) samples that have already been labeled, and U = {xj }N −mj=1 be the set of N − m unlabeled samples. FW-iGS constructs a ridge regression model f (x) from L, and multiplies each dimension of xn by the corresponding regression coefficient in ridge regression to obtain xw 
+
+> n
+
+(n = 1 , ..., N ). Then, for each xj ∈ U ,FW-iGS computes dxw 
+
+> ij
+
+in (7), dyij in (3), and then the following 
+
+dxwyj :
+
+dxwyj = min  
+
+> i
+
+dxw 
+
+> ij
+
+· dyij , ∀xj ∈ U. (9) FW-iGS next selects the sample with the maximum dxwyj to label, to achieve diversity in both the input space and the output space. The pseudo-code of FW-iGS is given in Algorithm 7. It is very similar to the pseudo-code of iGS in Algorithm 3, except 6
+
+that the feature weights are used in computing the inter-sample distances when m > d + 1 .
+
+Algorithm 7: The FW-iGS ALR algorithm. 
+
+Input: N unlabeled samples, {xn}Nn=1 , xn ∈ Rd;
+
+M , the maximum number of samples to label. 
+
+Output: A ridge regression model f (x).
+
+// Select the first sample to label, using GSx 
+
+Set U = {xn}Nn=1 , and L = ∅;Identify x∗, the sample closest to the centroid of U , to label; Move x∗ from U to L;
+
+// Iteratively select the next d
+
+samples to label, using GSx 
+
+for m = 2 , ..., d + 1 do 
+
+Compute dx 
+
+> j
+
+in (2) for all xj ∈ U ;Select x∗ with the largest dx 
+
+> j
+
+to label; Move x∗ from U to L;
+
+end 
+
+Construct a ridge regression model f (x) from the 
+
+d + 1 labeled samples in L;
+
+// Iteratively select the next 
+
+M − d − 1 samples to label 
+
+for m = d + 2 , ..., M do 
+
+Multiply each dimension of each xn ∈ L ∪ U by the corresponding regression coefficient in ridge regression, and denote the result as xw 
+
+> n
+
+;Compute dxw yj in (9) for each xj ∈ U ;Select x∗ with the largest dxwyj to label; Move x∗ from U to L;Update f (x) using the m labeled samples in L;
+
+end 
+
+D. FW-MT-GSx 
+
+When the feature weights are not considered, GSx can be used for both single-task ALR and multi-task ALR. However, when incorporating the feature weights, a dedicated FW-MT-GSx has to be developed for multi-task ALR, because each task has different ridge regression coefficients (feature weights). Similar to GSx, FW-MT-GSx also considers diversity in the input space. During initialization, FW-MT-GSx uses GSx to select the first d + 1 samples for labeling (note that each sample has T
+
+labels, each corresponding to a different task). Assume the first m (m ≥ d + 1 ) samples have been selected, and they form a labeled set L = {(xi, y i)}mi=1 . A ridge regression model can then be constructed from L. The remaining N − m unlabeled samples form an unlabeled set 
+
+U = {xj }N −mj=1 . T ridge regression models {ft(x)}Tt=1 can be constructed from L, one for each task. Let wt (t = 1 , ..., T )be the regression coefficient vector for the t-th task. For the 
+
+t-th task, FW-MT-GSx first multiplies each dimension of each 
+
+xn ∈ L ∪ U by the corresponding regression coefficients wt,and denotes the feature weighted xn as xwt 
+
+> n
+
+. FW-MT-GSx then needs to select a sample from U to label. For each xj ∈ U ,FW-MT-GSx computes first its product of feature weighted distances to each xi ∈ L:
+
+dxw 
+
+> ij
+
+=
+
+> T
+
+∏
+
+> t=1
+
+|| xwt 
+
+> i
+
+− xwt 
+
+> j
+
+|| , ∀xi ∈ L, ∀xj ∈ U, (10) then dx 
+
+> j
+
+, the shortest feature weighted distance from xj to all 
+
+m labeled samples in L:
+
+dxw 
+
+> j
+
+= min  
+
+> i
+
+dxw 
+
+> ij
+
+, ∀xj ∈ U. (11) FW-MT-GSx next selects the sample with the maximum dxw
+
+> j
+
+to label, to achieve diversity in the input space. The pseudo-code of FW-MT-GSx is given in Algorithm 8. 
+
+Algorithm 8: The FW-MT-GSx ALR algorithm. 
+
+Input: N unlabeled samples, {xn}Nn=1 , xn ∈ Rd;
+
+M , the maximum number of samples to label. 
+
+Output: A ridge regression model f (x).
+
+// Select the first sample to label, using GSx 
+
+Set U = {xn}Nn=1 , and L = ∅;Identify x∗, the sample closest to the centroid of U , to label; Move x∗ from U to L;
+
+// Iteratively select the next d
+
+samples to label, using GSx 
+
+for m = 2 , ..., d + 1 do 
+
+Compute dx 
+
+> j
+
+in (2) for all xj ∈ U ;Select x∗ with the largest dx 
+
+> j
+
+to label; Move x∗ from U to L;
+
+end 
+
+// Iteratively select the next 
+
+M − d − 1 samples to label 
+
+for m = d + 2 , ..., M do 
+
+for t = 1 , ..., T do 
+
+Construct a ridge regression model ft(x) from the m − 1 labeled samples in L, for the t-th task; Multiply each dimension of each xn ∈ L ∪ U
+
+by the corresponding regression coefficient in 
+
+ft(x), and denote the result as xwt 
+
+> n
+
+;
+
+end 
+
+Compute dxw 
+
+> j
+
+in (11) for each xj ∈ U ;Select x∗ with the largest dxw 
+
+> j
+
+to label; Move x∗ from U to L;
+
+end for t = 1 , ..., T do 
+
+Update ft(x) using the M labeled samples in L;
+
+end 
+
+E. FW-MT-iGS 
+
+Similar to MT-iGS, FW-MT-iGS considers simultaneously the diversity in the input and output spaces. During initialization, FW-MT-iGS uses GSx to select the first d + 1 samples to label (note that each sample has T7
+
+labels, each corresponding to a different task). It then selects the remaining M − d − 1 samples to achieve diversity in both the input and output spaces. Let L = {(xi, y i, 1, ..., y i,T )}mi=1 be the set of m (m ≥ d+1 )samples that have already been labeled, and U = {xj }N −mj=1 be the set of N −m unlabeled samples. T ridge regression models 
+
+{ft(x)}Tt=1 can be constructed from L, one for each task. Let 
+
+wt be the regression coefficient vector for the t-th task. For the t-th task, FW-MT-iGS first multiplies each dimension of each xn ∈ L ∪ U by the corresponding regression coefficient 
+
+wt, and denotes the feature weighted xn as xwt 
+
+> n
+
+. FW-MT-iGS then needs to select a sample from U to label. For each 
+
+xj ∈ U , FW-MT-iGS computes first its product of feature weighted distances dxw 
+
+> ij
+
+to each xi ∈ L using (11), and dy
+
+> ij
+
+below: 
+
+dy 
+
+> ij
+
+=
+
+> T
+
+∏
+
+> t=1
+
+|ft(xj ) − yi,t |, ∀xi ∈ L, ∀xj ∈ U, (12) and then dxy  
+
+> j
+
+:
+
+dxy  
+
+> j
+
+= min  
+
+> i
+
+dxw 
+
+> ij
+
+· dy 
+
+> ij
+
+, ∀xj ∈ U. (13) FW-MT-IGS next selects the sample with the maximum dxy 
+
+> j
+
+to label, to simultaneously achieve the diversity in the input and output spaces. The pseudo-code of FW-MT-iGS is given in Algorithm 9. It is very similar to the pseudo-code of MT-iGS in Algorithm 4, except that the feature weights are used in computing the inter-sample distances when m > d + 1 .
+
+F. Discussion 
+
+There are some other popular active learning algorithms, e.g., active learning with Gaussian processes [25], [26], Bayesian active learning by disagreement (BALD) [27], etc., which use uncertainty (informativeness) as the primary crite-rion for sample selection, and may also be used for regression problems with little or no modifications. However, these approaches may not be enhanced by our proposed feature weighting strategy, as they do not involve computing the distances among different samples (which is typically used in the diversity and representativeness measures), so feature weighting is unemployable. IV. E XPERIMENT RESULTS ON SINGLE -T ASK ALR Experiments are performed in this section to demonstrate the performance of the three proposed single-task feature weighted ALR approaches. 
+
+A. Datasets 
+
+We used 11 single-task regression datasets from the UCI Machine Learning Repository 2 and the CMU StatLib Datasets Archive 3, which have been used in previous ALR studies [18], [20]–[22], [28]. Table I summarizes their main characteristics. The autoMPG and CPS datasets contain both numerical and categorical features. One-hot encoding was used to covert the categorical values into numerical ones.   
+
+> 2http://archive.ics.uci.edu/ml/index.php
+> 3http://lib.stat.cmu.edu/datasets/
+
+Algorithm 9: The FW-MT-iGS ALR algorithm. 
+
+Input: N unlabeled samples, {xn}Nn=1 , xn ∈ Rd;
+
+M , the maximum number of samples to label. 
+
+Output: T ridge regression models {ft(x)}Tt=1 .
+
+// Select the first sample to label, using GSx 
+
+Set U = {xn}Nn=1 , and L = ∅;Identify x∗, the sample closest to the centroid of U , to label; Move x∗ from U to L;
+
+// Iteratively select the next d
+
+samples to label, using GSx 
+
+for m = 2 , ..., d + 1 do 
+
+Compute dx 
+
+> j
+
+in (2) for each xj ∈ U ;Select x∗ with the largest dx 
+
+> j
+
+to label; Move x∗ from U to L;
+
+end 
+
+// Iteratively select the next 
+
+M − d − 1 samples to label 
+
+for m = d + 2 , ..., M do 
+
+for t = 1 , ..., T do 
+
+Construct a ridge regression model ft(x) from the m − 1 labeled samples in L, for the t-th task; Multiply each dimension of each xn ∈ L ∪ U
+
+by the corresponding regression coefficient in 
+
+ft(x), and denote the result as xwt 
+
+> n
+
+;
+
+end 
+
+Compute dxy  
+
+> j
+
+in (13) for each xj ∈ U ;Select x∗ with the largest dxy  
+
+> j
+
+to label; Move x∗ from U to L;
+
+end for t = 1 , ..., T do 
+
+Update ft(x) using the M labeled samples in L;
+
+end                                                                                             
+
+> TABLE I SUMMARY OF THE 11 SINGLE -TASK REGRESSION DATASETS .
+> No. of No. of No. of No. of No. of Dataset Source samples raw numerical categorical total
+> features features features features
+> Yacht 1UCI 308 6606autoMPG 2UCI 392 7619NO2 3StatLib 500 7707PM10 3StatLib 500 7707Housing 4UCI 506 13 13 013 CPS 5StatLib 534 11 8319 EE-Cooling 6UCI 768 7707Concrete 7UCI 1,030 8808Airfoil 8UCI 1,503 5505Wine-red 9UCI 1,599 11 11 011 Wine-white 9UCI 4,898 11 11 011
+> 1https://archive.ics.uci.edu/ml/datasets/Yacht+Hydrodynamics
+> 2https://archive.ics.uci.edu/ml/datasets/auto+mpg
+> 3http://lib.stat.cmu.edu/datasets/
+> 4https://archive.ics.uci.edu/ml/machine-learning-databases/housing/
+> 5http://lib.stat.cmu.edu/datasets/CPS 85 Wages
+> 6http://archive.ics.uci.edu/ml/datasets/energy+efficiency
+> 7https://archive.ics.uci.edu/ml/datasets/Concrete+Compressive+Strength
+> 8https://archive.ics.uci.edu/ml/datasets/Airfoil+Self-Noise
+> 9https://archive.ics.uci.edu/ml/datasets/Wine+Quality 8
+
+B. Algorithms 
+
+We compared the performance of the following nine single-task ALR approaches on the 11 datasets in Table I: 1) BL , which is a baseline approach that randomly selects all M samples to label. 2) EMCM (expected model change maximization) [20], which considers only the informativeness, represented by expected model parameter changes, in sample selec-tion. 3) QBC (query-by-committee) [19], which considers only the informativeness, represented by model uncertainty, in sample selection. 4) RD , which is the RD ALR algorithm [18] introduced in Section II-A. 5) FW-RD , which is our proposed FW-RD ALR algorithm introduced in Section III-A. 6) GSx , which is the GSx ALR algorithm [22] introduced in Section II-B. 7) FW-GSx , which is our proposed FW-GSx ALR algo-rithm introduced in Section III-B. 8) iGS , which is the iGS ALR algorithm [22] introduced in Section II-C. 9) FW-iGS , which is our proposed FW-iGS ALR algo-rithm introduced in Section III-C. All nine approaches constructed a ridge regression model from the labeled samples. λ = 0 .1 was used in the objective function min  
+
+> β
+
+(‖y − Xβ‖2 + λ‖β‖2), where β contains the ridge regression bias and coefficients. 
+
+C. Evaluation Process 
+
+The evaluation process for single-task ALR approaches was identical to that used in [18]. For each dataset, let P be the pool of all samples. We first randomly selected 80% of the total samples as our training pool (denoted as P80 ), initialized the first d+ 1 labeled samples (for each dataset, d was the number of total features in Table I), identified one sample to label in each subsequent iteration by different algorithms, and built a ridge regression model. The maximum number of samples to be labeled, M , was 10% of the size of P80 . For large datasets, we clipped M at 60. After each iteration of each algorithm, we computed the root mean squared error (RMSE) and the correlation coefficient (CC) on the test set as the performance measures. As pointed out in [18], RMSE should be considered as the primary performance measure, because it is directly optimized in the objective function of ridge regression, whereas CC is not. Generally, as RMSE decreases, CC increases, but there could be exceptions. 
+
+D. Main Results 
+
+Fig. 1 shows the RMSEs and CCs of the nine single-task ALR algorithms on the 11 datasets, averaged over 100 runs. We can observe that: 1) Generally, as M (the number of labeled samples) in-creased, all nine algorithms achieved better performance (smaller RMSE and larger CC), which is intuitive. 2) EMCM , QBC , RD , GSx and iGS outperformed BL on almost all datasets, suggesting the effectiveness of ALR. 3) Generally, the feature weighed ALR approaches out-performed their unweighted counterparts, i.e., FW-RD 
+
+outperformed RD , FW-GSx outperformed GSx , and 
+
+FW-iGS outperformed iGS , demonstrating the effec-tiveness of feature weighting. As in [18], we also define an aggregated performance measure called the area under the curve (AUC) for the average RMSE and the average CC on each of the 11 datasets in Fig. 1. Fig. 2(a) shows the AUCs of the RMSEs, where the AUC of 
+
+BL was used to normalize the AUCs of the other eight ALR algorithms for each dataset (so the AUC of BL was always 1). For the RMSE, a smaller AUC is preferred. Similarly, Fig. 2(b) shows the normalized AUCs of the CCs, where a larger AUC is preferred. The detailed numerical values are given in Table II. We can observe that: 1) On average, all eight ALR approaches achieved smaller RMSEs and larger CCs than BL , suggesting the effec-tiveness of ALR. 2) On average, the feature weighed ALR approaches out-performed their unweighted counterparts, demonstrating again the effectiveness of feature weighting. 3) Generally, feature weighting maintained the rank of the original ALR approaches. For example, in Fig. 2(a) the average normalized AUCs of the RMSEs of the unweighted ALR approaches were in the order of 
+
+RD ≥GSx >iGS (from worst to best), and the aver-age normalized AUCs of the RMSEs of the fea-ture weighted ALR approaches were in the order of 
+
+FW-RD >FW-GSx >FW-iGS (from worst to best). The CCs in Fig. 2(b) showed a similar pattern. 4) Overall, iGS was the best-performing single-task ALR approach without feature weighting, and the correspond-ing FW-iGS was the best-performing feature weighted single-task ALR approach. 
+
+E. Feature Correlation/Redundancy 
+
+This subsection studies how correlated/redundant features may impact the weight calculation and subsequently the ALR sample selection effectiveness. Due to page limit, we only considered the first three datasets. For each dataset, we extracted its first two features and augmented them to the original feature set. For example, the original Yacht dataset has six features, and we augmented its first two features to the six features, resulting in a total of eight features. In this way, significant feature correla-tion/redundancy was introduced. All ALR algorithms in the previous subsection were evaluated on the feature augmented datasets. The results are shown in Fig. 3. Feature correla-tion/redundancy did not noticeably affect the effectiveness of FW-RD , FW-GSx and FW-iGS : they still outperformed, or at least achieved comparable performance with, their un-weighted counterparts, as demonstrated also in the first three subfigures of Fig. 1. These results validated the effectiveness 9    
+
+> 10 15 20 25 30
+> 10 15 20 25
+> RMSE
+
+Yacht, RMSE     
+
+> 10 15 20 25 30
+> 0.5 0.6 0.7 0.8
+> CC
+
+Yacht, CC 
+
+(a)    
+
+> 10 20 30 40
+> 456789
+> RMSE
+
+autoMPG, RMSE    
+
+> 10 20 30 40
+> 0.8
+> CC
+
+autoMPG, CC 
+
+(b)     
+
+> 10 20 30 40 50
+> 0.6 0.7 0.8 0.9 11.1
+> RMSE
+
+NO2, RMSE     
+
+> 10 20 30 40 50
+> 0.3 0.4 0.5 0.6
+> CC
+
+NO2, CC 
+
+(c)     
+
+> 10 20 30 40 50
+> 11.2 1.4 1.6 1.8
+> RMSE
+
+PM10, RMSE     
+
+> 10 20 30 40 50
+> 00.1 0.2 0.3
+> CC
+
+PM10, CC 
+
+(d)    
+
+> 20 30 40 50
+> 6810 12 14
+> RMSE
+
+Housing, RMSE    
+
+> 20 30 40 50
+> 0.6 0.7 0.8
+> CC
+
+Housing, CC 
+
+(e)    
+
+> 20 30 40 50
+> 5678910
+> RMSE
+
+CPS, RMSE    
+
+> 20 30 40 50
+> 0.2 0.3 0.4
+> CC
+
+CPS, CC 
+
+(f)      
+
+> 10 20 30 40 50 60
+> 3.5 44.5 55.5
+> RMSE
+
+EE-Cooling, RMSE      
+
+> 10 20 30 40 50 60
+> 0.9
+> CC
+
+EE-Cooling, CC 
+
+(g)      
+
+> 10 20 30 40 50 60
+> 12 14 16 18 20 22 24
+> RMSE
+
+Concrete, RMSE      
+
+> 10 20 30 40 50 60
+> 0.5 0.6 0.7
+> CC
+
+Concrete, CC 
+
+(h)      
+
+> 10 20 30 40 50 60
+> 678910 11 12
+> RMSE
+
+Airfoil, RMSE      
+
+> 10 20 30 40 50 60
+> 0.4 0.5 0.6 0.7
+> CC
+
+Airfoil, CC 
+
+(i)     
+
+> 20 30 40 50 60
+> 0.8 11.2 1.4 1.6
+> RMSE
+
+Wine-red, RMSE     
+
+> 20 30 40 50 60
+> 00.1 0.2 0.3 0.4
+> CC
+
+Wine-red, CC 
+
+(j)     
+
+> 20 30 40 50 60
+> 11.2 1.4 1.6 1.8
+> RMSE
+
+Wine-white, RMSE     
+
+> 20 30 40 50 60
+> 0.1 0.2 0.3 0.4
+> CC
+
+Wine-white, CC 
+
+BL 
+
+EMCM 
+
+QBC 
+
+RD 
+
+FW-RD 
+
+GSx 
+
+FW-GSx 
+
+iGS 
+
+FW-iGS 
+
+(k) Fig. 1. Performance of the nine single-task ALR algorithms on the 11 datasets, averaged over 100 runs. (a) Yacht; (b) autoMPG; (c) NO2; (d) PM110; (e) Housing; (f) CPS; (g) EE-Cooling; (h) Concrete; (i) Airfoil; (j) Wine-red; and, (k) Wine-white. TABLE II NORMALIZED AUC S OF RMSE S AND CC S OF DIFFERENT ALR ALGORITHMS ON THE 11 DATASETS .
+
+RMSE —CC 
+
+Dataset BL EMCM QBC RD FW-RD GSx FW-GSx iGS FW-iGS BL EMCM QBC RD FW-RD GSx FW-GSx iGS FW-iGS 
+
+Yacht 1.00 1.11 1.11 0.95 0.86 1.19 0.97 0.95 0.91 1.00 1.02 1.02 1.11 1.08 1.04 1.05 1.07 1.08 autoMPG 1.00 0.87 0.85 0.82 0.80 0.76 0.76 0.79 0.77 1.00 1.02 1.03 1.03 1.03 1.05 1.05 1.04 1.04 NO2 1.00 0.97 0.94 1.01 0.97 0.93 0.92 0.91 0.92 1.00 1.01 1.03 0.98 1.00 1.02 1.00 1.00 0.99 PM10 1.00 0.92 0.92 1.01 0.98 0.95 0.89 0.89 0.89 1.00 1.19 1.24 0.59 0.72 1.35 1.34 1.28 1.26 Housing 1.00 0.77 0.77 0.64 0.66 0.81 0.71 0.70 0.68 1.00 1.08 1.09 1.14 1.13 1.12 1.16 1.15 1.15 CPS 1.00 0.78 0.81 0.78 0.74 0.73 0.68 0.66 0.66 1.00 1.25 1.20 1.21 1.31 1.37 1.54 1.49 1.50 EE-Cooling 1.00 0.97 0.96 1.09 0.97 0.93 0.91 0.95 0.92 1.00 1.01 1.00 0.98 1.00 1.01 1.01 1.01 1.01 Concrete 1.00 0.96 0.95 0.89 0.87 0.86 0.85 0.85 0.87 1.00 1.01 1.01 1.06 1.08 1.02 1.05 1.04 1.02 Airfoil 1.00 1.02 1.01 0.91 0.92 0.98 0.94 0.96 0.95 1.00 0.97 0.97 1.09 1.05 1.02 1.04 1.02 1.02 Wine-red 1.00 0.91 0.90 0.91 0.89 0.88 0.87 0.82 0.83 1.00 0.70 0.80 1.00 1.01 0.81 0.80 0.89 0.86 Wine-white 1.00 0.94 0.93 1.05 1.01 0.94 0.92 0.92 0.88 1.00 0.96 0.99 0.84 0.84 0.86 0.95 0.90 0.98 
+
+Average 1.00 0.93 0.92 0.91 0.88 0.91 0.86 0.85 0.84 1.00 1.02 1.04 1.00 1.02 1.06 1.09 1.08 1.08 10    
+
+> Yacht autoMPG NO2 PM10 Housing CPS EE-Cooling Concrete Airfoil Wine-red Wine-white Average
+> 0.6 0.7 0.8 0.9 11.1 1.2 RMSE
+> BL
+> EMCM
+> QBC
+> RD
+> FW-RD
+> GSx
+> FW-GSx
+> iGS
+> FW-iGS
+> (a)
+> Yacht autoMPG NO2 PM10 Housing CPS EE-Cooling Concrete Airfoil Wine-red Wine-white Average
+> 0.6 0.8 11.2 1.4 1.6 CC
+> BL
+> EMCM
+> QBC
+> RD
+> FW-RD
+> GSx
+> FW-GSx
+> iGS
+> FW-iGS
+> (b) Fig. 2. Normalized AUCs of the nine single-task ALR algorithms on the 11 datasets. (a) RMSE; and, (b) CC. The last group shows the average over the 11 datasets.
+
+and robustness of feature weighted ALR to feature correla-tion/redundancy. However, these results do not exclude the possibility that feature selection [ ?] or transformation may be used to reduce the feature correlation/redundancy, and hence to improve the performance and efficiency of all ALR algorithms. 
+
+F. Irrelevant Features G. Sensitivity to the Ridge Parameter λ
+
+The feature weights are influenced by the ridge regression regularization parameter λ. This subsection studies the sensi-tivity of the feature weighted ALR approaches to λ.Using EE-Cooling as an example, Fig. 4 shows the RMSEs and CCs of the seven single-task ALR approaches (excluding QBC and EMCM), when λ ∈ { 0.01 , 0.1, 1, 10 }. The benefits of feature weighting are obvious: 1) For all λ considered, feature weighting always im-proved the performance of the ALR approaches, e.g., 
+
+FW-RD outperformed RD , FW-GSx outperformed GSx ,and FW-iGS outperformed iGS .2) Though the performance of RD was generally worse than BL , by incorporating feature weighting, FW-RD 
+
+outperformed BL , or at least achieved comparable per-formance. 
+
+H. Effect of Different Number of Initially Labeled Samples 
+
+Let nmin be the number of initially labeled samples. Though in all previous single-task ALR experiments, we always se-lected the first nmin = d + 1 unlabeled samples using RD or GSx, and then labeled them to initialize a ridge regression model, it should be noted that nmin can start from fewer than 
+
+d + 1 samples, and this does not impact the effectiveness of feature weighting. Fig. 5 shows the RMSEs and CCs of iGS and FW-iGS 
+
+on two representative datasets when nmin increased from 2 to 
+
+d + 1 . We can observe that: 1) FW-iGS always outperformed the corresponding iGS ,regardless of nmin , suggesting again the effectiveness and robustness of feature weighting. 2) There was no consistent pattern on whether a smaller or larger nmin was better. For example, Fig. 5(a) shows that a smaller nmin may result in a smaller RMSE for 
+
+FW-iGS , whereas Fig. 5(b) shows that a smaller nmin 
+
+may result in the largest RMSE for FW-iGS .3) When M < d + 1 , both RMSE and CC exhibited large fluctuations as M changed. This is because ridge regression (and consequently the feature weights) is unstable when there are too few labeled samples (this is also the reason why we started from nmin = d + 1 in previous experiments). A remedy for small nmin is to choose a larger regularization parameter λ, as done in the next subsection. In summary, our proposed feature weighted FW-RD ,
+
+FW-GSx and FW-iGS , and their original versions, can work with any nmin ≥ 2; however, which nmin is optimal is application dependent. 
+
+I. Effect of Different Initialization Approaches 
+
+More sophisticated initial sample selection approaches, such as iterative representativeness-diversity maximization (iRDM) [29] and informativeness-representativeness-diversity (IRD) [30], could also be used to improve the ALR performance, and they are independent of the proposed feature weighting scheme. Fig. 6 shows an example on the EE-cooling dataset, which had 7 features (i.e., d = 7 ), but we started from 5 initial samples selected by GSx, iRDM and IRD, respectively. Since the number of initially labeled training samples was smaller than the feature dimensionality, we used a large λ = 10 for strong regularization. The results show that different initialization approaches resulted in different regression performance at the beginning: IRD was the best, and iRDM was the second best, both outperformed GSx. However, as M increased, their perfor-mance gradually approached each other. More importantly, feature weighting was always effective, regardless of which initialization approach was used, and how small the initial M
+
+was. 11     
+
+> 10 15 20 25 30
+> 10 11 12 13 14 15 16
+> RMSE
+
+Yacht, RMSE     
+
+> 10 15 20 25 30
+> 0.7 0.8
+> CC
+
+Yacht, CC 
+
+(a)      
+
+> 15 20 25 30 35 40
+> 456789
+> RMSE
+
+autoMPG, RMSE      
+
+> 15 20 25 30 35 40
+> 0.8
+> CC
+
+autoMPG, CC 
+
+(b)     
+
+> 10 20 30 40 50
+> 0.6 0.7 0.8 0.9 11.1
+> RMSE
+
+NO2, RMSE     
+
+> 10 20 30 40 50
+> 0.4 0.5 0.6
+> CC
+
+NO2, CC 
+
+BL 
+
+RD 
+
+FW-RD 
+
+GSx 
+
+FW-GSx 
+
+iGS 
+
+FW-iGS 
+
+(c) Fig. 3. Performance of the seven single-task ALR algorithms, averaged over 100 runs. (a) Yacht; (b) autoMPG; and, (c) NO2. Two redundant features were introduced to each dataset.      
+
+> 10 20 30 40 50 60
+> 3.5 44.5 55.5 6
+> RMSE
+
+RMSE, =0.01 
+
+BL 
+
+RD 
+
+FW-RD 
+
+GSx 
+
+FW-GSx 
+
+iGS 
+
+FW-iGS      
+
+> 10 20 30 40 50 60
+> 0.84 0.86 0.88 0.9 0.92
+> CC
+
+CC, =0.01      
+
+> 10 20 30 40 50 60
+> 3.5 44.5 55.5 6
+> RMSE
+
+RMSE, =0.1      
+
+> 10 20 30 40 50 60
+> 0.86 0.88 0.9 0.92
+> CC
+
+CC, =0.1      
+
+> 10 20 30 40 50 60
+> 3.5 44.5 5
+> RMSE
+
+RMSE, =1      
+
+> 10 20 30 40 50 60
+> 0.88 0.9 0.92 0.94
+> CC
+
+CC, =1      
+
+> 10 20 30 40 50 60
+> 3.5 44.5 55.5 6
+> RMSE
+
+RMSE, =10      
+
+> 10 20 30 40 50 60
+> 0.87 0.88 0.89 0.9 0.91 0.92 0.93
+> CC
+
+CC, =10 
+
+Fig. 4. Performance of the seven single-task ALR algorithms on the EE-Cooling dataset with λ ∈ { 0.01 , 0.1, 1, 10 }, averaged over 100 runs. 
+
+5 10 15 20 25 30 
+
+10 15 20 25 30 
+
+> RMSE
+
+Yacht, RMSE 
+
+5 10 15 20 25 30 
+
+00.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 
+
+> CC
+
+Yacht, CC 
+
+(a)        
+
+> 510 15 20 25 30 35 40
+> 44.5 55.5 66.5 7
+> RMSE
+
+autoMPG, RMSE        
+
+> 510 15 20 25 30 35 40
+> 0.65 0.7 0.75 0.8 0.85
+> CC
+
+autoMPG, CC 
+
+(b) Fig. 5. Effect of different number of initially labeled samples, nmin (averaged over 100 runs). (a) Yacht, where d = 6 ; and, (b) autoMPG, where d = 9 .
+
+These results suggest that initial sample selection and fea-ture weighting in subsequent sample selection are decoupled and complementary to each other, so a better initial sample selection approach can always be directly plugged in to improve the overall ALR performance. 12            
+
+> 510 15 20 25 30
+> 44.5 55.5 66.5 7
+> RMSE
+> EE-Cooling, RMSE
+> BL
+> iGS
+> FW-iGS
+> iGS (iRDM)
+> FW-iGS (iRDM)
+> iGS (IRD)
+> FW-iGS (IRD)
+> 510 15 20 25 30
+> 0.78 0.8 0.82 0.84 0.86 0.88 0.9 0.92
+> CC
+> EE-Cooling, CC
+> Fig. 6. Performance of different initialization approaches on the EE-Cooling dataset, averaged over 100 runs. iGS (iRDM) and FW-iGS (iRDM) used iRDM [29] to select the first 5 samples to label. iGS (IRD) and FW-iGS (IRD) used IRD [30] to select the first 5 samples to label.
+
+J. Nonlinear Regression Models 
+
+In all previous experiments, the simple linear ridge re-gression model was used in both feature weight estimation and unlabeled sample prediction. This subsection studies two important problems: 1) Whether the feature weights estimated by a linear model is effective in nonlinear predictors? 2) Whether the feature weights estimated by a nonlinear model is more effective than those by a linear model? Fig. 7 shows the results when linear ridge regression was used to estimate the feature weights in FW-RD , FW-GSx 
+
+and FS-iGS , and a nonlinear regression tree was trained for new sample prediction. The feature weighted ALR algorithms generally achieved better performance than or comparable performance with their unweighted counterparts, i.e., the fea-ture weights estimated by a linear model is also effective in nonlinear predictors. Fig. 8 shows the results when a nonlinear regression tree was used for both estimating the feature weights in FW-RD ,
+
+FW-GSx and FS-iGS , and new sample prediction. Similar to Fig. 7, the feature weighted ALR algorithms generally achieved better performance than or comparable performance with their unweighted counterparts. Comparing Figs. 7 and 7, we cannot observe significant performance differences, i.e., the feature weights estimated by a linear model and a nonlinear model may be equally effective. These experiments demonstrated the effectiveness and ro-bustness of feature weighting: both linear and nonlinear regres-sion models could be used in feature weight estimation, and for new sample prediction; moreover, the regression models used in these two parts could be different. In any case, feature weighting rarely hurts the ALR performance. V. E XPERIMENT RESULTS ON MULTI -T ASK ALR Experiments are performed in this section to demonstrate the performance of the two proposed multi-task feature weighted ALR approaches. 
+
+A. Datasets 
+
+We used two multi-task regression datasets: 1) VAM , which contains spontaneous speech with authentic emotions recorded from guests in a German TV talk-show and has been used in many studies [3], [23], [31]–[34]. There are 947 emotional utterances from 47 speakers (11m/36f), each labeled in the 3D space of valence, arousal and dominance. The same 46 acoustic features extracted in previous research [23], [33], [34], including nine pitch features, five duration features, six energy features, and 26 Mel Frequency Cepstral Coefficient (MFCC) features, were used in this paper. Each feature was normalized to mean 0 and standard deviation 1. 2) Energy Efficiency (EE) 4, which aims to predict two outputs (the heating load and cooling load requirements) for 768 different building shapes simulated in Ecotect. There are eight numerical features, including relative compactness, surface area, wall area, roof area, overall height, orientation, glazing area, and glazing area distri-bution. EE-Cooling in Table I is part of this dataset. 
+
+B. Algorithms 
+
+We compared the performance of the following five multi-task ALR approaches on the VAM and EE datasets: 1) BL , which is a baseline approach that randomly selects all M samples to label. 2) GSx , which is the GSx ALR algorithm [22] introduced in Section II-B. It can be used in both single-task ALR and multi-task ALR. 3) FW-MT-GSx , which is our proposed FW-MT-GSx ALR algorithm introduced in Section III-D. 4) MT-iGS , which is the MT-iGS ALR algorithm [23] introduced in Section II-D. 5) FW-MT-iGS , which is our proposed FW-MT-iGS ALR algorithm introduced in Section III-E. All five approaches construct a ridge regression model from the labeled samples, with ridge parameter λ = 10 . The ridge parameter here was much larger, as all five approaches started from only 5 labeled samples, lower than the feature dimensionality, so a large λ was needed to enforce strong regularization. 
+
+C. Evaluation Process 
+
+The evaluation process for multi-task ALR approaches was identical to that used in [23]. For each dataset, 30% of the samples were randomly selected as the training pool, and the remaining 70% as the test pool. The number of selected samples ranged from 5 to 100 on VAM, and 5 to 40 on EE (the performance converged around M = 40 on EE). 
+
+D. Main Results 
+
+Fig. 9 shows the RMSEs and CCs of the five multi-task ALR algorithms on the VAM dataset, averaged over 100 runs. We can observe that:         
+
+> 4http://archive.ics.uci.edu/ml/datasets/energy+efficiency 13
+> 10 15 20 25 30
+> 46810 12 14
+> RMSE
+> Yacht, RMSE
+> 10 15 20 25 30
+> 0.4 0.5 0.6 0.7 0.8 0.9
+> CC
+> Yacht, CC
+
+(a)       
+
+> 10 20 30 40
+> 4.5 55.5 6
+> RMSE
+> autoMPG, RMSE
+> 10 20 30 40
+> 0.7 0.8
+> CC
+> autoMPG, CC
+
+(b)         
+
+> 10 20 30 40 50
+> 0.75 0.8 0.85 0.9 0.95
+> RMSE
+> NO2, RMSE
+> 10 20 30 40 50
+> 0.2 0.3 0.4 0.5
+> CC
+> NO2, CC
+> BL
+> RD
+> FW-RD
+> GSx
+> FW-GSx
+> iGS
+> FW-iGS
+
+(c) Fig. 7. Performance of the seven single-task ALR algorithms, averaged over 200 runs. Linear ridge regression was used to estimate the feature weights in 
+
+FW-RD , FW-GSx and FS-iGS , and a nonlinear regression tree was trained for new sample prediction. (a) Yacht; (b) autoMPG; and, (c) NO2.         
+
+> 10 15 20 25 30
+> 46810 12 14
+> RMSE
+> Yacht, RMSE
+> 10 15 20 25 30
+> 0.5 0.6 0.7 0.8 0.9
+> CC
+> Yacht, CC
+
+(a)       
+
+> 10 20 30 40
+> 55.5 66.5
+> RMSE
+> autoMPG, RMSE
+> 10 20 30 40
+> 0.8
+> CC
+> autoMPG, CC
+
+(b)         
+
+> 10 20 30 40 50
+> 0.75 0.8 0.85 0.9 0.95 1
+> RMSE
+> NO2, RMSE
+> 10 20 30 40 50
+> 0.2 0.3 0.4 0.5
+> CC
+> NO2, CC
+> BL
+> RD
+> FW-RD
+> GSx
+> FW-GSx
+> iGS
+> FW-iGS
+
+(c) Fig. 8. Performance of the seven single-task ALR algorithms, averaged over 200 runs. A nonlinear regression tree was used in both feature weight estimation in FW-RD , FW-GSx and FS-iGS , and for new sample prediction. (a) Yacht; (b) autoMPG; and, (c) NO2. 
+
+1) Generally, as M increased, all five algorithms achieved better performance (smaller RMSE and larger CC), which is intuitive. 2) RD , GSx and iGS outperformed BL in each individual task, suggesting that all these ALR approaches were effective. 3) Generally, the feature weighed ALR approaches outper-formed their unweighted counterparts, i.e., FW-MT-GSx 
+
+outperformed GSx , and FW-MT-iGS outperformed 
+
+MT-iGS , demonstrating again the effectiveness of fea-ture weighting. 4) As in single-task ALR, feature weighting maintained the rank of the original multi-task ALR approaches. For ex-ample, the average RMSEs of the unweighted multi-task ALR approaches were in the order of GSx >iGS , and the average RMSEs of the feature weighted multi-task ALR approaches were in the order of FW-GSx >FW-iGS .The CCs showed a similar pattern. 5) Overall, MT-iGS was the better-performing multi-task ALR approach without feature weighting, as it more comprehensively considers the diversities of the selected samples than MT-GSx . The corresponding FW-MT-iGS 
+
+was the better-performing feature weighted multi-task ALR approach. Fig. 10 shows the RMSEs and CCs of the five multi-task ALR algorithms on the EE dataset, averaged over 100 runs. Similar observations as in VAM can be made. Particularly, fea-ture weighted FW-MT-GSx and FW-MT-iGS outperformed their unweighted counterparts, demonstrating again the effec-tiveness of feature weighting. 
+
+E. Discussion 
+
+The original multi-task ALR algorithms, GSx and MT-iGS ,prioritize balance across different tasks, potentially overlook-ing samples that are particularly informative for individual tasks. GSx and MT-iGS may be improved in this direction, i.e., to give important tasks more consideration; however, this is out of the scope of the current paper. However, no matter whether the multiple tasks have bal-anced or imbalanced importance, the effectiveness of feature weighting may not be affected. As an example, compare Fig. 1(g), where the task of EE-Cooling is considered without considering the task of EE-Heating at all (i.e., EE-Cooling has the maximum importance, whereas EE-Heating has the minimum importance), and Fig. 10, where both tasks of EE-Cooling and EE-Heating are considered equally important. In both cases, feature weighted ALR algorithms always outper-formed their unweighted counterparts. VI. C ONCLUSIONS AND FUTURE RESEARCH 
+
+In many real-world machine learning problems, acquiring a large amount of unlabeled data is relatively easy, but obtaining their labels is labor intensive, time consuming, and/or expen-sive. Active learning is a promising strategy to cope with these challenges. Particularly, pool-based sequential ALR optimally selects a small number of samples sequentially from a large pool of unlabeled samples to label, so that a more accurate regression model can be constructed under a given (small) labeling budget. Representativeness and diversity, which in-volve computing the distances among different samples, are important considerations in ALR. However, previous ALR approaches do not incorporate the importance of different 14                                 
+
+> 20 40 60 80 100
+> 0.2 0.205 0.21 0.215 0.22 0.225 0.23
+> RMSE
+> VAM-Valance, RMSE
+> 20 40 60 80 100
+> 0.1 0.15 0.2 0.25 0.3
+> CC
+> VAM-Valance, CC
+> 20 40 60 80 100
+> 0.24 0.26 0.28 0.3
+> RMSE
+> VAM-Arousal, RMSE
+> 20 40 60 80 100
+> 0.55 0.6 0.65 0.7 0.75
+> CC
+> VAM-Arousal, CC
+> 20 40 60 80 100
+> 0.21 0.22 0.23 0.24 0.25 0.26 0.27
+> RMSE
+> VAM-Dominance, RMSE
+> 20 40 60 80 100
+> 0.55 0.6 0.65 0.7
+> CC
+> VAM-Dominance, CC
+> 20 40 60 80 100
+> 0.21 0.22 0.23 0.24 0.25 0.26
+> RMSE
+> VAM, Average RMSE
+> 20 40 60 80 100
+> 0.4 0.45 0.5 0.55 0.6
+> CC
+> VAM, Average CC
+> BL
+> GSx
+> FW-GSx
+> MT-iGS
+> FW-MT-iGS
+
+Fig. 9. Performance of the five multi-task ALR algorithms on the VAM dataset, averaged over 100 runs. 
+
+features in inter-sample distance computation, resulting in sub-optimal sample selection. This paper has proposed three feature weighted single-task ALR approaches and two feature weighted multi-task ALR approaches, where the ridge regression coefficients trained from a small amount of previously labeled samples are used to weight the corresponding features in inter-sample distance computation. Extensive experiments showed that this easy-to-implement enhancement consistently improved the perfor-mance of four existing ALR approaches, in both single-task and multi-task regression problems. The following directions will be considered in our future research: 1) Theoretical justifications of the advantages of feature weighting in ALR. This paper has provided extensive experiment results to demonstrate the effectiveness and robustness of feature weighting, but in-depth theoretical justifications would make it more complete. 2) Incorporating feature weights in stream-based active learning for regression [35]–[37], where unlabeled data    
+
+> 10 20 30 40
+> 46810 12 14 16 18
+> RMSE
+
+EE-Cooling, RMSE    
+
+> BL
+> GSx
+> FW-GSx
+> MT-iGS
+> FW-MT-iGS
+> 10 20 30 40
+> 0.8 0.85 0.9
+> CC
+
+EE-Cooling, CC    
+
+> 10 20 30 40
+> 46810 12 14 16 18
+> RMSE
+
+EE-Heating, RMSE    
+
+> 10 20 30 40
+> 0.8 0.85 0.9
+> CC
+
+EE-Heating, CC    
+
+> 10 20 30 40
+> 46810 12
+> RMSE
+
+EE, Average RMSE    
+
+> 10 20 30 40
+> 0.52 0.54 0.56 0.58 0.6 0.62
+> CC
+
+EE, Average CC 
+
+Fig. 10. Performance of the five multi-task ALR algorithms on the EE dataset, averaged over 100 runs. 
+
+arrive continuously, and we need to determine on-the-fly if a sample should be selected for labeling. The scenario is significantly different from pool-based active learning for regression; however, as long as unlabeled sample selection involves computing the distances among sam-ples, feature weighting should still be beneficial. 3) Incorporating feature weights in active learning for clas-sification problems. As in ALR, inter-sample distance computation is also frequently used in active learning for classification problems to assess the representativeness and diversity of the unlabeled samples. So, the feature weighting strategy proposed in this paper may also be used to improve the performance of active learning for classification problems. 4) Considering sample weights in active learning ap-proaches. Many active learning approaches, e.g., RD and FW-RD, use clustering to select the most representative and diverse samples, usually one sample from each cluster; however, different clusters have different sizes, and existing approaches do not take the cluster size into consideration. Weighting the selected samples by their corresponding cluster sizes may further improve 15 
+
+the learning performance. REFERENCES [1] R. Picard, Affective Computing . Cambridge, MA: The MIT Press, 1997. [2] D. Wu, B.-L. Lu, B. Hu, and Z. Zeng, “Affective brain-computer interfaces (aBCIs): A tutorial,” Proc. of the IEEE , vol. 11, no. 10, pp. 1314–1332, 2023. [3] M. Grimm, K. Kroschel, and S. S. Narayanan, “The Vera Am Mittag German audio-visual emotional speech database,” in Proc. Int’l Conf. on Multimedia & Expo (ICME) , Hannover, German, June 2008, pp. 865– 868. [4] S. Koelstra, C. Muhl, M. Soleymani, J. S. Lee, A. Yazdani, T. Ebrahimi, T. Pun, A. Nijholt, and I. Patras, “DEAP: A database for emotion anal-ysis using physiological signals,” IEEE Trans. on Affective Computing ,vol. 3, no. 1, pp. 18–31, 2012. [5] W.-L. Zheng, W. Liu, Y. Lu, B.-L. Lu, and A. Cichocki, “EmotionMeter: A multimodal framework for recognizing human emotions,” IEEE Trans. on Cybernetics , vol. 49, no. 3, pp. 1110–1122, 2019. [6] E. S. Dan-Glauser and K. R. Scherer, “The Geneva affective picture database (GAPED): a new 730-picture database focusing on valence and normative significance,” Behavior Research Methods , vol. 43, pp. 468–477, 2011. [7] M. M. Bradley and P. J. Lang, “The international affective digitized sounds (2nd edition; IADS-2): Affective ratings of sounds and instruc-tion manual,” University of Florida, Gainesville, FL, Tech. Rep. B-3, 2007. [8] J. Joo, D. Wu, J. M. Mendel, and A. Bugacov, “Forecasting the post fracturing response of oil wells in a tight reservoir,” in Proc. SPE Western Regional Meeting , San Jose, CA, March 2009. [9] B. Settles, Active learning . Morgan & Claypool Publishers, 2012. [10] Q. Yang, Y. Zhang, W. Dai, and S. J. Pan, Transfer Learning . Cam-bridge, UK: Cambridge University Press, 2020. [11] W. Zhang, L. Deng, L. Zhang, and D. Wu, “A survey on negative transfer,” IEEE/CAA Journal of Automatica Sinica , vol. 10, no. 2, pp. 305–329, 2023. [12] J. Gui, T. Chen, J. Zhang, Q. Cao, Z. Sun, H. Luo, and D. Tao, “A survey on self-supervised learning: Algorithms, applications, and future trends,” 
+
+IEEE Trans. on Pattern Analysis and Machine Intelligence , vol. 46, no. 12, pp. 9052–9071, 2024. [13] L. Zhao, S. Pan, E. Xiang, E. Zhong, Z. Lu, and Q. Yang, “Active transfer learning for cross-system recommendation,” in Proc. AAAI Conf. on Artificial Intelligence , Bellevue, WA, July 2013. [14] D. Wu, “Active semi-supervised transfer learning (ASTL) for offline BCI calibration,” in Proc. IEEE Int’l. Conf. on Systems, Man and Cybernetics , Banff, Canada, October 2017. [15] L. Deng, C. Zhao, Z. Du, K. Xia, and D. Wu, “Semi-supervised transfer boosting (SS-TrBoosting),” IEEE Trans. on Artificial Intelligence , vol. 5, no. 7, pp. 3431–3444, 2024. [16] X. Jiang, L. Meng, Z. Wang, and D. Wu, “Deep source semi-supervised transfer learning (DS3TL) for cross-subject EEG classification,” IEEE Trans. on Biomedical Engineering , vol. 71, no. 4, pp. 1308–1318, 2024. [17] D. Li, Z. Wang, Y. Chen, R. Jiang, W. Ding, and M. Okumura, “A survey on deep active learning: Recent advances and new frontiers,” 
+
+IEEE Trans. on Neural Networks and Learning Systems , vol. 36, no. 4, pp. 5879–5899, 2025. [18] D. Wu, “Pool-based sequential active learning for regression,” IEEE Trans. on Neural Networks and Learning Systems , vol. 30, no. 5, pp. 1348–1359, 2019. [19] T. RayChaudhuri and L. Hamey, “Minimisation of data collection by active learning,” in Proc. IEEE Int’l. Conf. on Neural Networks , vol. 3, Perth, Australia, November 1995, pp. 1338–1341. [20] W. Cai, Y. Zhang, and J. Zhou, “Maximizing expected model change for active learning in regression,” in Proc. IEEE 13th Int’l. Conf. on Data Mining , Dallas, TX, December 2013. [21] H. Yu and S. Kim, “Passive sampling for regression,” in Proc. IEEE Int’l. Conf. on Data Mining , Sydney, Australia, December 2010, pp. 1151–1156. [22] D. Wu, C.-T. Lin, and J. Huang, “Active learning for regression using greedy sampling,” Information Sciences , vol. 474, pp. 90–105, 2019. [23] D. Wu and J. Huang, “Affect estimation in 3D space using multi-task active learning for regression,” IEEE Trans. on Affective Computing ,vol. 13, no. 1, pp. 16–27, 2022. [24] O. Sener and S. Savarese, “Active learning for convolutional neural networks: A core-set approach,” in Proc. Int’l Conf. on Learning Representations , Vancouver, Canada, Apr. 2018. [Online]. Available: https://openreview.net/forum?id=H1aIuk-RW [25] S. Seo, M. Wallat, T. Graepel, and K. Obermayer, “Gaussian process regression: Active data selection and test point rejection,” in Proc. IEEE-INNS-ENNS Int’l Joint Conf. on Neural Networks , vol. 3, Como, Italy, Jul. 2000, pp. 241–246. [26] D. Holzm¨ uller, V. Zaverkin, J. K¨ astner, and I. Steinwart, “A framework and benchmark for deep batch active learning for regression,” Journal of Machine Learning Research , vol. 24, no. 164, pp. 1–81, 2023. [27] N. Houlsby, F. Husz´ ar, Z. Ghahramani, and M. Lengyel, “Bayesian active learning for classification and preference learning,” 
+
+arXiv:1112.5745 , 2011. [28] W. Cai, M. Zhang, and Y. Zhang, “Batch mode active learning for re-gression with expected model change,” IEEE Trans. on Neural Networks and Learning Systems , vol. 28, no. 7, pp. 1668–1681, July 2017. [29] Z. Liu, X. Jiang, H. Luo, W. Fang, J. Liu, and D. Wu, “Pool-based unsu-pervised active learning for regression using iterative representativeness-diversity maximization (iRDM),” Pattern Recognition Letters , vol. 142, pp. 11–19, 2021. [30] Z. Liu, X. Jiang, and D. Wu, “Unsupervised pool-based active learning for linear regression,” Acta Automatica Sinica , vol. 47, no. 12, pp. 2771– 2783, 2021, in Chinese. [31] M. Grimm, K. Kroschel, E. Mower, and S. S. Narayanan, “Primitives-based evaluation and estimation of emotions in speech,” Speech Com-munication , vol. 49, pp. 787–800, 2007. [32] M. Grimm and K. Kroschel, “Emotion estimation in speech using a 3D emotion space concept,” in Robust Speech Recognition and Understanding , M. Grimm and K. Kroschel, Eds. Vienna, Austria: I-Tech, 2007, pp. 281–300. [33] D. Wu, T. D. Parsons, E. Mower, and S. S. Narayanan, “Speech emotion estimation in 3D space,” in Proc. IEEE Int’l Conf. on Multimedia & Expo (ICME) , Singapore, July 2010, pp. 737–742. [34] D. Wu, T. D. Parsons, and S. S. Narayanan, “Acoustic feature analysis in speech emotion primitives estimation,” in Proc. InterSpeech , Makuhari, Japan, September 2010. [35] D. Cacciarelli, M. Kulahci, and J. S. Tyssedal, “Stream-based active learning with linear models,” Knowledge-Based Systems , vol. 254, p. 109664, 2022. [36] D. Cacciarelli, J. S. Tyssedal, and M. Kulahci, “Stream-based active learning for regression with dynamic feature selection,” in Proc. 5th Int’l Conf. on Transdisciplinary AI , Laguna Hills, CA, Sep. 2023, pp. 243–248. [37] S. Horiguchi, K. Dohi, and Y. Kawaguchi, “Streaming active learning for regression problems using regression via classification,” in proc. IEEE Int’l Conf. on Acoustics, Speech and Signal Processing , Seoul, Korea, Apr. 2024, pp. 4955–4959.
