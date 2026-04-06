@@ -1,0 +1,118 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.00961v1/fig-001.webp",
+      "caption": "Figure 8: Application to Event-Related Potentials. Posterior frequencies of the 15 most frequently sampled factor configurations across 10, 000 retained MCMC draws after burn-in.",
+      "page": 26,
+      "index": 1,
+      "width": 788,
+      "height": 365
+    },
+    {
+      "url": "assets/figures/arxiv/2604.00961v1/fig-002.webp",
+      "caption": "Figure 9: Application to Event-Related Potentials. Heatmaps of the estimated covariancederived shared and group-specific factor loadings, over a time window from 47ms to 349ms. The shared component Λ̃⊤, of dimension 1×78, is shown on the left-hand side, the alcoholic-specific component Φ̃⊤ alcoholic, of dimension 4 × 78, is shown in middle panel, and the control-specific component Φ̃⊤ control, of dimension 5 × 78, in the right panel.",
+      "page": 26,
+      "index": 2,
+      "width": 976,
+      "height": 254
+    },
+    {
+      "url": "assets/figures/arxiv/2604.00961v1/fig-003.webp",
+      "caption": "Figure 2: Simulation Study. Comparison of heatmaps for the true (top) and estimated (bottom) covariance-derived shared and group-specific factor loadings for the same replicate from Scenario A (3, 2, 2) with n1 = 40, and n2 = 80 shown in Figure 1.",
+      "page": 15,
+      "index": 3,
+      "width": 938,
+      "height": 582
+    },
+    {
+      "url": "assets/figures/arxiv/2604.00961v1/fig-004.webp",
+      "caption": "Figure 3: Simulation Study. True and estimated curves fs, together with pointwise 95% credible intervals, for two representative subjects from each group for the same replicate from Scenario A (3, 2, 2) with n1 = 40, and n2 = 80 shown in Figure 1.",
+      "page": 15,
+      "index": 4,
+      "width": 888,
+      "height": 389
+    },
+    {
+      "url": "assets/figures/arxiv/2604.00961v1/fig-005.webp",
+      "caption": "Figure 6: Simulation Study. Group-level point-wise log(MSE), averaged across 100 replicated datasets, for scenario A (3, 2, 2) with different sample sizes. We compare our method, BMGFFM, with the semiparametric functional factor model (SFFM) of Kowal and Canale (2023), the Bayesian functional PCA (BFPCA) approach of Boland et al. (2023), the standard fPCA implemented using the fda package in R (Ramsay et al., 2022), and the filtrated common principal component analysis method (filt-fPCA) of Jiao et al. (2024).",
+      "page": 21,
+      "index": 5,
+      "width": 881,
+      "height": 1022
+    },
+    {
+      "url": "assets/figures/arxiv/2604.00961v1/fig-006.webp",
+      "caption": "Figure 7: Simulation Study. Boxplots of RV coefficients between true and estimated explained covariance matrices, across 100 replicates, under each simulated scenario. We compare our method, BMGFFM, with the semiparametric functional factor model (SFFM) of Kowal and Canale (2023), the Bayesian functional PCA (BFPCA) approach of Boland et al. (2023), the standard fPCA implemented using the fda package in R (Ramsay et al., 2022), and the filtrated common principal component analysis method (filt-fPCA) of Jiao et al. (2024).",
+      "page": 22,
+      "index": 6,
+      "width": 954,
+      "height": 1113
+    },
+    {
+      "url": "assets/figures/arxiv/2604.00961v1/fig-007.webp",
+      "caption": "Figure 1: Simulation Study. Posterior frequencies of the 15 most frequently sampled factor configurations for one replicate from Scenario A (3, 2, 2) with n1 = 40, and n2 = 80, based on 10, 000 retained MCMC draws after burn-in. The modal factor configuration coincides with the true configuration (3, 2, 2).",
+      "page": 14,
+      "index": 7,
+      "width": 988,
+      "height": 391
+    },
+    {
+      "url": "assets/figures/arxiv/2604.00961v1/fig-008.webp",
+      "caption": "Figure 5: Simulation Study. Boxplots of the RV coefficients between the true shared and group-specific factor loadings, BΛtrue and BΦs,true, and the estimated covariance-derived shared and group-specific factor loadings, Λ̃ and Φ̃s, averaged across replicates where the estimates of L∗, K∗ 1 , and K∗ 2 equal the true values, among 100 simulated datasets, for all scenarios described in Section 3.1.",
+      "page": 18,
+      "index": 8,
+      "width": 784,
+      "height": 429
+    },
+    {
+      "url": "assets/figures/arxiv/2604.00961v1/fig-009.webp",
+      "caption": "Table 3: Simulation Study. Sensitivity analysis for hyperparameters (a1, a2, v0) based on 50 replicated datasets of Scenario A (3, 2, 2) with n1 = 40, n2 = 80. Results are mean RV values, with standard deviation (in parentheses), between true and estimated explained matrices Σfs , and total MSE between true and estimated curves, averaged across subjects, time points and replicates.",
+      "page": 23,
+      "index": 9,
+      "width": 658,
+      "height": 438
+    },
+    {
+      "url": "assets/figures/arxiv/2604.00961v1/fig-010.webp",
+      "caption": "Figure 11: Application to Event-Related Potentials. Top line: Event-Related Potentials (ERPs) for 76 alcoholic subjects (left) and 44 control subjects (right) over the time window from 47 ms to 349 ms. The average ERP curves are indicated as a green curve. Bottom line: fitted curves as posterior means from BMGFFM, with group-specific mean function shown in blue.",
+      "page": 28,
+      "index": 10,
+      "width": 797,
+      "height": 635
+    },
+    {
+      "url": "assets/figures/arxiv/2604.00961v1/fig-011.webp",
+      "caption": "Table 1: Simulation Study. Estimated number of shared factors (L∗) and group-specific factors, (K∗ s ), reported as means and standard deviations, in parentheses, across 100 replicated datasets, for all simulated scenarios described in Section 3.1.",
+      "page": 17,
+      "index": 11,
+      "width": 810,
+      "height": 436
+    },
+    {
+      "url": "assets/figures/arxiv/2604.00961v1/fig-012.webp",
+      "caption": "Figure 10: Application to Event-Related Potentials. Posterior mean estimates and pointwise 95% credible intervals for two representative subjects from the alcoholic group and two representative subjects from the control group, based on posterior draws corresponding to the modal factor configuration (L∗, K∗ a , K ∗ c ) = (1, 4, 5).",
+      "page": 27,
+      "index": 12,
+      "width": 804,
+      "height": 364
+    },
+    {
+      "url": "assets/figures/arxiv/2604.00961v1/fig-013.webp",
+      "caption": "Table 2: Simulation Study. Total MSEs, averaged across 100 replicated datasets, for all simulated scenarios described in Section 3.1. We compare our method, BMGFFM, with the semiparametric functional factor model (SFFM) of Kowal and Canale (2023), the Bayesian functional PCA (BFPCA) approach of Boland et al. (2023), the standard fPCA implemented using the fda package in R (Ramsay et al., 2022), and the filtrated common principal component analysis method (filt-fPCA) of Jiao et al. (2024). Smallest MSE values are in bold.",
+      "page": 20,
+      "index": 13,
+      "width": 977,
+      "height": 334
+    },
+    {
+      "url": "assets/figures/arxiv/2604.00961v1/fig-014.webp",
+      "caption": "Figure 4: Simulation Study. Comparison of simulated curves, Ys, and true and estimated curves fs for all subjects in the two groups for the same replicate from Scenario A (3, 2, 2) with n1 = 40, and n2 = 80 shown in Figure 1. Top line: simulated Ys for 40 subjects (left) and 80 subjects (right) over the 60 time points, with subject-level curves in green and averaged curves in blue; Middle line: true curves fs for the two groups, with subject-level curves in green and averaged curves in blue; Bottom line: estimated curves f̂s , shown as posterior means, with subject-level curves in green and averaged curves in blue.",
+      "page": 16,
+      "index": 14,
+      "width": 976,
+      "height": 985
+    }
+  ]
+}

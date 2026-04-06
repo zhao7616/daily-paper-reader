@@ -1,0 +1,182 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.03224v1/fig-001.webp",
+      "caption": "Table 5: Comparison of 3D (CTViT) and 2D (DINOv3) backbones on retrospective study (Conventional labels). Best results are bolded. Full table is in Appendix. C",
+      "page": 11,
+      "index": 1,
+      "width": 904,
+      "height": 193
+    },
+    {
+      "url": "assets/figures/arxiv/2604.03224v1/fig-002.webp",
+      "caption": "Figure 4: Principle Component Analysis (PCA) of task-specific LoRA. Blue is opportunistic labels and orange is conventional labels. Number is the index of labels.",
+      "page": 11,
+      "index": 2,
+      "width": 903,
+      "height": 496
+    },
+    {
+      "url": "assets/figures/arxiv/2604.03224v1/fig-003.webp",
+      "caption": "Table 13: LoRA target modules in HyperCT. All linear layers in attention and MLP blocks are adapted.",
+      "page": 25,
+      "index": 3,
+      "width": 756,
+      "height": 277
+    },
+    {
+      "url": "assets/figures/arxiv/2604.03224v1/fig-004.webp",
+      "caption": "Figure 10: Decision Curve Analysis on CU retrospective cohort. HyperCT (blue) shows positive net benefit above “treat all” (orange) and “treat none” (gray) baselines.",
+      "page": 30,
+      "index": 4,
+      "width": 884,
+      "height": 584
+    },
+    {
+      "url": "assets/figures/arxiv/2604.03224v1/fig-005.webp",
+      "caption": "Table 1: Comprehensive comparison of AUC scores (%) on retrospective study. Best results among MTL methods are bolded, second best are underlined.",
+      "page": 7,
+      "index": 5,
+      "width": 904,
+      "height": 512
+    },
+    {
+      "url": "assets/figures/arxiv/2604.03224v1/fig-006.webp",
+      "caption": "Figure 9: Dendrogram of hierarchical clustering (complete linkage, cosine distance) showing the tree structure of task relationships. Colors indicate the four identified clusters at the optimal cut point (k=4).",
+      "page": 29,
+      "index": 6,
+      "width": 902,
+      "height": 645
+    },
+    {
+      "url": "assets/figures/arxiv/2604.03224v1/fig-007.webp",
+      "caption": "Table 4: Ablation of LoRA Rank (r) dimensions on retrospective study (Conversional labels). Best results are bolded, and second-best results are underlined. Full table is in Appendix. Sec. D",
+      "page": 10,
+      "index": 7,
+      "width": 904,
+      "height": 295
+    },
+    {
+      "url": "assets/figures/arxiv/2604.03224v1/fig-008.webp",
+      "caption": "Figure 6: Sample valid fraction heatmaps for opportunistic screening labels",
+      "page": 18,
+      "index": 8,
+      "width": 885,
+      "height": 587
+    },
+    {
+      "url": "assets/figures/arxiv/2604.03224v1/fig-009.webp",
+      "caption": "Figure 7: Sample valid fraction heatmaps for conventional screening labels",
+      "page": 18,
+      "index": 9,
+      "width": 893,
+      "height": 345
+    },
+    {
+      "url": "assets/figures/arxiv/2604.03224v1/fig-010.webp",
+      "caption": "Figure 8: Hierarchical clustering of task-specific LoRA weights. MDS (Torgerson, 1952) projection of 25 tasks colored by cluster assignment (cosine distance, complete linkage, k=4, silhouette=0.30). Tasks naturally group into clinically interpretable categories without any clinical priors.",
+      "page": 28,
+      "index": 10,
+      "width": 890,
+      "height": 771
+    },
+    {
+      "url": "assets/figures/arxiv/2604.03224v1/fig-011.webp",
+      "caption": "Table 2: Comprehensive comparison of AUC scores (%) on prospective study. Best results among MTL methods are bolded, and second-best results are underlined.",
+      "page": 8,
+      "index": 11,
+      "width": 902,
+      "height": 212
+    },
+    {
+      "url": "assets/figures/arxiv/2604.03224v1/fig-012.webp",
+      "caption": "Figure 1: Overview of HyperCT. Given a set of learnable task embeddings, e.g., {e1, e2, e3}, a hypernet h produces task-specific weight adjustments ∆W1,∆W2,∆W3, which modulate the weights of the base model. The base model, produces task-specific predictions {ŷ1, ŷ2, ŷ3}. These outputs are compared with ground-truth task labels {y1,y2,y3} via Binary Cross-Entropy Loss.",
+      "page": 4,
+      "index": 12,
+      "width": 905,
+      "height": 385
+    },
+    {
+      "url": "assets/figures/arxiv/2604.03224v1/fig-013.webp",
+      "caption": "Table 7: Ablation Study: Comparison of AUC scores (%) for LoRA Module variants on Prospective Datasets. Best results are bolded.",
+      "page": 17,
+      "index": 13,
+      "width": 814,
+      "height": 225
+    },
+    {
+      "url": "assets/figures/arxiv/2604.03224v1/fig-014.webp",
+      "caption": "Table 6: Ablation Study: Comparison of AUC scores (%) for LoRA Module variants on Retrospective study. Best results are bolded.",
+      "page": 17,
+      "index": 14,
+      "width": 814,
+      "height": 625
+    },
+    {
+      "url": "assets/figures/arxiv/2604.03224v1/fig-015.webp",
+      "caption": "Table 15: Clinical Definitions for Cardiovascular Condition Curation",
+      "page": 32,
+      "index": 15,
+      "width": 1004,
+      "height": 782
+    },
+    {
+      "url": "assets/figures/arxiv/2604.03224v1/fig-016.webp",
+      "caption": "Figure 5: Saliency maps generated using Grad-CAM for different tasks. First row is opportunistic screening tasks and second row is part of the conventional screening tasks.",
+      "page": 12,
+      "index": 16,
+      "width": 879,
+      "height": 289
+    },
+    {
+      "url": "assets/figures/arxiv/2604.03224v1/fig-017.webp",
+      "caption": "Table 12: Bootstrap 95% confidence intervals for HyperCT on prospective evaluation. AUC (%) with 95% CI computed over 1000 bootstrap iterations. CI width scales inversely with sample size.",
+      "page": 24,
+      "index": 17,
+      "width": 868,
+      "height": 331
+    },
+    {
+      "url": "assets/figures/arxiv/2604.03224v1/fig-018.webp",
+      "caption": "Table 3: Comparison of AUC scores (%) for LoRA module variants on retrospective study. Best results are bolded, and second best are underlined. Full table is in Appendix Sec. A",
+      "page": 9,
+      "index": 18,
+      "width": 904,
+      "height": 206
+    },
+    {
+      "url": "assets/figures/arxiv/2604.03224v1/fig-019.webp",
+      "caption": "Figure 2: Decision Curve Analysis on CU prospective cohort for all 7 opportunistic cardiac tasks. HyperCT (blue) shows positive net benefit above “treat all” (orange) and “treat none” (gray) baselines across clinically relevant thresholds (5-80%).",
+      "page": 9,
+      "index": 19,
+      "width": 890,
+      "height": 296
+    },
+    {
+      "url": "assets/figures/arxiv/2604.03224v1/fig-020.webp",
+      "caption": "Figure 3: Decision Curve Analysis on WCM prospective cohort (external validation). HyperCT demonstrates consistent clinical utility across institutions, with positive net benefit maintained for all 7 opportunistic tasks.",
+      "page": 9,
+      "index": 20,
+      "width": 890,
+      "height": 294
+    },
+    {
+      "url": "assets/figures/arxiv/2604.03224v1/fig-021.webp",
+      "caption": "Figure 11: Decision Curve Analysis on WCM retrospective cohort.",
+      "page": 31,
+      "index": 21,
+      "width": 884,
+      "height": 585
+    },
+    {
+      "url": "assets/figures/arxiv/2604.03224v1/fig-022.webp",
+      "caption": "Table 9: Ablation of LoRA Rank (r) dimensions on Opportunistic Tasks (Retrospective vs. Prospective Test Sets). Best results are bolded per institution.",
+      "page": 20,
+      "index": 22,
+      "width": 906,
+      "height": 318
+    }
+  ]
+}
