@@ -1,0 +1,816 @@
+Title: Towards Intrinsically Calibrated Uncertainty Quantification in Industrial Data-Driven Models via Diffusion Sampler
+
+URL Source: https://arxiv.org/pdf/2604.01870v1
+
+Published Time: Fri, 03 Apr 2026 00:45:33 GMT
+
+Number of Pages: 12
+
+Markdown Content:
+> MANUSCRIPT ACCEPTED FOR PUBLICATION IN IEEE TRANSACTIONS ON INDUSTRIAL INFORMATICS 1
+
+# Towards Intrinsically Calibrated Uncertainty Quantification in Industrial Data-Driven Models via Diffusion Sampler 
+
+Yiran Ma , Jerome Le Ny , Senior Member, IEEE , Zhichao Chen , and Zhihuan Song 
+
+Abstract —In modern process industries, data-driven models are important tools for real-time monitoring when key perfor-mance indicators are difficult to measure directly. While accurate predictions are essential, reliable uncertainty quantification (UQ) is equally critical for safety, reliability, and decision-making, but remains a major challenge in current data-driven approaches. In this work, we introduce a diffusion-based posterior sampling framework that inherently produces well-calibrated predictive uncertainty via faithful posterior sampling, eliminating the need for post-hoc calibration. In extensive evaluations on synthetic distributions, the Raman-based phenylacetic acid soft sensor benchmark, and a real ammonia synthesis case study, our method achieves practical improvements over existing UQ techniques in both uncertainty calibration and predictive accuracy. These results highlight diffusion samplers as a principled and scalable paradigm for advancing uncertainty-aware modeling in industrial applications. 
+
+Index Terms —Industrial data-driven modeling, uncertainty quantification, Bayesian inference, diffusion sampler, stochastic optimal control, Schr¨ odinger bridge, neural networks 
+
+I. I NTRODUCTION 
+
+Data-driven models have become essential tools in modern process industries, enabling the indirect estimation of key performance indicators that are difficult to physically measure in real time [1]. However, in practice, such models often suffer from a lack of trust from industrial practitioners, which substantially limits their deployment in safety-critical and decision-driven scenarios. A major reason is that most existing data-driven models provide only point predictions without reliable measures of confidence, making it difficult to assess 
+
+This manuscript has been accepted for publication in IEEE Transactions on Industrial Informatics. © IEEE. Reuse of this material is subject to IEEE copyright restrictions. See https://www.ieee.org/publications/rights/index.html for more information. This work was supported by the National Natural Science Foundation of China under Grant Number 62473103 and was also supported by the China Postdoctoral Science Foundation under Grant Number 2025M781449. Part of this work was done while the first author was visiting Polytechnique Montreal and GERAD. (Corresponding author: Zhihuan Song and Zhichao Chen) Yiran Ma is with the College of Control Science and Engineering, Zhejiang University, Hangzhou, 310027, China (e-mail: mayiran@zju.edu.cn). Jerome Le Ny is with the Electrical Engineering Department, Polytechnique Montreal, and with GERAD, Montreal, QC H3T 1J4, Canada (e-mail: jerome.le-ny@polymtl.ca). Zhichao Chen is with the State Key Lab of General AI, School of Intelligence Science and Technology, Peking University, Beijing 100871, China (e-mail: 12032042@zju.edu.cn). Zhihuan Song is with the Guangdong Provincial Key Laboratory of Petro-chemical Equipment Fault Diagnosis, Guangdong University of Petrochemical Technology, Maoming, 525000, China, and also with the College of Control Science and Engineering, Zhejiang University, Hangzhou, 310027, China (e-mail: songzhihuan@zju.edu.cn). 
+
+the risk associated with their outputs and to support robust operational decision making [2]. Formally, let x ∈ Rd denote the vector of easy-to-measure variables and y ∈ R the target performance indicator. In most existing data-driven modeling practices, given a his-torical dataset D = ( xi, y i)i = 1 N , a deterministic mapping 
+
+ˆy = fθ (x), θ ∈ Θ, is learned by minimizing the prediction error (e.g., in a mean-square sense). However, such point estimators provide no explicit mechanism to account for either data noise (e.g., measurement errors and process disturbances) or model uncertainty arising from limited data and model misspecification. Consequently, they often yield overconfident yet incorrect predictions, which is particularly dangerous in safety-critical and optimization-driven process control. Therefore, beyond providing point predictions, it is crucial to assess their reliability. To meet this demand, this work focuses on uncertainty quantification, aiming to deliver not only accurate predictions of y but also a calibrated predic-tive distribution p(y | x, D). Such a distribution allows for constructing statistically meaningful credible intervals. For example, a nominal 95% credible interval should empirically contain the true value approximately 95% of the time. This capability is particularly valuable for industrial tasks such as reliable decision-making [3], risk-sensitive control [4], and optimization [5]. Moreover, it underpins data-efficient learning by identifying areas of uncertainty in the model’s knowledge [6]. Bayesian approaches naturally address this need because, when faced with multiple plausible and competing explana-tions for observed data, they take all possibilities into account rather than prematurely committing to any single explanation [7], [8]. This helps in understanding what a data-driven model does not know, which is important for safety-critical scenar-ios. In practice, Bayesian models predicts by marginalization 
+
+p(y|x) = R p(y|x, θ )p(θ|D )dθ , thus requiring a proper likeli-hood function p(y|x, θ ) and the complete representation of the posterior p(θ|D ). Although conjugate Bayesian models under-pinned many early successes in industrial data-driven model-ing [9], typically by adopting linear and Gaussian likelihood, conjugate exponential-family likelihoods, or low-dimensional parameterizations that admit closed-form posteriors, these suc-cesses rely on strong structural assumptions. In the nonlinear, heteroscedastic noise and high-dimensional regimes of modern complex industrial practice, more complex models such as neural networks (NNs) are used [10], where closed-form posteriors are no longer available; explicit Bayesian inference  
+
+> arXiv:2604.01870v1 [cs.LG] 2 Apr 2026 MANUSCRIPT ACCEPTED FOR PUBLICATION IN IEEE TRANSACTIONS ON INDUSTRIAL INFORMATICS 2
+
+becomes either inapplicable or computationally prohibitive. Therefore, the problem of predictive uncertainty quantification (UQ) for industrial models has not been comprehensively addressed in the literature. Furthermore, due to the intractability of exact Bayesian inference in modern nonlinear and high-dimensional indus-trial process models, most existing industrial UQ methods resort to classical approximate inference schemes or heuristic uncertainty estimators, thus requiring post-hoc calibration to compensate for systematic bias in uncertainty estimates. In in-dustrial scenarios, however, obtaining ground-truth data often relies on time-consuming laboratory analysis; consequently, reserving a portion of this already scarce data or collecting a new independent set for post-hoc calibration [2], [11], [12] is practically expensive, time-consuming, and sometimes even infeasible. Consequently, the central challenge in designing industrial UQ frameworks lies in achieving intrinsically cal-ibrated predictive uncertainty. Namely, uncertainty estimates that are reliable by construction and do not depend on addi-tional post-hoc calibration or extra ground-truth data. Fundamentally, the need for post-hoc calibration of existing methods reflects a deeper issue: the underlying approximate inference or sampling procedures fail to faithfully represent the true posterior distribution, leading to systematic under-coverage or mis-calibration. In complex industrial models, the posterior is often high-dimensional and non-Gaussian, mak-ing faithful posterior approximation particularly challenging. Existing methods typically fail to provide reliable posterior coverage for three fundamentally different reasons. First, methods based on restrictive parameterizations (e.g., Monte Carlo dropout [13]–[15] and Mean-field variational inference (MFVI) [16]) impose unimodal or factorized posterior families that cannot represent complex structures. Second, sampling-based methods such as SG-MCMC [17] often suffer from prohibitively slow mixing in high-dimensional landscapes. Third, particle-based methods such as SVGD [2] rely on finite-particle kernelized approximations that degenerate in high dimensions, leading to particle collapse or insufficient mode coverage [2], [11], [12]. As a result, these methods produce systematically under-covered posteriors, resulting in miscalibrated uncertainty estimates in practice and often ne-cessitating post-hoc calibration on an additional independent dataset. Therefore, the key technical difficulty lies in ensuring faithful coverage of the entire posterior support, rather than approximating only the dominant mode(s). To achieve a more faithful approximation of the posterior distribution, we adopt the Schr¨ odinger bridge (SB) perspective [18]. This theoretically grounded framework casts posterior inference as a stochastic transport problem: finding a path-space distribution whose terminal marginal matches the target posterior while minimizing the KL divergence from a refer-ence diffusion process. However, the main difficulty lies in reformulating this strict transport problem into a tractable, un-constrained objective to enable efficient end-to-end training via gradient descent. While earlier approaches relied on iterative proportional fitting [19], recent work shows that the SB prob-lem admits a stochastic optimal control (SOC) interpretation, offering a principled and well-posed objective for inference. Therefore, recent advancements have increasingly focused on learning-based methods leveraging diffusion processes [20]– [22], which are named diffusion samplers . These diffusion samplers are particularly compelling due to their scalability in high-dimensional settings. Recently, adjoint matching [23], [24] has further improved the efficiency of training diffusion samplers, making them more practical for complex models. While these methods yield principled samplers from complex posterior or energy distributions that can be used to compute uncertainty measures, explicit UQ applications of diffusion samplers are still relatively limited; most existing work focuses on sampling methodology and theoretical analysis rather than dedicated UQ case studies. In this work, we therefore build upon the SB formulation to construct a robust diffusion sampler for industrial data-driven modeling, aiming to provide calibrated uncertainty by capturing complex structure of posterior distributions inherent in such practical industrial models. To summarize, the contributions of this paper are as follows: 1) We introduce the diffusion sampler for posterior sam-pling, providing a principled alternative to conventional industrial data-driven modeling and establishing a theo-retically grounded framework for UQ. 2) We demonstrate the practical value of the framework on synthetic benchmarks and real-world industrial modeling tasks, showing improved uncertainty quality without the need for post-hoc calibration. 3) Additional analyses show that the method exhibits ro-bustness to hyperparameters and smooth optimization dynamics, highlighting diffusion samplers as a promising direction for uncertainty-aware industrial models. II. P RELIMINARIES 
+
+A. Uncertainty Quantification in Machine Learning 
+
+Machine learning models, in particular deep neural net-works, are often regarded as black-box predictors, producing outputs without revealing the confidence or reliability of their decisions. In many real-world scenarios, such as the industrial applications we study, however, relying solely on point predic-tions is insufficient, as overconfident yet incorrect predictions can lead to costly or unsafe outcomes. This has motivated a growing demand for UQ, which aims to complement point predictions with principled measures of uncertainty. The central objective in UQ is calibration , which formal-izes the statistical consistency between predicted probabilities and empirical frequencies. A well-calibrated model satisfies Definition 1. 
+
+Definition 1 (Calibration) . Given an input x, consider a probabilistic model that provides a predictive distribution 
+
+p(y | x) over the target y. Let C1−α(x) denote the (1 − α)-credible set induced by p(y | x), representing the region that contains true y with a nominal coverage level of 1 − α.The model is perfectly calibrated if, for any coverage level 
+
+1 − α ∈ (0 , 1) , the following holds: 
+
+Pr  y ∈ C 1−α(x) = 1 − α. (1) MANUSCRIPT ACCEPTED FOR PUBLICATION IN IEEE TRANSACTIONS ON INDUSTRIAL INFORMATICS 3
+
+Intuitively, (1) means that the probability of observations falling inside the empirical (1 − α)-credible interval matches the expected coverage 1−α. Based on this understanding, cal-ibration for regression tasks can be defined, see Definition 2. 
+
+Definition 2 (Calibrated regression [25]) . A regression model is well-calibrated if, for any 1 − α ∈ (0 , 1) ,
+
+Pr  F −1 
+
+> x
+
+(α/ 2) ≤ y ≤ F −1 
+
+> x
+
+(1 − α/ 2) x = 1 − α (2) 
+
+for every x, where F −1 
+
+> x
+
+denotes the inverse CDF of predictive distribution of y given x.B. Bayesian Learning 
+
+Bayesian learning is known as a natural and comprehensive framework for UQ, as it incorporates the representation of both aleatoric (data) and epistemic (model) uncertainty. Unlike point estimation methods that rely on a single optimum, i.e., maximum a posteriori (MAP) or maximum likelihood estimation (MLE), Bayesian approaches integrate over all plausible parameter configurations, yielding calibrated predic-tive uncertainty and improved robustness. Mathematically, given labeled training dataset D =
+
+{(xi, y i)}Ni=1 , and the probabilistic model p(y | x, θ ) parame-terized by θ ∈ Θ, the Bayesian predictive distribution is 
+
+p(y | x, D) = 
+
+Z
+
+> Θ
+
+p(y | x, θ ) p(θ | D ) d θ. (3) In practice, this integral is empirically estimated by sampling θ
+
+from the posterior distribution p(θ | D ). The point predictions and the confidence intervals of each prediction are acquired by computing the quantiles of the Bayesian predictive distribution 
+
+p(y | x, D). Neural networks that predict under this paradigm are called Bayesian neural networks (BNNs) [7], [8], [26]. 
+
+Definition 3 (Point Predictions and Credible Intervals for Regression) . 1) The point prediction is the expected value of 
+
+y under the predictive distribution, 
+
+ˆy(x) = Ep(y|x, D)[y] = 
+
+Z
+
+y p (y | x, D) d y. (4) 
+
+2) Let F −1 
+
+> x
+
+denote the inverse CDF of p(y | x, D), which is available in numerical form, a (1 − α) credible interval for y
+
+is obtained by taking the lower (α/ 2) and upper (1 − α/ 2) 
+
+quantiles: 
+
+C1−α(x) =  F −1 
+
+> x
+
+( α 
+
+> 2
+
+), F −1 
+
+> x
+
+(1 − α 
+
+> 2
+
+) , (5) Under this Bayesian framework, it is also natural to consider the decomposition of the aleatoric and epistemic uncertainty to guarantee the mathematical rigor of UQ [27]. Specifically, the aleatoric uncertainty is depicted by the probabilistic model (likelihood) p(y | x, θ ) itself, while the epistemic uncertainty is from the posterior p(θ | D ).Posterior inference lies at the core of Bayesian learning. Specifically, given a dataset D = {(xi, y i)}Ni=1 , a likelihood function p(y | x, θ ), and a prior distribution p(θ), the objective is to infer the posterior distribution over model parameters: 
+
+p(θ | D ) = p(D | θ) p(θ)
+
+p(D) ,
+
+where p(D) = R p(D | θ) p(θ) dθ is the evidence. By maintaining a full posterior distribution rather than a single point estimate, Bayesian learning naturally captures epistemic uncertainty, which can then be propagated to the predictive distribution p(y | x). Such uncertainty quantification serves as the foundation for the label-efficient strategies developed in this work. In practice, posterior inference implements this process computationally by approximating the intractable posterior distribution, as the marginal likelihood p(D) cannot be com-puted analytically. Typically, the posterior p(θ | D ) is approx-imated by minimizing the KL divergence between a proposed distribution q(θ) and the true posterior distribution 
+
+arg min 
+
+> q
+
+DKL (q(θ)∥p(θ | D )) . (6) The proposed distribution q(θ) denotes the variational approx-imation in variational inference, and corresponds to the law of particles in sampling-based approaches. 
+
+C. Connections Between Sampling and Finite-Horizon Stochastic Optimal Control 
+
+Bayesian inference can be performed through sampling, where samples drawn from p(θ | D ) are used to approximate expectations under the posterior distribution. Compared to explicit variational methods, sampling-based approaches make fewer assumptions on the posterior and can achieve higher-fidelity approximations of complex posterior distributions [28]. However, sampling from complex and unnormalized high-dimensional posteriors remains a challenging problem in prac-tice. Recent developments in optimal transport and stochastic control [29] have inspired a unifying view of sampling as a Schr¨ odinger bridge problem (Definition 4), naturally formu-lated as a finite-horizon optimal control problem. 
+
+Definition 4 (Schr¨ odinger bridge problem [18]) . Let S be a reference path measure on C([0 , 1] , Rd) (e.g., Wiener mea-sure), and let π0, π1 be probability measures on Rd. For any path measure Q on this space, denote by Qt its marginal distribution at time t. Define the set of admissible path measures: 
+
+D(π0, π 1) := {Q ≪ S | Q0 = π0, Q1 = π1} .
+
+Then the Schr¨ odinger bridge problem seeks 
+
+Q∗ = arg min 
+
+> Q∈D (π0,π 1)
+
+DKL (Q ∥ S), (7) 
+
+where DKL denotes the Kullback–Leibler (KL) divergence (or relative entropy) on path space. 
+
+Definition 4 states the modern formulation of the Schr¨ odinger bridge problem, which seeks the stochastic evolu-tion Q that transports π0 to π1 while minimizing the relative entropy with respect to the reference diffusion S. Next, we explain how the posterior inference problem can be reformu-lated as such a Schr¨ odinger bridge problem, where the key step relies on the data processing inequality (Lemma 1). MANUSCRIPT ACCEPTED FOR PUBLICATION IN IEEE TRANSACTIONS ON INDUSTRIAL INFORMATICS 4
+
+Lemma 1 (Data processing inequality (See Appendix A in [18])) . Let Q, S be two probability measures on path space, with terminal distributions μ1 = Q1, π1 = S1. Then 
+
+DKL (μ1 ∥ π1) ≤ DKL (Q ∥ S),
+
+where the equality holds if and only if 
+
+Q(· | θ1) = S(· | θ1) for μ1-almost every θ1.
+
+By the data processing inequality, the KL divergence be-tween marginals DKL (μ1 ∥ π1) is upper-bounded by the path-space KL divergence DKL (Q ∥ S). Revisit the typical optimiza-tion problem 6 of posterior inference, and let μ1 = q(θ) and 
+
+π1 = p(θ | D ). The objective of 6 can be relaxed into a path-space KL minimization problem as formulated in (7). This relaxation enables a more tractable and smooth optimization via drift control, as elaborated in the following part. 
+
+Proposition 1 (Stochastic optimal control formulation of Schr¨ odinger bridge problem [18]) . Let the reference process 
+
+S = Qf,π 0 be an Itˆ o diffusion with drift f and constant diffusion coefficient γ:
+
+dθt = f (t, θ t) d t + √γ dBt, θ0 ∼ π0,
+
+and the controlled process Qf +u,π 0 with additional drift control u:
+
+dθt = f (t, θ t) d t + u(t, θ t) d t + √γ dBt, θ0 ∼ π0.
+
+The Schr¨ odinger bridge problem with marginals θ0 ∼ π0 and 
+
+θ1 ∼ π1 is equivalent to the finite-horizon stochastic optimal control problem 
+
+min  
+
+> u
+
+E
+
+Z 10
+
+12γ ∥u(t, θ t)∥2 dt
+
+
+
+,
+
+s.t. dθt = f (t, θ t) d t + u(t, θ t) d t + √γ dBt,θ0 ∼ π0, θ 1 ∼ π1.
+
+(8) The solution of (8) defines a controlled SDE whose sim-ulation yields terminal states distributed according to the target posterior. This observation motivates the construction of diffusion samplers , which approximate the optimal control and generate samples by simulating the controlled SDE and collecting the terminal states. However, (8) enforces exact matching of the target dis-tribution within a finite time horizon, which can require large control magnitudes when the target is complex, as is often the case for posteriors in industrial models, leading to an ill-conditioned optimization problem. Therefore, we relax this hard constraint into a soft terminal penalty, yielding the following equivalent formulation. 
+
+Proposition 2 (Stochastic optimal control cost with soft termi-nal penalty [21], [30], [31]) . Under the conditions f (t, θ t) ≡ 0
+
+and the initial distribution being the Dirac measure at the origin π0 = δ0, (8) admits, by Girsanov’s theorem and Itˆ o’s formula, the same solution as the following optimization problem: 
+
+u∗ =arg min 
+
+> u
+
+E
+
+Z 10
+
+12γ ∥u(t, θ t)∥2dt − log π1(θ1)
+
+N (θ1|0, γ Id)
+
+
+
+,
+
+s.t. dθt = u(t, θ t) d t + √γ dBt,θ0 ∼ δ0.
+
+(9) Proposition 2 converts the hard terminal constraint to a soft terminal penalty, which facilitates a principled trade-off between staying close to the reference prior (running cost) and matching the target posterior distribution (terminal cost). Moreover, this transition yields a smoother, unconstrained differentiable objective [30] that enables end-to-end training via gradient descent. In practice, the drift control u(t, θ t) is parameterized by a neural network and optimized via gradient descent on (9). Diffusion-based samplers, such as the Path In-tegral Sampler (PIS) [21] and the Neural Schr¨ odinger–F¨ ollmer Sampler (NSFS) [31], build upon this relaxed formulation. Both methods learn to approximate an optimal control policy with neural networks, but differ in their theoretical derivations, parameterization schemes, and application domains. III. U NCERTAINTY QUANTIFICATION IN INDUSTRIAL 
+
+MODELS VIA DIFFUSION SAMPLER 
+
+This section elaborates on how to incorporate diffusion sam-plers into industrial data-driven modeling to equip models with reliable and well-calibrated predictive uncertainty. Given that the diffusion sampler lies at the core of modeling epistemic uncertainty in our framework, we refer to our method as Diffusion-based Uncertainty Quantification (DiffUQ). Fig. 1 illustrates the overall workflow of our proposed method. Specifically, our method includes 3 steps: 1) construct a probabilistic regression model p(y | x, θ ) as the base model, where x denotes the process variables, y is the target variable to be predicted, and θ represents the model’s parameter vector; 2) draw n samples {θi}ni=1 from the posterior p(θ | D ) given a dataset D; 3) predict by n forward passes and aggregation. Epistemic uncertainty arises from the presence of multiple plausible parameter configurations, which are captured by the complex and typically unnormalized posterior distribution 
+
+p(θ | D ) after observing the dataset D.
+
+A. Probabilistic Regression Model 
+
+The probabilistic model captures the conditional distribu-tion of y given x and θ, thereby providing a framework to predict the target variable and represent aleatoric uncertainty. A proper probabilistic model p(y | x, θ ) is critical for both accurate prediction and aleatoric uncertainty representation. Considering that industrial processes may have heteroscedastic data noise [32], industrial models require explicit estimation of input-dependent noise variances. Consequently, two distinct neural networks (or, more generally, parametric functions) are employed to parameterize the probabilistic model, providing the mean and precision, respectively. 
+
+p(y|x, θ ) = N (NN θμ (x), e −NN θτ (x)), (10) MANUSCRIPT ACCEPTED FOR PUBLICATION IN IEEE TRANSACTIONS ON INDUSTRIAL INFORMATICS 5μy
+
+log τy
+
+p(y | x, θ) = 𝒩 (y | μy,1 /τy)        
+
+> Step 1: Designing a Probabilistic
+> Soft Sensor
+> Landscape of posterior p(θ|𝒟 )
+> Step 2: Sampling from Posterior
+> via Di ff usion Sampler
+
+{θi}n    
+
+> i=1Step 3: Prediction ( Forward Passes
+> and Aggregation)
+
+n
+
+> . . .
+
+p(y | x) ≈ 1
+
+n
+
+> n
+
+∑
+
+> i=1
+
+p(y | x, θi)
+
+NN θμ
+
+NN θτ   
+
+> θ=[θμ,θτ]
+
+x . . .          
+
+> NN θμ
+> NN θτ
+> θ=[θμ,θτ]
+> x. . .
+> NN θμ
+> NN θτ
+> θ=[θμ,θτ]
+> NN θμ
+> NN θτ
+> θ=[θμ,θτ]
+> . . .
+
+Fig. 1: Overview of the DiffUQ Framework 
+
+Algorithm 1 Training a diffusion sampler 
+
+Require: Dataset D = {xi, y i}Ny=1 , probabilistic model 
+
+p(·| x, θ ), prior p(θ) = N (0 , I ).
+
+Ensure: uϕ(t, θ ) parameterized by ϕ 
+
+> 1:
+
+Define: Augmented SDE drift fϕ(t, [θt, c t]) =uϕ(t, θ t), 12 ∥uϕ(t, θ t)∥2, diffusion g(t, [θt, c t]) = [ γ, 0] ,
+
+θ0 = 0, c0 = 0 ; discretization step ∆t = 1 /T  
+
+> 2:
+
+for i = 1 to max iter do  
+
+> 3:
+
+SDE simulation 
+
+(θ1, c 1) ←(θ0, c 0) + Σ Tt=0 f t, [θt, c t] ∆t
+
++ Σ Tt=0 g t, [θt, c t] ∆Wt
+
+(11)  
+
+> 4:
+
+Sample mini-batch S ⊂ D and run gradient descent step 
+
+ϕ ← ϕ − η ∇ϕ
+
+c1 − |D| |S| log p(S| θ1)p(θ1)+ log N (θ1|0, γ Id) 
+
+> 5:
+
+end for 
+
+where θ = [ θμ, θ τ ]. Specifically, θμ and θτ parameterize the mean network NN θμ (point prediction) and the precision net-work NN θτ (aleatoric uncertainty), respectively. This design enables learning input-dependent noise variance instead of using a fixed one. Note that despite the notation ‘’ NN ’, these components can be any differentiable parametric functions. 
+
+B. Posterior Sampling via Diffusion Sampler 1) Training: With the probabilistic regression model p(y |
+
+x, θ ) defined in section III-A and a standard Gaussian distribu-tion as an uninformative prior, we utilize a diffusion sampler to obtain samples from the resulting parameter posterior given 
+
+D. Algorithm 1 shows the complete training procedure of the training process. Consider a reference Wiener process 
+
+dθ = γ dWt. Instead of directly working with θ, the goal is to learn a optimal control uϕ(t, θ ) parameterized by ϕ, such that the terminal states induced by the controlled diffusion process dθ = uϕ(t, θ ) d t + γ dWt distribute according to the posterior p(θ|D ). This goal can be accomplished through gradient descent on a single objective (9). An augmented state 
+
+ct is used to integrate the running cost term ∥u∥2 along the path: 
+
+c1 =
+
+Z 10
+
+12γ ∥uϕ(t, θ t)∥2dt
+
+thus significantly reducing peak memory usage during training. The drift neural network uϕ(t, θ ) is parameterized 1 as an 8-layer MLP of width 32, using GELU activations for all experiments in our work (see Section A for details on net-work capacity). Layer normalization without learnable affine parameters is also adopted, as it can stabilize training. Batch normalization is strictly forbidden as it introduces dependence between samples within a batch and compromises the unique-ness of the solution [33]. Equation (11) shows that the SDE is simulated using the Euler–Maruyama (EM) discretization scheme, where ∆Wt ∼N (0 , ∆t). Theoretically, this discretization has a provable er-ror bound [20], [31] for finite-horizon stochastic optimal con-trol problems. This discrete SDE simulation is implemented in an efficient manner using torchsde [34], [35], which integrates n trajectories in parallel. We use ∆t = 0 .04 for the training process and ∆t = 0 .01 , which will be introduced next. 
+
+2) Sampling: After training, n i.i.d. samples {θi}ni=1 are generated via simulating n trajectories and collecting the their terminal states. Each sample requires only 1/∆t for-ward passes of the control network, and all trajectories are computed in parallel via torchsde . Hence, the per-sample computational cost becomes marginal and can be regarded as amortized into the training phase. In our framework, multiple forward predictions are indeed used to estimate predictive statistics. However, the key dis-tinction is that the diversity of posterior samples is not pri-marily governed by the number of samples drawn at inference time, but by the learned diffusion dynamics. During training, the controlled SDE learns a global transport that maps the reference distribution to the posterior manifold, effectively encoding multi-modal structure in the drift function. As a  
+
+> 1Standard SDE theory assumes Lipschitz continuity and linear growth of the drift, which are not explicitly enforced for drift parameterizations. In practice, GELU and layer normalization can promote stable dynamics. The diffusion mechanism further encourages smooth optimization landscapes (see Fig. 6). MANUSCRIPT ACCEPTED FOR PUBLICATION IN IEEE TRANSACTIONS ON INDUSTRIAL INFORMATICS 6
+
+result, even a small number of trajectories can traverse dif-ferent modes, since exploration is embedded in the dynamics itself rather than achieved through independent Monte Carlo exploration. Increasing the number of samples mainly reduces Monte Carlo estimation variance, but does not fundamentally alter posterior coverage. 
+
+C. Posterior Prediction 
+
+Once posterior samples are obtained, the posterior predictive distribution p(y | x) is evaluated via the posterior predictive equation (3), where the intractable integral is approximated empirically using Monte Carlo estimation over the posterior samples 
+
+p(y | x, D) = 1
+
+n
+
+> n
+
+X
+
+> i=1
+
+p(y | x, θ i), (12) where θi ∼ p(θ | D), i = 1, ..., n. Equation (12) im-plies that each prediction of our method requires n forward passes, which, in our implementation, is parallelized using 
+
+torch.vmap . This process is referred to as aggregation and is also known as an ensemble of base models in some literature. Finally, in accordance with definition 3, uncertainty-aware prediction is performed. IV. E XPERIMENTS 
+
+In this section, we first introduce the evaluation setup (Sec-tion IV-A), including the metrics and baseline methods. We then demonstrate the advantage of diffusion-based sampling in capturing complex posterior distributions of industrial models through two illustrative toy examples (Section IV-B). Next, the effectiveness of DiffUQ is validated on a simple linear Raman-based soft sensor from the penicillin fermentation process (Section IV-C). Finally, experiments on a neural network–based industrial process model for the real-world ammonia synthesis process further highlight the capability of DiffUQ to deliver reliable uncertainty quantification in higher-dimensional parameter spaces (Section IV-D). 
+
+A. Evaluation Setup 1) Metrics: Consider a test set Dtest = {(xi, y i)}Mi=1 
+
+of size M . A series of evaluation metrics is employed to assess both the point prediction accuracy and the predictive uncertainty quality. To jointly evaluate these two aspects, the mean negative log-likelihood (NLL) is adopted to measure the quality of probabilistic predictions: 
+
+NLL = − 1
+
+M
+
+> M
+
+X
+
+> i=1
+
+log p(yi | xi, D), (13) where p(yi | xi, D) denotes the posterior predictive distri-bution given by the uncertainty-aware model. A lower NLL indicates that the model produces confident and accurate predictions by jointly accounting for accuracy and uncertainty calibration. To further evaluate the calibration of predictive uncertainty, the expected calibration error (ECE) and maximum calibration error (MCE) [25], [36] are computed based on the empirical coverage of credible intervals. Given the posterior predictive distribution (12), the empirical coverage level ˆp of the nominal coverage level p is defined as ˆp = 1
+
+> M
+
+PMj=1 I{yi ∈ C p(xi)},
+
+where Cp(xi) is the credible interval defined in (5). The expected calibration error is then given by 
+
+ECE = 1
+
+B
+
+> B
+
+X
+
+> k=0
+
+|ˆpk − pk|, (14) while the maximum calibration error is defined as 
+
+MCE = max  
+
+> j
+
+(|ˆpk − pk|), (15) where pk = k/B , k = 1 , . . . , B , and B denotes the number of different nominal coverage levels evaluated. ECE evaluates the average alignment between predicted confidence and empirical accuracy, reflecting overall reliability. MCE captures the worst-case calibration error, which is crucial for preventing danger-ous overconfidence in safety-critical operations. Together, they validate the trustworthiness of the predictive distribution. For point prediction accuracy, denoting ˆyi the point predic-tion (4) given xi, the mean squared error (MSE) and mean absolute error (MAE) are used: MSE = 1
+
+M
+
+> M
+
+X
+
+> i=1
+
+(yi − ˆyi)2, MAE = 1
+
+M
+
+> M
+
+X
+
+> i=1
+
+|yi − ˆyi|. (16) Finally, the coefficient of determination ( R2) evaluates the overall goodness of fit: 
+
+R2 = 1 −
+
+PMi=1 (yi − ˆyi)2
+
+PMi=1 (yi − ¯y)2 , where ¯y = 1
+
+M
+
+X
+
+> i
+
+yi. (17) 
+
+2) Baseline Methods: We compare our approach with several representative uncertainty quantification methods that cover the main methodological categories commonly adopted in industrial data-driven modeling. Specifically, we include: (i) MC Dropout [13], [14], which approximates Bayesian inference by injecting stochasticity at test time; (ii) deep ensembles (DE) [37], which capture model uncertainty through diversity across independently trained networks; (iii) mean-field variational inference (MFVI) [16], a classical variational Bayesian approach with factorized posterior assumptions; (iv) stochastic gradient Langevin dynamics (SGLD), as a rep-resentative stochastic-gradient MCMC method [38]; and (v) Stein variational gradient descent (SVGD) [2], representing deterministic particle-based Bayesian inference. These methods are selected because they represent widely used and conceptually distinct approaches to uncertainty quan-tification, spanning variational inference, ensemble-based, and particle-based variational inference. In addition, we report re-sults obtained using maximum a posteriori (MAP) estimation. Although MAP yields only a point estimate of model parame-ters and therefore does not account for model uncertainty, data uncertainty is still captured through the probabilistic output model, making MAP a meaningful baseline for assessing the effect of explicitly modeling parameter uncertainty. In order to enable a comparison of the intrinsic calibration accuracy of uncertainty estimates, all methods are evaluated without post-hoc calibration. MANUSCRIPT ACCEPTED FOR PUBLICATION IN IEEE TRANSACTIONS ON INDUSTRIAL INFORMATICS 7
+
+B. Sampling from Toy Posterior Distributions 
+
+This section presents synthetic examples that demonstrate the diffusion sampler’s capacity to explore complex or even ill-posed posterior distributions. In particular, the non-Gaussian and multimodal ‘smiley-face’ distribution and an ill-posed funnel distribution featuring a narrow neck and wide base are examined, reflecting typical challenges that may arise in posteriors of industrial models. MFVI restricts the variational approximation to a mean-field Gaussian family, and Fig. 2a, 2e illustrate the limitations of this assumption when representing complex target distribu-tions. Gradient flow–based sampling methods, such as SGLD (Fig. 2b, 2f) and SVGD (Fig. 2c, 2g), both fail to fully recover the structural characteristics of the target distribution. Fig. 2d, 2h demonstrates that the diffusion sampler can generate high-quality samples covering all modes of such challenging distri-butions, outperforming the compared methods.   
+
+> (a) MFVI
+> (b) SGLD
+> (c) SVGD
+> (d) Diffusion Sampler
+> (e) MFVI
+> (f) SGLD
+> (g) SVGD
+> (h) Diffusion Sampler
+
+Fig. 2: Comparison on the smiley-face (left) and funnel (right) distributions. (a,e) show mean-field variational contours; other panels show samples from different sampling methods. 
+
+C. Penicillin Fermentation System Simulation 
+
+In this section, we consider an industrial-scale simulation (IndPenSim) [39], shown on Fig. 3, a 100,000-litre penicillin 
+
+Fig. 3: Summary of the first principle-based mathematical simulator of industrial-scale penicillin simulation [39] fermentation process. The dataset includes 100 batches of process and Raman spectroscopy measurements, which is the largest available resource for advanced data analytics in this domain. The process involves a Raman-based phenylacetic acid (PAA) soft sensor task, where Raman spectra serve as input variables to predict the PAA concentration. Since the Raman-based PAA soft sensor exhibits a strong linearity, it serves as an appropriate benchmark to investigate the per-formance of our UQ method in the context of simple linear models. Hence, this setting provides a simple case that is well-suited for comparing the effectiveness of different methods. 
+
+1) Task Description: In this case study, the purpose is to develop a Raman-based soft sensor for the online prediction of PAA concentration during penicillin fermentation [39]. Out of the 100 batches, we select batches 1–60 for training and batches 61–90 for testing. The first 60 batches correspond to open-loop or manually operated processes, while batches 61–90 are subject to closed-loop control based on a simple lin-ear soft sensor of PAA, which reflects the intended application of PAA prediction—supporting closed-loop process control. This split, therefore, ensures that the evaluation directly aligns with the original motivation of the task. Raman spectra are generated in IndPenSim every 12 minutes across the wavenumber range 250–2250 cm −1, yielding a large high-dimensional dataset, which is preprocessed following [39]. Specifically, the spectral regions 1540–1580 cm −1 and 1950–2050 cm −1 were identified and selected as informative for PAA concentration. The selected spectral regions were preprocessed using a Savitzky–Golay smoothing filter (15-point window), followed by taking the first derivative. These processed spectra served as the secondary variables x, while offline PAA measurements were interpolated via cubic splines to align with the spectral acquisition times. Conventional Raman-based PAA soft sensors, however, pro-vide only point predictions without accounting for predictive uncertainty. Considering prediction of PAA concentrations is essential for operator decision-making and closed-loop control, incorporating well-calibrated uncertainty estimates has the po-tential to enhance downstream task performance and improve overall process robustness and safety. 
+
+2) Probabilistic Model Structure: The probabilistic regres-sion model for Raman-based PAA soft sensor follows (10). Considering the classical Raman-based PAA soft sensor is MANUSCRIPT ACCEPTED FOR PUBLICATION IN IEEE TRANSACTIONS ON INDUSTRIAL INFORMATICS 8
+
+TABLE I: Results of Raman-based PAA soft sensor. 
+
+Uncertainty Quality Accuracy Method NLL ECE MCE MSE MAE R2
+
+MAP -2.6339 ± 0.2131 0.1331 ± 0.0896 0.2267 ± 0.1564 524.7643 ± 86.7733 18.1418 ± 1.4578 0.9020 ± 0.0162 DE -2.8330 ± 0.0085 0.0654 ± 0.0044 0.1058 ± 0.0068 493.4771 ± 6.1154 17.6894 ± 0.0907 0.9078 ± 0.0011 MC Dropout -2.3574 ± 0.4713 0.1421 ± 0.1027 0.2537 ± 0.1963 1414.1550 ± 1809.8815 26.3602 ± 16.5030 0.7358 ± 0.3381 MFVI -2.8593 ± 0.0238 0.0493 ± 0.0071 0.0856 ± 0.0111 486.7107 ± 26.2902 17.5233 ± 0.4535 0.9091 ± 0.0049 SGLD -2.4741 ± 0.0271 0.2036 ± 0.0080 0.3630 ± 0.0128 541.3067 ± 7.5517 18.5968 ± 0.1380 0.8989 ± 0.0014 SVGD -2.3324 ± 0.0128 0.1111 ± 0.0215 0.2046 ± 0.0482 1001.8524 ± 83.1500 25.6316 ± 1.1111 0.8128 ± 0.0155 
+
+DiffUQ -2.8741 ± 0.0021 0.0429 ± 0.0009 0.0716 ± 0.0015 477.8259 ± 2.1541 17.3031 ± 0.0379 0.9107 ± 0.0004 
+
+n = 64 posterior samples are used for all Bayesian methods, except MAP. Values are reported as mean ± standard deviation over five runs. 
+
+Bold indicates the best result. 
+
+linear [39], NN θμ is specified as a linear model. NN θτ is specified as an MLP with 1 hidden layer of width 4 to capture data noise. 
+
+3) Results: Table I compares the performance of DiffUQ with other uncertainty quantification methods on the Raman-based PAA soft sensor task. We report both uncertainty quality metrics (NLL, ECE, MCE) and accuracy-oriented metrics (R2, MSE, MAE). DiffUQ consistently outperforms alterna-tive methods: it achieves the lowest NLL, ECE, and MCE, indicating well-calibrated predictive distributions, while simul-taneously attaining the best R2, MSE, and MAE, reflecting superior point prediction quality. Although MFVI assumes a factorized Gaussian variational family, this structural bias ap-pears mild in this relatively simple task; in contrast, sampling-based methods may suffer from finite-sample effects and mix-ing inefficiencies, leading to inferior empirical performance. The case of the Raman-based PAA soft sensor highlights that our DiffUQ, when applied to a linear model, yields highly competitive performance. 
+
+D. Real-World Case Study: High-Low Transformer Unit of Ammonia Synthesis Process !    
+
+> !
+> !
+> !
+> !!
+> !
+> !
+> !
+> !
+> !!
+> !
+> !" #A!!B
+> C'EFGHI-. LG HMNOP L
+> !" #A!!4
+> RSTGHI-. LG HMNOP L!" #8!!B
+> !" #9!!B !" #9!!4 !" #9!!W
+> ;<
+> !"!!B ;
+> ;<
+> !"!!B ;#
+> ;A
+> ;<
+> !"!!B ;#
+> =>
+> ;<
+> !"!!B ;#
+> =C "
+> ;<
+> !"!!B ;#
+> C4
+> ;<
+> !"!!B ?
+> ;<
+> !"!!B ?#
+> =C "
+> ;<
+> !"!!B ?#
+> ;A
+> ;<
+> !"!!B ?#
+> C4
+> ;<
+> !"!!B ?#
+> @4
+> ;<
+> !"!!B ?#
+> => 4
+> H<
+> !"!!B
+> H<
+> !"!!4
+> H<
+> !"!!W
+> H<
+> !"!!A
+> H<
+> !"!!B
+> H<
+> !"!B!
+> HA
+> !"!!"
+> H=
+> !"!!C
+> H<
+> !"!!a
+> CbG?8c => 4G=SOd L
+> ;e'dGcIOI HA
+> !"!BB
+> b=
+> !"!BB
+> b=
+> !"!!W
+> H<
+> !"!B4
+> H<
+> !"!BW
+> ;A
+> !"!!W
+> CbGgH9;h
+> bMSeIPPGiNP
+> HSG=> 4G
+> ;MPSM.I'SO
+> bMSeIPPG iNP Gb'.I
+> =SSN'OEGR'lm'd Gb'.I
+> <OPIMm-IOIGR'OI
+> R=
+> !"!BB
+> HSGiNPG
+> AIeneNI
+> !" #$%"&'($" )" *H,
+> #%-.%L012L%
+> #L0345HL-"63'1
+
+Fig. 4: High-Low Transformer unit from an ammonia synthesis process. This section uses the residual carbon monoxide (CO )concentration prediction task from the high-low transformer (HLT) unit of an ammonia synthesis process as a real-world case study to demonstrate the value of DiffUQ. Unlike using Raman spectra as secondary variables x, predicting residual 
+
+CO concentrations depends on dynamic process variables and involves nonlinear relationships. Thus, this process model requires a more complex neural network architecture. 
+
+1) Task Description: The ammonia synthesis process serves as a representative industrial benchmark: it is operated at large scale under extreme conditions, involves strongly cou-pled and nonlinear unit operations, and faces safety-critical and economically vital constraints. The key process variables (e.g., residual CO concentration of HLT unit) are difficult to measure online, motivating the use of data-driven models. The dataset employed in this case study originates from the high-low transformer (HLT) unit of a full-scale ammonia synthesis plant, as illustrated in Fig. 4. CO is a severe poison for ammonia synthesis catalysts, and excessive CO 
+
+also leads to unnecessary H2 consumption during downstream methanation. Controlling the CO concentration at the outlet of the HLT unit is crucial to protect the catalyst and maintain the efficiency of the process. However, this key quality variable is not directly available via online measurement but is instead obtained offline through gas chromatography, hindering the timely intervention. The objective is to develop a process model capable of estimating the residual CO concentration in real time, us-ing the available process measurements, thereby eliminating the reliance on delayed laboratory assay results. Moreover, credible prediction intervals are as operationally important as the predicted residual CO value itself, as they guide risk-aware operational decision making about timely intervention and enhance process safety. The collected data contains 26 continuously monitored operational measurements, including flow rates, inlet gas compositions, temperatures, pressures, and liquid levels, as well as one key variable measured offline: the residual CO concentration at the unit outlet. To account for temporal dependencies within the process, the dataset is split into training and testing subsets based on the sampling order, with the initial 80% of continuous samples for training and the final 20% for evaluation. 
+
+2) Probabilistic Model Structure: The probabilistic regres-sion model in this case study follows (10), where NN θ1 is a 3-layer MLP with a hidden layer of 32 neurons, and NN θ2 is a 4-layer MLP with 2 hidden layers of width 4 and 2. 
+
+3) Main Results: Table II reports the uncertainty quality and accuracy of our method against the reference methods. MANUSCRIPT ACCEPTED FOR PUBLICATION IN IEEE TRANSACTIONS ON INDUSTRIAL INFORMATICS 9
+
+TABLE II: Uncertainty qualities and accuracy of the HLT residual CO concentration model based on our method compared with commonly used UQ approaches in industrial models.                                                                                                                                                        
+
+> Uncertainty Quality Accuracy Method nNLL ECE MCE MSE MAE R2
+> MAP 1-0.2729 ± 0.0841 0.0321 ± 0.0269 0.0649 ± 0.0469 0.0330 ± 0.0034 0.1440 ± 0.0079 0.9430 ± 0.0059 DE 4-0.3363 ± 0.0216 0.0210 ± 0.0104 0.0404 ± 0.0156 0.0298 ± 0.0015 0.1365 ± 0.0040 0.9472 ± 0.0026 64 -0.3399 ± 0.0204 0.0227 ± 0.0101 0.0450 ± 0.0210 0.0295 ± 0.0015 0.1363 ± 0.0037 0.9489 ± 0.0036 128 -0.3290 ± 0.0387 0.0229 ± 0.0171 0.0480 ± 0.0303 0.0301 ± 0.0028 0.1376 ± 0.0063 0.9479 ± 0.0039 MC Dropout 4-0.0038 ± 0.0100 0.0758 ± 0.0017 0.1364 ± 0.0049 0.0602 ± 0.0017 0.1920 ± 0.0021 0.8959 ± 0.0029 64 -0.0296 ± 0.0019 0.1059 ± 0.0010 0.1847 ± 0.0038 0.0499 ± 0.0002 0.1769 ± 0.0005 0.9138 ± 0.0004 128 -0.0291 ± 0.0004 0.1090 ± 0.0005 0.1881 ± 0.0019 0.0498 ± 0.0001 0.1766 ± 0.0002 0.9138 ± 0.0001 MFVI 4-0.0592 ± 0.1246 0.0910 ± 0.0201 0.1614 ± 0.0398 0.0379 ± 0.0044 0.1557 ± 0.0103 0.9344 ± 0.0075 64 -0.0611 ± 0.1247 0.0906 ± 0.0203 0.1608 ± 0.0400 0.0379 ± 0.0043 0.1556 ± 0.0102 0.9345 ± 0.0075 128 -0.0614 ± 0.1249 0.0905 ± 0.0203 0.1609 ± 0.0398 0.0379 ± 0.0043 0.1556 ± 0.0102 0.9345 ± 0.0075 SGLD 4-0.3666 ± 0.0094 0.0186 ± 0.0053 0.0376 ± 0.0084 0.0280 ± 0.0006 0.1325 ± 0.0015 0.9515 ± 0.0010 64 -0.3734 ± 0.0032 0.0199 ± 0.0009 0.0412 ± 0.0012 0.0276 ± 0.0002 0.1315 ± 0.0005 0.9522 ± 0.0003 128 -0.3714 ± 0.0038 0.0195 ± 0.0011 0.0401 ± 0.0007 0.0278 ± 0.0002 0.1319 ± 0.0006 0.9520 ± 0.0004 SVGD 4-0.3516 ± 0.0157 0.0063 ± 0.0035 0.0132 ± 0.0058 0.0290 ± 0.0009 0.1347 ± 0.0024 0.9498 ± 0.0016 64 -0.3697 ± 0.0092 0.0134 ± 0.0027 0.0272 ± 0.0057 0.0279 ± 0.0005 0.1321 ± 0.0014 0.9517 ± 0.0009 128 -0.3683 ± 0.0114 0.0125 ± 0.0040 0.0249 ± 0.0068 0.0280 ± 0.0007 0.1323 ± 0.0017 0.9515 ± 0.0011
+> DiffUQ 4-0.4262 ± 0.0073 0.0088 ± 0.0028 0.0237 ± 0.0034 0.0250 ± 0.0003 0.1234 ± 0.0010 0.9568 ± 0.0006 64 -0.4242 ± 0.0064 0.0081 ± 0.0011 0.0233 ± 0.0010 0.0251 ± 0.0003 0.1237 ± 0.0009 0.9566 ± 0.0005 128 -0.4266 ± 0.0055 0.0086 ± 0.0022 0.0238 ± 0.0021 0.0250 ± 0.0003 0.1234 ± 0.0007 0.9568 ± 0.0004 Values are reported as ‘mean ±standard deviation’ over five runs. Bold indicates the best result, and underline indicates the second best.
+
+Except for MAP, which only finds a single optimal parameter vector, all approximate inference methods are evaluated with different sampling sizes of 4, 64, and 128. In comparison with commonly used approximate inference methods, DiffUQ achieves consistently superior uncertainty metrics across different sample sizes. An exception is ob-served for SVGD at n = 4, where calibration is slightly better. However, this is accompanied by reduced predictive accuracy ( R2/MSE/MAE) and a worse NLL. These results suggest that the improved calibration of SVGD in this setting may be associated with a trade-off in predictive precision. In contrast, DiffUQ maintains a more balanced performance across both accuracy and calibration metrics, as reflected by its consistently lower NLL even in the small-sample regime. In terms of predictive accuracy, our method also consistently outperforms the baselines. Furthermore, under limited sample budgets, our approach maintains stable performance, whereas MFVI, SGLD, and SVGD all suffer from increased NLL. Notably, MFVI and MC dropout perform even worse than MAP, underscoring that restrictive structural assumptions on the posterior distribution (e.g., factorized Gaussian of MFVI) can be detrimental to the uncertainty-aware modeling. In addition, the results obtained by our method exhibit over-all smaller standard deviations compared with the baselines, which highlights the improved stability and robustness of our approach. 
+
+4) Hyperparameter Sensitivity Analysis: This part is to demonstrate the robustness of DiffUQ. 
+
+Number of Samples n: Results with different sample sizes are reported in Table II. Even with as few as n = 4
+
+posterior samples, DiffUQ maintains comparable performance, exhibiting only a slight increase in variance. This behavior should be interpreted from the perspective of sample efficiency rather than sample quantity. The generated samples are highly informative, reflecting the amortized nature of the proposed diffusion-based inference procedure. Specifically, extensive SDE simulations during training enable thorough exploration of the posterior support, with the resulting structural informa-tion, such as multimodality and posterior geometry, encoded into the learned drift network. As a consequence, inference-time samples are not obtained through unguided random exploration, but are instead explicitly guided toward high-probability regions of the posterior. This separation between posterior exploration and inference-time sampling allows Dif-fUQ to achieve accurate uncertainty estimation with a small number of forward predictions, even in the presence of com-plex posterior structures. 
+
+Discretization Step Size ∆t: To assess the sensitivity of our method to hyperparameters, we first examined the effect of the discretization. Specifically, we varied the step size of EM discretization during the training phase, selecting 
+
+∆t ∈ { 0.025 , 0.05 , 0.075 , 0.1}. The results in Fig. 5a indi-cate that predictive accuracy is only slightly reduced when 
+
+∆t = 0 .1, while calibration metrics remain largely unaffected. This demonstrates that our method is robust to the choice of discretization step size. From a theoretical perspective, this behavior is expected. The optimization problem is defined over continuous-time trajectories, while ∆t only affects the numerical approximation of the SDE. Within a reasonable discretization regime, varying ∆t does not change the target objective but merely adjusts the resolution of the simulated paths. 
+
+Diffusion Coefficient γ: We further conducted a sensitivity analysis with respect to the diffusion coefficient by varying its value across three orders of magnitude. The results in Fig. 5b consistently indicate that this hyperparameter has no MANUSCRIPT ACCEPTED FOR PUBLICATION IN IEEE TRANSACTIONS ON INDUSTRIAL INFORMATICS 10 0.100 0.075 0.050 0.025        
+
+> t
+> 0.955
+> 0.960
+> R2over t
+> 0.100 0.075 0.050 0.025
+> t
+> 0.024
+> 0.026
+> MSE over t
+> 0.100 0.075 0.050 0.025
+> t
+> 0.120
+> 0.125
+> MAE over t
+> 0.100 0.075 0.050 0.025
+> t
+> 0.45
+> 0.40
+> NLL over t
+> 0.100 0.075 0.050 0.025
+> t
+> 0.00
+> 0.01
+> ECE over t
+> 0.100 0.075 0.050 0.025
+> t
+> 0.00
+> 0.02
+> 0.04
+> MCE over t
+
+(a) Effect of different ∆t during training phase. 10 5 10 4 10 3                          
+
+> 0.955
+> 0.960
+> R2over
+> 10 510 410 3
+> 0.022
+> 0.024
+> 0.026
+> MSE over
+> 10 510 410 3
+> 0.115
+> 0.120
+> 0.125
+> MAE over
+> 10 510 410 3
+> 0.45
+> 0.40
+> NLL over
+> 10 510 410 3
+> 0.00
+> 0.02
+> ECE over
+> 10 510 410 3
+> 0.00
+> 0.05
+> MCE over
+
+(b) Effect of different diffusion coefficient γ.
+
+Fig. 5: Sensitivity Analysis. The shaded area indicates ±1 standard deviation over 5 independent runs. meaningful influence on predictive accuracy or uncertainty quantification. Only when the diffusion coefficient was in-creased to 10 −3 did we observe a minor degradation in calibration, while the other metrics remained unaffected. This robustness suggests that the method is relatively insensitive to the precise choice of the diffusion coefficient. γ in our framework defines the volatility of the reference process. As requested by the theoretical analysis, these properties are not coincidental but stem from the stochastic control formulation. The optimization objective (9) drives a neural network to learn a drift function u(t, θ ) that adaptively compensates for the noise level to reach the target posterior. This creates a self-regulating mechanism where the learned control effort balances the diffusion intensity, ensuring consistent posterior sampling across orders of magnitude of γ.
+
+5) Training Dynamics: To provide a clearer understanding of DiffUQ’s optimization behavior, we present the progression of its composite loss over multiple training runs (Fig. 6). Ac-coring to (9), the total loss compromises two competing terms: the running cost E
+
+hR 1012γ ∥u(t, θ t)∥2dt
+
+i
+
+, and the terminal cost 
+
+E
+
+h
+
+− log π1(θ1) 
+
+> N(θ1|0,γ Id)
+
+i
+
+.Overall, the optimization process demonstrates stable and reproducible behavior across runs, with a gradual and mono-tonic balance established between the terminal and control objectives. As shown in Fig. 6b, varying γ mainly changes the relative scale of the running and terminal costs, while the overall convergence behavior remains smooth and consistent across runs. Similarly, for ∆t ∈ { 0.025 , 0.05 , 0.075 , 0.1}, the optimization trajectories (Fig. 6a) exhibit stable and largely overlapping convergence patterns, with no noticeable oscilla-tion or instability. These results indicate that DiffUQ maintains smooth and robust optimization dynamics across a broad range of discretization and diffusion hyperparameters. The smooth optimization dynamics can be explained by the 
+
+entropic regularization intrinsically induced by the diffusion process [18], [29], [30]. Mathematically, the diffusion term acts as a smoothing operator on the probability density, convexifying the optimization landscape and preventing sharp minima. Furthermore, by relaxing the hard boundary con-straints into a soft terminal penalty (Proposition 2), the frame-work avoids the numerical instabilities typical of constrained transport problems, resulting in a stable and monotonic con-vergence trajectory. In addition, we notice that the total loss appears to stabilize after a few thousand steps; however, its decomposition indi-cates that training continues to evolve, revealing a trade-off relationship. This behavior suggests that convergence should be evaluated by jointly monitoring both objectives, which together delineate an empirical Pareto front characterizing the balance between accuracy and regularization. MANUSCRIPT ACCEPTED FOR PUBLICATION IN IEEE TRANSACTIONS ON INDUSTRIAL INFORMATICS 11 0 5000 10000 15000 20000 25000 30000                       
+
+> 0
+> 2
+> 4
+> 1e5 Running Cost
+> 05000 10000 15000 20000 25000 30000
+> 4
+> 2
+> 0
+> 1e5 Terminal Cost
+> 05000 10000 15000 20000 25000 30000
+> Iteration
+> 0
+> 1
+> 1e4 Total Cost = Running Cost + Terminal Cost
+> t= 0.02 t= 0.05 t= 0.075 t= 0.1
+
+(a) Variation of ∆t0 5000 10000 15000 20000 25000 30000                       
+
+> 0.0
+> 2.5
+> 5.0
+> 1e6 Running Cost
+> 05000 10000 15000 20000 25000 30000
+> 5.0
+> 2.5
+> 0.0 1e6 Terminal Cost
+> 05000 10000 15000 20000 25000 30000
+> Iteration
+> 0
+> 1
+> 1e4 Total Cost = Running Cost + Terminal Cost
+> = 3.16 × 10 6
+> = 1.00 × 10 5
+> = 3.16 × 10 5
+> = 1.00 × 10 4
+> = 3.16 × 10 4
+> = 1.00 × 10 3
+
+(b) Variation of γ
+
+Fig. 6: Training Curves V. C ONCLUSION 
+
+This work introduced DiffUQ, a new approach for uncer-tainty quantification in industrial models based on a diffusion sampler. By leveraging elegant connections between sampling and optimal control, the method avoids strong assumptions on the posterior form that compromise fidelity, and can achieve robust representation of complex posterior landscapes through sufficient exploration enabled by SDE simulation during train-ing. These properties ensure reliable posterior sampling that directly translates into well-calibrated predictive uncertainty. Experiments on toy distributions, a Raman-based PAA bench-mark, and a process modeling task from a real-world ammonia synthesis imply that these theoretical advantages consistently yield improvements in both calibration and accuracy over existing baselines, without relying on post-hoc adjustments. In addition, DiffUQ also exhibits robustness to hyperpa-rameters and shows well-behaved training dynamics, which are particularly valuable in practical industrial applications where ease of deployment is of primary concern. Overall, this work highlights the potential of diffusion samplers as a principled and scalable family of methods for advancing uncertainty quantification in complex industrial data-driven modeling. Future research may further extend this framework by developing more efficient training strategies and exploring alternative diffusion formulations. Specifically, investigating other advanced solvers within the diffusion family, such as Denoising Diffusion Samplers (DDS) [22] or Adjoint Sam-pling (AS) [23], could offer further potential to optimize the training dynamics and sampling efficiency for specific industrial scenarios. APPENDIX 
+
+A. On Drift Network Capacity 20 40 60 
+
+> Drift network width
+> 0.40
+> 0.35
+> NLL
+> Test NLL vs Width (depth=8)
+
+(a) NLL vs. Width 20 40 60  
+
+> Drift network width
+> 0.02
+> 0.04
+> ECE
+> Test ECE vs Width (depth=8)
+
+(b) ECE vs. Width 5 10 15 
+
+> Drift network width
+> 0.45
+> 0.40
+> NLL
+> Test NLL vs Depth (width=32)
+
+(c) NLL vs. Depth 5 10 15  
+
+> Drift network width
+> 0.005
+> 0.010
+> 0.015
+> ECE
+> Test ECE vs Depth (width=32)
+
+(d) ECE vs. Depth 
+
+Fig. 7: Impact of Drift Network Size 
+
+1) Drift Network Capacity and Discretization Error: From a theoretical perspective, existing results, e.g., Theorem 2 in [21], ensure that a sufficiently expressive neural drift can approximate the target distribution in KL to arbitrary accu-racy under mild regularity assumptions. However, these are 
+
+existence results and do not account for finite-step numerical discretization. In practice, the learned drift is simulated using a fixed-step Euler–Maruyama scheme. Under global Lipschitz and linear growth conditions, its strong error satisfies 
+
+E
+
+h
+
+sup 
+
+> s≤T
+
+∥Xs − ˆXs∥2i
+
+≤ C(L, T ) h, 
+
+where the constant C(L, T ) depends on the regularity of the drift via a Gr¨ onwall argument (e.g., Theorem 10.2.2 in [40]). While the convergence order is governed by the step size h,the prefactor is sensitive to the drift’s Jacobian magnitude. Increasing network capacity expands the hypothesis space and can lead to drifts with larger Jacobians, making fixed-step linear integration less accurate and effectively enlarging 
+
+C(L, T ).MANUSCRIPT ACCEPTED FOR PUBLICATION IN IEEE TRANSACTIONS ON INDUSTRIAL INFORMATICS 12 
+
+As a result, under a fixed discretization budget, larger net-works do not necessarily improve sampling accuracy. Instead, there exists a practically relevant capacity regime in which the drift is sufficiently expressive, while further increasing network size mainly amplifies discretization error rather than improving posterior approximation. This observation is supported by the ablation results on the CO soft sensor case study (Fig. 7). Empirically, we observe a non-monotonic dependence on network capacity: small networks suffer from insufficient expressivity, whereas overly large networks offer no further benefits and can even degrade both likelihood and calibration under a fixed step size, likely due to amplified discretization effects. 
+
+2) Other drift network parameterization: Exploring more suitable drift architectures and parameterizations remains an important direction for future work. [21] augment the time variable t with Fourier features or sinusoidal embeddings to enhance temporal representation. However, our preliminary experiments did not show clear improvements. REFERENCES [1] P. Kadlec, B. Gabrys, and S. Strandt, “Data-driven soft sensors in the process industry,” Computers & chemical engineering , vol. 33, no. 4, pp. 795–814, 2009. [2] Y. Ma, Z. Chen, Z. Yang, X. Zhang, and Z. Song, “Heat equation Stein variational ensemble: Rethinking and advancing uncertainty-aware soft sensor modeling,” IEEE Transactions on Industrial Informatics , 2024. [3] M. J. Kochenderfer, Decision making under uncertainty: theory and application . MIT press, 2015. [4] L. P. Hansen and T. J. Sargent, “Robust control and model uncertainty,” 
+
+American Economic Review , vol. 91, no. 2, pp. 60–66, 2001. [5] N. V. Sahinidis, “Optimization under uncertainty: state-of-the-art and opportunities,” Computers & chemical engineering , vol. 28, no. 6-7, pp. 971–983, 2004. [6] Y. Gal, R. Islam, and Z. Ghahramani, “Deep Bayesian active learning with image data,” in International conference on machine learning .PMLR, 2017, pp. 1183–1192. [7] D. J. MacKay, “A practical Bayesian framework for backpropagation networks,” Neural computation , vol. 4, no. 3, pp. 448–472, 1992. [8] R. M. Neal, “Bayesian leaning for neural networks,” 1996. [9] Z. Ge, “Process data analytics via probabilistic latent variable models: A tutorial review,” Industrial & Engineering Chemistry Research , vol. 57, no. 38, pp. 12 646–12 661, 2018. [10] Q. Sun and Z. Ge, “A survey on deep learning for data-driven soft sensors,” IEEE Transactions on Industrial Informatics , vol. 17, no. 9, pp. 5853–5866, 2021. [11] C. Liu, J. Zhuo, P. Cheng, R. Zhang, and J. Zhu, “Understanding and accelerating particle-based variational inference,” in International Conference on Machine Learning . PMLR, 2019, pp. 4082–4092. [12] F. D’Angelo and V. Fortuin, “Annealed Stein variational gradient de-scent,” in The Third Symposium on Advances in Approximate Bayesian Inference , 2021. [13] J. Yang, Y. Peng, J. Xie, and P. Wang, “Remaining useful life prediction method for bearings based on lstm with uncertainty quantification,” 
+
+Sensors , vol. 22, no. 12, p. 4549, 2022. [14] L. Cao, H. Zhang, Z. Meng, and X. Wang, “A parallel GRU with dual-stage attention mechanism model integrating uncertainty quantification for probabilistic rul prediction of wind turbine bearings,” Reliability Engineering & System Safety , vol. 235, p. 109197, 2023. [15] Y. Gal and Z. Ghahramani, “Dropout as a Bayesian approximation: Representing model uncertainty in deep learning,” in international conference on machine learning . PMLR, 2016, pp. 1050–1059. [16] M. Lee, J. Bae, and S. B. Kim, “Uncertainty-aware soft sensor using Bayesian recurrent neural networks,” Advanced Engineering Informatics ,vol. 50, p. 101434, 2021. [17] Y. Zhang, ¨ O. D. Akyildiz, T. Damoulas, and S. Sabanis, “Nonasymptotic estimates for stochastic gradient Langevin dynamics under local condi-tions in nonconvex optimization,” Applied Mathematics & Optimization ,vol. 87, no. 2, p. 25, 2023. [18] C. L´ eonard, “A survey of the Schr¨ odinger problem and some of its con-nections with optimal transport,” Discrete and Continuous Dynamical Systems , vol. 34, no. 4, pp. 1533–1574, 2013. [19] S. Kullback, “Probability densities with given marginals,” The Annals of Mathematical Statistics , vol. 39, no. 4, pp. 1236–1243, 1968. [20] J. Huang, Y. Jiao, L. Kang, X. Liao, J. Liu, and Y. Liu, “Schr¨ odinger-F¨ ollmer sampler,” IEEE Transactions on Information Theory , vol. 71, no. 2, pp. 1283–1299, 2025. [21] Q. Zhang and Y. Chen, “Path integral sampler: A stochastic control approach for sampling,” in The Tenth International Conference on Learning Representations, ICLR , 2022. [22] F. Vargas, W. S. Grathwohl, and A. Doucet, “Denoising diffusion samplers,” in The Eleventh International Conference on Learning Rep-resentations, ICLR , 2023. [23] A. J. Havens, B. K. Miller, B. Yan, C. Domingo-Enrich, A. Sriram, D. S. Levine, B. M. Wood, B. Hu, B. Amos, B. Karrer et al. , “Adjoint sampling: Highly scalable diffusion samplers via adjoint matching,” in 
+
+International Conference on Machine Learning . PMLR, 2025, pp. 22 204–22 237. [24] G.-H. Liu, J. Choi, Y. Chen, B. K. Miller, and R. T. Chen, “Adjoint Schr¨ odinger bridge sampler,” in The Thirty-ninth Annual Conference on Neural Information Processing Systems , 2025. [25] V. Kuleshov, N. Fenner, and S. Ermon, “Accurate uncertainties for deep learning using calibrated regression,” in International conference on machine learning . PMLR, 2018, pp. 2796–2804. [26] A. Kendall and Y. Gal, “What uncertainties do we need in Bayesian deep learning for computer vision?” Advances in neural information processing systems , vol. 30, 2017. [27] E. H¨ ullermeier and W. Waegeman, “Aleatoric and epistemic uncertainty in machine learning: An introduction to concepts and methods,” Machine learning , vol. 110, no. 3, pp. 457–506, 2021. [28] A. Foong, D. Burt, Y. Li, and R. Turner, “On the expressiveness of approximate inference in Bayesian neural networks,” Advances in Neural Information Processing Systems , vol. 33, pp. 15 897–15 908, 2020. [29] Y. Chen, T. T. Georgiou, and M. Pavon, “On the relation between optimal transport and Schr¨ odinger bridges: A stochastic control viewpoint,” 
+
+Journal of Optimization Theory and Applications , vol. 169, no. 2, pp. 671–691, 2016. [30] B. Tzen and M. Raginsky, “Theoretical guarantees for sampling and inference in generative models with latent diffusions,” in Conference on Learning Theory . PMLR, 2019, pp. 3084–3114. [31] F. Vargas, A. Ovsianas, D. Fernandes, M. Girolami, N. D. Lawrence, and N. N¨ usken, “Bayesian learning via neural Schr¨ odinger–F¨ ollmer flows,” 
+
+Statistics and Computing , vol. 33, no. 1, p. 3, 2023. [32] S. Kay, H. Kay, M. Mowbray, A. Lane, C. Mendoza, P. Martin, and D. Zhang, “Integrating autoencoder and heteroscedastic noise neural networks for the batch process soft-sensor design,” Industrial & Engi-neering Chemistry Research , vol. 61, no. 36, pp. 13 559–13 569, 2022. [33] W. Xu, R. T. Chen, X. Li, and D. Duvenaud, “Infinitely deep Bayesian neural networks with stochastic differential equations,” in International Conference on Artificial Intelligence and Statistics . PMLR, 2022, pp. 721–738. [34] X. Li, T.-K. L. Wong, R. T. Q. Chen, and D. Duvenaud, “Scalable gradients for stochastic differential equations,” International Conference on Artificial Intelligence and Statistics , 2020. [35] P. Kidger, J. Foster, X. Li, H. Oberhauser, and T. Lyons, “Neural SDEs as infinite-dimensional GANs,” International Conference on Machine Learning , 2021. [36] M. P. Naeini, G. Cooper, and M. Hauskrecht, “Obtaining well calibrated probabilities using Bayesian binning,” in Proceedings of the AAAI conference on artificial intelligence , vol. 29, no. 1, 2015. [37] B. Lakshminarayanan, A. Pritzel, and C. Blundell, “Simple and scalable predictive uncertainty estimation using deep ensembles,” Advances in neural information processing systems , vol. 30, 2017. [38] M. Welling and Y. W. Teh, “Bayesian learning via stochastic gradient Langevin dynamics,” in Proceedings of the 28th international conference on machine learning (ICML-11) , 2011, pp. 681–688. [39] S. Goldrick, C. A. Duran-Villalobos, K. Jankauskas, D. Lovett, S. S. Farid, and B. Lennox, “Modern day monitoring and control challenges outlined on an industrial-scale benchmark fermentation process,” Com-puters & Chemical Engineering , vol. 130, p. 106471, 2019. [40] P. E. Kloeden and E. Platen, Numerical Solution of Stochastic Differen-tial Equations , ser. Applications of Mathematics: Stochastic Modelling and Applied Probability. Berlin, Heidelberg: Springer-Verlag, 1992, vol. 23.

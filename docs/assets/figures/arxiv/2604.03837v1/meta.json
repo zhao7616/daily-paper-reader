@@ -1,0 +1,14 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.03837v1/fig-001.webp",
+      "caption": "Fig. 1: Two-stage architecture. Stage one extracts frozen Vision Transformer–based model embeddings and applies different representation learning losses to shape the latent space. Stage two trains linear task heads on each latent space to measure the impact on downstream performance.",
+      "page": 3,
+      "index": 1,
+      "width": 450,
+      "height": 298
+    }
+  ]
+}
