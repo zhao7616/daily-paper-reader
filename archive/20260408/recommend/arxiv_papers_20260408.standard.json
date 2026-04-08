@@ -1,0 +1,200 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-04-08T20:14:01.346834+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 4,
+    "deep_cap": 6,
+    "deep_selected": 4,
+    "quick_candidates": 1,
+    "quick_skim_target": 11,
+    "quick_selected": 1
+  },
+  "deep_dive": [
+    {
+      "id": "2604.01532v1",
+      "source": "arxiv",
+      "title": "PHMForge: A Scenario-Driven Agentic Benchmark for Industrial Asset Lifecycle Maintenance",
+      "abstract": "Large language model (LLM) agents are increasingly deployed for complex tool-orchestration tasks, yet existing benchmarks fail to capture the rigorous demands of industrial domains where incorrect decisions carry significant safety and financial consequences. To address this critical gap, we introduce PHMForge, the first comprehensive benchmark specifically designed to evaluate LLM agents on Prognostics and Health Management (PHM) tasks through realistic interactions with domain-specific MCP servers. Our benchmark encompasses 75 expert-curated scenarios spanning 7 industrial asset classes (turbofan engines, bearings, electric motors, gearboxes, aero-engines) across 5 core task categories: Remaining Useful Life (RUL) Prediction, Fault Classification, Engine Health Analysis, Cost-Benefit Analysis, and Safety/Policy Evaluation. To enable rigorous evaluation, we construct 65 specialized tools across two MCP servers and implement execution-based evaluators with task-commensurate metrics: MAE/RMSE for regression, F1-score for classification, and categorical matching for health assessments. Through extensive evaluation of leading frameworks (ReAct, Cursor Agent, Claude Code) paired with frontier LLMs (Claude Sonnet 4.0, GPT-4o, Granite-3.0-8B), we find that even top-performing configurations achieve only 68\\% task completion, with systematic failures in tool orchestration (23\\% incorrect sequencing), multi-asset reasoning (14.9 percentage point degradation), and cross-equipment generalization (42.7\\% on held-out datasets). We open-source our complete benchmark, including scenario specifications, ground truth templates, tool implementations, and evaluation scripts, to catalyze research in agentic industrial AI.",
+      "authors": [
+        "Ayan Das",
+        "Dhaval Patel"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-04-02T02:09:27+00:00",
+      "link": "https://arxiv.org/pdf/2604.01532v1",
+      "tags": [
+        "query:PHM"
+      ],
+      "llm_score": 10.0,
+      "llm_evidence_en": "benchmark for PHM tasks including RUL prediction and fault diagnosis",
+      "llm_evidence_cn": "包含剩余寿命预测和故障诊断的PHM任务基准",
+      "llm_evidence": "包含剩余寿命预测和故障诊断的PHM任务基准",
+      "canonical_evidence": "包含剩余寿命预测和故障诊断的PHM任务基准",
+      "llm_tldr_en": "PHMForge is a comprehensive benchmark for evaluating LLM agents on RUL prediction and fault diagnosis tasks.",
+      "llm_tldr_cn": "PHMForge是一个专门用于评估LLM智能体在RUL预测和故障诊断等PHM任务表现的综合基准。",
+      "llm_tldr": "PHMForge是一个专门用于评估LLM智能体在RUL预测和故障诊断等PHM任务表现的综合基准。",
+      "llm_tags": [
+        "query:phm:composite"
+      ],
+      "matched_query_tag": "query:phm:composite",
+      "matched_query_text": "Papers central to 同时涉及故障诊断与剩余寿命预测的研究论文, especially work that connects or combines: joint modeling of diagnosis and prognosis; multi-task learning for diagnosis and RUL; simultaneous fault diagnosis and remaining useful life prediction; integrated approach for machinery fault diagnosis and prognosis; multi task deep learning for PHM applications; joint diagnosis and RUL estimation research papers.",
+      "matched_requirement_id": "req-composite-phm",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.29755v1",
+      "source": "arxiv",
+      "title": "CausalPulse: An Industrial-Grade Neurosymbolic Multi-Agent Copilot for Causal Diagnostics in Smart Manufacturing",
+      "abstract": "Modern manufacturing environments demand real-time, trustworthy, and interpretable root-cause insights to sustain productivity and quality. Traditional analytics pipelines often treat anomaly detection, causal inference, and root-cause analysis as isolated stages, limiting scalability and explainability. In this work, we present CausalPulse, an industry-grade multi-agent copilot that automates causal diagnostics in smart manufacturing. It unifies anomaly detection, causal discovery, and reasoning through a neurosymbolic architecture built on standardized agentic protocols. CausalPulse is being deployed in a Robert Bosch manufacturing plant, integrating seamlessly with existing monitoring workflows and supporting real-time operation at production scale. Evaluations on both public (Future Factories) and proprietary (Planar Sensor Element) datasets show high reliability, achieving overall success rates of 98.0% and 98.73%. Per-criterion success rates reached 98.75% for planning and tool use, 97.3% for self-reflection, and 99.2% for collaboration. Runtime experiments report end-to-end latency of 50-60s per diagnostic workflow with near-linear scalability (R^2=0.97), confirming real-time readiness. Comparison with existing industrial copilots highlights distinct advantages in modularity, extensibility, and deployment maturity. These results demonstrate how CausalPulse's modular, human-in-the-loop design enables reliable, interpretable, and production-ready automation for next-generation manufacturing.",
+      "authors": [
+        "Chathurangi Shyalika",
+        "Utkarshani Jaimini",
+        "Cory Henson",
+        "Amit Sheth"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-03-31T13:54:34+00:00",
+      "link": "https://arxiv.org/pdf/2603.29755v1",
+      "tags": [
+        "query:PHM"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "unifies anomaly detection, causal discovery, and diagnostics in manufacturing",
+      "llm_evidence_cn": "统一了制造业中的异常检测、因果发现和诊断",
+      "llm_evidence": "统一了制造业中的异常检测、因果发现和诊断",
+      "canonical_evidence": "统一了制造业中的异常检测、因果发现和诊断",
+      "llm_tldr_en": "An industrial neurosymbolic multi-agent system for automated causal diagnostics in smart manufacturing.",
+      "llm_tldr_cn": "一种用于智能制造自动化因果诊断的工业级神经符号多智能体系统。",
+      "llm_tldr": "一种用于智能制造自动化因果诊断的工业级神经符号多智能体系统。",
+      "llm_tags": [
+        "query:phm:composite"
+      ],
+      "matched_query_tag": "query:phm:composite",
+      "matched_query_text": "Papers central to 同时涉及故障诊断与剩余寿命预测的研究论文, especially work that connects or combines: joint modeling of diagnosis and prognosis; multi-task learning for diagnosis and RUL; simultaneous fault diagnosis and remaining useful life prediction; integrated approach for machinery fault diagnosis and prognosis; multi task deep learning for PHM applications; joint diagnosis and RUL estimation research papers.",
+      "matched_requirement_id": "req-composite-phm",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.29354v1",
+      "source": "arxiv",
+      "title": "ARC: Alignment-based RPM Estimation with Curvature-adaptive Tracking",
+      "abstract": "Tacho-less rotational speed estimation is critical for vibration-based prognostics and health management (PHM) of rotating machinery, yet traditional methods--such as time-domain periodicity, cepstrum, and harmonic comb matching--struggle under noise, non-stationarity, and inharmonic interference. Probabilistic tracking offers a principled way to fuse multiple estimators, but a major challenge is that heterogeneous estimators produce evidence on incompatible axes and scales. We address this with ARC (Alignment-based RPM Estimation with Curvature-adaptive Tracking) by unifying the observation representation. Each estimator outputs a one-dimensional evidence curve on its native axis, which is mapped onto a shared RPM grid and converted into a comparable grid-based log-likelihood via robust standardization and a Gibbs-form energy shaping. Standard recursive filtering with fixed-variance motion priors can fail under multi-modal or ambiguous evidence. To overcome this, ARC introduces a curvature-informed, state-dependent motion prior, where the transition variance is derived from the local discrete Hessian of the previous log-posterior. This design enforces smooth tracking around confident modes while preserving competing hypotheses, such as octave alternatives. Experiments on synthetic stress tests and real vibration-table data demonstrate stable, physically plausible trajectories with interpretable uncertainty, and ablations confirm that these gains arise from uncertainty-aware temporal propagation rather than per-frame peak selection or ad hoc rules.",
+      "authors": [
+        "Weiheng Hua",
+        "Changyu Hao"
+      ],
+      "primary_category": "eess.SP",
+      "categories": [
+        "eess.SP",
+        "eess.SY",
+        "stat.ME"
+      ],
+      "published": "2026-03-31T07:26:26+00:00",
+      "link": "https://arxiv.org/pdf/2603.29354v1",
+      "tags": [
+        "query:PHM"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "vibration-based PHM of rotating machinery and RPM estimation",
+      "llm_evidence_cn": "基于振动的旋转机械PHM与转速估计",
+      "llm_evidence": "基于振动的旋转机械PHM与转速估计",
+      "canonical_evidence": "基于振动的旋转机械PHM与转速估计",
+      "llm_tldr_en": "Introduces ARC for robust RPM estimation in vibration-based PHM of rotating machinery.",
+      "llm_tldr_cn": "引入ARC方法，用于旋转机械振动监测中的鲁棒转速估计。",
+      "llm_tldr": "引入ARC方法，用于旋转机械振动监测中的鲁棒转速估计。",
+      "llm_tags": [
+        "query:rul:composite"
+      ],
+      "matched_query_tag": "query:rul:composite",
+      "matched_query_text": "Papers central to 剩余寿命预测和旋转机械设备剩余寿命预测, especially work that connects or combines: Remaining Useful Life (RUL) prediction methods; Health monitoring and RUL for rotating machinery; Remaining useful life prediction for rolling element bearings; Deep learning architectures for RUL estimation; State of the art methods for remaining useful life prediction of rotating machinery; Deep learning based RUL estimation for industrial bearings and motors; Data driven vs physics informed models for RUL prediction; Real time health assessment and RUL forecasting for rotating components.",
+      "matched_requirement_id": "req-composite-rul",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2604.05863v1",
+      "source": "arxiv",
+      "title": "LoRM: Learning the Language of Rotating Machinery for Self-Supervised Condition Monitoring",
+      "abstract": "We present LoRM (Language of Rotating Machinery), a self-supervised framework for multi-modal rotating-machinery signal understanding and real-time condition monitoring. LoRM is built on the idea that rotating-machinery signals can be viewed as a machine language: local signals can be tokenised into discrete symbolic units, and their future evolution can be predicted from observed multi-sensor context. Unlike conventional signal-processing methods that rely on hand-crafted transforms and features, LoRM reformulates multi-modal sensor data as a token-based sequence-prediction problem. For each data window, the observed context segment is retained in continuous form, while the future target segment of each sensing channel is quantised into a discrete token. Then, efficient knowledge transfer is achieved by partially fine-tuning a general-purpose pre-trained language model on industrial signals, avoiding the need to train a large model from scratch. Finally, condition monitoring is performed by tracking token-prediction errors as a health indicator, where increasing errors indicate degradation. In-situ tool condition monitoring (TCM) experiments demonstrate stable real-time tracking and strong cross-tool generalisation, showing that LoRM provides a practical bridge between language modelling and industrial signal analysis. The source code is publicly available at https://github.com/Q159753258/LormPHM.",
+      "authors": [
+        "Xiao Qin",
+        "Xingyi Song",
+        "Tong Liu",
+        "Hatim Laalej",
+        "Zepeng Liu",
+        "Yunpeng Zhu",
+        "Ligang He"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL"
+      ],
+      "published": "2026-04-07T13:25:20+00:00",
+      "link": "https://arxiv.org/pdf/2604.05863v1",
+      "tags": [
+        "keyword:PHM",
+        "query:PHM"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "self-supervised framework for rotating machinery condition monitoring and signal prediction",
+      "llm_evidence_cn": "用于旋转机械状态监测和信号预测的自监督框架",
+      "llm_evidence": "用于旋转机械状态监测和信号预测的自监督框架",
+      "canonical_evidence": "用于旋转机械状态监测和信号预测的自监督框架",
+      "llm_tldr_en": "Introduces LoRM, a self-supervised framework for multi-modal rotating machinery signal understanding.",
+      "llm_tldr_cn": "引入LoRM，一种用于多模态旋转机械信号理解和实时状态监测的自监督框架。",
+      "llm_tldr": "引入LoRM，一种用于多模态旋转机械信号理解和实时状态监测的自监督框架。",
+      "llm_tags": [
+        "query:rul:composite"
+      ],
+      "matched_query_tag": "query:rul:composite",
+      "matched_query_text": "Papers central to 剩余寿命预测和旋转机械设备剩余寿命预测, especially work that connects or combines: Remaining Useful Life (RUL) prediction methods; Health monitoring and RUL for rotating machinery; Remaining useful life prediction for rolling element bearings; Deep learning architectures for RUL estimation; State of the art methods for remaining useful life prediction of rotating machinery; Deep learning based RUL estimation for industrial bearings and motors; Data driven vs physics informed models for RUL prediction; Real time health assessment and RUL forecasting for rotating components.",
+      "matched_requirement_id": "req-composite-rul",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2604.03891v1",
+      "source": "arxiv",
+      "title": "Provable Multi-Task Reinforcement Learning: A Representation Learning Framework with Low Rank Rewards",
+      "abstract": "Multi-task representation learning (MTRL) is an approach that learns shared latent representations across related tasks, facilitating collaborative learning that improves the overall learning efficiency. This paper studies MTRL for multi-task reinforcement learning (RL), where multiple tasks have the same state-action space and transition probabilities, but different rewards. We consider T linear Markov Decision Processes (MDPs) where the reward functions and transition dynamics admit linear feature embeddings of dimension d. The relatedness among the tasks is captured by a low-rank structure on the reward matrices. Learning shared representations across multiple RL tasks is challenging due to the complex and policy-dependent nature of data that leads to a temporal progression of error. Our approach adopts a reward-free reinforcement learning framework to first learn a data-collection policy. This policy then informs an exploration strategy for estimating the unknown reward matrices. Importantly, the data collected under this well-designed policy enable accurate estimation, which ultimately supports the learning of an near-optimal policy. Unlike existing approaches that rely on restrictive assumptions such as Gaussian features, incoherence conditions, or access to optimal solutions, we propose a low-rank matrix estimation method that operates under more general feature distributions encountered in RL settings. Theoretical analysis establishes that accurate low-rank matrix recovery is achievable under these relaxed assumptions, and we characterize the relationship between representation error and sample complexity. Leveraging the learned representation, we construct near-optimal policies and prove a regret bound. Experimental results demonstrate that our method effectively learns robust shared representations and task dynamics from finite data.",
+      "authors": [
+        "Yaoze Guo",
+        "Shana Moothedath"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-04-04T23:08:35+00:00",
+      "link": "https://arxiv.org/pdf/2604.03891v1",
+      "tags": [
+        "keyword:PHM",
+        "query:PHM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "multi-task representation learning framework",
+      "llm_evidence_cn": "多任务表示学习框架",
+      "llm_evidence": "多任务表示学习框架",
+      "canonical_evidence": "多任务表示学习框架",
+      "llm_tldr_en": "A theoretical framework for multi-task reinforcement learning using shared latent representations.",
+      "llm_tldr_cn": "一种利用共享潜表示进行多任务强化学习的理论框架。",
+      "llm_tldr": "一种利用共享潜表示进行多任务强化学习的理论框架。",
+      "llm_tags": [
+        "query:phm"
+      ],
+      "matched_query_tag": "query:phm",
+      "matched_query_text": "multi task deep learning for PHM applications",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}
