@@ -1,0 +1,540 @@
+Title: UniSpector: Towards Universal Open-set Defect Recognition via Spectral-Contrastive Visual Prompting
+
+URL Source: https://arxiv.org/pdf/2604.02905v1
+
+Published Time: Mon, 06 Apr 2026 00:44:25 GMT
+
+Number of Pages: 15
+
+Markdown Content:
+# UniSpector : Towards Universal Open-set Defect Recognition via Spectral-Contrastive Visual Prompting 
+
+# Geonuk Kim Minhoi Kim Kangil Lee Minsu Kim Hyeonseong Jeon Jeonghoon Han Hyoungjoon Lim Junho Yim LG Energy Solution 
+
+# Abstract 
+
+Although industrial inspection systems should be capable of recognizing unprecedented defects, most existing ap-proaches operate under a closed-set assumption, which pre-vents them from detecting novel anomalies. While visual prompting offers a scalable alternative for industrial in-spection, existing methods often suffer from prompt em-bedding collapse due to high intra-class variance and subtle inter-class differences. To resolve this, we propose UniSpector, which shifts the focus from naive prompt-to-region matching to the principled design of a semantically structured and transferable prompt topology. UniSpector employs the Spatial-Spectral Prompt Encoder to extract orientation-invariant, fine-grained representations; these serve as a solid basis for the Contrastive Prompt Encoder to explicitly regularize the prompt space into a semantically organized angular manifold. Additionally, Prompt-guided Query Selection generates adaptive object queries aligned with the prompt. We introduce Inspect Anything, the first benchmark for visual-prompt-based open-set defect local-ization, where UniSpector significantly outperforms base-lines by at least 19.7% and 15.8% in AP50 b and AP50 m,respectively. These results show that our method enable a scalable, retraining-free inspection paradigm for continu-ously evolving industrial environments, while offering crit-ical insights into the design of generic visual prompting. https://geonuk-kimmm.github.io/UniSpector 
+
+# 1. Introduction 
+
+In industrial mass production, visual inspection is essential for quality control, where defect localization often matters more than merely declaring whether a product is defective. While existing supervised detectors perform well in closed-set scenarios with fixed defect categories [20, 30, 33], such assumptions rarely hold in practice, as new defect types continuously emerge and the definition of “normal” may shift over time. As illustrated in Figure 1, conventional 
+
+Figure 1. Comparison of visual inspection paradigms: (a) closed-set detectors fail on novel defect types and require costly re-training, (b) anomaly detectors cannot distinguish between defect classes, and (c) visual prompting enables open-set recognition by aligning unseen defects with exemplar prompts, providing a scal-able visual inspection framework. 
+
+closed-set models [8, 10, 21, 25, 33] fail when new de-fects appear, requiring costly data rebuilding and retraining, whereas anomaly detection methods [2, 6, 26] cannot dis-tinguish among defect types. To address category scalability without retraining, language-driven open-set detectors leverage text descrip-tions [12, 19, 27]. However, in fine-grained industrial in-spection, defects are often visually subtle and hard to ver-balize even for domain experts, making purely text-driven grounding unreliable. Consequently, visual prompting [18, 22, 32, 38]—which matches input image regions to exem-plar prompts—emerges as a scalable alternative for open-set localization. Nevertheless, we find that existing visual prompting methods suffer from prompt embedding collapse 
+
+> arXiv:2604.02905v1 [cs.CV] 3 Apr 2026
+
+(Fig. 4) when confronted with high intra-class variance and subtle inter-class differences typical of industrial domains (Fig. 2). By treating prompt embeddings merely as im-plicit representations learned via prompt-to-region match-ing , prior works leave underexplored how the prompt em-bedding space should be structured to ensure robust trans-ferability. We argue that applying visual prompting to the industrial domain reveals these critical but underexplored structural aspects of the visual prompting mechanism. To overcome these limitations, we propose UniSpector ,a novel visual prompting framework for open-set defect de-tection and segmentation. Shifting the focus from prompt-to-region matching to the principled design of a semanti-cally structured and transferable prompt topology. UniSpec-tor comprises two core components: the Spatial–Spectral Prompt Encoder (SSPE) and the Contrastive Prompt En-coder (CPE). Specifically, SSPE redefines the visual prompt as a dual-domain descriptor that captures both spatial and spectral features. It extracts orientation-invariant fre-quency cues to suppress intra-class variance caused by ro-tational transformations, while enhancing inter-class sepa-ration through fine-grained spatial-spectral representations capturing subtle textures often overlooked in the pixel do-main. Building on these fine-grained representations, CPE explicitly regularizes the prompt embedding space to es-tablish a semantically structured topology within an an-gular manifold through contrastive learning. By enforcing compactness within each class and sufficient angular sep-aration between distinct defects, CPE ensures a semanti-cally structured and transferable topology, where related defect types lie closer in angle and dissimilar ones farther apart—enabling semantically consistent placement of un-seen defects instead of arbitrary projection. In addition, to improve adaptability to novel defect types, we introduce Prompt-guided Query Selection (PQS), which dynamically selects prompt-conditioned object queries via differentiable Gumbel–Softmax selection, ensuring that queries are adap-tively initialized to the characteristics of prompt exemplar. To evaluate the effectiveness, we establish Inspect Any-thing (InsA), the first benchmark for visual-prompt-based open-set defect detection. InsA measures both in-domain and cross-domain generalization ability, reflecting adapt-ability to real-world settings where visually similar de-fects may arise from different products or materials. Exten-sive experiments demonstrate that UniSpector substantially outperforms existing baselines, achieving a 19.7% higher detection AP b 
+
+> 50
+
+and a 15.8% higher segmentation AP m
+
+> 50
+
+.These results highlight that the principled design of the prompt space to mitigate intra-class variance and enhance inter-class separability is key to open-set defect detection. Consequently, UniSpector establishes a scalable foundation for next-generation inspection, eliminating the need for ex-tensive labeling and retraining in evolving environments. 
+
+Contributions 
+
+1. Through the lens of industrial inspection, we identify underexplored structural aspects of visual prompting, where treating prompts as implicit representations can lead to prompt embedding collapse due to high intra-class variance and subtle inter-class differences. Our findings offer key architectural insights for designing ro-bust, transferable visual prompting mechanisms. 2. We propose UniSpector , a novel framework where SSPE extracts orientation-invariant, dual-domain representa-tions that serve as a solid basis for CPE to explicitly reg-ularize the prompt space into a semantically structured angular manifold, ensuring enhanced discriminability and transferability for novel defects. 3. We establish InsA, the first benchmark for visual-prompt-based open-set defect recognition. Experiment results show that UniSpector surpasses baselines in both in-domain and cross-domain settings, demonstrat-ing scalable, class- and domain-generalizable inspection.     
+
+> Figure 2. Examples from the InsA benchmark. Top: Samples from the same defect class showing high intra-class appearance vari-ance. Bottom: Samples from different classes exhibiting similar visual patterns, resulting in low inter-class separability. Such am-biguities highlight the inherent difficulty of defect recognition.
+
+# 2. Related Works 
+
+2.1. Traditional defect detection and segmentation 
+
+Modern industrial defect inspection largely relies on deep learning models designed for instance- or pixel-level lo-calization. U-Net–style segmentation networks [25] re-main widely adopted for their precise boundary model-ing [20, 36], SSD-FasterNet [29] enhances Faster R-CNN with region proposals and FPN to capture fine-grained defects. Transformer-based architectures further improve long-range context modeling [13, 30]. WPA-QFormer [33] uses wavelet decomposition and prototype queries to sta-bilize features for heterogeneous textures. Recent stud-Figure 3. Overview of UniSpector , an open-set defect detection and segmentation framework. The Spatial–Spectral Prompt Encoder ex-tracts orientation-invariant spectral cues fused with spatial features to distinguish visually similar defects. Building on these, Contrastive Prompt Encoding regularizes the prompt embedding space into a structured manifold for robust open-set generalization. A Prompt-guided Query Selection mechanism dynamically selects prompt-aware queries. Refer to Appendix C.1 for the inference phase architecture. 
+
+ies [8, 10, 21] have explored strategies to mitigate high intra-class variability and low inter-class separability due to variations in texture, illumination, or geometry. Despite strong supervised performance, all of these methods assume a fixed defect taxonomy and operate in a closed-set regime, making them unsuitable for real-world industrial environ-ments where novel defect types continue to emerge. 
+
+2.2. Visual/Text-prompted Open-Set Detection 
+
+GroundingDINO [19] and YOLO-World [5] introduce novel object detection by associating language descriptions with visual features, without relying on pre-defined cate-gories. However, in domains involving specialized or tech-nical objects, verbal descriptions can be challenging. DI-NOv [18] explores the use of visual prompts as in-context examples for general vision tasks, while T-Rex2 [12] and YOLOE [27] further integrate both text and visual prompts. COSINE [23] leverages multiple backbones to extract multi-modal features, and Prompt-DINO [9] applies order-aware query selection to align text and visual cues. De-spite these advances, most methods assume well-defined classes—assumptions rarely met in industrial defect inspec-tion. Their focus on prompt-to-region matching neglects structure of the prompt embedding space, causing semantic collapse when encountering novel or fine-grained defects. 
+
+# 3. Methods 
+
+We propose UniSpector , a visual prompting framework tai-lored for open-set defect detection and segmentation. To mitigate prompt embedding collapse inherent in prompt-to-region matching due to high intra-class variance and subtle inter-class difference, UniSpector employs two crit-ical components: (1) the Spatial-Spectral Prompt Encoder (SSPE), which enhances inter-class separability by integrat-ing fine-grained spectral descriptors to distinguish subtle textures beyond the pixel domain, while suppressing intra-class variance via orientation-invariant radial frequency cues to handle geometric rotations; and (2) leveraging these refined representations, the Contrastive Prompt Encoder (CPE) explicitly regularizes the embedding manifold to es-tablish a semantically organized angular topology, ensur-ing intra-class compactness and sufficient inter-class sepa-ration. Furthermore, Prompt-guided Query Selection (PQS) dynamically selects prompt-conditioned object queries. 
+
+3.1. Overview 
+
+As shown in Fig. 3, UniSpector comprises the DETR frame-work. The vision encoder extracts token embeddings F ∈ 
+
+RNs×d from a target image, where Ns and d denote the number of tokens and the hidden dimension, respectively. Given K annotated prompt samples, prompt embeddings are averaged per class to obtain class-level prototypes pc ∈
+
+Rd, where c is the class index. To obtain F-conditioned representations, the decoder performs cross-attention CA (·)
+
+over F using object queries q ∈ RNq ×d and prototypes pc,followed by a linear projection h(·). Here, Nq denotes the number of object queries. This process yields: 
+
+ˆqi = h(CA (qi, F)) , ˆpc = h(CA (pc, F))  (1) The final logit yi,c is then computed via the dot product be-tween the class-level prototypes and query embeddings: 
+
+yi,c = (ˆ pc)⊤ ˆqi, i = 1 , . . . , N q , c = 1 , . . . , C  (2) where C denotes the number of unique classes among the K prompt samples. This design allows flexible class-conditioned predictions without relying on a fixed classifier, supporting robust recognition of unseen defect categories. The encoder-decoder architecture and the training-inference phase are detailed in Appendices C.1 and C.3, respectively. 
+
+3.2. Spatial-Spectral Prompt Encoder 
+
+For each of the K annotated prompt samples, we extract the corresponding RoI patch Rk based on the annotated bound-ing box. To capture orientation-invariant yet fine-grained features, we first compute the 2D Discrete Fourier Trans-form (DFT) of each patch, Fk(u, v ) = DFT (Rk). We then eliminate directional bias by averaging the magnitude re-sponses along concentric frequency rings: 
+
+hk(ρ) = 1
+
+|Γρ|
+
+X
+
+> (u,v )∈Γρ
+
+Fk(u, v ) , (3) where Γρ denotes the set of frequency components at a ra-dial distance ρ from the origin. The resulting 1D radial spec-trum hk preserves global structural and spectral patterns while remaining orientation-invariant. To derive the final multi-modal representation, we em-ploy a dual-path encoding strategy. First, the spectral code 
+
+zfreq  
+
+> k
+
+is obtained by projecting hk into a latent space via a Radial Frequency Encoder. In parallel, a spatial code zspatial 
+
+> k
+
+is extracted from the prompt image using masked cross-attention. This attention mechanism is guided by the RoI mask of the prompted region, ensuring that only the defect-relevant area contributes to the representation. To effec-tively fuse these modalities, we employ two lightweight MLPs, denoted as falign and valign . The final prompt embed-ding e for the k-th sample is then computed as: 
+
+ek = falign (zspatial  
+
+> k
+
+) + valign (zfreq  
+
+> k
+
+) (4) Through this dual-path fusion, UniSpector enhances inter-class separability even under high visual similarity, while the orientation-invariant radial spectrum effectively min-imizes intra-class variance caused by rotations. Detailed derivations of the radial frequency extraction are provided in the Appendix B. 
+
+3.3. Contrastive Prompt Encoding 
+
+We introduce the CPE, which explicitly regularizes the prompt embedding space to exhibit semantically coherent topology to enhance open-set transferability. Specifically, CPE encourages two complementary properties: (1) Intra-class compactness : Aligning instances of the same class into a shared semantic identity, ensuring invariance to geo-metric variations (e.g., orientation, width). (2) Semantic an-gular topology : Structuring the embedding manifold such that semantically related classes occupy neighboring re-gions while dissimilar ones are separated by wider angu-lar margins. To encourage this structure during training, we employ the prompt embeddings with an angular-margin contrastive loss, inspired by ArcFace [7]. For each defect class  c, a class-level prototype  pc is computed by averag-ing the embeddings e of same-class instances among the K
+
+samples. The cosine similarity between a prompt embed-ding  ek and its class prototype  pc is then given by 
+
+cos θc,k = (pc)⊤ek
+
+∥pc∥2 ∥ek∥2
+
+(5) We then apply an angular-margin loss with margin m:         
+
+> LCPE =−1
+> N
+> PNk=1 log exp
+>  α·cos( θyk ,k +m)
+> 
+> exp
+>  α·cos( θyk ,k +m)
+> +P
+> c̸=ykexp
+>  α·cos( θc,k )
+> 
+
+(6) where α is a scaling factor, yk is the ground-truth class la-bel of the k-th instance, and N is the number of prompt instances in the batch. The margin m enforces a mini-mum angular gap between classes, preventing embedding collapse. Importantly, once this margin is satisfied, em-beddings are free to self-organize according to semantic affinity—allowing related classes to stay closer while push-ing dissimilar classes farther apart, thus yielding a struc-tured and semantically meaningful angular space. Conse-quently, this structured topology enables semantically con-sistent placement of unseen defects instead of arbitrary pro-jection. For the full objective function integrating LCPE and further details, please refer to Appendix C.2. 
+
+3.4. Prompt-guided Query Selection 
+
+Conventional DETR-style detectors and recent visual prompting approaches [18, 23] rely on learnable object queries that encode biases from learned classes, limit-ing open-set generalization. Although similarity-based top-
+
+K heuristics [12, 19] have been explored, they are non-differentiable and cannot be optimized end-to-end. To address this, we introduce a prompt-guided query se-lection module that selects a subset of vision tokens as ob-ject queries, conditioned on the given visual prompt. Given the vision token embeddings F ∈ RNs×d and class proto-types p ∈ RC×d, we first compute cosine similarities be-tween each token and all prompts, then reduce them to a single relevance score per token by taking the maximum over class prototypes, resulting in a vector S ∈ RNs . To enable differentiable top-K selection, we add element-wise Gumbel noise g ∈ RNs and compute soft selection weights: 
+
+˜w = softmax  (S + g)/τ ,
+
+where τ is a temperature parameter. The hard top-K tokens are then selected based on ˜w to form a binary mask, which is used in the forward pass while gradients flow through 
+
+˜w via a Straight-Through Estimator. This produces prompt-conditioned object queries from the vision tokens in a fully differentiable manner, eliminating reliance on static priors. 
+
+# 4. Experiments 
+
+Industrial defects are typically small, subtle, and visually heterogeneous, often lacking consistent semantics or clear category boundaries. To evaluate generalization ability to unseen defects, we introduce Inspect Anything (InsA), a benchmark for open-set defect detection and segmentation within a visual prompting framework. InsA evaluates three aspects of generalization: (1) in-domain generalization to novel defect types that share vi-sual similarity with the seen sets, (2) cross-domain transfer-ability to unseen defects emerging under different material properties, imaging conditions, and defect morphologies, and (3) prompt-level generalization, quantified by aggre-gating results across multiple class partitions and indepen-dently sampled prompt sets to reflect stability rather than dependence on a single prompt configuration. 
+
+4.1. InsA Benchmark Overview 
+
+4.1.1. Dataset Composition 
+
+As shown in Tab. 1, InsA aggregates seven publicly avail-able industrial defect datasets. We construct an in-domain open-set protocol by splitting four datasets (GC10, Mag-neticTile, Real-IAD, MVTec) into disjoint seen (train) and 
+
+unseen (test) sets. To reduce sampling bias and ensure re-producibility, we generate three splits with fixed random seeds  {42 , 82 , 777 }. All training samples for the seen sets across these four datasets are merged into a single train-ing set. To assess cross-domain transfer, we further eval-uate cross-domain data drawn from 3CAD, VISION, and VisA, which contain imaging conditions and defect patterns that differ significantly from those seen during training. Un-like the in-domain, the cross-domain setting evaluates on 
+
+all classes of each dataset, measuring the model’s ability to transfer beyond domain boundaries as well. Detailed dataset information is provided in the Appendix A. 
+
+4.1.2. Evaluation 
+
+We adopt an exemplar-based evaluation protocol. For each prompt seed  s ∈ { 42 , 82 , 777 }, we sample  5 exemplar im-ages per class as prompts and use the remaining images as queries, without overlap between the two sets. This prompt-level seeding is independent of the class-split seeds that de-fine the seen/unseen partitions. 
+
+Metrics. We report  AP b 
+
+> 50
+
+and  AP m 
+
+> 50
+
+as the primary metrics as industrial defects often exhibit ambiguous or fuzzy spa-tial boundaries (e.g., dents, bends, scratches), making the precise extent of a ground-truth region inherently subjec-tive. Thus, stricter IoU thresholds (e.g., 0.75 or 0.95) pro-vide limited practical value. 
+
+Reporting. We fine-tune each method on the seen set un-der three class-split seeds  {42 , 82 , 777 }, yielding three in-dependently trained models. Each model is evaluated un-der the three prompt–query partitions defined by the same seeds, resulting in  3 (models) × 3 (prompt seeds) = 9  runs per setting. We report the mean across these runs for both in-domain unseen and cross-domain evaluations. All baselines are compared under two configurations: (i) using publicly released pre-trained weights when available, and (ii) after fine-tuning on the InsA in-domain seen sets. 
+
+4.2. Baseline Models 
+
+We compare our approach against two categories of re-lated methods: visual grounding models and visual prompt-ing models. For the visual grounding baselines, Ground-ingDINO [19] and YOLO-World [5] are trained using cat-egory names converted into caption-style prompts with a unified template, “a {def ect name } defect of the 
+
+{product name }.” GroundingDINO is evaluated solely on detection as it has no segmentation head. SEEM [38] is trained with both image and text prompts using the same caption template, and is evaluated solely on segmentation as it lacks a detection head. For the visual prompting base-lines, SegGPT [32] is evaluated using only the publicly re-leased pre-trained weights, as no official training code is available. Consequently, it is not fine-tuned on InsA, and evaluation is performed at its supported input resolution of 448×448. All remaining models are evaluated under both pre-trained and benchmark fine-tuning settings for fair com-parison. SINE [22] and DINOv [18] are trained following their official visual prompting configurations without mod-ification. T-Rex2 [12] is re-implemented (no official code is provided) and adapted to operate in purely visual prompting mode. YOLOE [27] is evaluated with its textual interface disabled and modified to accept only visual prompts when fine-tuned on InsA. Implementation details are provided in the Appendix C.1,C.4. Dataset Count Class Split 
+
+Images Defect Instances Defect Categories In-domain Cross-domain 
+
+Seen (Train) Unseen (Test) GC10 [24] 2,292 3,563 10 7 3 -MagneticTile [11] 388 514 5 4 1 -Real-IAD [28] 49,237 55,326 111 83 28 -MVTec [3] 1,258 1,836 73 53 20 -3CAD [35] 11,074 16,559 46 - - 46 VISION [1] 1,757 3,553 44 - - 44 VisA [39] 1,167 2,131 71 - - 71 
+
+Total 67,173 83,482 360 147 52 161 Table 1. Overview of the InsA benchmark composition. The in-domain split contains seen sets for training and unseen sets held out for open-set evaluation, while the cross-domain split is held out for cross-domain evaluation. Refer to the Appendix A for the details.                                                                                                                                                                                                                                                                           
+
+> Methods
+> In-domain Cross-domain Overall
+> GC10 MagneticTile Real-IAD MVTec AD 3CAD VISION VisA Avg
+> AP b
+> 50 AP m
+> 50 AP b
+> 50 AP m
+> 50 AP b
+> 50 AP m
+> 50 AP b
+> 50 AP m
+> 50 AP b
+> 50 AP m
+> 50 AP b
+> 50 AP m
+> 50 AP b
+> 50 AP m
+> 50 AP b
+> 50 AP m
+> 50
+> visual grounding
+> GroundingDINO [19] 9.6 -26.7 -0.3 -1.4 -0.0 -0.0 -0.0 -5.4 -GroundingDINO †[19] 8.0 -11.0 -1.2 -18.8 -0.0 -0.0 -0.1 -5.6 -YOLO-World [5] 7.0 2.1 30.7 28.6 0.3 0.2 2.7 2.4 0.0 0.0 0.3 0.3 1.2 1.2 6.0 5.0 YOLO-World †[5] 3.4 1.5 29.8 27.5 21.7 16.7 5.4 4.7 0.0 0.0 0.0 0.0 1.7 1.6 8.9 7.4
+> visual prompting
+> SEEM [38] -0.2 -0.2 -0.0 -0.3 -0.0 -0.0 -0.0 -0.1 SEEM †[38] -0.1 -0.6 -0.0 -0.1 -0.0 -0.0 -0.0 -0.1 SegGPT [32] -16.0 -20.1 -3.1 -6.8 -1.7 -0.9 -1.7 -7.2 SINE [22] 0.7 0.5 2.0 2.0 0.6 0.5 4.6 4.4 0.1 0.2 0.7 0.6 0.9 0.9 1.4 1.3 SINE †[22] 0.9 0.9 1.6 1.9 1.2 0.5 4.5 4.1 0.1 0.1 0.6 0.2 1.0 0.8 1.4 1.2 DINOv [18] 3.2 0.8 30.0 26.9 2.2 1.4 19.0 15.0 4.1 2.1 4.3 3.8 8.4 7.0 10.2 8.1 DINOv †[18] 16.5 16.6 48.4 39.6 21.0 17.5 15.9 15.2 2.9 1.9 4.6 3.8 10.4 8.5 17.1 14.7 T-Rex2 †[12] 32.4 33.9 49.0 38.0 25.1 28.8 24.4 22.4 4.3 2.9 5.4 4.3 7.8 6.7 21.2 19.6 YOLOE [27] 1.6 0.4 48.3 45.4 16.6 13.9 26.9 22.7 4.9 2.0 7.2 5.9 14.4 12.2 17.1 14.6 YOLOE †[27] 10.7 9.5 43.3 41.8 17.2 15.5 25.8 23.9 3.3 1.4 3.5 3.0 17.7 15.3 17.4 15.8 UniSpector (Ours) †38.2 36.9 63.3 57.7 69.1 56.7 53.5 46.5 14.1 10.0 15.3 12.5 32.8 27.8 40.9 35.4
+
+Table 2. Open-set detection and segmentation performance on the InsA. † Denotes models fine-tuned on in-domain seen sets of InsA. 
+
+4.3. Comparison on InsA Benchmark 
+
+Text-prompt for open-set inspection Tab. 2 summarizes the performance of UniSpector with a range of base-line methods. Visual grounding models such as Ground-ingDINO and YOLO-World exhibit modest performance on certain datasets, but their overall AP 50 remains below 10%, as many industrial defects cannot be fully described cor-rectly by textual prompts. Notably, these visual grounding approaches show near-zero performance in cross-domain scenarios. These can be attributed to overfitting on highly specific textual labels corresponding to seen product de-fects, which limits their transferability compared to purely visual prompting methods. 
+
+Visual-prompt for open-set inspection Other baselines (SEEM, SegGPT, and SINE) underperform even after fine-tuning on the training set. Recent visual prompting meth-ods, DINOv and YOLOE, achieve modest performance with a pre-trained model. Notably, despite DINOv being trained on over one billion images in SA-1B, the subtle and heterogeneous nature of industrial defects limits effec-tive transfer from such large-scale pre-training. After fine-tuning on InsA, both DINOv and YOLOE show slight im-provements, with AP b 
+
+> 50
+
+increasing from 10.2% to 17.1% and from 17.1% to 17.4%, respectively. In contrast, UniSpector consistently outperforms all baselines across both in-domain and cross-domain test sets by a substantial margin. Specifically, on MagneticTile and 
+
+Real-IAD , UniSpector achieves AP b 
+
+> 50
+
+scores of 63.3% and 69.1%, respectively, demonstrating its strong potential to develop a visual inspection system that generalizes across diverse defect types. However, the cross-domain perfor-mance remains relatively lower than the in-domain results, primarily due to the strong dataset-specific imaging biases Table 3. Ablation study on individual modules in UniSpector . All experiments were conducted on the Real-IAD test set. SSPE CPE PQS Detection Segmentation 
+
+AP b AP b 
+
+> 50
+
+AP b 
+
+> 75
+
+AP bs AP bm AP bl AP m AP m 
+
+> 50
+
+AP m 
+
+> 75
+
+AP ms AP mm AP ml
+
+13.6 24.0 14.5 17.9 16.3 24.0 7.7 20.0 5.1 7.2 12.3 29.6 
+
+✓ 27.9 43.0 31.0 38.3 31.4 39.8 17.7 34.8 16.9 17.2 24.8 33.7 
+
+✓ ✓ 43.8 65.8 48.9 47.4 47.6 44.7 26.0 53.1 22.3 21.0 32.7 36.2 
+
+✓ ✓ ✓ 46.3 69.1 51.9 50.3 50.1 47.8 28.9 56.7 24.5 23.3 34.1 38.0 (a) Prompt embedding with UniSpector (ours) (b) Prompt embedding with Dinov   
+
+> Abrasion on SIM card set Missing parts on U block Foreign objects on PCB
+
+Figure 4. 3D PCA projection of L2-normalized prompt embeddings learned by UniSpector (left) and DINOv (right). Circle markers ( ◦)denote seen sets and cross markers ( ×) denote unseen sets. Table 4. Comparison of query selection strategies. Strategy GC10 VisA 
+
+AP b 
+
+> 50
+
+AP m 
+
+> 50
+
+AP b 
+
+> 50
+
+AP m
+
+> 50
+
+Learnable Parameter 34.4 34.2 29.2 24.7 Heuristic Top-K 35.6 33.9 30.1 25.4 PQS 38.2 36.9 32.8 27.8 
+
+inherent in industrial inspection data. Such biases—arising from variations in illumination, texture, and capture con-ditions—pose a major challenge for generalization. While 
+
+UniSpector effectively learns transferable semantic struc-tures, its sensitivity to these domain-specific variations in-dicates that enhancing domain robustness—through cross-domain regularization or domain-agnostic prompt represen-tation—remains a promising direction for future work. 
+
+4.4. Model Analysis 
+
+Effectiveness of each module Ablation studies on Real-IAD (Tab. 3) confirm that each component incremen-tally improves performance. Specifically, given the refined prompt embeddings provided by SSPE, CPE yields the most significant gains by structuring the embedding space for open-set transfer. Furthermore, PQS improves objectness estimation through prompt-adaptive queries, with the full integration achieving the best results. 
+
+Query Selection Ablation Comparisons with fixed learn-able queries and heuristic top-K similarity-based selec-tion (Tab. 4) show simply replacing learnable queries with prompt-relevant tokens yields only marginal improvements. In contrast, PQS achieves substantial gains across both datasets and all metrics by learning a differentiable, prompt-conditioned query distribution. Table 5. In-domain evaluation on seen defect set using all cate-gories of Real-IAD. Unlike the main open-set benchmark, here we disable the seen/unseen split and train all models on the full label space, using a standard train/test split.                 
+
+> Method Real-IAD
+> AP b
+> 50 AP m
+> 50
+> Closed-set models
+> YOLOv11 [16] 88.3 -RT-DETR [37] 89.9 -Mask2Former [4] 88.8 82.0 MaskDINO [17] 91.7 84.5
+> Visual-Prompting models
+> DINOv [18] 24.8 20.4 T-Rex2 [12] 29.8 26.4 UniSpector (Ours) 90.0 82.7
+> Figure 5. Intra-class cosine similarity comparison across seen and unseen defect classes on RealIAD.
+> Figure 6. Effect of the number of prompt samples per defect class.
+
+Seen in-domain performance. To verify that the proposed framework remains competitive under fully supervised con-ditions, we evaluate it on Real-IAD using all defect cate-gories for training, with images split only into train and test sets (Tab. 5). This setup corresponds to a pure closed-set evaluation. Notably, DINOv and T-Rex2 fail significantly, struggling to recognize even seen classes. This confirms that naive prompt-to-region matching leads to prompt embed-ding collapse when faced with the high intra-class variance of industrial defects. In contrast, our model achieves per-formance on par with strong closed-set baselines. These re-sults indicate that UniSpector generalizes well to open-set scenarios while preserving high accuracy on seen sets. 
+
+Visualization of Prompt Embedding We visualize the prompt embeddings learned by UniSpector and DINOv in a 3D embedding space. As shown in Fig. 4, UniSpec-tor forms compact clusters within each defect class and clear angular separation across classes, indicating substan-tial reductions in both intra-class variance and inter-class separability. These improvements arise from two factors: (1) the SSPE, which injects orientation-invariant spectral cues that mitigate rotation-induced intra-variance and en-rich feature representation beyond pixel-level, and (2) the CPE, which explicitly enforces intra-class compactness and inter-class angular margins. In contrast, DINOv produces scattered and less separable embeddings, reflecting weak intra-class grouping—a consequence of relying solely on prompt-to-region matching without imposing a coherent se-mantic structure. Overall, UniSpector yield a semantically organized and transferable embedding space, where unseen sets (e.g., Missing parts on U block ) naturally position near related seen sets (e.g., Abrasion on SIM card set ), enabling stronger open-set generalization. 
+
+Intra-class Variance Analysis To quantitatively assess the compactness of prompt embeddings, we measure the av-erage cosine similarity between embeddings of instances within the same class. As shown in Fig. 5, UniSpector 
+
+achieves higher intra-class similarity for seen sets while ex-hibiting only slightly reduced similarity for unseen sets. In contrast, T-Rex2 and DINOv show lower intra-class simi-larity for seen sets and more pronounced degradation for unseen sets. These results quantitatively confirm that UniS-pector learns a more generalized embedding space, support-ing improved open-set transferability. 
+
+Impact of prompt samples. We further investigate how the number of prompt per defect class influences perfor-mance on MVTec, VisA and RealIAD. Performance stabi-lizes with only 1–3 prompt images per class (Fig. 6). This data efficiency suggests the learned space captures core de-fect semantics without requiring extensive exemplar diver-sity, making it highly practical for industrial settings, where high-quality exemplar collection is often limited. 
+
+# 5. Conclusion 
+
+In this paper, we introduced UniSpector , a universal visual prompting framework that addresses embedding collapse in open-set industrial inspection. To resolve this, we pro-posed the SSPE to extract refined, orientation-invariant rep-resentations, providing a solid basis for the CPE to explic-itly regularize the prompt space into a semantically struc-tured angular topology. This topological structuring ensures intra-class compactness and inter-class separation, enabling robust generalization to novel defects. Beyond its state-of-the-art performance, UniSpector offers critical insights into generic visual prompting while establishing a scalable, retraining-free foundation for next-generation industrial in-spection. UniSpector : Towards Universal Open-set Defect Recognition via Spectral-Contrastive Visual Prompting Appendix 
+
+# A. Dataset Details 
+
+We construct the Inspect Anything (InsA) benchmark from seven industrial inspection datasets: GC10-DET [24], Mag-netic Tile Surface Defect [11], Real-IAD [28], MVTec AD [3], 3CAD [35], VISION [1], and VisA [39]. Among these, GC10-DET, Magnetic Tile Surface Defect, Real-IAD, and MVTec AD are used as in-domain datasets, with defect categories partitioned into seen classes for training and unseen classes for testing. In contrast, 3CAD, VISION, and VisA serve as cross-domain datasets, used exclusively for evaluating transferability to novel defect types and ob-ject appearances. To ensure robust estimates of generaliza-tion performance, we form three independent seen–unseen splits with random seeds {42 , 82 , 777 }, holding out roughly 25% of defect categories in each in-domain dataset as un-seen .
+
+A.1. Dataset Composition and Characteristics 
+
+Table 6 summarizes key characteristics of each dataset, in-cluding product types, materials, and HSV color statistics. The InsA benchmark is composed of diverse products and materials, enabling evaluation of open-set visual inspection performance across varied distributions. Defect images are captured under a mix of distinct imaging conditions (e.g., very bright or very dark), resulting in generally large stan-dard deviations in HSV channels. These distributions also vary across datasets, leading to differing mean values and further highlighting the challenge of generalizing visual in-spection models across heterogeneous industrial data. 
+
+GC10 [24]. GC10-DET is a defect detection dataset col-lected from metallic surfaces in industrial environments. It comprises roughly 2,300 defect images annotated with bounding boxes for ten defect categories: silk spot , welding line , punching hole , water spot , crescent gap , oil spot , inclu-sion , waist folding , crease , and rolled pit . For each random seed, we select three categories as in-domain unseen test set and use the remaining seven categories as in-domain seen 
+
+training set under that seed. 
+
+MagneticTile [11]. The magnetic tile surface defect dataset contains images of magnetic tile surfaces collected from industrial production lines, covering both defective and defect-free samples. It provides pixel-level annotations for five defect categories— blowhole , crack , break , fray , and 
+
+uneven —while normal images are discarded in our bench-mark to focus solely on faulty cases. We retain approx-imately 400 defect images from the original release. For each random seed, we select one defect category as an 
+
+in-domain unseen test set and use the remaining four cat-egories as in-domain seen classes for training under that seed. 
+
+Real-IAD [28]. Real-IAD is a multi-view industrial anomaly dataset comprising 30 real-world objects fabri-cated from diverse materials (e.g., plastic, rubber). Each object is captured under five viewpoints and exhibits 2–5 
+
+distinct defect modes selected from eight defect families (i.e., pit , deformation , abrasion , scratch , damage , miss-ing parts , foreign objects , and contamination ). Only view-points equipped with pixel-level defect masks are retained as anomaly samples, and we use the official 1024 × 1024 -resolution version of the images. From the binary defect masks, we perform connected-component labeling with 8-connectivity to obtain instance-level segments, and discard components whose width or height is smaller than 1% of the image width or height to remove tiny noisy polygons. For each split, we select 28 defect categories as in-domain unseen test classes and use the remaining categories as in-domain seen classes for training. 
+
+MVTec AD [3]. MVTec AD is a real-world industrial anomaly dataset that contains defective images across mul-tiple object and texture categories, with various defect types such as contamination, oil, cuts, and cracks. In our bench-mark, we discard all “good” images and use only anomalous samples with polygon masks. From these masks, we extract individual defect instances and remove components whose width or height is smaller than 1% of the corresponding im-age dimension, thereby filtering out tiny noisy regions. 
+
+3CAD [35]. 3CAD is a large-scale anomaly detection dataset collected from real 3C product manufacturing lines, covering representative defects that arise in practical pro-duction environments. It focuses on parts made of three common materials (Aluminum, Iron, and Copper) and in-cludes multiple types of 3C components (e.g., camera cov-ers, tablets, and PCs). Since 3CAD is designed for anomaly detection, we discard the “good” class without polygon an-notations and also remove the Multiple-defects class, whose defect instances cannot be assigned to specific categories. After this filtering, we obtain a total of 46 defect categories. From the remaining polygons, we extract individual defect instances and discard components whose width or height is smaller than 1% of the corresponding image dimension to eliminate tiny noisy regions. 
+
+VISION [1]. The VISION benchmark unifies 14 indus-Dataset Product Material Color Distribution Statistics H S VGC10 [24] Steel Steel 0.0 ± 0.0 0.0 ± 0.0 85 .7 ± 39 .6                                                                    
+
+> MagneticTile [11] Magnetic Tile Steel 0.0±0.00.0±0.0109 .4±47 .4
+> Real-IAD [28] PCB, Toy Brick, Transistor, etc. Plastic, Rubber, Wood, etc. 33 .4±49 .540 .6±65 .7110 .2±105 .5
+> MVTec AD [3] Cable, Hazelnut, Tile, etc. Glass, Metal, Fabric, etc. 46 .7±55 .146 .0±47 .8120 .5±66 .7
+> 3CAD [35] Camera Cover, Tablet PC, etc. Aluminum, Copper, etc. 7.2±19 .216 .7±49 .078 .6±70 .5
+> VISION [1] Capacitor, Lens, Screw, etc. Plastic, Steel, Wood, etc. 25 .2±41 .138 .4±70 .7106 .3±83 .3
+> VisA [39] Candle, Capsule, Macaroni, etc. Plastic, Food, etc. 47 .7±36 .495 .7±71 .9101 .9±66 .1
+> Table 6. Dataset statistics used in the InsA benchmark, including their product types, materials, and the color distribution statistics (mean ±std) for each HSV channel.
+
+trial inspection subsets, each corresponding to a distinct object class from real manufacturing lines and captured at its native (often high) resolution; consequently, image size varies across subsets. The corpus provides pixel-level in-stance masks for 44 defect categories. For InsA, we retain only images in the train and val partitions that include poly-gon annotations and discard the inference split, whose la-bels are withheld. From the polygon masks, we remove seg-ments whose width or height is smaller than 1% of the width or height of the image to filter out tiny noisy regions. All 44 defect categories are used exclusively for cross-domain evaluation, and none of them are included in the training data. 
+
+VisA [39]. VisA is an industrial visual inspection dataset containing normal and defective images from 12 object cat-egories, some of which exhibit large variations in object lo-cation and pose across images. It covers both surface-level defects (e.g., scratches, dents) and structural defects (e.g., misplacement). In our benchmark, we discard all normal images and retain only those that contain at least one an-notated defective region. We also exclude the Other defect class, whose semantics are not clearly specified. From the binary defect masks, we apply connected-component label-ing with 8-connectivity to obtain instance-level segments, and discard components whose width or height is smaller than 1% of the corresponding image dimension, thereby fil-tering out tiny noisy regions. 
+
+A.2. Prompt Allocation 
+
+Selection of Prompt data To ensure class purity, prompt samples are selected only from single-label samples that contain the target defect alone; mixing co-occurring other categories into a prompt would inject ambiguous cues and dilute the class-specific signal. 
+
+Image-level vs. Instance-level Furthermore, unlike con-ventional few-shot protocols [15, 31, 34] that count shots per instance (box or mask), we define k with respect to entire images . In industrial defect inspection a single pho-tograph often exhibits multiple defect instances whose vi-sual similarity renders selective prompting ill-posed; ex-cluding certain regions while prompting others would im-plicitly guide the detector to ignore genuine defects within the same frame. Counting shots at the image level therefore mirrors real deployment conditions and yields a fairer, more interpretable comparison across categories and methods. 
+
+Prompt Size For each defect category, we default to 5 vi-sual prompt images during evaluation. However, to ensure a balanced evaluation across all dataset in InsA. For the ”tail classes” (total images ≤ 10 ), we restrict the number of prompts to 1, as assigning 5 prompts to classes with very few target images leads to an irrational prompt-to-target ra-tio. As shown in Figure 7, by reducing the prompt to a sin-gle image for these cases, we achieved a more balanced and reasonable evaluation setting for long-tailed defect distri-butions. Notably, potential selection bias from using a sin-gle prompt is mitigated by averaging results across multiple random seeds, ensuring a robust evaluation. 
+
+Algorithm 1 Radial Frequency Feature Extraction 
+
+Require: Image I, Bounding boxes B, Frequency bins J
+
+Ensure: Spectral features F ∈ RK×J 
+
+> 1:
+
+for each bounding box bi ∈ B do  
+
+> 2:
+
+Icrop ← Crop (I, b i) and convert to grayscale  
+
+> 3:
+
+M ← | FFTShift (FFT2D (Icrop )) | 
+
+> 4:
+
+R ← p(X − cx)2 + ( Y − cy )2 
+
+> 5:
+
+Rnorm ← R/ max( R) 
+
+> 6:
+
+for j = 1 to J do  
+
+> 7:
+
+fj ← mean (M [Rnorm ∈ bin j ])  
+
+> 8:
+
+end for  
+
+> 9:
+
+fi ← L2Normalize ([ f1, ..., f J ])  
+
+> 10:
+
+end for  
+
+> 11:
+
+return F = [ f1, ..., fK ]T
+
+# B. Details of Radial Frequency Extraction 
+
+We present the radial frequency extraction procedure in Al-gorithm 1. Given a region crop, 2D FFT is computed and Figure 7. Distribution of Prompt-to-Target Ratios across Defect Classes. It illustrates the prompt-to-target ratio for each defect class (with sample sizes). We compare our adaptive prompt strategy (Blue) against the fixed prompt strategy (Orange). By reducing the number of prompts to one for tail classes (total images ≤ 10 ), the adaptive strategy prevents an irrational ratio in the tail classes, ensuring a more balanced and fair evaluation across the entire InsA dataset. (a) Prompt samples  (b) Target Images  (c) Prediction results 
+
+(UniSpector )
+
+(d) Prediction results 
+
+(Dinov )
+
+Figure 8. UniSpector is capable of recognizing unseen defects via visual prompts. (a) Orange box: user-specified prompt region. (b) Blue box: corresponding ground-truth in the target image. (c) Green boxes: correct predictions by UniSpector , accurately localizing subtle defects. (d) Red boxes: DINOv predictions, showing failure to localize the prompted defect. the resulting frequency magnitudes are aggregated into ra-dial bins and L2-normalized. This process introduces min-imal computational overhead while providing complemen-tary texture cues to the spatial features. 
+
+# C. Implementation Details 
+
+C.1. Architectural Details 
+
+UniSpector is built upon the MaskDINO [17] architecture, an encoder-decoder framework designed for unified object detection and segmentation. For the encoder, we employ a Swin-T backbone with hierarchical stages to extract multi-scale feature maps. For fair comparison, the same SwinT backbone is used for DINOv, T-Rex2 and UniSpector , while YOLOE utilize its native YOLO11m [14] backbone due to architectural constraints. The decoder is composed of 9 Deformable Transformer layers with 8 attention heads. Each layer consists of self-attention, multi-scale deformable cross-attention, and an FFN. 
+
+C.2. Training Objective 
+
+We follow the standard MaskDINO training recipe, incor-porating denoising (DN) training and auxiliary deep super-vision across all L decoder layers to accelerate convergence. Bounding box regression is supervised by L1 and GIoU losses, while mask segmentation employs a combination of BCE and Dice losses. Classification is addressed by a Fo-cal loss measuring the similarity between object queries and class prototypes. The bipartite matching between predic-tions and ground truths is established via Hungarian match-ing. Finally, the proposed LCPE is integrated with these stan-dard terms to form total objective: 
+
+Ltotal =
+
+> L−1
+
+X
+
+> l=0
+
+
+
+λcls L(l) 
+
+> cls
+
++ λL1 L(l) 
+
+> L1
+
++ λgiou L(l) 
+
+> giou
+
++ λbce L(l)
+
+> bce
+
++ λdice L(l)
+
+> dice
+
+
+
++ LDN + λCPE LCPE 
+
+(7) where each λ denotes the corresponding loss weight. Note that LDN is the denoising counterpart of the same base losses with the same coefficients as their corresponding main losses. Under this joint optimization, we use the de-fault weights: λcls = 4 , λL1 = 5 , λgiou = 2 , λbce = 5 ,
+
+λdice = 5 , and λCPE = 1 .
+
+C.3. Details of Inference Phase 
+
+As illustrated in Figure 9, UniSpector decouples the in-ference process into two distinct stages to minimize com-putational overhead. Specifically, Prompt Embedding Ex-traction is performed as a one-time offline process to ex-tract prompt embeddings. During the subsequent Prompt-guided Prediction stage, these stored embeddings are loaded directly, bypassing redundant re-extraction of prompt em-beddings for every query. Notably, this architecture allows 
+
+> Figure 9. Detailed view of the inference phase. Unlike the training phase (see Fig. 3 in the main manuscript), inference is decoupled into “Prompt Embedding Extraction” and “Prompt-guided Predic-tion” to minimize computational overhead by leveraging cached embeddings.
+
+UniSpector to seamlessly integrate prompt embeddings for any defect category of interest, enabling flexible and effi-cient deployment in open-set scenarios. 
+
+C.4. Training settings 
+
+All Swin-T-based models are initialized with the official DI-NOv pre-trained wights, while YOLOE is initialized from its publicly available checkpoint. Training is conducted for 20,000 steps with a total batch size of 48 on two NVIDIA H100 GPUs. We use the AdamW optimizer with a linear learning rate schedule, a base learning rate of  1 × 10 −4, a 10-step warm-up, and a weight decay of 0.05. Data aug-mentation includes random horizontal flipping, contrast ad-justment (0.8–1.1), and brightness adjustment (0.5–1.3). All models are trained at an input resolution of  720 × 720  pix-els. The radial frequency distribution is computed using 256 bins. The scaling factor is set to  s = 30 .0 and the angular margin to  m = 0 .5, which empirically stabilizes the op-timization. We use  Nq = 300  object queries and set the Gumbel-Softmax temperature to  τ = 1 .0.
+
+# D. Additional analysis 
+
+D.1. Robustness to the quality of prompts 
+
+To analyze robustness to prompt quality which is indeed critical factor for practical deployment. We conducted addi-tional experiments simulating realistic industrial scenarios along two dimensions: image and annotation. 
+
+Image Degradation To simulate blurry conditions, we evaluated the performance under Gaussian blur kernels with controlled standard deviations ( σ) on the prompt images. Figure 10. Robustness against prompt annotation (averaged over 10 trials per IoU). Each perturbed box is constrained to a specific IoU level relative to the ground-truth label. Table 7. Experimental analysis under Gaussian Blur on the prompt images. We evaluate the impact of varying blur levels ( σ) on the performance. 
+
+Dataset Metric Clean 0.5σ 1.0σ 1.5σ 2.0σ 2.5σ 3.0σ
+
+VisA AP b 
+
+> 50
+
+32.5 33.3 32.0 30.0 27.4 25.8 23.4   
+
+> AP m
+> 50
+
+28.2 28.3 27.6 26.3 23.8 22.3 20.4 MTile AP b 
+
+> 50
+
+64.2 64.9 64.1 63.5 62.0 60.1 57.0   
+
+> AP m
+> 50
+
+38.9 39.1 38.8 37.8 36.4 34.3 31.0 The results are summarized in Table 7. Interestingly, a slight performance improvement was observed at 0.5σ blur. This improvement likely stems from the suppression of high-frequency noise, yielding prompt embeddings that are less biased toward instance-specific artifacts. The performance differences remain small up to 1.5σ, while a clear degra-dation is observed beyond 2.0σ, where the image quality degradation becomes visually noticeable. Performance is stable under Gaussian blur up to σ = 1 .5 (Tab. 7) and box perturbations down to IoU 0.3 (Fig. 10, proving robustness. 
+
+Noisy Annotation We further examined robustness by ran-domly perturbing the prompt bounding boxes to achieve IoU levels ranging from 0.1 to 0.9 relative to the ground truth (GT). Each configuration was averaged over 10 inde-pendent trials. As shown in Figure 10, UniSpector main-tains high performance down to an IoU of 0.3, demon-strating significant tolerance to imprecise annotations. Be-yond this threshold, the perturbed boxes begin to encom-pass background or non-defect regions rather than the tar-get defect, leading to an expected drop in precision as the prompt’s semantic signal becomes corrupted. 
+
+D.2. Analysis of In-Context Learning Approaches 
+
+We conducted quantitative comparisons with representa-tive in-context learning methods, PerSAM[1] and VRP-SAM[2], as shown in the table below. When evaluated in a training-free manner, PerSAM achieved an average AP m
+
+> 50
+
+of 6.0 due to the significant domain gap. The fine-tuning variant (PerSAM-F) yielded only a marginal improvement of +1.4 in average performance. We attribute this to a rep-resentation bottleneck: both PerSAM and VRP-SAM fun-damentally rely on the representational capacity of frozen SAM encoders. Relying on frozen SAM general-object rep-resentations, PerSAM and VRP-SAM fail to generalize to InsA even after fine-tuning. Because the feature space of SAM, which is primarily trained on general real-world ob-jects, may not be optimally suited for discriminating fine-grained features of subtle and complex defects. For VRP-SAM, since the authors do not release pre-trained weights for the VRP-Encoder, we report only the performance after training the VRP-Encoder on our in-domain seen set. Re-lying on frozen SAM general-object representations, Per-SAM and VRP-SAM fail to generalize to InsA even after fine-tuning (Tab. 8). 
+
+Table 8. Results of in-context learning methods ( AP m 
+
+> 50
+
+) on InsA benchmark. † indicates results obtained by fine-tuning on the in-domain seen split of the proposed protocol.                           
+
+> Method GC10 MTile RIAD MVTe 3CAD VISN VisA Avg PerSAM 0.0 33.0 0.8 4.8 0.1 0.3 3.0 6.0 PerSAM †0.1 34.2 1.5 8.7 0.2 1.0 6.0 7.4 VRP-SAM †0.4 12.5 22.3 18.8 3.2 4.7 12.2 10.6
+
+D.3. Visualization 
+
+Figure 8 presents qualitative results for open-set defect de-tection. Given a user-specified region in the prompt images (orange bounding box), UniSpector successfully identifies corresponding defect instances in the target image. As illus-trated in Figure 8(c), UniSpector accurately captures even subtle and fine-grained defects in PCB (TOP). Moreover, despite the pronounced rotational difference between the prompt and target defect instance, UniSpector consistently localizes the prompted defect type (BTM). 
+
+# References 
+
+[1] Haoping Bai, Shancong Mou, Tatiana Likhomanenko, Ra-mazan Gokberk Cinbis, Oncel Tuzel, Ping Huang, Jiulong Shan, Jianjun Shi, and Meng Cao. Vision datasets: A bench-mark for vision-based industrial inspection. arXiv preprint arXiv:2306.07890 , 2023. 6, 9, 10 [2] Kilian Batzner, Lars Heckler, and Rebecca K¨ onig. Efficien-tad: Accurate visual anomaly detection at millisecond-level latencies. In Proceedings of the IEEE/CVF winter confer-ence on applications of computer vision , pages 128–138, 2024. 1 [3] Paul Bergmann, Michael Fauser, David Sattlegger, and Carsten Steger. Mvtec ad–a comprehensive real-world dataset for unsupervised anomaly detection. In Proceedings of the IEEE/CVF conference on computer vision and pattern recognition , pages 9592–9600, 2019. 6, 9, 10 [4] Bowen Cheng, Ishan Misra, Alexander G Schwing, Alexan-der Kirillov, and Rohit Girdhar. Masked-attention mask transformer for universal image segmentation. In Proceed-ings of the IEEE/CVF conference on computer vision and pattern recognition , pages 1290–1299, 2022. 8 [5] Tianheng Cheng, Lin Song, Yixiao Ge, Wenyu Liu, Xing-gang Wang, and Ying Shan. Yolo-world: Real-time open-vocabulary object detection. In Proceedings of the IEEE/CVF conference on computer vision and pattern recognition , pages 16901–16911, 2024. 3, 5, 6 [6] Thomas Defard, Aleksandr Setkov, Angelique Loesch, and Romaric Audigier. Padim: a patch distribution modeling framework for anomaly detection and localization. In Inter-national conference on pattern recognition , pages 475–489. Springer, 2021. 1 [7] Jiankang Deng, Jia Guo, Niannan Xue, and Stefanos Zafeiriou. Arcface: Additive angular margin loss for deep face recognition. In Proceedings of the IEEE/CVF con-ference on computer vision and pattern recognition , pages 4690–4699, 2019. 4 [8] Hanze Ding, Zhangkai Wu, Jiyan Zhang, Ming Ping, and Yanfang Liu. Lerenet: Eliminating intra-class differences for metal surface defect few-shot semantic segmentation. arXiv preprint arXiv:2403.11122 , 2024. 1, 3 [9] Yuchen Guan, Chong Sun, Canmiao Fu, Zhipeng Huang, Chun Yuan, and Chen Li. Text-guided visual prompt dino for generic segmentation. In Proceedings of the IEEE/CVF International Conference on Computer Vision , pages 21288– 21298, 2025. 3 [10] Zican Hu, Jiaxiang Luo, and Zixiang Hong. Category rela-tionship enhancement transformer for industrial defect seg-mentation. Knowledge-Based Systems , 326:114059, 2025. 1, 3[11] Yibin Huang, Congying Qiu, and Kui Yuan. Surface defect saliency of magnetic tile. The Visual Computer , 36(1):85–96, 2020. 6, 9, 10 [12] Qing Jiang, Feng Li, Zhaoyang Zeng, Tianhe Ren, Shilong Liu, and Lei Zhang. T-rex2: Towards generic object detection via text-visual prompt synergy. In European Conference on Computer Vision , pages 38–57. Springer, 2024. 1, 3, 4, 5, 6, 8[13] Xiaoheng Jiang, Kaiyi Guo, Yang Lu, Feng Yan, Hao Liu, Jiale Cao, Mingliang Xu, and Dacheng Tao. Cin-former: Transformer network with multi-stage cnn feature injection for surface defect segmentation. arXiv preprint arXiv:2309.12639 , 2023. 2 [14] Glenn Jocher and Jing Qiu. Ultralytics yolo11, 2024. 12 [15] Bingyi Kang, Zhuang Liu, Xin Wang, Fisher Yu, Jiashi Feng, and Trevor Darrell. Few-shot object detection via feature reweighting. In Proceedings of the IEEE/CVF international conference on computer vision , pages 8420–8429, 2019. 10 [16] Rahima Khanam and Muhammad Hussain. Yolov11: An overview of the key architectural enhancements. arXiv preprint arXiv:2410.17725 , 2024. 8 [17] Feng Li, Hao Zhang, Huaizhe Xu, Shilong Liu, Lei Zhang, Lionel M Ni, and Heung-Yeung Shum. Mask dino: Towards a unified transformer-based framework for object detection and segmentation. In Proceedings of the IEEE/CVF con-ference on computer vision and pattern recognition , pages 3041–3050, 2023. 8, 12 [18] Feng Li, Qing Jiang, Hao Zhang, Tianhe Ren, Shilong Liu, Xueyan Zou, Huaizhe Xu, Hongyang Li, Jianwei Yang, Chunyuan Li, et al. Visual in-context prompting. In Pro-ceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , pages 12861–12871, 2024. 1, 3, 4, 5, 6, 8 [19] Shilong Liu, Zhaoyang Zeng, Tianhe Ren, Feng Li, Hao Zhang, Jie Yang, Qing Jiang, Chunyuan Li, Jianwei Yang, Hang Su, et al. Grounding dino: Marrying dino with grounded pre-training for open-set object detection. In Euro-pean conference on computer vision , pages 38–55. Springer, 2024. 1, 3, 4, 5, 6 [20] Taiheng Liu, Zhaoshui He, Zhijie Lin, Guang-Zhong Cao, Wenqing Su, and Shengli Xie. An adaptive image segmen-tation network for surface defect detection. IEEE Trans-actions on Neural Networks and Learning Systems , 35(6): 8510–8523, 2022. 1, 2 [21] Tongkun Liu, Bing Li, Xiao Jin, Yupeng Shi, Qiuying Li, and Xiang Wei. Exploring few-shot defect segmentation in general industrial scenarios with metric learning and vision foundation models. arXiv preprint arXiv:2502.01216 , 2025. 1, 3 [22] Yang Liu, Chenchen Jing, Hengtao Li, Muzhi Zhu, Hao Chen, Xinlong Wang, and Chunhua Shen. A simple image segmentation framework via in-context examples. Advances in Neural Information Processing Systems , 37:25095–25119, 2024. 1, 5, 6 [23] Yang Liu, Yufei Yin, Chenchen Jing, Muzhi Zhu, Hao Chen, Yuling Xi, Bo Feng, Hao Wang, Shiyu Li, and Chunhua Shen. Unified open-world segmentation with multi-modal prompts. In Proceedings of the IEEE/CVF International Conference on Computer Vision , pages 21557–21567, 2025. 3, 4 [24] Xiaoming Lv, Fajie Duan, Jia-jia Jiang, Xiao Fu, and Lin Gan. Deep metallic surface defect detection: The new bench-mark and detection network. Sensors , 20(6):1562, 2020. 6, 9, 10 [25] Olaf Ronneberger, Philipp Fischer, and Thomas Brox. U-net: Convolutional networks for biomedical image segmen-tation. In International Conference on Medical image com-puting and computer-assisted intervention , pages 234–241. Springer, 2015. 1, 2 [26] Karsten Roth, Latha Pemula, Joaquin Zepeda, Bernhard Sch¨ olkopf, Thomas Brox, and Peter Gehler. Towards total recall in industrial anomaly detection. In Proceedings of the IEEE/CVF conference on computer vision and pattern recognition , pages 14318–14328, 2022. 1 [27] Ao Wang, Lihao Liu, Hui Chen, Zijia Lin, Jungong Han, and Guiguang Ding. Yoloe: Real-time seeing anything. arXiv preprint arXiv:2503.07465 , 2025. 1, 3, 5, 6 [28] Chengjie Wang, Wenbing Zhu, Bin-Bin Gao, Zhenye Gan, Jiangning Zhang, Zhihao Gu, Shuguang Qian, Mingang Chen, and Lizhuang Ma. Real-iad: A real-world multi-view dataset for benchmarking versatile industrial anomaly detec-tion. In Proceedings of the IEEE/CVF Conference on Com-puter Vision and Pattern Recognition , pages 22883–22892, 2024. 6, 9, 10 [29] Jingyao Wang and Naigong Yu. Ssd-faster net: A hybrid network for industrial defect inspection. arXiv preprint arXiv:2207.00589 , 2022. 2 [30] Junpu Wang, Guili Xu, Fuju Yan, Jinjin Wang, and Zheng-sheng Wang. Defect transformer: An efficient hybrid trans-former architecture for surface defect detection. Measure-ment , 211:112614, 2023. 1, 2 [31] Xin Wang, Thomas E Huang, Trevor Darrell, Joseph E Gon-zalez, and Fisher Yu. Frustratingly simple few-shot object detection. arXiv preprint arXiv:2003.06957 , 2020. 10 [32] Xinlong Wang, Xiaosong Zhang, Yue Cao, Wen Wang, Chunhua Shen, and Tiejun Huang. Seggpt: Towards seg-menting everything in context. In Proceedings of the IEEE/CVF International Conference on Computer Vision ,pages 1130–1140, 2023. 1, 5, 6 [33] Feng Yan, Xiaoheng Jiang, Yang Lu, Jiale Cao, Dong Chen, and Mingliang Xu. Wavelet and prototype augmented query-based transformer for pixel-level surface defect detection. In 
+
+Proceedings of the Computer Vision and Pattern Recognition Conference , pages 23860–23869, 2025. 1, 2 [34] Xiaopeng Yan, Ziliang Chen, Anni Xu, Xiaoxi Wang, Xi-aodan Liang, and Liang Lin. Meta r-cnn: Towards general solver for instance-level low-shot learning. In Proceedings of the IEEE/CVF international conference on computer vi-sion , pages 9577–9586, 2019. 10 [35] Enquan Yang, Peng Xing, Hanyang Sun, Wenbo Guo, Yuan-wei Ma, Zechao Li, and Dan Zeng. 3cad: A large-scale real-world 3c product dataset for unsupervised anomaly detec-tion. In Proceedings of the AAAI Conference on Artificial Intelligence , pages 9175–9183, 2025. 6, 9, 10 [36] Yuting Yang, Licheng Jiao, Xu Liu, Fang Liu, Shuyuan Yang, Lingling Li, Puhua Chen, Xiufang Li, and Zhongjian Huang. Dual wavelet attention networks for image classifi-cation. IEEE Transactions on Circuits and Systems for Video Technology , 33(4):1899–1910, 2022. 2 [37] Yian Zhao, Wenyu Lv, Shangliang Xu, Jinman Wei, Guanzhong Wang, Qingqing Dang, Yi Liu, and Jie Chen. De-trs beat yolos on real-time object detection. In Proceedings of the IEEE/CVF conference on computer vision and pattern recognition , pages 16965–16974, 2024. 8 [38] Xueyan Zou, Jianwei Yang, Hao Zhang, Feng Li, Linjie Li, Jianfeng Wang, Lijuan Wang, Jianfeng Gao, and Yong Jae Lee. Segment everything everywhere all at once. Advances in neural information processing systems , 36:19769–19782, 2023. 1, 5, 6 [39] Yang Zou, Jongheon Jeong, Latha Pemula, Dongqing Zhang, and Onkar Dabeer. Spot-the-difference self-supervised pre-training for anomaly detection and segmentation. arXiv preprint arXiv:2207.14315 , 2022. 6, 9, 10

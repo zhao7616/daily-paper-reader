@@ -1,0 +1,1655 @@
+Title: Niching Importance Sampling for Multi-modal Rare-event Simulation
+
+URL Source: https://arxiv.org/pdf/2604.06417v1
+
+Published Time: Thu, 09 Apr 2026 00:11:28 GMT
+
+Number of Pages: 30
+
+Markdown Content:
+# Niching Importance Sampling for Multi-modal Rare-event Simulation 
+
+Hugh J. Kinnear a, F.A. DiazDelaO a
+
+> aClinical Operational Research Unit, Department of Mathematics, UCL, London, WC1H 0BT, United Kingdom
+
+Abstract 
+
+This paper proposes niching importance sampling, a framework that combines concepts from reliability analysis, e.g. Markov chains, importance sampling, and relative cross entropy minimisation, with nich-ing techniques from evolutionary multi-modal optimisation. The result is a highly robust estimator of the probability of failure, that can tackle sampling challenges posed by the underlying geometry of a reliability problem. Niching importance sampling is tested on a range of numerical examples and is shown to con-sistently avoid the degenerate behaviour observed for existing reliability methods on several multi-modal performance functions. 
+
+Keywords: Reliability analysis, Rare event simulation, Markov chain, Importance sampling, Evolutionary multi-modal optimisation, Cross entropy. 
+
+Acronyms MC Monte Carlo CE Cross entropy 
+
+IS Importance sampling NIS Niching importance sampling 
+
+DIS Direct importance sampling NInitS Niching initial sampling 
+
+SuS Subset simulation vMF Von Mises-Fisher 
+
+SIS Sequential importance sampling vMFNM Von Mises-Fisher-Nakagami mixture 
+
+SAIS Sequential adaptive imp. samp. EM Expectation-maximisation 
+
+1. Introduction 
+
+In reliability analysis, the behaviour of a physical system is modelled by a performance function operating on a space of uncertain input variables. The probability of failure, the primary quantity of interest in this context, is defined as the probability measure of the failure region, which refers to the set of input configurations for which the demand exceeds the system’s capacity. Over the past few decades, various reliability methods have been developed to estimate the probability of failure [1]. The suitability of any of these reliability methods is determined by the characteristics of the particular reliability problem being considered. When the Taylor expansion of the performance function around appropriate points in the input space yields a good approximation, first- and second-order reliability methods can provide an accurate estimate of the probability of failure with low computational cost [2–5]. When the performance function is computationally expensive to evaluate, a surrogate model can be built and analysed [6–9]. Alternatively, if little is known about a reliability problem, Monte Carlo (MC)-based methods [10] offer a robust approach for estimating the probability of failure. When a physical system is well-designed, the probability of failure tends to be, by definition, very small. Under these circumstances, a simple MC estimator is highly inefficient in producing failure samples, that is, input configurations in the failure region. Variance reduction techniques are a class of reliability methods that seek to address this problem by modifying the simple MC estimator. Here, Importance sampling (IS) is the fundamental concept which, explicitly or implicitly, underlies the theory of most variance reduction techniques [11]. The idea is to sample from a so-called importance distribution, which assigns high probability density to the most important regions of the input space. An IS method is characterised by the strategy 1
+
+> arXiv:2604.06417v1 [stat.CO] 7 Apr 2026
+
+it employs to construct the importance distribution, since the computational efficiency of such methods depends entirely on how accurately the importance distribution models the failure region. In this work, it will be useful to classify IS methods for reliability analysis into two broad categories. The first type, which will be referred to as direct importance sampling (DIS) methods, consists of separate initial sampling and distribution fitting procedures. The simplest of the DIS methods, and first to be developed, are the static methods [12], where the initial sampling procedure generates failure samples which are then used to fit the parameters of an importance distribution. Adaptive methods begin in the same way as static methods. However, once the first importance distribution has been fitted, it is then sampled from, and those samples are used to fit the parameters of a new importance distribution. This process can be iterated many times and often results in a relatively efficient estimator [13, 14]. The second type of IS method for reliability analysis runs the initial sampling and adaptive fitting procedures concurrently [15–17]. These more recently proposed algorithms will be referred to as sequential adaptive IS (SAIS) methods. SAIS methods do not attempt to model the failure region directly, and only yield failure samples at the end of the procedure. Such algorithms are appealing, since they have a relatively simple control flow and assume very little about the performance function. Indeed, they are often applied when the performance function is only known implicitly. However, it is known that if the performance function exhibits challenging topology, such as rapidly changing output and multiple local optima, SAIS methods can give unreliable estimates for the probability of failure [18, 19]. From this point of view, SAIS methods can be compared to stochastic optimisation algorithms. In the same way that optimisation algorithms may get stuck in local optima, SAIS methods can be led away from important regions of the input space. This problem has prompted the development of more robust variance reduction methods. In stochastic spectral embedding-based reliability, the important regions of the input space are highlighted via a sequential partitioning procedure, and a surrogate is fit in each set of the partition [20]. Sequential space conversion scales the input distribution and replaces the performance function with a series of control variates, allowing global information about the performance function to be incorporated into the probability of failure estimate [21]. Evolutionary algorithms are a class of biologically inspired optimisation meta-heuristics that can be applied to find multiple local optima of an objective function in multi-modal optimisation problems [22]. Niching techniques, where “niching” in biology refers to the role a specific species plays in an environment, are used within evolutionary algorithms to maintain samples in the neighbourhoods of multiple local optima, called niches [23]. Due to the similarities between some variance reduction techniques and evolutionary algorithms, it is natural to suggest that niching techniques can be applied to reliability problems. For instance, the approach taken in [24] of adding a bulge to the performance function could be considered a niching technique. More explicitly, niching techniques have been combined with subset simulation (SuS) to produce a robust estimator for the probability of failure [25]. This paper proposes niching importance sampling (NIS), a reliability analysis strategy that integrates niching techniques into an importance sampling framework. NIS is a DIS method that attempts to maintain the wide applicability of SAIS methods, whilst more carefully and deliberately exploring the failure region. The fundamental component of NIS is niching initial sampling (NInitS), which utilises niching techniques in order to efficiently populate all the important subsets of the failure region. The output of NInitS can be used to fit a mixture importance distribution using an expectation-maximisation (EM) algorithm without the need for an initialisation procedure. Performance functions with challenging topology can lead to poor ergodic behaviour of the Markov chains used to generate failure samples, and so a component weight correction routine is also carried out after the EM algorithm. Finally, a heuristic for determining an appropriate computational budget is introduced, based on the mutual information of the mixture importance distribution. This paper is organised as follows. Section 2 formally defines the probability of failure and gives an overview of IS reliability methods. NInitS is introduced in Section 3 and applied within NIS in Section 4. In Section 5, illustrative high-dimensional numerical examples are presented, alongside more practical reliability problems. The paper is summarised and concluded in Section 6, including ideas for future directions of research. 22. Importance Sampling (IS) 
+
+2.1. Reliability Analysis 
+
+The behaviour of a system in reliability analysis is modelled by a performance function, g : X ⊆ Rd → R,which assigns a scalar value to every combination of inputs in the input space, x ∈ X . The input space is endowed with a probability density function f (x), called the input distribution. If the performance of a set of inputs exceeds a critical threshold b, then that set of inputs is said to be in the failure region, denoted as 
+
+F = {x ∈ X : g(x) ≥ b}. Without loss of generality, the critical threshold can be set to 0. The central task of reliability analysis is to determine the probability of failure, namely, 
+
+PF := 
+
+Z
+
+> X
+
+1F (x)f (x)dx = Ef [1F (x)] . (1) where 1F (·) is an indicator function. Reliability methods can be categorised according to the assumptions about the reliability problem they rely on. Typically, the more simplifying assumptions a reliability method makes, the more computationally efficient it is. However, this comes at the cost of reduced robustness and applicability. NIS, the method proposed in this work, is intended to be more robust than SAIS techniques, whilst incurring the least possible additional computational cost. The following are the properties of the reliability problem being considered: 
+
+• The performance function is computationally expensive. The assumption is that the cost of any other procedure is negligible compared to the cost of evaluating the performance function. Thus, these evaluations will be used to measure computational complexity and should be minimised. 
+
+• The input space is high-dimensional. It is assumed that the performance function is sensitive to all inputs across the input space. This property precludes the use of dimension reduction techniques to simplify the reliability problem. 
+
+• The performance function is treated as a black-box model. Consequently, no analytical techniques or gradient information are assumed to be available. Also, no prior expert information regarding the performance function is available. This includes knowledge of the number of components in the reliability problem and areas of the input space guaranteed to be in the failure region for the purpose of initial sampling. 
+
+• The performance function has challenging topology. In this work, “challenging topology” refers to geometric features of the performance function or failure region, such as multiple important niches, local optima, and rapidly varying performance values, that make it difficult for sequential adaptive importance sampling methods to reliably populate all important regions. 
+
+• Augmenting the standard deviation of the input distribution is not guaranteed to increase the proba-bility of failure. The opposite was assumed in [21]. 
+
+• The input distribution is the standard normal multivariate distribution. The idea behind the last property is that for some general input distribution, it is often possible to apply suitable transformations to obtain an equivalent reliability problem in standard normal space. If the input distribution is explicitly known, the Rosenblatt transformation can be applied [26]. If only the marginal distributions and correlations are given, the joint probability distribution can be approximated by a Nataf distribution [27]. Whilst this assumption limits applicability, it is made here for ease of exposition, con-creteness, and to isolate the main algorithmic contribution. Provided that an appropriate parametric family of probability densities and Markov chain algorithm can be identified, the approach in this paper could be applied to a reliability problem with an arbitrary input distribution. Such extensions are not investigated in this work, and complications associated with the chosen transformation, any induced dependence structure, and the resulting sampling scheme are left for future study. 3The most robust reliability method, which makes no assumptions about the reliability problem, is a simple MC estimator, 
+
+ˆPMC = 1
+
+N
+
+> N
+
+X
+
+> i=1
+
+1F (xi), (2) where x1, . . . , xN ∼ f . The problem with the MC estimator is made clear by its coefficient of variation (CoV), 
+
+δMC =
+
+r 1 − PF
+
+N P F
+
+. (3) When the probability of failure is very small, the CoV of the MC estimator becomes very large for a fixed N .Thus, obtaining an acceptable CoV requires a very large sample size, which requires many computationally expensive performance function evaluations. Variance reduction techniques are a type of reliability method that seek to reduce the variance of the MC estimator. The fundamental concept underlying most variance reduction techniques, either explicitly or implicitly, is IS. 
+
+2.2. The Concept 
+
+The idea of IS is to introduce an importance distribution q into the probability of failure expression, 
+
+PF =
+
+Z
+
+> X
+
+1F (x) f (x)
+
+q(x) q(x)dx = Eq
+
+
+
+1F (x) f (x)
+
+q(x)
+
+
+
+. (4) This way, the expectation is recast with respect to the importance distribution, and importance samples 
+
+x1, . . . , xN ∼ q, can be used to estimate the probability of failure, 
+
+ˆPIS = 1
+
+N
+
+> N
+
+X
+
+> i=1
+
+1F (xi) f (xi)
+
+q(xi) , (5) where f (xi)/q (xi) are referred to as the importance weights. The CoV of the IS estimator is given by 
+
+δIS =
+
+vuut Vq
+
+h
+
+1F (x) f (x)
+
+> q(x)
+
+i
+
+N P 2
+
+> F
+
+. (6) If the importance distribution is chosen appropriately, the CoV of an IS estimator can be considerably smaller than the CoV of an MC estimator, given the same number of samples. The optimal importance distribution in reliability analysis, i.e., the one which minimises the variance of the IS estimator, is given by 
+
+q∗(x) = argmin 
+
+> q
+
+V
+
+h ˆPIS 
+
+i
+
+= 1F (x)f (x)
+
+PF
+
+. (7) An IS estimator using q∗ has zero variance. However, q∗ is not useful in practice because the probability of failure appears in its definition. Additionally, it is generally not possible to sample efficiently from q∗
+
+without the use of Markov chains. Variance reduction methods apply IS in varied ways. As mentioned in the introduction, one useful classification of IS techniques distinguishes methods that use an explicit initial sampling procedure (DIS methods) from those that do not (SAIS methods). Initial sampling generates failure samples and allows DIS methods to target the optimal importance density directly. Instead, SAIS methods target a sequence of intermediate distributions. SAIS methods concurrently locate the failure region whilst fitting a sequence of importance distributions. The sequence of intermediate distributions that SAIS methods employ must be constructed carefully so that an efficient and accurate estimate of the probability of failure can be made. As the sequence progresses, the intermediate distributions must become better approximations of the optimal importance distribution. Additionally, it is crucial that consecutive intermediate densities are sufficiently 4close to one another, such that samples from one can be used in a procedure to efficiently produce samples from the next. The first intermediate distribution should be relatively easy to sample from, and is typically the input distribution itself. The sequences have the general form 
+
+qi(x) = ηi(x)
+
+Pi
+
+, (8) for 0 ≤ i ≤ m, where Pi are the intermediate normalising constants and ηi are the intermediate unnormalised densities. There are mainly two sequences that have been used as the numerator of Equation 8 in the reliability analysis literature: 
+
+η1 
+
+> i
+
+(x) = 1Fi (x)f (x), (9) 
+
+η2 
+
+> i
+
+(x) = Φ 
+
+ g(x)
+
+σi
+
+
+
+f (x), (10) where Φ( ·) is the normal cdf and Fi = {x ∈ X : g(x) ≥ bi} are intermediate failure regions with intermediate failure thresholds bi ≤ 0, and σi > 0 denote intermediate scale parameters. The sequences are constructed in such a way that bi ≤ bi+1 and σi ≥ σi+1 to ensure that, as the sequence progresses, the intermediate distributions become better approximations of the optimal importance density. Indeed, note that if bi = 0 
+
+then 1Fi (x) = 1F (x) and that lim σ→0 Φ ( g(x)/σ ) = 1F (x). Typically, the intermediate failure thresholds and intermediate scale parameters are chosen adaptively as the algorithm progresses to guarantee that the consecutive intermediate distributions are sufficiently close to one another. In the remainder of this section two SAIS methods, cross entropy (CE) and sequential importance sampling (SIS), will be briefly described so that the problems with such variance reduction methods can be understood and so that some of the ideas can be used in Section 3 and Section 4. 
+
+2.3. Cross Entropy (CE) 
+
+At the ith step, sequential adaptive CE methods attempt to approximate the intermediate density qi,with a parametric family of probability densities h(x; ν) where ν denotes the vector of parameters. It should be possible to evaluate all the probability densities in the family point-wise, and they should be relatively easy to sample from. The Kullback-Leibler (KL) divergence, also known as the relative cross entropy, can be used to quantify how close two probability densities are, 
+
+D(qi(x), h (x; ν)) = Eqi
+
+
+
+ln 
+
+ qi(x)
+
+h(x; ν)
+
+ 
+
+. (11) The goal in CE is to find the parameters νi that minimise the KL divergence to the intermediate density, 
+
+νi = argmin 
+
+> ν
+
+D(qi(x), h (x; ν)) (12) 
+
+= argmax 
+
+> ν
+
+Eqi [ln( h(x; ν))] . (13) The expectation in Equation 13 can be approximated with a MC estimator using samples from qi.However, it is not generally possible to sample efficiently from qi without a Markov chain. To overcome this challenge, the expectation can be rewritten with respect to the approximate density from the previous step, that is, h(x; νi−1):
+
+νi = argmax 
+
+> ν
+
+Ehνi−1
+
+
+
+ln( h(x; ν)) ηi(x)
+
+h(x; νi−1)
+
+
+
+. (14) Note that the normalising constant Pi does not appear in Equation 14 since it does not affect the optimisation problem. Samples x1, . . . , xN ∼ h(· ; νi−1) can be used to estimate the expectation, 
+
+ˆνi = argmax 
+
+> ν
+
+1
+
+N
+
+> N
+
+X
+
+> j=1
+
+ln( h(xj ; ν)) ηi(xj )
+
+h(xj ; ˆ νi−1) . (15) 5Updating rules for solving the optimisation problem, dependent on the parametric family chosen, can typi-cally be derived by setting the gradient of the objective function equal to zero. Originally, the unnormalised density sequence η1 
+
+> i
+
+was used for sequential adaptive CE [28, 29]. More recently however, a method referred to as improved cross entropy (iCE) was proposed which uses η2 
+
+> i
+
+instead [17]. It should be noted that CE reliability methods have been suggested which employ an initial sampling procedure rather than an intermediate sequence [30, 31]. For more explicit details of CE reliability methods, the reader is directed towards the references that have been used in this section. 
+
+2.4. Sequential Importance Sampling (SIS) 
+
+In contrast to CE, SIS directly samples from the intermediate unnormalised densities, rather than some approximation. This is accomplished using Markov chains, which are able to sample without knowing normalisation constants. The distribution from which a particular Markov chain samples is known as its stationary distribution. Consecutive normalisation constants can be related as follows: 
+
+Pi = Pi−1
+
+Z
+
+> X
+
+ηi(x)
+
+ηi−1(x) qi−1(x)dx = Pi−1Eqi−1
+
+ ηi(x)
+
+ηi−1(x)
+
+
+
+. (16) By rearranging Equation 16, and replacing the expectation with an estimator based on Markov chain samples 
+
+x1, . . . , xN with stationary distribution qi−1, an estimator for the ratio of normalising constants results in 
+
+Pi
+
+Pi−1
+
+≈ ˆSi = 1
+
+N
+
+> N
+
+X
+
+> j=1
+
+ηi(xj )
+
+ηi−1(xj ) , (17) for 1 ≤ i ≤ m. If the intermediate densities are chosen in such a way that P0 = 1 and Pm = PF , then the SIS estimator for the probability of failure is 
+
+ˆPSIS =
+
+> m
+
+Y
+
+> i=1
+
+ˆSi. (18) To sample from qi−1, the Markov chains use samples from the previous step as starting points, also known as seeds. It should be noted that this kind of sampling has some drawbacks. Markov chains typically require a burn-in period before they begin sampling from the stationary distribution. Also, the samples are correlated and so the resulting estimators usually require more samples for the same variance when compared to independent samples. When η1 
+
+> i
+
+is used as intermediate density sequence, the resulting method is Subset Simulation [15]. When η2 
+
+> i
+
+is used, the resulting method is called and SIS [16]. For more explicit details of SIS reliability methods, the reader is directed to the references cited in this section. 
+
+2.5. Challenges and Motivating Examples 
+
+The limit state surface and the design point are two important concepts in reliability analysis. The former is defined as the set Λ = {x ∈ X : g(x) = b} and the latter is defined as the point x ∈ Λ closest to the origin, assuming that the input distribution is a standard multivariate normal. An equivalent definition is that it is the point in the failure region with the highest probability density. This means, particularly in the case of a low-dimensional input space, that the neighbourhood of the design point often contributes a significant amount to the probability of failure. It follows that any variance reduction technique that fails to populate neighbourhoods that contribute substantially to the probability of failure, including the neighbourhood of the design point when it is dominant, will tend to underestimate the probability of failure. In this work, a niche is regarded as important when its associated region contributes materially to the probability of failure, not merely because it contains a local optimum of the performance function. As has been noted before [18, 19], sequential adaptive IS methods like CE and SIS can be interpreted heuristically as performing a stochastic search toward higher-performance regions. As these algorithms progress, the intermediate distributions increasingly favour samples with higher performance, so the sample population tends to move toward regions that are closer to, or inside, the failure region. This behaviour is 6encouraged both by the intermediate densities themselves and by generating new samples in the neighbour-hoods of currently high-performance samples. This type of greedy search is often a sensible heuristic for locating the failure region. However, performance functions with features such as rapidly changing output and multiple local optima, can lead SAIS methods astray, ultimately resulting in no samples in the neigh-bourhood of the design point and an underestimation of the probability of failure. The difficulty is not that failure samples cannot be generated in principle for such examples, but rather that sequential adaptive methods such as SIS may fail to discover and populate the relevant failure-region neighbourhoods reliably without additional structural information. In order to understand the behaviour of SAIS methods, it is useful to consider the following dynamical system, which can be defined for any differentiable performance function g,
+
+dx(t)
+
+dt = ∇g(x(t)) , (19) where t is a time-like variable and x(t) is a solution trajectory [32]. For any point x0 in the input space, there exists an associated solution trajectory with initial condition x(0) = x0 and terminal point x(τ ) = xτ
+
+where τ = min( {t ∈ R : g(x(t)) ≥ 0}). The way in which SAIS methods use samples of one step to create samples of the next step can be loosely approximated by the following informal procedure. First, randomly choose a sample from the current step, where the selection is done so that samples with higher performance are more likely to be chosen. Next, travel along the associated solution trajectory of the chosen sample for some amount of time. The point reached on the solution trajectory after this time is a sample for the next step. Iterate this process to generate the necessary number of samples. Loosely speaking, from step to step, SAIS methods tend to travel in the direction of the solution trajectories of the samples in the current step with the highest performance. Other approaches seek to improve the exploration of rare-event regions by exploiting additional geometric or dynamical structure. For example, Hamiltonian Monte Carlo methods have been adapted to Subset Simulation [33], and more recent energy-based approaches have also been proposed for rare-event probability estimation [34]. Such methods are complementary to the present work, but they rely on structure that is not assumed to be available here. In contrast, NIS is designed for black-box reliability problems in which gradient information is not assumed accessible. Following the above discussion, two performance functions with challenging topology are considered, both found in [18]. Note that both have been multiplied by −1, since this paper defines the failure region as inputs which have performance greater than the critical threshold. The first one is the piecewise linear performance function, 
+
+gpwl (x) = − min( g1(x1), g 2(x2)) , where 
+
+g1(x1) = 
+
+(
+
+4 − x1 x1 > 3.5,
+
+0.85 − 0.1x1 x1 ≤ 3.5,g2(x2) = 
+
+(
+
+0.5 − 0.1x2 x2 > 2,
+
+2.3 − x2 x2 ≤ 2.
+
+(20) Figure 1a shows a plot of the piecewise linear function, with the reliability problem’s limit state surface and design point, along with the solution trajectories of two points that have been sampled from the input distribution. Algorithm runs that do or do not produce samples in the neighbourhood of the design point will be referred to as non-degenerate and degenerate respectively. Note that one of the solution trajectories is degenerate and the other is non-degenerate. Due to the topology of the piecewise linear function, samples from the input distribution with degenerate solution trajectories will tend to have a relatively high performance. According to the above heuristic, this implies that SAIS methods acting on the piecewise linear function will struggle to produce samples in the neighbourhood of the design point. Figure 2a shows a degenerate SIS run on the piecewise linear function. It should be noted that SAIS methods are stochastic algorithms. Thus, when acting on challenging performance functions, some percentage of the time they will produce non-degenerate runs, and the rest of the time they will produce degenerate runs. It follows that the probability density of a SAIS estimator in these 7Limit state surface 
+
+> Design point
+> Solution trajectory
+> Initial sample
+> Terminal point 4
+> 2
+> 0
+> 2
+> 4
+> 6
+
+x4
+
+> 2
+> 0
+> 2
+> 4
+> 6
+
+x      
+
+> 1
+> 0
+> 1
+> 2
+> Performance (a) Piecewise linear function. 6420246
+
+x
+
+> 8
+> 4
+> 0
+> 4
+> 8
+
+x 
+
+> 20
+> 10
+> 0
+> Performance (b) Meatball function.
+> Figure 1: Solution trajectories of points sampled from the input distribution.
+
+cases is bi-modal, with one mode corresponding to the degenerate case, and the other mode corresponding to the non-degenerate case. Figure 3 shows a kernel density estimate of 100 SIS estimators acting on the piecewise linear function, along with a correct reference probability of failure. Despite the fact that the mean of the estimators may be an acceptable estimate for the probability of failure, the variance of the distribution makes the SIS estimator in this situation impractical. The second performance function considered is the meatball function, 
+
+gmb (x1, x 2) = − 30 
+
+ 4( x1+2) 2 
+
+> 9
+
++ x22
+
+> 25
+
+2
+
++ 1 
+
+− 20 
+
+ (x1−2.5) 2 
+
+> 4
+
++ (x2−0.5) 2
+
+> 25
+
+2
+
++ 1 + 5 .
+
+(21) Figure 1b shows a plot of this function, with the limit state surface and design point, along with the solution trajectories of two points that have been sampled from the input distribution. In this case, it is very unlikely that any sample from the input distribution will have a non-degenerate solution trajectory. This is due to the local minima between the origin and the design point. This property distinguishes the meatball function as a more challenging performance function than the piecewise linear function for SAIS methods. If the algorithm is not even able to produce one sample with a non-degenerate solution trajectory, it has very little chance of populating the neighbourhood of the design point. Figure 2b shows a degenerate SIS run using the meatball function. 8Design point 
+
+Samples 
+
+Limit state surface 4 2 0 2 4 6
+
+x1
+
+> 4
+> 2
+> 0
+> 2
+> 4
+> 6
+> x2
+
+(a) Piecewise linear function. 6 4 2 0 2 4 6
+
+x1 
+
+> 8
+> 6
+> 4
+> 2
+> 0
+> 2
+> 4
+> 6
+> 8
+> x2
+
+(b) Meatball function. 
+
+Figure 2: Degenerate SIS runs on performance functions with challenging topology. 10 8 10 7 10 6 10 5 10 4 10 3 10 2
+
+Failure Probability Estimate 
+
+0.00 
+
+0.05 
+
+0.10 
+
+0.15 
+
+0.20 
+
+0.25 
+
+0.30 
+
+0.35 
+
+> Denstiy
+
+Ref Probability 
+
+Figure 3: Kernel density estimate of the SIS estimator for the piecewise linear function. 
+
+93. Niching Initial Sampling (NInitS) 
+
+3.1. Niching 
+
+Informally, let a locally high density region (LHDR) be a subset of the failure region with the following property: if a Markov chain with the optimal importance density as its stationary distribution is started within a LHDR, then it is highly likely to remain in that LHDR as it travels through the input space. A LHDR should be minimal in the sense that it should not contain a LHDR as a subset. In evolutionary multi-modal optimisation, a niche generally refers to a neighbourhood of a local optimum. In the reliability analysis context, a LHDR is analogous to a local optimum. Again, informally, let a niche of an LHDR be a subset of the failure region such that if a Markov chain with the optimal importance density as its stationary distribution is started within it, then the Markov chain would be highly likely to enter the LHDR as it travels through the input space. For a given reliability problem, some niches may contribute significantly to the failure probability, whilst others may contribute only marginally. These will be referred to as important and 
+
+unimportant niches respectively. If a reliability method is able to sample from and model all the LHDRs of the important niches, then it should produce a robust estimator for the probability of failure. Given a set of samples and some objective function, a niching technique can be used to determine which samples belong to which niche. Many niching techniques rely on the Euclidean metric [23]. Unfortunately this metric loses utility in high dimensions [35], hence a lot of research is focussed on low-dimensional objective functions [36]. These techniques would not be satisfactory, since the goal is to make NInitS applicable in high dimensions. Hill valley tests are a class of niching method that detect valleys in the objective function between two samples [37]. The idea is that two points belong to two separate niches if they exist on two hills of an objective function, separated by a valley. Most hill valley tests are able to perform well in high dimensions. However, they do require additional objective function evaluations. In this work, the following simple hill valley test is defined for two samples x, y ∈ Rd,
+
+χ(x, y) = 
+
+(
+
+1 if g   x+y
+
+> 2
+
+ ≥ min( g(x), g (y)) ,
+
+0 otherwise. (22) Note that a 1 is returned when no valley is detected. This midpoint-based test is intentionally parameter-free and is used here as a low-cost heuristic for distinguishing niches without introducing additional user-defined tuning parameters. More elaborate hill valley tests could be considered, but they would generally require additional performance evaluations and are therefore left for future work. This hill valley test will be useful, as it allows NInitS to avoid exploring a niche it has already populated. The motivation for the NInitS procedure is that it should ideally produce exactly one sample in each important niche. Any more than one sample per important niche would likely be a waste of computational resources. 
+
+3.2. Initial Sampling 
+
+The purpose of an initial sampling procedure in IS reliability methods is to produce failure samples that can be used to fit an importance distribution directly or, as is the case for the proposed NIS, Markov chain seeds. The most robust initial sampling procedure is to sample from the input distribution and to reject samples not in the failure region [13]. Of course, for small failure probabilities this approach is inefficient. Though not explicitly a distinct initial sampler, the first step in [21] entails sampling from a scaled input distribution. This is only effective if the scaling is able to increase the probability of failure. The optimisation method in [24] can efficiently locate multiple niches by adding a bulge to the limit state function. However, it does require gradient information. The technique in [14] is gradient-free, though in the case of multiple niches, it requires prior expert knowledge regarding the performance function. The purpose of NInitS is not to generate samples from a single target distribution. Rather, it is a heuristic exploration procedure whose output is a set of representative failure samples intended to seed Markov chains in distinct important niches of the failure region. More recently, it is common to use a SIS algorithm for the initial sampling. For instance, [31] uses SuS for initial sampling and [11] uses a density extrapolation approach combined with SuS [38]. As discussed 10 previously, SIS methods can fail to populate all of the important niches. Another approach taken in [11] to deal with challenging performance functions is to sample uniformly within some predetermined bounded area. This would not be a viable strategy for a reliability problem with a high-dimensional input space. The NInitS procedure can be thought of as a series of SuS runs, where each run only uses one chain per step. These runs will henceforth be referred to as chain runs . To begin, one initial seed is sampled from the input distribution. Next, a Markov chain is started from that seed and run until it produces p−1 ∈ N
+
+samples, where p ∈ (0 , 1) is a user defined parameter known as the level probability. The Markov chain should have η10 as its stationary distribution, where the initial intermediate threshold is b0 = −∞ . The performance is then evaluated for all of the samples, and the sample x′ with the highest performance is identified. The sample x′ is then chosen as the seed for the next Markov chain, this time with stationary distribution η11 , determined by b1 = g(x′). Once more, this new chain produces p−1 samples. The chain run continues this way until a stopping condition is triggered. The algorithm then samples an initial seed from the input distribution and the entire process restarts. Within each chain run, the samples are generated by Markov chains whose stationary distributions are the successive intermediate failure densities. However, the collection of samples produced across all runs is not interpreted as a sample from one common distribution; instead, it is used to identify and represent distinct important niches. The Markov chain algorithm used in this paper is the Modified Metropolis Algorithm, proposed in the original SuS paper [15]. This algorithm is specifically designed to be efficient in high dimensions. It does this by taking advantage of the structure of the intermediate failure densities, assuming that the input distribution is the standard multivariate normal. Specifically, it takes advantage of the fact that the input dimensions are independent, that is, f (x) = Qdi=1 fi(xi) where the fi(xi) are standard univariate normal probability density functions. The Modified Metropolis Algorithm requires a proposal distribution ξ(·| x),dependent on the current state of the chain, x. The implementation used for this paper uses the normal distribution, where σ is a user-defined proposal scale parameter. The process is summarised in Algorithm 1. Note that even if the input distribution is not the standard multivariate normal, NInitS is still applicable, as long as a Markov chain algorithm that can sample efficiently from the resulting intermediate densities can be identified. 
+
+Algorithm 1 Modified Metropolis Algorithm 
+
+Input 
+
+Sample: x ∈ Rd
+
+Parameters 
+
+Stationary distribution: fs ∝ 1F (x) Qdi=1 fi(xi)
+
+Proposal distribution: ξ(·| x) : Rd → R 
+
+> 1:
+
+procedure ModifiedMetropolis (x; fs) 
+
+> 2:
+
+for 1 ≤ i ≤ d do  
+
+> 3:
+
+Sample x′ 
+
+> i
+
+∼ ξ(·| xi) 
+
+> 4:
+
+θ ← min(1 , f i(x′
+
+> i
+
+)/f i(xi))  
+
+> 5:
+
+if bernoulli (θ) = 0 then  
+
+> 6:
+
+x′ 
+
+> i
+
+← xi 
+
+> 7:
+
+x′ ← (x′
+
+> 1
+
+, . . . , x ′
+
+> d
+
+) 
+
+> 8:
+
+if 1F (x′) = 0 then  
+
+> 9:
+
+x′ ← x 
+
+> 10:
+
+return x′
+
+A Markov chain run can be stopped in any of the following scenarios. Firstly, if the chain contains any samples in the failure region. Secondly, in some cases, a chain run might not be able to produce failure samples in a reasonable amount of steps. This could happen if the chain run becomes stuck in a local maximum of the performance function [39]. To account for this, a chain run is stopped if bm = bm−ncon 
+
+where bm is the latest defined intermediate threshold and ncon is a user defined parameter known as the 11 convergence limit. Thirdly, a chain might make very slow progress towards the failure region, likely implying the region of the failure region it is approaching makes a negligible contribution to the probability of failure. If a chain run consists of more than nlen chains, then it is stopped, where the length limit nlen is a user defined parameter. Let X denote a chain run and let ChainStop (X) denote any combination of the three previously described stopping conditions. That is, ChainStop (X) returns True if any of the stopping conditions are triggered, and False otherwise. When a chain run is stopped and it contains samples in the failure region, the failure sample that was last to be generated is added to a set of initial samples, and a set of representatives, denoted I and R respectively. Note that I is the final output of the entire NInitS algorithm. If a chain run is stopped and there are no samples in the failure region, then the sample with the highest performance is added to the set of representatives. The hill valley test can be used to define a hill valley niche for a point x ∈ Rd,
+
+χx = {y ∈ Rd : χ(x, y) = 1 }. (23) Together with the set of representatives, the hill valley niche can be used to define the admissible region of the input space, A = Rd \ S
+
+> x∈R
+
+χx . The admissible region A represents the subset of the input space that NInitS has not yet explored. For the entire run of the algorithm, if a sample is not in A, then it is rejected. If the initial seed sampled from the input distribution is rejected, then a new initial seed is sampled from the input distribution. If a sample from a Markov chain is rejected for not being in A, then the chain returns to its previous state. Let {σi}nnoise  
+
+> i=1
+
+be a user-defined noise sequence of increasing scales, i.e. σi < σ i+1 . When an initial seed is sampled from the input distribution, it may be rejected for not being in the admissible region. When this occurs, the algorithm will sample a new point from the input distribution. On the ith attempt at producing an initial seed, the algorithm adds noise, N (0, Iσ 2 
+
+> i
+
+), where I is the n-dimensional identity matrix. After 
+
+nnoise attempts, the entire NInitS algorithm terminates and returns the initial samples it found. Note that the sequence resets after every successful attempt. The purpose of adding noise is to prevent the algorithm from becoming stuck in a hill valley niche that dominates the high-density region of the input distribution. The algorithm can also terminate if the maximum number of initial samples, a user defined parameter denoted as Imax , is ever surpassed. The NInitS procedure is summarised in Algorithm 2. For the numerical examples in this work, if the end of noise sequence is reached, and there are no initial samples detected, the noise sequence is simply restarted. 
+
+> Algorithm 2: Niching Initial Sampling
+
+Input 
+
+Performance function: g : Rd → R
+
+Parameters 
+
+Level probability: p ∈ (0 , 1] 
+
+Input distribution: f : Rd → R
+
+Noise sequence: σi > 0 for 1 ≤ i ≤ nnoise 
+
+Converge limit: ncon ∈ N
+
+Length limit: nlen ∈ N
+
+Maximum initial samples: Imax ∈ N
+
+Subroutines 
+
+ModifiedMetropolis : Rd → Rd
+
+ChainStop (X) ∈ { True , False } 
+
+> 1:
+
+procedure NichingInitialSampling (g) 
+
+> 2:
+
+n ← p−1 
+
+> 3:
+
+R, I ← ∅ , ∅ 
+
+> 4:
+
+while |I| ≤ I max do  
+
+> 5:
+
+A ← Rd \ S
+
+> x∈R
+
+χx 
+
+> 6:
+
+SeedFound ← False 
+
+12 7: for 1 ≤ i ≤ nnoise do  
+
+> 8:
+
+if SeedFound is False then  
+
+> 9:
+
+x11 ∼ f + N (0, Iσ 2 
+
+> i
+
+) 
+
+> 10:
+
+if 1A(x11) = 1 then SeedFound ← True  
+
+> 11:
+
+if SeedFound is False then return I 
+
+> 12:
+
+F ′, X, k ← Rd, ∅, 0 
+
+> 13:
+
+while ChainStop (X; ncon , n len ) is False do  
+
+> 14:
+
+k ← k + 1  
+
+> 15:
+
+fs ← f (x)1F ′∩A (x) 
+
+> 16:
+
+for 2 ≤ i ≤ n do  
+
+> 17:
+
+xki ← ModifiedMetropolis (xki−1; fs) 
+
+> 18:
+
+X ← (( xji )ni=1 )kj=1  
+
+> 19:
+
+i∗ ← argmax i{g(xki )} 
+
+> 20:
+
+b′ ← g(xki∗ ) 
+
+> 21:
+
+F ′ ← { x ∈ Rd : g(x) ≥ b′} 
+
+> 22:
+
+xk+1 1 ← xki∗ 
+
+> 23:
+
+if b′ ≥ b then  
+
+> 24:
+
+i∗ ← max {j : g(xki ) ≥ b} 
+
+> 25:
+
+I ← I ∪ { xki∗ } 
+
+> 26:
+
+R ← R ∪ { xki∗ } 
+
+> 27:
+
+else  
+
+> 28:
+
+R ← R ∪ { xk+1 1 } 
+
+> 29:
+
+return I
+
+Figure 4 shows the result of running the NInitS procedure on the piecewise linear function and the meatball function introduced in Section 2. The piecewise linear function has two niches, at the top and the right of Figure 4a. The meatball function has four niches, at the top, bottom, left and right of Figure 4b. Since the piecewise linear function is relatively simpler, the niching initial sampler is able to produce exactly one initial sample in each of the two niches. Due to the relatively complex limit state surface of the meatball function, the NInitS procedure yields more than one initial sample in some of the niches. In the final mixture importance distribution described in the next section, initial samples in the same niches will correspond to overlapping mixture components. Note also that some of the initial samples are the result of very short chain runs. This is because the initial seed of those chain runs likely had a lot of noise applied to them. 
+
+4. Niching Importance Sampling (NIS) 
+
+The NInitS procedure introduced in Section 3.1 is designed to be integrated into NIS, an importance sampling framework. After NInitS generates initial samples, the algorithm proceeds iteratively, and each iteration comprises three steps. First, Markov chains are run, starting from each of the initial samples. Next, an importance distribution is fit using the Markov chain samples. Finally, importance samples are generated from the importance distribution and used to estimate the probability of failure. This process is repeated until a stopping condition is triggered and the algorithm terminates. On some of the iterations, depending on a condition that will be described later, the Markov chains are not updated and no new importance distribution is fit. Instead, the importance distribution from the previous iteration generates an additional batch of importance samples that are combined with the previous batch, in order to yield a more accurate estimate for the probability of failure. 
+
+4.1. Updating Markov Chains 
+
+Let Kinit = |I| initial samples be used as seeds for Markov chains with the optimal importance density as the stationary distribution. Modified Metropolis is again used as the Markov chain algorithm for this step. The Kinit chains will be denoted as (( xki )nk
+
+> i=1
+
+)Kinit  
+
+> k=1
+
+, where nk denotes the length of the kth chain. On the 13 Design point             
+
+> Markov chain
+> Initial sample
+> Limit state surface 420246
+> x1
+> 4
+> 2
+> 0
+> 2
+> 4
+> 6
+> x2(a) Piecewise linear function. 6420246
+> x1
+> 8
+> 6
+> 4
+> 2
+> 0
+> 2
+> 4
+> 6
+> 8
+> x2(b) Meatball function.
+> Figure 4: Chain runs of niching initial sampling procedure for challenging performance functions.
+
+first iteration, immediately after NInitS has finished, nk = 1 for 1 ≤ k ≤ Kinit , since each chain consists of only an initial sample. Some care must be taken when deciding how many steps each Markov chain should take. A large amount of steps could be needlessly computationally expensive, whereas too few could lead to the importance distribution being a poor approximation of the optimal importance density. There are a few factors to consider. The first factor is the dimension of the problem. In general, the higher the dimension of the reliability problem, the more samples will be required in order to fit an importance distribution. The second factor is the number of important niches. Since samples from one niche offer very little information about any other niche, a reliability problem with more important niches will require more samples. The estimated number of effective niches, denoted ˆKeff , will quantify this idea. Finally, some chains may be exploring regions of higher density than others, and should be assigned more steps. In a problem with only one niche, this would not be necessary, since the Markov chains would automatically distribute the samples correctly across the failure region. However, with multiple niches, the chains experience ergodic problems, so they may sample different areas of the failure region disproportionate to their contribution to the probability of failure. Let the chain weights be denoted as α1, . . . , α K with P 
+
+> k
+
+αk = 1 .To incorporate all this information into one heuristic, first the total budget is calculated, 
+
+T = M · ˆKeff · max( d, 25) , (24) where M is a user-defined parameter called the budget multiplier. The dimension component is limited from below by 25 , since for low dimensions this heuristic was empirically found to be too small otherwise. The kth chain is then updated by ⌊αkT ⌋ steps. In the first iteration, there is not enough information to accurately determine the number of effective niches and the chain weights, thus they are set conservatively as ˆKeff = 1 and αk = 1 /K init for 1 ≤ k ≤ Kinit . The reason the estimated number of effective niches is not set to Kinit is that multiple initial samples may be in the same niche, and not all the populated niches may be important. Information gained during the first iteration will be used to set these parameters more accurately for the second iteration. Though not considered in this work, the effective number of samples each chain produces could also be used to help determine the total budget. 14 Limit state surface             
+
+> Design point
+> Markov chain samples 420246
+> x1
+> 4
+> 2
+> 0
+> 2
+> 4
+> 6
+> x2(a) Piecewise linear function. 6420246
+> x1
+> 8
+> 6
+> 4
+> 2
+> 0
+> 2
+> 4
+> 6
+> 8
+> x2(b) Meatball function.
+> Figure 5: Markov chains of the niching importance sampling procedure after one update, applied to challenging performance functions.
+
+Figure 5 shows the result of updating the Markov chains for the first time on the meatball and piecewise linear performance functions. Notice that in both cases, the neighbourhood of the design point has been populated. However, due to the ergodicity problems, there are also many samples in unimportant niches in both examples. At this stage, NIS is not aware of the relative importance of each niche. Note also that for the meatball function, though seven initial samples were used as seeds, as shown in Figure 4b, it is now more clear in Figure 5b that there are only four niches as the chains have begun to overlap. This idea will be captured by the estimation of the effective number of components later in the algorithm. 
+
+4.2. The von Mises-Fisher-Nakagami Mixture (vMFNM) 
+
+The choice of the parametric family of probability densities to consider is simplified by the assumption that the input distribution is a standard multivariate normal. If the distance of a point to the origin is referred to as its radius, then in high dimensions the probability density of the standard multivariate normal is highly concentrated around points with radius √d [40]. The fact that most of the density exists on a manifold, sometimes called the important ring, with lower dimensionality than the input space can be exploited to make the process of constructing the importance distribution more efficient. To do this, a parametric family of probability densities can be chosen to naturally align with the important ring. The result is that relatively few parameters are required to describe the parametric family, and consequently, less samples are required to fit those parameters. This paper follows the approach suggested in [17], of fitting a von Mises-Fisher-Nakagami mixture (vMFNM) model. It should be noted that this approach is a generalisation of the strategy used in [30], where a von Mises-Fisher mixture (vMFM) model is considered. The vMFM model assumes that the failure samples have radius √d, which becomes inaccurate in low dimensions. Conversely, the vMFNM distribution explicitly models the radius of the failure samples. The vMFNM model is most naturally described in polar coordinates. Each x ∈ Rd can be rewritten as x = ra where r ∈ R is a scalar radius and a ∈ Rd is a unit direction vector. The direction and radius are modelled separately, by the von Mises-Fisher (vMF) distribution and Nakagami distribution respectively. Although the main motivation for this family is its 15 suitability for high-dimensional standard normal spaces, the additional Nakagami radius model also makes it applicable in the lower-dimensional settings considered in the numerical examples. The vMF distribution is given by, 
+
+fvMF (a; μ, κ ) = Cd(κ) exp( κμT a), (25) where μ is the mean direction, with ∥μ∥ = 1 , and κ ≥ 0 is the concentration parameter. The normalising constant Cd(κ) is defined as 
+
+Cd(κ) = κd/ 2−1
+
+(2 π)d/ 2Id/ 2−1(κ) , (26) where Ik is the modified Bessel function of the first kind with order k. The Nakagami distribution is given by 
+
+fN(r; m, Ω) = 2mm
+
+Γ( m)Ω m r2m−1 exp 
+
+
+
+− m
+
+Ω r2
+
+, (27) where m ≥ 0.5 is the shape parameter, Ω > 0 is the spread parameter and Γ is the gamma function. Together, these distributions define the von Mises-Fisher-Nakagami (vMFN) distribution, 
+
+fvMFN (r, a; m, Ω, μ, κ ) = fN(r; m, Ω) · fvMF (a; μ, κ ). (28) Finally, in order to be capable of modelling failure regions with multiple important niches, a mixture distribution is defined. This requires a set of K × 5 parameters, 
+
+ν = {νk = ( πk, m k, Ωk, μk, κ k) : 1 ≤ k ≤ K}, (29) where the πk are the component weights with P 
+
+> k
+
+πk = 1 and K is the number of components. Let a vMFN component be defined as 
+
+fvMFNc (r, a; νk) = πk · fvMFN (r, a; mk, Ωk, μk, κ k). (30) The vMFNM distribution is given as 
+
+fvMFNM (r, a; ν) = 
+
+> K
+
+X
+
+> k=1
+
+fvMFNc (r, a; νk). (31) The vMFNM family is not assumed to represent the optimal importance density exactly; rather, it is used as a flexible parametric approximation from which importance samples can be generated efficiently. Any mismatch between the fitted mixture and the optimal importance density therefore affects the efficiency of the resulting estimator, rather than replacing the weighted importance sampling estimate itself. 
+
+4.3. Expectation-Maximisation (EM) 
+
+The samples from the Markov chains can be used to fit the mixture distribution. In this section, all the samples from all the Markov chains will be considered as one set of collective chain samples, written in polar coordinates as Kinit [
+
+> k=1
+> nk
+
+[
+
+> i=1
+
+xki = ( riai)Ni=1 , where N =
+
+> Kinit
+
+X
+
+> k=1
+
+nk. (32) The parameters can be fit to the samples by minimising the relative cross entropy between the importance distribution and the optimal importance density. Following the cross entropy approach in Section 2.3, an approximate objective function can be derived, 
+
+L(ν) = 1
+
+N
+
+> N
+
+X
+
+> i=1
+
+ln( fvMFNM (ri, ai; ν)) . (33) 16 Of course, this optimisation problem is equivalent to maximum likelihood estimation for a vMFNM distri-bution. An EM algorithm, which is an iterative algorithm where each iteration comprises an expectation step (E-step) and maximisation step (M-step), is typically used to optimise this type of objective function. This section follows closely the EM approach detailed in [17]. However, since the Markov chains sample directly from the optimal importance density, no importance weights appear in the approximate cross entropy objective function. This means that the task can be considered a regular maximum likelihood estimation problem, rather than a weighted maximum likelihood estimation problem. This is significant, since as has been noted previously [30, 31], the importance weights can become degenerate in high dimensions. That is, the importance weights can become very large for very few samples, and so only very few points contribute to the estimation of the parameters. On the lth iteration of the EM algorithm, the estimated parameters are denoted as, 
+
+ˆν(l) = { ˆν(l) 
+
+> k
+
+= (ˆ π(l) 
+
+> k
+
+, ˆm(l) 
+
+> k
+
+, ˆΩ(l) 
+
+> k
+
+, ˆμ(l) 
+
+> k
+
+, ˆκ(l) 
+
+> k
+
+) : 1 ≤ k ≤ K}. (34) In the lth E-step, the objective function is evaluated as L(ν(l)). Note that the objective function is an approximation of an expectation. Next, the latent component label of each sample is estimated. This assignment can be done with the posterior probabilities, 
+
+γk(r, a; ν) = fvMFNc (r, a; νk)
+
+fvMFNM (r, a; ν) . (35) Let γ(l) 
+
+> i,k
+
+= γk(ri, ai; ˆ ν(l)) for 1 ≤ k ≤ K and 1 ≤ i ≤ N . On iteration l + 1 , the M-step attempts to maximise the objective function, given the posterior probabilities from iteration l. Using auxiliary variables, 
+
+¯Rk = min ∥ PNi=1 γ(l) 
+
+> i,k
+
+· ai∥
+
+PNi=1 γ(l)
+
+> i,k
+
+, 0.95 
+
+!
+
+, (36) 
+
+μj,k =
+
+PNi=1 γ(l) 
+
+> i,k
+
+· rji
+
+PNi=1 γ(l)
+
+> i,k
+
+, (37) the following update rules were derived in [17]: 
+
+ˆπ(l+1)  
+
+> k
+
+=
+
+> N
+
+X
+
+> i=1
+
+γ(l)
+
+> i,k
+
+, (38) 
+
+ˆμ(l+1)  
+
+> k
+
+=
+
+PNi=1 γ(l) 
+
+> i,k
+
+· ai
+
+∥ PNi=1 γ(l) 
+
+> i,k
+
+· ai∥ , (39) 
+
+ˆκ(l+1)  
+
+> k
+
+= ¯Rk(d − ¯R2
+
+> k
+
+)1 − ¯R2
+
+> k
+
+, (40) 
+
+ˆΩ(l+1)  
+
+> k
+
+= μ2,k , (41) 
+
+ˆm(l+1)  
+
+> k
+
+= μ22,k 
+
+μ4,k − μ22,k 
+
+, (42) for 1 ≤ k ≤ K. The Lagrangian multiplier method can be used to analytically derive the rules for π, μ and 
+
+Ω. This is not possible for m and κ, and thus the updating rules are approximated using estimators that have been shown to give empirically good results [41, 42]. The upper limit is placed on ¯R for numerical stability. At each step, if |L( ˆ ν(l+1) ) − L( ˆ ν(l))| < 10 −5 · | L( ˆ ν(l+1) )|, then the algorithm is stopped, and the final parameter estimator is relabelled as 
+
+ˆν(l+1) = ˆ ν = { ˆνk = (ˆ πk, ˆmk, ˆΩk, ˆμk, ˆκk) : 1 ≤ k ≤ K}. (43) 17 For the sake of use in the next section, the final posterior probabilities are also relabelled γi,k = γ(l+1)  
+
+> i,k
+
+.Note that since a set of parameters is required to compute the posterior probabilities, and the posterior probabilities are required to estimate a set of parameters, some initial set of posterior probabilities must be decided upon starting the EM algorithm. Determining the initial posterior probabilities is not typically straightforward and the performance of the EM algorithm can be sensitive to this choice. Defining the initial posterior probabilities requires the number of components, K, to also be decided upon. If K is too small, then some important niches may be missed. However, if K is too large, there may not be enough samples to fit all the parameters accurately. Even if K can be chosen appropriately, a poor initial assignment of the samples to components could negatively affect the performance of the EM algorithm. In some cases, prior information regarding the reliability problem, such as the number of components, can be used to aid the process. However, in this paper, it is assumed no such information is available. Clustering methods like DBSCAN [43] or k-means [44] could be used to decide the initial posterior probabilities. However, these algorithms have their own user-defined parameters, and will often perform poorly in high dimensions because of their reliance on the Euclidean metric [35]. Because NIS uses NInitS, this task is considerably simplified. Because of NInitS, the number of chains, Kinit , is a reasonable upper bound for the optimal number of components, and so K is set to Kinit . Additionally, it is natural to initially assign samples from the same chain to the same corresponding component. Formally, 
+
+γ(0)  
+
+> i,k
+
+=
+
+(
+
+1 if riai ∈ (xkj )nk
+
+> j=1
+
+,
+
+0 otherwise , (44) for 1 ≤ k ≤ K and 1 ≤ i ≤ N .
+
+4.4. Component Weight Correction 
+
+Because of the ergodicity problems that multiple niches can cause for Markov chains, the component weight estimate from the previous section is likely to be inaccurate. In this section, one last adjustment is made to the component weight estimate, whilst the other estimators are left as they are. One approach could be to use the chain runs from the NInitS procedure. The idea is that each chain run is actually a run of SuS, hence the estimator ˆPSIS in Equation 18 could be used to estimate the size of each niche. Unfortunately, due to the fact that only a single chain is used at each step and that the initial seed has noise applied to it, this estimator will also yield an inaccurate result. Instead, the cross entropy optimisation problem defined in Equation 13 is considered with respect to the optimal importance density and with an additional importance weight term, 
+
+ν′ = argmax 
+
+> ν
+
+Eq∗
+
+
+
+ln( h(x; ν)) f (x)
+
+q∗(x)
+
+
+
+. (45) The parameter set fit in the previous section can be used to approximate the optimal importance density, 
+
+q∗(·) ≈ fvMFNM ( · ; ˆ ν). This approximation, together with the collective chain samples, may be used to approximate the expectation, 
+
+ˆν′ = argmax 
+
+> ν
+
+1
+
+N
+
+> N
+
+X
+
+> i=1
+
+ln( fvMFNM (ri, ai; ν)) wi, (46) with wi = f (ri, ai)/f vMFNM (ri, ai; ˆ ν) where the input distribution is defined in polar coordinates. The Lagrangian multiplier method may then be used again to derive a weighted updating rule for the component weights, 
+
+ˆπ′ 
+
+> k
+
+=
+
+PNi=1 wi · γi,k 
+
+PNi=1 wi
+
+, (47) for 1 ≤ k ≤ K. Let ˆνIS denote the parameter set that is the result of replacing ˆπk with ˆπ′ 
+
+> k
+
+in ˆν for 
+
+1 ≤ k ≤ K. For use in the next iteration, the chain weights are also updated, 
+
+αk =
+
+PNi=1 wi · γ(0) 
+
+> i,k
+
+PNi=1 wi
+
+, (48) 18 Limit state surface             
+
+> Design point
+> Importance samples 420246
+> x1
+> 4
+> 2
+> 0
+> 2
+> 4
+> 6
+> x2(a) Piecewise linear function. 6420246
+> x1
+> 8
+> 6
+> 4
+> 2
+> 0
+> 2
+> 4
+> 6
+> 8
+> x2(b) Meatball function.
+> Figure 6: Importance samples generated by the importance distribution fit using niching importance sampling for two chal-lenging performance functions.
+
+for 1 ≤ k ≤ K.
+
+4.5. Importance Sampling Estimate 
+
+Finally, the probability of failure is estimated with an IS estimator. Importance samples are generated from the importance distribution defined by the parameter set learned in the last section, 
+
+{rIS  
+
+> i
+
+aIS  
+
+> i
+
+}NIS  
+
+> i=1
+
+∼ fvMFNM ( · ; ˆ νIS ), (49) where NIS is the number of importance samples, a user-defined parameter. The estimator is obtained by substituting the vMFNM distribution as the importance distribution into Equation 5, 
+
+ˆPIS = 1
+
+NIS 
+
+> NIS
+
+X
+
+> i=1
+
+Wi, with Wi = 1F (rIS  
+
+> i
+
+, aIS  
+
+> i
+
+) · f (rIS  
+
+> i
+
+, aIS  
+
+> i
+
+)
+
+fvMFNM (rIS  
+
+> i
+
+, aIS  
+
+> i
+
+; ˆ νIS ) , (50) where the indicator function has been defined in polar coordinates. Figure 6 shows the importance samples NIS produced when it was run on the piecewise linear function and the meatball function. Note how the vast majority of the samples are in the important niches in both examples, that is, the neighbourhoods of the design points. This is in contrast to the collective Markov chain samples of the first iteration, which are roughly uniformly spread amongst the niches. In later iterations, the chain weights encourage more Markov chain samples to be generated in the important niches. At this point, the effective number of niches is estimated for use in the next iteration. The mutual information between two random variables is a measure of how much information is gained about one random variable by observing the other. In particular, the mutual information of a vMFNM distribution may be defined as 
+
+MI ( ν) = 
+
+Z Z 
+
+fvMFNM (r, a; ν)
+
+> K
+
+X
+
+> k=1
+
+γk(r, a; ν) · ln 
+
+ γk(r, a; ν)
+
+πk
+
+
+
+drd a. (51) 19 In this case, the two random variables considered are the latent component labels and the samples from the vMFNM distribution. The more uniform the component weights, and the less the components overlap, the higher the mutual information will be. The exponential of the mutual information is bounded between 1
+
+and K, and is often used to represent an effective number of components. In this work, the exponential of the mutual information will be referred to as the effective number of niches, which can be estimated with an MC estimator, 
+
+Keff = exp MI( ˆ νIS ) (52) 
+
+ˆKeff = exp 
+
+"
+
+1
+
+NIS 
+
+> NIS
+
+X
+
+> i=1
+> K
+
+X
+
+> k=1
+
+γIS  
+
+> i,k
+
+· ln γIS 
+
+> i,k
+
+ˆπ′
+
+> k
+
+!# 
+
+, (53) where γIS  
+
+> i,k
+
+= γk(rIS  
+
+> i
+
+aIS  
+
+> i
+
+; νIS ) for 1 ≤ k ≤ K and 1 ≤ i ≤ NIS .The control flow of the NIS algorithm is determined by two CoV estimators, 
+
+ˆδW =
+
+vuut 1
+
+NIS · ˆP 2
+
+> IS
+> NIS
+
+X
+
+> i=1
+
+
+
+Wi − ˆPIS 
+
+2
+
+, (54) 
+
+ˆδIS = ˆδW
+
+√NIS 
+
+, (55) that is, the CoV estimate of the importance weights and the CoV estimate of the IS estimator respectively. At the start of each iteration, it is checked whether ˆδW > δ target  
+
+> w
+
+, where δtarget  
+
+> w
+
+is a user-defined parameter. If the condition is true, then the chains and importance distribution are updated. If the condition is false, the chains are not updated and the importance distribution remains the same as in the previous iteration. In this case, the NIS generated importance samples are combined with the importance samples from the previous iteration. That is, if the algorithm has iterated l times without the importance distribution changing, there will be l · NIS importance samples. Formally, all references to NIS in the equations of this section should be replaced with l ·NIS . Note that ˆδW is updated on every iteration, and so at any point the current importance distribution and importance samples can be discarded. The algorithm continues while ˆδIS > δ target IS , where 
+
+δtarget IS is a user defined parameter. The resulting NIS algorithm is summarised in Algorithm 3. 
+
+5. Numerical Examples 
+
+In this section, NIS is compared with SIS and iCE in a series of numerical experiments. Each algorithm is run 100 times on each performance function considered. The mean estimate for the probability of failure, the CoV of the estimates, and the mean number of performance function evaluations are all reported. Typ-ically, the quality of a reliability method is determined by the number of performance function evaluations required to yield a probability of failure estimator with a given CoV. However, it is possible that when a reliability method is applied to certain challenging reliability problems, the resulting estimator is completely degenerate. By degenerate , it is meant that either the mean of the estimator deviates significantly from the target reference value, or that the CoV is prohibitively large for any reasonable number of performance function evaluations, or both. With the exception of the last example, the performance functions chosen for this section exhibit the type of challenging topology that often causes SAIS methods to produce degenerate estimators. The examples are chosen to serve two complementary purposes. The stylised benchmark func-tions isolate geometric features that are known to be challenging for sequential adaptive methods, while the later application-oriented examples illustrate the behaviour of NIS on more practical reliability problems. The results indicate that NIS is a robust reliability method that consistently avoids degenerate behaviour on several challenging examples, while remaining effective on problems that do not exhibit the same geometric difficulties. NIS has many tuning parameters that need to be set by the user. In order to demonstrate robustness and to avoid over-fitting the algorithm to each individual reliability problem, these parameters are set to 20 Algorithm 3 Niching Importance Sampling 
+
+Input 
+
+Performance function: g : Rd → R
+
+Parameters 
+
+Optimal importance density: q∗ : Rd → R
+
+Budget multiplier: M ∈ R
+
+Estimator CoV target: δtarget IS > 0
+
+Importance weights CoV target: δtarget  
+
+> w
+
+> 0
+
+Importance sample size: NIS ∈ Z
+
+Subroutines 
+
+NichingInitialSampling (g)
+
+ModifiedMetropolis : Rd → Rd 
+
+> 1:
+
+procedure NichingImportanceSampling (g)  
+
+> 2:
+
+I ← NichingInitialSampling (g) 
+
+> 3:
+
+K, K eff , ˆδw, ˆδIS ← |I| , 1, ∞, ∞ 
+
+> 4:
+
+αk = 1 /K for 1 ≤ k ≤ K 
+
+> 5:
+
+while ˆδIS > δ target IS do  
+
+> 6:
+
+if ˆδw > δ target  
+
+> w
+
+then  
+
+> 7:
+
+T ← M · Keff · max( d, 25)  
+
+> 8:
+
+for 1 ≤ k ≤ K do  
+
+> 9:
+
+n′ ← ⌊ αkT ⌋ 
+
+> 10:
+
+for 1 ≤ i ≤ n′ do  
+
+> 11:
+
+xknk +i ← ModifiedMetropolis (xknk +i−1; q∗) 
+
+> 12:
+
+nk ← nk + n′ 
+
+> 13:
+
+Compute ˆν with EM algorithm using updating Equations 35–42  
+
+> 14:
+
+Compute ˆνIS with Equation 47  
+
+> 15:
+
+Compute αk for 1 ≤ k ≤ K with Equation 48  
+
+> 16:
+
+Sample NIS times from fvMFNM ( · ; ˆ νIS ) 
+
+> 17:
+
+Compute ˆPIS with Equation 50  
+
+> 18:
+
+Compute ˆKeff with Equation 53  
+
+> 19:
+
+Compute ˆδw, ˆδIS with Equation 54 and Equation 55  
+
+> 20:
+
+return ˆPIS 
+
+21 the same constant defaults for all the experiments. The defaults are as follows: the proposal scale, σ = 0 .8;the level probability, p = 0 .1; the maximum initial samples, Imax = 10 ; the chain run convergence limit, 
+
+ncon = 20 ; the chain run length limit nlen = 100 ; the noise sequence, (0 .00 , 0.04 , . . . , 3.96 , 4.00) ; the budget multiplier, M = 30 ; the importance weights CoV target, δtarget  
+
+> w
+
+= 5 ; the estimator CoV target, δtarget IS = 0 .1;and the importance sample size, NIS = 250 .Most of the parameters of SIS and iCE were fixed for the numerical experiments as well. In this paper, neither algorithm’s parameters have been discussed in detail, and some parameters have not been discussed at all. For more explicit details, the reader is referred to [16, 17]. For SIS, the adaptive conditional sampler was used along with a level sample size of 2000 , a level probability of 0.1, a burn-in period of 0 and a target CoV of 1.5. For iCE, the vMFNM distribution was used with level size 2000 , maximum iterations set at 
+
+30 and a target CoV of 1.5. The number of initial mixture components was varied, and the results of the parameter value that gave the optimal performance are presented. Given a performance function g with input dimension d, it is possible to construct a performance function with identical probability of failure and a higher input dimension d∗. Provided d∗/d = s is an integer, the higher dimensional performance function is defined as 
+
+g∗(x) = g(z1, . . . , z d), where zi = 1
+
+√s
+
+> i·s
+
+X
+
+> j=( i−1) s+1
+
+xj , for 1 ≤ i ≤ d. (56) This construction is used in the numerical examples to embed a low-dimensional benchmark problem into a higher-dimensional ambient space while preserving the probability of failure. It is intended as a controlled numerical device for studying algorithmic behaviour in higher dimensions, rather than as a physically derived high-dimensional model. For this reason, these examples are complemented below by application examples that are intrinsically high-dimensional. Note that if the input distribution is a standard normal multivariate distribution, each of the zi will have a standard normal distribution. For the purpose of reproducibility, the Python code and data used in this section are available on GitHub at https://github.com/HughKinnear/nis_paper . The SIS, iCE and EM implementations were taken from https://github.com/ERA-Software/Overview . The reference probabilities for each numerical example were estimated with a MC estimator, and are presented alongside the results tables. 
+
+5.1. Piecewise Linear Function 
+
+Table 1 presents the results of the first numerical example, which revisits the piecewise linear function defined in Equation 20. For the 2-dimensional case, all methods have a reasonable mean estimate for the probability of failure. However, SIS has a very large CoV, and while iCE has a much lower CoV, it requires more performance function evaluations than NIS, which has an even lower CoV. The 100 and 300-dimensional cases have similar results, apart from the iCE mean estimate, which underestimates the probability of failure by two orders of magnitude. This is because in these cases, iCE struggles to populate the neighbourhood of the design point in any runs at all. 
+
+5.2. Meatball Function 
+
+The second example revisits the meatball function from Equation 21, and the results are presented in Table 2. For 2 dimensions, SIS yields an entirely degenerate estimator, that is, the mean estimate is a large underestimate and the CoV is very large. Both iCE and NIS produce a good estimator with a low CoV, but NIS is able to do so with a lower number of performance function evaluations. For the higher dimensional experiments, the iCE estimator also becomes degenerate, whilst NIS still performs well. Perhaps surprisingly, in the 300 -dimensional case, SIS begins to populate the neighbourhood of the design point more frequently and hence it is able to produce a good mean estimate. This is likely due to the fact that the process used to increase the dimension of the reliability problem changes how the Markov chains move through the input space. 22 Dimension Method Mean PF CoV PF Mean g evals 2 SIS 4.16 × 10 −5 2.80 1.25 × 10 4
+
+iCE 2.92 × 10 −5 0.35 2.09 × 10 4
+
+NIS 3.05 × 10 −5 0.07 1.44 × 10 3
+
+100 SIS 2.95 × 10 −5 2.31 1.26 × 10 4
+
+iCE 2.73 × 10 −7 0.24 1.64 × 10 4
+
+NIS 3.06 × 10 −5 0.10 9.42 × 10 3
+
+300 SIS 2.83 × 10 −5 2.73 1.25 × 10 4
+
+iCE 2.99 × 10 −7 1.09 3.37 × 10 4
+
+NIS 3.07 × 10 −5 0.11 2.44 × 10 4          
+
+> Table 1: Numerical results for the piecewise linear function. Reference probability 3.18 ×10 −5estimated by MC estimator with 10 8samples. The iCE algorithm used 1initial component.
+
+Dimension Method Mean PF CoV PF Mean g evals 2 SIS 8.01 × 10 −6 5.22 1.47 × 10 4
+
+iCE 1.10 × 10 −5 0.14 3.14 × 10 4
+
+NIS 1.09 × 10 −5 0.08 2.62 × 10 3
+
+100 SIS 8.49 × 10 −6 4.06 1.52 × 10 4
+
+iCE 1.66 × 10 −6 9.95 6.00 × 10 4
+
+NIS 1.09 × 10 −5 0.11 1.80 × 10 4
+
+300 SIS 1.13 × 10 −5 3.50 1.47 × 10 4
+
+iCE 3.48 × 10 −6 9.93 4.34 × 10 4
+
+NIS 1.10 × 10 −5 0.09 5.25 × 10 4       
+
+> Table 2: Numerical results for the meatball function. Reference probability 1.12 ×10 −5estimated by MC estimator with 10 8
+> samples. The iCE algorithm used 4initial components.
+
+5.3. Two-degree-of-freedom Mass Spring System 
+
+The third example deals with the forced vibration of the two-degree-of-freedom (TDOF) mass spring system [45] depicted in Figure 7. The masses are M1 = M2 = 2000 kg, the modal damping ratios are 
+
+η1 = η2 = 0 .02 , and the forcing function acting on M2 is given as P (t) = 2000 sin(11 t)N. Let the stiffness parameters K1 and K2 have independent log-normal distributions with mean 2.5 × 10 5 and CoV 0.2. The standard normal input variables are transformed so that they have the required distribution, K1, K 2 =
+
+T (x1, x 2). Let r1(t; K1, K 2) be the displacement of the first mass at some time t, given stiffness constants. The performance function is 
+
+gtdof (x1, x 2) = max  
+
+> 0≤t≤20
+
+r1(t; K1, K 2) − 0.024 . (57) This reliability problem has a failure region composed of two disconnected sets, where one of the sets is roughly three times larger than the other, with respect to the input distribution. For an accurate estimate of the probability of failure, both sets must be sampled. This is difficult for the SAIS methods to accomplish on every run. However, NIS is able to populate both sets at every run thanks to the NInitS procedure. Table 3 shows the results of the numerical experiments. In the 2-dimensional case, all three methods give a decent mean estimate for the probability of failure. However, SIS has a large CoV, and iCE requires many more performance function evaluations than NIS. In the higher dimensional cases, the CoV of SIS remains large whilst iCE produces a biased estimate. NIS is able to perform well even in high dimensions. 
+
+5.4. Passive Vehicle Suspension Mechanical Model 
+
+This example considers the passive vehicle suspension model depicted in Figure 8. The performance function, taken from [46], models the road-holding ability of a vehicle. The input variables are stiffness c
+
+(kg/cm), tire stiffness ck (kg/cm) and damping coefficient k (kg/cms), all with normal distributions with 23 Figure 7: Two-degree-of-freedom mass spring system. 
+
+Dimension Method Mean PF CoV PF Mean g evals 2 SIS 2.15 × 10 −5 2.62 1.00 × 10 4
+
+iCE 1.87 × 10 −5 0.42 3.94 × 10 4
+
+NIS 2.38 × 10 −5 0.08 1.86 × 10 3
+
+100 SIS 2.10 × 10 −5 3.10 1.00 × 10 4
+
+iCE 7.94 × 10 −6 0.06 1.63 × 10 4
+
+NIS 2.20 × 10 −5 0.12 1.87 × 10 4
+
+300 SIS 2.38 × 10 −5 3.54 1.01 × 10 4
+
+iCE 6.92 × 10 −6 0.19 4.64 × 10 4
+
+NIS 2.20 × 10 −5 0.11 4.66 × 10 4        
+
+> Table 3: Numerical results for the TDOF performance function. Reference probability 2.48 ×10 −5estimated by MC estimator with 10 7samples. The iCE algorithm used 2initial components.
+
+means and standard deviations of (424 , 1480 , 47) and (10 , 10 , 10) respectively. The input standard normal variables are transformed to have the correct distributions, T (x1, x 2, x 3) = ( c, c k, k ), and the performance function is defined as 
+
+gveh (x1, x 2, x 3) = 1 −
+
+ πAV m b0G2k
+
+  ck
+
+M + m − cM
+
+2
+
++ c2
+
+M m + ckk2
+
+M 2m
+
+!
+
+, (58) where A = 1 cm 2/cycle m, b0 = 0 .27 , V = 10 m/s, M = 3 .2633 kg s 2/cm, G = 981 cm/s 2 and m =0.8158 kg s 2/cm. This reliability problem has a topology similar to that of the piecewise linear function, but with more extreme gradient changes. The result is that SAIS methods can frequently produce no failure samples at all. Table 4 shows the results of the numerical experiments and the reference probability of failure. In the 3-dimensional case SIS does not produce any failure samples on any of the 100 experiment runs, whilst iCE and NIS both perform well, although NIS uses much fewer performance function evaluations. For the 99 and 300-dimensional cases, the SIS and iCE estimators are both entirely degenerate, whereas NIS is still able to perform well. 
+
+5.5. Large Portfolio Losses 
+
+In this final example, a financial application [47] is considered. Note that this reliability problem does not have topology that is challenging for SIS and iCE. There is only one important niche. However, the niche itself has complex geometry, so the NInitS procedure will often mistake the one niche for many, which means some performance function evaluations will be wasted. However, as NIS iterates, it is often able to determine that there is only one effective niche, since the importance distribution it yields has many overlapping components. The example was chosen to demonstrate that NIS performs well even under these circumstances. 24 Figure 8: Passive vehicle suspension model. 
+
+Dimension Method Mean PF CoV PF Mean g evals 3 SIS 0 - 1.65 × 10 4
+
+iCE 1.32 × 10 −6 0.25 1.14 × 10 4
+
+NIS 1.42 × 10 −6 0.04 2.22 × 10 3
+
+99 SIS 0 - 1.67 × 10 4
+
+iCE 1.25 × 10 −8 3.82 9.28 × 10 3
+
+NIS 1.28 × 10 −6 0.10 1.17 × 10 4
+
+300 SIS 1.52 × 10 −8 6.52 1.64 × 10 4
+
+iCE 5.36 × 10 −11 9.91 1.21 × 10 4
+
+NIS 1.33 × 10 −6 0.12 2.84 × 10 4        
+
+> Table 4: Numerical results for the vehicle performance function. Reference probability 1.32 ×10 −6estimated by MC estimator with 10 8samples. The iCE algorithm used 1initial component.
+
+Given a random variable Z = ( Z1, . . . , Z n), let the loss function be defined as 
+
+L(Z) = 
+
+> n
+
+X
+
+> j=1
+
+1{Zj ≥0.5√n}. (59) The failure region is defined as the loss function being greater than bn , where three cases are considered: 
+
+b = 0 .45 , n = 30 ; b = 0 .25 , n = 100 ; b = 0 .25 , n = 250 . The random variable Z is defined as a function of other random variables, 
+
+Zj =
+
+
+
+qU + (1 − q2)1/2ηj
+
+
+
+μ−1/2. (60) where U ∼ N (0 , 1) , μ ∼ Gamma (6 , 6) , ηj ∼ N (0 , 9) for 1 ≤ j ≤ n, and q = 0 .25 . The same realisation of U
+
+and μ are used for all Zj . The dimension of this reliability problem is d = n + 2 . These random variables must be transformed into standard normal space. That is, given standard normal input x = ( x1, x 2, . . . , x d),
+
+Z may be rewritten as, 
+
+Zj =
+
+
+
+qx 1 + 3(1 − q2)1/2xj+2 
+
+ F −1Γ (FN (x2)) −1/2 , (61) for 1 ≤ j ≤ n, where FN , FΓ are the cumulative distribution functions of N (0 , 1) and Gamma (6 , 6) respec-tively. Finally, the portfolio loss performance function is defined, 
+
+gloss (x) = 
+
+> n
+
+X
+
+> j=1
+
+1{Zj ≥0.5√n} − bn. (62) 25 Note that a significant portion of the probability density of the failure region is represented by inputs which have a performance of exactly 0. Since the inequality used in the definition of the probability of failure in this work was not strict, whilst it is in [47], a small ϵ > 0 is taken from the output of the performance functions in this numerical example. Table 5 shows the results of the numerical experiments and the reference probability of failure. Most of the estimators for all of the dimensions perform well, though the SIS estimator in the 252-dimensional case does have a larger CoV. Despite the difficult geometry which deceives NInitS into thinking there is more than one niche, NIS has a comparable number of performance function evaluations and CoV to the other methods for all the dimensions tested. Dimension Method Mean PF CoV PF Mean g evals 32 SIS 4.17 × 10 −3 0.21 7.86 × 10 3
+
+iCE 4.24 × 10 −3 0.09 5.89 × 10 4
+
+NIS 4.07 × 10 −3 0.09 1.04 × 10 4
+
+102 SIS 1.86 × 10 −3 0.22 8.00 × 10 3
+
+iCE 1.83 × 10 −3 0.06 8.20 × 10 3
+
+NIS 1.79 × 10 −3 0.12 1.43 × 10 4
+
+252 SIS 1.06 × 10 −5 1.45 1.04 × 10 4
+
+iCE 1.08 × 10 −5 0.09 2.33 × 10 4
+
+NIS 1.03 × 10 −5 0.08 3.56 × 10 4              
+
+> Table 5: Numerical results for the portfolio loss performance function. Reference probabilities are 4.28 ×10 −3,1.81 ×10 −3
+> and 1.12 ×10 −5for dimensions 32, 102 and 252 respectively. Reference probabilities estimated with MC estimator with 10 7
+> samples. The iCE algorithm used 1initial component.
+
+6. Conclusions and Future Work 
+
+This paper proposes NIS, a reliability method designed to robustly estimate the probability of failure for black-box problems that are high-dimensional and may exhibit challenging geometry. The development of the method was prompted by the idea of integrating hill valley testing, a niching technique taken from the field of evolutionary multi-modal optimisation, into an importance sampling framework. The numerical experiments suggest that its principal advantage arises on problems with multiple important niches or misleading geometric structure, whilst still showing strong performance on problems that do not exhibit the same challenges. The fundamental component of NIS is NInitS, an initial sampling procedure that is consistently able to populate all the important niches of a reliability problem. The NInitS procedure obviates the need for an initialisation routine in the EM algorithm used to fit the mixture importance distribution. This is because the number of initial samples NInitS returns provides a natural upper bound on the number of mixture components in the importance distribution. Reliability problems with multiple important niches are likely to cause ergodicity problems for any Markov chain algorithm. The result is that the EM algorithm will yield a poor estimate for the mixture component weights when using these Markov chains to fit the parameters of a mixture distribution. A mixture component weight correction procedure was proposed, which is able to improve the estimate and specify chain weights that can help mitigate the problem on later iterations. A heuristic for determining the appropriate computational budget to assign to each Markov chain was also introduced, based on the mutual information of the mixture distribution. All reliability methods have inevitable limitations that stem from their assumptions. Techniques such as iCE and SIS implicitly assume that the performance function does not have the types of challenging topology that have been examined in this work, and are able to perform well when this assumption is true. Conversely, NIS does not assume this, and instead incurs a computational cost in order to understand the geometry of the failure region. In the case where the failure region comprises only one important niche, these extra performance evaluations will have been wasted. However, when the performance function is a black 26 box, it is impossible to know this information a priori. Additionally, the computational cost of the NInitS procedure is often relatively small compared to the computational cost of the rest of the NIS algorithm. It could be the case that a performance function has many important niches, and crucially, it could have more important niches than the user-defined maximum allowed initial samples. In this case, NIS is almost guaranteed to underestimate the probability of failure. However, if once the algorithm has terminated, the estimated effective number of niches is very close to the maximum allowed initial samples, this could indicate to the user that there are more important niches to be modelled. In these circumstances, the entire NIS algorithm could be run again with a higher number of maximum allowed initial samples. If a reliability problem has a very large number of important niches, explicitly modelling each individual niche may become more expensive than using a simple MC estimator, especially when the probability of failure is relatively large. It is important to note that this type of reliability problem would present a serious and possibly insurmountable challenge for any variance reduction method. Finally, note that whilst in this paper NInitS has been developed for importance sampling, it is flexible enough so that in future work it could readily be utilised with other reliability methods, such as line sampling or surrogate modelling. 27 References 
+
+[1] C. Song, R. Kawai, Monte Carlo and variance reduction methods for structural reliability analysis: A comprehensive review, Probabilistic Engineering Mechanics 73 (2023) 103479. doi:10.1016/j. probengmech.2023.103479 .[2] H. AM, N. Lind, An Exact and Invariant First Order Reliability Format, Journal of Engineering Me-chanics 100 (Jan. 1974). [3] B. Keshtegar, S. Chakraborty, A hybrid self-adaptive conjugate first order reliability method for robust structural reliability analysis, Applied Mathematical Modelling 53 (2018) 319–332. doi:10.1016/j. apm.2017.09.017 .[4] A. Der Kiureghian, H.-Z. Lin, S.-J. Hwang, Second-Order Reliability Approximations, Journal of En-gineering Mechanics 113 (8) (1987) 1208–1225. doi:10.1061/(ASCE)0733-9399(1987)113:8(1208) .[5] X. Huang, Y. Li, Y. Zhang, X. Zhang, A new direct second-order reliability analysis method, Applied Mathematical Modelling 55 (2018) 68–80. doi:10.1016/j.apm.2017.10.026 .[6] C. G. Bucher, U. Bourgund, A fast and efficient response surface approach for structural reliability problems, Structural Safety 7 (1) (1990) 57–66. doi:10.1016/0167-4730(90)90012-E .[7] I. Kaymaz, Application of Kriging method to structural reliability, Structural Safety 27 (2005) 133–151. 
+
+doi:10.1016/j.strusafe.2004.09.001 .[8] J. M. Bourinet, Rare-event probability estimation with adaptive support vector regression surrogates, Reliability Engineering & System Safety 150 (2016) 210–221. doi:10.1016/j.ress.2016.01.023 .[9] J. B. Cardoso, J. R. de Almeida, J. M. Dias, P. G. Coelho, Structural reliability analysis using Monte Carlo simulation and neural networks, Advances in Engineering Software 39 (6) (2008) 505–513. doi: 10.1016/j.advengsoft.2007.03.015 .[10] G. Schueller, Efficient Monte Carlo simulation procedures in structural uncertainty and reliability anal-ysis - recent advances, Structural Engineering and Mechanics 32 (May 2009). doi:10.12989/sem. 2009.32.1.001 .[11] A. Tabandeh, G. Jia, P. Gardoni, A review and assessment of importance sampling methods for relia-bility analysis, Structural Safety 97 (2022) 102216. doi:10.1016/j.strusafe.2022.102216 .[12] R. Melchers, Importance sampling in structural systems, Structural Safety 6 (1) (1989) 3–10. doi: 10.1016/0167-4730(89)90003-9 .[13] C. G. Bucher, Adaptive sampling — an iterative fast Monte Carlo procedure, Structural Safety 5 (2) (1988) 119–126. doi:10.1016/0167-4730(88)90020-3 .[14] R. Melchers, Search-based importance sampling, Structural Safety 9 (2) (1990) 117–128. doi:10.1016/ 0167-4730(90)90003-8 .[15] S. K. Au, J. L. Beck, Estimation of small failure probabilities in high dimensions by subset simulation, Probabilistic Engineering Mechanics 16 (4) (2001) 263–277. doi:10.1016/S0266-8920(01)00019-4 .[16] I. Papaioannou, C. Papadimitriou, D. Straub, Sequential importance sampling for structural reliability analysis, Structural Safety 62 (2016) 66–75. doi:10.1016/j.strusafe.2016.06.002 .[17] I. Papaioannou, S. Geyer, D. Straub, Improved cross entropy-based importance sampling with a flexible mixture model, Reliability Engineering & System Safety 191 (2019) 106564. doi:10.1016/j.ress. 2019.106564 .28 [18] K. Breitung, The geometry of limit state function graphs and subset simulation: Counterexamples, Reliability Engineering & System Safety 182 (2019) 98–106. doi:10.1016/j.ress.2018.10.008 .[19] K. Breitung, The return of the design points, Reliability Engineering & System Safety 247 (2024) 110103. doi:10.1016/j.ress.2024.110103 .[20] P. R. Wagner, S. Marelli, I. Papaioannou, D. Straub, B. Sudret, Rare event estimation using stochastic spectral embedding, Structural Safety 96 (2022) 102179. doi:10.1016/j.strusafe.2021.102179 .[21] M. Rashki, SESC: A new subset simulation method for rare-events estimation, Mechanical Systems and Signal Processing 150 (2021) 107139. doi:10.1016/j.ymssp.2020.107139 .[22] T. H. W. Bäck, A. V. Kononova, B. van Stein, H. Wang, K. A. Antonov, R. T. Kalkreuth, J. de Nobel, D. Vermetten, R. de Winter, F. Ye, Evolutionary Algorithms for Parameter Optimization—Thirty Years Later, Evolutionary Computation 31 (2) (2023) 81–122. doi:10.1162/evco_a_00325 .[23] X. Li, M. G. Epitropakis, K. Deb, A. Engelbrecht, Seeking Multiple Solutions: An Updated Survey on Niching Methods and Their Applications, IEEE Transactions on Evolutionary Computation 21 (4) (2017) 518–538. doi:10.1109/TEVC.2016.2638437 .[24] A. Der Kiureghian, T. Dakessian, Multiple design points in first and second-order reliability, Structural Safety 20 (1) (1998) 37–49. doi:10.1016/S0167-4730(97)00026-X .[25] H. J. Kinnear, F. DiazDelaO, Niching subset simulation, Probabilistic Engineering Mechanics 79 (2025) 103729. doi:10.1016/j.probengmech.2025.103729 .[26] M. Rosenblatt, Remarks on a Multivariate Transformation, The Annals of Mathematical Statistics 23 (3) (1952) 470–472. doi:10.1214/aoms/1177729394 .[27] A. Nataf, Determination des distributions dont les marges sont donnees., C. R. Acad. Sci. Paris (225) (1962) 42–43. [28] N. Kurtz, J. Song, Cross-entropy-based adaptive importance sampling using Gaussian mixture, Struc-tural Safety 42 (2013) 35–44. doi:10.1016/j.strusafe.2013.01.006 .[29] S. Geyer, I. Papaioannou, D. Straub, Cross entropy-based importance sampling using Gaussian densities revisited, Structural Safety 76 (2019) 15–27. doi:10.1016/j.strusafe.2018.07.001 .[30] Z. Wang, J. Song, Cross-entropy-based adaptive importance sampling using von Mises-Fisher mixture for high dimensional reliability analysis, Structural Safety 59 (2016) 42–52. doi:10.1016/j.strusafe. 2015.11.002 .[31] M. B. Mehni, M. B. Mehni, Reliability analysis with cross-entropy based adaptive Markov chain im-portance sampling and control variates, Reliability Engineering & System Safety 231 (2023) 109014. 
+
+doi:10.1016/j.ress.2022.109014 .[32] A. Klarbring, B. Torstenfelt, Dynamical systems and topology optimization, Structural and Multidis-ciplinary Optimization 42 (2) (2010) 179–192. doi:10.1007/s00158-010-0479-9 .[33] Z. Wang, M. Broccardo, J. Song, Hamiltonian Monte Carlo methods for Subset Simulation in reliability analysis, Structural Safety 76 (2019) 51–67. doi:10.1016/j.strusafe.2018.05.005 .[34] L. Friedli, D. Ginsbourger, A. Doucet, N. Linde, An energy-based model approach to rare event prob-ability estimation, SIAM/ASA Journal on Uncertainty Quantification 13 (2025) 400–424. [35] F. Klawonn, F. Höppner, B. Jayaram, What are Clusters in High Dimensions and are they Difficult to Find?, in: F. Masulli, A. Petrosino, S. Rovetta (Eds.), Clustering High–Dimensional Data, Springer, Berlin, Heidelberg, 2015, pp. 14–33. doi:10.1007/978-3-662-48577-4_2 .29 [36] X. Li, A. P. Engelbrecht, M. G. Epitropakis, Benchmark functions for the cec 2013 special session and competition on niching methods for multimodal function optimization, in: Proceedings of the IEEE Congress on Evolutionary Computation (CEC 2013), IEEE, 2013, pp. 1–10. [37] R. Ursem, Multinational evolutionary algorithms, in: Proceedings of the 1999 Congress on Evolutionary Computation-CEC99 (Cat. No. 99TH8406), IEEE, Washington, DC, USA, 1999, pp. 1633–1640. doi: 10.1109/CEC.1999.785470 .[38] G. Jia, A. Tabandeh, P. Gardoni, A density extrapolation approach to estimate failure probabilities, Structural Safety 93 (2021) 102128. doi:10.1016/j.strusafe.2021.102128 .[39] M. A. Valdebenito, H. J. Pradlwarter, G. I. Schuëller, The role of the design point for calculating failure probabilities in view of dimensionality and structural nonlinearities, Structural Safety 32 (2) (2010) 101–111. doi:10.1016/j.strusafe.2009.08.004 .[40] L. Katafygiotis, K. Zuev, Geometric insight into the challenges of solving high-dimensional reliabil-ity problems, Probabilistic Engineering Mechanics 23 (2008) 208–218. doi:10.1016/j.probengmech. 2007.12.026 .[41] A. Abdi, M. Kaveh, Performance comparison of three different estimators for the Nakagami m parameter using Monte Carlo simulation, IEEE Communications Letters 4 (4) (2000) 119–121. doi:10.1109/ 4234.841316 .[42] S. Sra, A short note on parameter approximation for von Mises-Fisher distributions: And afast implementation of I s (x), Computational Statistics 27 (1) (2012) 177–190. doi:10.1007/ s00180-011-0232-x .[43] M. Ester, H.-P. Kriegel, J. Sander, X. Xu, A density-based algorithm for discovering clusters in large spatial databases with noise, in: Proceedings of the Second International Conference on Knowledge Discovery and Data Mining, KDD’96, AAAI Press, Portland, Oregon, 1996, pp. 226–231. [44] J. MacQueen, Some methods for classification and analysis of multivariate observations, in: Proceedings of the Fifth Berkeley Symposium on Mathematical Statistics and Probability, Volume 1: Statistics, Vol. 5.1, University of California Press, 1967, pp. 281–298. [45] A. Sharma, C. S. Manohar, Modified replica exchange-based MCMC algorithm for estimation of struc-tural reliability based on particle splitting method, Probabilistic Engineering Mechanics 72 (2023) 103448. doi:10.1016/j.probengmech.2023.103448 .[46] M. Rashki, M. Miri, M. A. Moghaddam, A simulation-based method for reliability based design op-timization problems with highly nonlinear constraints, Automation in Construction 47 (2014) 24–36. 
+
+doi:10.1016/j.autcon.2014.07.004 .[47] M. El Masri, J. Morio, F. Simatos, Improvement of the cross-entropy method in high dimension for failure probability estimation through a one-dimensional projection without gradient estimation, Reli-ability Engineering & System Safety 216 (2021) 107991. doi:10.1016/j.ress.2021.107991 .30

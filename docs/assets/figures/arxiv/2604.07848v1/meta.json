@@ -1,0 +1,46 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.07848v1/fig-001.webp",
+      "caption": "Figure 3: Practical utility. (A) Gradient similarity predicts MTL benefit (r = 0.71, p < 10−8); high-G pairs show positive transfer while low-G pairs show negative transfer. (B) Gradient-based task grouping outperforms random assignment by 1.4–4.2% (p = 0.023, n = 3 groups).",
+      "page": 6,
+      "index": 1,
+      "width": 798,
+      "height": 247
+    },
+    {
+      "url": "assets/figures/arxiv/2604.07848v1/fig-002.webp",
+      "caption": "Figure 1: Sample overlap determines gradient interpretability. (a) When tasks share samples, gradients ∇θLA and ∇θLB are computed on the same input, and their angle θ reflects the true mechanistic relationship. (b) When tasks have disjoint samples, gradients are computed on different inputs from potentially different distributions, making cos θ spurious.",
+      "page": 2,
+      "index": 2,
+      "width": 827,
+      "height": 320
+    },
+    {
+      "url": "assets/figures/arxiv/2604.07848v1/fig-003.webp",
+      "caption": "Table 1: Comprehensive dataset statistics and validation results. (↑) indicates higher is better. Bold/underline mark best/second-best. All correlations significant at p < 0.001.",
+      "page": 3,
+      "index": 3,
+      "width": 830,
+      "height": 244
+    },
+    {
+      "url": "assets/figures/arxiv/2604.07848v1/fig-004.webp",
+      "caption": "Table 7: Complete overlap threshold characterization. Sigmoid fit parameters: L = 0.82, k = 0.15, x0 = 29.7, R2 = 0.94.",
+      "page": 13,
+      "index": 4,
+      "width": 827,
+      "height": 282
+    },
+    {
+      "url": "assets/figures/arxiv/2604.07848v1/fig-005.webp",
+      "caption": "Figure 2: Main validation results. (A) Gradient similarity vs empirical correlation across datasets; each dataset shows strong positive correlation with per-dataset regression lines. (B) Phase transition at ∼30% compound overlap; green points indicate p < 0.01, red indicates non-significant. Shaded regions show unreliable (<30%) vs reliable (>30%) regimes. (C) Cross-domain analysis: withindomain pairs (Tox21, ADME) show high r(G,E) while cross-domain pairs show weak correlation, confirming hierarchical structure recovery. (D) Training dynamics on Tox21: gradient matrix stabilizes by epoch 20, enabling early estimation.",
+      "page": 5,
+      "index": 5,
+      "width": 804,
+      "height": 642
+    }
+  ]
+}

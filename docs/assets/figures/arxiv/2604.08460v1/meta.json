@@ -1,0 +1,118 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.08460v1/fig-001.webp",
+      "caption": "Fig. 2: Generated degradation trajectories for 10 health indicators and 1 engine",
+      "page": 6,
+      "index": 1,
+      "width": 722,
+      "height": 363
+    },
+    {
+      "url": "assets/figures/arxiv/2604.08460v1/fig-002.webp",
+      "caption": "Fig. 3: Simulated sensor values (measurements) for the trajectory in Figure 2 and corresponding to Cruise operational condition.",
+      "page": 7,
+      "index": 2,
+      "width": 723,
+      "height": 360
+    },
+    {
+      "url": "assets/figures/arxiv/2604.08460v1/fig-003.webp",
+      "caption": "Fig. 11: t-SNE plot of few trajectories from the VJEPA architecture. The four clusters correspond to trajectories grouped by the amount of maintenance performed.",
+      "page": 22,
+      "index": 3,
+      "width": 710,
+      "height": 543
+    },
+    {
+      "url": "assets/figures/arxiv/2604.08460v1/fig-004.webp",
+      "caption": "Fig. 6: SSL Approaches. a. Autoencoder: trained with reconstruction loss on yt to learn latent zt. b. JEPA: predicts masked patches in latent space to learn zt. c. State Decoding: predicts xt from frozen zt to evaluate representations.",
+      "page": 10,
+      "index": 4,
+      "width": 725,
+      "height": 204
+    },
+    {
+      "url": "assets/figures/arxiv/2604.08460v1/fig-005.webp",
+      "caption": "Fig. 7: True health indicators versus predictions made by different models for four HI trajectories with varying levels of prediction difficulty.",
+      "page": 14,
+      "index": 5,
+      "width": 710,
+      "height": 207
+    },
+    {
+      "url": "assets/figures/arxiv/2604.08460v1/fig-006.webp",
+      "caption": "Table 2: Proposed Notation (to refactor in text).",
+      "page": 18,
+      "index": 6,
+      "width": 406,
+      "height": 312
+    },
+    {
+      "url": "assets/figures/arxiv/2604.08460v1/fig-007.webp",
+      "caption": "Fig. 12: (Proposal) Multitask Experiment Setup Overview. a) Learning: A model learns a representation from sensor observation which is evaluated on a series of downstream tasks. b) Decoding: The latent z is used to train a regression head to estimate the HI labels, and another block ϕz is trained for next state prediction zt+1 = ϕz(zt). c) Forecasting: the frozen blocks are used for multi-state forecasting over τ timesteps from n randomly sampled initial states zt. We compute the R2 score of the estimated HIs through time. d) Geometric Interpretation: Through clustering methods, we investigate if the learned representation reflects the underlying geometry in terms of cluster separation of signature degradation modes and maintenance history. e) Prescription: we evaluate the model capabilities in RUL estimation as well as the horizon of maintenance actions.",
+      "page": 23,
+      "index": 7,
+      "width": 725,
+      "height": 398
+    },
+    {
+      "url": "assets/figures/arxiv/2604.08460v1/fig-008.webp",
+      "caption": "Fig. 4: Sensor variables (measurements) distribution grouped by 4 flight phases.",
+      "page": 8,
+      "index": 8,
+      "width": 640,
+      "height": 257
+    },
+    {
+      "url": "assets/figures/arxiv/2604.08460v1/fig-009.webp",
+      "caption": "Table 3: Health Indicators (HIs): degradation factors per module with their physical bounds. Each indicator represents a subsystem state used to generate observations.",
+      "page": 19,
+      "index": 9,
+      "width": 638,
+      "height": 318
+    },
+    {
+      "url": "assets/figures/arxiv/2604.08460v1/fig-010.webp",
+      "caption": "Fig. 8: health indicators distribution",
+      "page": 19,
+      "index": 10,
+      "width": 567,
+      "height": 273
+    },
+    {
+      "url": "assets/figures/arxiv/2604.08460v1/fig-011.webp",
+      "caption": "Table 1: Prediction performance for 10 health indicators across model families. Results are reported as mean ± standard deviation over 5-fold cross-validation using SMAPE, RMSE (×103), and Pearson correlation. It should be noted that the mean and std reported in avg column is computed directly on the test sets and is not the average of the 10 columns.",
+      "page": 12,
+      "index": 11,
+      "width": 719,
+      "height": 383
+    },
+    {
+      "url": "assets/figures/arxiv/2604.08460v1/fig-012.webp",
+      "caption": "Fig. 9: Health indicators (degradation trajectories) mean and standard deviation over all the sequences",
+      "page": 20,
+      "index": 12,
+      "width": 723,
+      "height": 261
+    },
+    {
+      "url": "assets/figures/arxiv/2604.08460v1/fig-013.webp",
+      "caption": "Fig. 10: Auto-correlation (ACF) and partial autocorrelation (PACF). The x-axis represents the lag and y-axis represents the correlation value (-1,1)",
+      "page": 20,
+      "index": 13,
+      "width": 723,
+      "height": 268
+    },
+    {
+      "url": "assets/figures/arxiv/2604.08460v1/fig-014.webp",
+      "caption": "Fig. 1: Turbofan engine; with the courtesy of the team of OpenDeckSMR.",
+      "page": 5,
+      "index": 14,
+      "width": 652,
+      "height": 373
+    }
+  ]
+}

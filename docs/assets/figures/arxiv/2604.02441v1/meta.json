@@ -1,0 +1,62 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.02441v1/fig-001.webp",
+      "caption": "Fig. 1. Architecture of AM-KNet. The four input features and the motion state encoding are expanded through fully connected layers (FC5, FC6, FC8) and concatenated into the shared backbone GRUs (GRU Q, GRU P). For each measurement component, a sensor-specific head (FC1, FC7, GRU S) extracts per-component features, which are refined by FC2 and FC3 and aggregated by the Kalman Gain module. The S Decoder produces the innovation covariance Sk via Cholesky factorisation. FC4 combines the fused covariance with the GRU P output and feeds back into GRU P as a recurrent connection; its output is also passed to the B Decoder, which produces the learned noise term Bk for the Joseph-form covariance update. The hypernetwork (bottom) maps the 27-dimensional context vector, comprising a target encoding and object type encoding, through two FC layers and separate gain and shift heads to produce an affine modulation of the pre-activations throughout the network. Modules enclosed by the grey dashed box are instantiated per sensor modality; all other modules are shared.",
+      "page": 6,
+      "index": 1,
+      "width": 1007,
+      "height": 542
+    },
+    {
+      "url": "assets/figures/arxiv/2604.02441v1/fig-002.webp",
+      "caption": "Fig. 2. Camera and Lidar detected object centroid error distributions on the nuScenes Train dataset. The left side shows the errors and the right the total count of detections. In this visualization the forward direction of the ego vehicle is along the positive x-axis.",
+      "page": 7,
+      "index": 2,
+      "width": 529,
+      "height": 408
+    },
+    {
+      "url": "assets/figures/arxiv/2604.02441v1/fig-003.webp",
+      "caption": "TABLE III MEAN ABSOLUTE ERROR (MAE), MEDIAN, AND STANDARD DEVIATION ON THE NUSCENES TEST SET. ACCELERATION COMPONENTS ARE OMITTED AS THE BASELINES DO NOT ESTIMATE THEM. BEST MAE PER COMPONENT IN BOLD.",
+      "page": 10,
+      "index": 3,
+      "width": 346,
+      "height": 477
+    },
+    {
+      "url": "assets/figures/arxiv/2604.02441v1/fig-004.webp",
+      "caption": "Fig. 3. Overview of the AM-KNet training framework. Measurements from lidar, camera, and radar enter the state estimation system at timestep k. The prior state x̂k|k−1 is obtained through the prediction step and used to compute the predicted measurement, innovation, and the four input features. For each available sensor, AM-KNet receives the features along with the motion state encoding, sensor identifier, and context vector, and outputs the Kalman gain Wk , innovation covariance Sk , and learned noise term Bk . The state is updated via the Kalman gain and the covariance via Joseph’s form. After processing all sensors sequentially, the posterior x̂k|k and Pk|k are fed back for the next timestep. Training is supervised by a weighted component-wise MSE loss and two Gaussian NLL terms on the estimation error and innovation, introduced in a staged schedule.",
+      "page": 8,
+      "index": 4,
+      "width": 1070,
+      "height": 871
+    },
+    {
+      "url": "assets/figures/arxiv/2604.02441v1/fig-005.webp",
+      "caption": "Fig. 4. This figure shows a sample of the VoD dataset, showing the lidar and radar point clouds, ground truth in brown and estimates in green. The reference points for ground truths and estimates are visualized as diamond shapes. The ego car faces the top and the y-data is plotted along the plot x-axis. Lidar points are in blue and radar points visualized in purple.",
+      "page": 9,
+      "index": 5,
+      "width": 529,
+      "height": 1075
+    },
+    {
+      "url": "assets/figures/arxiv/2604.02441v1/fig-006.webp",
+      "caption": "TABLE I MEAN ABSOLUTE ERROR (MAE), MEDIAN, AND STANDARD DEVIATION ON THE VIEW-OF-DELFT TEST SET. ACCELERATION COMPONENTS ARE OMITTED AS THE BASELINES DO NOT ESTIMATE THEM. BEST MAE PER COMPONENT IN BOLD.",
+      "page": 9,
+      "index": 6,
+      "width": 338,
+      "height": 477
+    },
+    {
+      "url": "assets/figures/arxiv/2604.02441v1/fig-007.webp",
+      "caption": "TABLE II NEES AND NIS EVALUATION ON THE VIEW-OF-DELFT TEST SET. CONSISTENCY RATE IS THE PERCENTAGE OF SAMPLES WITHIN THE 90% χ2 INTERVAL (2D). BEST CONSISTENCY PER METRIC IN BOLD. MEAN, MEDIAN, AND STD ARE COMPUTED ON THE ≤ 95TH-PERCENTILE FILTERED VALUES.",
+      "page": 9,
+      "index": 7,
+      "width": 460,
+      "height": 327
+    }
+  ]
+}

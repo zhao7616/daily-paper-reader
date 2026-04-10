@@ -1,0 +1,688 @@
+Title: Adaptive Learned State Estimation based on KalmanNet
+
+URL Source: https://arxiv.org/pdf/2604.02441v1
+
+Published Time: Mon, 06 Apr 2026 00:04:23 GMT
+
+Number of Pages: 11
+
+Markdown Content:
+# Adaptive Learned State Estimation based on KalmanNet 
+
+Arian Mehrfard ∗, Bharanidhar Duraisamy ∗, Stefan Haag ∗, Florian Geiss ∗, Mirko M¨ ahlisch †∗ Research and Development, Mercedes-Benz AG, Germany, Email: [firstname].[lastname]@mercedes-benz.com  
+
+> †
+
+Institute for Autonomous Driving, University of the Bundeswehr Munich, Germany 
+
+Abstract —Hybrid state estimators that combine model-based Kalman filtering with learned components have shown promise on simulated data, yet their performance on real-world au-tomotive data remains insufficient. In this work we present Adaptive Multi-modal KalmanNet (AM-KNet), an advancement of KalmanNet tailored to the multi-sensor autonomous driv-ing setting. AM-KNet introduces sensor-specific measurement modules that enable the network to learn the distinct noise characteristics of radar, lidar, and camera independently. Ahypernetwork with context modulation conditions the filter on target type, motion state, and relative pose, allowing adaptation to diverse traffic scenarios. We further incorporate a covariance estimation branch based on the Josephs form and supervise it through negative log-likelihood losses on both the estimation error and the innovation. A comprehensive, component-wise loss function encodes physical priors on sensor reliability, target class, motion state, and measurement flow consistency. AM-KNet is trained and evaluated on the nuScenes and View-of-Delft datasets. The results demonstrate improved estimation accuracy and tracking stability compared to the base KalmanNet, narrowing the performance gap with classical Bayesian filters on real-world automotive data. 
+
+Index Terms —State Estimation, Kalman Filter, Tracking 
+
+I. I NTRODUCTION 
+
+Advanced driver-assistant systems (ADAS) have greatly contributed to improved safety of vehicles on the road, pre-venting crashes, and reducing the number of accidents. In the current ADAS pipelines the Fusion of noisy measurements from Radar, Camera, and occasionally Lidar is a crucial step towards obtaining reliable and accurate tracks that can be used for motion planning. Classical fusion and state estimation methods are grounded in Bayesian estimation theory. The Kalman filter (KF) and its nonlinear extensions, the extended Kalman filter (EKF) and the unscented Kalman filter (UKF) are the most widely adopted. These methods model the target state as a stochastic process and provide explicit uncertainty quantification alongside the state estimate. With the increasing presence of deep neural networks (DNNs) and the availability of large datasets and compute resources, data-driven methods have been established in both research and industry approaches. Learning-based frameworks for ADAS often follow two paradigms. First, the end-to-end 
+
+> This work is a result of the joint research project STADT:up (19A22006O). The project is supported by the German Federal Ministry for Economic Affairs and Energy (BMWE), based on a decision of the German Bundestag. The author is solely responsible for the content of this publication.
+
+(E2E) driving approach, which is characterized by an interface to a learned model that takes sensor measurements as input and provides trajectories or actuation as output. This approach is the least verifiable or interpretable, as there is no information on the scene or decision-making process, merely on the trajec-tory output. The second paradigm is the modular stack, which often retains the classical ADAS structures of perception ,
+
+prediction , planning , but uses learned, data-driven modules. The modular paradigm exposes intermediate representations and outputs like objects or lanes, but can still be trained jointly with end-to-end objectives. Providing intermediate outputs increases the interpretability compared to the black-box E2E approach. However, the learned modules themselves generally lack interpretability. During the sensor fusion step this contrast is particularly stark when considering Bayesian methods which follow physical models and provide uncertainty measures. Classical, probabilistic methods of state estimation have ad-vantages through their underlying physical principles and ex-plainability provided by their inherent uncertainty awareness. However, DNNs are capable of extracting complex structures and relationships from data, leading to superior performance in many applications such as computer vision or natural language processing. For the task of state estimation, recurrent neural networks (RNNs) [1] or Transformer [2] architectures are used most commonly, as they are effective at modeling temporal dependencies in sequential data. In Deep Kalman Filters [3], the authors learn a latent state-space model directly from data, replacing traditional transi-tion and observation models. While their model proved that accurate data-driven estimation is feasible, the learned latent space and dynamics are unconstrained and depend strongly on the training data. Similarly, Deep Variational Bayes Fil-ters [4] learns a latent dynamical model without prior physical knowledge. The system learns Markovian latent state-space models from sequences and allows gradients to propagate through the transition model over time, facilitating dynamical information flow. Another approach to a neural state estimator was presented with Recurrent Kalman Networks [5], where the authors retained a KF-style recurrence with a Gaussian cell state and a prediction and update cycle. While these data-driven models demonstrated their ability to perform estimation tasks, the lack of interpretability and need for well-curated datasets motivated the development of systems that combine data-driven models with rule-derived 
+
+> © 2024 IEEE. Personal use of this material is permitted. Permission from IEEE must be obtained for all other uses.
+> arXiv:2604.02441v1 [cs.RO] 2 Apr 2026
+
+models to enhance the interpretability and physical knowledge of the latter with the capacity and adaptiveness of the former. One of the most prominent examples of such a system was introduced by Revach et al. [6]. They present KalmanNet, a state estimator that follows the Kalman Filter equations, but replaces the covariance and Kalman Gain computations with a recurrent neural network (RNN). The internal cell state of RNNs is used to estimate the covariances over the time sequence, while a Kalman Gain is output at each timestep. The authors aimed to preserve interpretability of a Kalman Filter while gaining the benefits of a data-driven model. An extension to KalmanNet has been proposed by Han et al. [7] who presents a Multi-Model KalmanNet that utilizes multiple KalmanNets with different motion models. The estimates of these KalmanNets are combined using weights predicted by a deep neural network, which learns, from historical state estimates and innovations, the similarity between the predicted and observed target motion. In MAML KalmanNet [8] the authors present model-agnostic meta-learning into the KalmanNet system to address the challenges of scarce labeled training data and inflexi-ble network architectures. It pre-trains the network param-eters on simulated data across different noise conditions, enabling quick adaption to new state-space models. Split-KalmanNet [9] addresses performance degradation due to model mismatch in the EKF by replacing the single RNN KalmanNet architecture with two RNNs that separately learn the predicted state covariance and innovation covariance. By using the measurement Jacobian, the predicted state covari-ance, and innovation covariance the Kalman Gain can be ex-plicitly computed, improving robustness under heterogeneous noise conditions. To address the covariance estimation with KalmanNet, Mortada et al. [10] separate the noise dependent term of the covariance update and predict its Cholesky factor using additional modules. To constrain the partially learned state covariance, the authors add a loss term which consists of the normalized estimation error squared (NEES) and the logarithm of the covariance matrix determinant, to prevent the covariance from blowing up. An alternative approach to covariance estimation is Bayesian KalmanNet [11], which leverages Concrete dropout to create an approximate Bayesian model ensemble from the stochastic KalmanNet parameters. At inference time the model ensemble yields a set of state es-timates from which the mean and covariance can be computed. The training is supervised through an empirical tracking loss and a Kullback-Leibler regularization term that constrains the learned dropout probability and dicourages degenerate dropout behavior. In Adaptive KalmanNet [12] the authors present a system that uses a hypernetwork and context modulation to adapt to different state space dynamics. Adaptive KalmanNet is trained by first training the KalmanNet module on a set of trajectories with similar noise statistics. Then the KalmanNet weights are frozen and the hypernetwork is trained on the full dataset with varying noise statistics. The authors evaluations showed their systems adaptibility to varying noise distributions. Although Revach et al. showed superior performance of KalmanNet [6] on simulated data and other evaluations, an in-depth evaluation [13] showed insufficient performance when using real-world automotive data. In this work we will address the performance gap and present an improved version of KalmanNet that is evaluated on two automotive datasets. Next section will detail the problem statement and our main contribution. Section III will discuss related works and the state of the art. In section IV the details of the changed network and loss function are presented. Section V will cover the training setup and used datasets. Finally, sections VI and VII will present and discuss the results of the evaluation with section VIII concluding this work. II. P ROBLEM STATEMENT 
+
+The evaluation of the base KalmanNet [6] on automotive radar data yielded lower accuracy and unstable tracking com-pared to rule-based filter [13]. The unstable tracking indicated that the base KalmanNet did not learn the statistics of the data and the underlying physical model of the target motion. In this work, we present Adaptive Multi-modal (AM-KNet), which is an adaption and advancement of KalmanNet for the automotive setting. We utilise two automotive datasets, namely nuScenes [14] and View of Delft [15] for development and evaluation of AM-KNet. We adapt the system to accept multi-modal data, extend the loss function to consider different modalities, motion states, and the flow of the target motion. Following the implementations in Adaptive-KalmanNet [12] we also add hypernetwork based context modulation. We change the context vector, which serves as input to the hypernetwork, to provide information on the target type, its motion-state, and relative pose to the ego vehicle. The new KalmanNet model is evaluated on the two datasets, where we compare the performance to a state of the art bayesian filter. III. R ELEVANT WORK 
+
+This section will provide background information on the Kalman Filter, which forms the foundation for KalmanNet and the different models we use as a benchmark. The KF estimates the unknown state ( x) of a target given noisy measurements (z). The target dynamics are characterized by a discrete-time linear state-space model comprising a state transition model and a measurement model. 
+
+ˆxk+1 = Fk∆t ˆxk + vk (1) 
+
+zk = Hk ˆxk + wk (2) In (1), ˆxk+1 ∈ R m denotes the predicted state at time step k + 1 , obtained by propagating the estimate at time k
+
+through the linear state transition model Fk and accounting for additive process noise vk ∼ N (0 , Q k) with covariance 
+
+Qk. The measurement model in (2) maps the state to an observation zk ∈ R n via the linear measurement matrix Hk,where the measurements are perturbed by zero-mean Gaussian noise wk ∼ N (0 , R k) with covariance Rk.The Kalman filter (KF) [16] provides a recursive solution for state estimation in linear dynamical systems under Gaussian noise assumptions. Specifically, if the initial state x0 is Gaus-sian, then due to the linearity of Fk and Hk, the state remains Gaussian at all subsequent steps and is fully characterized by its mean and covariance. The algorithm alternates between prediction and update. In the prediction step, the posterior estimate (ˆ xk|k, P k|k) is propagated to the prior at the next time instant (ˆ xk+1 |k, P k+1 |k) according to 
+
+ˆxk+1 |k = Fk ˆxk|k (3) 
+
+Pk+1 |k = FkPk|kF ′ 
+
+> k
+
++ Qk. (4) From the predicted state, the corresponding predicted mea-surement and its covariance are computed as 
+
+ˆzk+1 |k = Hk+1 ˆxk+1 |k (5) 
+
+Sk+1 = Hk+1 Pk+1 |kH′ 
+
+> k+1
+
++ Rk+1 . (6) Based on (4) and (6), the Kalman gain is given by 
+
+Wk+1 = Pk+1 |kH′
+
+> k+1
+
+S−1
+
+> k+1
+
+. (7) Once the measurement zk+1 becomes available, the update step uses the innovation 
+
+νk+1 = zk+1 − ˆzk+1 |k (8) to obtain the posterior mean and covariance: 
+
+ˆxk+1 |k+1 = ˆ xk+1 |k + Wk+1 νk+1 (9) 
+
+Pk+1 |k+1 = Pk+1 |k − Wk+1 Sk+1 W ′
+
+> k+1
+
+. (10) For linear systems with Gaussian noise, the KF is the optimal minimum mean-square error estimator [16]. In prac-tice, however, estimation accuracy depends strongly on how well the assumed motion and measurement models reflect the underlying system dynamics. Commonly adopted kinematic models include constant velocity (CV) and constant accelera-tion (CA) [16]. 
+
+A. KalmanNet 
+
+KalmanNet [6] is a hybrid approach that couples a classi-cal, model-based filtering structure with learned, data-driven modules. The authors present it as a method for real-time state estimation in nonlinear dynamical systems when only incomplete or approximate domain knowledge is available. In particular, KalmanNet is intended to operate with an ap-proximated system model while avoiding the need for explicit knowledge of the process noise vk and measurement noise 
+
+wk. To achieve this, it employs a recurrent neural network (RNN) that is trained to infer the Kalman Gain (KG) directly from data. This RNN is embedded within the Kalman filtering routine, so KalmanNet still follows the familiar predict–update recursion. In the prediction step, (3) is used to form the prior state estimate ˆxk+1 |k and (5) is applied to obtain the pre-dicted measurement ˆzk+1 |k. Unlike the standard KF, however, KalmanNet does not propagate the second-order moment of the state. In the subsequent update step, it computes the poste-rior estimate ˆxk+1 |k+1 according to (9). Rather than explicitly calculating the KG via the state and innovation covariance matrices as in (7), KalmanNet replaces that computation with an RNN prediction of the gain Wk+1 . As a result, the method can be applied without explicit access to the state covariance matrix P or the innovation covariance matrix S.Because the classical KG expression in (7) depends on the state and innovation covariances, the RNN is fed with hand-designed features intended to reflect the underlying statistical information: 
+
+F1 The observation difference ∆˜ zk = zk − zk−1
+
+F2 The innovation difference ∆zk = zk − ˆzk|k−1
+
+F3 The forward evolution difference ∆˜ xk = ˆ xk|k − ˆxk−1|k−1
+
+F4 The forward update difference ∆ˆ xk = ˆ xk|k − ˆxk|k−1
+
+Here, F3 measures the change between two successive posterior state estimates, whereas F4 captures the discrepancy between the posterior and prior estimates at the same time index. Therefore, at time k the state-related inputs available to the network are ∆˜ xk−1 and ∆ˆ xk−1. Analogously, F1 
+
+quantifies the difference between consecutive observations, and F2 represents the innovation, i.e., the mismatch between the observation and its prediction. Interpreting these signals, 
+
+F1 and F3 mainly describe temporal changes in observations and state estimates, while F2 and F4 emphasize residual terms associated with measurements and state updates. To mirror the recursive nature of Kalman filtering, the authors adopt an RNN-based design, motivated by the idea that the network’s internal memory can implicitly track covariance-like quantities over time [6]. Concretely, the KalmanNet module comprises three gated recurrent units (GRU) [17]. These GRUs are associated with three covariance terms: the process noise covariance Q, the prior state covariance Pk|k−1,and the innovation covariance Sk. The first two GRUs use a hidden dimension of m2, and the third uses n2. In addition, the GRUs are paired with dedicated fully connected layers at their inputs and outputs, and they are connected in a cascaded manner: the output of the Q GRU is provided as input to the 
+
+Pk|k−1 GRU, whose output then feeds into the Sk GRU. The latter two representations are ultimately used to produce the KG estimate. For learning, KalmanNet is trained in a supervised fashion on the posterior state estimate ˆxk, rather than directly super-vising the network’s KG output. The objective is a least error loss: 
+
+L = |xk − ˆxk|k|2 (11) Additional architectural and training details, along with the original implementation, can be found in the original KalmanNet work [6]. 
+
+B. Recursive KalmanNet 
+
+In Recursive KalmanNet [10] (RKNet) the authors address the problem of error covariance extraction from KalmanNet. They use a KalmanNet architecture which uses a single GRU to estimate the Kalman gain [6] and add a second GRU which receives the same features as input but is used to output part of the state covariance. The authors use Josephs formula (12) of covariance estimation, but combine the prediction and update of the state covariance and split them into two parts. One part uses the state space matrices, while the other, noise dependent term, is learned through the GRU. 
+
+Pk|k = ( I − WkHk) Pk|k−1 (I − WkHk)′ + WkRkW ′ 
+
+> k
+
+(12) Inserting the covariance prediction (4) into Joseph’s update formula, the resulting formula can be split into the two parts, isolating the noise dependent terms: 
+
+Ak = ( I − WkHk) FkPk−1|k−1F ′ 
+
+> k
+
+(I − WkHk)′ (13) 
+
+Bk = ( I − WkHk) Qk (I − WkHk)′ + WkRkW ′
+
+> k
+
+. (14) In RKNet term (13) is computed explicitly using the state space matrices, while term (14) is learned through the second GRU. To ensure a positive semi-definite covariance matrix the GRU estimates the lower triangular Cholesky factor C
+
+of the B matrix, such that Bk = CkCTk . To supervise the state covariance during training the authors use a loss based on the negative log likelihood loss of the estimation error: 
+
+Lk = e′ 
+
+> k
+
+bP −1 
+
+> k|k
+
+ek + log det 
+
+ bPk|k
+
+
+
+. (15) 
+
+C. Adaptive KalmanNet 
+
+To address the challenge of adaption to changing state space dynamics, Adaptive-KalmanNet [12] introduces context modulation [18] with a hypernetwork [19]. Hypernetworks are DNNs that predict the weights of another network. This concept was further developed by [18] to introduce context modulation, which does not predict the weight matrices, but instead applies an affine transformation on the pre-activations of a network. Adaptive-KalmanNet uses the concept of con-text modulation to adapt KalmanNet to different situations, providing a scalar state of world input, which can be seen as a noise ratio, to the hyper network. 
+
+D. OAFuser 
+
+The Online Adaptive Fuser (OAFuser) [20] is a tracking and fusion framework that estimates process and measurement noise covariances jointly with the object state. The system consists of four coupled estimators. An α-β filter provides a predicted measurement from which a measurement noise estimate R is derived through the outer product of its residual. A second α-filter tracks the innovation covariance M using the residual of the main estimator. From R, M , and the current state covariance, the process noise intensity is com-puted analytically and bounded to prevent unrealistic values. A standard Kalman filter then performs the state update with the online-estimated noise matrices. By adapting both R and 
+
+Q at every time step, OAFuser adjusts its correction sensitivity to varying target dynamics and sensor conditions without requiring multiple parallel models. The authors demonstrated competitive tracking accuracy compared to an IMM filter while achieving a significantly lower computational footprint, making it suitable for real-time automotive applications. IV. M ETHODS 
+
+The goal of KalmanNet is to learn second order mo-ments of the measurements, the dynamical model, and the state estimate. Each sensor has its own characteristics and properties, radar, for example, provides more accurate radial measurements but exhibits noiser data for lateral measure-ments, whereas camera detections generally provide excellent lateral accuracy but have a poor depth accuracy. Likewise, the divergence of the dynamical model, which is characterized by the process noise, depends on the motion state of the target. A vehicle moving in a straight line at a fixed velocity can be ideally modelled with the Constanct Velocity model, but other scenarios might require an adjusted process noise. AM-KNet is an advancement of KalmanNet with changed architecture and training strategy to improve estimation accu-racy and tracking performance. The architecture changes en-able KalmanNet to process data from different sensor modal-ities and receive the necessary information that is required by the complex autonomous driving use case. The comprehensive loss function introduces physical knowledge about the sensor modality and the target motion, facilitating KalmanNet to learn the dynamics of the scene and its objects. The following will provide a detailed explanation of the changes to model architecture and the loss function. 
+
+A. Architecture 1) Multi-modal KalmanNet: To be suitable for real world applications in navigation and tracking, such as autonomous driving, a state estimator has to be able to process and fuse data from different information sources. A general overview of our system can be seen in Fig. 3 while a detailed view of AM-KNet can be seen in Fig. 1. The measurements are used to update the same KalmanNet in sequential order. If the measurements have different timestamps a prediction step is performed between the updates. The measurement space specific modules are marked in Fig. 1 with a read square, they process data related to the measurements and extract the noise statistics to compute the Kalman Gain. We create distinctive, measurement specific, sets of these modules for each sensor, during training and inference lidar data is always passed to the lidar-set of measurement specific modules, camera data to the camera-set and radar measurements to the radar-set. This change allows KalmanNet to learn the sensor and detection characteristics for each modalities. 
+
+2) Motion State Awareness: In order to facilitate adap-tion to different motion types we provide AM-KNet with information on the current motion state relative to the ego vehicle. Based on an analysis of the measurement errors and measurement distributions in the datasets we chose Stationary ,
+
+Same Lane , and Crossing to categorize the motion state of objects in the scene. Same Lane and Crossing imply moving targets, thus the three motion states are mutually exclusive. The motion state is detected based on position and the velocity vector and represented as a one-hot encoding with three states. This motion state encoding is passed to GRU Q and 
+
+GRU P and used to gate the measurement features that are passed to FC 7 . The gating mechanism is also based on the analysis of the used dataset and reduces the impact of noisy measurements. While not relevant to motion states, a general distribution of detection errors can be seen in Fig. 2. 
+
+3) Context Modulation: In an autonomous driving scenario a state estimator is confronted with different types of scenarios, targets, driving maneuvers, and sensor settings. To be able to handle this diverse environment we take inspiration from AdaptiveKalmanNet [12] and use a hypernetwork with context modulation to modulate the pre-activations of AM-KNet. Unlike AM-KNet, which only passes a scalar value into the hypernetwork to represent a noise ratio our implementation will receiver a richer context. Our hypernetwork consists of four fully connected layers with ReLU activation functions. The first layer FC H1 receives the 27 component input which contains encodings for the object type (Car, Truck, ...), motion state, and target pose. After FC H2 the modulation is ouput by two heads FC GAIN and FC SHIFT which provide the context modulation. This modulation is an affine transformation ap-plied to the pre-activations, i.e. the values after multiplication of inputs by weights and before application of the activation function. The shift is multiplied with the pre-activation and the gain added to it. During inference, each target, at each timestep will receive modulation from the hypernetwork based on its own context. 
+
+4) Covariance Estimation: While the cell state of the GRUs in the KalmanNet architecture contain information on noises in the scene, prior evaluation [13] showed that these cannot be directly used as a covariance matrix. We follow the approach used in Recursive KalmanNet [10], where the authors use Josephs formula of covariance estimation, but combine the prediction and update of the state covariance and split them into two parts. One part uses the state space matrices, while the other, noise dependent term, is learned through a GRU. 
+
+B. Loss Function 
+
+Our architecture design provides AM-KNet with the re-quired information to estimate the targets state. With the design of the training objective the strengths of a learned state estimator can be maximized. We design multiple components of our loss to teach AM-KNet how to use and process the available information. The foundation of our training objective is a component-wise, normalized squared error. With sensor set S and state components C the loss per sensor s ∈ S and state component c ∈ C is defined as 
+
+ℓk,c =
+
+ xk,c − ˆxk,c 
+
+2
+
+α2
+
+> c
+
+, α = [ αc]c∈C . (16) with normalization coefficient α to ensure comparable mag-nitudes among the state components. 
+
+1) Sensor Characteristics: Radar, Lidar, and Camera sen-sors and their corresponding detection methods have different characteristics. Radar, for example, has a high radial resolution while exhibiting a lower angular resolution. And while Radar will be able to measure points from the bottom of the car through ground-reflections, Lidar is generally only capable to measure the outlines of the visible sides. Another important example is the shape, while shape information can be extracted from lidar and radar, they do not come close to the quality of shape data that is provided by a camera based detector. In order to teach KalmanNet the expected noises of a measurement we introduced a state-component specific weighting of the loss that is a function of the sensor and the targets relative pose to the sensor. With dk denoting the target range, φk its bearing, and vk
+
+its velocity the weighting factor wsensor  
+
+> k,s,c
+
+active sensor s and component c at time k is defined as: 
+
+wsensor  
+
+> k,s,c
+
+= γs,c (dk) ξs,c (φk) νs,c (vrel  
+
+> k
+
+) c ∈ C , s ∈ S (17) 
+
+2) Target Class & Motion State: Analogously the object category and motion state are considered. The factor wclass  
+
+> k,c
+
+is based on the object category of the target. The factor wstate 
+
+> k,c
+
+is based on the target motion-state, it takes into account if the target is stationary, driving in the same lane as the ego vehicle or crossing that lane. 
+
+3) Rate of Change: To enable KalmanNet to learn the varying measurement reliability we devise a score based on the flow of the data points. This score rates how well mea-sured motion aligns with ground-truth motion. For each state component c, a mismatch signal from the difference between consecutive ground-truth states and consecutive measurements is computed. Using a sliding window a scalar reliability weight is obtained from the mismatch history using and inverse coefficient of variation. A component whose recent flow, i.e. its measured change, is inconsistent with the actual change receives a lower weight. The deltas in ground-truth ∆xk,c and measurements ∆z(s)
+
+> k,c
+
+are used to compute the flow-residual ϵ(s)
+
+> k,c
+
+.
+
+∆xk,c = xk,c − xk−1,c , ∆z(s) 
+
+> k,c
+
+= z(s) 
+
+> k,c
+
+− z(s) 
+
+> k−1,c
+
+(18) 
+
+ϵ(s) 
+
+> k,c
+
+= ∆xk,c − ∆z(s) 
+
+> k,c
+
+. (19) The overall flow residual E(s) 
+
+> k,c
+
+for the current time k is computed over a window of the past W timesteps. Using the mean μ(E(s) 
+
+> k,c
+
+) and standard deviation σ(E(s) 
+
+> k,c
+
+) of that window the coefficient of variation r(s) 
+
+> k,c
+
+is computed. The small constant δ improves numerical stability. 
+
+E(s) 
+
+> k,c
+
+= {ϵ(s)
+
+> k−j,c
+
+}W −1 
+
+> j=0
+
+, r(s) 
+
+> k,c
+
+= σ(E(s) 
+
+> k,c
+
+)
+
+μ(E(s) 
+
+> k,c
+
+) + δ (20) Using the inverse of the coefficient of variation a scoring of the current sensor reliability can be computed as wroc ,(s) 
+
+> k,c
+
+:
+
+wroc ,(s) 
+
+> k,c
+
+= 11 + r(s)
+
+> k,c
+
+(21) This score is clipped to: wroc min ≤ wroc ,(s) 
+
+> k,c
+
+≤ wroc max . This loss term is introduced to facilitate a better understanding of INPUTS  SHARED BACKBONE  SENSOR-SPECIFIC HEADS  FUSION & DECODING  FILTER OUTPUT                
+
+> Motion State
+> Encoding
+> Object Type Enc.
+> FC 5
+> n5n
+> FC 8
+> 840
+> FC 6
+> n5n
+> ⊕
+> ⊕
+> GRU Q
+> 5n+1+40 n²
+> GRU P
+> n²+5n+40 n²
+> Measurement-Component Heads
+> FC 1
+> n² 5n
+> FC 7
+> 2m 5n
+> ⊕
+> GRU S
+> FC 2
+> n²+5n
+> n
+> FC 3
+> 5n+n
+> n²
+> Kalman
+> Gain
+> m(n+n²) mn+n²
+> 5n·m
+> FC 4
+> 2n² n²
+> B Dec.
+> n² n(n+1)/2
+> Wk
+> n × m
+> Sk
+> m × m
+> (SPD)
+> Bk
+> n × n
+> (SPD)
+> Context Modulation
+> Hypernetwork
+> FC H1
+> L
+> Δx̂ t-1
+> Δx̃ t-1
+> Δt
+> Δyt
+> Δỹt
+> n2+5n
+> n2
+> m(m+1)/2
+> LL T
+> m2
+> LL T
+> n2
+> S Dec.
+> 27
+> 128
+> FC H2
+> 128 128
+> Gain Shift
+> Target Enc.
+> 8
+> 13
+> 14
+> Context
+> Modulation of Pre-
+> Activations
+
+Fig. 1. Architecture of AM-KNet. The four input features and the motion state encoding are expanded through fully connected layers (FC5, FC6, FC8) and concatenated into the shared backbone GRUs (GRU Q, GRU P). For each measurement component, a sensor-specific head (FC1, FC7, GRU S) extracts per-component features, which are refined by FC2 and FC3 and aggregated by the Kalman Gain module. The S Decoder produces the innovation covariance 
+
+Sk via Cholesky factorisation. FC4 combines the fused covariance with the GRU P output and feeds back into GRU P as a recurrent connection; its output is also passed to the B Decoder, which produces the learned noise term Bk for the Joseph-form covariance update. The hypernetwork (bottom) maps the 27-dimensional context vector, comprising a target encoding and object type encoding, through two FC layers and separate gain and shift heads to produce an affine modulation of the pre-activations throughout the network. Modules enclosed by the grey dashed box are instantiated per sensor modality; all other modules are shared. 
+
+noise distributions in the measurement and enable AM-KNet to decide which measurements to accept .
+
+4) Negative Log Likelihood: Inspired by Recursive KalmanNet we use a negative log likelihood of the estimation covariance to supervise our learned state covariance P . The estimation error rk = xk − ˆxk is assumed to be normally distributed with covariance P , it parametrizes the gaussian likelihood: 
+
+p(rk | Pk) = 1(2 π)nx/2 |Pk|1/2 exp 
+
+
+
+− 12 r⊤ 
+
+> k
+
+P −1 
+
+> k
+
+rk
+
+
+
+(22) Taking the negative log-likelihood ℓstate (k) = − log p(rk |
+
+Pk) yields the training objective for the estimation error: 
+
+ℓstate (k) = 12
+
+
+
+r⊤ 
+
+> k
+
+P −1 
+
+> k
+
+rk + log |Pk| + nx log(2 π)
+
+
+
+(23) Beyond stabilizing the state covariance output, this loss term will also stabilize the AM-KNet performance overall as it impacts multiple modules inside the network. To further improve the network performance we added a NLL loss term for the innovation ek = zk − ˆzk. The measurement residuals gaussian likelihood given the innovation covariance 
+
+S is defined as: 
+
+p(ek | Sk) = 1(2 π)nz /2 |Sk|1/2 exp 
+
+
+
+− 12 e⊤ 
+
+> k
+
+S−1 
+
+> k
+
+ek
+
+
+
+(24) The NLL ℓinnov (k) = − log p(ek | Sk) is given as: 
+
+ℓinnov (k) = 12
+
+
+
+e⊤ 
+
+> k
+
+S−1 
+
+> k
+
+ek + log |Sk| + nz log(2 π)
+
+
+
+(25) V. E XPERIMENTAL SETUP & D ATA 
+
+A. State-Space Formulation 
+
+AM-KNet uses a constant acceleration motion model augmented with extent and orientation states xt =[ x, y, v x, v y , a x, a y , l, w, c x, c y , ψ ]⊤ ∈ R11 , where 
+
+(x, y ) denote the position, (vx, v y ) the velocity, and (ax, a y )
+
+the acceleration of the object reference-point. The shape is characterised by length and width of the bounding box and the object yaw angle (l, w, ψ ), while (cx, c y ) give the center of the tracked object. The reference point is chosen to maximize observation by the sensors, it is the midpoint on the side of the target which faces the ego vehicle, taking the side lengths into consideration. As the basis of our state transition model we use the constant acceleration (CA) dynamical model [16] state tran-sition matrix. The CA model is applied to the reference Fig. 2. Camera and Lidar detected object centroid error distributions on the nuScenes Train dataset. The left side shows the errors and the right the total count of detections. In this visualization the forward direction of the ego vehicle is along the positive x-axis. 
+
+point (x, y, v x, v y , a x, a y ) and the object centroid (cx, c y ). The centroid prediction is coupled to the velocity and acceleration of the reference point. Length and width are treated as quasi-static in the motion model. In this motion model ψ is also treated as constant over one step, the changes in yaw are updated through the learned AM-KNet only. The observation model is defined by a linear measurement matrix H that selects the observed components from the full state vector. For the lidar and camera modalities, the measurement vector is seven-dimensional: 
+
+zt = x y l w cx cy ψ⊤ ∈ R7 and H ∈ R7×11 .For lidar and camera the velocities and accelerations remain unobserved. For the radar modality the measurement vector is extended by (vx, v y ) the converted, cartesian velocities obtained from the doppler range rate. The measurement matrix is thus H ∈ R9×11 .During the the prediction step the state vector is propagated from ˆxk−1|k−1 to ˆxk|k−1 using Eq.(3). With Eq. (5) and (8) the predicted observation and the innovation are computed respectively. Eq. (9) updates the state vector using the Kalman Gain given by AM-KNet. 
+
+B. Dataset 
+
+We train and evaluate AM-KNet on two automotive datasets, nuScenes [14] and View-of-Delft (VoD) [15]. VoD was recorded in urban traffic in Delft, the Netherlands, with synchronised frames captured at approximately 10 Hz using a lidar, a front camera, and a radar. Ground truth (GT) bounding box annotations are provided within the camera field of view. We used 36609 samples from 686 sequences as training data, 
+
+32404 samples across 640 sequences as validation data, and 
+
+18642 samples over 346 sequences as test data. The radar and lidar pointclouds were processed based on the Ground truth bounding boxes to emulate a detection algorithm. From the clusters we compute a centroid, the reference point, median cartesian velocity vector for radar, and a convex hull to obtain length and width of the measured bounding box. The nuScenes dataset was collected across Boston and Singapore, using a sensor suite consisting of one 360 ◦ li-dar, five radar units, and six surround-view cameras. Three-dimensional bounding-box annotations are provided at 2Hz for 23 object categories. We use 458 scenes for training, 153 for validation and 151 for testing. Due to lacking radar quality we use lidar and camera data in our experimental setup. We restrict our data to objects of the classes car, truck, bus, trailer, construction vehicle, pedestrian, motorcycle, bicycle .We use a total of 290694 timesteps across 14149 sequences for training, 96497 timesteps over 4664 sequences for validation and 99780 timesteps across 4810 sequences for testing, this is equal to a 60 /20 /20 split. As in VoD the lidar clusters are processed to extract the centroid and the reference point for each cluster. The camera images from nuScenes were given to a BevDepth [21] detector which output the detected 3D
+
+bounding boxes. The detected bounding boxes were processed to extract a reference point. In Fig. 2 the error distribution for Lidar and Camera detections on the nuScenes dataset can be seen. 
+
+C. Training 
+
+Each training sample consists of a tracked object sequence of fixed legnth K = 100 time steps. Sequences are constructed from the respective dataset annotations and grouped into batches of B = 20 sequences. All computations are performed in double precision ( float64 ), however, it is completely feasi-ble to run this framework in single precision ( float16 ). The network is trained using the AdamW [22] optimizer. We use several regularisation mechanisms, dropout is applied to all layers and the weight decay of the Adam optimiser acts as L2
+
+regularisation on the learnable parameters. Further the outputs of the GRU unitsare normalised using layer normalisation. Our training follows a three-phase schedule. During the first 
+
+5 epochs of training the stationary target loss and the two Gaussian NLL terms are inactive, permitting the network to first learn accurate dynamics and state estimates. From epoch 
+
+5 onward the loss term for stationary targets is enabled which encourages an inertia in the estimates of static targets. After epoch 8 the estimation error and innovation NLL’s are enabled. This staged introduction prevents the covariance heads from dominating the gradients before the state estimates have started converging. During training at each timestep k we extrapolate the state vector into the current timestep and call sequential update calls for each available sensor. The VoD data was synchronized, so we treat the measurements as originating from the same timestamp. In nuScenes the measurements are assigned to the same frame, but have not been synchronized exactly. For this case we predict once to the earliest sensor and perform the update. For the next sensors we predict the state to the correct timestamp, provided it differs from the previous timestamp, before updating using that sensors measurements. The first NLidar  
+
+> Cluster, CenterPoint
+> Detections
+> Camera
+> BEVDepth Detections
+> Radar
+> Cluster, CenterPoint
+> Detections
+> zk(s) — measurements for available sensors at timestep k
+> STATE ESTIMATION — TIMESTEP k
+
+x̂ k−1|k−1 
+
+Pk−1|k−1 
+
+Predict 
+
+x̂ k|k−1  = F k · x̂ k−1|k−1 
+
+with ego compensation 
+
+Δt, F(Δt)   
+
+> FOR EACH AVAILABLE SENSOR s ∈{lidar, camera, radar}
+> sequential update — state is updated after each sensor before proceeding to the next
+
+x̂ k|k−1 
+
+Predict Measurement 
+
+ẑk|k−1  = H ·  x̂ k|k−1 
+
+Innovation 
+
+ek = z k(s)  − ẑk|k−1 
+
+> zk(s)
+
+Compute Features 
+
+Δỹk , Δŷ k , Δ x̃ k−1  , Δ x̂ k−1 
+
+L2-normalized deltas 
+
+AMKNet    
+
+> learned Kalman gain & covariance
+> decoder
+> GRU Q → GRU P GRU S
+> KG, S, FC4, B
+> Hypernetwork (context modulation)
+> Outputs:
+> WkSkBk
+> state_enc (8-D)
+> sensor_id
+> context (27-D)
+> target enc + obj cat
+
+State Update 
+
+x̂ k|k  = x̂ k|k−1  + W k · e k       
+
+> ek
+> Covariance Update
+> Pₖ|ₖ=(I−K kH) FₖPₖ₋₁ |ₖ₋₁ Fₖᵀ (I−K kH) T+ B k
+> Joseph's form
+> Pk|k−1
+
+x̂ k|k  , P k|k 
+
+posterior 
+
+> next sensor
+> update
+> x̂ , P → next timestep
+> TRAINING LOSSES
+
+xgt 
+
+ground truth state 
+
+ℒMSE 
+
+Σc (x k,c  − x̂ k,c )² / α c²
+
+× w sensor  · w class  · w state  · w roc 
+
+ℒinnov 
+
+½ [e kT Sk−1  ek + log|S k|] 
+
+innovation NLL — teaches S k
+
+ℒstate 
+
+½ [r kT Pk−1  rk + log|P k|] 
+
+state NLL — teaches P k
+
+ℒ = ℒMSE  + λ ₁ ℒinnov  + λ ₂ ℒstate 
+
+λ₁, λ ₂ = 0 during warmup      
+
+> Training Schedule
+> Epoch 0–4: ℒMSE only
+> Epoch 5–7: + stationary loss
+> Epoch 8+: + ℒinnov +ℒstate
+
+∇ℒ  → AdamW 
+
+grad clip ≤ 1.0, wd = 1e-3 
+
+> Phase 2: Context Modulation Training
+> Freeze AMKNet → train hypernetwork only
+> on full dataset with varying scenarios
+
+x̂ k|k 
+
+x̂ , P k|k 
+
+ek, S k
+
+> backprop through
+> time
+> x̂ 0
+> P0
+
+Fig. 3. Overview of the AM-KNet training framework. Measurements from lidar, camera, and radar enter the state estimation system at timestep k. The prior state ˆxk|k−1 is obtained through the prediction step and used to compute the predicted measurement, innovation, and the four input features. For each available sensor, AM-KNet receives the features along with the motion state encoding, sensor identifier, and context vector, and outputs the Kalman gain Wk ,innovation covariance Sk , and learned noise term Bk . The state is updated via the Kalman gain and the covariance via Joseph’s form. After processing all sensors sequentially, the posterior ˆxk|k and Pk|k are fed back for the next timestep. Training is supervised by a weighted component-wise MSE loss and two Gaussian NLL terms on the estimation error and innovation, introduced in a staged schedule. 
+
+epochs the AM-KNet model is trained on its own without a hypernetwork. After N epochs the weights of the model itself are frozen and the hypernetwork is attached to the network and trained for N epochs. 
+
+D. Benchmarks 
+
+To compare our KalmanNet model with state of the art state estimators we choose the OAFuser which we introduced above in Sec. III-D. Further we choose the Unscented Kalman Filter Extended Object Tracker (UKF-EOT) [23], [24], which is a specialized fusion model, that contains multiple motion models and was specifically adapted to autonomous driving. Neither of the two models was intensively tuned to fit the present data. Table IV reports the NEES and NIS consistency results on the nuScenes test set. VI. R ESULTS 
+
+We evaluate on the official test split of VoD and 20% 
+
+nuScenes. We report the mean absolute error (MAE), median, and standard deviation (Std) per state component and assess statistical consistency via the normalised estimation error squared (NEES) and normalised innovation squared (NIS). NEES and NIS are evaluated for position and velocity terms, both with 2 degrees of freedom. The χ2-consistency rate denotes the fraction of samples within the 90% acceptance region of the χ2 distribution at the corresponding degrees of freedom. A result sample of AM-KNet can be seen in Fig. 2. Fig. 4. This figure shows a sample of the VoD dataset, showing the lidar and radar point clouds, ground truth in brown and estimates in green. The reference points for ground truths and estimates are visualized as diamond shapes. The ego car faces the top and the y-data is plotted along the plot x-axis. Lidar points are in blue and radar points visualized in purple. TABLE I MEAN ABSOLUTE ERROR (MAE), MEDIAN , AND STANDARD DEVIATION ON THE VIEW -OF -D ELFT TEST SET . A CCELERATION COMPONENTS ARE OMITTED AS THE BASELINES DO NOT ESTIMATE THEM . B EST MAE PER COMPONENT IN BOLD .Comp. Model MAE Median Std 
+
+x KNet Base 0.29 0.11 0.74 AM-KNet-CM 0.27 0.11 0.70 OAFuser 1.20 0.26 2.59 UKF 0.74 0.13 1.79 
+
+y KNet Base 0.23 0.05 0.76 AM-KNet-CM 0.21 0.05 0.71 OAFuser 0.95 0.21 2.50 UKF 0.38 0.07 0.89 
+
+vx KNet Base 0.48 0.23 0.82 AM-KNet-CM 0.48 0.24 0.77 OAFuser 1.20 0.44 2.68 UKF 0.66 0.24 1.42 
+
+vy KNet Base 0.56 0.21 0.96 AM-KNet-CM 0.57 0.22 0.93 OAFuser 1.20 0.38 2.59 UKF 0.34 0.16 0.59 length KNet Base 0.31 0.13 0.61 AM-KNet-CM 0.31 0.13 0.61 OAFuser 2.62 1.39 2.82 UKF 2.64 1.39 2.86 width KNet Base 0.19 0.11 0.43 AM-KNet-CM 0.19 0.11 0.43 OAFuser 0.84 0.44 0.93 UKF 0.84 0.44 0.95 TABLE II NEES AND NIS EVALUATION ON THE VIEW -OF -D ELFT TEST SET .CONSISTENCY RATE IS THE PERCENTAGE OF SAMPLES WITHIN THE 90% 
+
+χ2 INTERVAL (2D). B EST CONSISTENCY PER METRIC IN BOLD . M EAN ,
+
+> MEDIAN
+
+, AND STD ARE COMPUTED ON THE ≤ 95 TH -PERCENTILE FILTERED VALUES .Metric Model Cons. % Mean Median Std NEES Pos. KNet Base 76.97 1.37 0.58 2.07 AM-KNet-CM 59.05 0.84 0.20 1.49 OAFuser 33.31 106.95 10.23 321.51 UKF 45.28 249.36 5.86 1035.09 NEES Vel. KNet Base 68.32 2.33 0.55 4.68 AM-KNet-CM 65.15 1.41 0.36 2.68 OAFuser 69.41 3.96 0.98 8.24 UKF 68.70 3.98 0.79 8.49 NIS Pos. KNet Base 59.77 0.42 0.17 0.70 AM-KNet-CM 66.03 0.59 0.22 0.99 OAFuser 79.42 0.95 0.53 1.19 UKF 75.25 2.56 0.99 4.38 NIS Vel. KNet Base 36.20 0.13 0.05 0.19 AM-KNet-CM 38.73 0.24 0.06 0.45 OAFuser 22.96 1.29 0.02 3.94 UKF 11.54 0.04 0.03 0.03 
+
+A. View of Delft 
+
+Tables I and II summarise the VoD results. AM-KNet+CM achieves the lowest position MAE ( x: 0.27 m, y: 0.21 m) and the lowest vx MAE ( 0.477 m/s ). UKF-EOT is the strongest method in vy 4 (40 .34 m/s ). Both baselines exhibit larger position errors ( 0.38 –1.12 m). For extent, AM-KNet variants outperform the baselines (length: ≈ 0.31 vs. 2.6 m; width: 0.19 
+
+vs. 0.84 m). AM-KNet achieves the highest position NEES consistency (76 .97% ) with a mean of 1.37 . The OAFuser has a mean of TABLE III MEAN ABSOLUTE ERROR (MAE), MEDIAN , AND STANDARD DEVIATION ON THE NU SCENES TEST SET . A CCELERATION COMPONENTS ARE OMITTED AS THE BASELINES DO NOT ESTIMATE THEM . B EST MAE PER COMPONENT IN BOLD .Comp. Model MAE Median Std                                                                                                                                                 
+
+> xKNet Base 2.27 0.25 8.36 AM-KNet-CM 2.13 0.26 7.89 OAFuser 6.38 0.38 18.08 UKF 4.35 0.26 13.81
+> yKNet Base 0.78 0.19 2.52 AM-KNet-CM 0.73 0.20 2.26 OAFuser 3.25 0.27 10.86 UKF 1.95 0.20 7.31
+> vxKNet Base 1.03 0.28 2.49 AM-KNet-CM 0.91 0.26 2.30 OAFuser 2.87 0.62 5.49 UKF 2.07 0.37 4.19
+> vyKNet Base 0.39 0.16 0.80 AM-KNet-CM 0.35 0.16 0.70 OAFuser 1.70 0.43 3.64 UKF 1.20 0.33 2.57 length KNet Base 0.58 0.20 1.15 AM-KNet-CM 0.84 0.28 1.43 OAFuser 3.31 2.51 3.91 UKF 3.30 2.61 3.79 width KNet Base 0.26 0.12 0.42 AM-KNet-CM 0.43 0.27 0.51 OAFuser 1.05 0.83 0.98 UKF 1.05 0.85 0.96 TABLE IV NEES AND NIS EVALUATION ON THE NU SCENES TEST SET .CONSISTENCY RATE IS THE PERCENTAGE OF SAMPLES WITHIN THE 90%
+> χ2INTERVAL (2D). B EST CONSISTENCY PER METRIC IN BOLD . M EAN ,
+> MEDIAN ,AND STD ARE COMPUTED ON THE ≤95 TH -PERCENTILE FILTERED VALUES .Metric Model Cons. % Mean Median Std NEES Pos. KNet Base 55.78 4.29 0.31 12.68 AM-KNet-CM 60.27 4.53 0.44 12.44 OAFuser 33.54 1198.08 3.80 4855.51 UKF 37.02 258.87 9.15 769.59 NEES Vel. KNet Base 51.16 0.80 0.15 1.70 AM-KNet-CM 47.39 0.48 0.11 1.02 OAFuser 39.50 8.29 0.33 20.30 UKF 48.37 10.62 0.79 24.36 NIS Pos. KNet Base 63.87 0.92 0.28 1.50 AM-KNet-CM 59.77 0.81 0.22 1.40 OAFuser 48.28 0.63 0.12 1.26 UKF 54.16 2.04 0.26 4.64
+
+106 .95 , with 33 .3% consistency and the UKF-EOT achieves a mean of 249 .4, with 45 .3% consistency. Velocity NEES con-sistency is comparable across all methods ( 65 .15 − − 69 .41% )with the OAFuser having the highest rate of 79 .42% . The OAFuser also leads in position NIS consistency ( 79 .42% ), whereas the AM-KNet+CM reaches the highest NIS velocity rate ( 38 .73% ). 
+
+B. nuScenes 
+
+Tables III and IV report the nuScenes results. AM-KNet+CM achieves the lowest MAE in position ( x: 2.13 m, y:
+
+0.73 m) and velocity ( vx: 0.91 m/s , vy : 0.35 m/s ), reducing position error by roughly half compared to UKF-EOT and by a factor of three compared to OAFuser. AM-KNet yields the best extent accuracy (length: 0.58 m, width: 0.26 m), while both baselines are at approximately 3.3 m and 1.0 m respectively. The consistency gap widens on nuScenes. AM-KNet+CM achieves the highest position NEES consistency (60 .3% ), while OAFuser and UKF-EOT reach only 33 .5% and 37 .0% .AM-KNet leads in velocity NEES ( 51 .2% ) and achieves the highest position NIS consistency (63 .9% ). VII. D ISCUSSION 
+
+A. Accuracy and adaptiveness 
+
+Across both datasets the AM-KNet variants consistently achieve the lowest position and extent MAEs. The margin grows on nuScenes, which has a higher the diversity of target classes, ranges, and sensor configurations. While the baseline methods performance could be improved through intensive tuning to the data these results show that AM-KNet’s sensor-specific measurement modules and learned covariance branches allow it to adapt to the distinct characteristics of each modality, and the context modulation in AM-KNet+CM provides further conditioning on target type and motion state. This adaptiveness is especially visible in the velocity results on nuScenes, while UKF-EOT retains the advantage in vy on VoD. This indicating that the learned estimators do not yet fully capture lateral dynamics in the VoD setting. 
+
+B. Consistency 
+
+The NEES results reveal the most significant advantage of the learned approach. On VoD, AM-KNet achieves 77 .0% 
+
+position NEES consistency. On nuScenes, AM-KNet+CM leads with 60 .3% . In contrast, the high NEES mean of the baseline methods indicates severe overconfidence. These extreme values suggest that fixed or heuristically adapted noise models degenerate when confronted with the variety of targets and sensors in the multi-target evaluation. OAFuser’s innovation-based adaptation is effective in con-trolled settings: it achieves the best position NIS position con-sistency and velocity NEES on VoD. However, this advantage does not transfer to position NEES or to nuScenes, where its consistency degrades sharply. AM-KNet’s data-driven adap-tation, by contrast, scales more robustly to heterogeneous conditions. VIII. C ONCLUSION 
+
+We presented Adaptive Multi-modal KalmanNet (AM-KNet), a hybrid state estimator that preserves the recursive predict–update structure of the Kalman filter while replacing the covariance and gain computations with learned modules. Three architectural contributions address the limitations of the original KalmanNet on real-world automotive data. First, sensor-specific measurement modules enable the network to learn the distinct noise characteristics of radar, lidar, and camera independently, rather than treating all observations identically. Second, a covariance estimation branch based on the Joseph form, supervised through negative log-likelihood losses on both the estimation error and the innovation, provides an explicit and calibrated uncertainty output. Third, a hyper-network with context modulation conditions the filter on target type, motion state, and relative pose, allowing a single model to adapt to the diverse scenarios encountered in autonomous driving. The learned variants achieve superior estimation ac-curacy on position and extent states and, importantly, produce substantially more consistent covariance estimates than the rule-based baselines. REFERENCES [1] Alex Sherstinsky. Fundamentals of recurrent neural network (rnn) and long short-term memory (lstm) network. Physica D: Nonlinear Phenomena , 404:132306, March 2020. [2] A Vaswani. Attention is all you need. Advances in Neural Information Processing Systems , 2017. [3] Rahul G Krishnan, Uri Shalit, and David Sontag. Deep kalman filters. 
+
+arXiv preprint arXiv:1511.05121 , 2015. [4] Maximilian Karl, Maximilian Soelch, Justin Bayer, and Patrick Van der Smagt. Deep variational bayes filters: Unsupervised learning of state space models from raw data. arXiv preprint arXiv:1605.06432 , 2016. [5] Philipp Becker, Harit Pandya, Gregor Gebhardt, Cheng Zhao, C James Taylor, and Gerhard Neumann. Recurrent kalman networks: Factorized inference in high-dimensional deep feature spaces. In International conference on machine learning , pages 544–552. PMLR, 2019. [6] Guy Revach, Nir Shlezinger, Xiaoyong Ni, Adria Lopez Escoriza, Ruud JG Van Sloun, and Yonina C Eldar. Kalmannet: Neural network aided kalman filtering for partially known dynamics. IEEE Transactions on Signal Processing , 70:1532–1547, 2022. [7] Xuehan Han, Ling Ding, Cheng Peng, WenWen Zeng, Xin Zhang, Zheng Wen, and Le Zheng. Multi-model kalmannet for maneuvering target tracking. In IET International Radar Conference (IRC 2023) , volume 2023, pages 399–405. IET, 2023. [8] Shanli Chen, Yunfei Zheng, Dongyuan Lin, Peng Cai, Yingying Xiao, and Shiyuan Wang. Maml-kalmannet: A neural network-assisted kalman filter based on model-agnostic meta-learning. IEEE Transactions on Signal Processing , 2025. [9] Geon Choi, Jeonghun Park, Nir Shlezinger, Yonina C Eldar, and Namyoon Lee. Split-kalmannet: A robust model-based deep learning approach for state estimation. IEEE transactions on vehicular technol-ogy , 72(9):12326–12331, 2023. [10] Hassan Mortada, Cyril Falcon, Yanis Kahil, Math´ eo Clavaud, and Jean-Philippe Michel. Recursive kalmannet: Deep learning-augmented kalman filtering for state estimation with consistent uncertainty quan-tification. In 2025 33rd European Signal Processing Conference (EU-SIPCO) , pages 885–889. IEEE, 2025. [11] Yehonatan Dahan, Guy Revach, Jindrich Dunik, and Nir Shlezinger. Bayesian kalmannet: quantifying uncertainty in deep learning augmented kalman filter. IEEE Transactions on Signal Processing , 2025. [12] Xiaoyong Ni, Guy Revach, and Nir Shlezinger. Adaptive kalmannet: Data-driven kalman filter with fast adaptation. In ICASSP 2024-2024 IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP) , pages 5970–5974. IEEE, 2024. [13] Arian Mehrfard, Bharanidhar Duraisamy, Stefan Haag, and Florian Geiss. Performance evaluation of deep learning-based state estimation: A comparative study of kalmannet. In 2024 Sensor Data Fusion: Trends, Solutions, Applications (SDF) , pages 1–7. IEEE, 2024. [14] Holger Caesar, Varun Bankiti, Alex H Lang, Sourabh Vora, Venice Erin Liong, Qiang Xu, Anush Krishnan, Yu Pan, Giancarlo Baldan, and Oscar Beijbom. nuscenes: A multimodal dataset for autonomous driving. In Proceedings of the IEEE/CVF conference on computer vision and pattern recognition , pages 11621–11631, 2020. [15] Andras Palffy, Ewoud Pool, Srimannarayana Baratam, Julian F. P. Kooij, and Dariu M. Gavrila. Multi-class road user detection with 3+1d radar in the view-of-delft dataset. IEEE Robotics and Automation Letters ,7(2):4961–4968, 2022. [16] Yaakov Bar-Shalom, X Rong Li, and Thiagalingam Kirubarajan. Esti-mation with applications to tracking and navigation: theory algorithms and software . John Wiley & Sons, 2004. [17] Junyoung Chung. Empirical evaluation of gated recurrent neural net-works on sequence modeling. arXiv preprint arXiv:1412.3555 , 2014. [18] Ning Ding, Yujia Qin, Guang Yang, Fuchao Wei, Zonghan Yang, Yusheng Su, Shengding Hu, Yulin Chen, Chi-Min Chan, Weize Chen, et al. Parameter-efficient fine-tuning of large-scale pre-trained language models. Nature machine intelligence , 5(3):220–235, 2023. [19] David Ha, Andrew Dai, and Quoc V Le. Hypernetworks. arXiv preprint arXiv:1609.09106 , 2016. [20] Stefan Haag, Bharanidhar Duraisamy, Constantin Blessing, Reiner Marchthaler, Wolfgang Koch, Martin Fritzsche, and J¨ urgen Dickmann. Oafuser: Online adaptive extended object tracking and fusion using automotive radar detections. In 2020 IEEE International Conference on Multisensor Fusion and Integration for Intelligent Systems (MFI) ,pages 303–309, 2020. [21] Yinhao Li, Zheng Ge, Guanyi Yu, Jinrong Yang, Zengran Wang, Yukang Shi, Jianjian Sun, and Zeming Li. Bevdepth: Acquisition of reliable depth for multi-view 3d object detection, 2022. [22] Diederik P Kingma. Adam: A method for stochastic optimization. arXiv preprint arXiv:1412.6980 , 2014. [23] Stefan Haag, Bharanidhar Duraisamy, Felix Govaers, Wolfgang Koch, Martin Fritzsche, and J¨ urgen Dickmann. Extended object tracking assisted adaptive clustering for radar in autonomous driving applications. In 2019 Sensor Data Fusion: Trends, Solutions, Applications (SDF) ,pages 1–7, 2019. [24] Stefan Haag, Bharanidhar Duraisamy, Felix Govaers, Martin Fritzsche, J¨ urgen Dickmann, and Wolfgang Koch. Extended object tracking assisted adaptive multi-hypothesis clustering for radar in autonomous driving domain. In 2021 21st International Radar Symposium (IRS) ,pages 1–10, 2021.
