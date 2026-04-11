@@ -1,0 +1,1450 @@
+Title: Active Propeller Fault Detection and Isolation in Multirotors Via Vibration Model
+
+URL Source: https://arxiv.org/pdf/2604.07281v1
+
+Published Time: Thu, 09 Apr 2026 01:18:03 GMT
+
+Number of Pages: 12
+
+Markdown Content:
+# Active Propeller Fault Detection and Isolation in Multirotors Via Vibration Model 
+
+Alessandro Baldini a, Riccardo Felicetti a, Alessandro Freddi a, Andrea Monteriù a
+
+> aDepartment of Information Engineering, Università Politecnica delle Marche, Via Brecce Bianche 12, Ancona, 60131, Italy
+
+Abstract 
+
+In rotary-wing aircraft, rotating blades are exposed to collisions and subsequent damage. The detection and isolation of blade damage constitute the first step in fault mitigation; however, they are particularly challenging when considerable input redundancy is available, as in the case of multirotors. In this article, we propose an active model-based approach that deliberately perturbs the control inputs to isolate blade faults in multirotor vehicles. By exploiting a model that captures the vibrations caused by blade damage, the isolation method relies solely on vibration data from the onboard inertial measurement unit. The strategy is tested in simulation using an octarotor platform, and both time-domain and frequency-domain features are analyzed. Several accuracy-related metrics of the technique are evaluated on a set of 9600 simulations and compared with the most relevant variables. 
+
+Keywords: Drones, Active Fault diagnosis, Fault isolation. 
+
+1. Introduction 
+
+Unmanned Aerial Vehicles (UAVs) have become integral to a wide range of military and civilian activities, o ff ering cost-e ff ective capabilities for applications such as surveillance, search and rescue, infrastructure inspection, logistics, aerial imaging, and intelligence gathering. The increasing di ff usion of UAVs in commercial and private contexts, together with their widespread use by non-professional and recreational users, has intensified concerns related to safety, privacy, and security (Tan et al., 2021). These concerns are particularly relevant for small-scale platforms, which exhibit comparatively high fail-ure rates (Shraim et al., 2018), largely attributable to equip-ment malfunctions. Empirical evidence indicates that equip-ment failures account for a significant proportion of incidents, with approximately 64% of accidents involving remotely pi-loted UAVs being linked to such causes (Wild et al., 2016). Among these, actuator-related faults are especially critical, as they may rapidly compromise flight stability, reduce control au-thority, and lead to vehicle damage if not promptly addressed. In this context, Fault Detection (FD) represents a fundamental component of fault-tolerant operation, serving as the initial step in fault mitigation. To be e ff ective across diverse platforms and operating conditions, FD schemes should therefore be designed with a high degree of robustness and adaptability to di ff erent en-vironmental conditions and UAV configurations (Brulin et al., 2024). A substantial body of literature investigates the use of vibra-tion signals and frequency-domain features for the detection of propeller faults in UAVs. Acceleration-based approaches are explored in Ghalamchi and Mueller (2018), where propeller damage is identified through onboard measurements; however, the proposed method is limited to scenarios in which the ve-hicle follows a predefined trajectory. An extension is pre-sented in Ghalamchi et al. (2019), where an Extended Kalman Filter is employed to estimate mass unbalance induced by a chipped blade, demonstrating the feasibility of fault isola-tion. Despite its e ff ectiveness, the reported convergence time for a medium-sized hexarotor is on the order of several min-utes, which may be unsuitable for safety-critical applications. More recent contributions focus on real-time implementations, such as the vibration-based FD strategy proposed in Baldini et al. (2023b). In Rao et al. (2025), experimental valida-tion of stochastic subspace-based FD methods combined with histogram-based analysis of acceleration data is provided for both hovering and linear flight conditions. Most existing studies primarily focus on FD, as isolating the specific faulty propeller during flight remains a challenging task. This di ffi culty arises from the large number of vibration-related frequency components that accumulate during opera-tion, making individual sources of damage hard to distinguish. As a result, approaches that explicitly address propeller Fault Detection and Isolation (FDI) and Fault Detection and Diagno-sis (FDD) tend to rely on data-driven methods with relatively high model complexity. A representative example is provided in Bondyra et al. (2017), where a FDD framework based on In-ertial Measurement Unit (IMU) acceleration measurements is introduced. Flight data collected under di ff erent propeller dam-age conditions are used to extract time- and frequency-domain features, which are subsequently employed to train a one-vs-all Support Vector Machine (SVM) classifier. The same au-thors extend this analysis in Puchalski et al. (2022), deploy-ing a lightweight Artificial Neural Network (ANN) on em-bedded hardware for online fault classification. Similar data-driven strategies are adopted in later works, such as Zhang et al. (2021), where time–frequency features are processed by an Long and Short-Term Memory (LSTM) network for pro-peller FDI. In Cabahug and Eslamiat (2022), vibration analysis is further expanded to include gyroscopic data acquired through a custom hardware setup and clustered using a K-means algo-
+
+> arXiv:2604.07281v1 [eess.SY] 8 Apr 2026
+
+rithm. Recently, multimodal approaches combining accelerom-eter, gyroscope, and control energy information have been pro-posed, with a Deep Neural Network (DNN) directly regress-ing the extent of propeller damage in millimeters Pose et al. (2023), later extended to integrated damage estimation in Pose et al. (2025). In parallel, several public datasets have become available and are widely used to benchmark data-driven FDI and FDD methods. Notable examples include the dataset pre-sented in Baldini et al. (2023a), which provides inertial and flight controller data, and the dataset in Puchalski et al. (2024), which combines inertial measurement unit data with micro-phone recordings. Although the aforementioned approaches are able to achieve FDI and FDD, they generally lack a formal justification of the vibration frequencies expected under specific operating and flight conditions. In the absence of an explicit vibration model, data-driven FDI and FDD techniques tend to be highly sensi-tive to changes in flight maneuvers, payload, and environmental conditions. As a consequence, these methods often require con-tinual retraining as new data become available, which hampers reproducibility and limits their applicability when the experi-mental setup or vehicle configuration is modified. To address these limitations, this work adopts an Active Fault Diagnosis (AFD) framework grounded in an explicit vibration model. AFD improves fault detection performance by deliberately injecting a designed auxiliary input into the system and analyz-ing the resulting input–output response. This paradigm allevi-ates several shortcomings of passive approaches, particularly in the presence of model uncertainty, noise, disturbances, or faults whose e ff ects are weak or partially masked Heirung and Mes-bah (2019). When combined with vibration analysis, AFD be-comes especially relevant, as variations in lift and drag induced by blade chipping may be indistinguishable from inherent mo-tor performance variability Ghalamchi et al. (2019). Moreover, for overactuated UAVs, the design of auxiliary control inputs that minimally a ff ect nominal dynamics can be carried out in a systematic and straightforward manner. From a modeling perspective, vibration analysis in the liter-ature is often carried out using high-fidelity tools such as Finite Element Analysis (FEA) Ahmad et al. (2019) or computational fluid dynamics Jiang et al. (2025). While these techniques pro-vide detailed insights into structural and aerodynamic e ff ects, their computational complexity renders them unsuitable for on-line FDI. Simpler modeling approaches, such as those proposed in Zou et al. (2025), are better suited to capture the dominant vibration phenomena associated with blade mass unbalance. In this work, a rigid-body formulation is adopted to derive the ef-fects of blade damage on the vehicle’s linear and angular accel-erations, complemented by blade element theory Bangura et al. (2016). The resulting model captures the essential vibration-induced dynamics with su ffi cient fidelity, while remaining com-putationally tractable for online FDI and Fault Tolerant Control (FTC) applications in UAVs. Using a multi-rigid model that captures the oscillatory dy-namics of the chipped propellers, in this paper we design a model-based active FDI strategy to isolate the faulty blade. The technique intentionally alters the control input to isolate the faulty propeller. The provided solution makes use of the well known frequency domain features, whose policies are guided by the geometry and the dynamics of the system. The technique is discussed for multirotors having coplanar and collinear pro-pellers, which represents the most common configuration, and for which the linearly dependent trust pointing vectors are make the isolation challenging. However, the similar approach can be extended for variable tilting and morphing configurations. The paper is organized as follows. In Section 2, we present the multirotor model, which accounts for the rigid-body repre-sentation of blade chipping. Section 3 analyzes the vibration from a frequency-domain perspective, detailing low- and high-frequency components. Based on the these considerations, Sec-tion 4 presents the proposed active method to isolate faults due to blade chipping. Extensive simulation results are shown in Section 5 to validate the method across a wide range of condi-tions, and concluding remarks are provided in Section 6. 
+
+2. Multirotor model 
+
+In this paper we consider a multirotor with na coplanar and collinear propellers, which is modeled as a constrained sys-tem of na + 1 rigid bodies, i.e., one for each rotating propeller and the remaining one for the central main body on which the IMU and the propellers are attached. More precisely, let 
+
+RE = (OE , xE , yE , zE ) be a North-East-Down (NED) earth-fixed reference frame, assumed to be inertial, let R0 = (O0, x0, y0, z0)be a body-fixed reference frame, centered in the center of mass of the central body, and let Ri = (Oi, xi, yi, zi) be a body-fixed reference frame in the center of mass of the ith propeller, for 
+
+i = 1, . . . , na. An example as depicted in Fig. 1 for a standard hexarotor having na = 6 actuators. Without loss of generality, we assume the positions of the IMU and R0 coincide. There-fore, we consider the generic UAV described by the mathemat-ical model ˙pEE,0 = RE 
+
+> 0
+
+v0 
+
+> E,0
+
+, (1a) ˙RE 
+
+> 0
+
+= RE 
+
+> 0
+
+ˆω0 
+
+> E,0
+
+, (1b) 
+
+m(˙ v0 
+
+> E,0
+
++ ω0 
+
+> E,0
+
+× v0
+
+> E,0
+
+) + f 0 
+
+> as
+
++ f 0 
+
+> aa
+
+= f 0 
+
+> g
+
++ f 0 
+
+> m
+
++ f 0 
+
+> f r
+
+, (1c) 
+
+I ˙ω0 
+
+> E,0
+
++ ω0 
+
+> E,0
+
+× Iω0 
+
+> E,0
+
++ τ0 
+
+> gyro
+
++ τ0 
+
+> a
+
+= r00,g × f 0 
+
+> g
+
++ τ0 
+
+> f r
+
++ τ0 
+
+> m
+
+, (1d) ¨pi = ¨θi(e3 × pi) + ˙θi(e3 × ˙pi) i = 1, . . . , na , (1e) where pEE,0 ∈ R3 is the position of R0 relative to RE (expressed in RE ), v0 
+
+> E,0
+
+∈ R3 denotes the velocity of R0 relative to RE (ex-pressed in R0), RE 
+
+> 0
+
+∈ S O (3) is the rotation matrix mapping R0
+
+to RE , and ω ∈ R3 is the angular velocity of R0 relative to RE
+
+(expressed in R0). Finally, pi = col (cos( θi), sin( θi), 0) denotes the configuration of the ith blade, i.e., it models the pure rota-tion of angle θi around a fixed and vertical rotation axis in R0,while e3 = col (0 , 0, 1). It is important to emphasize that the pa-rameters, the forces, and the torques describing model (1) are aff ected by possible blades chippings. Thus, in the remainder of the section we briefly summarize the most relevant terms. 2Figure 1: NED reference frames for a standard hexarotor. 
+
+2.1. Mass, center of mass and inertia 
+
+The propeller of the ith actuator is modeled as a homoge-neous rigid rod having two blades with possibly di ff erent radii 
+
+r1i, ri2 ∈ [0 , r], where r > 0 denotes the length of each healthy blade. When the ith blade su ff ers from chipping, r1i and /or ri2
+
+di ff er from r. For i = 1, . . . , na, the quantities 
+
+wi = 12r (ri1 + ri2) wki = 1
+
+r (ri1 − ri2) (2) take into consideration the magnitude and the asymmetry of the chipping of the ith propeller, respectively. It follows that the multirotor total mass is m = m0 + Pna 
+
+> i=1
+
+wi ¯mi, where m0 denotes the mass of the central body, while ¯ mi denote the mass of the 
+
+ith propeller in the nominal scenario, i.e., when ri1 = ri2 = r.Consequently, the center of mass of the multirotor (expressed in R0), which is denoted with r00,g, is r00,g = r0 
+
+> g,l
+
++ r0
+
+> g,h
+
+, where 
+
+r0 
+
+> g,l
+
+= 1
+
+m
+
+> na
+
+X
+
+> i=1
+
+mil0 
+
+> i
+
+r0 
+
+> g,h
+
+= 1
+
+m
+
+> na
+
+X
+
+> i=1
+
+miki pi, (3) 
+
+ki = r 
+
+> 2
+
+wki , and l0 
+
+> i
+
+denotes the vector from R0 to the ith propeller attaching point (expressed in R0). Finally, the total time varying inertia tensor of the multirotor (expressed in R0) is I = I0 +
+
+Pna 
+
+> i=1
+
+R0 
+
+> i
+
+Ii(R0 
+
+> i
+
+)T , where I0 is the inertia tensor of the central body (expressed in R0), and Ii is the inertia tensor of the ith blade w.r.t. its rest frame Ri (expressed in Ri). Please note that Ii is aff ected by the blade chipping. 
+
+2.2. External and and actuation wrenches 
+
+The main external disturbances to take into account are those provided by the gravity and the air drag. Therefore, f 0 
+
+> g
+
+=
+
+mg (RE 
+
+> 0
+
+)T e3 denotes the force due to the gravity, while the linear and angular frictions are f 0 
+
+> f r
+
+= −kt(RE 
+
+> 0
+
+)T v0
+
+> E,0
+
+, and τ0 
+
+> f r
+
+= −krω0
+
+> E,0
+
+,where kt, kr > 0 denote the friction coe ffi cients (Baldini et al., 2020a). The pair ( f 0
+
+> m
+
+, τ 0
+
+> m
+
+) denotes the wrench which can be used for control purposes (expressed in R0), which is a ff ected by the blade faults as well. More precisely, using cwi ∈ { 0, 1} to denote the clockwise /counterclockwise rotation of the ith propeller, the actuation force f 0 
+
+> m
+
+is f 0 
+
+> m
+
+= Pna 
+
+> i=1
+
+f 0
+
+> m,i
+
+, where 
+
+f 0 
+
+> m,i
+
+= wicwi cL ˙θi|˙θi|e3. (4) The actuation torque τ0 
+
+> m
+
+represents the overall torques which di-rectly depends from the propeller rotation, i.e., from the upward lifts, and it can be calculated as 
+
+τ0 
+
+> m
+
+=
+
+> na
+
+X
+
+> i=1
+
+(l0 
+
+> i
+
+× f 0
+
+> m,i
+
+) +
+
+> na
+
+X
+
+> i=1
+
+(τ0 
+
+> d,i
+
++ τ0
+
+> a,i
+
+), (5) where τ0 
+
+> d,i
+
+= −wd,icD ˙θi|˙θi|e3, τ0 
+
+> a,i
+
+= wa,icD 23r ˙θi|˙θi|e3, and 
+
+wd,i = r4 
+
+> i,1
+
++ r4
+
+> i,2
+
+2r4 , wa,i = (ri,1 − ri,2)( r3 
+
+> i,1
+
+− r3
+
+> i,2
+
+)2r4 . (6) Finally, cD = 12 kdr4 denotes the nominal drag coe ffi cient, where 
+
+kd is a constant. 
+
+2.3. Vibration features and damping 
+
+The blade chippings provide small variations of the center of mass and the mass. Coupled with the high frequency rotation of the propellers, they generate additional forces and torques. Two additional forces, denoted with f 0 
+
+> as
+
+and f 0
+
+> aa
+
+, and expressed as 
+
+f 0 
+
+> as
+
+=
+
+> na
+
+X
+
+> i=1
+
+mi(ω0 
+
+> E,0
+
+× (ω0 
+
+> E,0
+
+× l0 
+
+> i
+
+) + ˙ω0 
+
+> E,0
+
+× l0 
+
+> i
+
+) (7) 
+
+f 0 
+
+> aa
+
+=
+
+> na
+
+X
+
+> i=1
+
+miki(ω0 
+
+> E,0
+
+× (ω0 
+
+> E,0
+
+× pi)) (8) 
+
++
+
+> na
+
+X
+
+> i=1
+
+miki(2( ω0 
+
+> E,0
+
+× ˙pi) + ˙ω0 
+
+> E,0
+
+× pi + ¨pi),
+
+are injected into the plant due to the blade chipping. Please note that, in absence of chipping, we consider a symmetric structure, and hence f 0 
+
+> as
+
+= 0. Thus, due to the conservation of the angular momentum, the torque τ0 
+
+> a
+
+and the gyroscopic torque τ0 
+
+> gyro
+
+are expressed as 
+
+τ0 
+
+> a
+
+=
+
+> na
+
+X
+
+> i=1
+
+(p00,i × (m˙v0 
+
+> E,0
+
++ m(ω0 
+
+> E,0
+
+× v0
+
+> E,0
+
+) + f 0 
+
+> as
+
++ f 0
+
+> aa
+
+)) (9) 
+
+τ0 
+
+> gyro
+
+=
+
+> na
+
+X
+
+> i=1
+
+˙θi[ˆ e3, I0 
+
+> i
+
+]ω0 
+
+> E,0
+
++ Iiz ˙θi(ω0 
+
+> E,0
+
+× e3) + Iiz ¨θie3
+
+ , (10) where Iiz is the component (3 , 3) of Ii, consequently modifying the wrench acting on the plant. Despite the fact the such vibrational contributions can be cap-tured by the IMU, the structure is not actually rigid. Thus, we need to consider harmonic distortion and magnitude damping due to structure elasticity. The first issue has been examined in the literature, showing that multiples of the fundamental fre-quency are present, with the lower-order harmonics exhibiting the greatest significance (Balandi et al., 2025; Baldini et al., 2023b). The second source of damping arises from the struc-ture itself and from the IMU, which is not rigidly attached to the UAV. This damping phenomenon is commonly modeled as a mass–spring–damper system, i.e., a linear system (Balandi et al., 2025). Consequently, for a given rotational speed, the cu-mulative damping e ff ect results in an attenuation that must be applied to the vibration signals modeled in the following sec-tions. 33. Vibrations and loss of e ff ectiveness 
+
+In this section we study the forces (and thus the accelera-tions /vibrations) back to the IMU provided by the blade fault due to chipping. Indeed, a blade damage leads to additional ac-celeration contributions, namely f 0 
+
+> as
+
+and f 0 
+
+> aa
+
+for the linear accel-eration and τ0 
+
+> a
+
+for the torque (thus, for the angular acceleration). 
+
+3.1. Linear acceleration low frequency components 
+
+Considering the matrix Ξs = ( ˆ ω0
+
+> E,0
+
+)2 + ˆ˙ω0
+
+> E,0
+
+, it is possible to write f 0 
+
+> as
+
+= ¯mΞs(Pna 
+
+> i=1
+
+wili). Thus, if f 0 
+
+> as
+
+is not identically null, then the UAV B is subject to an unbalanced chipped blade Loss Of E ff ectiveness (LOE). Therefore, the term f 0 
+
+> as
+
+is a symptom for detecting unbalanced chipped blade LOE. 
+
+Remark 1. Let Ω(ν) = F [ω0
+
+> E,0
+
+] be the Fourier transform of the angular velocity and consider the transforms Vi(ν) = F [ω0 
+
+> E,0
+
+× (ω0 
+
+> E,0
+
+× ei)] (11) 
+
+S i(ν) = Vi(ν) − j2πν (ei × Ω(ν)) , (12) 
+
+for i = 1, 2. Then, for null initial conditions the Fourier trans-form of f 0 
+
+> as
+
+is 
+
+F [ f 0
+
+> as
+
+] =
+
+> na
+
+X
+
+> i=1
+
+mi(⟨e1, l0 
+
+> i
+
+⟩S 1(ν) + ⟨e2, l0 
+
+> i
+
+⟩S 2(ν)) . (13) 
+
+Indeed, in the body frame the third component of l 0 
+
+> i
+
+is null, hence l 0 
+
+> i
+
+= ⟨e1, l0 
+
+> i
+
+⟩e1 + ⟨e2, l0 
+
+> i
+
+⟩e2. By direct calculation we have 
+
+F [ f 0
+
+> as
+
+] =
+
+> na
+
+X
+
+> i=1
+
+mi(F [ω0 
+
+> E,0
+
+× (ω0 
+
+> E,0
+
+× l0 
+
+> i
+
+)] + F [ ˙ ω0 
+
+> E,0
+
+× l0 
+
+> i
+
+]) 
+
+=
+
+> na
+
+X
+
+> i=12
+
+X
+
+> k=1
+
+mi⟨ek, l0 
+
+> i
+
+⟩F [ω0 
+
+> E,0
+
+× (ω0 
+
+> E,0
+
+× ek)] 
+
+−
+
+> na
+
+X
+
+> i=1
+
+mi⟨ek, l0 
+
+> i
+
+⟩(ek × F [ ˙ ω0
+
+> E,0
+
+]) 
+
+=
+
+> na
+
+X
+
+> i=12
+
+X
+
+> k=1
+
+mi⟨ek, l0 
+
+> i
+
+⟩(Vk(ν) − j2πν (ek × Ω(ν))) 
+
+=
+
+> na
+
+X
+
+> i=12
+
+X
+
+> k=1
+
+mi⟨ek, l0 
+
+> i
+
+⟩S k(ν).
+
+An unbalanced fault produces frequency components as a lin-ear combination of S 1(ν) and S 2(ν), where the coe ffi cients de-pend on the UAV arms. 
+
+Remark 2. The term f 0 
+
+> as
+
+depends on the faulty propellers arms, and therefore is a good candidate feature for the FDI. However, f 0 
+
+> as
+
+is not directly a ff ected by the rotors speed, and thus it can be considered as a low frequency component, with frequencies similar to those of the angular velocity. Each component is weighted by m i (and thus m i/m for the acceleration), which can easily be of order 10 −2. This makes the FD and FDI using f 0
+
+> as
+
+particularly challenging in a real world scenario. 3.2. Linear acceleration high frequency components 
+
+Let us define the matrices 
+
+Ξa,i = ( ˆ ω0
+
+> E,0
+
+)2 + ˆ˙ω0 
+
+> E,0
+
++ 2˙ θi ˆω0 
+
+> E,0
+
+ˆe3 + ¨θi ˆe3 − ˙θ2 
+
+> i
+
+I3, (14) where I3 is the identity matrix. For i = 1, . . . , na, it is possible to rewrite 
+
+f 0 
+
+> aa
+
+=
+
+> na
+
+X
+
+> i=1
+
+mikiΞa,i pi. (15) The force f 0 
+
+> aa
+
+is linear in pi, which models the rotation of the blades. Depending on the UAV maneuver, it is possible to greatly simplify such force contribution. 
+
+Remark 3. If f 0 
+
+> aa
+
+is not identically null, then the UAV B is sub-ject to an asymmetric blade fault. Therefore, the term f 0 
+
+> aa
+
+is a symptom for detecting asymmetrically chipped blades. The converse is however not true, since Ξs depends on both ω0 
+
+> E,0
+
+and 
+
+˙ω0
+
+> E,0
+
+, and thus it can point-wise vary its rank and null space. 
+
+Remark 4. Assume a propeller Bi is subject to an asymmetric LOE, while B j is healthy for each j , i. Forcing ideal hovering conditions, that is ω0 
+
+> E,0
+
+= ˙ω0 
+
+> E,0
+
+= 0, v 0 
+
+> E,0
+
+= ˙v0 
+
+> E,0
+
+= 0, ˙θi = ˙θi,hov 
+
+and ¨θi = 0, for some constant ˙θi,hov ∈ R, we have f 0 
+
+> aa
+
+= −kimi ˙θ2
+
+> i,hov
+
+
+
+cos(˙ θi,hov t)sin(˙ θi,hov t)0
+
+ , (16) 
+
+and therefore a pure sinusoidal signals along the x 0 and y 0 axes. This confirms the approximation mostly used in the literature. Moreover, the first two components of the Fourier transform magnitude |F [ f 0
+
+> aa
+
+]| of f 0 
+
+> aa
+
+is a pure spike in the pulsation ˙θi,hov .No vibrations are induced in the z 0 component. 
+
+During a general maneuver, the frequency components of f 0
+
+> aa
+
+can be nontrivial. Assume the rotor speed ˙ θi is constant over time, i.e., ¨ θi = 0. Without loss of generality, also assume zero angle for each blade at the initial time, implying θi = ˙θit, and then pi = cos(˙ θit)e1 + sin(˙ θit)e2. Defining the signals 
+
+γi,1(t) = mikiΞa,ie1 γi,2(t) = mikiΞa,ie2, (17) it follows that 
+
+F [ f 0
+
+> aa
+
+(t)] =
+
+> na
+
+X
+
+> i=1
+
+F [γi,1(t) cos(˙ θit)] + F [γi,2(t) sin(˙ θit)]  . (18) Therefore, the propeller rotation acts as an amplitude modu-lation on γi,1(t) and γi,2(t), and having θi as carrier pulsation. Depending on which propeller Bi is subject to a LOE, the vi-brations due to f 0 
+
+> aa
+
+may slide on the pulsation axis. Therefore, a coordination between control actions and frequency domain residual generators can lead to fault isolation. 
+
+4. Fault Detection and Isolation 
+
+In this section, we describe the proposed method to isolate LOE faults due to blade chipping. Firstly, we introduce the control allocation algorithm, as it plays a central role to perform active FDI. Then, the proposed FD strategy, followed by the active Fault Isolation (FI) algorithm, are discussed. 44.1. Control Allocation 
+
+The control allocation is designed under the classic rigid body approximation as usual. Even if the multirotor is a multi-body system, the interaction between the propellers and the frame are by far negligible for the purpose of control. Control allocation algorithms (Johansen and Fossen, 2013) are used to find the inputs u ∈ Rna such that 
+
+τ = Bu , (19) where τ ∈ R6 is the wrench required by a control law, B ∈ R6×na
+
+is the control e ff ectiveness matrix, and u = cL
+
+h˙θ21 . . . ˙θ2
+
+> na
+
+i
+
+denotes the motor lift forces. 
+
+Remark 5. Blade chipping leads to LOE and thus a loss of ac-tuation wrench. For the sake of simplicity, the input mapping 
+
+(19) is considered fault-free in performing control allocation, leading to a model mismatch that is negligible as long as the blade damage is small. However, in case of severe blade chip-ping LOE, i.e., when an high percentage the blade is lost, the wrench mismatch can be significant, and a classical observer-based residual generator Baldini et al. (2021) can be coupled with the proposed frequency domain active solution. 
+
+Several methods can be used to solve (19), including the well-known Moore-Penrose pseudo-inverse (Baldini et al., 2020a), which returns the solution u with the minimum Eu-clidean norm. However, to comply with constraints, such as saturation and rate limits, the control allocation problem is for-mulated as a Quadratic Programming (QP) problem (Baldini et al., 2020b). Let us define the decision variable 
+
+x =
+
+"us
+
+#
+
+∈ Rna+1, (20) where s ∈ R is an artificial variable to relax equality constraints, thus preventing infeasibility. Let us also define a quadratic cost function to be minimized min  
+
+> x
+
+J(x) = 12 x⊤ Hx + f ⊤ x, (21) with 
+
+H = 2
+
+"Ina 00⊤ λH
+
+#
+
+, f =
+
+" 0
+
+λ f
+
+#
+
+, (22) where Ina ∈ Rna×na is the identity matrix, 0 is a column vec-tor of zeros with proper dimension, while λH and λ f are scalar weights associated with the artificial variable s, which penal-izes constraint violations in a manner similar to big-M methods (Nocedal and Wright, 1999). Introducing the artificial variable s, the hard constraint (19) is formulated as follows 
+
+"−B −1
+
+B −1
+
+#
+
+x ≤
+
+"−ττ
+
+#
+
+, (23) where 1 is a column vector of ones with proper dimension. Es-sentially, (23) is equivalent to −1s ≤ Bu − τ ≤ 1s and s ≥ 0is implicitly required. To enforce s ≈ 0 whenever possible, so that (19) holds, λH and λ f must be su ffi ciently large. Control input and rate limits are imposed as box constraints: 
+
+lb ≤ u ≤ ub, (24) where 
+
+lb = max uprev − δ, 0
+
+ub = min uprev + δ, 1umax 
+
+ . (25) Both the saturation constraints in [0 , umax ] and the rate limit 
+
+δ are enforced in (25), where uprev is the previous value of u.The problem (21)–(25) is a conventional QP, therefore it can be solved by any suitable solver. 
+
+4.2. Fault Detection 
+
+To perform Fault Detection (FD), we evaluate the individual terms of the Discrete Fourier Transform (DFT) of the acceler-ation signals, provided by the on-board accelerometers during regular flight. The Goertzel algorithm is employed to compute the phase and amplitude in a range of frequencies including the motor speed at hovering. We then take the maximum amplitude and compare it to a fixed threshold ρFD . More precisely, for a closed interval Ω ⊂ R+ and for a time window length T ∈ R+,consider the residual 
+
+rΩ,T (t) = max  
+
+> ω∈Ω
+
+|F [rect( t − T, t)˙ v0
+
+> E,0
+
+(t)] |, (26) where F [·] denotes the Fourier transform and rect( t − T, t) is the rectangle filtering the last T s of signal. The residuals rFD 
+
+and rFDI to perform the detection and isolation, respectively, are chosen as 
+
+rFD (t) = rΩFD ,T (t) (27) 
+
+rFDI (t) = rΩFDI ,T (t). (28) The frequency interval ΩFD , used for FD, should be approxi-mately centered around the rotational frequency at hover, and its width should be large enough to cover the relevant rota-tional frequencies encountered during flight. In accordance to the vibration model, this choice allows the capture of vibra-tions associated with a faulty propeller while eliminating most frequency components related to maneuvers and filtering part of the sensor noise. The frequency interval ΩFDI , used instead for FDI, should lie outside the previous range and therefore it should not be excited during steady flight conditions. By em-ploying AFD, one of the motors is forced to rotate within ΩFDI ,thereby facilitating FDI. The numerical implementation of both 
+
+rFD (t) and rFDI (t) are performed using the Goertzel algorithm. Since ˙ v0
+
+> E,0
+
+(t) is unknown, the measured variable is used instead. When the threshold ρFD is exceeded, the active FI procedure, described in the remainder, is triggered. 
+
+4.3. Active Fault Isolation 
+
+Once a fault is detected, a FI strategy is employed to iden-tify the faulty propeller. The FI strategy is active, meaning it involves a deliberate modification of the control input, and con-sists of three steps: 51) Depending on the multirotor configuration, the UAV could be stabilized in hovering before the active isolation is per-formed, 2) the motor speeds are varied and the corresponding vibration is quantified, 3) the motor showing the largest vibration is labeled as the faulty one. In the optional step 1), the UAV could be stabilized in a hov-ering position for safety reasons, as well as to ease the FI. In step 2), we exploit actuator redundancy to vary the indi-vidual motor speeds, while preserving the nominal net wrench, acting on the QP parameters. In fact, using the basic QP param-eters shown in Section 4.1, the control e ff ort would be equally weighted among the actuators. Therefore, the motor speeds during hovering would be nearly identical, preventing the ex-traction of distinctive frequency signatures to isolate the faulty motor. The objective of step 2) is to set ˙ θ j = ˙θdes , or equivalently, to set a single motor lift force u j at a given udes = cL ˙θ2
+
+> des
+
+. This operation is repeated for each motor ( j = 1, . . . , na). To do so, during the active FI phase, we modify the QP parameters in (22) as follows 
+
+H j, j = κ
+
+f j = −κudes 
+
+(29) with 0 < κ < λ H . In this way, the QP steers u j to udes whenever feasible. In fact, rewriting (21), we obtain 
+
+J(x) = κ
+
+2 u2 
+
+> j
+
+− κu judes +
+
+> na
+
+X 
+
+> i,j
+
+u2 
+
+> i
+
++ λH s2 + λ f s. (30) Choosing a su ffi ciently large κ, H j, j and f j are large in mag-nitude, thus the solver prioritizes the minimization of κ 
+
+> 2
+
+u2 
+
+> j
+
+−
+
+κu judes whenever the problem is feasible (i.e., when s = 0). As  
+
+> κ
+> 2
+
+u2 
+
+> j
+
+− κu judes is a parabola opening upwards, its unique global minimum is the only point where its gradient κu j − κu judes is zero, namely, u j = udes .As u j = udes holds, the motor lift force and speed of the j-th motor are known. To perform FI, we calculate the DFT of the acceleration signals in a narrow range of frequencies around such known motor speed. According to (16), we expect a sinu-soidal signal centered at the motor speed, with a magnitude that increases along with the blade unbalance. Therefore, repeating the test for each motor, the maximum amplitude corresponds to the faulty motor. 
+
+Remark 6. During the active isolation the condition ˙θ j = ˙θdes 
+
+is forced. In order to improve the correct isolation rate, it is however required ˙θi , ˙θdes for i , j. Thus, ˙θdes is chosen out from the range of speeds which is usually covered during the flight. In the extreme cases where this is not possible, additional constraints can be managed by the control allocation. 
+
+Remark 7. If the UAV has su ffi cient input redundancy, an al-ternative solution is to set ˙θdes = 0 to completely remove the vi-brations, instead of amplifying them during the active phase. In this case, the fault isolation residual should be constructed us-ing a broad set of frequencies ΩFDI and step 3) of the FI strategy should be modified to operate using inverted logic. Depending on the multirotor configuration, this solution may result in tem-porary underactuation and di ffi culties in maintaining altitude and is therefore avoided. 
+
+5. Simulation results 
+
+The method is tested using Matlab /Simulink on a octarotor (i.e., na = 8), whose parameters are reported in Table 1. The multirotor physical equations are simulated with a simulation step of 1 ms , using the built-in Runge-Kutta solver. Di ff er-ently, the overall embedded code is implemented in discrete time through a backward Euler method with sample frequency of 200 Hz . This includes the control algorithm, the optimal allocation, and the fault detection and isolation residuals. For the purpose of FD, ΩFD = [300 , 500] rad /s and T = 1 s are chosen in (27), so the Goertzel algorithm calculates the DFT between 300 Hz and 500 Hz, with a step of 5 Hz. When a fault is detected, with a threshold ρFD = 0.005, the active FI strategy in Section 4.3 is triggered, then the QP parameter modification in (29) is enabled in turn for each motor ( j = 1, . . . , 8) for 5 s each. In particular, we employ λH = 100, λ f = 100, and κ = 20 as QP parameters. MATLAB’s quadprog function with the 
+
+active-set algorithm is employed to solve QP problems. In the meanwhile, as ΩFDI = [500 , 540] and T = 1 s are selected, the Goertzel algorithm calculates the DFT between 500 Hz and 540 Hz, with a step of 5 Hz to isolate the fault. Finally, as con-siderable input redundancy is available for the octarotor under investigation, the optional step 1) in Section 4.3 is avoided: we do not perform stabilization during AFD, and the UAV contin-ues to track its trajectory. The following aspects are taken into account to enhance the realism of the simulation. 1. The powertrain dynamics including the motors and the Electronic Speed Controllers (ESCs) are simulated as first order systems having time constant τpt = 0.1 s. 2. Each ith motor related to the propeller Bi is unidirec-tional, and the related angular speed ˙ θi exhibits a saturation 
+
+−cwi ˙θi ∈ [0 , 620 .97] rad /s. Thus, the related motor upward lift force fi = || fmi || constraint is fi ∈ [0 , fmax ] = [0 , 4.75] 
+
+N, leading to a thrust to weight ratio equal to 2 .5. For each force fi, we also simulate the PWM signal PW M i =
+
+fi/ fmax ∈ [0 , 1]. 3. A time-varying external wrench, not available to either the control system or the FDI module, is simulated to repre-sent exogenous accelerations acting on the multirotor, such as those induced by wind disturbances, suspended payload dynamics, and similar e ff ects. Accordingly, this term is mainly a low frequency acceleration and its Fourier trans-form is approximately zero for the pulsations near ˙ θdes .4. Additive sensor noise is simulated according to the datasheet of the MPU-9250 IMU TDK InvenSense (2016), which is commonly adopted by the commercial Cube au-topilot (also known as Pixhawk 2 autopilot). Accelerome-ter and gyroscope noise is directly injected, while noise on 6Table 1: Known hexarotor parameters Niemiec et al. (2022), known propeller parameters, and unknown parameters used for the simulation. 
+
+Parameter Value Meas. Unit Number of actuators ( na) 8 -Frame B0 mass ( m0) 1.55 kg Propeller Bi mass ( mi) 0.13 kg 
+
+B0 inertia along xB (I0x) 0.0266 kg m 2
+
+B0 inertia along yB (I0y) 0.0266 kg m 2
+
+B0 inertia along zB (I0z) 0.0498 kg m 2
+
+Gravitational acceleration ( g) 9.81 m/s2
+
+Arm length ( l) 0.275 mPropeller Bi radius ( r) 0.12 mPropeller Bi width ( a) 0.025 mLift coe ffi cient ( cL) 1.23 · 10 −5 N s 2
+
+Drag coe ffi cient ( cD) 1.10 · 10 −7 N m s 2
+
+Friction coe ffi cient ( kt) 3.2 10 −2 s-1 
+
+Friction coe ffi cient ( kr) 5.57 10 −4 s-1 
+
+> Table 2: Additive output white gaussian noise.
+
+Aff ected variables Standard deviation Components of ˙ v0 
+
+> E,0
+
+0.0785 Components of v0 
+
+> E,0
+
+0.0392 Components of pEE,0 0.0196 Components of ω0 
+
+> E,0
+
+0.0055 Roll, pitch, yaw angles 0.0028 the remaining state variables is assumed to be smaller due to Kalman filtering, as reported in Table 2. 5. That the IMU is placed at the Center Of Mass (COM) of B0 (which is not the COM of the UAV in general), providing the measured variables ˙ vmeas = ˙v0 
+
+> E,0
+
++ νa and 
+
+ωmeas = ω0 
+
+> E,0
+
++ νω, where νv, ν ω denote white Gaussian noise. 
+
+5.1. Motors and ESCs 
+
+In the simulations, each pair composed by an ESC and a mo-tor is modeled as a first order system ¨θi = −λi(˙ θi − ˙θi,r) i = 1, . . . , na, (31) where λi ∈ R, and ˙ θi,r denotes the desired angular speed of the 
+
+ith propeller. Note that the ESC equation (31) does not provide the convergence of |˙θi − ˙θi,r| → 0 unless ¨ θi,r = 0, which models some possibly open loop components (e.g., the e ff ect of the in-ertia tensors contribution Ii of each propeller). The references ˙θ1,r, . . . , ˙θna,r represent the control inputs for the system. 
+
+5.2. Time Domain Plots 
+
+Using a double loop feedback linearization coupled with PID controllers, the octarotor travels an ascending helicoid trajec-tory. An asymmetric LOE is introduced at t = 10 s on the pro-peller B2. The chipping, a ff ecting a single blade, is abrupt and equal to 10% of the propeller’s blade radius. In the following time domain plots, the time interval IFDI = [10 .22 , 31 .22] s is -60 -40 -20 020 
+
+> [m]
+
+xyz      
+
+> 010 20 30 40 50
+> t[s]
+> -1 -0.5 00.5 1
+> [rad ]
+
+'
+
+3A     
+
+> Figure 2: Pose of the multirotor. 010 20 30 40 50
+
+t [s]       
+
+> 300 400 500 600
+> [rad=s ]
+> _31_32_33_34_35_36_37_38
+> Figure 3: Octarotor motors angular speeds. During the active FDI the propellers speeds are allocated accordingly with the optimal control allocation previously described.
+
+highlighted with a red background. IFDI represents the overall time required for the fault detection and the active isolation. The pose of the multirotor is depicted in Fig. 2. For t ∈ IFDI ,the octarotor smoothly continues to follow the trajectory, shift-ing the active isolation burden to the allocation. Once the FD triggers, the active isolation starts, and the motors angu-lar speeds are allocated as reported in Fig. 3. During each stage of the FDI, the rotor’s speed ˙ θ j of the candidate jth motor is set approximately to ˙ θdes , separating it from the remaining ro-tors’ speeds. The measured linear body accelerations ˙ vmeas are represented in Fig. 4. The asymmetric injected fault at t = 10 s leads to additional high frequency terms, and the detection can be performed in the frequency domain, here investigated using the DFT. Finally, both the detection residual rFD and the isolation residual rFDI are plotted in Fig. 5. To better clarify the active strategy, the background color is set according to the motor under investigation. Once rFD has been triggered, the ac-tive isolation starts and the second DFT algorithm around the prescribed angular speed pulsation ˙ θdes provides rFDI . In this simulation the faulty propeller is B2, and therefore rFDI clearly exceeds the threshold for t ∈ IFDI ,2 only. 70 10 20 30 40 50          
+
+> t[s]
+> -10 -5 0510 15
+> [m=s 2]
+> _v1;meas
+> _v2;meas
+> _v3;meas Figure 4: Measured linear body acceleration components. 00.005 0.01 0.015 0.02 rF D; 1
+> rF D; 2
+> rF D; 3
+> 010 20 30 40 50
+> t[s]
+> 00.01 0.02 0.03 rF DI; 1
+> rF DI; 2
+> rF DI; 3
+> Figure 5: FD residual and FDI residual. The FD residual triggers the active FDI stage. In this scenario the actual faulty motor is the second one, and the FDI residual triggers in the second stage of the active isolation.
+
+5.3. Frequency Domain Plots 
+
+Fault detection and active isolation rely on the coordinated excitation and analysis of the frequency components inherent to the multirotor dynamics. The magnitude of the Fourier trans-forms of ˙ v is then reported in Fig. 6. Although the body linear acceleration ˙ v has three components, the last one is almost neg-ligible for detection purposes. In fact, the vibrations propagate mainly along the x0 and y0 axes. Since the spectrum varies w.r.t. the rotors’ angular speeds ˙ θi, a total of 10 time windows are re-ported separately. The first time window [0 , 10] s represents the fault-free case. The frequency components in the pulsa-tion range ΩFD = [300 , 500] rad /s are due to the noise and the regular UAV motion. Clearly, the average propellers’ angular speeds obtained in a near hovering motion are within the range 
+
+ΩFD . The second plot in Fig. 6 is for t ∈ IFDI ,0, representing the time when the fault has been injected. Since the amplitude is highly increased due to the vibration, the FD residual trig-gers. All the remaining plots are relative to the time windows 
+
+IFDI ,i, for i = 1, . . . , 8, representing the active isolation phase for which the allocation goal is ˙ θi = ˙θdes , in addition to the con-trol commands. Spurious pulsations in each time window can appear, and they are not easily related to the faulty propeller 
+
+B2. Therefore the pulsation range ΩFDI = [500 , 540] rad /s is considered. Fig. 7 reports the magnitude of the Fourier trans-form of ˙ v for the same time windows, but in the pulsation range 
+
+ΩFDI = [500 , 540] rad /s. The condition ˙ θdes = 520 rad /s is imposed by the active isolation strategy, and the isolation resid-ual rFDI is indeed calculated centered on this pulsation range. In the time interval t ∈ IFDI ,2, the magnitude increases signifi-cantly, proving that fault isolation is feasible. 
+
+5.4. Statistical Analysis 
+
+Fault detection and isolation can present additional chal-lenges depending on the boundary conditions, such as the fault magnitude, the signal to noise ratio, the damping of mechanical vibrations, and the desired trajectory. To evaluate the robust-ness and performance of the proposed method, a total of 9600 simulations were conducted under varying conditions. These conditions include 4 tracking references (straight lines, ascend-ing helicoids, ascending 8-shapes, squares), 5 LOE magnitudes aff ecting one blade (ranging from 0% to 20% unilateral chip-ping, where 0% means no chipping), 3 possible vibration damp-ing factors d (defined as the ratio of the measured acceleration amplitude to the actual acceleration amplitude), and 20 tenta-tive thresholds ρFD (ranging from 0 .5 · 10 −3 to 10 −2). For each combination of the aforementioned parameters, each one of the 
+
+na = 8 propellers has been simulated under the same condi-tions, i.e., 1200 simulations per motor, where 240 are fault-free and 960 with chipping appearing and t = 10 s. All the remain-ing boundary conditions (controller, external wrench, etc.) are the same as previously described in Section 5. Fig. 8 reports the ROC curves to determine the optimal threshold ρFD under di ff erent damping factors d, where d = 5% means that the 95% of vibration amplitude is absorbed by the non-rigid structure and the IMU, thus the measured vibration amplitude is only 5% of the one calculated using the rigid-multibody equations. The True Positive Rate (TPR) is defined as the ratio between correct fault isolation occurrences (the al-gorithm isolated a fault and the fault was actually present) and the total number of flights a ff ected by a fault. The False Positive Rate (FPR), instead, is defined as the ratio between wrong fault isolation occurrences (the algorithm isolated a fault while none were present) and the total number of flights without faults. Each point of the ROC curve represents a tentative threshold value ρFD . The curves are parameterized by the fault ampli-tude. Considering the smallest attenuation d = 5%, we ob-tain in Fig. 8a a ROC curve representing a perfect classifier for each fault magnitude. In other words, there exists a threshold 
+
+ρFD ∈ [0 .0080 , 0.01] such that the accuracy is maximal, i.e., TPR = 1 and FPR = 0. Clearly, as the attenuation increases, FDI is more challeng-ing due to the worse signal-to-noise ratio. Fig. 8b shows that, in case of the smallest LOE, there is no threshold ρFD achieving perfect accuracy when the damping d is 3%. In this case, we still obtain no false positives using ρFD = 0.0080, but the TPR drops to 15 .62% when the LOE is small (5%) as the FD resid-ual does not overcome the threshold. For larger LOEs, instead, 
+
+ρFD = 0.0080 still achieves perfect isolation. On the other hand, a smaller ρFD = 0.0040 maximizes the TPR to 100%, 8300 400 500 
+
+P ulsation [rad=s ]
+
+00.1 0.2 0.3 0.4 0.5 
+
+t 2 [0 ; 10] 
+
+jF [ _ v1;meas ]jjF [ _ v2;meas ]jjF [ _ v3;meas ]j
+
+300 400 500 
+
+P ulsation [rad=s ]
+
+00.1 0.2 0.3 0.4 0.5 
+
+t 2 IF DI; 0
+
+jF [ _ v1;meas ]jjF [ _ v2;meas ]jjF [ _ v3;meas ]j
+
+300 400 500 
+
+P ulsation [rad=s ]
+
+00.1 0.2 0.3 0.4 0.5 
+
+t 2 IF DI; 1
+
+jF [ _ v1;meas ]jjF [ _ v2;meas ]jjF [ _ v3;meas ]j
+
+300 400 500 
+
+P ulsation [rad=s ]
+
+00.1 0.2 0.3 0.4 0.5 
+
+t 2 IF DI; 2
+
+jF [ _ v1;meas ]jjF [ _ v2;meas ]jjF [ _ v3;meas ]j
+
+300 400 500 
+
+P ulsation [rad=s ]
+
+00.1 0.2 0.3 0.4 0.5 
+
+t 2 IF DI; 3
+
+jF [ _ v1;meas ]jjF [ _ v2;meas ]jjF [ _ v3;meas ]j
+
+300 400 500 
+
+P ulsation [rad=s ]
+
+00.1 0.2 0.3 0.4 0.5 
+
+t 2 IF DI; 4
+
+jF [ _ v1;meas ]jjF [ _ v2;meas ]jjF [ _ v3;meas ]j
+
+300 400 500 
+
+P ulsation [rad=s ]
+
+00.1 0.2 0.3 0.4 0.5 
+
+t 2 IF DI; 5
+
+jF [ _ v1;meas ]jjF [ _ v2;meas ]jjF [ _ v3;meas ]j
+
+300 400 500 
+
+P ulsation [rad=s ]
+
+00.1 0.2 0.3 0.4 0.5 
+
+t 2 IF DI; 6
+
+jF [ _ v1;meas ]jjF [ _ v2;meas ]jjF [ _ v3;meas ]j
+
+300 400 500 
+
+P ulsation [rad=s ]
+
+00.1 0.2 0.3 0.4 0.5 
+
+t 2 IF DI; 7
+
+jF [ _ v1;meas ]jjF [ _ v2;meas ]jjF [ _ v3;meas ]j
+
+300 400 500 
+
+P ulsation [rad=s ]
+
+00.1 0.2 0.3 0.4 0.5 
+
+t 2 IF DI; 8
+
+jF [ _ v1;meas ]jjF [ _ v2;meas ]jjF [ _ v3;meas ]jFigure 6: Fourier magnitude of measured acceleration before the fault, after the fault, and during each active isolation stage, over the frequency range used for fault detection. 500 520 540 
+
+P ulsation [rad=s ]
+
+00.05 0.1 0.15 0.2 0.25 
+
+t 2 [0 ; 10] 
+
+jF [ _ v1;meas ]jjF [ _ v2;meas ]jjF [ _ v3;meas ]j
+
+500 520 540 
+
+P ulsation [rad=s ]
+
+00.05 0.1 0.15 0.2 0.25 
+
+t 2 IF DI; 0
+
+jF [ _ v1;meas ]jjF [ _ v2;meas ]jjF [ _ v3;meas ]j
+
+500 520 540 
+
+P ulsation [rad=s ]
+
+00.05 0.1 0.15 0.2 0.25 
+
+t 2 IF DI; 1
+
+jF [ _ v1;meas ]jjF [ _ v2;meas ]jjF [ _ v3;meas ]j
+
+500 520 540 
+
+P ulsation [rad=s ]
+
+00.05 0.1 0.15 0.2 0.25 
+
+t 2 IF DI; 2
+
+jF [ _ v1;meas ]jjF [ _ v2;meas ]jjF [ _ v3;meas ]j
+
+500 520 540 
+
+P ulsation [rad=s ]
+
+00.05 0.1 0.15 0.2 0.25 
+
+t 2 IF DI; 3
+
+jF [ _ v1;meas ]jjF [ _ v2;meas ]jjF [ _ v3;meas ]j
+
+500 520 540 
+
+P ulsation [rad=s ]
+
+00.05 0.1 0.15 0.2 0.25 
+
+t 2 IF DI; 4
+
+jF [ _ v1;meas ]jjF [ _ v2;meas ]jjF [ _ v3;meas ]j
+
+500 520 540 
+
+P ulsation [rad=s ]
+
+00.05 0.1 0.15 0.2 0.25 
+
+t 2 IF DI; 5
+
+jF [ _ v1;meas ]jjF [ _ v2;meas ]jjF [ _ v3;meas ]j
+
+500 520 540 
+
+P ulsation [rad=s ]
+
+00.05 0.1 0.15 0.2 0.25 
+
+t 2 IF DI; 6
+
+jF [ _ v1;meas ]jjF [ _ v2;meas ]jjF [ _ v3;meas ]j
+
+500 520 540 
+
+P ulsation [rad=s ]
+
+00.05 0.1 0.15 0.2 0.25 
+
+t 2 IF DI; 7
+
+jF [ _ v1;meas ]jjF [ _ v2;meas ]jjF [ _ v3;meas ]j
+
+500 520 540 
+
+P ulsation [rad=s ]
+
+00.05 0.1 0.15 0.2 0.25 
+
+t 2 IF DI; 8
+
+jF [ _ v1;meas ]jjF [ _ v2;meas ]jjF [ _ v3;meas ]j
+
+Figure 7: Fourier magnitude of measured acceleration before the fault, after the fault, and during each active isolation stage, over the frequency range used for active fault isolation. 
+
+90 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1
+
+FPR 
+
+> 00.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1
+> TPR
+
+5% LOE 10% LOE 15% LOE 20% LOE (a) d = 5%. 0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1
+
+FPR 
+
+> 00.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1
+> TPR
+
+5% LOE 10% LOE 15% LOE 20% LOE (b) d = 3%. 0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1
+
+FPR 
+
+> 00.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1
+> TPR
+
+5% LOE 10% LOE 15% LOE 20% LOE (c) d = 1%. 
+
+Figure 8: ROC curves for di ff erent damping factors d.Motor 1 Motor 2 Motor 3 Motor 4 Motor 5 Motor 6 Motor 7 Motor 8 No Fault 
+
+> Predicted Class
+> Motor 1 Motor 2 Motor 3 Motor 4 Motor 5 Motor 6 Motor 7 Motor 8 No Fault
+> True Class
+> 16 16 16 16 16 16 16 16 32
+
+(a) d = 5%. Motor 1 Motor 2 Motor 3 Motor 4 Motor 5 Motor 6 Motor 7 Motor 8 No Fault  
+
+> Predicted Class
+> Motor 1 Motor 2 Motor 3 Motor 4 Motor 5 Motor 6 Motor 7 Motor 8 No Fault
+> True Class
+> 12 14 12 13 12 12 12 12 4243444432
+
+(b) d = 3%. Motor 1 Motor 2 Motor 3 Motor 4 Motor 5 Motor 6 Motor 7 Motor 8 No Fault  
+
+> Predicted Class
+> Motor 1 Motor 2 Motor 3 Motor 4 Motor 5 Motor 6 Motor 7 Motor 8 No Fault
+> True Class
+> 3635443413 10 13 11 12 12 13 12 32
+
+(c) d = 1%. 
+
+Figure 9: Confusion matrix choosing ρFD = 0.0080. 
+
+but a significant 25% FPR arises. Practically, choosing a large 
+
+ρFD = 0.0080 is preferable, thus avoiding false positives and accepting the fact that minor faults can go unnoticed. A 1% damping makes the proposed algorithm less e ff ective, as shown in Fig. 8c. If avoiding false positives is prioritized (ρFD = 0.0080), even some of the largest 20% LOE faults can go unnoticed (90 .62% TPR). Moreover, for a 5% LOE, the method behaves like a random classifier, as the ROC mostly coincides with the line of no-discrimination. Fig. 9 reports the confusion matrix regarding fault isolation, choosing ρFD = 0.0080 to avoid false positives according to Fig. 8. False negatives are distributed among all the propellers with no pattern. The false negative rates are 0%, 16 .875%, and 58 .75%, respectively with damping 5%, 3%, and 1%. In Fig. 9, where every misclassification is a false negative, i.e., missed fault detection, while no confusion between faulty actuators ap-pears in the isolation phase. The overall accuracy of the solution choosing ρFD = 0.0080 is resumed in Fig. 10 for di ff erent LOE severity and damping factors. The accuracy is higher as the fault magnitude increases, as expected, due to the increasing vibrations. Also, high attenu-ation a ff ects negatively the accuracy: a damping d = 5% allows for perfect classification, d = 3% makes possible to classify ex-actly LOEs starting from 10%, while in the worst case ( d = 1%) LOE
+
+0 0.05 0.1 0.15 0.2 
+
+> Accuracy
+
+0
+
+0.2 
+
+0.4 
+
+0.6 
+
+0.8 
+
+1
+
+d = 0:05
+
+d = 0:03
+
+d = 0:01
+
+Figure 10: Correct FDI ratio w.r.t. the LOE severity and the damping d, choos-ing ρFD = 0.0080. 
+
+no LOEs strictly less than 20% can be isolated. 
+
+6. Conclusion 
+
+This work presented a comprehensive analysis of how blade damage a ff ects the dynamics of multirotor vehicles, and intro-duced a model-based active FDI strategy that leverages vibra-tion data from the on-board IMU. Starting from a white-box model capable of capturing both the loss of aerodynamic ef-ficiency and the characteristic vibrations induced by propeller 10 faults, a sensor-minimal active diagnostic method has been de-signed, making fault isolation possible by deliberately injecting controlled perturbations into the system. The proposed FDI approach was evaluated in simulation on an octarotor platform using a dataset of 9600 scenarios. Both time and frequency domain features were extracted and ana-lyzed, showing that vibration signatures provide reliable indi-cators of blade faults. The method demonstrated high accuracy under nominal damping conditions; however, its performance degrades in the presence of strong attenuation, particularly when small-magnitude faults are considered, due to the attenuation of fault-induced vibrations. This degradation is primarily reflected in an increased false-negative rate, as the vibration signatures be-come less distinguishable from nominal system behavior. The confusion matrices indicate that fault detection represents the most critical step; conversely, once the presence of a fault has been identified, the active isolation stage proves robust, mak-ing fine-tuning of ˙ θdes unnecessary. In future work, we aim to address this limitation by incorporating an active fault detec-tion strategy to facilitate detection under poor signal-to-noise ratio conditions. When applied at regular time intervals, this approach may enhance the fault detection rate while limiting the increase in energy consumption associated with energy-suboptimal thrust allocation. 
+
+References 
+
+Ahmad, F., Bhandari, A., Kumar, P., Patil, P.P., 2019. Mod-eling and mechanical vibration characteristics analysis of a quadcopter propeller using fea, in: IOP conference series: materials science and engineering. Balandi, L., Giordano, P.R., Tognon, M., 2025. Enhancing imu accuracy in mravs: A theoretical and experimental approach to vibration damping, in: 2025 International Conference on Unmanned Aircraft Systems (ICUAS), IEEE. pp. 847–853. Baldini, A., D’Alleva, L., Felicetti, R., Ferracuti, F., Freddi, A., Monteriù, A., 2023a. Uav-fd: a dataset for actuator fault detection in multirotor drones, in: 2023 International Con-ference on Unmanned Aircraft Systems (ICUAS), IEEE. pp. 998–1004. Baldini, A., Felicetti, R., Ferracuti, F., Freddi, A., Iarlori, S., Monteriù, A., 2023b. Real-time propeller fault detection for multirotor drones based on vibration data analysis. Engineer-ing Applications of Artificial Intelligence 123, 106343. Baldini, A., Felicetti, R., Freddi, A., Longhi, S., Monteriù, A., 2020a. Actuator fault-tolerant control architecture for multi-rotor vehicles in presence of disturbances. Journal of Intelli-gent & Robotic Systems 99, 859–874. Baldini, A., Felicetti, R., Freddi, A., Longhi, S., Monteriu, A., 2020b. Actuator fault tolerant control of variable pitch quadrotor vehicles. IFAC-PapersOnLine 53, 4095–4102. Baldini, A., Felicetti, R., Freddi, A., Longhi, S., Monteriù, A., 2021. Disturbance observer based fault tolerant control for tilted hexarotors, in: 2021 International Conference on Un-manned Aircraft Systems (ICUAS), IEEE. pp. 20–27. Bangura, M., Melega, M., Naldi, R., Mahony, R., 2016. Aero-dynamics of rotor blades for quadrotors. arXiv preprint arXiv:1601.00733 . Bondyra, A., Gasior, P., Gardecki, S., Kasi´ nski, A., 2017. Fault diagnosis and condition monitoring of uav rotor using signal processing, in: 2017 Signal Processing: Algorithms, Archi-tectures, Arrangements, and Applications (SPA), pp. 233– 238. Brulin, P.Y., Khenfri, F., Rizoug, N., 2024. Generating fault databases through simulated and experimental multi-rotor uav propulsion systems. IEEE Transactions on Vehicular Technology 73, 4671–4682. Cabahug, J., Eslamiat, H., 2022. Failure detection in quad-copter uavs using k-means clustering. Sensors 22. Ghalamchi, B., Jia, Z., Mueller, M.W., 2019. Real-time vibration-based propeller fault diagnosis for multicopters. IEEE /ASME Transactions on Mechatronics 25, 395–405. Ghalamchi, B., Mueller, M., 2018. Vibration-based propeller fault diagnosis for multicopters, in: 2018 International Con-ference on Unmanned Aircraft Systems (ICUAS), IEEE. pp. 1041–1047. Heirung, T.A.N., Mesbah, A., 2019. Input design for active fault diagnosis. Annual Reviews in Control 47, 35–50. Jiang, Z., Ma, R., Lu, F., Zhu, H., Lan, Y., Xue, X., Zhang, S., Wu, C., 2025. Damage identification of multirotor uav propellers via unsteady coupling association. Measurement 243, 116364. Johansen, T.A., Fossen, T.I., 2013. Control allocation—a sur-vey. Automatica 49, 1087–1103. Niemiec, R., Ivler, C., Gandhi, F., Sanders, F., 2022. Multiro-tor electric aerial vehicle model identification with flight data with corrections to physics-based models. CEAS Aeronauti-cal Journal 13, 575–596. Nocedal, J., Wright, S.J., 1999. Numerical optimization. Springer. Pose, C., Giribet, J., Torre, G., 2025. Propeller damage de-tection, classification, and estimation in multirotor vehicles. IEEE Transactions on Robotics 41, 2213–2229. Pose, C., Giribet, J., Torre, G., Marzik, G., 2023. Neural network-based propeller damage detection for multirotors, in: 2023 International Conference on Unmanned Aircraft Systems (ICUAS), pp. 17–23. 11 Puchalski, R., Bondyra, A., Giernacki, W., Zhang, Y., 2022. Actuator fault detection and isolation system for multirotor unmanned aerial vehicles, in: 2022 26th International Con-ference on Methods and Models in Automation and Robotics (MMAR), pp. 364–369. Puchalski, R., Ha, Q., Giernacki, W., Nguyen, H.A.D., Nguyen, L.V., 2024. Padre–a repository for research on fault detection and isolation of unmanned aerial vehicle propellers. Journal of Intelligent & Robotic Systems 110, 74. Rao, M.E., Simon, J., Moll, J., Schütz, M.F., 2025. Real-time onboard propeller fault diagnosis of autonomous de-livery drones through vibration analysis. Structural Health Monitoring , 14759217251327224. Shraim, H., Awada, A., Youness, R., 2018. A survey on quadro-tors: Configurations, modeling and identification, control, collision avoidance, fault diagnosis and tolerant control. IEEE Aerospace and Electronic Systems Magazine 33, 14– 33. Tan, L.K.L., Lim, B.C., Park, G., Low, K.H., Yeo, V.C.S., 2021. Public acceptance of drone applications in a highly urbanized environment. Technology in Society 64, 101462. TDK InvenSense, 2016. Mpu-9250, nine-axis (gyro +accelerometer +compass) mems motiontracking ™
+
+device. Https: // invensense.tdk.com /download-pdf /mpu-9250-datasheet /.Wild, G., Murray, J., Baxter, G., 2016. Exploring civil drone accidents and incidents to help prevent potential air disasters. Aerospace 3, 22. Zhang, X., Zhao, Z., Wang, Z., Wang, X., 2021. Fault detection and identification method for quadcopter based on airframe vibration signals. Sensors 21, 581. Zou, Y., Xia, H., Yang, X., Li, P., Yu, Y., 2025. Dynamics model of a multi-rotor uav propeller and its fault detection. Drones 9, 176. 12

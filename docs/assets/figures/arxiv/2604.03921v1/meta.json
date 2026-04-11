@@ -1,0 +1,14 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.03921v1/fig-001.webp",
+      "caption": "Figure 3: Trajectories of m = 4 sensing nodes for three topologies, along with corresponding error norms.",
+      "page": 7,
+      "index": 1,
+      "width": 954,
+      "height": 216
+    }
+  ]
+}

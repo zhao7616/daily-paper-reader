@@ -1,0 +1,94 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.07281v1/fig-001.webp",
+      "caption": "Table 1: Known hexarotor parameters Niemiec et al. (2022), known propeller parameters, and unknown parameters used for the simulation.",
+      "page": 7,
+      "index": 1,
+      "width": 506,
+      "height": 382
+    },
+    {
+      "url": "assets/figures/arxiv/2604.07281v1/fig-002.webp",
+      "caption": "Table 2: Additive output white gaussian noise.",
+      "page": 7,
+      "index": 2,
+      "width": 510,
+      "height": 377
+    },
+    {
+      "url": "assets/figures/arxiv/2604.07281v1/fig-003.webp",
+      "caption": "Figure 2: Pose of the multirotor.",
+      "page": 7,
+      "index": 3,
+      "width": 524,
+      "height": 378
+    },
+    {
+      "url": "assets/figures/arxiv/2604.07281v1/fig-004.webp",
+      "caption": "Figure 3: Octarotor motors angular speeds. During the active FDI the propellers speeds are allocated accordingly with the optimal control allocation previously described.",
+      "page": 7,
+      "index": 4,
+      "width": 524,
+      "height": 275
+    },
+    {
+      "url": "assets/figures/arxiv/2604.07281v1/fig-005.webp",
+      "caption": "Figure 8: ROC curves for different damping factors d.",
+      "page": 10,
+      "index": 5,
+      "width": 1074,
+      "height": 366
+    },
+    {
+      "url": "assets/figures/arxiv/2604.07281v1/fig-006.webp",
+      "caption": "Figure 9: Confusion matrix choosing ρFD = 0.0080.",
+      "page": 10,
+      "index": 6,
+      "width": 1080,
+      "height": 294
+    },
+    {
+      "url": "assets/figures/arxiv/2604.07281v1/fig-007.webp",
+      "caption": "Figure 10: Correct FDI ratio w.r.t. the LOE severity and the damping d, choosing ρFD = 0.0080.",
+      "page": 10,
+      "index": 7,
+      "width": 521,
+      "height": 241
+    },
+    {
+      "url": "assets/figures/arxiv/2604.07281v1/fig-008.webp",
+      "caption": "Figure 4: Measured linear body acceleration components.",
+      "page": 8,
+      "index": 8,
+      "width": 524,
+      "height": 276
+    },
+    {
+      "url": "assets/figures/arxiv/2604.07281v1/fig-009.webp",
+      "caption": "Figure 5: FD residual and FDI residual. The FD residual triggers the active FDI stage. In this scenario the actual faulty motor is the second one, and the FDI residual triggers in the second stage of the active isolation.",
+      "page": 8,
+      "index": 9,
+      "width": 526,
+      "height": 395
+    },
+    {
+      "url": "assets/figures/arxiv/2604.07281v1/fig-010.webp",
+      "caption": "Figure 6: Fourier magnitude of measured acceleration before the fault, after the fault, and during each active isolation stage, over the frequency range used for fault detection.",
+      "page": 9,
+      "index": 10,
+      "width": 1087,
+      "height": 591
+    },
+    {
+      "url": "assets/figures/arxiv/2604.07281v1/fig-011.webp",
+      "caption": "Figure 7: Fourier magnitude of measured acceleration before the fault, after the fault, and during each active isolation stage, over the frequency range used for active fault isolation.",
+      "page": 9,
+      "index": 11,
+      "width": 1086,
+      "height": 586
+    }
+  ]
+}
