@@ -1,0 +1,741 @@
+Title: Feature-Aware Anisotropic Local Differential Privacy for Utility-Preserving Graph Representation Learning in Metal Additive Manufacturing
+
+URL Source: https://arxiv.org/pdf/2604.05077v1
+
+Published Time: Wed, 08 Apr 2026 00:05:31 GMT
+
+Number of Pages: 21
+
+Markdown Content:
+# Feature-Aware Anisotropic Local Differential Privacy for Utility-Preserving Graph Representation Learning in Metal Additive Manufacturing 
+
+## MD Shafikul Islam 
+
+## Graduate Research Assistant 
+
+Mechanical and Industrial Engineering Louisiana State University Baton Rouge, LA 70803 
+
+misla79@lsu.edu 
+
+## Mahathir Mohammad Bappy ∗
+
+## Assistant Professor 
+
+Mechanical and Industrial Engineering Louisiana State University Baton Rouge, LA 70803 
+
+mmbappy@lsu.edu 
+
+## Saifur Rahman Tushar 
+
+## Graduate Research Assistant 
+
+Mechanical and Industrial Engineering Louisiana State University Baton Rouge, LA 70803 
+
+SaifurRahman.Tushar@lsu.edu 
+
+## Md Arifuzzaman 
+
+## Assistant Professor 
+
+Department of Computer Science Missouri University of Science and Technology Missouri S&T, Rolla, MO 65409 
+
+marifuzzaman@mst.edu 
+
+Metal additive manufacturing (AM) enables the fabri-cation of safety-critical components, but reliable qual-ity assurance depends on high-fidelity sensor streams containing proprietary process information, limiting col-laborative data sharing. Existing defect-detection mod-els typically treat melt-pool observations as indepen-dent samples, ignoring layer-wise physical couplings, in-cluding heat accumulation and track interactions, that govern porosity formation. Moreover, conventional privacy-preserving techniques, particularly Local Dif-ferential Privacy (LDP), cause severe utility degrada-tion due to uniform noise injection across all feature dimensions. To address these interrelated challenges, we propose FI-LDP-HGAT , a computational framework that combines two methodological components: a strati-fied Hierarchical Graph Attention Network (HGAT) that captures spatial and thermal dependencies across scan tracks and deposited layers, and a feature-importance-aware anisotropic Gaussian mechanism (FI-LDP) for non-interactive feature privatization. Unlike isotropic 
+
+> ∗
+
+LDP, FI-LDP redistributes the privacy budget across em-bedding coordinates using an encoder-derived importance prior, assigning lower noise to task-critical thermal sig-natures and higher noise to redundant dimensions while maintaining formal (ϵ, δ )-LDP guarantees. Experiments on a Directed Energy Deposition (DED) porosity dataset demonstrate that FI-LDP-HGAT achieves 81.5% utility recovery at a moderate privacy budget ( ϵ = 4 ) and main-tains defect recall of 0.762 under strict privacy ( ϵ =2), while outperforming classical ML, standard GNNs, and alternative privacy mechanisms including DP-SGD across all evaluated metrics. Mechanistic analysis con-firms a strong negative correlation (Spearman ρ = −0.81 )between feature importance and noise magnitude, provid-ing interpretable evidence that the privacy–utility gains are driven by principled anisotropic allocation. 
+
+1 INTRODUCTION 
+
+Data-driven quality assurance in metal additive man-ufacturing (AM) increasingly depends on computational methods that can simultaneously model complex process    
+
+> arXiv:2604.05077v1 [cs.LG] 6 Apr 2026 Fig. 1. Framework for utility-preserving private feature release. Structured multimodal records are encoded, privatized via importance-aware anisotropic LDP (FI-LDP), and processed through a stratified Hierarchical Graph Attention Network (HGAT) for defect prediction.
+
+physics and satisfy real-world deployment constraints such as data confidentiality [1, 2]. In Directed Energy Deposition (DED) platforms, including Laser Engineered Net Shaping (LENS™), layer-wise fabrication produces high-fidelity thermal and spatial sensor streams that en-code information about melt-pool dynamics, heat accu-mulation, and defect propensity [3, 4]. Among process-induced defects, porosity remains one of the most per-sistent failure modes, degrading fatigue life and me-chanical integrity and constituting a primary barrier to certification-grade deployment in aerospace and biomed-ical systems [5, 6, 7]. A central computational limitation of existing learn-ing pipelines is the independent-sample assumption .Convolutional neural networks (CNNs), recurrent archi-tectures (LSTMs), and classical machine learning models typically treat each melt-pool observation as an individ-ual sample [8, 9, 10]. This modeling choice disregards the physical coupling inherent to layer-wise AM: defect propensity at a given location is influenced by cumulative heat accumulation from adjacent scan tracks and the ther-mal history of underlying layers [11, 12, 13]. Structured representations that explicitly encode these relational de-pendencies are needed to advance predictive capability beyond what frame-level models can achieve. Graph Neural Networks (GNNs) offer a principled abstraction for such relational data, aggregating neighbor-hood information through learned message-passing op-erators to enable context-aware inference [14, 15, 16]. Graph-based inductive biases have shown promise in manufacturing settings when geometry- or process-aware priors are incorporated [17, 18, 19]. However, deploy-ing graph learning in collaborative manufacturing ecosys-tems introduces a second challenge: sharing sensor-derived representations across organizations can expose proprietary “process fingerprints”, thermal signatures, scan-path geometry, and design-specific parameter sets— that constitute a manufacturer’s core competitive advan-tage [20, 21, 22]. This tension between relational model-ing and IP protection has motivated a growing body of work on privacy-preserving computational methods for manufacturing [23, 24, 25, 26, 27, 28]. Among formal approaches, local differential privacy (LDP) is particu-larly attractive for decentralized settings because each data holder randomizes its own features before any down-stream sharing [29, 30]. Yet standard LDP mechanisms rely on isotropic perturbations that uniformly corrupt all coordinates, degrading task-critical signals and redundant dimensions alike in manufacturing embeddings where predictive utility is concentrated in a sparse subset of fea-tures [31, 32, 33, 34]. To address these interrelated computational chal-lenges, this paper proposes FI-LDP-HGAT , a method-ology that combines two computational components tai-lored to privacy-preserving graph learning in manufac-turing: (i) Feature-Importance-guided Local Differen-tial Privacy (FI-LDP), an anisotropic Gaussian mecha-nism for non-interactive feature privatization, and (ii) a 
+
+stratified Hierarchical Graph Attention Network (HGAT) that encodes manufacturing-specific physical priors for structure-aware inference. FI-LDP redistributes privacy perturbation across feature dimensions using encoder-derived importance signals, assigning lower noise vari-ance to task-critical coordinates and higher noise variance to redundant dimensions under a formal (ϵ, δ )-LDP ac-counting framework. The stratified HGAT constructs a layer-restricted hybrid kNN graph that couples in-layer spatial proximity with learned thermal embedding simi-larity, enabling attention-based message passing that re-spects the physical structure of the deposition process. Figure 1 summarizes the motivating problem context that gives rise to FI-LDP-HGAT: structured defect prediction in DED requires relational learning, while collaborative data sharing requires formal privacy protection. The con-tributions of this work are three-fold: 1. Privacy mechanism design : We develop FI-LDP, an importance-aware anisotropic Gaussian mechanism for local feature privatization. FI-LDP redistributes per-dimension privacy budgets using a temperature-controlled power-law allocation derived from a su-pervised warmup signal under a formal (ϵ, δ )-LDP accounting framework (Eq. (20)). This distinguishes FI-LDP from both isotropic LDP [29] and heuris-tic de-identification approaches [23] by providing a principled, tunable mechanism that explicitly cou-ples noise allocation to task utility. 2. Physics-informed computational modeling : We design a layer-stratified hybrid graph construction and hierarchical attention architecture that encodes domain-specific manufacturing priors, intra-layer thermal coupling, spatial–thermal hybrid proximity, and edge-affinity-biased attention—into the compu-tational model. Unlike standard GAT applied to generic graphs, this formulation restricts message passing to physically meaningful neighborhoods and integrates process-aware edge priors into the atten-tion mechanism. 3. Comprehensive quantitative evaluation : We eval-uate the proposed framework on an experimental DED porosity dataset against baseline methods span-ning classical machine learning, deep learning, graph learning, and privacy-preserving approaches. The re-sults show that FI-LDP-HGAT maintains strong de-tection utility under source-side privacy constraints, achieving 81.5% utility recovery relative to the non-private oracle at ϵ = 4 while preserving high rare-defect recall under stricter privacy budgets. The remainder of the paper is organized as follows. Section 2 reviews related work on graph learning for AM, privacy-preserving computational methods in manufac-turing, and local privacy mechanisms. Section 3 presents the proposed framework. Section 4 explains experimental setup and data acquisition, section 5 reports experiments and privacy–utility analysis. Section 6 discusses implica-tions and future directions. Section 7 concludes. 
+
+2 BACKGROUND AND RELATED WORK 
+
+This section reviews the computational methods rel-evant to the three challenges that FI-LDP-HGAT is de-signed to address: (i) how existing porosity predictors model or fail to model the relational structure of AM process data; (ii) how graph learning captures that struc-ture but introduces IP exposure risks in collaborative set-tings; and (iii) how current privacy-preserving methods for manufacturing fall short of formal, utility-aware fea-ture privatization. The section concludes by identifying the specific methodological gap that the proposed frame-work targets. 
+
+2.1 Learning-Based Porosity Prediction from In-situ Sensing 
+
+Data-driven porosity detection has progressed through several modeling paradigms. CNN-based ar-chitectures first demonstrated that melt-pool geometry carries discriminative signatures for defect classification from coaxial or infrared imagery [3, 6]. Temporal extensions such as CNN–LSTM architectures were subsequently introduced to capture dynamic thermal fluctuations across sequential frames [8, 10], and mul-timodal fusion approaches improved defect assessment by combining multiple sensor streams [35]. Classi-cal machine learning methods have also established competitive baselines: Random Forests applied to engi-neered thermal descriptors for voxel-level prediction [9], and Self-Organizing Maps (SOMs) for unsupervised melt-pool clustering that achieved up to 96% detection accuracy on DED thin-wall builds [36]. Stochastic defect localization using Gaussian mixture representations has further begun to address spatial correlation in cooperative AM settings [37]. Despite these advances, the methods above share a common computational limitation: each melt-pool obser-vation is modeled as an independent sample. This as-sumption prevents the model from exploiting track-to-track interactions and cumulative heat-accumulation ef-fects, physical couplings that are central drivers of defect formation in DED-style deposition [13, 11, 12]. Over-coming this limitation requires structured representations that explicitly encode spatial and layer-wise dependen-cies, which motivates graph-based formulations. 
+
+2.2 Graph Representation Learning for Structured Manufacturing Data 
+
+Graph representation learning addresses the independent-sample limitation by representing sensor observations as nodes and physically meaningful re-lations: spatial proximity, layer adjacency, or thermal similarity as edges. GNNs leverage iterative neighbor-hood aggregation to propagate context across connected nodes, while attention-based variants (GATs) learn data-adaptive aggregation weights that prioritize informative neighbors under varying thermal regimes [14, 16]. In the AM domain, Mozaffar et al. [17] developed a geometry-agnostic GNN for thermal modeling along DED scan paths, demonstrating that graph inductive biases improve generalization across part geometries. Zhou et al. [19] proposed a spatially-informed GNN with multiphysics priors for online surface deformation prediction in digital twinning applications. Graph-theoretic frameworks have also been applied to manufacturing cybersecurity risk modeling, illustrating the broader applicability of graph-based computational methods in manufacturing systems [27]. These models, however, uniformly assume access to high-fidelity, unperturbed features. In cross-organization collaboration, raw features or learned embeddings may encode proprietary process information, creating a funda-mental tension between the relational modeling capabil-ity of GNNs and the data confidentiality requirements of multi-stakeholder manufacturing. Resolving this tension requires privacy mechanisms that can protect released features without destroying the embedding geometry on which graph construction and attention depend. 
+
+2.3 Privacy-Preserving Computational Methods in Manufacturing Analytics 
+
+The need to balance collaborative data sharing with IP protection has driven the development of several privacy-preserving approaches for manufacturing, which can be organized by their protection target (Table 1). At the image level , Bappy et al. [23] proposed an adaptive de-identification method for DED thermal data that com-bines stochastic image augmentation with surrogate im-age generation to mask printing trajectory information while preserving defect-modeling utility. This approach operates directly on raw melt-pool images and provides empirical privacy, but it does not offer formal guaran-tees, and the utility–privacy trade-off depends on an aug-mentation policy rather than on a provable bound. At the model level , Lee et al. [24] introduced Mosaic Neu-ron Perturbation (MNP), which perturbs neural network parameters during distributed training to prevent model inversion attacks under differential privacy. MNP pro-tects the model rather than the data, making it com-plementary to feature-release mechanisms but inapplica-ble when encoded features must be shared for down-stream graph construction. At the infrastructure level ,blockchain-based frameworks have been proposed for se-curing sensor data in transit [25, 26]; these ensure data integrity and access control but do not address the statis-tical utility–privacy trade-off inherent to feature perturba-tion. Finally, federated learning approaches for AM en-able collaborative model training without centralizing raw data [38, 39], but they require iterative multi-round com-munication and do not support the non-interactive, single-shot feature-release setting considered in this work. Be-yond model- and data-level privacy mechanisms, prior work has emphasized that additive manufacturing infor-mation requires protection strategies that go beyond con-ventional encryption, especially when sensitive process knowledge may still be exposed through side-channel or workflow-level leakage [40]. This broader AM security perspective reinforces the need for formal, utility-aware feature privatization mechanisms for collaborative ana-lytics. But none of these methods directly address the problem of releasing learned, graph-ready feature em-beddings under formal local privacy guarantees while pre-serving task-relevant structure for downstream attention-based inference. This is the specific computational gap that FI-LDP is designed to fill. 
+
+2.4 Local Differential Privacy for Continuous Fea-ture Release 
+
+Local differential privacy (LDP) requires each data holder to randomize its own record before release, re-moving the need for a trusted curator [29, 30]. For con-tinuous features, the standard Gaussian mechanism adds isotropic noise calibrated to the ℓ2-sensitivity of the re-leased vector [41]. While this provides a clean formal guarantee, isotropic perturbation treats all feature coor-dinates uniformly—a mismatch with manufacturing em-beddings where a small number of dimensions (e.g., peak melt-pool temperature, eccentricity) carry most of the predictive signal. In the broader machine learning community, sev-eral works have explored privacy-preserving graph neural networks. Sajadmanesh and Gatica-Perez [42] proposed Table 1. Comparison of privacy-preserving methods relevant to manufacturing analytics. The table highlights the protection target, privacy mechanism, and the main limitation of each method relative to graph-ready feature release. 
+
+Method Target Privacy type Formal Main relevance / limitation 
+
+SIA+ASIG [23] Raw images Heuristic No De-identifies melt-pool images through stochastic augmentation and surrogate generation, but does not provide a formal privacy bound for learned embeddings. MNP [24] Model weights (ϵ, δ )-DP Yes Perturbs model parameters during distributed training; protects the model rather than released feature representations. Blockchain/Encryption [25, 26] Data in transit Access con-trol No Ensures integrity and secure transmission, but does not address sta-tistical privacy or utility-aware feature perturbation. Federated learning [38, 39] Training data Varies Optional Avoids raw-data centralization, but requires iterative communication and is not designed for single-shot feature release. 
+
+FI-LDP (Proposed) Feature em-beddings 
+
+(ϵ, δ )-LDP Yes Applies importance-guided anisotropic noise to graph-ready feature embeddings, enabling formal privacy with downstream graph learn-ing utility. 
+
+Fig. 2. High-level overview of the utility-preserving private graph learning framework for in-situ porosity prediction. The pipeline in-tegrates (i) porous-targeted data augmentation to address class imbalance, (ii) a supervised warmup phase for feature importance estimation, and (iii) importance-aware anisotropic Local Differential Privacy (FI-LDP) for secure feature release to a stratified Hierar-chical Graph Attention Network (HGAT). 
+
+locally private GNNs with node-level LDP, and subse-quent work introduced aggregation perturbation mecha-nisms for differentially private graph learning [43]. These methods target social-network-style graphs with discrete or low-dimensional attributes and do not address the high-dimensional multimodal embeddings, severe class im-balance, or manufacturing-specific graph topologies en-countered in AM process monitoring. Utility-aware LDP Table 2. Nomenclature. Key symbols used in the proposed FI-LDP-HGAT framework.                                                             
+
+> Symbol Description
+> G= ( V,E)Layer-stratified process graph with nodes Vand edges E.
+> viNode corresponding to a localized melt-pool observation.
+> ξi= ( Ii,si,gi, y i)Multimodal record: thermal patch, process-state features, geometric context, and label.
+> Ii∈RH×WIn-situ thermal image patch (melt-pool neighborhood).
+> si∈RdsProcess-state / melt-pool scalar descriptors.
+> gi∈RdgGeometric context (layer index and in-layer coordinates; optional part/toolpath attributes).
+> yi∈ { 0,1}Porosity label after XCT-to-in-situ registration.
+> z(img)
+> i=fθ(Ii)Image embedding (thermal fingerprints) from ResNet-18 encoder.
+> z(ctx)
+> i=gϕ(si,gi)Context embedding from MLP over process and geometry features.
+> xi=[z(img)
+> i∥z(ctx)
+> i]∈
+> RD
+> Fused node feature used for warmup, privatization, and graph learning.
+> ℓiPhysical layer index of node vi(enforces within-layer edges).
+> Dij Hybrid distance for kNN edges (spatial proximity + thermal embedding similarity).
+> k, α, τ Graph hyperparameters: neighbors, mixing, kernel bandwidth.
+> Tatt Attention temperature used in HGAT (softmax/logit scaling).
+> wij Edge affinity prior, wij = exp( −Dij /τ ).
+> q∈RDGlobal feature-importance prior from warmup head weights.
+> (ϵ, δ )Local differential privacy parameters for feature release.
+> Cimg , C ctx , C tot Modality clipping bounds and fused sensitivity bound.
+> ϵd, δ d, σ dDimension-wise privacy budget and FI-LDP Gaussian noise scale.
+> ˆxiPrivatized feature vector released under FI-LDP.
+> a(g)
+> ij HGAT attention coefficient at graph layer gfor neighbor aggregation.
+> t∗Validation-tuned decision threshold for node-level classification.
+
+mechanisms that allocate noise according to feature con-tribution have been explored in distribution estimation settings [31, 32], but their integration with graph learning and manufacturing-domain priors remains unexplored. FI-LDP addresses this gap by deriving a per-dimension noise schedule from a supervised warmup signal, provid-ing a principled bridge between feature importance and privacy budget allocation that is compatible with down-stream graph construction and attention-based inference. 
+
+2.5 Research Gaps and Positioning 
+
+Table 1 contrasts the proposed FI-LDP with exist-ing privacy-preserving approaches across several com-putational dimensions. Taken together, the literature re-veals a methodological gap at the intersection of struc-tured relational inference and source-side local privacy. Graph-based predictors are well suited to capture layer-wise and spatial coupling in AM process streams, but they generally assume non-private access to high-fidelity features. Standard local differential privacy, by contrast, provides formal protection but remains utility-agnostic, uniformly perturbing the embedding geometry that graph construction and attention mechanisms depend on. Exist-ing privacy-preserving methods in manufacturing further focus on image-level de-identification, model-level per-turbation, or infrastructure-level security, none of which directly address formal, non-interactive privatization of graph-ready feature representations. FI-LDP-HGAT is designed to bridge this gap by combining a stratified graph model with an importance-guided anisotropic LDP mechanism for utility-preserving feature release under formal (ϵ, δ )-LDP guarantees. 
+
+3 METHODOLOGY 
+
+We develop a utility-preserving private analytics pipeline for in-situ porosity prediction. The framework follows a staged design that (i) increases defect-signal di-versity under extreme class imbalance via porous-targeted augmentation, (ii) learns multimodal representations and estimates a global importance prior for importance-weighted privatization, and (iii) enables structure-aware inference on a layer-stratified process graph. The overall workflow is summarized in Fig. 2. 
+
+3.1 Graph Formulation for Node-Level Porosity In-ference 
+
+We formulate in-situ porosity detection in layer-wise metal AM as a node-level binary classification problem on a stratified process graph G = ( V, E). Each node vi ∈Fig. 3. Porous-targeted augmentation operators used during training. The four transformations (A1)–(A4) are applied 
+
+only to minority-class (porous) thermal frames to increase defect-signal diversity under severe class imbalance. The operators emulate sensor noise, intensity drift, mild registration errors, and interpolated defect signatures; validation and test splits remain unaugmented. 
+
+V corresponds to a localized melt-pool observation 
+
+ξi :=  Ii, si, gi, y i
+
+, (1) where Ii ∈ RH×W is an in-situ thermal image patch cen-tered at the deposition zone. The vector si ∈ Rds col-lects scalar process-state and melt-pool descriptors (e.g., intensity/area statistics and sensing-derived summaries). The vector gi ∈ Rdg encodes geometric and spatial con-text, including the physical layer index and in-layer co-ordinates (and, when available, part/toolpath-related at-tributes). The label yi ∈ { 0, 1} indicates whether porosity is present at the corresponding location, obtained by reg-istering post-process XCT pore annotations to the in-situ observation within a fixed spatial tolerance. We define a fused node feature vector as 
+
+xi = z(img)  
+
+> i
+
+∥ z(ctx) 
+
+> i
+
+ ∈ RD , (2) where z(img)  
+
+> i
+
+is a learned embedding extracted from Ii
+
+(thermal fingerprints), and z(ctx)  
+
+> i
+
+is an embedding of pro-cess and geometric context derived from (si, gi).Fig. 4. Multimodal feature extraction and fusion for node representation. Each node feature xi concatenates an image-derived embedding z(img)  
+
+> i
+
+= fθ (Ii) (thermal fingerprints) with a context embedding z(ctx)  
+
+> i
+
+= gϕ(si, gi) capturing process-state and geometric descriptors. This fused representation is used for warmup importance estimation and as the input to FI-LDP privatization in subsequent stages. 
+
+3.2 Porous-Targeted Augmentation for Rare-Event Sensing 
+
+Porosity formation in metal AM is sparse and spa-tially localized. As a result, naive empirical risk mini-mization tends to learn a majority-dominated boundary and under-detect rare defects. To increase sensitivity to porous regions without distorting the nominal (non-porous) distribution, we adopt a porous-targeted augmen-tation protocol that operates only on minority-class obser-vations during training. 
+
+Targeted augmentations. For each porous thermal frame Ii, we apply one of the following on-the-fly trans-formations (Fig. 3) to emulate realistic sensing noise and modest process drift. Let clip( ·) denote intensity clipping to the valid sensor range [44]. 
+
+(A1) Additive Gaussian noise. This models camera stochasticity and acquisition drift so the encoder learns defect morphology that is stable under pixel-level pertur-bations [45]: 
+
+I′ 
+
+> i
+
+= clip  Ii + η,
+
+η ∼ N (0, σ 2I), σ2 ∼ U [σ2min , σ 2max ]. (3) Here η is i.i.d. pixel noise and σ2 is sampled per augmen-tation instance to span a plausible range of sensor noise levels. 
+
+(A2) Brightness scaling. This captures global inten-sity shifts (e.g., emissivity/exposure variation) to reduce reliance on absolute thermal magnitude [45, 46]: 
+
+I′ 
+
+> i
+
+= clip( a I i),a ∼ U [amin , a max ]. (4) The random scalar a enforces invariance to multiplicative intensity changes while preserving melt-pool shape cues. 
+
+(A3) Rotation/translation. This approximates mild registration drift relative to the nominal toolpath, so pre-dictions are robust to small pose/alignment errors: 
+
+I′ 
+
+> i
+
+= S∆u, ∆v
+
+ Rθ (Ii),θ ∼ U [−θmax , θ max ],
+
+∆u, ∆v ∼ U [−∆max , ∆max ].
+
+(5) 
+
+Rθ applies a bounded in-plane rotation and S∆u, ∆v ap-plies a bounded translation; together they mimic small coordinate misalignment without changing the underly-ing defect structure. 
+
+(A4) Interpolated melt-pool synthesis. This densi-fies the porous manifold by generating intermediate de-fect signatures via convex mixing [47]: 
+
+I′ 
+
+> i
+
+= clip  λI i + (1 − λ)Ij
+
+,
+
+s′ 
+
+> i
+
+= λsi + (1 − λ)sj ,λ ∼ U [λmin , λ max ].
+
+(6) Here, i and j are sampled from the porous set to avoid synthesizing majority-class patterns. The mixing weight 
+
+λ samples points within the convex hull of observed porous instances, yielding plausible intermediate patterns in image space and corresponding process-state descrip-tors. All augmentations are applied only to the training split; validation and test data remain unaugmented to en-sure unbiased evaluation. 
+
+3.3 In-situ Feature Extraction and Warmup for Importance-Weighted Privatization 
+
+The porous-targeted augmentation is designed to en-sure that rare defect signatures contribute sufficient gradi-ent signal during training. We next leverage this strength-ened minority signal to obtain a stable importance prior 
+
+for FI-LDP. Concretely, we (i) learn multimodal embed-dings that capture thermal patterns and geometry-aware process context, and (ii) run a short supervised warmup stage to estimate which coordinates of the fused repre-sentation are most predictive of porosity. This warmup stage is performed before local privatization and is used only to calibrate the privacy mechanism. 
+
+Morphological encoding of in-situ thermal signatures. 
+
+A ResNet-18 backbone fθ (·) maps each in-situ thermal frame Ii to a compact embedding [48]: 
+
+z(img)  
+
+> i
+
+= fθ (Ii) ∈ Rdimg . (7) The intent is to encode melt-pool footprint patterns asso-ciated with porosity. 
+
+Context-aware encoding of process and geometric fea-tures. We encode the process-state descriptors si and geometric features gi via an MLP after standardization (and optional low-order interaction features): 
+
+z(ctx)  
+
+> i
+
+= gϕ(si, gi) ∈ Rdctx . (8) This pathway captures layer-wise spatial context and lo-cal energy/stability cues, which influence defect likeli-Node Formation 
+
+# +
+
+CNN 
+
+## Connecting each 
+
+## node to its k nearest 
+
+## neighbors in the 
+
+## same layer 
+
+Edges 
+
+# +
+
+> Augmentation
+> function
+> F(x)
+
+(a) 
+
+(b)  
+
+> Fig. 5.
+
+Graph construction pipeline for FI-LDP-HGAT. (a) Porous-targeted augmentation applies transformation operators 
+
+F (·) to minority-class thermal patches to increase defect-signal diversity during training (Sec. 3.2). (b) Node and edge formation for the layer-stratified hybrid kNN graph: each node aggregates an image embedding from the thermal patch and a context vector of process/geometric features (Sec. 3.3). Within each physical layer, edges connect each node to its k nearest neighbors under the hybrid distance in Eq. (13) , combining in-layer spatial proximity and thermal embedding similarity. hood through heat accumulation and track-to-track inter-actions. We then form the multimodal node feature used downstream by concatenation: 
+
+xi = z(img)  
+
+> i
+
+∥ z(ctx) 
+
+> i
+
+ ∈ RD . (9) Using the same imbalance-aware sampling policy as Sec. 3.2, we train a lightweight classifier head on xi for a short warmup phase (with label smoothing) to stabi-lize porosity-discriminative directions in representation space [49]. The warmup head is a linear classifier trained with cross-entropy (label smoothing) for Ewarm epochs under the same imbalance-aware sampling policy. Let 
+
+W ∈ RH×D denote the warmup projection weights. We compute a global importance vector q ∈ RD as 
+
+qd = 1
+
+H
+
+> H
+
+X
+
+> h=1
+
+Whd , d = 1 , . . . , D, (10) where larger qd indicates coordinates consistently ex-ploited to separate porous from non-porous observations under the rare-event training regime. The vector q is ag-gregated over the warmup training set and is used only to allocate privacy noise in FI-LDP; it is not released at the record level. 
+
+3.4 Layer-Stratified Hybrid Graph Construction and Hierarchical Graph Attention Learning 
+
+Thermal transport and melt-pool interactions in layer-wise metal AM induce strong intra-layer coupling: neighboring tracks within the same layer share a similar heat-accumulation history and often exhibit correlated de-fect propensity. We encode this manufacturing prior by constructing a layer-stratified process graph and perform-ing node-level inference via hierarchical attention-based message passing. Figure 5 illustrates the node/edge for-mation workflow. 
+
+Layer-stratified hybrid kNN graph construction. We define a stratified graph G = ( V, E) by restricting edges to within-layer neighborhoods, 
+
+(i, j ) ∈ E ⇒ ℓi = ℓj , (11) where ℓi is the physical layer index. Within each layer ℓ,we connect each node i to its k nearest neighbors under a hybrid distance that combines (i) in-layer spatial prox-imity and (ii) similarity of learned thermal embeddings [50]. 
+
+Cosine similarity. 
+
+cos( u, v) := u⊤v
+
+∥u∥2 ∥v∥2
+
+. (12) Let pyz i = ( yi, z i) denote the in-layer coordinates of node i. The hybrid distance between nodes i and j is 
+
+Dij = α pyz i − pyz j 2+(1 −α)
+
+
+
+1−cos( z(img)  
+
+> i
+
+, z(img)  
+
+> j
+
+)
+
+
+
+,
+
+(13) where α ∈ [0 , 1] controls the geometry–appearance trade-off [50]. We convert Dij into a soft edge-affinity prior via a heat kernel, 
+
+wij = exp 
+
+
+
+− Dij 
+
+τ
+
+
+
+, (14) where τ > 0 is the neighborhood bandwidth. The prior 
+
+wij biases learning toward nearby and thermally similar events while retaining flexibility through attention. 
+
+Hierarchical graph attention (HGAT) for structure-aware inference. Let h(g) 
+
+> i
+
+denote the node represen-tation at HGAT layer g (distinct from ℓi). For neighbor 
+
+j ∈ N (i), we compute attention logits by combining transformed features with the edge prior [16]: 
+
+e(g) 
+
+> ij
+
+= LReLU 
+
+
+
+a⊤Wh (g) 
+
+> i
+
+∥ Wh (g) 
+
+> j
+
+∥ wij 
+
+
+
+, (15) followed by normalized coefficients 
+
+a(g) 
+
+> ij
+
+= exp( e(g) 
+
+> ij
+
+)
+
+P  
+
+> r∈N (i)
+
+exp( e(g) 
+
+> ir
+
+) , (16) and aggregation 
+
+h(g+1)  
+
+> i
+
+= σ
+
+ X 
+
+> j∈N (i)
+
+a(g) 
+
+> ij
+
+Wh (g)
+
+> j
+
+ , (17) where σ(·) is a nonlinearity. In practice, we use multi-head attention and concatenate (or average) heads at each layer (Fig. 6). The final node score ˆpi ∈ (0 , 1) is obtained via a classifier head. Training uses a weighted focal loss to emphasize rare porous nodes, and the operating thresh-old is tuned on validation ( t∗) to maximize F1 [51]. Fig. 6. HGAT message passing with attention. Edge priors bias attention toward spatially/thermally consistent neighbors, while learned coefficients adaptively weight neighborhood contributions for node-level porosity inference. 
+
+Fig. 7. Effect of isotropic vs. importance-guided local privatization on graph features. (a) Uniform-LDP (isotropic Gaussian noise). A single privacy budget is enforced by injecting the same noise scale into every feature coordinate, perturbing task-critical “thermal fingerprint” dimensions and redundant dimensions equally. This uniform corruption distorts the relative geometry of node embeddings and can weaken attention-based neighborhood aggregation. (b) FI-LDP (importance-guided anisotropic noise). The privacy budget is redistributed across coordinates using the warmup-derived importance prior q, assigning smaller noise to high-importance coordinates and larger noise to low-importance coordinates under the same (ϵ, δ ) guarantee. This preserves task-relevant subspaces while maintaining local privacy for feature release. 
+
+3.5 FI-LDP: Importance-Weighted Local Feature Privatization 
+
+To support collaborative analytics without releas-ing raw process fingerprints, we enforce privacy at the 
+
+feature-release boundary [30]. After extracting the fused representation xi ∈ RD , each facility releases only a privatized vector ˆxi and performs all subsequent steps (graph construction and HGAT training/inference) on ˆxi.This yields a non-interactive protocol (single-shot re-lease). Figure 7 summarizes the FI-LDP mechanism. Modality-aware clipping (bounded sensitivity). We first bound record-level sensitivity by ℓ2-clipping each modality embedding: 
+
+˜xi =
+
+h
+
+clip  z(img)  
+
+> i
+
+, C img 
+
+ clip  z(ctx)  
+
+> i
+
+, C ctx 
+
+i
+
+,
+
+clip( u, C ) = u
+
+max(1 , ∥u∥2/C ) .
+
+(18) This implies a fused bound 
+
+Ctot =
+
+q
+
+C2img + C2ctx , (19) which is used to calibrate the noise scale. 
+
+Algorithm 1 FI-LDP-HGAT: Utility-Preserving Private Porosity Prediction                                                                                                                  
+
+> Require: Records {ξi= ( Ii,si,gi, y i)}Ni=1 ; privacy (ϵ, δ ); FI-LDP
+> (β, η, C img , C ctx ); graph (k, α, τ )
+> Ensure: Predictions {ˆyi}Ni=1
+> 1: Stage 0: Warmup to estimate importance prior.
+> 2: Train encoders (fθ, g ϕ)using porous-targeted augmentation 3: Fit a warmup linear head with weights W∈RH×D
+> 4: qd←1
+> H
+> PHh=1 |Whd |,d= 1 , . . . , D ▷global importance prior 5: Stage 1: Pre-compute FI-LDP noise scales.
+> 6: Ctot ←
+> q
+> C2img +C2ctx
+> 7: Z←PDr=1 (qr+η)β
+> 8: for d= 1 to Ddo
+> 9: ϵd←ϵ(qd+η)β
+> Z;δd←δ/D
+> 10: σd←2Ctot
+> √2 ln(1 .25 /δ d)
+> ϵd
+> 11: end for
+> 12: σ←(σ1, . . . , σ D)
+> 13: Stage 2: FI-LDP feature release (non-interactive).
+> 14: for i= 1 to Ndo
+> 15: z(img)
+> i←fθ(Ii);z(ctx)
+> i←gϕ(si,gi)
+> 16: ˜xi←clip( z(img)
+> i, C img )∥clip( z(ctx)
+> i, C ctx )
+> 17: ˆxi←˜xi+νi,νi∼ N (0,diag( σ2))
+> 18: end for
+> 19: Stage 3: Stratified graph construction and HGAT inference.
+> 20: For each physical layer ℓ, build a kNN graph using hybrid distance
+> Dij and set wij = exp( −Dij /τ )
+> 21: Train HGAT on G= ( V,E)using weighted focal loss; tune thresh-old t∗on validation 22: for i= 1 to Ndo
+> 23: ˆyi←I{HGAT(ˆ xi)> t ∗}
+> 24: end for
+
+Importance-weighted privacy budget allocation. 
+
+Uniform-LDP perturbs all coordinates equally, which is inefficient when predictive utility is concentrated in a small subset of dimensions. Using the warmup-derived importance prior q ∈ RD (Sec. 3.3), FI-LDP allocates a larger share of the privacy budget to high-importance coordinates. Let β ≥ 0 control anisotropy and η > 0
+
+stabilize allocation: 
+
+Z =
+
+> D
+
+X
+
+> r=1
+
+(qr + η)β ,ϵd = ϵ (qd + η)β
+
+Z , δd = δ/D, d = 1 , . . . , D. 
+
+(20) Thus, larger qd yields larger ϵd and hence weaker pertur-bation on task-critical coordinates. 
+
+Anisotropic Gaussian perturbation (local release). 
+
+We privatize each record by adding coordinate-wise Gaussian noise: 
+
+ˆxi = ˜ xi + νi, νi,d ∼ N (0 , σ 2
+
+> d
+
+),σd = 2Ctot 
+
+q
+
+2 ln  1.25 /δ d
+
+
+
+ϵd
+
+.
+
+(21) Equations (20)–(21) make explicit that FI-LDP is equiv-alent to injecting an anisotropic noise vector with dimension-dependent scales {σd} (Fig. 7). After feature release, all downstream processing is purely a function of {ˆxi}, and therefore does not incur additional privacy loss by post-processing immunity. For consistency with the deployment setting, we apply the same privatization mechanism to train/validation/test representations under the reported (ϵ, δ ) budgets. 
+
+4 EXPERIMENTAL SETUP AND DATA ACQUI-SITION 
+
+The proposed framework is evaluated using an ex-perimental dataset of Ti-6Al-4V thin-walled structures (dimensions: 25 .4 × 1.0 × 12 .7 mm) fabricated via an OPTOMEC LENS™ 750 Directed Energy Deposi-tion (DED) system. The specimens were built using a laser power of 400 W and a constant travel speed of 10.58 mm/s [52]. During the build, a Stratonics dual-wavelength pyrometer was integrated into the sys-tem to provide a top-down, on-axis view of the depo-sition zone. The sensor captured high-resolution ther-mal images ( 200 × 200 pixels) at a sampling rate of 6.7 fps, focusing on the melt pool and the adjacent Heat-Affected Zone (HAZ). The pyrometer was calibrated for a range of 1000–2500 ◦C, ensuring the capture of critical thermal gradients during the solidification phase. Post-fabrication, internal porosity was characterized via X-ray Computed Tomography (XCT). To maintain high fidelity, pores ranging from 0.05 mm to 1.00 mm in diameter were cataloged. To establish ground truth labels, the in-process ther-mal signatures were registered with the XCT-detected pore locations. We applied a spatial tolerance of 0.5 mm to accommodate thermal expansion during build-up and slight coordinate system misalignments between the py-rometer and XCT reference frames. The final dataset comprises 1,564 unique observations. In alignment with high-quality stable manufacturing, the data exhibits a severe class imbalance: only 70 frames are labeled as porous ( 4.47% ), while 1,494 instances are non-porous. 
+
+5 RESULTS 
+
+We evaluate FI-LDP-HGAT along five axes: (i) non-private baseline benchmarking to establish the performance landscape, (ii) privacy-aware benchmark-ing against alternative protection mechanisms, (iii) mechanism-level evidence that FI-LDP allocates noise anisotropically as intended, (iv) privacy–utility scaling over a range of budgets, and (v) ablations that isolate the contribution of individual design choices. All results are computed on a fixed stratified split (60/20/20) and aver-aged across five random seeds unless otherwise noted. 
+
+5.1 Non-Private Baseline Comparison 
+
+Before evaluating privacy mechanisms, we first es-tablish the non-private performance landscape by com-paring the proposed HGAT architecture against repre-sentative baselines from classical machine learning, deep learning, and graph learning. All methods operate on the same dataset and train/val/test split. Table 3 summarizes the results.    
+
+> Table 3. Non-private baseline comparison. All methods use the same data split. Feature columns indicate the input represen-tation:
+
+Img = ResNet-18 image embedding; Multi = image + process-state + geometric context; Graph = layer-stratified kNN topology.                                            
+
+> Method Features AUC AUPR Rec@0.5 F1 ∗F1 ∗std
+> Classical / deep learning (no graph structure)
+> SVM (RBF) Img 0.979 0.973 0.926 0.903 0.000 MLP (2-layer) Img 0.986 0.948 0.778 0.824 0.022 ResNet-18 + MLP Img 0.978 0.969 0.879 0.861 0.022
+> Graph neural networks (with layer-stratified topology)
+> GCN Multimodal + Graph 0.964 0.931 0.946 0.862 0.022 Vanilla GAT Multimodal + Graph 0.977 0.967 0.960 0.854 0.030
+> HGAT (Ours) Multimodal + Graph 0.990 0.907 N/A 0.941 —
+
+Several observations are worth noting. First, flat clas-sifiers (SVM, MLP, ResNet-18 + MLP) operating on pre-extracted image embeddings achieve strong AUC values (0.978–0.986) and AUPR values (0.948–0.973). This re-flects the discriminative power of the ResNet-18 encoder on thermal image patches, consistent with prior CNN-based porosity detection work [3, 8] rather than the contri-bution of the downstream classifier. However, these meth-ods operate on image embeddings alone and do not in-corporate process-state or geometric context, nor do they model relational dependencies across observations. Second, among graph-based methods, GCN and vanilla GAT achieve high recall ( >0.94) but lower tuned F1 ∗ (0.862 and 0.854, respectively), indicating that stan-dard message-passing without edge priors or process-aware construction tends to over-predict the minority class. The proposed HGAT, which integrates multi-modal features, layer-stratified hybrid edges, and edge-affinity-biased attention, achieves the highest calibrated F1 ∗ (0.941) among all methods, demonstrating that manufacturing-informed graph construction and attention design translate into measurable gains in defect discrim-ination. Critically, the non-private comparison is not the primary evaluation axis of this work. Flat classifiers re-quire access to unperturbed, high-fidelity embeddings, a condition that is violated in multi-stakeholder manufac-turing where IP-sensitive features must be privatized be-fore release. The key question is how well each archi-tecture degrades when privacy constraints are imposed, which we examine next. 
+
+5.2 Privacy-Aware Benchmarking 
+
+We now evaluate FI-LDP-HGAT against alternative privacy mechanisms under matched (ϵ, δ ) budgets. Ta-ble 4 reports results at two representative privacy lev-els: a strict budget ( ϵ = 2.0) and a moderate budget (ϵ = 4 .0). We compare: (i) Uniform-LDP with HGAT (isotropic Gaussian perturbation on embeddings), (ii) DP-SGD-style training with HGAT (gradient-level clipping and Gaussian noise during optimization), and (iii) FI-LDP with HGAT (the proposed importance-guided anisotropic perturbation). The non-private HGAT oracle is included as an upper bound. The results reveal a clear performance hierarchy un-der privacy constraints. DP-SGD-style training, which adds calibrated noise to gradients during optimization, suffers catastrophic utility loss (AUC ≈ 0.44 , F1 ∗ <
+
+0.21 ) at both budget levels. This is consistent with known challenges of DP-SGD in high-dimensional, im-balanced regimes [33]: gradient clipping combined with per-step noise injection disrupts the delicate optimiza-tion dynamics required for rare-event detection, caus-ing the model to converge to near-majority-class predic-Table 4. Privacy-aware method comparison at fixed privacy bud-gets. All methods use the same HGAT backbone and graph topol-ogy for fair comparison. F 1∗ denotes the test F1-score at a validation-optimized threshold.                                         
+
+> Method ϵAUC AUPR Rec@0.5 F1 ∗
+> Non-Private Oracle —0.990 0.907 N/A 0.941 DP-SGD + HGAT 2.0 0.436 0.130 0.489 0.194 Uniform-LDP + HGAT 2.0 0.884 0.621 0.711 0.685
+> FI-LDP + HGAT (Ours) 2.0 0.913 0.664 0.762 0.686
+> DP-SGD + HGAT 4.0 0.446 0.132 0.489 0.202 Uniform-LDP + HGAT 4.0 0.910 0.697 0.770 0.752
+> FI-LDP + HGAT (Ours) 4.0 0.936 0.751 0.777 0.767
+
+tion. This finding motivates the feature-release privacy paradigm adopted by FI-LDP, where noise is injected once into the learned embedding rather than accumu-lated across training iterations. Uniform-LDP provides a substantially stronger baseline, achieving AUC = 0 .884 
+
+and F1 ∗ = 0.685 at ϵ = 2.0. Under the same bud-get, FI-LDP improves AUC by 3.3% (0.913 vs. 0.884), AUPR by 6.9% (0.664 vs. 0.621), and recall by 7.2% (0.762 vs. 0.711). At ϵ = 4 .0, FI-LDP achieves F1 ∗ =0.767 , corresponding to 81.5% utility recovery relative to the non-private oracle ( 0.767 /0.941 ). These gains are consistent across metrics and support the hypothe-sis that importance-guided anisotropic perturbation pre-serves task-relevant subspaces more effectively than uni-form corruption. 
+
+5.3 Mechanism Insight: Importance-Guided Anisotropic Noise Allocation 
+
+To directly validate that FI-LDP implements importance-guided perturbation, we visualize how feature importance translates into dimension-wise noise allocation at ϵ = 2 .0 in Fig. 8. The figure is constructed from the learned embedding coordinates, with dimen-sions sorted by descending importance. Fig. 8(a) shows a sharply heavy-tailed importance profile: importance drops rapidly within the first few ranked dimensions and then approaches a near-flat tail. This shape indicates that predictive utility is concentrated in a small subset of coordinates, while the majority of dimensions contribute marginal information. This concentration motivates anisotropic perturbation, since uniform corruption wastes the privacy budget on weak coordinates while unnecessarily degrading strong ones. Fig. 8(b) reports the corresponding allocated noise scale σj per ranked dimension. Uniform-LDP appears as a flat horizontal line, reflecting utility-blind isotropic per-turbation with identical noise across all coordinates. In contrast, FI-LDP exhibits a structured, non-uniform pro-file: the noise scale decreases across the high-importance head and increases toward the low-importance tail. This redistribution provides mechanistic evidence that FI-LDP preserves task-critical coordinates by assigning them lower variance while pushing more perturbation into re-dundant dimensions under the same (ϵ, δ ) constraint. Fig. 8(c) further quantifies this coupling by plotting σj
+
+against the (normalized) importance scores. The down-ward trend and the strong negative monotonic associa-tion (Spearman ρ = −0.81 ) confirm that FI-LDP sys-tematically assigns less noise to more important features. Taken together, these provide interpretable evidence that the observed privacy–utility gains are driven by principled anisotropic allocation, not by incidental hyperparameter effects. 
+
+5.4 Analysis of the Privacy–Utility Frontier 
+
+We next sweep ϵ ∈ [0 .5, 8.0] to characterize stabil-ity under varying privacy requirements. Fig. 9 reports six complementary views of the privacy–utility frontier: (a) AUC and (b) AUPR summarize threshold-free ranking quality, (c) Precision@0.5 and (d) Recall@0.5 quantify the default operating point ( t = 0 .5), (e) F1@0.5 sum-marizes the default precision–recall balance, and (f) the optimized F 1∗ reports the best achievable operating point after tuning the threshold on validation ( t = t∗). Table 5 provides the corresponding FI-LDP values. Across all metrics, FI-LDP remains informative even at strict budgets. At ϵ = 1 .0, FI-LDP achieves AUC =0.826 and AUPR = 0.429 , indicating non-trivial rank-ing utility under strong noise. Utility increases as ϵ be-comes more permissive (less noise), with diminishing re-turns beyond ϵ ≥ 4 (e.g., AUPR improves from 0.751 at 
+
+ϵ = 4 to 0.766 at ϵ = 8 ). The separation between FI-LDP and Uniform-LDP is most visible in the moderate regime ( ϵ ≈ 2–4), where FI-LDP attains higher AUPR (e.g., 0.664 at ϵ = 2 and 0.751 at ϵ = 4 ), reflecting im-proved preservation of rare-defect ranking signal. Small metric fluctuations across adjacent ϵ values are expected due to stochastic perturbations and finite-sample estima-tion on an imbalanced test set; the aggregate trend re-mains consistent, and the gap to Uniform-LDP narrows at larger budgets as both mechanisms inject less noise and approach the oracle [53]. 
+
+5.5 Ablation Study and Sensitivity Analysis 
+
+To attribute the observed privacy-utility gains to spe-cific design choices, we conduct controlled ablations at a Table 5. FI-LDP utility scaling across privacy budgets. Recov-ery % is computed relative to F 1∗ 
+
+> oracle
+
+= 0 .941 .
+
+ϵ AUC AUPR F1 ( t = 0 .5) F1 ∗ (tuned) Recovery % 
+
+0.5 0.792 0.302 0.361 0.440 46.7% 1.0 0.826 0.429 0.490 0.537 57.0% 2.0 0.913 0.664 0.647 0.685 72.8% 4.0 0.936 0.751 0.677 0.767 81.5% 8.0 0.943 0.766 0.776 0.801 85.1% 
+
+fixed strict budget ( ϵ = 2 .0). Each variant modifies one component while keeping the training protocol, split, and evaluation procedure unchanged. Table 6 summarizes the resulting impact on ranking and rare-defect detection per-formance. Removing class balancing (Oversampling=False) causes a collapse in recall (0.125), consistent with majority-class domination during optimization in rare-event settings. To avoid any data leakage, porous-targeted augmentation and oversampling were applied only within the training split; validation and test sets were kept un-changed and were never augmented or oversampled. Re-placing FI-LDP with isotropic perturbation ( β = 0)reduces AUPR from 0.664 to 0.621 (a +6.9% relative gain for anisotropy), indicating that importance-aware allocation is a primary contributor to utility retention under strict privacy. Finally, graph connectivity influ-ences the precision-recall trade-off: a thermal-only graph (α = 0) increases AUPR but reduces AUC relative to the multimodal construction, suggesting that geomet-ric features complement thermal similarity by improving global ranking robustness. In summary, FI-LDP improves upon Uniform-LDP most clearly in the moderate privacy regime ( ϵ ≈ 2–4), and the mechanism analysis confirms that this gain is driven by importance-aware anisotropic noise allocation rather than uniform perturbation. 
+
+Table 6. Ablation study of framework components at ϵ = 2 .0.                      
+
+> Configuration Oversampling AUC AUPR Recall
+> Full Framework True 0.913 0.664 0.762
+> w/o Oversampling False 0.165 0.036 0.125 w/o Anisotropy ( β= 0 )True 0.884 0.621 0.711 Thermal-only Graph ( α= 0 )True 0.666 0.638 0.650
+
+To facilitate reproducibility, the model architecture and training hyperparameters are detailed in Table 7. 
+
+6 DISCUSSION 
+
+The experimental results support three main find-ings regarding the interplay between privacy mechanisms, graph-based relational modeling, and defect detection utility in metal AM. We discuss each in turn, followed by a comparison with prior work on the same dataset and directions for future research. 0 25 50 75 100 125 150              
+
+> Ranked Feature Dimensions
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> Normalized Importance
+> (a) Feature Importance Profile
+> 025 50 75 100 125 150
+> Ranked Feature Dimensions
+> 12.5
+> 15.0
+> 17.5
+> 20.0
+> 22.5
+> 25.0
+> 27.5
+> 30.0
+> Noise Scale ( σ)
+> (b) Allocated Noise Level
+> FI-LDP (Adaptive)
+> Uniform-LDP (Baseline)
+> 0.0 0.2 0.4 0.6 0.8 1.0
+> Normalized Feature Importance
+> 12.5
+> 15.0
+> 17.5
+> 20.0
+> 22.5
+> 25.0
+> 27.5
+> 30.0
+> Allocated Noise Scale ( σ)
+> (c) Utility-Noise Coupling
+> Proposed Method
+> Uniform Baseline
+> Trend ( ρ=−0.81 )
+
+Fig. 8. Mechanism insight for FI-LDP at ϵ = 2 .0: importance-guided anisotropic perturbation. (a) Normalized importance scores (sorted) show that predictive utility is concentrated in a small subset of embedding coordinates. (b) Allocated Gaussian noise scale σj per coordinate: Uniform-LDP applies a constant σ, whereas FI-LDP assigns smaller σj to high-importance coordinates and larger σj to low-importance ones under the same privacy budget. (c) Utility–noise coupling: scatter of importance vs. allocated σj with a fitted trend, showing a strong negative monotonic association (Spearman ρ = −0.81 ), i.e., FI-LDP perturbs informative coordinates less aggressively. Fig. 9. Privacy–utility frontier for FI-LDP and Uniform-LDP. Metrics are reported across ϵ ∈ [0 .5, 8.0] under a fixed protocol (same split; seed-averaged runs). (a) AUC and (b) AUPR summarize threshold-free ranking quality. (c) Precision@0.5, (d) Recall@0.5, and (e) F1@0.5 are computed at the default decision threshold t = 0 .5. (f) F 1∗ is evaluated at a validation-optimised threshold t∗, representing the best calibrated operating point. FI-LDP exhibits a higher utility ceiling in the moderate-privacy regime (ϵ ≈ 2–4), while both methods converge at larger budgets as privacy-induced distortion diminishes. 
+
+6.1 Privacy–Utility Degradation Is Not Inevitable 
+
+The central finding of this work is that privacy-induced utility loss under Local Differential Privacy is not a fixed cost, it depends on whether the perturbation mechanism is aligned with the structure of the learned embedding. Across all experiments, FI-LDP provides the clearest benefit in the moderate privacy regime ( ϵ ≈
+
+2–4), where the privacy constraint is strong enough to distort high-dimensional features but not so strict as to erase all discriminative information. In this context, FI-LDP consistently improves AUPR and recall relative to Uniform-LDP, which is operationally important in rare-defect monitoring where missed detections are costly. The mechanism-level evidence (Fig. 8) is consistent with these gains: the heavy-tailed feature-importance profile shows that predictive utility is concentrated in a small subset of coordinates, and FI-LDP explicitly allocates less noise to this high-importance subset while shifting per-turbation to the low-importance tail. The strong nega-tive importance–noise coupling (Spearman ρ = −0.81 )supports the interpretation that the utility improvement is mechanistic and principled rather than an incidental hy-perparameter effect. In contrast, DP-SGD-style training, which clips and perturbs gradients at every optimization step, suffers catastrophic utility collapse (F1 ∗ < 0.21 ) even at moder-ate budgets. This outcome highlights a fundamental dis-tinction between training-time and release-time privacy: in high-dimensional, severely imbalanced regimes, ac-cumulated gradient noise disrupts the delicate optimiza-tion dynamics needed to learn rare-event boundaries. FI-LDP avoids this failure mode by injecting noise once into the learned embedding after training, preserving the op-timization trajectory while still providing formal (ϵ, δ )-LDP guarantees for the released features. Table 7. Reproducibility checklist and key hyperparameters for FI-LDP-HGAT.                          
+
+> Category Parameter Value
+> Data / Protocol Train/Val/Test split 0.6 / 0.2 / 0.2 Seed-averaged evaluation (runs) 5Decision threshold(s) t=0 .5;t∗tuned on val Graph Construction Node feature dimension ( d)64 Connectivity mixing coefficient ( α)main; α=0 (ablation) Stratified grouping (layer-wise) enabled HGAT Model Hidden dimension; attention heads; layers 64; 4; 2 Dropout; attention temperature ( Tatt )0.2; 0.1 Optimization Optimizer Adam Learning rate; weight decay
+> 10 −3;10 −4
+> Batch size; epochs 64; 25 Loss; class balancing Focal-CE; weighted sampler FI-LDP (Importance Prior) Warmup to estimate importance q
+> enabled Importance temperature ( β)0.6 Privacy (LDP) Privacy parameter δ10 −5
+> Privacy budgets reported ( ϵ)
+> {0.5,1,2,4,8}
+> ℓ2clipping (quantile) 0.95
+
+6.2 System-Level Robustness From Component In-teractions 
+
+The ablation study clarifies that robustness under pri-vacy is a system-level outcome arising from the inter-action of data balancing, perturbation design, and graph structure. When class balancing is removed, recall col-lapses to 0.125, indicating that minority-class learning must be preserved during training regardless of the pri-vacy mechanism. Replacing anisotropic perturbation with isotropic noise ( β = 0 ) reduces AUPR from 0.664 to 0.621, confirming that importance-guided allocation is a primary driver of utility retention under strict privacy. The graph connectivity ablation shows that thermal-only con-nectivity ( α = 0 ) can improve AUPR by emphasizing local intensity similarity, but the full multimodal graph yields better AUC, suggesting that spatial information sta-bilizes global ranking across layers and scan tracks when privacy noise perturbs feature geometry. These interac-tions illustrate that no single component is sufficient; the privacy–utility gains emerge from the coordinated design of all three elements. 
+
+6.3 Non-Private Performance and Comparison with Prior Work 
+
+The non-private baseline comparison (Table 3) re-veals that flat classifiers operating on pre-extracted ResNet-18 image embeddings achieve strong AUC and AUPR values (e.g., SVM: AUC = 0 .979 , AUPR = 0 .973 ). This reflects the discriminative power of the thermal en-coder on this dataset and is consistent with prior find-ings that melt-pool morphology carries strong defect sig-natures [3, 8]. However, these methods use image em-beddings alone and do not model relational dependen-cies. Among graph-based methods, the proposed HGAT achieves the highest calibrated F1 ∗ (0.941), outperform-ing GCN (0.862) and vanilla GAT (0.854), which tend to over-predict the minority class without edge-affinity pri-ors. It is also informative to compare with Khanzadeh et al. [36], who applied Self-Organizing Map (SOM) clus-tering on the same LENS Ti-6Al-4V thin-wall dataset. Using a 6 × 6 SOM on spherically transformed thermal distributions, they reported 96.07% pore detection accu-racy, a false alarm rate of 0.128%, and an F-score of 98.00% (Table 7 of that study). Several aspects of this comparison merit discussion. First, the SOM approach is an unsupervised anomaly detection method that identi-fies abnormal melt pools via cluster dissimilarity, whereas the proposed HGAT is a supervised node-level classifier that learns from labeled pore annotations. The two meth-ods address complementary aspects of porosity predic-tion: SOM detects distributional outliers, while HGAT di-rectly optimizes for defect discrimination under class im-balance. Second, the SOM evaluation uses detection ac-curacy (fraction of XCT-confirmed pores whose locations overlap with predicted anomalies), which is not directly comparable to the AUC, AUPR, and F1 metrics used in this work. Third, and most important, neither the SOM nor the flat classifiers address the privacy-constrained set-ting that is the focus of this paper. Under any LDP mech-anism, the SOM’s cluster-based anomaly detection would be disrupted by noise in the thermal features, and the flat classifiers would lose access to clean embeddings. The proposed FI-LDP-HGAT is, to our knowledge, the only method evaluated on this dataset that maintains struc-tured relational inference under formal source-side pri-vacy guarantees. 6.4 Comparison with Privacy-Preserving Ap-proaches in Manufacturing 
+
+The privacy-aware benchmarking (Table 4) posi-tions FI-LDP relative to alternative protection paradigms. Compared with Bappy et al. [23], who proposed image-level de-identification (SIA + ASIG) for the same DED privacy problem, FI-LDP operates at the embedding level and provides formal (ϵ, δ )-LDP guarantees rather than heuristic privacy. While direct numerical comparison is not possible due to differences in evaluation protocol and privacy definition, the two approaches are comple-mentary: SIA + ASIG masks trajectory information in raw images before encoding, whereas FI-LDP privatizes the encoded features before graph construction. A com-bined pipeline that applies image-level de-identification followed by FI-LDP at the embedding level could pro-vide defense-in-depth. Compared with model-level per-turbation (MNP [24]) and infrastructure-level protec-tion [25, 26], FI-LDP addresses a distinct threat model, non–interactive release of learned embeddings, that is not covered by methods protecting model parameters or data in transit (Table 1). 
+
+6.5 Future Research Directions 
+
+While this study establishes a robust privacy–utility frontier for experimental data, several directions remain for industrial-scale deployment. First, extending FI-LDP-HGAT to multi-facility federated learning [38] would enable joint training of global quality assurance models without sharing proprietary sensor signatures or facility-specific parameters [39]. In such a setting, FI-LDP could serve as the local privatization step within each feder-ated client. Second, future work will investigate physics-informed graph inductive biases [19]: incorporating ex-plicit process priors (e.g., heat conduction kernels or so-lidification constraints) into graph construction or mes-sage passing may improve robustness under strict pri-vacy noise by anchoring the graph topology to physical invariants rather than noisy feature geometry. Third, a systems-level direction is the use of privatized represen-tations in autonomous closed-loop control [54], where FI-LDP embeddings serve as state variables for supervisory decision modules that support real-time defect mitigation, linking privacy-preserving analytics with trustworthy au-tonomous manufacturing. 
+
+7 CONCLUSION 
+
+This paper introduces FI-LDP-HGAT, a privacy-preserving graph learning framework for in-situ defect monitoring in metal additive manufacturing. The frame-work addresses a central computational challenge: en-abling collaborative analytics from sensitive process data while protecting proprietary information under formal privacy guarantees. The proposed method combines two methodological components—a feature-importance-guided local differential privacy mechanism (FI-LDP) for anisotropic feature privatization, and a stratified Hier-archical Graph Attention Network (HGAT) for physics-informed relational inference—into a coherent pipeline for non-interactive feature release and structure-aware de-fect prediction. Experimental evaluation on a DED porosity dataset demonstrates that FI-LDP-HGAT consistently outper-forms isotropic privacy baselines and gradient-level pri-vacy approaches across multiple metrics. The method achieves 81.5% utility recovery at a moderate privacy budget ( ϵ = 4 ) and maintains strong defect recall (0.762) under a strict budget ( ϵ = 2 ), while DP-SGD-style train-ing collapses entirely under the same constraints. Among non-private baselines, the proposed HGAT achieves the highest calibrated F1 ∗ (0.941), and mechanism-level analysis confirms that the privacy–utility gains of FI-LDP are driven by principled importance-guided noise alloca-tion (Spearman ρ = −0.81 ) rather than incidental ef-fects. These results indicate that anisotropic, importance-guided perturbation can mitigate the utility collapse typi-cally observed in high-dimensional private learning by se-lectively protecting the most informative feature coordi-nates. More broadly, this work demonstrates that reliable graph-based defect monitoring and strict local privacy can be reconciled, providing a technically grounded pathway for trustworthy multi-stakeholder AI deployment in metal additive manufacturing. 
+
+COMPETING INTERESTS 
+
+The authors declare that they have no known compet-ing financial interests or personal relationships that could have appeared to influence the work reported in this pa-per. 
+
+DECLARATION OF AI AND AI-ASSISTED TECH-NOLOGIES IN THE WRITING PROCESS 
+
+During the preparation of this work, the authors used AI assisted tool to refine the linguistic clarity and improve the narrative flow of the manuscript. After using this tool, the authors reviewed and edited the content as needed and take full responsibility for the scientific accuracy and in-tegrity of the final published work. 
+
+REFERENCES 
+
+[1] Tian, Q., Guo, S., Melder, E., Bian, L., and Guo, W. G., 2021, “Deep learning-based data fusion method for in situ porosity detection in laser-based additive manufacturing,” Journal of Manufacturing Science and Engineering, 143 (4), p. 041011. [2] Chen, L., Bi, G., Yao, X., Su, J., Tan, C., Feng, W., Benakis, M., Chew, Y., and Moon, S. K., 2024, “In-situ process monitoring and adaptive quality en-hancement in laser additive manufacturing: a criti-cal review,” Journal of Manufacturing Systems, 74 ,pp. 527–574. [3] Zhang, B., Liu, S., and Shin, Y. C., 2019, “In-process monitoring of porosity during laser additive manufacturing process,” Additive Manufacturing, 
+
+28 , pp. 497–505. [4] Bappy, M. M., Liu, C., Bian, L., and Tian, W., 2022, “Morphological dynamics-based anomaly de-tection towards in situ layer-wise certification for directed energy deposition processes,” Journal of Manufacturing Science and Engineering, 144 (11), p. 111007. [5] Ren, Z., Gao, L., Clark, S. J., Fezzaa, K., Shevchenko, P., Choi, A., Everhart, W., Rollett, A. D., Chen, L., and Sun, T., 2023, “Machine learning-aided real-time detection of keyhole pore generation in laser powder bed fusion,” Science, 
+
+379 (6627), pp. 89–94. [6] Ansari, M. A., Crampton, A., Garrard, R., Cai, B., and Attallah, M., 2022, “A convolutional neural net-work (cnn) classification to identify the presence of pores in powder bed fusion images,” The Interna-tional Journal of Advanced Manufacturing Technol-ogy, 120 (7), pp. 5133–5150. [7] Esfahani, M. N., Bappy, M. M., Bian, L., and Tian, W., 2022, “In-situ layer-wise certification for di-rect laser deposition processes based on thermal im-age series analysis,” Journal of Manufacturing Pro-cesses, 75 , pp. 895–902. [8] Ho, S., Zhang, W., Young, W., Buchholz, M., Al Ju-fout, S., Dajani, K., Bian, L., and Mozumdar, M., 2021, “Dlam: Deep learning based real-time poros-ity prediction for additive manufacturing using ther-mal images of the melt pool,” IEEE Access, 9,pp. 115100–115114. [9] Estalaki, S. M., Lough, C. S., Landers, R. G., Kinzel, E. C., and Luo, T., 2022, “Predicting de-fects in laser powder bed fusion using in-situ ther-mal imaging data and machine learning,” Additive Manufacturing, 58 , p. 103008. [10] Mao, Y., Lin, H., Yu, C. X., Frye, R., Beckett, D., Anderson, K., Jacquemetton, L., Carter, F., Gao, Z., Liao, W.-k., et al., 2023, “A deep learning frame-work for layer-wise porosity prediction in metal powder bed fusion using thermal signatures,” Jour-nal of Intelligent Manufacturing, 34 (1), pp. 315– 329. [11] Haribaskar, R., and Kumar, T. S., 2024, “Defects in metal additive manufacturing: formation, process parameters, postprocessing, challenges, economic aspects, and future research directions,” 3D Printing and Additive Manufacturing, 11 (4), pp. 1629–1655. [12] Rottler, J., Tetzlaff, T. K., Lion, A., and Johlitz, M., 2025, “Effect of heat accumulation-induced embrit-tlement on the mechanical behavior of laser pow-der bed fusion ti-6al-4v microstructure,” Progress in Additive Manufacturing , pp. 1–9. [13] Ozel, T., 2023, “A review on in-situ process sens-ing and monitoring systems for fusion-based ad-ditive manufacturing,” International Journal of Mechatronics and Manufacturing Systems, 16 (2-3), pp. 115–154. [14] Wu, Z., Pan, S., Chen, F., Long, G., Zhang, C., and Yu, P. S., 2020, “A comprehensive survey on graph neural networks,” IEEE transactions on neural net-works and learning systems, 32 (1), pp. 4–24. [15] Wasi, A. T., Islam, M., Akib, A. R., and Bappy, M. M., 2024, “Graph neural networks in supply chain analytics and optimization: Concepts, per-spectives, dataset and benchmarks,” arXiv preprint arXiv:2411.08550 .[16] Veliˇ ckovi´ c, P., Cucurull, G., Casanova, A., Romero, A., Lio, P., and Bengio, Y., 2017, “Graph attention networks,” arXiv preprint arXiv:1710.10903 .[17] Mozaffar, M., Liao, S., Lin, H., Ehmann, K., and Cao, J., 2021, “Geometry-agnostic data-driven ther-mal modeling of additive manufacturing processes using graph neural networks,” Additive Manufac-turing, 48 , p. 102449. [18] Xiong, C., Xiao, J., Li, Z., Zhao, G., and Xiao, W., 2024, “Knowledge graph network-driven pro-cess reasoning for laser metal additive manufactur-ing based on relation mining,” Applied Intelligence, 
+
+54 (22), pp. 11472–11483. [19] Zhou, Q., Zhang, Y., Kim, J., Imani, F., and Tang, J., 2025, “Spatially-informed online prediction of milling surface deformation using multiphysics-infused graph neural network for digital twinning,” 
+
+Journal of Manufacturing Science and Engineering, 
+
+147 (12), p. 121003. [20] Yang, C., Lan, S., Wang, L., Shen, W., and Huang, G. G., 2020, “Big data driven edge-cloud col-laboration architecture for cloud manufacturing: a software defined perspective,” IEEE access, 8,pp. 45938–45950. [21] Bappy, M. M., 2024, Toward privacy-preserving component certification for metal additive manufac-turing Mississippi State University. [22] Bappy, M., Bian, L., and Tian, W., 2023, “Privacy-preserving and utility-aware data sharing strategy for process-defect modeling in metal-based additive manufacturing,” In IISE Annual Conference and Expo, IISE. [23] Bappy, M. M., Fullington, D., Bian, L., and Tian, W., 2025, “Adaptive thermal history de-identification for privacy-preserving data sharing of directed energy deposition processes,” Journal of Computing and Information Science in Engineering, 
+
+25 (3), p. 031006. [24] Lee, H., Finke, D., and Yang, H., 2024, “Privacy-preserving neural networks for smart manufactur-ing,” Journal of Computing and Information Sci-ence in Engineering, 24 (7), p. 071002. [25] Shi, Z., Oskolkov, B., Tian, W., Kan, C., and Liu, C., 2024, “Sensor data protection through integra-tion of blockchain and camouflaged encryption in cyber-physical manufacturing systems,” Journal of Computing and Information Science in Engineering, 
+
+24 (7), p. 071004. [26] Oskolkov, B., Kan, C., Tian, W., Law, A. C. C., and Liu, C., 2025, “Incremental machine learning-integrated blockchain for real-time security protec-tion in cyber-enabled manufacturing systems,” Jour-nal of Computing and Information Science in Engi-neering, 25 (4), p. 041004. [27] Rahman, M. H., Hamedani, E. Y., Son, Y.-J., and Shafae, M., 2024, “Taxonomy-driven graph-theoretic framework for manufacturing cybersecu-rity risk modeling and assessment,” Journal of Computing and Information Science in Engineering, 
+
+24 (7), p. 071003. [28] Ali Milaat, F., and Lubell, J., 2024, “Layered secu-rity guidance for data asset management in additive manufacturing,” Journal of computing and informa-tion science in engineering, 24 (7), p. 071001. [29] Wang, T., Zhang, X., Feng, J., and Yang, X., 2020, “A comprehensive survey on local differential pri-vacy toward data statistics and analysis,” Sensors, 
+
+20 (24), p. 7030. [30] Duchi, J. C., Jordan, M. I., and Wainwright, M. J., 2013, “Local privacy and statistical minimax rates,” In 2013 IEEE 54th annual symposium on founda-tions of computer science, IEEE, pp. 429–438. [31] Murakami, T., and Kawamoto, Y., 2019, “ {Utility-optimized } local differential privacy mechanisms for distribution estimation,” In 28th USENIX Secu-rity Symposium (USENIX Security 19), pp. 1877– 1894. [32] Acharya, J., Bonawitz, K., Kairouz, P., Ramage, D., and Sun, Z., 2020, “Context aware local differential privacy,” In International Conference on Machine Learning, PMLR, pp. 52–62. [33] Huang, T., Huang, Q., Shi, X., Meng, J., Zheng, G., Yang, X., and Yi, X., 2024, “Enhancing dp-sgd through non-monotonous adaptive scaling gradient weight,” arXiv preprint arXiv:2411.03059 .[34] Li, H., Ge, L., and Tian, L., 2024, “Survey: feder-ated learning data security and privacy-preserving in edge-internet of things,” Artificial Intelligence Re-view, 57 (5), p. 130. [35] Karthikeyan, A., Balhara, H., Hanchate, A., Lianos, A. K., and Bukkapatnam, S. T., 2023, “In-situ sur-face porosity prediction in ded (directed energy de-position) printed ss316l parts using multimodal sen-sor fusion,” arXiv preprint arXiv:2304.08658 .[36] Khanzadeh, M., Chowdhury, S., Tschopp, M. A., Doude, H. R., Marufuzzaman, M., and Bian, L., 2019, “In-situ monitoring of melt pool images for porosity prediction in directed energy deposition processes,” Iise Transactions, 51 (5), pp. 437–455. [37] Rescsanski, S., Shah, V., Tang, J., and Imani, F., 2024, “Stochastic defect localization for coopera-tive additive manufacturing using gaussian mixture maps,” Journal of Computing and Information Sci-ence in Engineering, 24 (11), p. 111006. [38] Wang, Y., Tang, J., Zhao, Z., Wang, C., Zhang, X., and Chen, X., 2026, “A privacy-enhancing fed-erated learning framework for cross-manufacturer lpbf powder bed defect identification,” Journal of Intelligent Manufacturing , pp. 1–25. [39] Zhou, S., and Tian, W., 2025, “Privacy-preserving process-defect modelling for metal-based additive manufacturing processes: A federated learning-based case study,” Manufacturing Letters, 44 ,pp. 1016–1025. [40] Lubell, J., 2022, “Protecting additive manufac-turing information when encryption is insufficient,” In ASTM International Conference on Additive Manufacturing (ICAM 2021), ASTM International, pp. 177–191. [41] Zheng, Y., Chang, C.-H., Huang, S.-H., Chen, P.-Y., and Picek, S., 2024, “An overview of trustworthy ai: advances in ip protection, privacy-preserving feder-ated learning, security verification, and gai safety alignment,” IEEE Journal on Emerging and Se-lected Topics in Circuits and Systems .[42] Sajadmanesh, S., and Gatica-Perez, D., 2021, “Lo-cally private graph neural networks,” In Proceedings of the 2021 ACM SIGSAC conference on computer and communications security, pp. 2130–2145. [43] Sajadmanesh, S., Shamsabadi, A. S., Bellet, A., and Gatica-Perez, D., 2023, “ {GAP }: Differentially pri-vate graph neural networks with aggregation per-turbation,” In 32nd USENIX Security Symposium (USENIX Security 23), pp. 3223–3240. [44] Gonzalez, R. C., 2009, Digital image processing 
+
+Pearson education india. [45] Shorten, C., and Khoshgoftaar, T. M., 2019, “A sur-vey on image data augmentation for deep learning,” 
+
+Journal of big data, 6(1), pp. 1–48. [46] Chua, Z. Y., Ahn, I. H., and Moon, S. K., 2017, “Process monitoring and inspection sys-tems in metal additive manufacturing: Status and applications,” International Journal of Precision Engineering and Manufacturing-Green Technology, 
+
+4(2), pp. 235–245. [47] Zhang, H., Cisse, M., Dauphin, Y. N., and Lopez-Paz, D., 2017, “mixup: Beyond empirical risk min-imization,” arXiv preprint arXiv:1710.09412 .[48] He, K., Zhang, X., Ren, S., and Sun, J., 2016, “Deep residual learning for image recognition,” In Pro-ceedings of the IEEE conference on computer vision and pattern recognition, pp. 770–778. [49] Szegedy, C., Vanhoucke, V., Ioffe, S., Shlens, J., and Wojna, Z., 2016, “Rethinking the inception ar-chitecture for computer vision,” In Proceedings of the IEEE conference on computer vision and pattern recognition, pp. 2818–2826. [50] Wang, Y., Sun, Y., Liu, Z., Sarma, S. E., Bronstein, M. M., and Solomon, J. M., 2019, “Dynamic graph cnn for learning on point clouds,” ACM Transac-tions on Graphics (tog), 38 (5), pp. 1–12. [51] Lin, T.-Y., Goyal, P., Girshick, R., He, K., and Doll´ ar, P., 2017, “Focal loss for dense object de-tection,” In Proceedings of the IEEE international conference on computer vision, pp. 2980–2988. [52] Zamiela, C., Tian, W., Guo, S., and Bian, L., 2023, “Thermal-porosity characterization data of additively manufactured ti-6al-4v thin-walled struc-ture via laser engineered net shaping,” Data in Brief, 
+
+51 , p. 109722. [53] Khavkin, M., and Toch, E., 2025, “Differential pri-vacy configurations in the real world: A compar-ative analysis,” IEEE Transactions on Knowledge and Data Engineering .[54] Zhang, J., Yin, C., Farbiz, F., Jafary-Zadeh, M., and Sing, S. L., 2025, “Advancing machine learning ap-plications for in-situ monitoring and control in laser-based metal additive manufacturing: a state-of-the-art review,” Virtual and Physical Prototyping, 20 (1), p. e2592732.

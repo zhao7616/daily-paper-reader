@@ -1,0 +1,110 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.05077v1/fig-001.webp",
+      "caption": "Table 2. Nomenclature. Key symbols used in the proposed FI-LDP-HGAT framework.",
+      "page": 6,
+      "index": 1,
+      "width": 979,
+      "height": 602
+    },
+    {
+      "url": "assets/figures/arxiv/2604.05077v1/fig-002.webp",
+      "caption": "Fig. 6. HGAT message passing with attention. Edge priors bias attention toward spatially/thermally consistent neighbors, while learned coefficients adaptively weight neighborhood contributions for node-level porosity inference.",
+      "page": 11,
+      "index": 2,
+      "width": 979,
+      "height": 374
+    },
+    {
+      "url": "assets/figures/arxiv/2604.05077v1/fig-003.webp",
+      "caption": "Fig. 7. Effect of isotropic vs. importance-guided local privatization on graph features. (a) Uniform-LDP (isotropic Gaussian noise). A single privacy budget is enforced by injecting the same noise scale into every feature coordinate, perturbing task-critical “thermal fingerprint” dimensions and redundant dimensions equally. This uniform corruption distorts the relative geometry of node embeddings and can weaken attention-based neighborhood aggregation. (b) FI-LDP (importance-guided anisotropic noise). The privacy budget is redistributed across coordinates using the warmup-derived importance prior q, assigning smaller noise to high-importance coordinates and larger noise to low-importance coordinates under the same (ϵ, δ) guarantee. This preserves task-relevant subspaces while maintaining local privacy for feature release.",
+      "page": 11,
+      "index": 3,
+      "width": 979,
+      "height": 415
+    },
+    {
+      "url": "assets/figures/arxiv/2604.05077v1/fig-004.webp",
+      "caption": "Fig. 8. Mechanism insight for FI-LDP at ϵ = 2.0: importance-guided anisotropic perturbation. (a) Normalized importance scores (sorted) show that predictive utility is concentrated in a small subset of embedding coordinates. (b) Allocated Gaussian noise scale σj per coordinate: Uniform-LDP applies a constant σ, whereas FI-LDP assigns smaller σj to high-importance coordinates and larger σj to low-importance ones under the same privacy budget. (c) Utility–noise coupling: scatter of importance vs. allocated σj with a fitted trend, showing a strong negative monotonic association (Spearman ρ = −0.81), i.e., FI-LDP perturbs informative coordinates less aggressively.",
+      "page": 15,
+      "index": 4,
+      "width": 974,
+      "height": 351
+    },
+    {
+      "url": "assets/figures/arxiv/2604.05077v1/fig-005.webp",
+      "caption": "Fig. 1. Framework for utility-preserving private feature release. Structured multimodal records are encoded, privatized via importance-aware anisotropic LDP (FI-LDP), and processed through a stratified Hierarchical Graph Attention Network (HGAT) for defect prediction.",
+      "page": 2,
+      "index": 5,
+      "width": 979,
+      "height": 483
+    },
+    {
+      "url": "assets/figures/arxiv/2604.05077v1/fig-006.webp",
+      "caption": "Fig. 3. Porous-targeted augmentation operators used during training. The four transformations (A1)–(A4) are applied only to minority-class (porous) thermal frames to increase defect-signal diversity under severe class imbalance. The operators emulate sensor noise, intensity drift, mild registration errors, and interpolated defect signatures; validation and test splits remain unaugmented.",
+      "page": 7,
+      "index": 6,
+      "width": 979,
+      "height": 777
+    },
+    {
+      "url": "assets/figures/arxiv/2604.05077v1/fig-007.webp",
+      "caption": "Table 4. Privacy-aware method comparison at fixed privacy budgets. All methods use the same HGAT backbone and graph topology for fair comparison. F1∗ denotes the test F1-score at a validation-optimized threshold.",
+      "page": 14,
+      "index": 7,
+      "width": 475,
+      "height": 265
+    },
+    {
+      "url": "assets/figures/arxiv/2604.05077v1/fig-008.webp",
+      "caption": "Fig. 4. Multimodal feature extraction and fusion for node representation. Each node feature xi concatenates an image-derived embedding z (img)",
+      "page": 8,
+      "index": 8,
+      "width": 979,
+      "height": 391
+    },
+    {
+      "url": "assets/figures/arxiv/2604.05077v1/fig-009.webp",
+      "caption": "Table 7. Reproducibility checklist and key hyperparameters for FI-LDP-HGAT.",
+      "page": 17,
+      "index": 9,
+      "width": 479,
+      "height": 756
+    },
+    {
+      "url": "assets/figures/arxiv/2604.05077v1/fig-010.webp",
+      "caption": "Fig. 5. Graph construction pipeline for FI-LDP-HGAT. (a) Porous-targeted augmentation applies transformation operators F (·) to minority-class thermal patches to increase defect-signal diversity during training (Sec. 3.2). (b) Node and edge formation for the layer-stratified hybrid kNN graph: each node aggregates an image embedding from the thermal patch and a context vector of process/geometric features (Sec. 3.3). Within each physical layer, edges connect each node to its k nearest neighbors under the hybrid distance in Eq. (13), combining in-layer spatial proximity and thermal embedding similarity.",
+      "page": 9,
+      "index": 10,
+      "width": 974,
+      "height": 538
+    },
+    {
+      "url": "assets/figures/arxiv/2604.05077v1/fig-011.webp",
+      "caption": "Table 1. Comparison of privacy-preserving methods relevant to manufacturing analytics. The table highlights the protection target, privacy mechanism, and the main limitation of each method relative to graph-ready feature release.",
+      "page": 5,
+      "index": 11,
+      "width": 979,
+      "height": 331
+    },
+    {
+      "url": "assets/figures/arxiv/2604.05077v1/fig-012.webp",
+      "caption": "Fig. 2. High-level overview of the utility-preserving private graph learning framework for in-situ porosity prediction. The pipeline integrates (i) porous-targeted data augmentation to address class imbalance, (ii) a supervised warmup phase for feature importance estimation, and (iii) importance-aware anisotropic Local Differential Privacy (FI-LDP) for secure feature release to a stratified Hierarchical Graph Attention Network (HGAT).",
+      "page": 5,
+      "index": 12,
+      "width": 979,
+      "height": 604
+    },
+    {
+      "url": "assets/figures/arxiv/2604.05077v1/fig-013.webp",
+      "caption": "Fig. 9. Privacy–utility frontier for FI-LDP and Uniform-LDP. Metrics are reported across ϵ ∈ [0.5, 8.0] under a fixed protocol (same split; seed-averaged runs). (a) AUC and (b) AUPR summarize threshold-free ranking quality. (c) Precision@0.5, (d) Recall@0.5, and (e) F1@0.5 are computed at the default decision threshold t = 0.5. (f) F1∗ is evaluated at a validation-optimised threshold t∗, representing the best calibrated operating point. FI-LDP exhibits a higher utility ceiling in the moderate-privacy regime (ϵ ≈ 2–4), while both methods converge at larger budgets as privacy-induced distortion diminishes.",
+      "page": 16,
+      "index": 13,
+      "width": 979,
+      "height": 618
+    }
+  ]
+}

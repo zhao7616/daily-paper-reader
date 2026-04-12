@@ -1,0 +1,110 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.08162v1/fig-001.webp",
+      "caption": "Figure 5: Specifications of the computational model: behaviour of concrete under uniaxial compression (a), behaviour of concrete under uniaxial tension (b), close-up of the interface at the breakage point (c), local forces at the steel-concrete interface (d), contact specification normal to the interfaces by an exponential relationship between clearance 𝑐 and contact pressure 𝑝, according to ABAQUS [Dassault Systèmes Simulia Corporation] (e).",
+      "page": 15,
+      "index": 1,
+      "width": 850,
+      "height": 404
+    },
+    {
+      "url": "assets/figures/arxiv/2604.08162v1/fig-002.webp",
+      "caption": "Figure 9: Influence analysis on the model calibrated with embedded parameters. At the top for both sides, ?̂?𝜙 (𝑆𝑖) for the full posterior for each 𝑆𝑖 . On the left, influence ?̂? ( 𝑗 ) 𝜙 (𝑆𝑖) of each 𝑆𝑖 on the marginal posterior of the parameters 𝜃 ( 𝑗 ) using KDE smoothing. On the right, influence ?̂? ( 𝑗 ) , (fix)",
+      "page": 21,
+      "index": 2,
+      "width": 932,
+      "height": 229
+    },
+    {
+      "url": "assets/figures/arxiv/2604.08162v1/fig-003.webp",
+      "caption": "Figure 10: Computational model of an upscaled T-beam used to investigate the separability of predictions for different tendon depths",
+      "page": 22,
+      "index": 3,
+      "width": 886,
+      "height": 340
+    },
+    {
+      "url": "assets/figures/arxiv/2604.08162v1/fig-004.webp",
+      "caption": "Figure 4: Distributed fiber-optic sensor, as used in the instrumentation of the specimen: general structure of a sensor (a), sensor grid applied to the concrete surface (b).",
+      "page": 13,
+      "index": 4,
+      "width": 850,
+      "height": 302
+    },
+    {
+      "url": "assets/figures/arxiv/2604.08162v1/fig-005.webp",
+      "caption": "Figure 2: Flow diagram of uncertainty propagation and identifiability analysis. The calibrated parameters θ∗ are extended with a set of non-calibrated parameters λ, propagated through the FEM model 𝑔, approximated via PCEs, and used to train GP surrogates for separability analysis.",
+      "page": 8,
+      "index": 5,
+      "width": 950,
+      "height": 635
+    },
+    {
+      "url": "assets/figures/arxiv/2604.08162v1/fig-006.webp",
+      "caption": "Table 7: Comparison of posterior summaries acros calibrations with and without embedding.",
+      "page": 19,
+      "index": 6,
+      "width": 944,
+      "height": 196
+    },
+    {
+      "url": "assets/figures/arxiv/2604.08162v1/fig-007.webp",
+      "caption": "Table 3: Input parameter ranges and Gaussian Process hyperparameter bounds.",
+      "page": 17,
+      "index": 7,
+      "width": 916,
+      "height": 258
+    },
+    {
+      "url": "assets/figures/arxiv/2604.08162v1/fig-008.webp",
+      "caption": "Table 2: Model parameters, descriptions, units, and default values. Parameters calibrated in θ are indicated.",
+      "page": 17,
+      "index": 8,
+      "width": 783,
+      "height": 506
+    },
+    {
+      "url": "assets/figures/arxiv/2604.08162v1/fig-009.webp",
+      "caption": "Figure 3: Setup of the experimental investigation: specimen with drill and applied grid of distributed fiber optical sensors (a), sketch of the specimen with corresponding geometrical properties (b).",
+      "page": 12,
+      "index": 9,
+      "width": 848,
+      "height": 423
+    },
+    {
+      "url": "assets/figures/arxiv/2604.08162v1/fig-010.webp",
+      "caption": "Figure 11: Comparison of sensor separability and overlap metrics for two classification approaches. Each subplot shows the spatial distribution of virtual sensors in the 𝑥–𝑧 plane, with separable sensors (◦) identified by the Min-Δ method and non-separable sensors (×) identified by the PDF-overlap method. The position of the tendon breakage is at 𝑥 = 0 mm and 𝑧 = 600 mm. (Top left) Sensor separability classification map. (Middle left) Maximin Δ𝑎 field (Min-Δ method). (Bottom left) 𝑎∗ field indicating the tendon depth where Δ𝑎∗ is maximal. (Top right) Minimum PDF overlap field. (Middle right) Maximum PDF overlap field (Overlap method). (Bottom right) Range of PDF overlap summarizing overlap variability. Interpolation between applicable sensors is performed using cubic splines",
+      "page": 24,
+      "index": 10,
+      "width": 907,
+      "height": 514
+    },
+    {
+      "url": "assets/figures/arxiv/2604.08162v1/fig-011.webp",
+      "caption": "Figure 8: Predicted confidence intervals at 95% of the posterior predictive for ˆ̃θ with and without embedding. The confidence interval in the calibrated model without embedding depends only on the prescribed noise 𝜎.",
+      "page": 20,
+      "index": 11,
+      "width": 827,
+      "height": 484
+    },
+    {
+      "url": "assets/figures/arxiv/2604.08162v1/fig-012.webp",
+      "caption": "Figure 7: Comparison with and without embedding of MCMC calibration for the parameters 𝐸cm, 𝜎𝐸𝑐𝑚 , 𝑝0, 𝑐0, and 𝜇. The left subfigure shows trace plots, and the right shows parameter pair plots",
+      "page": 20,
+      "index": 12,
+      "width": 947,
+      "height": 612
+    },
+    {
+      "url": "assets/figures/arxiv/2604.08162v1/fig-013.webp",
+      "caption": "Figure 6: Strain field determined in the direction of the tendon axis Δ𝜀𝑐,𝑥 . (Left) Experimentally, resulting from a broken tendon and (right) computational result as strain changes between simulation steps 2 and 3",
+      "page": 16,
+      "index": 13,
+      "width": 946,
+      "height": 221
+    }
+  ]
+}
