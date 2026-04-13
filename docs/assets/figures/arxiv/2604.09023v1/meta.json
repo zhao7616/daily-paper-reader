@@ -1,0 +1,38 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.09023v1/fig-001.webp",
+      "caption": "Figure 3. The data composition across domains, tasks, and sources in CAD 100K. All images are in RGB format with various resolutions from 100 × 84 to 4096 × 3072, covering diverse lighting and viewpoints.",
+      "page": 6,
+      "index": 1,
+      "width": 1034,
+      "height": 273
+    },
+    {
+      "url": "assets/figures/arxiv/2604.09023v1/fig-002.webp",
+      "caption": "Figure 1. Overview of the CAD 100K Dataset. The CAD 100K dataset contains over 100K images crossing 7 domains and 3 tasks, providing a comprehensive view for car-related anomaly detection. It features a multi-task architecture and synthesis data augmentation methods, solves cross-domain problems, supports both supervised and unsupervised learning paradigms, and is compatible with few-shot learning frameworks.",
+      "page": 2,
+      "index": 2,
+      "width": 989,
+      "height": 553
+    },
+    {
+      "url": "assets/figures/arxiv/2604.09023v1/fig-003.webp",
+      "caption": "Table 1. Comprehensive performance comparison on public car-related benchmarks across different backbone architectures, scales, and training paradigms. Results show classification accuracy (Cls. Acc), detection mAP (Det. mAP), and segmentation mIoU (Seg. mIoU). Bold indicates the best performance within each backbone size and architecture combination.",
+      "page": 7,
+      "index": 3,
+      "width": 494,
+      "height": 308
+    },
+    {
+      "url": "assets/figures/arxiv/2604.09023v1/fig-004.webp",
+      "caption": "Figure 2. Tasks and structure of the CAD 100K Dataset. CAD 100K adopts a hierarchical domain–system–part anomaly structure to ensure semantic consistency and extensibility across different tasks.",
+      "page": 4,
+      "index": 4,
+      "width": 996,
+      "height": 560
+    }
+  ]
+}

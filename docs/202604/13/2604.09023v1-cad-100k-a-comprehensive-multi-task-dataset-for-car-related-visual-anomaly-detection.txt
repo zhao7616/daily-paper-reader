@@ -1,0 +1,444 @@
+Title: CAD 100K: A Comprehensive Multi-Task Dataset for Car Related Visual Anomaly Detection
+
+URL Source: https://arxiv.org/pdf/2604.09023v1
+
+Published Time: Mon, 13 Apr 2026 00:39:42 GMT
+
+Number of Pages: 15
+
+Markdown Content:
+# CAD 100K: A Comprehensive Multi-Task Dataset for Car Related Visual Anomaly Detection 
+
+## Jiahua Pang Ying Li * Jingcai Luo Yanuo Zheng Bao Yunfan Yujie Lei Yuxi Tian Beijing Institute of Technology Dongpu Cao † Tsinghua University Rui Yuan China Agricultural University Guojin Yuan Beijing Jiaotong University Hongchang Chen The Hong Kong Polytechnic University Zhi Zheng Yongchun Liu Li Auto 
+
+## Abstract 
+
+Multi-task visual anomaly detection is critical for car-related manufacturing quality assessment. However, ex-isting methods remain task-specific, hindered by the ab-sence of a unified benchmark for multi-task evaluation. To fill in this gap, We present the CAD Dataset, a large-scale and comprehensive benchmark designed for car-related multi-task visual anomaly detection. The dataset contains over 100 K images crossing 7 vehicle domains and 3 tasks, providing models a comprehensive view for car-related anomaly detection. It is the first car-related anomaly dataset specialized for multi-task learning(MTL), while combining synthesis data augmentation for few-shot anomaly images. We implement a multi-task baseline and conduct extensive empirical studies. Results show MTL pro-motes task interaction and knowledge transfer, while also exposing challenging conflicts between tasks. The CAD dataset serves as a standardized platform to drive future ad-vances in car-related multi-task visual anomaly detection. 
+
+## 1. Introduction 
+
+Vision-based anomaly detection using multi-task learning (MTL) scheme is a core technology [1, 2, 11, 12, 20, 35] for smart manufacturing in the automotive industry, which simulates human visual capabilities through computer vi-sion to achieve precise identification, localization, and clas-sification of product defects. This task covers from the 
+
+> *Corresponding author.
+> †Corresponding author.
+
+overall vehicle appearance to micro defects, ensuring the reliability and safety of the entire process from automotive components to vehicle integration in a comprehensive man-ner [23, 29]. However, existing anomaly detection methods [1, 8, 24] mainly employ single-task learning (STL) models to detect one or a few types of anomalies. Although these models can achieve high performance with a low computa-tion cost, they struggle to meet the diverse anomaly detec-tion requirements of automotive manufacturing, leading to a proliferation of specialized STL models and a high reliance on data. Existing relevant datasets [2, 15, 23, 28, 29, 35] are also designed for these STL models, lacking a unified multi-task dataset to cover vehicle-related anomaly detec-tion tasks. To fill this gap, we present CAD 100 K, a large-scale and comprehensive benchmark designed for car related multi-task visual anomaly detection. Our proposed dataset com-prises more than 100,000 images spanning seven vehicle domains and three distinct tasks. This dataset is collected via three methods: real-world data collection, open-source dataset conversion, and synthetic data generation. Follow-ing rigorous data cleaning, all data is structured in a do-main–system–part hierarchy and annotated for industrial downstream application. It features a multi-task architec-ture, supports both supervised and unsupervised learning paradigms, and is compatible with few-shot learning frame-works. We further introduce a multi-task baseline framework specifically designed for our CAD 100K dataset. Our baseline adopts a shared-backbone multi-head structure, supporting both CNN-based and ViT-based encoders. A
+
+> arXiv:2604.09023v1 [cs.CV] 10 Apr 2026
+
+Problem: cross-domain Domain distribution Real-samples-classes distribution  
+
+> Real samples distribution Dataset1 Dataset2 Dataset3 Model1 Model2 Model3 Cls Det Seg
+> Data source distribution Task distribution
+
+Task: MTL vs STL Method: few-shot Learning Paradigms: supervised vs unsupervised Data Augmentation: Synthesis Tasks-classes distribution    
+
+> Classes num Tasks Cls 103 050 100 150 Det 11 Seg 22 Det,Seg 7Classes num 513 29 37 34 22 900-5 5-10 10-20 20-50 50-100 100-200 >200 20 10 30 40
+> Cls Model CAD dataset Det Seg
+> Electrical 2.9% EV-specific 3.1% Genneral 4.1% Engine 14.2% Chassis 5.7% Interior 10.8% Exterior 59.2% Normal samples Normal smaple Anomalous samples Anomal-ous samples Synthesis exte-rior anomalies Synthesis exte-rior anomalies
+> Seg 28.3% Det 28.9% Cls 42.8%
+> Collection 17.9% Transformation 40.4% Synthesis 41.3%
+> Anomaly 83.2% Normal 16.8%
+
+CAD 100K   
+
+> Exterior EV specific General Electrical Engine Interior Chassis
+> Seg Cls Det Rare samples Rare samples Plenty samples Plenty samples Exterior Exterior General EV-specific Electric Chassis Chassis Engine Interior
+
+Figure 1. Overview of the CAD 100K Dataset. The CAD 100K dataset contains over 100 K images crossing 7 domains and 3 tasks, providing a comprehensive view for car-related anomaly detection. It features a multi-task architecture and synthesis data augmentation methods, solves cross-domain problems, supports both supervised and unsupervised learning paradigms, and is compatible with few-shot learning frameworks. 
+
+convergence-aware balancing mechanism is introduced to dynamically adjust inter-task weights during joint optimiza-tion. We employ synchronized mixed-precision training across all heads, with shared early layers frozen for stabil-ity during warm-up. Additionally, we conduct comprehen-sive experiments to comparatively evaluate the performance of advanced single-task models against our proposed multi-task baseline. Our key contributions are outlined as follows: 1. We introduce CAD 100K, a large-scale vision anomaly detection dataset comprising 100,000+ anomaly images spanning seven vehicle domains and three distinct tasks. 2. We propose the first multi-task baseline model tai-lored for car-related industrial anomaly detection, which simultaneously learns from shared visual information across multiple domains. 3. We benchmark public datasets to analyze the perfor-mance of advanced single-task models against our multi-task baseline, and validate our approach on the CAD 100K dataset to demonstrate our collected data quality. 
+
+## 2. Related Work 
+
+2.1. Car-related Anomaly Detection Datasets 
+
+Car-related anomaly detection has evolved from early classification-focused datasets to more specialized bench-marks [23, 27, 29]. For example, CarDD [29] provides 4,000 high-resolution images with over 9,000 annotated in-stances across six damage types, supporting classification, object detection and instance segmentation. The Car Parts and Damages Dataset [27] comprises 1,812 images (998 for car parts, 814 for damages) and 24,851 polygon annotations for fine-grained part localization and damage segmentation. However, these datasets remain limited in two key as-pects. First, they are mainly designed for single tasks, whereas real-world anomaly detection requires multi-task integration—including classification, part identification, segmentation, and severity assessment. Second, the major-ity of existing car-related anomaly datasets focus predomi-nantly on obvious exterior damage e.g ., glass shatter, lamp broken) and overlook internal mechanical faults, structural deformations or complex environmental anomalies. Merging existing datasets introduces multiple chal-lenges: inconsistent annotations (e.g., differing label sets and segmentation protocols), conflicting labels (e.g., what constitutes a “scratch” vs “dent”), and varying part/detail granularity [13]. This is exacerbated by a pronounced do-main gap, stemming from disparities in image resolution, viewpoint, anomalous type distribution and scene context, as well as an imbalance in task difficulty (e.g., segmenta-tion vs classification) [22]. Together, these factors create conflicting learning signals that hinder model generaliza-tion and robustness. Thus, a comprehensive, multi-task benchmark, covering diverse anomaly types and scenarios and designed for task compatibility and scalability, is essential to advance real-world car-related anomaly detection. 
+
+2.2. Multi-Task Learning anomaly detection related methods 
+
+Multi-task learning (MTL) is suitable for the task of car-related anomaly detection, and has been widely applied in other domains like LLM, remote sensing. Li et al. [16] introduce the idea of applying one shared-backbone frame-works for different types of tasks including classification, object detection and semantic segmentation. Although Li et al. [16] achieve better performance than single-task learning tasks in specific remote-sensing task, there are several challenges when applying this idea to car-related anomaly detection tasks. Firstly, a foundational dif-ficulty arises from heterogeneous data sources: the image resolution varies in different datasets, or even in one dataset itself, which limits the usage of transfromer backbones [4]. Furthermore, task-difficulty imbalance makes it harder for MTL-learing to surpass STL-learning method in every task [34]. One remedy in the literature is dynamic loss-weighting ( e.g ., methods such as Conflict-Aware Balance, CoBa [33]) which adapts the relative importance of tasks via loss-level weights. However, such weighting schemes operate at the loss level and cannot resolve deeper issues of gradient conflict during back-propagation, where shared parameters receive conflicting gradient signals from multi-ple tasks. Methods like GradNorm [6] aim to balance task training by manipulating gradient magnitudes, thereby mit-igating conflict and improving overall Pareto performance. Nonetheless, its performance gain on particularly difficult tasks can be limited. In conclusion, a robust MTL framework for complex do-mains like car-related anomaly detection likely requires a synergistic approach that co-designs adaptive architectures, dynamic optimization strategies, and sophisticated gradient coordination [31]. 
+
+## 3. CAD 100K Dataset 
+
+The CAD 100K Dataset provides a unified, large-scale benchmark for multi-task car-related anomaly detection ,addressing the lack of a standardized dataset that jointly supports classification, detection, and segmentation under real-world automotive conditions. It establishes a hierarchi-cal organization across domains and systems, integrates real and synthetic data, and is designed to enable analysis of ro-bustness, transferability, and task interaction within multi-task learning (MTL) frameworks. 
+
+3.1. High-Level Goals 
+
+Comprehensive anomaly coverage. To comprehensively cover visual anomaly detection tasks related to vehicles, we systematically divide the detection areas based on multiple categories including vehicle exterior, chassis, cabin interior, and components. Corresponding data collection and orga-nization are then conducted for each specific detection do-main. 
+
+Multi-Task specialization. The downstream application of industrial anomaly detection typically involve multiple types of tasks such as detection, segmentation, and classi-fication [32], which may be executed either simultaneously or separately within the same workflow . Our constructed dataset and baseline can meet these practical needs in in-dustrial scenarios. 
+
+Support for multiple learning paradigms. With multi-level anomaly annotations (classification, detection, seg-mentation) and abundant normal samples, the CAD 100K dataset supports both fully-supervised and unsupervised anomaly detection paradigms [21]. 
+
+Compatibility with few-Shot learning. The core ob-jective of industrial production lines is to ensure high yield rates, which inherently results in a very limited number of anomaly samples available [19]. Consequently, many anomaly detection tasks [9, 14, 30] need to address the chal-lenge of few-shot learning [5]. In response, this dataset has specifically designed few-shot categories to adapt to and fa-cilitate efficient few-shot learning approaches. 
+
+Open-set friendly. Our dataset is structured in a hierar-chical domain–system–part taxonomy. For unseen anomaly data types, new categories can be added based on the dataset structure. 
+
+3.2. Dataset Structure and Design Principles 
+
+Unlike prior single-task datasets, CAD 100K adopts a hi-erarchical domain–system–part anomaly structure to en-sure semantic consistency and extensibility across different tasks. The CAD 100K dataset spans 7 domains, 23 systems, and over 78 anomaly classes, providing extensive coverage of car-related defects across both appearance and functional components. As illustrated in Fig. 2, it is organized along domains, systems and parts, and tasks. 
+
+Domains (7 domains). This dataset includes Exterior ,
+
+Interior , Chassis , Engine Bay , Electrical , EV-specific , and 
+
+General domians. Domains are defined based on subsys-tem anomaly statistics, visual detectability, and interface for Exterior  
+
+> Task: Object Detection
+> SLight paint damage
+> Screw
+> hole Loosen
+> Screw
+
+... Wrinkle scratch Detach  
+
+> ment
+
+... Stain   
+
+> Interior
+> Task: Anomaly Segmetation and Detection
+> Paint
+> Task: Car Part Segmetation
+> General
+> Heavy paint damage
+> Dent
+> Crack
+> Charging
+> Screw
+> Grille
+> Headlight'
+> Front-wheel
+> Rust
+
+...  
+
+> EV-specific
+> Chassis
+> Task: Anomaly Classification
+> Charging port
+> Normal
+> Burn mark
+> Orange cable
+> Normal
+> Breakage
+
+...   
+
+> Circuit
+> Wiring harness
+> Normal
+> Burned
+> Brake psd
+> Normal
+> Wear
+> Tire
+> Tire
+> Normal
+> Bulge
+> Aging
+> Abnormal wear
+> Foreign object
+> Cut
+
+... 
+
+> Engine
+> Belt
+> Normal
+> Crack
+> Wear
+> Filter
+> Normal
+> Dirty
+> Coolant
+> Low level
+> Brake fluid
+> Degraded
+> anomalous
+> smaple
+> normal
+> smaple
+> Aging
+> Corrugated tube aging
+> Lighting
+> Light bulb
+> Normal
+> Not lighting
+> Circuit Aging
+> Light bulb
+> Consumable
+> Brake disc
+> Normal
+> Wear
+
+... 
+
+...    
+
+> Br ake
+> Electrical
+> System
+> Task: Anomaly Classification
+> Battery
+> Terminal
+> Corrosion
+> Task: Object Detection
+> Task: Anomaly Classification
+> Task: Anomaly Classification
+> Normal Orange
+> Table
+> CAD 100K
+> Degraded Brake
+> fluid
+
+Figure 2. Tasks and structure of the CAD 100K Dataset. CAD 100K adopts a hierarchical domain–system–part anomaly structure to ensure semantic consistency and extensibility across different tasks. 
+
+new anomalous. The General domain encompasses cross-system anomalies ( e.g . bolt loosening) and ensures future extensibility. 
+
+Systems and Parts (23 systems, 78 parts). Each domain is decomposed into functional subsystems ( e.g .suspension, lighting, charging) and associated parts ( e.g .wheel, lamp, battery pack), capturing both structural and functional hierarchy for fine-grained anomaly localization. 
+
+Tasks (3 types and variants). In our dataset, all data is partitioned and annotated based on actual downstream application needs, including tasks such as classification, segmentation, and detection. For example, classification tasks include part and damage-type recognition and nor-mal/anomaly discrimination; detection tasks include local-ization of defective regions or missing components; seg-mentation tasks include pixel-level parsing of part bound-aries or surface damages. Each sample follows a unified semantic linkage: domain → system → part → anomaly type → tasks ,
+
+ensuring cross-task consistency and scalable annotation. The domain and system taxonomy in CAD 100K is de-fined by three practical dimensions: • System structure and anomaly frequency: CAD 100K’s organization mirrors the physical vehicle struc-ture—domains, systems and parts align with real car con-struction. In fact, the anomaly rates vary across different domains. Since exterior components are designed with a focus on aesthetics and lightweighting, and are highly ex-posed to external impacts [3], their anomaly rate tends to be higher than that of the cabin and other interior parts. By selecting parts and domains with these patterns in mind, CAD 100k ensures efficient anomaly acquisition and includes both frequent and rare failure modes. • Visual detectability: Vehicle subsystems differ markedly in visual clarity and annotation complexity. Exterior panels support fine-grained segmentation under uniform lighting; whereas interior zones or under-body regions are visually cluttered and less suited to pixel-level masks [20]. Recognizing these constraints, CAD 100k assigns segmentation/detection to high visibility domains, and classification to lower visibility ones. • Interface for new anomalous: To remain forward-compatible, CAD 100K introduces an “EV-specific” do-main (battery pack, drive motor, charging port) and a “General” domain for cross-system faults (e.g., fastener loosening). This ensures the dataset’s relevance to both current and future vehicle architectures. Together, these principles align CAD 100K with indus-trial reliability data, perceptual feasibility, and MTL re-quirements. 
+
+3.3. Dataset Acquisition and Processing 
+
+CAD 100K is built through a systematic pipeline that com-bines real-world acquisition with synthetic generation, en-suring both broad coverage of automotive anomalies and consistent hierarchical semantics. 
+
+Real-world data collection. We deploy an image cap-ture system across multiple automotive service center and assembly facilities to collect high-resolution photographs of car components under various viewpoints, lighting condi-tions and damage states. Each image is annotated accord-ing to our domain–system–part–anomaly taxonomy with bounding boxes for detection and pixel-masks for segmen-tation. 
+
+Open-source transformation. To expand dataset di-versity, we incorporate existing car damage image datasets [17, 27, 29] by re-mapping their labels into our unified hier-archy, filtering low-quality or ambiguous samples, and re-fining annotations to align with our task schema (classifica-tion, detection, segmentation). 
+
+Synthetic data generation. To address long-tail rarity of certain defect types, we designed a multi-stage synthetic pipeline: Based on generative diffusion models [7, 26], we synthesize plausible defects (e.g., corrosion, surface crack, missing element) onto those templates. Anomalous templates are composited into real backgrounds with re-alistic lighting and texture transformations, and matching “normal” variants are produced for classification and unsu-pervised tasks. This approach improves not only sample volume but critical coverage of hard-examples (e.g., low-contrast, occluded or subtle damages), thus improving eval-uation of model robustness and synthesis-to-real transfer. 
+
+Hierarchical classification and organization. All samples (real or synthetic) are catalogued using the do-main–system–part anomaly task linkage, enabling fine-grained performance analysis, controlled sampling for class and task balance, and efficient retrieval for specific experi-mental configurations. 
+
+Data cleaning and validation. We apply automated and manual quality control: removing corrupted or misaligned images, validating annotations via multi-expert review, cross-checking annotation consistency across tasks (classi-fication labels, detection boxes, segmentation masks), and performing statistical audits to identify annotation bias. In the final release, the dataset comprises approximately 53% real-world images and 47% synthetic ones—optimally bal-anced to maximise both realism and anomaly-type diversity while respecting the hierarchical structure necessary for rig-orous multi-task evaluation. 
+
+3.4. Dataset Statistics and Methodological Analysis 
+
+Figure 3 summarizes data composition across domains, tasks, and sources. All images are in RGB format with res-olutions from 100 × 84 to 4096 × 3072 , covering diverse lighting and viewpoints. 
+
+Domain imbalance. The Exterior domain contributes about 60% of all samples, consistent with real-world visi-bility and the prevalence of appearance-level defects. Do-mains such as Engine Bay , Interior , and Electrical are rel-atively underrepresented due to acquisition difficulty, form-ing a realistic cross-domain imbalance crucial for domain adaptation research. 
+
+Task distribution. Task ratios follow domain visibil-ity: exterior scenes mainly support segmentation/detection, while interior and mechanical scenes favor classification. This coupling naturally supports research on task synergy and interference within MTL frameworks. 
+
+Synthetic expansion. To enrich anomaly diversity and balance distributions in type, color, and spatial position, the CAD 100K dataset incorporates synthesized images generated by both general-purpose and industry-specific models. Diffusion-based synthesis is used here to enlarge the dataset. More importantly, synthesis targets hard ex-amples ,like complex paint damages including multi-types, dents without clear edges, enhancing coverage of visually challenging cases and enabling rigorous evaluation of hard-case robustness and synthetic-to-real transfer. 
+
+Few-shot and long-tail subsets. Long-tail distributions persist across categories, with many part-level anomalies having fewer than 50 instances. These subsets facilitate few-shot and data-efficient anomaly detection, where mod-els must generalize from head classes or auxiliary domains. 
+
+Supervision paradigms. Normal samples comprise 20% of CAD 100K, enabling both fully supervised and hy-brid semi-unsupervised training. The dataset thus bridges dense anomaly annotation with representation learning from normal data, supporting experiments across different supervision regimes. In general, CAD 100K integrates domain diversity, syn-thetic enhancement, and hierarchical task alignment into a coherent MTL-oriented benchmark, bridging dataset con-struction and methodological investigation in car anomaly detection. 
+
+## 4. Baseline 
+
+To efficiently address the diverse objectives of car-related anomaly detection—classification, detection, and segmen-tation, we design a unified MTL-oriented baseline that har-monizes shared feature learning across tasks, while adapt-ing dynamically to their varying convergence speeds and data complexity. Our baseline adopts a shared-backbone multi-head structure inspired by RSCoTr [16], supporting Figure 3. The data composition across domains, tasks, and sources in CAD 100K. All images are in RGB format with various resolutions from 100 × 84 to 4096 × 3072, covering diverse lighting and viewpoints. CAD 
+
+> 100K
+> Cls Task
+> Det Task
+> Seg Task
+> Task Samapler
+> Fixed Task Weight
+> Adaptive Task Weight
+> Shared Backbone Cls
+> Det
+> Seg
+> Shared MTL Encoder
+
+Figure 4. Structure of the proposed Baseline. 
+
+both CNN- and ViT-based encoders. Specifically, we implement a shared backbone across all domains, ensuring unified feature extraction for classi-fication, detection and segmentation tasks. The choice be-tween ConvNeXt [18] and DINOv3 [25] is determined by deployment constraints and model scaling rather than do-main separation—both serve as a common visual encoder for the entire benchmark. The architecture maintains a unified input interface across tasks of different resolutions, with lightweight task-specific decoders (classification, de-tection, segmentation) attached atop shared representations. This structure enables consistent feature sharing and effi-cient adaptation to scene-dependent resolution variation. 
+
+Adaptive Task Co-Training. We introduce a balancing mechanism considering convergence-CoBa (Convergence Balancer)-to dynamically adjust inter-task weights during joint optcimization. CoBa[10] evaluates each task’s relative convergence speed via the rate of loss descent and stability over a moving window: 
+
+wt ∝ α RCS t + β ACS t + γ DF t, (1) where RCS, ACS, and DF denote relative, absolute, and divergence-based convergence scores respectively. Tasks with slower or unstable convergence receive higher weights, ensuring balanced learning progress and preventing overfit-ting of dominant tasks. 
+
+Task Scheduler and Data Sampling. On top of CoBa[10], we design an adaptive task scheduler that selects which task to train at each iteration according to softmax-normalized CoBa[10] priorities. Tasks with higher weights (i.e ., poorer convergence) are sampled more frequently. The associated data loader synchronizes sampling probabilities accordingly: 
+
+P (task i) = exp( wi/T )
+
+P 
+
+> j
+
+exp( wj /T ) , (2) where T is the temperature controlling stochasticity. This cooperative mechanism adaptively allocates computational focus toward under-trained tasks while maintaining global convergence stability. 
+
+Training and Optimization. We employ synchro-nized mixed-precision training across all heads, with shared early layers frozen for stability during warm-up. Losses are normalized per task and dynamically reweighted using CoBa[10] outputs. This adaptive balancing yields faster convergence and improved generalization in challenging multi-domain scenarios, outperforming static-weight MTL baselines in both anomaly localization and part classifica-tion. Overall, the proposed baseline serves as a strong refer-ence for future research in multi-task car anomaly detec-tion, demonstrating how convergence-driven coordination can unify task learning across heterogeneous visual condi-tions. 
+
+## 5. Experiments 
+
+5.1. Experimental Settings 
+
+Datasets and Evaluation Protocols. To evaluate the ef-fectiveness of our proposed MTL-oriented baseline com-prehensively, we conduct rigorous experiments across two distinct settings. We perform extensive benchmarking on publicly available datasets to systematically analyze the performance characteristics of different backbone architec-tures under both Single-Task Learning (STL) and Multi-Task Learning (MTL) paradigms. Besides, we validate our approach using the real-world collected data in our CAD 100K dataset to demonstrate its practical utility in industrial applications. For public benchmarks, we carefully select three com-plementary datasets that collectively cover the spectrum of visual understanding tasks in automotive anomaly detec-tion: • Car Part 50 Classification Dataset [17]: Comprising 50 fine-grained car part categories, focusing on interior and exterior component recognition. • CarDD Detection Dataset [29]: Containing bounding box annotations for various car damages and defects, includ-ing scratches, dents, and cracks. • Car Parts Segmentation Dataset [27]: Providing pixel-level annotations for car part segmentation from the Car Parts and Damages dataset. These datasets span classification, detection, and seg-mentation tasks, enabling us to compare STL versus shared MTL. Notably, the semantic overlap among these tasks is limited, making this setting particularly challenging and primarily assessing our baseline’s capability to generalize across weakly related tasks. 
+
+Evaluation Metrics. We employ task-specific evaluation metrics following established practices in each domain: • Classification: We report Overall Accuracy (OA) and Top-1 Accuracy to measure categorical recognition per-formance. • Segmentation: We utilize mean Intersection-over-Union (mIoU) and mean F1 Score (mF1). The F1 score is com-puted as the harmonic mean of precision and recall for each class, then averaged across categories: mF1 = 1
+
+C
+
+> C
+
+X
+
+> c=1
+
+2 · Precision c · Recall c
+
+Precision c + Recall c
+
+, (3) where C is the number of classes. • Detection: We adopt the standard MS COCO evaluation protocol, reporting mean Average Precision (mAP) aver-aged over IoU thresholds from 0.50 to 0.95. 
+
+Implementation Details. Our implementation builds upon PyTorch with careful attention to reproducibility. We employ multiple backbone variants to study scale ef-fects: DINOv3-Splus (smallsplus), DINOv3-B (base), and DINOv3-L (large)[25]. All models are trained from pre-trained weights using AdamW optimizer with initial learn-
+
+Table 1. Comprehensive performance comparison on public car-related benchmarks across different backbone architectures, scales, and training paradigms. Results show classification accu-racy (Cls. Acc), detection mAP (Det. mAP), and segmentation mIoU (Seg. mIoU). Bold indicates the best performance within each backbone size and architecture combination.                                                            
+
+> Backbone Type Backbone Size Method Cls. Acc (%) Det. mAP (%) Seg. mIoU (%)
+> DINOv3 (ViT) Smallplus Single 98.40 59.20 72.80
+> Base 98.40 58.90 70.93 Adaptive 98.40 57.80 71.88 Base Single 100.00 59.40 72.42
+> Base 98.80 58.20 71.95 Adaptive 99.10 58.90 72.25 Large Single 100.00 62.10 73.53
+> Base 99.20 61.80 72.65 Adaptive 99.20 61.70 72.40 ConvNeXt (CNN) Small Single 98.80 58.80 72.80
+> Base 98.80 58.60 71.12 Adaptive 98.80 59.10 71.82 Base Single 98.60 60.40 72.8
+> Base 98.80 60.10 71.95 Adaptive 99.20 59.60 71.31 Large Single 100.00 62.10 73.38
+> Base 100.00 60.70 72.58 Adaptive 98.90 61.70 71.90
+
+ing rate of 1 × 10 −4 and cosine annealing schedule. We use batch size of 32 per GPU and train for 100 epochs. We compare three distinct training paradigms: • Single-Task (STL): Individual models trained separately for each task • Base MTL: Shared backbone with round-robin task scheduling and equal loss weighting • Adaptive MTL (Ours): Our proposed method with CoBa dynamic weighting and adaptive task scheduling 
+
+5.2. Public Benchmark Evaluation 
+
+Comparative Analysis. Comparative Analysis Table 1 presents comprehensive results across different backbone architectures, scales, and training paradigms. The experimental findings reveal sev-eral noteworthy patterns: 
+
+Performance Saturation in Classification. The clas-sification task demonstrates remarkable performance satu-ration across all configurations, with multiple architectures achieving perfect 100% accuracy in single-task settings (DINOv3-Base, DINOv3-Large, and ConvNeXt-Large). This indicates that car part classification represents a rela-tively solved problem even with moderate model capacities, creating significant optimization challenges for multi-task learning where gradient dominance from simpler tasks may impede learning in more complex ones. 
+
+Multi-task Learning Dynamics. The fixed task-weight MTL (Base scheme) exhibits complex behavior across different architectures. For DINOv3-Smallplus, base MTL maintains classification accuracy (98.4%) while experiencing modest degradation in detection (59.20% →58.90%) and more significant segmentation de-cline (72.80% →70.93%). Interestingly, ConvNeXt-Small demonstrates different characteristics, with base MTL pre-serving classification performance (98.8%) while show-ing minimal detection degradation (58.80% →58.60%) and moderate segmentation decline (72.80% →71.12%). 
+
+Adaptive Strategy Performance. Our adaptive MTL approach exhibits architecture-dependent effec-tiveness. In DINOv3-Smallplus, adaptive MTL shows mixed results—improving segmentation performance (70.93% →71.88%) but experiencing detection degradation (58.90% →57.80%). Conversely, ConvNeXt-Small demon-strates the adaptive strategy’s potential, achieving the best detection performance (59.10%) while maintaining clas-sification accuracy (98.8%) and improving segmentation (71.12% →71.82%) over base MTL. 
+
+Backbone Scale and Architecture Effects. Scal-ing effects vary significantly between architectures. DI-NOv3 shows consistent performance improvements with increased capacity across all tasks, with DINOv3-Large single-task achieving 100% classification, 62.10% detec-tion, and 73.53% segmentation. ConvNeXt exhibits more complex scaling behavior, with ConvNeXt-Base single-task showing superior detection performance (60.40%) com-pared to both smaller and larger variants, suggesting poten-tial optimization challenges at larger scales. 
+
+Analysis and Insights The experimental results reveal several important characteristics of multi-task learning in automotive anomaly detection: • Architecture-Specific MTL Behavior : The effective-ness of multi-task learning strategies varies significantly between transformer-based (DINOv3)[25] and CNN-based (ConvNeXt)[18] architectures, with ConvNeXt[18] generally showing better adaptability to multi-task coor-dination under our adaptive strategy. • Task Interdependence Complexity : The inconsistent performance patterns across tasks and architectures sug-gest complex task relationships that cannot be captured by simple weighting schemes. The adaptive strategy shows promise in navigating these complex interdependencies, particularly in CNN architectures. • Practical Deployment Considerations : Despite the per-formance variations, multi-task learning maintains com-pelling practical advantages. The small performance gaps in many configurations (often ¡1%) must be weighed against the significant efficiency benefits of unified mod-els for real-world automotive inspection systems. • Future Optimization Directions : The mixed results highlight the need for more sophisticated task coordina-tion mechanisms that can better account for architecture-specific characteristics and complex task relationships in automotive anomaly detection.                     
+
+> Table 2. Performance comparison on three types of tasks in the CAD 100K dataset configurations: ConvNeXt-S with base and adaptive MTL, and DINOv3-Splus with base and adaptive MTL. Results demonstrate the effectiveness of our adaptive strat-egy across different backbone architectures.
+> Backbone Method Cls. Acc (%) Det. mAP (%) Seg. mIoU (%)
+> DINOv3-Splus Base 92.98 55.20 56.84 Adaptive 89.47 59.60 57.19
+> ConvNeXt-S Base 92.10 59.10 52.20 Adaptive 90.10 60.10 52.77
+
+5.3. CAD 100K Dataset Validation 
+
+Real-world Performance Assessment. To validate the practical applicability of our approach and demonstrate the utility of the CAD 100K dataset, we conduct experiments on the real-world portion of the Car Anomaly Detection dataset. This evaluation focuses on three representative tasks: • Chassis Domain Classification: Identifying anomaly types in undercarriage components • General Domain Detection: Localizing various anomalies across vehicle surfaces • Appearance Domain Segmentation: Pixel-level anomaly segmentation on exterior surfaces As shown in Table 2, our adaptive MTL approach main-tains performance on real-world data. The performance trends mirror those observed on public benchmarks, with adaptive MTL consistently bridging the gap between single-task and naive multi-task approaches. 
+
+Dataset Quality Verification. The CAD 100K dataset demonstrates comparable task performance to public benchmarks despite the increased complexity of real-world industrial scenarios. The slight performance decrease is ex-pected given the challenging nature of real-world automo-tive anomaly detection, which includes diverse lighting con-ditions, occlusions, and manufacturing variations. The consistent performance across both public bench-marks and the CAD 100K dataset validates the quality and utility of our collected data for supporting multi-task learn-ing in automotive anomaly detection. More extensive exper-iments covering additional scenarios and domains are pro-vided in the appendix. 
+
+## 6. Discussion 
+
+Extensive empirical studies reveal that while multi-task learning presents inherent challenges in task conflict res-olution, it offers significant practical advantages in terms of model efficiency and deployment simplicity for real-world automotive manufacturing environments. 7. Conclusion 
+
+In this paper, we have introduced CAD 100K, the first com-prehensive benchmark specifically designed for car related multi-task visual anomaly detection. Through systematic integration of real-world collection, open-source transfor-mation, and synthetic generation, our dataset provides un-precedented coverage across seven vehicle domains and three fundamental tasks—classification, detection, and seg-mentation. The carefully designed domain–system–part hi-erarchy enables fine-grained analysis while supporting uni-fied evaluation across diverse automotive inspection scenar-ios. The CAD 100K dataset serves as a standardized plat-form to drive future research in several key directions: developing more sophisticated task coordination strategies that can better exploit the hierarchical structure of auto-motive inspection tasks, advancing few-shot learning tech-niques for rare anomaly types, and exploring the transfer-ability of learned representations across different vehicle domains and manufacturing stages. We believe this bench-mark will accelerate progress toward more versatile and ef-ficient visual inspection systems for the automotive indus-try. 
+
+## References 
+
+[1] Aimira Baitieva, David Hurych, Victor Besnier, and Olivier Bernard. Supervised anomaly detection for complex indus-trial images. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , pages 17754– 17762, 2024. 1 [2] Paul Bergmann, Michael Fauser, David Sattlegger, and Carsten Steger. Mvtec ad–a comprehensive real-world dataset for unsupervised anomaly detection. In CVPR , pages 9592–9600, 2019. 1 [3] Michael Abebe Berwo, Yong Fang, Asad Khan, Adnan Man-zor, and Jabar Mahmood. Vebd-hel: A noval approach to vehicle exterior body damage parts classification in intelli-gent transportation systems. Alexandria Engineering Jour-nal , 108:961–975, 2024. 4 [4] Xiangyu Cai, Ruliang Xiao, Zhixia Zeng, Ping Gong, and Youcong Ni. Itran: A novel transformer-based approach for industrial anomaly detection and localization. Engineering Applications of Artificial Intelligence , 125:106677, 2023. 3 [5] Junyang Chen, Changbo Wang, Yifan Hong, Rui Mi, Liang-Jie Zhang, Yirui Wu, Huan Wang, and Yue Zhou. A sur-vey on anomaly detection with few-shot learning. In Inter-national Conference on Cognitive Computing , pages 34–50. Springer, 2024. 3 [6] Zhao Chen, Vijay Badrinarayanan, Chen-Yu Lee, and An-drew Rabinovich. Gradnorm: Gradient normalization for adaptive loss balancing in deep multitask networks. In In-ternational conference on machine learning , pages 794–803. PMLR, 2018. 3 [7] Zhewei Dai, Shilei Zeng, Haotian Liu, Xurui Li, Feng Xue, and Yu Zhou. Seas: few-shot industrial anomaly image gen-eration with separation and sharing fine-tuning. In Proceed-ings of the IEEE/CVF International Conference on Com-puter Vision , pages 23135–23144, 2025. 5 [8] Hanqiu Deng and Xingyu Li. Anomaly detection via re-verse distillation from one-class embedding. In CVPR , pages 9737–9746, 2022. 1 [9] Zheng Fang, Xiaoyang Wang, Haocheng Li, Jiejie Liu, Qi-ugui Hu, and Jimin Xiao. Fastrecon: Few-shot indus-trial anomaly detection via fast feature reconstruction. In 
+
+Proceedings of the IEEE/CVF International Conference on Computer Vision , pages 17481–17490, 2023. 3 [10] Zi Gong, Hang Yu, Cong Liao, Bingchang Liu, Chaoyu Chen, and Jianguo Li. Coba: convergence balancer for mul-titask finetuning of large language models. arXiv preprint arXiv:2410.06741 , 2024. 6 [11] Simon Graham, Quoc Dang Vu, Mostafa Jahanifar, Shan E Ahmed Raza, Fayyaz Minhas, David Snead, and Nasir Ra-jpoot. One model is all you need: multi-task learning enables simultaneous histology image segmentation and classifica-tion. Medical Image Analysis , 83:102685, 2023. 1 [12] Md Jahid Hasan, Cong Kha Nguyen, Yee Ling Boo, Hamed Jahani, and Kok-Leong Ong. Vehicle damage detection us-ing artificial intelligence: A systematic literature review. Wi-ley Interdisciplinary Reviews: Data Mining and Knowledge Discovery , 15(2):e70027, 2025. 1 [13] Mauricio A Hern´ andez and Salvatore J Stolfo. Real-world data is dirty: Data cleansing and the merge/purge problem. 
+
+Data mining and knowledge discovery , 2(1):9–37, 1998. 3 [14] Ning Huyan, Xiangrong Zhang, Dou Quan, Jocelyn Chanus-sot, and Licheng Jiao. Aud-net: A unified deep detector for multiple hyperspectral image anomaly detection via relation and few-shot learning. IEEE Transactions on Neural Net-works and Learning Systems , 35(5):6835–6849, 2022. 3 [15] Nhan T Huynh, Nguyen ND Tran, Anh T Huynh, Van-Dung Hoang, and Hien D Nguyen. Vehide dataset: New dataset for automatic vehicle damage detection in car insurance. In 2023 15th International Conference on Knowledge and Systems Engineering (KSE) , pages 1–6. IEEE, 2023. 1 [16] Qingyun Li, Yushi Chen, Xin He, and Lingbo Huang. Co-training transformer for remote sensing image classification, segmentation, and detection. IEEE Transactions on Geo-science and Remote Sensing , 62:1–18, 2024. 3, 5 [17] Chuen-Horng Lin, Chia-Ching Yu, and Huan-Yu Chen. Augmentation dataset of a two-dimensional neural network model for use in the car parts segmentation and car classifi-cation of three dimensions. The Journal of Supercomputing ,78(17):18915–18958, 2022. 5, 7 [18] Zhuang Liu, Hanzi Mao, Chao-Yuan Wu, Christoph Feicht-enhofer, Trevor Darrell, and Saining Xie. A convnet for the 2020s. In Proceedings of the IEEE/CVF conference on com-puter vision and pattern recognition , pages 11976–11986, 2022. 6, 8 [19] Jianning Mai, Chen-Nee Chuah, Ashwin Sridharan, Tao Ye, and Hui Zang. Is sampled data sufficient for anomaly detec-tion? In Proceedings of the 6th ACM SIGCOMM conference on Internet measurement , pages 165–176, 2006. 3 [20] Dimitrios Mallios, Li Xiaofei, Niall McLaughlin, Jesus Mar-tinez Del Rincon, Clare Galbraith, and Rory Garland. Ve-hicle damage severity estimation for insurance operations using in-the-wild mobile images. IEEE Access , 11:78644– 78655, 2023. 1, 4 [21] Salima Omar, Asri Ngadi, and Hamid H Jebur. Machine learning techniques for anomaly detection: an overview. In-ternational Journal of Computer Applications , 79(2), 2013. 3[22] Maxime Oquab, Leon Bottou, Ivan Laptev, and Josef Sivic. Learning and transferring mid-level image representations using convolutional neural networks. In Proceedings of the IEEE conference on computer vision and pattern recogni-tion , pages 1717–1724, 2014. 3 [23] Jinbo Peng, Shoubin Dong, Hua Yuan, and Xiaorou Zheng. Car damage detection based on multi-view fusion and align-ment: Dataset and method. IEEE Transactions on Intelligent Transportation Systems , 2025. 1, 2 [24] Sebastian Schmidl, Phillip Wenig, and Thorsten Papenbrock. Anomaly detection in time series: a comprehensive evalu-ation. Proceedings of the VLDB Endowment , 15(9):1779– 1797, 2022. 1 [25] Oriane Sim´ eoni, Huy V Vo, Maximilian Seitzer, Federico Baldassarre, Maxime Oquab, Cijo Jose, Vasil Khalidov, Marc Szafraniec, Seungeun Yi, Micha¨ el Ramamonjisoa, et al. Dinov3. arXiv preprint arXiv:2508.10104 , 2025. 6, 7, 8 [26] Yizhi Song, Zhifei Zhang, Zhe Lin, Scott Cohen, Brian Price, Jianming Zhang, Soo Ye Kim, and Daniel Aliaga. Object-stitch: Object compositing with diffusion model. In Pro-ceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , pages 18310–18319, 2023. 5 [27] Wittawin Susutti, Siwarat Laoprom, Thanaphit Sutthipanyo, Kanok Vongsaroj, Pirun Dilokpatpongsa, and Warin Wat-tanapornprom. Real-time car part instance segmentation: the comparison of the state-of-the-art. In 2024 28th Interna-tional Computer Science and Engineering Conference (IC-SEC) , pages 1–6. IEEE, 2024. 2, 5, 7 [28] Chengjie Wang, Wenbing Zhu, Bin-Bin Gao, Zhenye Gan, Jiangning Zhang, Zhihao Gu, Shuguang Qian, Mingang Chen, and Lizhuang Ma. Real-iad: A real-world multi-view dataset for benchmarking versatile industrial anomaly detec-tion. In CVPR , pages 22883–22892, 2024. 1 [29] Xinkuang Wang, Wenjing Li, and Zhongcheng Wu. Cardd: A new dataset for vision-based car damage detection. IEEE Transactions on Intelligent Transportation Systems , 24(7): 7202–7214, 2023. 1, 2, 5, 7 [30] Shenxing Wei, Xing Wei, Zhiheng Ma, Songlin Dong, Shaochen Zhang, and Yihong Gong. Few-shot online anomaly detection and segmentation. Knowledge-Based Sys-tems , 300:112168, 2024. 3 [31] Tingyang Wei, Shibin Wang, Jinghui Zhong, Dong Liu, and Jun Zhang. A review on evolutionary multitask optimization: Trends and challenges. IEEE Transactions on Evolutionary Computation , 26(5):941–960, 2021. 3 [32] Peng Yan, Ahmed Abdulkadir, Paul-Philipp Luley, Matthias Rosenthal, Gerrit A Schatte, Benjamin F Grewe, and Thilo Stadelmann. A comprehensive survey of deep transfer learn-ing for anomaly detection in industrial time series: Methods, applications, and directions. IEEE Access , 12:3768–3789, 2024. 3 [33] Zongzhen Yang, Binhang Qi, Hailong Sun, Wenrui Long, Ruobing Zhao, and Xiang Gao. Cabs: Conflict-aware and balanced sparsification for enhancing model merging. arXiv preprint arXiv:2503.01874 , 2025. 3 [34] Hayoung Yun and Hanjoo Cho. Achievement-based training progress balancing for multi-task learning. In Proceedings of the IEEE/CVF International Conference on Computer Vi-sion , pages 16935–16944, 2023. 3 [35] Jian Zhang, Runwei Ding, Miaoju Ban, and Linhui Dai. Pku-goodsad: A supermarket goods dataset for unsupervised anomaly detection and segmentation. IEEE Robotics and Au-tomation Letters , 2024. 1 A. Ethical Considerations and Data Privacy 
+
+In accordance with the ethics guidelines, we have imple-mented comprehensive measures to protect privacy and mit-igate potential negative societal impacts throughout the cre-ation of the CAD 100K dataset. 
+
+A.1. Privacy Protection Measures 
+
+During the data collection and processing phases, we sys-tematically removed all personally identifiable information and sensitive data: • License Plates : All vehicle license plates were automat-ically detected and blurred using computer vision algo-rithms, followed by manual verification to ensure com-plete anonymization. •• Vehicle Logos and Identifiers : Manufacturer logos, ve-hicle model badges, and other identifying marks were re-moved or obscured to prevent brand identification and commercial sensitivity concerns. • Human Subjects : Any images containing human faces, body parts, or other personally identifiable human charac-teristics were either excluded from the dataset or under-went rigorous anonymization processing. • Location Context : Background elements that could re-veal specific geographical locations or private property details were carefully processed to maintain privacy. 
+
+## B. Dataset Visualization and Supplementary Experiments 
+
+This appendix provides visual documentation of the CAD 100K dataset subsets, supporting the experimental valida-tion in the main paper. Figure B1 illustrates the exterior do-main subset that simultaneously supports both detection and segmentation tasks, featuring various anomaly types with corresponding bounding boxes and segmentation masks. Figure B2 showcases the interior and general domain detec-tion subsets, highlighting diverse anomaly patterns in cabin components and cross-system defects. Figures B3 through B6 present the classification subsets across four specialized vehicle component domains: chas-sis systems (suspension, brakes, tires), engine bay com-ponents (fluids, consumables, mechanical parts), electrical systems (battery, wiring, sensors), and EV-specific compo-nents (high-voltage systems, drive motors, charging infras-tructure). These visual examples demonstrate the dataset’s comprehensive coverage of automotive anomalies across different vehicle systems and domains. The hierarchical organization and multi-task annotations visible in these figures enable the rigorous evaluation of multi-task learning approaches presented in our experimen-tal results, providing a solid foundation for advancing auto-motive visual inspection technologies. Besides, we conducted additional experiments to further analyze the multi-task learning performance across differ-ent backbone architectures and training strategies. Table ?? 
+
+provides a comprehensive comparison of computation effi-ciency and parameter utilization. heavy paint damage slight paint damage rust dent 
+
+> bbox  mask
+
+Figure B1. The Exterior Domain Subset Supporting both Detection and Segmentation in the CAD 100K Dataset. This subset contains various exterior anomalies with both bounding box and pixel-level mask annotations. wrinkle detachment peeling tear scratch deformation 
+
+Interior Domain Anomaly Detection 
+
+General Domain Object Detection 
+
+screw hole loosen screw screw 
+
+Figure B2. The Interior and General Domain Detection Subset in the CAD 100K Dataset. Examples include interior component defects and general cross-system anomalies with detection annotations. Rubber Boot Aging        
+
+> Impact Damage Rust
+> Shock Absorber Leakage Dust Cover Damage Suspension Component Damage
+> Disc Rust Worn Pad VS New Pad
+> Aging Cracking Foreign Objects Worn out
+
+System Instance 
+
+Frame 
+
+Suspension 
+
+Brake 
+
+Tire Figure B3. The Chassis Domain Classification Subset in the CAD 100K Dataset. Covering suspension, brake, and tire systems with various anomaly types. Table B1. Detection Performance Comparison Across Vehicle Domains . Models are evaluated on three vehicle domains (Interior, General, Exterior) using standard COCO metrics including AP at different IoU thresholds and AR. 
+
+Model Interior General Exterior AP AP 50 AP 75 AR AP AP 50 AP 75 AR AP AP 50 AP 75 AR DINOv3-Splus 48.0 79.9 46.7 61.0 62.4 91.2 65.88 68.9 45.1 66.9 45.2 54.5 ConvNeXt-S 46.9 76.1 46.6 61.8 64.8 92.8 72.3 72.4 51.0 72.0 54.4 57.6 
+
+Table B2. Classification Performance Across Vehicle Component Domains . Models are evaluated on four vehicle component domains using top-1 and top-5 accuracy metrics. Model Chassis Engine Electric EV-specific Acc@1 Acc@5 Acc@1 Acc@5 Acc@1 Acc@5 Acc@1 Acc@5 DINOv3-Splus 91.2 100.0 90.1 100.0 93.5 99.1 97.9 100.0 ConvNeXt-S 90.4 100.0 93.4 100.0 93.5 100.0 100.0 100.0 Camshaft Worn Cylinder Carbon Deposit 
+
+System Instance 
+
+Fluid 
+
+Consumable 
+
+Engine      
+
+> Engine Oil Leakage Coolant Leakage
+> Belt Aging Brake Fluid Deterioration Washer Fluid Low Filter Dirty
+> Worn Cylinder
+
+Figure B4. The Engine Domain Classification Subset in the CAD 100K Dataset. Featuring engine components, fluid systems, and mechanical parts. Table B3. Segmentation Performance Comparison . Models are evaluated on both car exterior anomalies segmentation and car parts segmentation tasks using mIoU, mFscore, and mPrecision metrics. Model Car Exterior Anomalies Car Parts Segmentation mIoU mFscore mPrec mRecall mIoU mFscore mPrec mRecall DINOv3-Splus 54.9 67.0 85.7 58.1 72.0 81.7 81.9 81.9 ConvNeXt-S 52.4 65.1 90.1 54.4 72.9 82.4 82.7 82.6 
+
+Table B4. Multi-task Learning Performance Comparison on Public Benchmarks . Models are evaluated across classification, detection, and segmentation tasks using single-task learning (STL), base multi-task learning (Base-MTL), and adaptive multi-task learning (Adaptive-MTL) approaches. 
+
+Model Method Cls. Acc (%) Det. mAP (%) Seg. mIoU (%) DINOv3-Splus Single 98.40 59.20 72.80 
+
+Base-MTL 98.40 58.90 70.93 Adaptive-MTL 98.40 57.80 71.88 ConvNeXt-S Single 98.80 58.80 72.80 
+
+Base-MTL 98.80 58.60 71.12 Adaptive-MTL 98.80 59.10 71.82 YOLOv11s-cls Single 97.2 - -YOLOv11s-det Single - 58.0 -ResNet-101+PSPNet Single - - 63.9 System Instance 
+
+Battery 
+
+Wiring Harness 
+
+Light 
+
+Sensor     
+
+> Terminal Corrosion Bulging
+> Plug Damage Wiring Harness Bitted Wiring Harness Broken
+> Non-Functional Light VSFunctional Light
+> Camera Broken Lidiar Brokeng Radar Broken
+
+Figure B5. The Electrical Domain Classification Subset in the CAD 100K Dataset. Including battery systems, wiring harnesses, and electronic components. Orange Harness Damage Anomalies 
+
+System Instance 
+
+High Voltage 
+
+Battery Pack 
+
+Drive Motor 
+
+Harness 
+
+and 
+
+Charging      
+
+> Battery Bulging Housing Damage Coolant Leakage
+> Charging Port Burn
+> Circuit Shot Housing Damage Part Damage Rotor Rust
+
+Figure B6. The EV-specific Domain Classification Subset in the CAD 100K Dataset. Specialized components for electric vehicles including high-voltage systems and charging infrastructure.

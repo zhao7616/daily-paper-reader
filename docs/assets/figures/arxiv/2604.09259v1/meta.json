@@ -1,0 +1,110 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.09259v1/fig-001.webp",
+      "caption": "Figure 4: SA1: Smoothed criterion functions C1(τ) and C2(τ) under varying quantile probability p ∈ {0.01, 0.10, 0.50}. Vertical dashed lines indicate the optimal τ0 for each criterion.",
+      "page": 25,
+      "index": 1,
+      "width": 817,
+      "height": 988
+    },
+    {
+      "url": "assets/figures/arxiv/2604.09259v1/fig-002.webp",
+      "caption": "Table 7: SA2: Smoothed one-variable optimal designs under Prior I for nine lower stress levels s1 ∈ {1/298, 1/303, . . . , 1/346} K−1, with p = 0.10, and n = 35.",
+      "page": 26,
+      "index": 2,
+      "width": 502,
+      "height": 411
+    },
+    {
+      "url": "assets/figures/arxiv/2604.09259v1/fig-003.webp",
+      "caption": "Table 5: Convergence diagnosis: Posterior summary statistics of model parameters.",
+      "page": 21,
+      "index": 3,
+      "width": 682,
+      "height": 500
+    },
+    {
+      "url": "assets/figures/arxiv/2604.09259v1/fig-004.webp",
+      "caption": "Figure 6: SA3: Smoothed criterion functions C1(τ) and C2(τ) under Prior choices; Prior I, Prior II and Prior III. Vertical dashed lines in red indicate the optimal τ0 for each criterion.",
+      "page": 29,
+      "index": 4,
+      "width": 817,
+      "height": 991
+    },
+    {
+      "url": "assets/figures/arxiv/2604.09259v1/fig-005.webp",
+      "caption": "Figure 3: Convergence diagnosis: Trace, density, and ACF plots.",
+      "page": 22,
+      "index": 5,
+      "width": 959,
+      "height": 1287
+    },
+    {
+      "url": "assets/figures/arxiv/2604.09259v1/fig-006.webp",
+      "caption": "Figure 8: Smoothed criterion surfaces C1(D) and C2(D) over the two-dimensional design space (x1, τ) under Prior I (tighter, top) and Prior II (wider, bottom). Each surface is shown from two viewing angles alongside a contour plot. 33",
+      "page": 33,
+      "index": 6,
+      "width": 863,
+      "height": 1311
+    },
+    {
+      "url": "assets/figures/arxiv/2604.09259v1/fig-007.webp",
+      "caption": "Figure 2: Histograms of the MLEs for the reparametrised parameters φj = (tq0,j ,−bj , βj) and selected quantiles tp(x0) at use stress s0, based on 1000 parametric bootstrap replications.",
+      "page": 19,
+      "index": 7,
+      "width": 963,
+      "height": 797
+    },
+    {
+      "url": "assets/figures/arxiv/2604.09259v1/fig-008.webp",
+      "caption": "Figure 1: EDF-based goodness-of-fit diagnostics: empirical and model-based fitted CDFs (left panel) and their pointwise CDF differences (right panel).",
+      "page": 17,
+      "index": 8,
+      "width": 930,
+      "height": 365
+    },
+    {
+      "url": "assets/figures/arxiv/2604.09259v1/fig-009.webp",
+      "caption": "Table 10: Smoothed two-variable optimal designs under Prior I, Prior II, and Prior III, with p = 0.10 and n = 35.",
+      "page": 32,
+      "index": 9,
+      "width": 668,
+      "height": 208
+    },
+    {
+      "url": "assets/figures/arxiv/2604.09259v1/fig-010.webp",
+      "caption": "Figure 5: SA2: Smoothed criterion functions C1(τ) and C2(τ) for five representative lower stress levels s1 ∈ {1/298, 1/309, 1/320, 1/333, 1/346} K−1. Vertical red dashed lines indicate the optimal τ0 for each criterion.",
+      "page": 27,
+      "index": 10,
+      "width": 672,
+      "height": 1264
+    },
+    {
+      "url": "assets/figures/arxiv/2604.09259v1/fig-011.webp",
+      "caption": "Figure 7: SA4: Smoothed criterion functions C1(τ) and C2(τ) under varying sample size n ∈ {20, 35, 50}. Vertical dashed lines in red indicate the optimal τ0 for each criterion.",
+      "page": 31,
+      "index": 11,
+      "width": 817,
+      "height": 991
+    },
+    {
+      "url": "assets/figures/arxiv/2604.09259v1/fig-012.webp",
+      "caption": "Table 4: Gamma prior hyperparameters (αij , λij) under the three prior specifications considered in this study. Prior I (tighter) is calibrated directly to the bootstrap standard errors. Prior II (wider) uses inflated standard errors (factor 1.5) with unchanged means. Prior III modifies Prior II by shifting the prior means of the acceleration parameters φ2j upward by 1.5 times their Prior I bootstrap standard errors.",
+      "page": 20,
+      "index": 12,
+      "width": 598,
+      "height": 264
+    },
+    {
+      "url": "assets/figures/arxiv/2604.09259v1/fig-013.webp",
+      "caption": "Table 1: Step-stress ALT data from Han and Kundu (2015) for the solar lighting device. Each entry is (failure time in 100 hours, cause of failure). Cause 1: capacitor failure; Cause 2: controller failure.",
+      "page": 16,
+      "index": 13,
+      "width": 244,
+      "height": 589
+    }
+  ]
+}

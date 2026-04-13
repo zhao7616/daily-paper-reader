@@ -1,0 +1,2204 @@
+Title: Joint Interference Detection and Identification via Adversarial Multi-task Learning
+
+URL Source: https://arxiv.org/pdf/2604.08607v1
+
+Published Time: Mon, 13 Apr 2026 00:10:21 GMT
+
+Number of Pages: 13
+
+Markdown Content:
+> 1
+
+# Joint Interference Detection and Identification via Adversarial Multi-task Learning 
+
+Haitao Xu , Boxiang He , and Shilian Wang 
+
+Abstract —Precise interference detection and identification are crucial for enhancing the survivability of communication systems in non-cooperative wireless environments. While deep learning (DL) has advanced this field, existing single-task learning (STL) approaches neglect inherent task correlations. Furthermore, emerging multi-task learning (MTL) methods often lack a theoretical foundation for quantifying and modeling task relationships. To bridge this gap, we establish a theoretically grounded MTL framework for joint interference detection, modulation identification, and interference identification. First, we derive an upper bound for the weighted expected loss in MTL frameworks. This bound explicitly connects MTL performance to task similarity, quantified by the Wasserstein distance and learnable task relation coefficients. Guided by this theory, we present the adversarial multi-task interference detection and identification network (AMTIDIN), which integrates adversarial training to minimize distributional discrepancies across tasks and uses adaptive coefficients to model task correlations dynamically. Crucially, we conducted a quantitative analysis of task similarity to reveal intrinsic task relationships, specifically that modulation identification and interference identification share a substantial feature overlap distinct from interference detection. Extensive comparative experiments demonstrate that AMTIDIN significantly outperforms both its task-specific STL baseline and state-of-the-art MTL baselines in robustness and generalization, particularly under challenging conditions with limited training data, short signal lengths, and low signal-to-noise ratios (SNRs). 
+
+Index Terms —Adversarial multi-task learning, anti-interference communication, interference detection and identification, task relation coefficients, Wasserstein distance. 
+
+I. I NTRODUCTION 
+
+# OWING to the inherent openness of wireless channels in non-cooperative wireless communication environments, ranging from military communication networks to unlicensed spectrum sharing scenarios, the electromagnetic spectrum is be-coming increasingly congested and contested [1]. Consequently, communication systems are highly susceptible to a diverse array of threats, including unintentional interference and malicious jamming attacks, which severely compromise the reliability and survivability of wireless links [2], [3]. To mitigate these risks, advanced anti-interference strategies, such as interference avoidance, suppression, and elimination, have been widely developed. However, the effective implementation of these countermeasures fundamentally relies on precise interference detection and identification to capture and characterize the specific interference patterns beforehand. Traditional methodologies are broadly categorized into likelihood-based (LB) and feature-based (FB) paradigms. LB 
+
+> H. Xu, B. He, and S. Wang are with the College of Electronic Science and Technology, National University of Defense Technology, Changsha 410003, P. R. China. (email: HaitaoXu1997@outlook.com; boxianghe1@bjtu.edu.cn; wangsl@nudt.edu.cn).
+
+approaches typically formulate the problem within a statistical hypothesis testing framework. For instance, Ref. [4] developed a discrimination scheme based on the generalized likelihood ratio test (GLRT) under the Neyman-Pearson criterion, using the dis-tinct spatial subspace properties of signal vectors to distinguish deception jamming from radar targets. However, these methods are often constrained by prohibitive computational complexity and the necessity for precise prior knowledge, such as chan-nel state information (CSI) or specific jamming parameters. Conversely, FB approaches rely on extracting domain-expert features, including amplitude, phase, high-order cumulants [5], cyclic spectrum [6], and time-frequency characteristics [7]. While multi-feature fusion can enhance identification accuracy [8], [9], this paradigm remains fundamentally limited by its dependence on laborious manual feature engineering, which significantly increases system complexity and restricts adaptability to dynamic environments. Deep learning (DL) has emerged as a potent tool for interference detection and identification, leveraging its ability to autonomously extract high-dimensional representations from raw data. Existing research has extensively explored DL-based single-task learning (STL) paradigms. For inter-ference detection, approaches typically employ architectures such as convolutional neural networks (CNNs), convolutional long short-term memory (ConvLSTM) networks, or object detection frameworks to identify signal presence or localize specific waveforms like frequency-hopping signals [10]–[12]. In the realm of modulation identification, methodologies have progressed from supervised models using LSTM networks [13] or hybrid architectures [14] to advanced semi-supervised and unsupervised contrastive learning paradigms designed to tackle label scarcity [15], [16]. Regarding interference identification, research has advanced from pioneering CNN-based classifiers [17] to efficient lightweight architectures [18] and sophisticated multi-domain [19] or multi-modal [20] feature fusion frameworks. Despite these achievements, treating these intrinsically coupled tasks in isolation overlooks their latent correlations. By failing to model the shared semantic informa-tion among these tasks, STL paradigms forego the potential for mutual enhancement, leading to suboptimal generalization and robustness in complex electromagnetic environments. Recognizing the limitations of STL, researchers have in-creasingly explored multi-task learning (MTL) for its potential to enhance generalization by leveraging shared information across related tasks. This paradigm has demonstrated significant potential in various wireless scenarios, including joint signal detection and modulation recognition [21], [22], open-set recognition via auxiliary tasks [23], and efficient interference identification in adversarial environments [24]. Despite these 
+
+> arXiv:2604.08607v1 [cs.LG] 8 Apr 2026 2
+
+empirical successes, existing approaches lack a rigorous theoret-ical foundation for quantifying and modeling task relationships. Consequently, the design of MTL frameworks often relies on heuristic loss weighting or implicit feature alignment, leaving the mathematical relationships among interference detection and identification tasks largely unexplained. Beyond architectural innovations, the efficacy of MTL fundamentally hinges on the rigorous quantification of task relationships to govern feature sharing. In the broader machine learning community, methodologies have evolved from heuristic loss weighting [25], [26] to sophisticated adversarial alignment employing distribution metrics such as H-divergence [27] or Wasserstein distance [28], [29]. Recent theoretical advance-ments have further derived generalization bounds based on these metrics to guide model design [30], [31]. However, in the specific realm of interference detection and identification, the explicit quantification of task similarity remains a largely under-investigated open problem, thereby limiting the development of theoretically grounded MTL frameworks. To bridge this gap, we establish a theoretically grounded MTL framework that unifies interference detection, modulation identification, and interference identification. Departing from heuristic designs, we explicitly derive an upper bound connect-ing the weighted expected loss in MTL to task similarity, which serves as the theoretical foundation for our proposed adversarial multi-task interference detection and identification network (AMTIDIN). By rigorously aligning feature distributions and modeling task correlations, AMTIDIN offers a robust solution for joint interference detection and identification. The main contributions of this work are summarized as follows:  
+
+> •
+
+We derive a theoretical upper bound for the weighted expected loss in MTL frameworks, explicitly bridging the generalization performance with task similarity through the Wasserstein distance and learnable task relation coef-ficients. This provides a rigorous justification for aligning feature distributions across tasks and offers mathematical guidance for designing effective MTL frameworks.  
+
+> •
+
+Guided by the theoretical analysis, we propose AMTIDIN for joint interference detection, modulation identification, and interference identification. This framework minimizes the derived upper bound by integrating adversarial training to reduce the Wasserstein distance between task feature distributions and employing learnable coefficients to adaptively model the underlying correlations among tasks.  
+
+> •
+
+We establish a principled approach to quantify task similarity via the Wasserstein distance and task relation coefficients. This method transcends heuristic assumptions and offers interpretable insights into the intrinsic relation-ships among the three tasks, elucidating the mechanism of performance gains in our MTL framework.  
+
+> •
+
+Extensive experiments verify that the achieved perfor-mance gains stem from our superior multi-task design rather than architectural complexity. We demonstrate that AMTIDIN significantly outperforms its task-specific STL baseline and state-of-the-art MTL baselines, exhibiting exceptional robustness and generalization, particularly under challenging conditions characterized by limited training data, short signal lengths, and low SNRs. The remainder of this paper is organized as follows: Sec-tion II presents the system model and formulates the joint interference detection and identification problem. Section III provides a comprehensive theoretical analysis, where we derive an upper bound for the MTL framework and quantify task similarity. Building on these theoretical insights, Section IV details the proposed AMTIDIN architecture and its algorithmic implementation. Section V presents the experimental setup and a comprehensive performance analysis. Finally, Section VI concludes the paper and outlines future research directions. 
+
+Notation: Throughout this paper, scalars, vectors, and matri-ces are denoted by lower-case italic letters x, bold lower-case italic letters x, and bold capital italic letters X, respectively. A random variable and its realization are respectively written as x
+
+and x. CN  μ, σ 2 denotes the probability density function of a random variable following the complex Gaussian distribution with the mean μ and the variance σ2. The operators [·]T, [·]†,log {·} , | · | , and ∥ · ∥ denote the transpose, the Hermitian, the logarithm, the modulus, and the Euclidean norm of their arguments, respectively. The symbol ∗ denotes the convolution operation. I(·) is the indicator function. [·]+ is defined as max (·, 0) . In is the n by n identity matrix, where the subscript is omitted when the matrix dimension is clear. Define 
+
+IN = {1, 2, . . . , N } as a shorthand for the index set and let 
+
+j = √−1. E{·} denotes the expectation with respect to all the randomness. ℜ {·} and ℑ {·} are the real part and the imaginary part of the complex number, respectively. II. S YSTEM MODEL AND PROBLEM FORMULATION 
+
+In this section, we first present the system model. Subse-quently, we mathematically formulate the joint interference detection, modulation identification, and interference identifi-cation within a unified MTL framework. 
+
+A. System Model 
+
+As illustrated in Fig. 1, the received complex baseband signal at the intelligent interference monitoring receiver can be modeled as 
+
+r = gsm,i + n, (1) where g ∈ C is the fading channel; n ∼ CN  0, σ 2IN
+
+
+
+represents the additive white Gaussian noise (AWGN); sm,i 
+
+is the transmitted interference signal characterized by m-th modulation type and i-th interference type. After preprocessing, the received signal matrix can be further represented as 
+
+X =
+
+rT
+
+> I
+
+rT
+
+> Q
+
+
+
+=
+
+ rI [1] rI [2] · · · rI [N ]
+
+rQ[1] rQ[2] · · · rQ[N ]
+
+
+
+, (2) where rI and rQ are the in-phase and quadrature components, respectively; N is the signal length. 
+
+B. Problem Formulation 
+
+Our goal is to design a multi-task model G for an intelligent interference monitoring receiver to achieve interference detec-tion, modulation identification, and interference identification simultaneously, which can be mathematically expressed by 
+
+G : X → { ˆyID , ˆyMI , ˆyII }, (3) 3Jamming    
+
+> Link
+> Intelligent Interference Monitoring Receiver
+> …
+> Band 1 Band 2 Band 3 Band N
+
+…
+
+…    
+
+> Modulation: BPSK
+> Modulation: QPSK
+> Modulation: AM-DSB
+> Interference
+> Link
+> Interference
+> Link
+> Interference
+> Link
+> Task Band 1 Band 2 Band 3
+
+···  Band N     
+
+> Interference Detection 
+
+···      
+
+> Modulation Identification BPSK QPSK AM-DSB
+
+···  None     
+
+> Interference Identification DMI DMI AMI
+
+···  NNI 
+
+> Results of Joint Interference
+> Detection and Identification
+> Interference Sources
+> Digital Modulation Interference (DMI)
+> Digital Modulation Interference (DMI)
+> Analog Modulation Interference (AMI)
+> Unmodulated
+> Narrowband Noise Interference (NNI)
+
+Fig. 1. System model for joint interference detection and identification within a non-cooperative electromagnetic spec-trum environment. The intelligent interference monitoring receiver monitors a spectrum environment containing diverse interference and jamming links. The receiver operates during a spectrum monitoring phase, such as a collaborative quiet period or an unoccupied frequency band, where legitimate communication is absent. where ˆyID ∈ { 1, 2} is the predicted label indicating the presence or absence of interference; ˆyMI ∈ I M denotes the predicted modulation type of the interference signal; ˆyII ∈ I I is the predicted interference type. To obtain the optimal model G∗, the intuitive approach is to maximize the joint posterior probability of the corresponding labels given the input X, which can be formulated as 
+
+G∗ = arg max  
+
+> G
+
+P  yID , y MI , y II |X; G , (4) where yID , yMI , and yII are the corresponding ground-truth labels for each task. However, because of the complex relationships among the tasks and the high dimensionality of the input interference sig-nal matrix X, directly modeling the joint posterior distribution 
+
+P (yID , y MI , y II |X; G) is computationally intractable. To address this, we use an MTL framework to tackle the optimization problem (4) . The core strategy is to reformulate problem (4) into finding the optimal set of hypotheses {h∗
+
+> ID
+
+, h ∗
+
+> MI
+
+, h ∗
+
+> II
+
+} ⊂ H 
+
+within the MTL framework, where H is the hypothesis space. To this end, we minimize the weighted expected loss across all tasks, which is mathematically expressed as 
+
+G∗ = {h∗
+
+> ID
+
+, h ∗
+
+> MI
+
+, h ∗
+
+> II
+
+}
+
+= arg min 
+
+> {hID ,h MI ,h II }⊂H
+
+λID LID (hID )+ λMI LMI (hMI ) + λII LII (hII ) , (5) where λID , λMI , and λII are the task-specific weights indicating the importance of each task in the overall learning objective. Here, the expected loss for interference detection is defined as 
+
+LID (hID ) = E(X,y ID )∼D ID 
+
+l  hID (X) , y ID  , (6) where  X, y ID  is the input-output pair sampled from the underlying distribution DID of interference detection task; l is the loss function. Modulation identification and interference identification can also be defined similarly, but for brevity, we omit the details here. Classical MTL approaches typically approximate the opti-mization problem (5) by minimizing the weighted empirical loss over the training dataset. However, this approach leaves the mathematical relationships among tasks largely unexplained. To solve this, we establish a rigorous theoretical framework that explicitly quantifies and models task relationships to enhance MTL performance. III. T HEORETICAL ANALYSIS 
+
+In this section, we first introduce the Wasserstein-1 distance and the task relation coefficients as metrics to quantify task similarity. We next derive an upper bound for the weighted expected loss across tasks, providing a theoretical foundation for our adversarial MTL framework. 
+
+A. Metrics for Task Similarity 
+
+To measure task similarity from a distributional perspective, we use the Wasserstein-1 distance [29], [32], defined as 
+
+W1
+
+ Dt, Di = sup   
+
+> f:∥f∥Lip ≤1
+
+EXt∼D t f  Xt−EXi∼D i f  Xi , (7) where ∥f ∥Lip = sup Xt̸ =Xi 
+
+> |f
+
+(Xt)−f (Xi)|∥Xt−Xi∥2 ≤ 1 means f is a 1-Lipschitz function; Xt and Xi are samples drawn from the underlying distributions Dt and Di of tasks t and i, respectively. From the perspective of task relationships, we also introduce the learnable task relation coefficients to further quantify task similarity [25]. For each task t, we define a task relation coefficient vector αt ∈ ∆T , where ∆T is the T -dimensional probability simplex. Each element αt,i in αt represents the contribution of task i to task t, with larger values indicating a stronger relationship between the two tasks. 
+
+B. Upper Bound for Weighted Expected Loss 
+
+In this subsection, we derive an upper bound for the weighted expected loss across tasks in the MTL framework using the Wasserstein distance and task relation coefficients. 
+
+Theorem 1: For any set of task relation coefficient vectors 
+
+{αt ∈ ∆T }Tt=1 and any confidence parameter δ ∈ (0 , 1) , with probability at least 1 − δ, the upper bound for the weighted expected loss can be given by 
+
+> T
+
+X
+
+> t=1
+
+λtLt(ht)
+
+| {z }
+
+> Weighted expected loss
+
+≤
+
+> T
+
+X
+
+> t=1
+
+λt ˆLαt (ht)
+
+| {z }
+
+> Weighted empirical loss
+
++ C1
+
+> T
+
+X
+
+> t=1
+
+λt
+
+vuut TX
+
+> i=1
+
+α2
+
+> t,i
+
+βi
+
+| {z }
+
+> Coefficient Regularization
+
++ 2 K
+
+> T
+
+X
+
+> t=1
+
+λtTX
+
+> i=1
+
+αt,i W1
+
+ ˆDi, ˆDt| {z }
+
+> Weighted empirical Wasserstein distance
+
++ C2 +
+
+> T
+
+X
+
+> t=1
+
+λtTX
+
+> i=1
+
+αt,i ξi,t 
+
+| {z }
+
+> Complexity & optimal expected loss
+
+, (8) 4
+
+where 
+
+C1 = 2 
+
+s
+
+2  d log   2em d
+
+ + log   16 Tδ
+
+ 
+
+m ; (9) 
+
+C2 = 2 K
+
+> T
+
+X
+
+> t=1
+
+λtTX
+
+> i=1
+
+αt,i γi,t , (10) with 
+
+γi,t = Aim−1/s i + Atm−1/s t
+
++
+
+s
+
+12 log 
+
+ 4T 2
+
+δ
+
+ r 1
+
+mi
+
++
+
+r 1
+
+mt
+
+
+
+; (11) 
+
+ˆLαt (ht) is the empirical loss for task t weighted by the task relation coefficients αt, which is defined as 
+
+ˆLαt (ht) = 
+
+> T
+
+X
+
+> i=1
+
+αt,i ˆLi(ht), (12) with 
+
+ˆLi(ht) = 1
+
+mimiX
+
+> j=1
+
+l  ht
+
+ Xij
+
+ , y ij
+
+ (13) being the empirical loss for task i with respect to hypothesis 
+
+ht. Here, H is the hypothesis space of functions mapping the input space X to [0 , 1] with a finite pseudo-dimension 
+
+d; {ht ∈ H} Tt=1 are at most K-Lipschitz continuous; λt ≥
+
+0 denotes the task-specific weight for task t, satisfying PTt=1 λt = 1 ; ˆDt is the empirical distribution sampled from the underlying distribution Dt; βi = mi 
+
+> m
+
+is the sample proportion for task i; m = PTi=1 mi is the total number of samples across all tasks; s, At, and Ai are the specified constants; 
+
+ξt,i = inf h∈H [Lt (h) + Li (h)] is the joint expected minimal loss for tasks t and i.
+
+Proof: See Appendix A. 
+
+Remark 1: The weighted empirical loss and the weighted empirical Wasserstein distance terms jointly control the task relation coefficients {αt}Tt=1 . Specifically, when the empirical loss for task i is small with respect to hypothesis ht, the task relation coefficient αt,i tends to be larger, indicating a stronger relationship between task t and task i. Similarly, when the Wasserstein distance between task i and task t is small, the task relation coefficient αt,i also tends to be larger, indicating a closer similarity between the two tasks. Therefore, as illustrated in Fig. 2, the task similarity of tasks t and i can be quantitatively measured by the Wasserstein distance W1
+
+ ˆDi, ˆDt
+
+
+
+and the task relation coefficient αt,i .IV. P ROPOSED AMTIDIN FOR JOINT INTERFERENCE 
+
+DETECTION AND IDENTIFICATION 
+
+In this section, we first transform the original optimization problem into minimizing the derived upper bound of the weighted expected loss. We next present the overall architecture design for AMTIDIN and detail its algorithmic implementation. Modulation Identification Interference Detection   
+
+> Interference Identification
+> Band_1 Band_2
+> …
+> Similarity
+> 𝛼𝛼 ID ,ID 𝛼𝛼 MI ,MI
+> 𝛼𝛼 II ,II
+
+𝛼𝛼 ID ,MI 
+
+𝛼𝛼 ID ,II 
+
+𝛼𝛼 MI ,ID 
+
+𝛼𝛼 MI ,II 
+
+𝛼𝛼 II ,ID  𝛼𝛼 II ,MI   
+
+> 𝑊𝑊 1�𝒟𝒟 ID ,�𝒟𝒟 MI
+
+Fig. 2. Quantitative measurement of task similarity using the Wasserstein distance and task relation coefficients. 
+
+A. Problem Transformation 
+
+Theorem 1 shows that the weighted expected loss in (5) is upper-bounded by the sum of the weighted empirical loss, the weighted empirical Wasserstein distance, and the coefficient regularization term, as well as the constant complexity and optimal expected loss terms. 1 Consequently, we transform the original optimization problem (5) into minimizing the upper bound derived in (8), which is mathematically expressed by 
+
+{h∗
+
+> ID
+
+, h ∗
+
+> MI
+
+, h ∗
+
+> II
+
+} = arg min 
+
+> {hID ,h MI ,h II }⊂H
+> 3
+
+X
+
+> t=1
+
+λt ˆLαt (ht)+ 2 K
+
+> 3
+
+X
+
+> t=1
+
+λt
+
+> 3
+
+X
+
+> i=1
+
+αt,i W1
+
+ ˆDi, ˆDt
+
++ C13X
+
+> t=1
+
+λt
+
+vuut 3X
+
+> i=1
+
+α2
+
+> t,i
+
+βi
+
+. (14) Problem (14) reformulates the original objective into a tractable empirical loss minimization problem that explicitly accounts for task correlations. 
+
+B. Overall Architecture Design for AMTIDIN 
+
+To solve problem (14) , we design AMTIDIN, which pa-rameterizes the task hypotheses {hID , h MI , h II } and the adver-sarial discrimination networks via the unified parameter set 
+
+θ = {θf , θh, θc, θd}. As illustrated in Fig. 3, the architecture of AMTIDIN is structured into four primary modules: the parameter-shared feature extraction module with θf , the task-specific hypothesis module with θh, the classification module with θc, and the adversarial discrimination module with θd.The functionality of each module is summarized as follows:          
+
+> 1The complexity and optimal loss terms quantify the model’s intrinsic capacity and the fundamental difficulty of jointly learning tasks, respectively.
+> C2represents the complexity term determined by the capacity and structure of the chosen hypothesis space H. Since we consider the hypothesis family to be fixed, this term remains constant. 1
+> T
+> PTt=1
+> PTi=1 αt,i ξt,i represents the weighted average of the joint minimal expected loss across tasks, which quantifies the fundamental capability of the model architecture to learn and represent pairs of tasks jointly. We assume that ξt,i is much smaller than the empirical term, indicating that the hypothesis family Hcan learn the multiple tasks with a small expected loss. To this end, we treat the two terms as constants during optimization. 5
+
+Input 
+
+# （
+
+𝑿𝑿 ID 
+
+Parameter-Shared 
+
+Feature Extraction Module 
+
+𝜽𝜽 𝑓𝑓 
+
+Adversarial 
+
+Discrimination Module 
+
+Task-Specific 
+
+Hypothesis Module 
+
+𝜽𝜽 ℎID 
+
+𝜽𝜽 ℎMI 
+
+𝜽𝜽 ℎII 
+
+𝜽𝜽 𝑐𝑐 ID ,ID 
+
+𝜽𝜽 𝑐𝑐 MI ,ID 
+
+𝜽𝜽 𝑐𝑐 II ,ID 
+
+𝜽𝜽 𝑐𝑐 ID ,MI 
+
+𝜽𝜽 𝑐𝑐 MI ,MI 
+
+𝜽𝜽 𝑐𝑐 II ,MI 
+
+Output Classification Module 
+
+𝛼𝛼 MI ,MI 
+
+𝑿𝑿 MI 
+
+𝑿𝑿 II 
+
+𝜽𝜽 𝑐𝑐 ID ,II 
+
+𝜽𝜽 𝑐𝑐 MI ,II 
+
+𝜽𝜽 𝑐𝑐 II ,II 
+
+> Training
+> &
+> Inference
+
+𝒇𝒇 𝐈𝐈𝐈𝐈  𝒇𝒇 𝐌𝐌 𝐈𝐈  𝒇𝒇 𝐈𝐈𝐈𝐈  �𝒚𝒚 ID 
+
+�𝒚𝒚 MI 
+
+�𝒚𝒚 II 
+
+�𝒚𝒚 ID 
+
+�𝒚𝒚 MI 
+
+�𝒚𝒚 II 
+
+�𝒚𝒚 ID 
+
+�𝒚𝒚 MI 
+
+�𝒚𝒚 II 𝜽𝜽 𝑑𝑑 MI ,II 
+
+𝜽𝜽 𝑑𝑑 ID ,II 
+
+𝜽𝜽 𝑑𝑑 ID ,MI 
+
+> Adversarial Training
+
+Wasserstein 
+
+Distance 
+
+min 𝜽𝜽 𝑓𝑓  max 𝜽𝜽 𝒅𝒅         
+
+> Training
+> Only
+> 𝛼𝛼 ID ,MI +𝛼𝛼 MI ,ID
+> 𝑊𝑊 1�𝒟𝒟 ID ,�𝒟𝒟 MI
+> 𝑊𝑊 1�𝒟𝒟 ID ,�𝒟𝒟 II
+> 𝑊𝑊 1�𝒟𝒟 MI ,�𝒟𝒟 II
+> GRL
+> GRL
+> GRL
+
+̂ℒ 𝑑𝑑 ID ,MI ̂ℒ 𝑑𝑑 ID ,II ̂ℒ 𝑑𝑑 MI ,II     
+
+> 𝛼𝛼 ID ,II +𝛼𝛼 II ,ID
+> 𝛼𝛼 MI ,II +𝛼𝛼 II ,MI
+
+𝛼𝛼 MI ,ID 
+
+𝛼𝛼 MI ,II 
+
+𝛼𝛼 ID ,ID 
+
+𝛼𝛼 ID ,MR 
+
+𝛼𝛼 ID ,II 
+
+𝛼𝛼 II ,ID 
+
+𝛼𝛼 II ,MR 
+
+𝛼𝛼 II ,II 
+
+> Interference Detection
+> Modulation Identification
+> Interference Identification
+
+Fig. 3. Overall architecture and data flow of the proposed AMTIDIN. The adversarial discrimination module (yellow block) aims to maximize the empirical Wasserstein distance to distinguish task features, while the feature extraction module (blue block) and task-specific hypothesis module (green block) work together to minimize the empirical Wasserstein distance to align task features. The black arrows denote the data flow operative during both training and inference phases, while the red arrows represent the data flow active exclusively during the training phase. 1) Parameter-Shared Feature Extraction Module  θf
+
+:This module is the foundational feature encoder, extract-ing high-dimensional representations from the received interference signal. Although the inputs for the three tasks are processed through independent parallel streams, they pass through the shared network layers parameterized by θf . This design enforces the learning of a universal feature space without merging the inputs. 2) Task-Specific Hypothesis Module  θth, t ∈ I 3
+
+: This module consists of three parallel sub-networks, each modeling a specific task. During training, each hypothesis network takes all three feature representations as input and produces a task-specific output representation, which is then fed into the corresponding classification heads. This design allows each hypothesis to learn from infor-mation transferred from other tasks while maintaining its own specialization. 3) Classification Module  θt,i c , t, i ∈ I 3
+
+: This module is the final decision-making component of the architecture, comprising a total of nine classification heads, with three heads attached to each hypothesis network. During training, we use all nine heads to compute losses and update the task relation coefficients. Note that, during inference, the final prediction for task t is obtained exclusively from the classification head θt,t c associated with its own hypothesis network θth.4) Adversarial Discrimination Module  θt,i d , t, i ∈ I 3,
+
+t < i : This module consists of three discriminators constrained by the 1-Lipschitz condition, each assigned to a unique pair of tasks. These discriminators compete with the feature extraction module in a min-max game during training. Specifically, while the discriminators aim to maximize the estimated Wasserstein distance to distinguish task features, the feature extractor aims to minimize this distance. This adversarial competition en-forces the learning of robust and invariant representations across tasks. 
+
+C. Algorithm Implementation for AMTIDIN 
+
+Fig. 4 illustrates the overall algorithm implementation process of AMTIDIN. To effectively minimize the empirical Wasserstein distance term, we use an adversarial learning strategy. For each task pair (t, i ), we define an adversarial discrimination network dt,i with parameters θt,i d to estimate the Wasserstein distance between the feature distributions of tasks t and i. Following the adversarial learning paradigm [33], the minimization of the Wasserstein distance can be reformulated as a min-max optimization problem. To this end, we reformulate the optimization problem (14) as 
+
+min  
+
+> θf,θh,θc,{αt}3
+> t=1
+
+max 
+
+> θd
+> 3
+
+X
+
+> t=1
+
+λt ˆLαt
+
+ θf , θth, θtc
+
+
+
++ ρ
+
+> 3
+
+X
+
+> t=1
+
+λt
+
+> 3
+
+X
+
+> i=1
+
+αt,i ˆLt,i d
+
+
+
+θf , θt,i d
+
+
+
++ C13X
+
+> t=1
+
+λt
+
+vuut 3X
+
+> i=1
+
+α2
+
+> t,i
+
+βi
+
+, (15) where ρ is a trade-off parameter; ˆLt,i d
+
+
+
+θf , θt,i d
+
+
+
+is the adver-sarial loss estimating the Wasserstein-1 distance between the feature distributions of tasks t and i, following the Kantorovich-Rubinstein duality form in (7), defined as 
+
+ˆLt,i d
+
+
+
+θf , θt,i d
+
+
+
+= EXt∼ ˆDt dt,i 
+
+Xt; θf , θt,i d
+
+
+
+− EXi∼ ˆDi dt,i 
+
+Xi; θf , θt,i d
+
+
+
+, (16) where dt,i 
+
+
+
+X; θf , θt,i d
+
+
+
+is the output of the adversarial discrim-ination network for task pair (t, i ). To satisfy the 1-Lipschitz constraint required for Wasserstein distance estimation, we 6Original Optimization  
+
+> Problem (14)
+> Adversarial Learning Strategy
+> Min-Max Optimization
+> Problem (15)
+> Spectral Normalization (SN)
+> Satisfy 1-Lipschitz Constraint
+> Gradient Reversal Layer
+> (GRL)
+> Enable End-to-End Training Minimize the Empirical
+> Wasserstein Distance
+> Transform
+> Network Parameter Optimization
+> Problem (18)
+> Task Relation Coefficient Optimization
+> Problem (19)
+> Solve
+> Alternating Optimization Min-Max to Minimization
+
+Fig. 4. Algorithm implementation of AMTIDIN. We reformu-late the original problem (14) into a min-max optimization problem 15, and solve it by alternately updating the network parameters and the task relation coefficients. apply spectral normalization (SN) [34] to the weights of each adversarial discrimination network dt,i , which offers computational efficiency and training stability compared to alternatives like weight clipping [32] or gradient penalty [35]. We next propose an iterative algorithm to solve problem (15) by alternately optimizing the network parameters θ and the task relation coefficients {αt}3
+
+> t=1
+
+.
+
+1) Optimizing Network Parameters with Fixed Task Relation Coefficients: Given fixed task relation coefficients {α(ℓ−1)  
+
+> t
+
+}3
+
+> t=1
+
+,we update the network parameters θ by solving the following min-max problem: 
+
+{θ(ℓ) 
+
+> f
+
+, θ(ℓ) 
+
+> h
+
+, θ(ℓ) 
+
+> c
+
+, θ(ℓ) 
+
+> d
+
+}
+
+= arg min  
+
+> θf,θh,θc
+
+max 
+
+> θd
+> 3
+
+X
+
+> t=1
+
+λt ˆLα(ℓ−1) 
+
+> t
+
+ θf , θth, θtc
+
+
+
++ ρ
+
+> 3
+
+X
+
+> t=1
+
+λt
+
+> 3
+
+X
+
+> i=1
+
+α(ℓ−1)  
+
+> t,i
+
+ˆLt,i d
+
+
+
+θf , θt,i d
+
+
+
+. (17) As illustrated in Fig. 5, to facilitate stable end-to-end training, we employ the gradient reversal layer (GRL) [33], which trans-forms the min-max problem (17) into a unified minimization problem. Specifically, During forward propagation, the GRL acts as an identity transform, while during backpropagation, it reverses the gradient sign. Thus, problem (17) can be reformulated as 
+
+{θ(ℓ) 
+
+> f
+
+, θ(ℓ) 
+
+> h
+
+, θ(ℓ) 
+
+> c
+
+, θ(ℓ) 
+
+> d
+
+}
+
+= arg min  
+
+> θf,θh,θc,θd
+> 3
+
+X
+
+> t=1
+
+λt ˆLα(ℓ−1) 
+
+> t
+
+ θf , θth, θtc
+
+
+
++ ρ
+
+> 3
+
+X
+
+> t=1
+
+λt
+
+> 3
+
+X
+
+> i=1
+
+α(ℓ−1)  
+
+> t,i
+
+ˆLt,i dGRL 
+
+
+
+θf , θt,i d
+
+
+
+, (18) where ˆLt,i dGRL 
+
+
+
+θf , θt,i d
+
+
+
+is the adversarial loss computed through the GRL. We can solve problem (18) using mini-batch stochastic gradient descent with the Adam optimizer. 
+
+2) Optimizing Task Relation Coefficients with Fixed Network Parameters: Given fixed network parameters θ(ℓ), we update the task relation coefficients {αt}3 
+
+> t=1
+
+by solving the following Adversarial Discrimination Module              
+
+> 𝜽𝜽 𝑑𝑑 ID ,MI ̂ℒ𝑑𝑑 ID ,MI
+> Gradient Reversal
+> 𝒇𝒇 ID
+> 𝒇𝒇 MI ̂ℒ𝑑𝑑 ID ,MI =𝑑𝑑 ID ,MI 𝒇𝒇 ID ,𝒇𝒇 MI ;𝜽𝜽 𝑑𝑑 ID ,MI
+
+（  
+
+> Parameter-Shared
+> Feature Extraction Module
+> 𝜽𝜽 𝑓𝑓
+> G
+> R
+> L
+> −𝛿𝛿 𝜕𝜕 ̂ℒ𝑑𝑑 ID ,MI
+> 𝜕𝜕𝜽𝜽 𝑑𝑑 ID ,MI
+
+Fig. 5. Gradient Reversal Layer (GRL) for adversarial learning. The red dashed lines represent the gradient backpropagation flow for the adversarial loss. 
+
+Algorithm 1 Training Algorithm of AMTIDIN 
+
+Input: 
+
+Training dataset S = {(Xm, y 1
+
+> m
+
+, y 2
+
+> m
+
+, y 3
+
+> m
+
+)}Mm=1 ;Task weights {λt}3
+
+> t=1
+
+; Trade-off parameter ρ;Max epochs E; Batch size B.
+
+Output: 
+
+Network parameters θ = {θf , θh, θc, θd};Task relation coefficients {αt}3 
+
+> t=1
+
+⊂ ∆3.
+
+1: Initialize θ randomly and αt as one-hot vectors; 
+
+2: for epoch from 1 to E do 
+
+3: for each mini-batch B ⊂ S of size B do 
+
+4: Update θ via solving (18) using Adam optimizer; 
+
+5: end for 
+
+6: for each task t ∈ I 3 do 
+
+7: Update αt via solving (19) using CVXPY .
+
+8: end for 
+
+9: end for 
+
+convex optimization problem: 
+
+{α(ℓ) 
+
+> t
+
+}3 
+
+> t=1
+
+= arg min 
+
+> {αt}3
+> t=1
+> 3
+
+X
+
+> t=1
+
+λt ˆLαt
+
+
+
+θ(ℓ) 
+
+> f
+
+, θt(ℓ) 
+
+> h
+
+, θt(ℓ)
+
+> c
+
+
+
++ ρ
+
+> 3
+
+X
+
+> t=1
+
+λt
+
+> 3
+
+X
+
+> i=1
+
+αt,i ˆLt,i d
+
+
+
+θ(ℓ) 
+
+> f
+
+, θt,i (ℓ)
+
+> d
+
+
+
++ C13X
+
+> t=1
+
+λt
+
+vuut 3X
+
+> i=1
+
+α2
+
+> t,i
+
+βi
+
+. (19) Problem (19) is solved using the CVXPY library [36]. Upon completing E iterations of alternating optimization, we can obtain the optimized network parameters θ∗ = θ(E) and task relation coefficients {α∗ 
+
+> t
+
+}3 
+
+> t=1
+
+= {α(E) 
+
+> t
+
+}3
+
+> t=1
+
+, and estimate the empirical Wasserstein-1 distance between tasks t and i using the trained adversarial discrimination network as 
+
+W1
+
+ ˆDi, ˆDt
+
+= ˆLt,i d
+
+
+
+θ(E) 
+
+> f
+
+, θt,i (E)
+
+> d
+
+
+
+= − ˆLt,i dGRL 
+
+
+
+θ(E) 
+
+> f
+
+, θt,i (E)
+
+> d
+
+
+
+. (20) The estimation of the Wasserstein distance in (20) serves as a quantitative metric for task similarity, offering interpretable insights into the intrinsic correlations among the tasks. 2 The training algorithm of AMTIDIN is summarized in Algorithm 1. 
+
+> 2
+
+Note that the Wasserstein distance is estimated by maximizing the adversarial loss ˆLt,i d in (17) . The GRL reformulates this as minimizing ˆLt,i dGRL 
+
+in (18) to facilitate standard backpropagation. Therefore, the estimated distance equals the negative of the empirical GRL-based adversarial loss. 7Sample Size  Sample Length  Modulation Type  Interference Type                        
+
+> {100, 200, 400,
+> 600, 800} {256, 512, 1024 }
+> Digital: {BPSK, QPSK, 8PSK, PAM4,
+> 16QAM , 64 QAM , GFSK, CPFSK}
+> Analog: {AM -SSB, AM-DSB ,NAM , FM, PM}
+> Unmodulated: {CWI, NNI, MTI, LFMI}
+> Modulated: {AMI, DMI}
+> GNU Radio Signal Generation Module
+> (Digital/Analog Modulation)
+> Python Control & Processing Module
+> (Master Control, Channel Simulation, Interference Generation)
+> Instantiate GR
+> Top Block
+> Source Block
+> (Digital/Analog Source)
+> Modulator Block
+> (Select: BPSK, QPSK, etc.)
+> Thick Green:
+> Run Flowgraph &
+> Extract Data
+> Begin
+> Loop: SNR
+> Loop: Interference Type
+> Modulated
+> Python Interference Generator Loop: Modulation Type
+> Frequency Shifting/Mixing (Carrier/Center Frequency: 15 MHz)
+> Data Slicing Apply Fading
+> Channel
+> Inject AWGN
+> Noise
+> Signal
+> Normalization
+> Append to Dictionary
+> {Key: (Modulation , Interference, SNR)}
+> GR Flowgraph Execution
+> End
+> Next Modulation
+> Next Interference
+> Next SNR
+> Channel Effects & Data Augmentation Pipeline
+> GNU Radio
+> (C++/Python Bindings):
+> Used for generating high -
+> fidelity modulated signals.
+> Python (NumPy/SciPy):
+> Used for orchestrating the
+> data generation pipeline.
+> data flow
+> control /logic flow
+> cross -module control
+> iteration loop
+> Sink Block
+> (Collect Complex
+> Baseband I/Q Signal)
+> Legend
+> Interference
+> visualization
+> Sample Rate Symbol Rate Environment Parameter
+> 64 MHz 2 MHz SNR Range: [-20, 20] dB (1 dB step)
+> Channels Models: AWGN, Rayleigh, Rician (varying K factor)
+> Control
+> No Yes
+> (Thick Green )
+> (Thin Blue )
+> (Dashed Red )
+> (Dashed Black )
+> Control
+
+Fig. 6. Overview of the dataset generation framework. The framework illustrates the hybrid pipeline where GNU Radio handles modulated waveform synthesis while Python manages interference injection and channel simulation. V. E XPERIMENTAL RESULTS 
+
+In this section, we provide a comprehensive evaluation of the proposed AMTIDIN. 
+
+A. Experimental Setup 1) Dataset Generation: As illustrated in Fig. 6, we con-structed a synthetic multi-task dataset using a hybrid generation framework. The top panel of Fig. 6 details the specific parameter configurations. In this system, Python scripts function as both the master controller and the generator for unmod-ulated interference, while the GNU Radio software-defined radio (SDR) platform is used for high-fidelity modulated waveform synthesis. For modulation identification, we adopted the methodology from the RadioML 2016.10a dataset [37], extending the original set to include noise amplitude modulation (NAM) and phase modulation (PM). Regarding interference identification, because of the limited availability of open-source datasets, we synthesized six common interference types based on [20]: continuous wave interference (CWI), narrowband noise interference (NNI), multi-tone interference (MTI), linear frequency modulation interference (LFMI), digital modulation interference (DMI), and analog modulation interference (AMI). To rigorously evaluate model robustness, three channel models (AWGN, Rayleigh, and Rician) were employed in equal proportions for each SNR level. For the interference detection task, a balanced dataset was constructed by using the previously generated interference mixture samples as the positive class, supplemented by an equal number of pure Gaussian noise samples as the negative class. Notably, the dataset supports diverse configurations of sample size, signal length, and SNR range to accommodate various experimental requirements. Furthermore, each sample is annotated with multiple labels (modulation, interference, SNR, and presence) to facilitate joint interference detection and identification tasks. 
+
+2) Implementation Details: The proposed AMTIDIN was implemented using Python 3.11 and PyTorch 2.5.1. All exper-iments were conducted on a high-performance workstation equipped with an Intel Core i9-13900HX CPU, 16 GB RAM, and an NVIDIA GeForce RTX 4060 GPU (8 GB VRAM). The detailed network architecture is summarized in Table I. During the training phase, the Adam optimizer was employed with a dynamic learning rate adjustment strategy via the ReduceLROnPlateau scheduler. Specifically, the initial learning rate was set to 0.001, with a decay factor of 0.1 and a patience of 8 epochs, down to a minimum of 
+
+1.0 × 10 −7. The batch size and maximum training epochs were configured as B = 256 and E = 100 , respectively. Regarding the optimization objective, task weights were assigned as 
+
+λID = 0.05 , λMI = 0.85 , and λII = 0.15 to prioritize modulation identification, while the trade-off parameter ρ was fixed at 1. Finally, the dataset was partitioned into training, validation, and test sets with a split of 60%, 20%, and 20%. 
+
+3) Evaluation Metric: To quantitatively evaluate the pro-posed method, we adopt classification accuracy as the primary metric. For a specific task t, Accuracy t measures the percentage of correctly classified samples relative to the total test set size 
+
+Mtest , formulated as Accuracy t = 1
+
+Mtest 
+
+> Mtest
+
+X
+
+> j=1
+
+I  ˆytj = ytj
+
+ × 100% , (21) 8
+
+TABLE I. Detailed Architecture of the Proposed AMTIDIN                                                                                                                                                   
+
+> Module Layer Parameters Output
+> Parameter-Shared Feature Extraction  θf
+> 
+> Input {XID ,XMI ,XII }(3 ,2, N )
+> Conv1D-1 2→32 , k = 3 , s = 1 , p = 1 (3 ,32 , N )
+> BatchNorm features = 32 (3 ,32 , N )
+> GELU –(32 , N )
+> Conv1D-2 32 →64 , k = 5 , s = 1 , p = 2 (3 ,64 , N )
+> BatchNorm features = 64 (3 ,64 , N )
+> GELU –(3 ,64 , N )
+> Conv1D-3 64 →128 , k = 7 , s = 1 , p = 3 (3 ,128 , N )
+> BatchNorm features = 128 (3 ,128 , N )
+> GELU –(3 ,128 , N )
+> AvgPool out size = 1 (3 ,128)
+> Hypothesis  θth
+> 
+> Input {fID ,fMI ,fII }(3 ,128)
+> Residual 3×(128 →256) , drop = 0 .1(3 ,256)
+> Linear-1 3×(256 →128) (3 ,128)
+> GELU –(3 ,128)
+> Linear-2 3×(128 →64) (3 ,64)
+> GELU –(3 ,64)
+> Classification  θt,i c
+> Input Parallel hypothesis out (3 ,64)
+> Linear 3× 3×64 → { ˆyID ,ˆyMI ,ˆyII }3×{ ˆyID ,ˆyMI ,ˆyII }
+> Softmax –3×{ ˆyID ,ˆyMI ,ˆyII }
+> Adversarial Discrimination
+>  θt,i d,t < i 
+> Input {ft,fi}(2 ,128)
+> GRL Gradient Reversal (2 ,128)
+> SN Linear-1 2×(128 →64) (2 ,64)
+> ELU –(2 ,64)
+> SN Linear-2 2×(64 →1) (2 ,1)
+> Sigmoid –(2 ,1) ID MI II
+> Task
+> ID MI II
+> Task
+> 0.00 7.77 7.05
+> 7.77 0.00 4.61
+> 7.05 4.61 0.00
+> 0
+> 2
+> 4
+> 6
+
+(a) SNR = -5 dB ID MI II        
+
+> Task
+> ID MI II
+> Task
+> 0.00 8.11 7.14
+> 8.11 0.00 4.07
+> 7.14 4.07 0.00
+> 0.0
+> 2.5
+> 5.0
+> 7.5
+
+(b) SNR = 5 dB ID MI II        
+
+> Task
+> ID MI II
+> Task
+> 0.00 6.69 6.09
+> 6.69 0.00 3.38
+> 6.09 3.38 0.00
+> 0
+> 2
+> 4
+> 6
+
+(c) SNR = 15 dB 
+
+Fig. 7. Wasserstein distance matrices before sigmoid transfor-mation. (a) SNR = -5 dB. (b) SNR = 5 dB. (c) SNR = 15 dB. ID MI II       
+
+> Task
+> ID MI II
+> Task
+> 0.00 0.95 0.93
+> 0.95 0.00 0.74
+> 0.93 0.74 0.00
+> 0.00
+> 0.25
+> 0.50
+> 0.75
+
+(a) SNR = -5 dB ID MI II        
+
+> Task
+> ID MI II
+> Task
+> 0.00 0.96 0.94
+> 0.96 0.00 0.65
+> 0.94 0.65 0.00
+> 0.00
+> 0.25
+> 0.50
+> 0.75
+
+(b) SNR = 5 dB ID MI II        
+
+> Task
+> ID MI II
+> Task
+> 0.00 0.92 0.91
+> 0.92 0.00 0.62
+> 0.91 0.62 0.00
+> 0.00
+> 0.25
+> 0.50
+> 0.75
+
+(c) SNR = 15 dB 
+
+Fig. 8. Wasserstein distance matrices after sigmoid transforma-tion. (a) SNR = -5 dB. (b) SNR = 5 dB. (c) SNR = 15 dB. ID MI II       
+
+> Task
+> ID MI II
+> Task
+> 0.63 0.18 0.19
+> 0.15 0.59 0.25
+> 0.16 0.25 0.59
+> 0.00
+> 0.25
+> 0.50
+> 0.75
+> 1.00
+
+(a) SNR = -5 dB ID MI II        
+
+> Task
+> ID MI II
+> Task
+> 0.64 0.18 0.19
+> 0.14 0.58 0.28
+> 0.15 0.28 0.58
+> 0.00
+> 0.25
+> 0.50
+> 0.75
+> 1.00
+
+(b) SNR = 5 dB ID MI II        
+
+> Task
+> ID MI II
+> Task
+> 0.62 0.18 0.19
+> 0.15 0.57 0.29
+> 0.15 0.28 0.56
+> 0.00
+> 0.25
+> 0.50
+> 0.75
+> 1.00
+
+(c) SNR = 15 dB 
+
+Fig. 9. Task relation coefficient matrices. (a) SNR = -5 dB. (b) SNR = 5 dB. (c) SNR = 15 dB. where ˆytj and ytj denote the predicted and ground-truth labels for the j-th sample, respectively. All reported results represent the average of five independent trials to ensure statistical reliability. 
+
+B. Task Similarity Analysis 
+
+To validate the proposed similarity metrics, we employed a restricted training regime by limiting the sample size to 100 per TABLE II. Quantitative Results of Task Similarity 
+
+Task Pair SNR W-Dist W-Dist (Sig) Relation Coeff ID & MI 
+
+-5 dB 7.77 0.95 0.18 / 0.15 5 dB 8.11 0.96 0.18 / 0.14 15 dB 6.69 0.92 0.18 / 0.15 
+
+Avg 7.52 0.94 0.18 / 0.15 ID & II 
+
+-5 dB 7.05 0.93 0.19 / 0.16 5 dB 7.14 0.94 0.19 / 0.15 15 dB 6.09 0.91 0.19 / 0.15 
+
+Avg 6.76 0.93 0.19 / 0.15 MI & II 
+
+-5 dB 4.61 0.74 0.25 / 0.25 5 dB 4.07 0.65 0.28 / 0.28 15 dB 3.38 0.62 0.29 / 0.28 
+
+Avg 4.02 0.67 0.27 / 0.27 
+
+class and the signal length to 256. This constraint intentionally compels the model to exploit intrinsic task correlations for performance rather than relying solely on data abundance. We trained AMTIDIN and evaluated the empirical Wasserstein distance and task relation coefficients under low (-5 dB), medium (5 dB), and high (15 dB) SNR conditions. The resulting Wasserstein distance matrices before and after sigmoid transformation, along with the task relation coefficient matrices, are illustrated in Figs. 7, 8, and 9, respectively. As summarized in Table II, the results reveal a significant similarity between modulation identification and interference identification. These two tasks exhibit the lowest average Wasserstein distance (4.02) and the highest task relation coefficients (0.27/0.27). This indicates that both tasks share a substantial overlap in the fine-grained feature space, facili-tating mutual enhancement during joint learning. By contrast, interference detection demonstrates a marked distributional divergence from the other tasks, evidenced by significantly larger distances (averaging 7.52 with modulation identification and 6.76 with interference identification) and lower relation coefficients (averaging 0.18/0.15 with modulation identification and 0.19/0.15 with interference identification). This disparity aligns with the physical intuition that interference detection is fundamentally a coarse-grained binary task focusing on signal presence, whereas modulation identification and interference identification require detailed pattern discrimination. These observations confirm that our method effectively quantifies the underlying relationships among interference detection and identification tasks, clarifying why feature transfer is more robust between modulation identification and interference identification than with interference detection. 
+
+C. Comparison with Task-Specific STL Baseline 
+
+To rigorously validate that the performance gains stem from our proposed adversarial multi-task framework rather than architectural complexity, we compare AMTIDIN against its task-specific STL baseline (AMTIDIN-STL). This baseline in-herits the identical network structure from AMTIDIN, including the feature extraction, hypothesis, and classification modules, but is trained independently for each task. By maintaining consistent hyperparameters and model capacity, we ensure a fair comparison that isolates the benefits derived from task-sharing and adversarial training mechanisms. 9-15 -10 -5 0SNR (dB) 0.65 0.70 0.75 0.80 0.85 0.90 0.95 1.00 Accuracy 
+
+Accuracy of Interference Detection 
+
+AMTIDIN AMTIDIN-STL Performance improves by 4.1% at -13 dB 
+
+(a) Accuracy of interference detection -15 -10 -5 0 5 10 15 SNR (dB) 0.50 0.55 0.60 0.65 0.70 0.75 0.80 0.85 0.90 Accuracy 
+
+Accuracy of Modulation Identification 
+
+AMTIDIN AMTIDIN-STL Performance improves by 5.8% at 0 dB (b) Accuracy of modulation identification -15 -10 -5 0 5 10 15 SNR (dB) 0.40 0.50 0.60 0.70 0.80 0.90 1.00 Accuracy 
+
+Accuracy of Interference Identification 
+
+AMTIDIN AMTIDIN-STL Performance improves by 5.2% at -5 dB (c) Accuracy of interference identification 
+
+Fig. 10. Classification accuracy comparison between AMTIDIN and AMTIDIN-STL under varying SNR levels. 100 200 300 400 500 600 700 800 Sample Size 0.78 0.79 0.80 0.81 0.82 0.83 0.84 0.85 0.86 0.87 Accuracy 
+
+Accuracy of Interference Detection (-13 dB) 
+
+> AMTIDIN AMTIDIN-STL
+
+Performance improves by 2.8% at a sample size of 200 Performance improves by 1.1% at a sample size of 600 
+
+(a) Accuracy of interference detection (SNR = -13 dB) 100 200 300 400 500 600 700 800 Sample Size 0.71 0.72 0.73 0.74 0.75 0.76 0.77 0.78 Accuracy 
+
+Accuracy of Modulation Identification (0 dB) 
+
+> AMTIDIN AMTIDIN-STL
+
+Performance improves by 2.8% at a sample size of 200 Performance improves by 0.3% at a sample size of 600 
+
+(b) Accuracy of modulation identification (SNR = 0 dB) 100 200 300 400 500 600 700 800 Sample Size 0.76 0.78 0.80 0.82 0.84 0.86 0.88 0.90 Accuracy 
+
+Accuracy of Interference Identification (-5 dB) 
+
+> AMTIDIN AMTIDIN-STL
+
+Performance improves by 8.3% at a sample size of 200 Performance improves by 0.6% at a sample size of 600 
+
+(c) Accuracy of interference identification (SNR = -5 dB) 
+
+Fig. 11. Classification accuracy comparison between AMTIDIN and AMTIDIN-STL under varying sample sizes. 300 400 500 600 700 800 900 1000 
+
+Sample Length 
+
+> 0.75 0.80 0.85 0.90 0.95 1.00
+> Accuracy
+
+Accuracy of Interference Detection (-13 dB) 
+
+> AMTIDIN AMTIDIN-STL
+
+Performance improves by 6.8% at a sample length of 256 Performance improves by 0.8% at a sample length of 1024 
+
+(a) Accuracy of interference detection (SNR = -13 dB) 300 400 500 600 700 800 900 1000 Sample Length 0.70 0.72 0.74 0.76 0.78 0.80 0.82 Accuracy 
+
+Accuracy of Modulation Identification (0 dB) 
+
+> AMTIDIN AMTIDIN-STL
+
+Performance improves by 3.4% at a sample length of 256 Performance improves by 0.5% at a sample length of 1024 
+
+(b) Accuracy of modulation identification (SNR = 0 dB) 300 400 500 600 700 800 900 1000 
+
+Sample Length 
+
+> 0.76 0.78 0.80 0.82 0.84 0.86 0.88 0.90
+> Accuracy
+
+Accuracy of Interference Identification (-5 dB) 
+
+> AMTIDIN AMTIDIN-STL
+
+Performance improves by 4.3% at a sample length of 256 Performance improves by 2.3% at a sample length of 1024 
+
+(c) Accuracy of interference identification (SNR = -5 dB) 
+
+Fig. 12. Classification accuracy comparison between AMTIDIN and AMTIDIN-STL under varying sample lengths. 
+
+1) Robustness against Noise: We first analyze performance across varying SNR levels. To simulate a resource-constrained scenario, we fix the signal length at 256 and restrict the training set to 100 samples per class. To explicitly quantify performance gains, we focus on the transition regions of the accuracy curves (i.e., the rising slope prior to saturation), where model robustness is most discernible. Therefore, we select the center points of these transition regions as representative scenarios for analysis. Based on the results shown in Fig. 10, we identify -13 dB, 0 dB, and -5 dB as the critical SNR points for interference detection, modulation identification, and interference identification, respectively. At these specific SNR levels, AMTIDIN demonstrates a marked advantage over its task-specific STL baseline. Specifically, for interference detection depicted in Fig. 10(a), the proposed method achieves a 4.1% gain over the baseline at -13 dB, subsequently reaching 92.0% accuracy at -11 dB. For modulation identification shown in Fig. 10(b), it outperforms the baseline by 5.8% at 0 dB. Similarly, for interference identification illustrated in Fig. 10(c), it surpasses the baseline by 5.2% at -5 dB. These results highlight that the MTL framework effectively aggregates shared knowledge to enhance robustness in low-SNR 10 
+
+TABLE III. Comparison of MTL Models                                            
+
+> Feature MTL Vanilla MTL MMoE MTL NonAdv AMTIDIN (Ours)
+> Adversarial Training No No No Yes Task Relation Coefficients αNo No Yes Yes Mechanism &Objective The vanilla MTL model used in most prior works. It optimizes the standard weighted empirical loss P3
+> t=1 λtLt(ht).The multi-gate mixture-of-experts (MMoE) model proposed in [38]. It uses a gating network to dynam-ically select experts for each task and optimizes the standard weighted empirical loss. The MTL model has the same architecture as our AMTIDIN but lacks adver-sarial training [25]. It opti-mizes P3
+> t=1 λtLαt(ht).The MTL model proposed in this paper. It optimizes the weighted empirical loss and the adversarial loss simultaneously. -15 -10 -5 0SNR (dB) 0.65 0.70 0.75 0.80 0.85 0.90 0.95 1.00 Accuracy
+> Accuracy of Interference Detection
+> AMTIDIN MTL_NonAdv MTL_MMoE MTL_Vanilla -14 -13 -12 0.79 0.80 0.81 0.82 0.83
+> (a) Accuracy of interference detection -15 -10 -5 0510 15 SNR (dB) 0.50 0.55 0.60 0.65 0.70 Accuracy
+> Accuracy of Modulation Identification
+> AMTIDIN MTL_NonAdv MTL_MMoE MTL_Vanilla -1 010.74 0.76 0.78 (b) Accuracy of modulation identification -15 -10 -5 0510 15
+> SNR (dB)
+> 0.40 0.50 0.60 0.70 0.80 0.90 1.00 Accuracy
+> Accuracy of Interference Identification
+> AMTIDIN MTL_NonAdv MTL_MMoE MTL_Vanilla -6 -5 -4 0.80 0.82 0.84 (c) Accuracy of interference identification
+
+Fig. 13. Classification accuracy comparison between AMTIDIN and other MTL models under varying SNR levels. conditions. Consequently, these three levels, representing the most discriminative SNR environments, are fixed for subsequent evaluations of sample size and signal length. 
+
+2) Data Efficiency: To assess model robustness under data scarcity, we fix the SNR levels at the aforementioned points (-13 dB, 0 dB, -5 dB) and vary the training sample size from 100 to 800. As illustrated in Fig. 11, while both models improve with more data, AMTIDIN significantly surpasses the STL counterpart when data is limited. At a sample size of 200, AMTIDIN achieves performance improvements of 2.8%, 2.8%, and 8.3% for interference detection, modulation identification, and interference identification, respectively. As data availability increases to 600, this gap naturally narrows. These results confirm that, even without increasing model depth or width, the parameter-sharing mechanism in AMTIDIN acts as an effective regularizer, mitigating overfitting and enabling superior generalization in data-limited scenarios compared to the isolated training of STL. 
+
+3) Sensitivity to Signal Duration: Finally, we evaluate the impact of signal duration (ranging from 256 to 1024 points) under the same fixed SNR conditions. Fig. 12 demonstrates that AMTIDIN provides substantial benefits for short signals, achieving gains of 6.8%, 3.4%, and 4.3%, respectively, at a length of 256. While increasing signal length to 1024 improve STL performance by providing richer temporal features, the multi-task advantage remains evident. This suggests that the performance bottleneck in STL lies not only in the network capacity but also in the lack of cross-task feature reinforcement. AMTIDIN effectively compensates for the lack of discriminative features in short signals by leveraging shared information, maintaining high accuracy where STL struggles. 
+
+D. Comparison with MTL Baselines 
+
+To strictly validate the effectiveness of the proposed mech-anisms, we compare AMTIDIN with three representative multi-task baselines: MTL Vanilla (a basic hard-parameter sharing model), MTL MMoE (a state-of-the-art model using gating networks in [38]), and MTL NonAdv (an ablation variant retaining task relation coefficients α but excluding the adversarial training module, similar to [25]). Table III details the architectural differences. Critically, these comparisons are conducted under the same challenging constraints defined in Section V-C (signal length of 256, 100 samples per class) to test model generalization under resource-limited conditions. The comparative results for interference detection, modula-tion identification, and interference identification are illustrated in Fig. 13. AMTIDIN consistently achieves the highest perfor-mance across all tasks and SNR ranges. A detailed breakdown of the performance gains reveals the specific contributions of our theoretical components:  
+
+> •
+
+Benefit of Learnable Task Relation Coefficients ( α): By comparing MTL NonAdv (blue curve) with MTL Vanilla (black curve), we observe distinct performance gains, particularly for modulation identification as shown in Fig. 13(b). This demonstrates that the proposed learnable coefficients α allow the model to explicitly quantify task similarity and exploit intrinsic correlations among tasks. Unlike the implicit feature sharing in MTL Vanilla, the in-corporation of task relation coefficients in MTL NonAdv enables adaptive weighting of auxiliary tasks, ensuring that the learning process is driven by constructive task relationships rather than blind parameter sharing. 11  
+
+> •
+
+Impact of Adversarial Feature Alignment: The superi-ority of AMTIDIN (red curve) over its ablation variant MTL NonAdv isolates the contribution of the adversarial module. As highlighted in the zoomed-in region of Fig. 13(a) (at -13 dB), AMTIDIN establishes a clear accuracy margin. This confirms that explicitly minimizing the Wasserstein distance between task distributions compels the feature extraction module to learn task-invariant representations. These aligned features are inherently more robust to noise, significantly improving generalization in low-SNR regimes where standard MTL methods falter.  
+
+> •
+
+Advantage over State-of-the-Art (MMoE): Although MTL MMoE (green curve) employs a sophisticated gating mechanism to model task relationships, it underperforms AMTIDIN in this specific domain. This suggests that in scenarios with limited training data and short signal lengths, complex gating networks may struggle to con-verge or capture the fine-grained physical correlations of signals. In contrast, AMTIDIN leverages a rigorous theoretical framework that directly optimizes the gener-alization bound via adversarial training and task relation coefficients, offering a superior balance of data efficiency and classification accuracy. VI. C ONCLUSION 
+
+This paper establishes a theoretically grounded adversarial MTL framework for joint interference detection and identifica-tion, termed AMTIDIN. Crucially, we conducted a quantitative analysis of task similarity to offer interpretable insights into intrinsic task relationships. This analysis revealed that modulation identification and interference identification share a substantial feature overlap, distinct from the coarse-grained interference detection task. Extensive comparative experiments confirm that AMTIDIN significantly outperforms its task-specific STL baseline and state-of-the-art MTL baselines. Specifically, AMTIDIN demonstrates high data efficiency and noise robustness, achieving superior accuracy in harsh environments characterized by limited data, short signal lengths, and low SNRs. These results validate that our theoretical framework enhances generalization by reducing distributional distances through adversarial training and adaptively modeling task correlations via learnable coefficients. Future work will extend this framework to open-set recognition for unknown interference types and optimize the architecture for real-time edge deployment. APPENDIX APROOF OF THEOREM 1
+
+A. Preliminaries 
+
+We begin by introducing the key definitions and notations used throughout the proof. Let ft, t ∈ I T be the ground-truth labeling functions for task t. For any hypothesis h ∈ H , the expected loss on task t
+
+is defined as 
+
+Lt (h) = EX∼D t [|h (X) − ft (X) |]. (22) The joint optimal hypothesis h∗ 
+
+> t,i
+
+for tasks t and i is defined as 
+
+h∗ 
+
+> t,i
+
+= arg min 
+
+> h∈H
+
+[Lt (h) + Li (h)] , (23) and the corresponding joint minimal expected loss is 
+
+ξt,i = inf 
+
+> h∈H
+
+[Lt (h) + Li (h)] . (24) The expected loss between any two hypotheses h, h ′ ∈ H on task t is defined as 
+
+Lt (h, h ′) = EX∼D t [|h (X) − h′ (X) |]. (25) For task t with weight vector αt ∈ ∆T , the weighted expected loss is 
+
+Lαt (h) = 
+
+> T
+
+X
+
+> i=1
+
+αt,i Li (h) , (26) and the corresponding weighted empirical loss is 
+
+ˆLαt (h) = 
+
+> T
+
+X
+
+> i=1
+
+αt,i ˆLi (h) , (27) where ˆLi (h) is the empirical loss on task i, defined as 
+
+ˆLi (h) = 1
+
+mimiX
+
+> j=1
+
+l (h (Xj ) , f i (Xj )) . (28) 
+
+B. Lemmas 
+
+We first state several technical lemmas that will be used in the proof. 
+
+Lemma 1 (Triangle Inequality for Loss): For any hypothesis 
+
+h ∈ H and tasks t, i ∈ I T , the following inequality holds: 
+
+|L t (h) − L t
+
+ h, h ∗
+
+> t,i
+
+ | ≤ L t
+
+ h∗
+
+> t,i
+
+ . (29) 
+
+Proof: By the triangle inequality, for any input X, we have 
+
+|h (X)−ft (X) | ≤ | h (X)−h∗ 
+
+> t,i
+
+(X) |+|h∗ 
+
+> t,i
+
+(X)−ft (X) |.
+
+Taking expectation over X ∼ D t yields 
+
+Lt (h) ≤ L t
+
+ h, h ∗
+
+> t,i
+
+ + Lt
+
+ h∗
+
+> t,i
+
+ ,
+
+and thus 
+
+Lt (h) − L t
+
+ h, h ∗
+
+> t,i
+
+ ≤ L t
+
+ h∗
+
+> t,i
+
+ .
+
+Similarly, 
+
+|h (X) − h∗ 
+
+> t,i
+
+(X) | ≤ | h (X) − ft (X) | + |ft (X) − h∗ 
+
+> t,i
+
+(X) |
+
+implies 
+
+Lt
+
+ h, h ∗
+
+> t,i
+
+ ≤ L t (h) + Lt
+
+ h∗
+
+> t,i
+
+ ,
+
+i.e., 
+
+Lt
+
+ h, h ∗
+
+> t,i
+
+ − L t (h) ≤ L t
+
+ h∗
+
+> t,i
+
+ .
+
+Combining these two inequalities completes the proof. 
+
+Lemma 2 (Transfer Bound [31]): Assume the hypothesis space H is K-Lipschitz continuous. For any hypotheses h, h ′ ∈H and tasks t, i , the following inequality holds: 
+
+Li(h, h ′) ≤ L t(h, h ′) + 2 KW 1(Dt, Di). (30) 12 
+
+Lemma 3 (Wasserstein Concentration [39]): Let ˆDm be the empirical distribution of a measure D on the metric space X ,formed by m i.i.d. samples. Let d∗
+
+> 1
+
+(D) be the upper Wasserstein dimension of D. Then, for any s > d ∗
+
+> 1
+
+(D), there exists a constant A > 0 such that with probability at least 1 − δ,
+
+W1(D, ˆDm) ≤ Am −1/s +
+
+s
+
+12m log 
+
+ 1
+
+δ
+
+
+
+. (31) 
+
+Lemma 4 (Generalization Bound [31]): Let H be a hy-pothesis space of functions mapping X to [0 , 1] with pseudo-dimension d. Consider T tasks with sample sizes {mi}Ti=1 ,where m = PTi=1 mi and βi = mi/m . For any task weight vector αt ∈ ∆T , with probability at least 1 − δ, the following inequality holds for all h ∈ H :
+
+Lαt(h) ≤ ˆLαt(h)+2 
+
+vuut TX
+
+> i=1
+
+α2
+
+> t,i
+
+βi
+
+s
+
+2 d log   2em d
+
++log   8
+
+> δ
+
+ 
+
+m . (32) 
+
+C. Proof of Theorem 1 Proof: The proof consists of three main steps. 
+
+1) Step 1: Bounding the difference between weighted loss and true loss: For task t, we have 
+
+|L αt (h) − L t (h) | =
+
+> T
+
+X
+
+> i=1
+
+αt,i Li (h) − L t (h)
+
+≤
+
+> T
+
+X
+
+> i=1
+
+αt,i |L i (h) − L t (h) |. (33) We decompose |L i (h) − L t (h) | using the triangle inequality 
+
+|L i (h) − L t (h) | ≤ |L i (h) − L i
+
+ h, h ∗
+
+> t,i
+
+ |
+
++ |L i
+
+ h, h ∗
+
+> t,i
+
+ − L t
+
+ h, h ∗
+
+> t,i
+
+ |
+
++ |L t (h) − L t
+
+ h, h ∗
+
+> t,i
+
+ |. (34) By Lemma 1 and Lemma 2, we have 
+
+|L i (h) − L i
+
+ h, h ∗
+
+> t,i
+
+ | ≤ L i
+
+ h∗
+
+> t,i
+
+ ,
+
+|L i
+
+ h, h ∗
+
+> t,i
+
+ − L t
+
+ h, h ∗
+
+> t,i
+
+ | ≤ 2KW 1
+
+ Di, Dt ,
+
+|L t (h) − L t
+
+ h, h ∗
+
+> t,i
+
+ | ≤ L t
+
+ h∗
+
+> t,i
+
+ . (35) Substituting back the bounds in (35) into (34) and using the definition of ξt,i in (24), we obtain 
+
+|L i (h) − L t (h) | ≤ L i
+
+ h∗
+
+> t,i
+
+ + 2 KW 1
+
+ Di, Dt + Lt
+
+ h∗
+
+> t,i
+
+
+
+= ξt,i + 2 KW 1
+
+ Di, Dt . (36) Therefore, 
+
+|L αt (h) − L t (h) | ≤ 
+
+> T
+
+X
+
+> i=1
+
+αt,i 
+
+ ξt,i + 2 KW 1
+
+ Di, Dt 
+
+=
+
+> T
+
+X
+
+> i=1
+
+αt,i ξt,i + 2 K
+
+> T
+
+X
+
+> i=1
+
+αt,i W1
+
+ Di, Dt . (37) Noting that Lt (h) ≤ L αt (h) + |L t (h) − L αt (h) |, we have 
+
+Lt (h) ≤ L αt (h)+ 
+
+> T
+
+X
+
+> i=1
+
+αt,i ξt,i +2 K
+
+> T
+
+X
+
+> i=1
+
+αt,i W1
+
+ Di, Dt . (38) Then, multiplying both sides by λt and summing over all tasks, we have 
+
+> T
+
+X
+
+> t=1
+
+λtLt (ht) ≤
+
+> T
+
+X
+
+> t=1
+
+λtLαt (ht) + 
+
+> T
+
+X
+
+> t=1
+
+λtTX
+
+> i=1
+
+αt,i ξt,i 
+
++ 2 K
+
+> T
+
+X
+
+> t=1
+
+λtTX
+
+> i=1
+
+αt,i W1
+
+ Di, Dt . (39) 
+
+2) Step 2: Bounding the expected Wasserstein distance with empirical distance: Using the triangle inequality of Wasserstein-1 distance [40], for any tasks t and i, we have 
+
+W1
+
+ Di, Dt ≤ W1
+
+
+
+Di, ˆDi
+
++ W1
+
+ ˆDi, ˆDt
+
++ W1
+
+ ˆDt, Dt
+
+. (40) From Lemma 3, with probability at least 1 − δ′, we have 
+
+W1
+
+
+
+Di, ˆDi
+
+≤ Aim−1/s i +
+
+s
+
+12mi
+
+log 
+
+ 2
+
+δ′
+
+
+
+,W1
+
+
+
+Dt, ˆDt
+
+≤ Atm−1/s t +
+
+s
+
+12mt
+
+log 
+
+ 2
+
+δ′
+
+
+
+. (41) Combining (40) and (41), we have 
+
+W1
+
+ Di, Dt ≤ W1
+
+ ˆDi, ˆDt
+
++ γi,t . (42) where 
+
+γi,t = Aim−1/s i + Atm−1/s t
+
++
+
+s
+
+12 log 
+
+ 2
+
+δ′
+
+ r 1
+
+mi
+
++
+
+r 1
+
+mt
+
+
+
+. (43) Then, setting δ′ = δ/ 2T 2 and applying union bound over all task pairs (i, t ), with probability at least 1 − δ/ 2, we have the above inequality holds for all i, t ∈ I T , i.e., 
+
+2K
+
+> T
+
+X
+
+> t=1
+
+λtTX
+
+> i=1
+
+αt,i W1
+
+ Di, Dt
+
+≤ 2K
+
+> T
+
+X
+
+> t=1
+
+λtTX
+
+> i=1
+
+αt,i W1
+
+ ˆDi, ˆDt
+
++ C2, (44) where 
+
+C2 = 2 K
+
+> T
+
+X
+
+> t=1
+
+λtTX
+
+> i=1
+
+αt,i γi,t . (45) 
+
+3) Step 3: Bounding the expected loss with empirical loss: 
+
+Applying Lemma 4, with probability at least 1 − δ′, we have 
+
+Lαt (ht) ≤ ˆLαt (ht)+2 
+
+vuut TX
+
+> j=1
+
+α2
+
+> t,j
+
+βj
+
+·
+
+s
+
+2  d log   2em d
+
+ + log   8
+
+> δ′
+
+ 
+
+m . (46) Then, setting δ′ = δ/ 2T and applying union bound over all tasks, with probability at least 1 − δ/ 2, we have the above inequality holds for all t ∈ I T , i.e., 
+
+> T
+
+X
+
+> t=1
+
+λtLαt (ht) ≤
+
+> T
+
+X
+
+> t=1
+
+λt ˆLαt (ht) + C1
+
+> T
+
+X
+
+> t=1
+
+λt
+
+vuut TX
+
+> j=1
+
+α2
+
+> t,j
+
+βj
+
+, (47) 13 
+
+where 
+
+C1 = 2 
+
+s
+
+2  d log   2em d
+
+ + log   16 Tδ
+
+ 
+
+m . (48) Combining all three steps completes the proof. 
+
+Remark 2: The risk allocation in this proof follows a principled approach where the total risk budget δ is evenly divided between the empirical Wasserstein distance bounds and the empirical loss bounds. Specifically, we allocate δ/ 2 to the Wasserstein distance bounds (by setting δ′ = δ/ 2T 2 in (41) )and δ/ 2 to the empirical loss bounds (by setting δ′ = δ/ 2T
+
+in (46) ). This ensures that the combined probability of failure across all tasks and task pairs does not exceed the overall risk level δ.REFERENCES [1] B. He et al. , “Towards secure semantic transmission in the era of GenAI: A diffusion-based framework,” IEEE Commun. Mag. , Feb. 2026, early access, doi: 10.1109/MCOM.001.2500553. [2] X. Wang et al. , “Dynamic spectrum anti-jamming communications: Challenges and opportunities,” IEEE Commun. Mag. , vol. 58, no. 2, pp. 79–85, Feb. 2020. [3] H. Pirayesh and H. Zeng, “Jamming attacks and anti-jamming strategies in wireless networks: A comprehensive survey,” IEEE Commun. Surveys Tuts. , vol. 24, no. 2, pp. 767–809, 2nd Quart. 2022. [4] S. Zhao, Y. Zhou, L. Zhang, Y. Guo, and S. Tang, “Discrimination between radar targets and deception jamming in distributed multiple-radar architectures,” IET Radar Sonar Navig. , vol. 11, no. 7, pp. 1124–1131, Jul. 2017. [5] D. Wang, N. Zhang, Z. Li, F. Gao, and X. Shen, “Leveraging high order cumulants for spectrum sensing and power recognition in cognitive radio networks,” IEEE Trans. Wireless Commun. , vol. 17, no. 2, pp. 1298–1310, Feb. 2018. [6] X. Yan, G. Liu, H.-C. Wu, G. Zhang, Q. Wang, and Y. Wu, “Robust modulation classification over α-stable noise using graph-based fractional lower-order cyclic spectrum analysis,” IEEE Trans. Veh. Technol. , vol. 69, no. 3, pp. 2836–2849, Mar. 2020. [7] P. Wang, J. Gao, and Z. Wang, “Time-frequency analysis of seismic data using synchrosqueezing transform,” IEEE Geosci. Remote Sens. Lett. ,vol. 11, no. 12, pp. 2042–2044, Dec. 2014. [8] M. Zuo, S. Xie, X. Zhang, and M. Yang, “Recognition of UAV video signal using RF fingerprints in the presence of WiFi interference,” IEEE Access , vol. 9, pp. 88 844–88 851, 2021. [9] G.-S. Wang, Q.-H. Ren, and Y.-Z. Su, “The interference classification and recognition based on SF-SVM algorithm,” in Proc. IEEE Int. Conf. Commun. Softw. Netw. (ICCSN) , May 2017, pp. 835–841. [10] J. Gao, X. Yi, C. Zhong, X. Chen, and Z. Zhang, “Deep learning for spectrum sensing,” IEEE Wireless Commun. Lett. , vol. 8, no. 6, pp. 1727–1730, Dec. 2019. [11] Q. Wang, B. Su, C. Wang, L. P. Qian, Y. Wu, and X. Yang, “ConvLSTM-based spectrum sensing at very low SNR,” IEEE Wireless Commun. Lett. ,vol. 12, no. 6, pp. 967–971, Jun. 2023. [12] K. N. R. S. V. Prasad, K. B. D’souza, and V. K. Bhargava, “A downscaled faster-RCNN framework for signal detection and time-frequency localization in wideband RF systems,” IEEE Trans. Wireless Commun. , vol. 19, no. 7, pp. 4847–4862, Jul. 2020. [13] S. Rajendran, W. Meert, D. Giustiniano, V. Lenders, and S. Pollin, “Deep learning models for wireless signal classification with distributed low-cost spectrum sensors,” IEEE Trans. Cogn. Commun. Netw. , vol. 4, no. 3, pp. 433–445, Sep. 2018. [14] K. Qiu, S. Zheng, L. Zhang, C. Lou, and X. Yang, “DeepSIG: A hybrid heterogeneous deep learning framework for radio signal classification,” 
+
+IEEE Trans. Wireless Commun. , vol. 23, no. 1, pp. 775–788, Jan. 2024. [15] W. Kong, X. Jiao, Y. Xu, B. Zhang, and Q. Yang, “A transformer-based contrastive semi-supervised learning framework for automatic modulation recognition,” IEEE Trans. Cogn. Commun. Netw. , vol. 9, no. 4, pp. 950– 962, Aug. 2023. [16] Y. Li, X. Shi, H. Tan, Z. Zhang, X. Yang, and F. Zhou, “Multi-representation domain attentive contrastive learning based unsupervised automatic modulation recognition,” Nat. Commun. , vol. 16, no. 1, p. 5951, Jul. 2025. [17] M. Schmidt, D. Block, and U. Meier, “Wireless interference identification with convolutional neural networks,” in Proc. IEEE Int. Conf. Ind. Informat. (INDIN) , Jul. 2017, pp. 180–185. [18] P. Wang, Z. Wang, and Z. Han, “Intelligent wireless interference identi-fication with lightweight transformer network,” IEEE Trans. Commun. ,vol. 73, no. 11, pp. 11 355–11 367, Nov. 2025. [19] P. Wang, Y. Cheng, B. Dong, Q. Peng, and S. Li, “Multi-domain networks for wireless interference recognition,” IEEE Trans. Veh. Technol. , vol. 71, no. 6, pp. 6534–6547, Jun. 2022. [20] P. Wang, K. Ma, Y. Bai, C. Sun, Z. Wang, and S. Chen, “Wireless interference recognition with multimodal learning,” IEEE Trans. Wireless Commun. , vol. 23, no. 12, pp. 18 576–18 591, Dec. 2024. [21] Z. Zhang, M. Zhu, Y. Li, and S. Wang, “JDMR-net: Joint detection and modulation recognition networks for LPI radar signals,” IEEE Trans. Aerosp. Electron. Syst. , vol. 59, no. 6, pp. 7575–7589, Dec. 2023. [22] H. Xing et al. , “Joint signal detection and automatic modulation classification via deep learning,” IEEE Trans. Wireless Commun. , vol. 23, no. 11, pp. 17 129–17 142, Nov. 2024. [23] J. Gong, X. Qin, and X. Xu, “Multi-task based deep learning approach for open-set wireless signal identification in ISM band,” IEEE Trans. Cogn. Commun. Netw. , vol. 8, no. 1, pp. 121–135, Mar. 2022. [24] R. Zhao et al. , “Low complexity wireless interference identification in antagonistic environments based on multi-task learning,” IEEE Trans. Veh. Technol. , vol. 74, no. 9, pp. 13 953–13 967, Sep. 2025. [25] K. Murugesan, H. Liu, J. Carbonell, and Y. Yang, “Adaptive smoothed online multi-task learning,” in Proc. Adv. Neural Inf. Process. Syst. (NeurIPS) , Dec. 2016, pp. 4296–4304. [26] A. Pentina and C. H. Lampert, “Multi-task learning with labeled and unlabeled tasks,” in Proc. Int. Conf. Mach. Learn. (ICML) , Aug. 2017, pp. 2807–2816. [27] S. Ben-David, J. Blitzer, K. Crammer, A. Kulesza, F. Pereira, and J. W. Vaughan, “A theory of learning from different domains,” Mach. Learn. ,vol. 79, no. 1-2, pp. 151–175, May 2010. [28] I. Redko, A. Habrard, and M. Sebban, “Theoretical analysis of domain adaptation with optimal transport,” in Proc. Eur. Conf. Mach. Learn. Knowl. Discov. Databases (ECML PKDD) , Sep. 2017, pp. 737–753. [29] J. Shen, Y. Qu, W. Zhang, and Y. Yu, “Wasserstein distance guided representation learning for domain adaptation,” in Proc. AAAI Conf. Artif. Intell. (AAAI) , Feb. 2018, pp. 4058–4065. [30] C. Shui, M. Abbasi, L.- ´E. Robitaille, B. Wang, and C. Gagn ´e, “A principled approach for learning task similarity in multitask learning,” in 
+
+Proc. Int. Joint Conf. Artif. Intell. (IJCAI) , Aug. 2019, pp. 3446–3452. [31] F. Zhou, C. Shui, M. Abbasi, L.-E. Robitaille, B. Wang, and C. Gagn ´e, “Task similarity estimation through adversarial multitask neural network,” 
+
+IEEE Trans. Neural Netw. Learn. Syst. , vol. 32, no. 2, pp. 466–480, Feb. 2021. [32] M. Arjovsky, S. Chintala, and L. Bottou, “Wasserstein generative adversarial networks,” in Proc. Int. Conf. Mach. Learn. (ICML) , Aug. 2017, pp. 214–223. [33] Y. Ganin et al. , “Domain-adversarial training of neural networks,” J. Mach. Learn. Res. , vol. 17, no. 59, pp. 1–35, Apr. 2016. [34] T. Miyato, T. Kataoka, M. Koyama, and Y. Yoshida, “Spectral normal-ization for generative adversarial networks,” in Proc. Int. Conf. Learn. Represent. (ICLR) , Apr. 2018. [35] I. Gulrajani, F. Ahmed, M. Arjovsky, V. Dumoulin, and A. C. Courville, “Improved training of wasserstein GANs,” in Proc. Adv. Neural Inf. Process. Syst. (NeurIPS) , Dec. 2017, pp. 5767–5777. [36] S. Diamond and S. Boyd, “CVXPY: A python-embedded modeling language for convex optimization,” J. Mach. Learn. Res. , vol. 17, no. 83, pp. 1–5, May 2016. [37] T. J. O’Shea and N. West, “Radio machine learning dataset generation with gnu radio,” in Proc. GNU Radio Conf. , Sep. 2016. [38] J. Ma, Z. Zhao, X. Yi, J. Chen, L. Hong, and E. H. Chi, “Modeling task relationships in multi-task learning with multi-gate mixture-of-experts,” in Proc. ACM SIGKDD Int. Conf. Knowl. Discov. Data Min. (KDD) ,Aug. 2018, pp. 1930–1939. [39] J. Weed and F. Bach, “Sharp asymptotic and finite-sample rates of convergence of empirical measures in wasserstein distance,” Bernoulli ,vol. 25, no. 4A, pp. 2620–2648, Nov. 2019. [40] C. Villani, Optimal Transport: Old and New . Berlin, Germany: Springer, 2009, vol. 338.

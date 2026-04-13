@@ -1,0 +1,713 @@
+Title: Cooperative Observer-Based $\mathcal{H}_\infty$ Fault-Tolerant Tracking Control for Networked Processes with Sensor Faults
+
+URL Source: https://arxiv.org/pdf/2604.03921v1
+
+Published Time: Tue, 07 Apr 2026 00:50:01 GMT
+
+Number of Pages: 10
+
+Markdown Content:
+# COOPERATIVE OBSERVER -B ASED H∞ FAULT -T OLERANT 
+
+# TRACKING CONTROL FOR NETWORKED PROCESSES WITH SENSOR FAULTS 
+
+Moh Kamalul Wafi, Bambang L. Widjiantoro, Katherin Indriawati 
+
+Department of Engineering Physics Institut Teknologi Sepuluh Nopember (ITS), Surabaya, Indonesia 
+
+{kamalul.wafi}@its.ac.id 
+
+Yurid E. Nugraha 
+
+Department of Electrical Engineering Institut Teknologi Sepuluh Nopember (ITS), Surabaya, Indonesia 
+
+## ABSTRACT 
+
+This paper develops a cooperative fault-tolerant control framework for heterogeneous networked linear systems subject to sensor degradation and external disturbances. Each unit employs an augmented H∞ observer that jointly reconstructs its state and sensor fault, providing disturbance-attenuated estimation guarantees. An inner state-feedback gain is then synthesized via convex H∞
+
+LMIs to ensure robust closed-loop stabilization, while an outer distributed integral action drives all units to track a constant setpoint source. The resulting network error dynamics satisfy an input-to-state stability condition with respect to disturbances and estimation imperfections, and converge to zero in their absence. Simulations on star, cyclic, and path topologies with heterogeneous agents confirm reliable tracking despite abrupt sensor faults and bounded disturbances, demonstrating a scalable and resilient coordination strategy for multi-agent systems with sensing imperfections. 
+
+Keywords Distributed Control · Nonlinear Systems · Networked Robotics · Adversarial Interactions 
+
+## 1 Introduction 
+
+Faulttolerant control (FTC) has been extensively investigated for safetycritical single-agent systems, including indus-trial processes, aerospace vehicles, and autonomous platforms [1–3]. As modern infrastructures increasingly rely on interconnected subsystems, distributed architectures have become essential due to their scalability, robustness to individual failures, and reduced communication requirements [4]. A key challenge in such systems is maintaining reliable state awareness under limited and potentially corrupted measurements. Consequently, distributed estimation has received significant attention for both linear and nonlinear multi-agent systems [5–8]. In networked environments, sensor faults are particularly disruptive because corrupted measurements propagate through cooperative control loops and may destabilize the entire team even if only a single unit is affected. This has motivated the development of distributed FTC schemes that address sensor faults via observer-based compen-sation [9, 10], actuator faults via resilient control laws [11, 12], and combined fault scenarios through adaptive or reconfigurable methods [13, 14]. These contributions demonstrate meaningful progress, but most existing methods assume nominal or disturbance-free plant dynamics. A second limitation is that current distributed FTC approaches rarely establish InputtoState Stability (ISS) for the networked tracking error. ISS guarantees are crucial for quantify-ing how well a multi-agent controller tolerates persistent disturbances, modeling uncertainties, and residual estimation errorsfactors that inevitably arise in large interconnected systems. Motivated by these gaps, this paper develops a cooperative FTC architecture that combines augmented fault estimation, robust distributed control, and integral/outer feedback to achieve reliable reference tracking across heterogeneous 
+
+> arXiv:2604.03921v1 [eess.SY] 5 Apr 2026
+
+Cooperative H∞ Fault-Tolerant Tracking with Sensor Faults agents. Unlike prior works, the proposed framework provides H∞–based criteria to guarantee robustness through Linear Matrix Inequalities (LMIs) [15] and a network-level ISS bound with respect to disturbances and estimation imperfections, and ensures exact consensus tracking when faults and disturbances vanish. This makes it suitable for applications such as UAV formations, vehicle platoons, distributed sensor networks with drifting biases, and industrial robotic teams. The main contributions of this paper are: 1. Augmented observer design. We develop an observer that jointly estimates the state and unknown sensor fault at each unit. The H∞ estimation guarantee of Theorem 1 ensures reliable state availability despite sensor degradation and disturbances. 2. Robust cooperative stabilizing control. Using the estimated state, we derive an inner statefeedback law whose robustness is guaranteed through the convex H∞ condition in Theorem 2. This inner-loop controller stabilizes the networked dynamics and attenuates disturbances. 3. Integral action for tracking. To eliminate steady-state offset and enable accurate tracking of constant setpoints, we incorporate a distributed integral term based on the cooperative tracking error. 4. Cooperative tracking with ISS robustness guarantees. In Theorem 3 together with Proposition 1, we prove that the cooperative tracking error is InputtoState Stable (ISS) with respect to disturbances and residual estimation uncertainty. When these inputs vanish, the cooperative error decays exponentially to zero. 5. Validation on heterogeneous multi-agent networks. Numerical studies on star, cyclic, and path topologies with heterogeneous agents demonstrate the effectiveness and robustness of the proposed FTC architecture in the presence of abrupt sensor faults and bounded disturbances. 
+
+## 2 Communication Network 
+
+The network under study comprises m+1 agents collected in the set V = {0, 1, . . . , m }, where agent 0 acts as a set-point source delivering reference or supervisory information, while agents 1 to m represent interconnected units (e.g., physical subsystems, autonomous devices, cyber–physical modules, or distributed industrial components) equipped with local sensing, estimation, and fault-mitigation capabilities. Information transfer among the agents is described by the weighted digraph G = ( V, E, W), with wij ≥ 0 denoting the weight of information received by agent i from agent j. The in-neighborhood of agent i is Ni = { j ∈ V | 
+
+(i, j ) ∈ E } . To differ unit–unit communication from source broadcasting, the graph G is decomposed into two induced subgraphs. The first, Gm = ( Vm, Em, Wm) with Vm = {1, . . . , m }, captures inter-unit interactions. The second, G0 = ( V0, E0, W0) with V0 = {0} ∪ { i : ( i, 0) ∈ E} , captures source-to-unit connectivity. Example is given in Fig. 1. For the inter-unit subgraph, the adjacency and in-degree matrices are [Am]ij = wij and Dm = diag {d1, . . . , d m}
+
+where di = ∑ 
+
+> j:( i,j )∈E m
+
+wij , leading to the Laplacian matrix Lm = Dm − Am. For the subgraph G0, broadcasts from the source are represented by A0 = diag {w10 , . . . , w m0}. The full communication structure is captured by the augmented Laplacian L = Lm + A0. Equivalently, with wi = di + wi0 = 1 , ∀i, resulting W = diag {w1, . . . , w m} =
+
+Im, this gives 
+
+L := Lm + A0 = W − Am.
+
+Finally, the distributed communication satisfies the balance condition 
+
+(L − A0)1m = 0m ⇔ (Am + A0)1m = 1m, (1) meaning each unit receives the same total incoming weight from its neighbors and from the setpoint source. When 
+
+W̸ = Im, normalized weights ˜wij = wij /w i and ˜wi0 = wi0/w i yield the Laplacian ˜L = ˜Lm + ˜A0, which also satisfies (1). 
+
+Remark 1 If at least one unit directly receives the setpoint signal ( wi0 > 0) and every unit is reachable from node 0
+
+along a directed communication pathway contained in E, then the augmented Laplacian L is positive stable. Thus, the supervisory reference affects the entire industrial network. 
+
+## 3 Problem Formulation 
+
+We study a network consisting of a setpoint source denoted as agent 0 and m interconnected units, each representing a generic dynamical subsystem whose physical output must track the source reference in the presence of disturbances 2Cooperative H∞ Fault-Tolerant Tracking with Sensor Faults 
+
+> w10
+> w40
+> w50
+> w21
+> w32
+> w45
+> w54
+
+G 
+
+> 0
+> 1
+> 23
+> 4
+> 5
+> w21
+> w32
+> w45
+> w54
+
+Gm 
+
+> 1
+> 23
+> 4
+> 5
+> w10
+> w40
+> w50
+
+G0
+
+> 0
+> 1
+> 4
+> 5
+
+Figure 1: Example of a graph G with m = 5 , unit-to-unit subgraph Gm, and source-to-unit subgraph G0, showing the decoupling and assignment of wij .
+
+and sensor degradation. The dynamics of the i-th unit with disturbance and sensor degradation can be written as 
+
+˙xi(t) = Aixi(t) + Biui(t) + Divi(t),yf,i (t) = Cixi(t) + Fifs,i (t), (2) Here, xi(t) ∈ Rnx is the local state and ui(t) ∈ Rnu is the control input to be determined later. Next, yf,i (t) ∈
+
+Rny denotes the measured pressure in the presence of the sensor degradation fs,i (t) ∈ Rny . The pair (Ai, B i)
+
+is controllable and (Ai, C i) is observable, with the matrices of appropriate dimensions. The disturbance matrix is 
+
+Di ∈ Rnx×nv with disturbance signal vi(t) ∈ Rnv which belongs to L2[0 , ∞). Here, the fault-location matrix is assumed to be known, with Fi := Iny . To reflect real-world diversity, the model (2) is allowed to be heterogeneous across the network. The setpoint source broadcasts its reference output y0 to the units that receive information from node 0 while each unit 
+
+i shares its estimated output ˆyi := Ci ˆxi with its neighbors. For every unit i, the total in-neighbor setpoint zi and the corresponding local tracking error ei are defined as 
+
+zi = ∑
+
+> j∈N i
+
+wij ˆyj + wi0y0, ei = ˆ yi − zi (3) This networked structure enables distributed estimation and tracking using only local communication. 
+
+Definition 1 A system with bounded disturbance v(t) is said to achieve H∞ performance if the following hold: 1. The system is asymptotically stable when v(t) ≡ 0.2. With zero initial condition, there exists a constant γ > 0 such that for any disturbance v(t) ∈ L 2[0 , ∞),
+
+∫ ∞
+
+> 0
+
+x⊤(t)x(t) dt ≤ γ2
+
+∫ ∞
+
+> 0
+
+v⊤(t)v(t) dt, 
+
+where x(t) is the state vector of the system. 
+
+Using the H∞ notion introduced above, then the proposed framework pursues three main objectives: 1. Observer design. Develop an augmented observer that provides reliable state and fault estimates under distur-bances. The corresponding H∞ performance is enforced through the LMI condition established in Theorem 1. 2. Robust distributed control. With point (1), design an inner feedback gain K, using the LMI in Theorem 2 (H∞ bound), together with an outer distributed integral action that enables setpoint tracking propagated through communication network while maintaining robustness. 3. Consensus tracking. Ensure that all units converge to the setpoint source and to one another. Theorem 3 with Proposition 1 guarantees InputtoState Stability (ISS) of the cooperative tracking error across the entire network. 
+
+## 4 Cooperative Fault–Tolerant Control 
+
+This section embeds the local unit dynamics of Section 3 into the communication network of Section 2 and designs a cooperative fault–tolerant control (FTC) strategy that compensates sensor degradation fault. Finally, for brevity, the time argument (t) is omitted when no confusion arises. Node 0 provides a source (setpoint) signal y0 ∈ Rny and in network-level, we define ¯y0 = 1m ⊗ y0. Moreover, the networked m-unit dynamics becomes 
+
+˙¯x = A¯x + B¯u + D¯v, ¯yf = C¯x + F ¯fs. (4) 3Cooperative H∞ Fault-Tolerant Tracking with Sensor Faults To avoid repetition, we define the stacked vectors and matrices as follows. The vectors ¯x, ¯u, ¯v, ¯yf , and ¯fs, are defined such that for any signal g ∈ Rn, ¯g = [ g⊤ 
+
+> 1
+
+, . . . , g m]⊤ ∈ Rmn . The matrices A, B, C, D, and F are denoted such that for a matrix G ∈ Rn×n, G = diag {G1, . . . , G m} ∈ Rmn ×mn .The in-neighbor setpoint of the network is defined as 
+
+¯z = [ z⊤ 
+
+> 1
+
+, . . . , z ⊤
+
+> m
+
+]⊤ := ( Am ⊗ Iny )ˆ ¯y + ( A0 ⊗ Iny )¯ y0, (5) and using W = Im and (1), the cooperative tracking error is 
+
+¯e := ( L ⊗ Iny )ˆ ¯y − (A0 ⊗ Iny )¯ y0 := ˆ ¯y − ¯z. (6) When ¯e = 0 , the estimated outputs of the units ( m agents) achieve a weighted consensus around the source y0.Before proceeding to controller and observer design, it is essential to understand the structural meaning of the coopera-tive tracking error (6). The following result establishes that this error vanishes exactly when all agents reach agreement with the setpoint satisfying the conditions in Remark 1. 
+
+Proposition 1 Assume that Remark 1 holds such that the Laplacian L is positive stable and the weights wij , w i0 ≥ 0
+
+satisfy (Am + A0)1m = 1m. Therefore ¯e = 0 if and only if ˆyi = ˆ yj for all i, j ∈ { 1, . . . , m } and ˆyi = y0, ∀i.
+
+Thus, enforcing ¯e = 0 guarantees network-wide tracking of the source y0. The remainder of this section develops an observercontroller structure that achieves this goal despite sensor degradation and disturbances. Since accurate track-ing requires reliable state information, unknown sensor faults render direct use of the measured outputs ¯yf inadequate, motivating the need for an augmented statefault observer. To overcome this, we construct an augmented observer that simultaneously estimates the unit state and the sensor fault at every unit. Define the augmented networked systems 
+
+E1 ˙¯xa = Aa ¯xa + B¯u + D¯v, ¯xa = [¯ x⊤, ¯f ⊤ 
+
+> s
+
+]⊤
+
+¯yf = E2 ¯xa, (7) where, Aa = [ A, 0¯nx×¯ny ], E1 = [ I¯nx , 0¯nx×¯ny ], and E2 = [ C, F] with F = I¯ny . Here, rank([ E⊤ 
+
+> 1
+
+, E⊤ 
+
+> 2
+
+]⊤) = ¯ nx + ¯ ny ,showing that [E⊤ 
+
+> 1
+
+, E⊤ 
+
+> 2
+
+]⊤ is a full rank and its inverse exists. Let F1 := [ I⊤ 
+
+> ¯nx
+
+, −C⊤]⊤ and F2 := [0 ⊤ 
+
+> ¯nx×¯ny
+
+, I ¯ny ]⊤, then 
+
+[E1
+
+E2
+
+]
+
+[F1 F2] = [ F1 F2]
+
+[E1
+
+E2
+
+]
+
+= I¯nx+¯ ny ,
+
+which means ([ E⊤ 
+
+> 1
+
+, E⊤ 
+
+> 2
+
+]⊤)−1 = [ F1, F2]. Multiplying F1 to both sides of (7) and using the fact that F1E1 + F2E2 =
+
+I¯nx+¯ ny , we obtain 
+
+F1E1 ˙¯xa = F1Aa ¯xa + F1B¯u + F1D¯v
+
+˙¯xa = F1Aa ¯xa + F1B¯u + F1D¯v + F2E2 ˙¯xa
+
+(8) Consider the virtual observer ˙¯xo = F1Aa ¯xo + F1B¯u + F2E2 ˙¯xa
+
++ L(¯ yf − E2 ¯xo), (9) where L is a gain matrix to be designed. Now, define the estimation error ¯ϵ = ¯ xa − ¯xo. Subtracting (8) from (9), the estimation error dynamics become 
+
+˙¯ϵ = ( F1Aa − LE 2)¯ ϵ + F1D¯v. (10) With the augmented representation in place, the first objective is to design an observer that guarantees robust estimation under sensor degradation. This is achieved by the following H∞ condition. 
+
+Theorem 1 For a given constant δ > 0, the error dynamics (10) is asymptotically stable with disturbance attenuation level δ if there exists a matrix P ≻ 0 ∈ R(¯ nx+¯ ny )×(¯ nx+¯ ny ) and any matrix H ∈ R(¯ nx+¯ ny )×¯ny such that the LMI 
+
+Π = 
+
+[∆ PF 1D
+
+∗ −δ2I¯nx
+
+]
+
+< 0, (11) 
+
+where ∆ = PF 1Aa + A⊤ 
+
+> a
+
+F⊤ 
+
+> 1
+
+P − HE 2 − E⊤ 
+
+> 2
+
+H⊤ + I¯nx+¯ ny .
+
+4Cooperative H∞ Fault-Tolerant Tracking with Sensor Faults According to Definition 1, the error dynamics (10) using the virtual observer (9) thus satisfies H∞ performance with disturbance attenuation level δ. However, its accuracy may still be limited since the term F2E2 ˙¯xa is generally not available. To overcome this, we perform a state transformation. Define ¯η = ¯ xo − F2E2 ¯xa and differentiating gives 
+
+
+
+˙¯η = F1Aa ¯xo + F1B¯u + L(¯ yf − E2 ¯xo),
+
+= ( F1Aa − LE 2)¯ η + F1B¯u + L¯yf
+
++[(F1Aa − LE 2)F2 + L]¯yf ,
+
+¯xo = ¯ η + F2 ¯yf ,
+
+(12) where L := P−1H. Theorem 1 ensures that each unit obtains a disturbanceattenuated estimate of its augmented state. We now use this estimate to construct an H∞ statefeedback law that guarantees closedloop stability in the presence of both unit disturbances and observer-induced perturbations. We now consider the observerbased control law 
+
+¯u = ¯ u∗ − I(Kℓ, ˆ¯y, ¯z). (13) In Theorem 2, we design an inner feedback gain K using ¯u∗ := KE 1 ¯xo so that by introducing ¯ϑ := KE 1¯ϵ, ¯θ =[¯ v⊤, ¯ϑ⊤]⊤, and Bθ := [ D, −B], the closed-loop networked system becomes 
+
+˙¯x = ( A + BK )¯ x − BKE 1¯ϵ + D¯v, 
+
+= ( A + BK )¯ x + Bθ ¯θ, (14) considering ¯ϵ = ¯ xa − ¯xo and E1 ¯xa = ¯ x. We now proceed to the second objective: designing a networked control gain that minimizes the effect of ¯θ on the global state. 
+
+Theorem 2 Given the observer gain L of Theorem 1, and let α > 0 and δ > 0 from Theorem 1. If there exist matrices 
+
+R ≻ 0 ∈ R¯nx×¯nx and G ∈ R¯nu×¯nx such that the LMI 
+
+Λ = 
+
+
+
+¯∆ R −B D
+
+∗ −I¯nx 0 0
+
+∗ ∗ −αI ¯nu 0
+
+∗ ∗ ∗ −δ2I¯nv
+
+ < 0, (15) 
+
+holds, where ¯∆ := AR + RA ⊤ + BG + G⊤B⊤, then the inner feedback gain K := GR −1 renders the closed– loop networked system (14) asymptotically stable with the attenuation level γ and guarantees the H∞ performance 
+
+∥¯x∥2 < γ ∥¯θ∥2.
+
+Remark 2 In view of Theorem 1, the observer error satisfies an H∞ bound with attenuation level δ > 0, and the auxiliary signal ¯ϑ = KE 1¯ϵ with ∥¯ϵ∥2 ≤ δ∥¯v∥2 satisfies 
+
+∥ ¯ϑ∥2 ≤ ∥ K∥ ∥ ¯ϵ∥2 ≤
+
+√
+
+λmax (K⊤K) δ ∥¯v∥2.
+
+Consequently, with ∥¯θ∥22 = ∥ ¯ϑ∥22 + ∥¯v∥22, if the attenuation level γ defined in Theorem 2 is chosen such that 
+
+γ2 ≥ [αλ max (K⊤K) + 1 ] δ2, (16) 
+
+then the closed-loop performance (∥¯x∥2 < γ ∥¯θ∥2) is automatically met for all disturbances ¯θ
+
+This inner loop K in Theorem 2 guarantees robust stabilization and disturbance attenuation. However, ¯u∗ alone does not ensure tracking of the network setpoint. The integral term I(·) := Kℓ ¯e, with ¯e = ˆ ¯y − ¯z resolves this issue. By feeding back the distributed tracking error, the outer loop removes steadystate offsets caused by disturbances, heterogeneity, or sensor degradation, and drives all estimates toward the reference y0 according to the communication structure satisfying Remark 1. With both observer and controller satisfying their H∞ objectives, we now examine the resulting cooperative error dynamic to complete the third objective. The next theorem shows that the network achieves ISS cooperative tracking. 
+
+Theorem 3 Assume that (1) and Remark 1 hold, and let the gains L and K be designed according to Theorems 1 and 2. Let x0 be a constant setpoint and consider the closed–loop networked system (14) with ¯ϑ∗ = ¯ϑ1 + ¯ϑ2, ¯ϑ1 := KE 1¯ϵ,
+
+¯ϑ2 := Kℓ ¯e, ¯θ∗ = [¯ v⊤, ¯ϑ⊤∗ ]⊤, and Bθ := [ D, −B]. Define the cooperative state error 
+
+¯ex := ( L ⊗ Inx )¯ x − (A0 ⊗ Inx )¯ x0. (17) 
+
+Then there exist positive constants c1, c 2, c 3 > 0 such that the following ISS estimate holds for all t ≥ 0:
+
+∥¯ex(t)∥ ≤ c1e−c2t∥¯ex(0) ∥ + c3 sup  
+
+> 0≤τ≤t
+
+∥¯θ∗(τ )∥. (18) 
+
+If ¯θ∗ ≡ 0, then ¯ex(t) → 0 exponentially. 
+
+5Cooperative H∞ Fault-Tolerant Tracking with Sensor Faults  
+
+> 1.01.0
+> 1.01.0
+
+Gs := Star   
+
+> 0
+> 12
+> 34
+> 0.40.4
+> 0.40.4
+
+Gc := Cyclic  
+
+> 0
+> 12
+> 34
+> 0.3
+> 0.3
+> 0.3
+> 0.3
+> 1.0
+
+Gp := Path       
+
+> 0
+> 12
+> 34
+> 1.0
+> 1.0
+> 1.0
+> Figure 2: Three network topologies (Gs,Gc,Gp)with weights used in the simulations.
+
+Remark 3 In Theorem 3, we assumed a constant y0 so that ˙¯y0 = 0 . If y0 is time–varying, using (17) the error dynamics becomes ˙˜¯e = Φ˜ ¯e + Bϕ ¯θ∗ + ( A0 ⊗ Inx ) ˙ ¯x0. Therefore, ˜¯e is driven by two inputs: the disturbance ¯θ∗ and the reference–rate ˙¯x0. Using V (˜ ¯e) = ˜ ¯e⊤Pe ˜¯e with Pe ≻ 0, and the LMI conditions that make Φ Hurwitz and guarantee 
+
+H∞ performance, one obtains an estimate of the form 
+
+˙V ≤ − α∗∥˜¯e∥2 + β∗ 
+
+> 1
+
+∥¯θ∗∥2 + β∗ 
+
+> 2
+
+∥ ˙¯x0∥2, (19) 
+
+for some α∗, β ∗ 
+
+> 1
+
+, β ∗ 
+
+> 2
+
+> 0. Inequality (19) is an inputtostate stability (ISS) condition for ˜¯e with respect to [¯θ∗⊤ , ˙¯x⊤ 
+
+> 0
+
+]⊤.
+
+Remark 3 establishes ISS of the cooperative state error under disturbances and time–varying references. Since the regulated outputs are linear functions of the states, this result can be directly translated into cooperative tracking guarantees at the output level, which is the quantity of practical interest in many applications. This is formalized in the following corollary. 
+
+Corollary 1 Under the conditions of Theorem 3, define the cooperative output error 
+
+¯ey := ( L ⊗ Iny )¯ y − (A0 ⊗ Iny )¯ y0,
+
+with ¯y = C¯x. Then ¯ey is ISS with respect to ¯θ∗. In particular, there exist constants ˜c1, ˜c2, ˜c3 > 0 such that 
+
+∥¯ey (t)∥ ≤ ˜c1e−˜c2t∥¯ey (0) ∥ + ˜ c3 sup  
+
+> 0≤τ≤t
+
+∥¯θ∗(τ )∥.
+
+If ¯θ∗ ≡ 0, then ¯ey (t) → 0 exponentially, and by Proposition 1 all unit outputs satisfy yi(t) → y0, yi(t) − yj (t) →
+
+0, ∀ i, j i.e., the network achieves cooperative output consensus tracking of the setpoint. 
+
+## 5 Numerical Results 
+
+In this section, we illustrate Theorems 13 and Lemma 1 on a network of m = 4 heterogeneous DCmotor units [16]. For each unit i, the local dynamics follow (2) with 
+
+Ai =
+
+[ − bi
+
+> JMi
+> J
+
+− Mi 
+
+> Li
+
+− Ri
+
+> Li
+
+]
+
+, Bi =
+
+[ 0
+
+> 1
+> Li
+
+]
+
+, Di = σ(i)
+
+[11
+
+]
+
+,
+
+and Ci = [1 , 0] , where the physical parameters are chosen as J = 0 .01 , bi = 0 .1(1 + 0 .1( i − 1)) , Mi = 0 .01(1 + 0.05( i − 1)) , Ri = 1 .0(1 − 0.02( i − 1)) , Li = 0 .5(1 + 0 .03( i − 1)) , and σ(i) = 0 .1 i for i = 1 , . . . , m . Each disturbance channel is driven by a constant input vi(t) ≡ 0.1, and a constant sensor fault of magnitude 5.75 is injected at t = 10 s and remains active thereafter. The initial unit states are chosen using xi(0) ∼ U ([ −1, 1] 2), i = 1 , . . . , m ,while the observer states are initialized at ηi(0) = 02, so that the initial estimate satisfies ˆxi(0) = E1ηi(0) = 02. The observer gain L is obtained by solving the LMI of Theorem 1 with attenuation level δ = 0 .3. The inner feedback gain K is computed from Theorem 2 using a common design parameter αi ≡ 0.2. To ensure setpoint tracking, each agent employs the distributed integral action described of the form ¯u = KE 1 ¯xo − Kℓ ¯e, with Kℓ = diag {ℓ1, . . . , ℓ 4},
+
+ℓi = [90 , 0.1] . This outer-loop integral correction eliminates steady-state tracking error and enables convergence to piecewise-constant setpoints across all communication topologies considered. Figure 3a shows the estimation error (xi − ˆxi) for the m agents under a uniform reference input. The two subplots report the errors in x(1)  
+
+> i
+
+(motor speed) and x(2)  
+
+> i
+
+(armature current), respectively. In all cases the errors converge rapidly to zero despite the persistent disturbances and the abrupt sensor fault at t = 10 s , confirming the H∞ observer performance guaranteed by Theorem 1. 6Cooperative H∞ Fault-Tolerant Tracking with Sensor Faults 0 0.5 1 1.5 2 2.5 3 3.5 4 4.5 5          
+
+> -1 -0.5 00.5 1
+> 00.5 11.5 22.5 33.5 44.5 5
+> -1 -0.5 00.5 1
+
+(a) Error 0 5 10 15 20 25 30 35 40 45 50  
+
+> 012345678910
+
+(b) Star– Gs0 5 10 15 20 25 30 35 40 45 50  
+
+> 012345678910
+
+(c) Cyclic– Gs0 5 10 15 20 25 30 35 40 45 50  
+
+> 012345678910
+
+(d) Path– Gs
+
+Figure 3: Trajectories of m = 4 sensing nodes for three topologies, along with corresponding error norms. 
+
+Figures 3b3d depict the closedloop trajectories of x(1)  
+
+> i
+
+for the star, cyclic, and path topologies. Each plot includes the true states x(1)  
+
+> i
+
+, the estimates ˆx(1)  
+
+> i
+
+, the piecewiseconstant setpoint, and a vertical dashed line marking the activation of the sensor fault at t = 10 s . For all three topologies the agents exhibit a short transient following each step change and the fault activation, and then converge to the common setpoint. The star graph achieves the fastest settling time and smallest overshoot, while the cyclic and path graphs show slightly slower but still welldamped responses, in line with their weaker connectivity. The performance degradation relative to the centralized (star) case is modest, illustrating that the proposed FTC architecture is robust to heterogeneity, sensor faults, and disturbances as long as the communication graph is connected (Remark 1, Proposition 1) and the LMI conditions of Theorems 12 are satisfied. 
+
+## 6 Conclusion 
+
+This paper presented a cooperative fault-tolerant control architecture for networked linear systems subject to sensor degradation and external disturbances. The framework integrates three key components: (i) an augmented observer that reconstructs both unit states and sensor faults while guaranteeing an H∞ disturbance-attenuation bound; (ii) an inner state-feedback law ensuring robust closed-loop performance via convex H∞ synthesis; and (iii) an outer integral action that removes steady-state tracking error and enables all units to follow a constant setpoint. The resulting cooperative tracking error is shown, through an ISS analysis, to converge exponentially in the absence of disturbances and remain uniformly bounded otherwise. Furthermore, Proposition 1 establishes that driving the cooperative error to zero ensures network-wide consensus on the desired setpoint. Numerical simulations on heterogeneous agents interconnected through star, cyclic, and path networks confirm that the proposed approach preserves accurate tracking despite sensor faults and disturbances. Overall, the method is scalable, robust to sensing imperfections, and well suited for coordinated control of interconnected units. Future work will investigate adaptive and data-driven extensions, including feedback-dependent tuning of observer and control gains; develop estimation and learning mechanisms to improve fault identification and uncertainty quan-tification from data; and extend the framework to more general adversarial and time-varying attack models. Addi-tional directions include relaxing linearity assumptions to accommodate broader classes of nonlinear systems, incor-porating communication constraints such as delays and packet losses, and exploring integration with reinforcement-learningbased decision-making for improved performance in uncertain environments [17–25]. 
+
+## References 
+
+[1] X. Zhang, X. Xu, J. Li, F. Ma, Z. Zhang, G. Brunauer, and F. Steyskal, “Fault estimation and H∞ fuzzy ac-tive fault-tolerant control design for ship steering autopilot subject to actuator and sensor faults,” IEEE Sensors Journal , vol. 23, no. 22, pp. 28110–28119, 2023. [2] F. Nan, S. Sun, P. Foehn, and D. Scaramuzza, “Nonlinear mpc for quadrotor fault-tolerant control,” IEEE Robotics and Automation Letters , vol. 7, no. 2, pp. 5047–5054, 2022. [3] X. Han, R. Rammal, Z. Li, M. Cabassud, and B. Dahhou, “Interval observer-based active fault tolerant control for an intensified heat exchanger/reactor,” in 2021 9th International Conference on Systems and Control (ICSC) ,pp. 133–138, 2021. [4] Y. Liu, G. Pang, J. Qiu, X. Chen, and J. Cao, “Fault-tolerant control for output regulation in multi-agent systems based on prescribed-time observers,” IEEE Transactions on Signal and Information Processing over Networks ,vol. 10, pp. 729–739, 2024. 7Cooperative H∞ Fault-Tolerant Tracking with Sensor Faults [5] M. K. Wafi, “Filtering module on satellite tracking,” AIP Conference Proceedings , vol. 2088, no. 1, p. 020045, 2019. [6] M. Doostmohammadian, A. Taghieh, and H. Zarrabi, “Distributed estimation approach for tracking a mobile tar-get via formation of uavs,” IEEE Transactions on Automation Science and Engineering , vol. 19, no. 4, pp. 3765– 3776, 2022. [7] M. K. Wafi and B. L. Widjiantoro, “Distributed estimation with decentralized control for quadruple-tank process,” 
+
+arXiv preprint arXiv:2304.04763 , 2025. [8] E. Javanfar, M. Rahmani, and M. K. Wafi, “Robust estimation-based non-fragile control for discrete-time non-linear systems,” International Journal of Robust and Nonlinear Control , vol. 35, no. 6, pp. 2462–2471, 2025. [9] S. Jiang and H. Fang, “Fault-tolerant control for networked control systems with imperfect measurements*,” 
+
+IFAC Proceedings Volumes , vol. 45, no. 20, pp. 1329–1334, 2012. 8th IFAC Symposium on Fault Detection, Supervision and Safety of Technical Processes. [10] Z. Pang, J. Zhang, Y. Zhou, and C. Han, “Active fault tolerant control of networked systems with sensor fault,” in 2017 29th Chinese Control And Decision Conference (CCDC) , pp. 6468–6473, 2017. [11] B. Cao, Y. Wu, and L. Yao, “Fault diagnosis and fault-tolerant control for leader-follower multi-agent systems with time-delay,” in 2021 CAA Symposium on Fault Detection, Supervision, and Safety for Technical Processes (SAFEPROCESS) , pp. 1–8, 2021. [12] K. Schenk and J. Lunze, “Fault-tolerant control in networked systems: A two-layer approach,” in 2017 IEEE 56th Annual Conference on Decision and Control (CDC) , pp. 6370–6376, 2017. [13] D. M. Raimondo, F. Boem, A. Gallo, and T. Parisini, “A decentralized fault-tolerant control scheme based on active fault diagnosis,” in 2016 IEEE 55th Conference on Decision and Control (CDC) , pp. 2164–2169, 2016. [14] Z. Gu, P. Shi, D. Yue, S. Yan, and X. Xie, “Fault estimation and fault-tolerant control for networked systems based on an adaptive memory-based event-triggered mechanism,” IEEE Transactions on Network Science and Engineering , vol. 8, no. 4, pp. 3233–3241, 2021. [15] T. H. Lee, C. P. Lim, S. Nahavandi, and R. G. Roberts, “Observer-based H∞ fault-tolerant control for linear systems with sensor and actuator faults,” IEEE Systems Journal , vol. 13, no. 2, pp. 1981–1990, 2019. [16] B. L. Widjiantoro, M. K. Wafi, and K. Indriawati, “Non-linear estimation using the weighted average consensus-based unscented filtering for various vehicles dynamics towards autonomous sensorless design,” Journal of Robotics and Control (JRC) , vol. 4, p. 95107, Mar. 2023. [17] S. Fahad, B. She, J. Yin, F. Li, H. Cui, and R. Bo, “A data-driven adaptive control approach for enhancing the dynamic response of vsgs in varying grid conditions,” IEEE Transactions on Power Delivery , vol. 40, no. 3, pp. 1421–1433, 2025. [18] W. Ruchun, “Adaptive safe data driven control strategy for closed loop system,” IEEE Access , vol. 13, pp. 95876– 95887, 2025. [19] M. K. Wafi and M. Siami, “A comparative analysis of reinforcement learning and adaptive control techniques for linear uncertain systems,” in 2023 Proceedings of the Conference on Control and its Applications (CT) , pp. 25–32, 2023. [20] W. Pinthurat, P. Kongsuk, T. Surinkaew, and B. Marungsri, “An adaptive data-driven-based control for voltage control loop of grid-forming converters in variable inertia mgs,” IEEE Access , vol. 12, pp. 58143–58155, 2024. [21] X. Liu, Z. Yuan, Z. Gao, and W. Zhang, “Reinforcement learning-based fault-tolerant control for quadrotor uavs under actuator fault,” IEEE Transactions on Industrial Informatics , vol. 20, no. 12, pp. 13926–13935, 2024. [22] M. Li, H. Zhang, T. Ji, and Q. H. Wu, “Fault identification in power network based on deep reinforcement learning,” CSEE Journal of Power and Energy Systems , vol. 8, no. 3, pp. 721–731, 2022. [23] M. K. Wafi, M. Siami, and M. Sznaier, “Investigating the effectiveness of reinforcement learning in closed-loop systems with time delays,” in 2024 American Control Conference (ACC) , pp. 4149–4154, 2024. [24] M. K. Wafi, R. Hajian, B. Shafai, and M. Siami, “Advancing fault-tolerant learning-oriented control for un-manned aerial systems,” in 2023 9th International Conference on Control, Decision and Information Technolo-gies (CoDIT) , pp. 1688–1693, 2023. [25] M. R. Muttaki, M. H. Rahman, A. Kulkarni, M. Tehranipoor, and F. Farahmandi, “Ftc: A universal framework for fault-injection attack detection and prevention,” IEEE Transactions on Very Large Scale Integration (VLSI) Systems , vol. 32, no. 7, pp. 1311–1324, 2024. 8Cooperative H∞ Fault-Tolerant Tracking with Sensor Faults 
+
+Proof 1 (Proof of Proposition 1) If ˆyi = y0, ∀i then ˆ¯y = ¯ y0 and hence (L ⊗ Iny )ˆ ¯y = ( L ⊗ Iny )¯ y0 = ( A0 ⊗ Iny )¯ y0,implying ¯e = 0mn y by definition. Conversely, assume ¯e = 0mn y and the condition of Remark 1 hold. We show that this implies ˆyi = y0 for all i. Assume ny = 1 and ¯e = 0m, we obtain ˆ¯y = Am ˆ¯y + A0 ¯y0. Notice that by 
+
+(1) , for each i ∈ { 1, . . . , m }, we have ∑ 
+
+> j∈N i
+
+wij + wi0 = 1 and wij , w i0 ≥ 0, so ˆyi is a convex combination of 
+
+{ˆyj : j ∈ N i} ∪ { x0}.Let ˜yi := ˆ yi − y0 and |˜yi⋆ | = max 1≤i≤m |˜yi|. Subtracting y0 from ˆyi = ∑ 
+
+> j∈N i
+
+wij ˆyj + wi0y0 results in the following 
+
+˜yi = ∑ 
+
+> j∈N i\{ 0}
+
+wij ˜yj . Taking absolute values and using |˜yj | ≤ | ˜yi⋆ |,
+
+|˜yi⋆ | ≤ ∑ 
+
+> j
+
+wi⋆j |˜yj | ≤ | ˜yi⋆ | ∑ 
+
+> j
+
+wi⋆j ≤ | ˜yi⋆ |,
+
+which implies |˜yj | = |˜yi⋆ | whenever wi⋆j > 0 and the signs of ˜yj and ˜yi⋆ coincide. Since at least one node has 
+
+wi0 > 0 and every node is reachable from 0 by Remark 1, we obtain ˜yi = 0 for that node and hence ˜yi = 0 for all i,i.e., ˆyi = y0 for all i. In particular ˆyi = ˆ yj for all i, j . For vector outputs ˆyi ∈ Rny , the same argument applies which yields ˆyi = y0 for all i and completes the proof. 
+
+Proof 2 (Proof of Theorem 1) Let the Lyapunov function be V (t) = ¯ ϵ⊤(t)P¯ϵ(t), with P ≻ 0. Using (10) , then 
+
+˙V = ¯ ϵ⊤[P(F1Aa − LE 2) + ( F1Aa − LE 2)⊤P]¯ϵ
+
++ 2 ¯ ϵ⊤PF 1D ¯v. 
+
+Introduce H := PL (due to bilinear in P and L), such that L = P−1H. By adding and subtracting ¯ϵ⊤¯ϵ and δ2 ¯v⊤ ¯v,
+
+˙V + ¯ ϵ⊤¯ϵ − δ2 ¯v⊤ ¯v =
+
+[¯ϵ
+
+¯v
+
+]⊤ [∆ PF 1D
+
+∗ −δ2I¯nx
+
+] [ ¯ϵ
+
+¯v
+
+]
+
+. (20) 
+
+where ∆ = PF 1Aa + A⊤ 
+
+> a
+
+F⊤ 
+
+> 1
+
+P − HE 2 − E⊤ 
+
+> 2
+
+H⊤ + I¯nx+¯ ny . Thus the LMI condition Π < 0 in (11) is exactly 
+
+˙V + ∥¯ϵ∥2 − δ2∥¯v∥2 < 0 for all (¯ ϵ, ¯v)̸ = 0 .
+
+Equivalently, ˙V ≤ −∥ ¯ϵ∥2 +δ2∥¯v∥2. Two conclusions follow immediately: (i) for ¯v(t) ≡ 0 we achieve ˙V ≤ −∥ ¯ϵ∥2 ≤ 0.Since V is positive definite and radially unbounded in ¯ϵ, this implies ¯ϵ(t) → 0 as t → ∞ ; hence the error dynamics are asymptotically stable; (ii) the inequality ˙V ≤ −∥ ¯ϵ∥2 + δ2∥¯v∥2 is the standard dissipation inequality with storage function V and supply rate s(¯ v, ¯ϵ) = δ2∥¯v∥2 − ∥ ¯ϵ∥2. By the boundedreal lemma, this is equivalent to the error system having H∞ gain (from ¯v to ¯ϵ) strictly less than δ, completing the proof. 
+
+Proof 3 (Proof of Theorem 2) Let Q ≻ 0 be the Lyapunov matrix and consider the quadratic storage function 
+
+V (¯ x) = ¯ x⊤Q¯x. Let the signal ¯ϑ := KE 1¯ϵ enters the performance inequality with weight α > 0. The derivative of V along (14) is ˙V = ¯ x⊤(Q(A + BK ) + ( A + BK )⊤Q)¯x + 2¯ x⊤QB θ ¯θ. 
+
+To enforce the dissipation inequality 
+
+˙V + ¯ x⊤ ¯x − α ¯ϑ⊤ ¯ϑ − δ2 ¯v⊤ ¯v < 0, ∀(¯ x, ¯ϑ, ¯v)̸ = 0 
+
+define ˆ∆ := Q(A + BK ) + ( A + BK )⊤Q + I¯nx . Then the above inequality is equivalent to 
+
+
+
+¯x
+
+¯ϑ
+
+¯v
+
+ 
+
+> ⊤
+
+
+
+ˆ∆ −QB QD 
+
+∗ −αI ¯nu 0
+
+∗ ∗ −δ2I¯nv
+
+
+
+¯x
+
+¯ϑ
+
+¯v
+
+ < 0, (21) 
+
+for all nonzero (¯ x, ¯ϑ, ¯v). By the bounded real lemma, (21) implies that the closed–loop system is asymptotically stable and satisfies ∥¯x∥2 < γ ∥¯θ∥2.To obtain an LMI that is affine in the decision variables, introduce the change of variables R := Q−1 and G := KR .Pre- and post–multiplying (21) by diag {R, I ¯nu , I ¯nv } and its transpose yields the equivalent matrix inequality 
+
+
+
+˜∆ −B D
+
+∗ −αI ¯nu 0
+
+∗ ∗ −δ2I¯nv
+
+ < 0,
+
+where ˜∆ = AR + RA ⊤ + BG + G⊤B⊤ + RR .
+
+9Cooperative H∞ Fault-Tolerant Tracking with Sensor Faults 
+
+The term RR is quadratic in the decision variable R. To obtain an LMI that is affine in (R, G) we apply a Schur complement. Writing ˜∆ = ¯∆ + RR where ¯∆ := AR + RA ⊤ + BG + G⊤B⊤, and using the equivalence 
+
+¯∆ + RR < 0 ⇐⇒ 
+
+[ ¯∆ R
+
+∗ −I¯nx
+
+]
+
+< 0,
+
+we arrive at the LMI (15) , which is affine in (R, G) and thus convex. Therefore, any pair (R, G) satisfying (15) 
+
+defines, via K = GR −1, a feedback law that stabilizes the closed–loop system and achieves the desired weighted H∞
+
+bound from ¯θ to ¯x.
+
+Proof 4 (Proof of Theorem 3) Here L is invertible and x0 is constant. Differentiating (17) and using ¯x = ( L ⊗
+
+Inx )−1[¯ex + ( A0 ⊗ Inx )¯ x0
+
+] (obtained from rearrangement of (17) ) gives 
+
+˙¯ex = ( L ⊗ Inx )( A + BK )¯ x + ( L ⊗ Inx )Bθ ¯θ∗
+
+= Φ¯ ex + ¯ϕ0 + Bϕ ¯θ∗, (22) 
+
+where Φ := ( L ⊗ Inx )( A + BK )( L ⊗ Inx )−1, ¯ϕ0 := ( L ⊗ Inx )( A + BK )( L ⊗ Inx )−1(A0 ⊗ Inx )¯ x0, and Bϕ := (L ⊗ Inx )Bθ . Since Theorem 2 guarantees that A + BK is Hurwitz and L ⊗ Inx is nonsingular, the matrix Φ is also Hurwitz (similarity transformation). Because Φ is Hurwitz, for any chosen positive definite matrix Q ∈ R¯nx×¯nx there exists a unique Pe ≻ 0 solving the Lyapunov equation Φ⊤Pe + PeΦ = −Q. Let ¯e⋆ be any equilibrium of (22) in the disturbance–free case ¯θ∗ ≡ 0, i.e. a solution of Φ¯ e⋆ + ¯ϕ0 = 0 . Define the shifted error variable ˜¯e := ¯ ex − ¯e⋆. Then ˜¯e satisfies 
+
+˙˜¯e = Φ˜ ¯e + Bϕ ¯θ∗. (23) 
+
+Consider the Lyapunov function V (˜ ¯e) = ˜ ¯e⊤Pe ˜¯e with Pe ≻ 0. Differentiating along trajectories of (23) gives 
+
+˙V = ˜ ¯e⊤(Φ ⊤Pe + PeΦ)˜ ¯e + 2˜ ¯e⊤PeBϕ ¯θ∗
+
+= −˜¯e⊤Q˜¯e + 2˜ ¯e⊤PeBϕ ¯θ∗.
+
+Let λmin (Q) denote the smallest eigenvalue of Q and define κ := ∥PeBϕ∥. Then, ˙V ≤ − λmin (Q)∥˜¯e∥2 + 2 κ∥˜¯e∥∥ ¯θ∗∥.Next, applying the Young inequality 2ab ≤ ca 2 + c−1b2 to 2κ∥˜¯e∥∥ ¯θ∗∥ with a = ∥˜¯e∥, b = κ∥¯θ∗∥, and c = λmin (Q)/2,yields 
+
+˙V ≤ − λmin (Q)2 ∥˜¯e∥2 + 2κ2
+
+λmin (Q) ∥¯θ∥2.
+
+Using the bounds λmin (Pe)∥˜¯e∥2 ≤ V (˜ ¯e) ≤ λmax (Pe)∥˜¯e∥2, then ∥˜¯e∥2 ≥ V (˜ ¯e)/λ max (Pe). Hence ˙V ≤ − αV +
+
+β∥¯θ∗∥2, with α := λmin (Q)/[2 λmax (Pe)] and β := 2 κ2/λ min (Q).The linear differential inequalities imply the ISS estimate 
+
+∥˜¯e(t)∥ ≤ c1e−c2t∥˜¯e(0) ∥ + c3 sup  
+
+> 0≤τ≤t
+
+∥¯θ∗(τ )∥,
+
+where the constants are c1 = √λmax (Pe)/λ min (Pe), c2 = α/ 2, and c3 = √β/αλ min (Pe). Since ¯ex = ˜ ¯e + ¯ e⋆ and 
+
+¯e⋆ is constant, this yields a bound of the form (18) with new constants c1, c 2, c 3 > 0.In the disturbance–free case ¯θ∗ ≡ 0, we have ˙V ≤ − αV and therefore ˜¯e(t) → 0 exponentially, so ¯ex(t) → ¯e⋆. For constant x0, one typically chooses the feedback so that ¯e⋆ = 0 , and then ¯ex(t) → 0. Finally, Proposition 1 implies that xi → x0 and xi − xj → 0 for all i, j , i.e. the network achieves cooperative consensus tracking of the setpoint. 
+
+Proof 5 (Proof of Corollary 1) The result follows directly from Theorem 3 and the linear relation yi = Cixi, which implies that bounded (or vanishing) cooperative state errors yield bounded (or vanishing) cooperative output errors. 
+
+10
