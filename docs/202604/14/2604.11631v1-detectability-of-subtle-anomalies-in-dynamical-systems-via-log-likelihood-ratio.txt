@@ -1,0 +1,1901 @@
+Title: Detectability of Subtle Anomalies in Dynamical Systems via Log-Likelihood Ratio
+
+URL Source: https://arxiv.org/pdf/2604.11631v1
+
+Published Time: Tue, 14 Apr 2026 02:32:43 GMT
+
+Number of Pages: 8
+
+Markdown Content:
+# Detectability of Subtle Anomalies in Dynamical Systems via Log-Likelihood Ratio 
+
+Alejandro Penacho Riveiros, Matthieu Barreau, and Nicola Bastianello 
+
+Abstract — Industrial control applications require detecting system anomalies as accurately and quickly as possible to enable prompt maintenance. In this context, it is common to consider several possible plant models, each linked to a different anomaly. The log-likelihood ratio method can then be used to identify the most accurate model and thereby classify which anomaly, if any, has occurred. Although the method has been applied to a wide variety of systems, there is no formal analysis of what makes anomalies more or less prone to detection. In this paper, we investigate a real-time anomaly detector based on the log-likelihood ratio and provide a theoretical characterization of its error rate when it is applied to linear Gaussian systems. We showcase the performance of this algorithm and the characterization obtained, and demonstrate how the latter can be leveraged for observer design. 
+
+I. I NTRODUCTION 
+
+Industrial process monitoring is essential for ensuring the safe and efficient operation of complex systems such as chemical plants, energy facilities, and manufacturing processes [1]. Advances in sensing technologies and the widespread adoption of Internet of Things (IoT) infrastruc-tures have enabled the collection of large volumes of data from distributed components, providing new opportunities for real-time monitoring and decision-making [2]. The main objective of process monitoring is to detect deviations of the plant from nominal system behavior. Such deviations may arise from component degradation, environ-mental changes, or external disturbances [3]. These devia-tions can indicate the onset of critical faults, such as early-stage material degradation or sensor drift. Detecting these subtle anomalies, also called incipient faults, reliably and in a timely manner, is therefore a key requirement in modern monitoring systems [4], [5], [6]. The problem of detecting deviations from nominal be-havior has been addressed using numerous approaches of varying complexity. Early methods relied on statistical tests applied directly to measured data, often neglecting the under-lying system dynamics [7] and lacking real-time applicabil-ity. Subsequent developments have incorporated knowledge of the plant’s dynamical model, leading to model-based fault detection techniques based on observers and residual gener-ation [8], [9]. More recently, data-driven approaches, such as machine learning and deep learning methods, have been pro-posed to capture complex patterns in large datasets without  
+
+> This work was supported by the Wallenberg AI, Autonomous Systems and Software Program (WASP) funded by the Knut and Alice Wallenberg Foundation. The authors are with the Department of Decision and Control Systems, and Digital Futures, KTH Royal Institute of Technology, Stockholm, Swe-den
+
+{alejpr,barreau,nicolba }@kth.se .
+
+explicit model assumptions [10], [11], often outperforming traditional approaches at the expense of explainability. Despite the practical success of all these approaches, their performance is usually evaluated empirically, and limited attention has been given to quantifying the number of obser-vations that allow to reliably detect different types of anoma-lies [12]. This question becomes particularly important when deviations from nominal behavior are small, as in models with very similar statistical properties [13]. In such cases, distinguishing between hypotheses is inherently difficult and may require a large number of measurements, which can be problematic in applications where rapid detection is needed, as is usually the case in changepoint detection problems [14]. In this paper, we study anomaly detection and classifi-cation when the models differ only slightly. Focusing on linear systems driven by Gaussian noise, we analyze how the magnitude and structure of deviations from nominal behavior affect their detectability, and how many observations are required to identify the correct model with a prescribed level of confidence. To this end, we employ the cumulative log-likelihood ratio [15], [16], adapted to dynamical systems. Once we have adapted the cumulative log-likelihood ratio method to steady-state linear-Gaussian systems to detect and classify anomalies, our main contributions are: 1) We characterize the statistical properties of the ratio, which allow us to derive an analytical bound to the number of output measurements required to detect and classify two competing anomalies. 2) We provide a heuristic to approximate this analytical bound in practice, based on e.g. historical data. 3) We demonstrate the numerical detection performance of the algorithm. Additionally, we show how to lever-age it for observer design, highlighting the important trade-off between observer accuracy and detectability. The remainder of the paper is organized as follows. Section II introduces the problem formulation and the cu-mulative likelihood-ratio. Section III applies likelihood-based detection to sequences of observations, deriving detectability properties as a function of deviations. This sets the stage for Section IV, which extends these results to dynamical systems. Section V applies the proposed method for detection and observer design, presenting numerical results. Conclu-sions and future work are discussed in Section VI. II. P ROBLEM STATEMENT AND PRELIMINARIES 
+
+We proceed by introducing the problem setup: first, defining the system whose deviations we want to detect; 
+
+> arXiv:2604.11631v1 [eess.SY] 13 Apr 2026
+
+second, how these deviations are defined; and finally, how the cumulative log-likelihood ratio is used to detect them. 
+
+A. Model description 
+
+We consider a linear, discrete dynamical system Π =(A, C, Q, R ), with state x ∈ Rn and measurements y ∈ Rp.Their evolution is given by 
+
+xk+1 = Ax k + wk wk ∼ N (0 , Q ),yk = Cx k + vk vk ∼ N (0 , R ), (1) where A ∈ Rn×n is the transition matrix, C ∈ Rp×n is the observation matrix, Q ∈ Rn×n is the covariance of the process noise and R ∈ Rp×p is the covariance of the observation noise. Both the process and observation noise are i.i.d. and independent from each other. An important aspect of this paper is our focus on au-tonomous systems driven by zero-mean Gaussian noise, motivated by closed-loop systems that are stabilized around a fixed operating condition via state feedback. A consequence of (1) is that E[xk] = E[yk] = 0 once the effect of initial conditions has dissipated. This rules out most anomaly detection techniques, designed to detect additive faults, and motivates the need for detection methods that pick up more subtle clues of deviation [4]. An additional complication in our setup is that the actual system matrices are unknown. Instead, we have knowledge of a nominal plant model, defined as Π∗ = ( A∗, C ∗, Q ∗, R ∗),which is expected to be close to the actual plant in standard conditions. This nominal plant can be obtained through first-principles modeling, system identification, or a combination of both. Our analysis then is based on characterizing the actual system’s model via a set of possible deviations from the nominal model, each one e.g. due to degradation of a different component. Specifically, let the model deviation i be characterized by Π∆ 
+
+> i
+
+= ( A∆ 
+
+> i
+
+, C ∆ 
+
+> i
+
+, Q ∆ 
+
+> i
+
+, R ∆ 
+
+> i
+
+), then the system is modeled as a linear combination of deviations w.r.t. Π∗:
+
+Πγ =Π ∗ +
+
+> N∆
+
+X
+
+> i=1
+
+γiΠ∆ 
+
+> i
+
+≜ A∗ +
+
+> N∆
+
+X
+
+> i=1
+
+γiA∆ 
+
+> i
+
+, (2) 
+
+C∗ +
+
+> N∆
+
+X
+
+> i=1
+
+γiC∆ 
+
+> i
+
+, Q ∗ +
+
+> N∆
+
+X
+
+> i=1
+
+γiQ∆ 
+
+> i
+
+, R ∗ +
+
+> N∆
+
+X
+
+> i=1
+
+γiR∆
+
+> i
+
+!
+
+,
+
+with weights γ = [ γ1, γ 2, . . . , γ N∆ ] ∈ RN∆ . As an example, consider a system whose A depends on a parameter κ
+
+representing the damping of some internal mechanism; the deviation related to a change in this parameter then is described as Πi = (( ∂A )/(∂κ ), 0, 0, 0) . We remark that no loss of generality is incurred by using this representation, since an arbitrary number of deviations can be accounted for. In practice, the weights γ are of course unknown, since we do not have access to the actual system’s model. Rather, our detection approach will rely on testing different hypotheses about the values of these weights, selecting those that yield more accurate predictions of the system’s behavior. The detection problem we address in this paper is further complicated by the following features of the systems that we consider. First of all, we assume that any deviated system 
+
+Πγ remains stable, for example, because the system has a large stability margin. Therefore, detection cannot rely on the coarse differences in the system’s behavior that would be caused by an unstable system diverging. We remark that a large stability margin is typically observed in industrial pro-cesses operating in safe regimes and using robust controllers. Secondly, we assume that model deviations are small, that is, ∥γ∥ ≪ 1. These deviations are harder to detect as they have a less obvious impact on the system’s behavior, thus requiring a specialized detection technique. As we will show later, this detection technique requires a larger number of measurements to compensate for the small magnitudes of the deviations at play. Thus, characterizing a sufficient number of measurements for detectability is important. 
+
+B. Model discrimination using cumulative log-likelihood 
+
+As discussed above, the actual deviation γ is unknown. Therefore, in this paper, we consider two hypotheses pa-rameterized by deviations’ weights α, β ∈ RN∆ , and aim to determine which one better explains the sequence of measurements {yk}Nk=1 we collect from the system. The metric used for this task is the cumulative log-likelihood, defined as 
+
+L({yk}Nk=1 |α, β ) = 
+
+> N
+
+X
+
+> k=1
+
+L(yk|α, β ) = 
+
+> N
+
+X
+
+> k=1
+
+log p(yk|α)
+
+p(yk|β) ,
+
+where p(y|α) is the probability of observing α given the model α. A positive log-likelihood ratio implies that α
+
+explains the data better than β, and therefore yields a more accurate representation Πα of the actual system’s model Πγ .In the remainder of the paper, β will represent a model close to nominal, and α a model of anomalous behavior. 
+
+C. Problem formulation 
+
+We are now ready to formalize the problem of interest. Consider a system represented by the unknown model Πγ
+
+in (2), based on a set of N∆ possible deviations from the nominal model Π∗. Let α, β ∈ RN∆ be hypotheses for the values of the unknown γ, with α representing anomalous behavior requiring corrective action. The objective is to determine, via the cumulative log-likelihood, which of Πα
+
+and Πβ better predicts the system’s model, alerting to the need for maintenance when it is the latter. In particular, we want to characterize the probability that the log-likelihood score is positive or negative as a function of the number of measurements. The proposed algorithm to solve this problem is presented in two steps. In section III (S TEP 1), we start by showing how to apply the log-likelihood score to distinguish which distribution generated measurements {yk}Nk=1 . Section IV (S TEP 2) will then extend this result to distinguish between dynamical models generating {yk}Nk=1 .III. S TEP 1: L OG -LIKELIHOOD DISCRIMINATION FOR 
+
+STATIC NORMAL DISTRIBUTIONS 
+
+This section prepares the tools and results needed to design the proposed detection algorithm for dynamical systems. A. Log-likelihood discrimination of distributions 
+
+We focus here on an i.i.d. sequence of measurements generated by the unknown distribution yk ∼ N (0 , Σγ ), with 
+
+Σγ = Σ ∗ + XN∆ 
+
+> i=1
+
+γiΣ∆ 
+
+> i
+
+, (3) where, following the notation of section II-A, Σ∗ represents the nominal covariance, and Σ∆ 
+
+> i
+
+are several possible devi-ations. The goal is to distinguish which normal distribution with covariance either Σα or Σβ (parameterized by α, β ∈
+
+RN∆ , resp.) better approximates N (0 , Σγ ).To this end, we can compute the cumulative log-likelihood ratio of {yk}Nk=1 between the two covariance matrices as: 
+
+L({yk}Nk=1 |α, β ) = 
+
+> N
+
+X
+
+> k=1
+
+log 
+
+> 1
+
+√2π|Σα| exp −y⊤ 
+
+> k
+
+Σ−1 
+
+> α
+
+yk
+
+
+
+> 1
+
+√2π|Σβ | exp 
+
+h
+
+−y⊤ 
+
+> k
+
+Σ−1 
+
+> β
+
+yk
+
+i
+
+= 12
+
+"
+
+N log |Σβ ||Σα| +
+
+> N
+
+X
+
+> k=1
+
+y⊤ 
+
+> k
+
+(Σ −1 
+
+> β
+
+− Σ−1 
+
+> α
+
+)yk
+
+#
+
+. (4) When the ratio is positive, α is the more accurate model; otherwise, β.
+
+B. Statistical properties of the log-likelihood ratio 
+
+We are now interested in characterizing the statistical properties of the log-likelihood ratio. The following results can then be used in practice to evaluate the detection mechanism’s accuracy. We start with the following general characterization; see proof in the Appendix. 
+
+Lemma 1. The cumulative log-likelihood ratio between the distributions characterized by Σα and Σβ follows, when 
+
+N → ∞ , the distribution L({yk}Nk=1 |α, β ) ∼ N (μ, σ 2),μ = N
+
+2
+
+
+
+log |Σβ ||Σα| + tr 
+
+
+
+(Σ −1 
+
+> β
+
+− Σ−1 
+
+> α
+
+)Σ γ
+
+
+
+, (5) 
+
+σ2 = N
+
+2 tr 
+
+h
+
+(Σ −1 
+
+> β
+
+− Σ−1 
+
+> α
+
+)Σ γ (Σ −1 
+
+> β
+
+− Σ−1 
+
+> α
+
+)Σ γ
+
+i
+
+. (6) Note that, when Σγ = Σ β , the expected value of the log-likelihood ratio becomes N ·DKL (N (0 , Σα), N (0 , Σβ )) ,where DKL is the Kullback-Leibler divergence. This connec-tion is to be expected, as the KL divergence is the expected value of the log-likelihood ratio [17]. With the characterization of its distribution in place, we can determine the probability of the cumulative log-likelihood being positive, that is, α being favored over β:
+
+P (L({y}Nk=1 |α, β ) > 0) = cdf 
+
+ μσ
+
+
+
+=
+
+Z μσ
+
+> −∞
+
+e− t22
+
+√2π dt, (7) where cdf( ·) is the cumulative distribution function of the normal distribution with mean 0 and unit variance. The formula (7) is difficult to interpret, as it does not make use of the linear combination structure (3) for Σγ (and Σα,
+
+Σβ ). The following lemma then simplifies it in the case of interest; see proof in the Appendix. 
+
+Lemma 2. Under the parameterization given by (3) , the mean and covariance of the log-likelihood can be approxi-mated quadratically around Σ∗ as 
+
+μ = N
+
+4 (α + β − 2γ)⊤Λ( α − β) + O(α3, β 3, γ 3), (8) 
+
+σ2 = N
+
+2 (α − β)⊤Λ( α − β) + O(α3, β 3, γ 3), (9) 
+
+where Λij = tr Σ−1 
+
+> ∗
+
+Σ∆ 
+
+> i
+
+Σ−1 
+
+> ∗
+
+Σ∆
+
+> j
+
+ .
+
+Connecting again with the field of statistics, we note that 
+
+Λ corresponds to the Fisher information of the distribution 
+
+N (0 , Σ∗). This is again expected, as the Fisher information quantifies the amount of information a random variable carries about a parameter of its distribution [17]. The analytical expressions (8) and (9) provide insights into which deviations in the covariances are easier or harder to detect. For instance, if β is an accurate model of the actual system ( β = γ), combining (7), (8), and (9) leads to 
+
+P  L({y}Nk=1 |α, β  = cdf 
+
+ μσ
+
+
+
+≈ cdf −√N
+
+2√2
+
+q
+
+(α − β)⊤Λ( α − β)
+
+!
+
+.
+
+Then, the probability of the wrong model ( α) obtaining a higher score falls at a rate of p(α − β)⊤Λ( α − β); this quantifies the false positive probability. Thus, if the models are similar, reliable model discrimination will require more measurements. On the other hand, if γ = ( α + β)/2 (the hypotheses are equally accurate), the average value of the cumulative log-likelihood ratio is 0, and, as expected, no hypothesis is favored. More generally, as discussed previously, γ is unknown in practice. We can then plug an estimated value ˆγ into Lemma 2, e.g. constructed from historical data or first principles, to evaluate the accuracy of our detection. IV. S TEP 2: L OG -L IKELIHOOD -B ASED ANOMALY 
+
+DETECTION 
+
+We are now ready to turn our attention to the problem of interest: selecting the model, between Πα and Πβ , that most accurately predicts the measurements sequence {yk}Nk=1 gen-erated by (1) with Πγ . Following our discussion in section II, we are focused on systems with small deviations that require a long sequence of measurements for reliable detection. Thus, we assume throughout that most measurements are collected when the system has settled into steady-state. To this end, the first step is to translate the results of section III into suitable tools. 
+
+A. Detection via measurement covariance 
+
+To leverage Section III, we need to reformulate the detec-tion problem as discriminating between covariance matrices that better model the sequence of measurements. 1) Nominal measurement covariance: For a nominal plant model Π∗, the covariance of xk at steady-state E[xkx⊤ 
+
+> k
+
+] = Σx 
+
+> ∗
+
+can be obtained based on the fact that it does not depend on k, which leads to the discrete Lyapunov equation: 
+
+Σx 
+
+> ∗
+
+= E[xk+1 x⊤
+
+> k+1
+
+] = E (A∗xk + wk)( A∗xk + wk)⊤
+
+= A∗E xkx⊤
+
+> k
+
+ A⊤∗ + E[wkw⊤ 
+
+> k
+
+] = A∗Σx 
+
+> ∗
+
+A⊤∗ + Q∗.
+
+(10) This equation can be solved easily either with the direct or the bilinear method. After computing the steady state covariance of x, the covariance of the measurements is then characterized by: 
+
+Σy 
+
+> ∗
+
+= E[yky⊤ 
+
+> k
+
+] = E
+
+h
+
+(C∗xk + vk) ( C∗xk + vk)⊤i
+
+= C∗E xkx⊤
+
+> k
+
+ C⊤∗ + E vkv⊤
+
+> k
+
+ = C∗Σx 
+
+> ∗
+
+C⊤∗ + R∗. (11) 
+
+2) Deviation of measurement covariance: Given the mea-surement covariance for the nominal model Π∗, we now want to determine how it changes when we make small changes to the model, described by the model deviations Π∆ 
+
+> i
+
+. For a model deviation Π∆ 
+
+> i
+
+, the steady-state covariance of the state of Π∗ + γiΠ∆ 
+
+> i
+
+can be computed as 
+
+Σx 
+
+> ∗
+
++ γiΣx, ∆ 
+
+> i
+
+= ( A∗ + γiA∆ 
+
+> i
+
+)(Σ ∗ + γiΣx, ∆ 
+
+> i
+
+)( A∗ + γiA∆ 
+
+> i
+
+)⊤
+
++ Q∗ + γiQ∆ 
+
+> i
+
+.
+
+We then linearize this expression with respect to γ by remov-ing higher-order terms, which yields the discrete Lyapunov equation: 
+
+Σx, ∆ 
+
+> i
+
+= A∗Σx, ∆ 
+
+> i
+
+A⊤∗ + A∆ 
+
+> i
+
+Σ∗A⊤∗ + A∗Σ∗A∆ 
+
+> i
+> ⊤
+
++ Q∆ 
+
+> i
+
+. (12) We can follow a similar procedure to obtain Σy, ∆ 
+
+> i
+
+:
+
+Σy 
+
+> ∗
+
++ γiΣy, ∆ =(C∗ + γiC∆)(Σ x 
+
+> ∗
+
++ γiΣx, ∆)( C∗ + γiC∆)⊤ + R∗ + γiR∆ 
+
+> i
+
+,
+
+and removing higher order terms again, we obtain 
+
+Σy, ∆ 
+
+> i
+
+= C∗Σx, ∆ 
+
+> i
+
+C⊤∗ + C∗Σx 
+
+> ∗
+
+C∆ 
+
+> i
+> ⊤
+
++ C∆ 
+
+> i
+
+Σx 
+
+> ∗
+
+C⊤∗ + R∆ 
+
+> i
+
+. (13) Then, given a nominal plant Π∗ and a set of possible deviations Π∆ 
+
+> i
+
+, i ∈ {1, . . . , N ∆}, we can compute the nominal measurement covariance Πy 
+
+> ∗
+
+from (10) and (11), and the variation of the covariance associated with each deviation using (12) and (13). For a system Πγ , its steady state measurement covariance matrix Σyγ can therefore be approximated as (recalling that ∥γ∥ ≪ 1): 
+
+Σyγ ≈ Σy 
+
+> ∗
+
++
+
+> N∆
+
+X
+
+> i=1
+
+γiΣy, ∆ 
+
+> i
+
+. (14) 
+
+3) Detection algorithm: With this derivation in place, we can then design the following detection algorithm: 0) Input: measurement sequence {yk}Nk=1 , nominal model 
+
+Π∗, hypothesis models Πα and Πβ , with α, β ∈ RN∆ .1) Compute the nominal steady-state covariance of the measurements Σy 
+
+> ∗
+
+(see (11)), and for each deviation i,the variation matrix Σy, ∆ 
+
+> i
+
+(see (13)). 2) Compute Σyα and Σyβ applying (14) to Πα and Πβ .3) Finally, compute the cumulative log-likelihood ratio according to (4). Then select the hypothesis model α
+
+if the ratio is positive, and β otherwise. 
+
+B. Evaluating detection accuracy 1) Detection accuracy: Recall from section II that the goal is to select the hypothesis model, between Πα and 
+
+Πβ , which more accurately approximates the actual model 
+
+Πγ . Leveraging the above derivation, we can thus effectively reformulate this problem as the problem of selecting the more accurate approximation of the output covariance matrix 
+
+Σyγ in (14). Indeed, applying (14) to Πα and Πβ yields the hypothesis covariance matrices Σyα and Σyβ , and by Lemma 2 the probability of α being favored over β is determined by: 
+
+P (L({yk}Nk=1 |α, β ) > 0) 
+
+≈ cdf −√N
+
+2√2(α + β − 2γ)⊤Λ( α − β)(α − β)⊤Λ( α − β)
+
+!
+
+, (15) where Λij = tr 
+
+h
+
+(Σ y
+
+> ∗
+
+)−1Σy, ∆ 
+
+> i
+
+(Σ y
+
+> ∗
+
+)−1Σy, ∆
+
+> j
+
+i
+
+.
+
+2) Correcting for measurement correlation: A limita-tion in our approach is that it relies on Lemma 2, which was derived under the assumption of i.i.d. measurements 
+
+{yk}Nk=1 . However, the outputs of a dynamical system are not uncorrelated, as shown by the covariance matrix: 
+
+E yk+ty⊤
+
+> k
+
+ = E
+
+h
+
+(Cx k+t + vk) ( Cx k + vk)⊤i
+
+= E
+
+"
+
+C Atxk +
+
+> k+t
+
+X
+
+> i=k
+
+Ai−kwk
+
+!
+
++ vk
+
+!
+
+(Cx k + vk)⊤
+
+#
+
+= CA tΣxC⊤. (16) It is therefore important to assess how this correlation impacts the cumulative log-likelihood ratio as a detection mechanism. In particular, we first characterize this deviation when yk ∈ R in Lemma 3 (proved in Appendix), and then translate it into a heuristic to correct P (L({yk}Nk=1 |α, β ) >
+
+0) when yk ∈ Rp, p ≥ 1.
+
+Lemma 3. Let {yk}Nk=1 , yk ∈ R, be output measurements of (1) such that E[ykyk+t] = λtE[ykyk], with λ ∈ [0 , 1) .Then, as N → ∞ , the distribution of the cumulative log-likelihood ratio approximates a normal distribution with mean μ and variance σ2 defined as 
+
+μ = μuncorr ., σ2 = σ2uncorr 
+
+1 + λ2
+
+1 − λ2 ,
+
+where μuncorr . and σ2uncorr . are the mean and variance of the uncorrelated case, defined in Lemma 1. 
+
+We can then take inspiration from this result to propose the following correction heuristic: the covariance between steps, given by (16), suggests that it decays at a rate determined by the largest eigenvalue λmax of A. Therefore, we correct our approximation by: 
+
+Pcorr (L > 0) = cdf μσ
+
+s
+
+1 − λ2max 
+
+1 + λ2max 
+
+!
+
+.We can then leverage this approximation to provide aconfidence bound on the cumulative log-likelihood ratio, indicating that a stronger correlation between measurements yields a less accurate detection threshold. V. A PPLICATION TO DETECTION AND OBSERVER DESIGN 
+
+In this section, we illustrate the application of the proposed results to: 1) detection of deviations from the nominal model, and 2) observer design to increase detection sensitivity. 1
+
+A. Deviation detection for double pendulum Setup: We consider an inverted double pendulum, sta-bilized in vertical position by state feedback which controls the torque at the two joints. Let θ1 and θ2 be the angles of the first and second joint (w.r.t. the vertical). Then the state vector is x = θ1 ˙θ1 θ2 ˙θ2
+
+, and linearizing and discretizing yields the open loop model: 
+
+Ao =
+
+
+
+1 Ts 0 0 
+
+> Tsmtgm1l1
+
+1 − Tsd1
+
+> m1l21
+
+− Tsm2gm1l1
+
+> Tsd2
+> m1l1l2
+
+0 0 1 Ts
+
+− Tsmtgm1l2 
+
+> Tsd1
+> m1l1l2
+> Tsmtgm1l2
+
+1 − Tsmtd2
+
+> m1m2l22
+
+ ,B = Ts
+
+
+
+0 0
+
+> 1
+> m1l21
+
+− 1
+
+> m1l1l2
+
+0 0
+
+− 1
+
+> m1l1l2
+> mt
+> m1m2l22
+
+ , C =
+
+1 0 0 00 0 1 0
+
+
+
+,Q = diag(0 , 0.5, 0, 0.6) , R = 0 .1I. 
+
+The parameters are the masses of the pendulums m1 = 1 
+
+and m2 = 1 .2 kg, with mt = m1 + m2 kg, the friction at the joints d1 = d2 = 0 .3 Nms , gravity acceleration g =9.8 m /s2, lengths of the arms l1 = 0 .5 and l2 = 0 .2, and sampling time Ts = 0 .2 s. The state feedback gain is: K =33 .04 6.76 1.33 0.99 4.72 1.52 3.54 0.2
+
+
+
+, which places the closed-loop poles at −5 × 10 −4, −0.6, −0.2 and −0.4. In this scenario, the nominal model of the closed-loop plant is Π∗ = ( Ao −
+
+BK, C, Q, R ).We consider three possible deviations: friction increase at the first or second joint (modifying either d1 or d2), and an increase in torque noise at the first joint, modeled as: 
+
+A∆1 = ∂∂d 1
+
+A, A∆2 = ∂∂d 2
+
+A, Q∆3 = diag(0 , 0.5, 0, 0) ,
+
+where the partial derivatives are evaluated for the numerical values of m1, m 2, d 1, d 2, g, l 1, l 2 introduced above, and all unspecified deviation matrices are set to 0.
+
+Detection sensitivity: Applying the results in section IV-B.1, we characterize the matrix Λ and its correlation normal-ization ( R, D) as 
+
+Λ = 
+
+
+
+1.1 7.09 1.25 7.09 72 .69 24 .33 1.25 24 .33 13 .25 
+
+ = D 12 RD 12      
+
+> 1The code can be found in https://github.com/ AlejandroPenacho/cdc26-log-likelihood
+
+R =
+
+
+
+1.00 0.80 0.33 0.80 1.00 0.78 0.33 0.78 1.00 
+
+ D =
+
+
+
+1.1 0 00 72 .76 00 0 13 .25 
+
+ .
+
+We can now employ these matrices to characterize the detectability of different deviations. First of all, a larger element on the diagonal of Λ indicates a deviation that is easier to detect (in this case, friction increase on the second joint is the easiest to detect). Secondly, the correlation matrix 
+
+R provides a picture of how deviations interact with each other. A large off-diagonal element Rij signifies that devi-ations i and j have a similar impact on measurements, and are thus more difficult to distinguish. Generally, small off-diagonals are preferable for more accurate classification of deviations. Nonetheless, the ability to detect that a deviation has occurred (even without correctly classifying) is still of great value. 
+
+Numerical evaluation: We consider now γ =[0 .03 0. 0.01] (which is not available to the detection algorithm), and candidate models, α = [0 . 0. 0.] and β =[0 .04 0 0] , neither of them tuned to the actual system, but β closer to it. In this setup, we evaluate the performance of the detection algorithm of section IV-A.3 as follows. We run 2000 simulations during which we collect N = 50000 
+
+measurements from the system, and use (4) to compute the cumulative log-likelihood ratio at each measurement time k.The evolution of the ratio is plotted in Fig. 1 (upper). At each time k, we then compute the percentage of trajectories for which the ratio is positive (red region), and plot it in Fig. 1 (solid line in the lower plot). As we can see, the percentage 
+
+Fig. 1: Upper: 2000 trajectories of the cumulative log-likelihood for the stabilized inverted double pendulums. 
+
+Lower: empirical and theoretical error rates, with shaded confidence bounds. decreases from ∼ 50% (α and β are equally accurate), reaching below 5% as more measurements are collected. This indicates that the algorithm successfully selects β as the better approximation of γ.As discussed in section IV-B.2, the correlation of measure-ments for a dynamical system will influence the accuracy of the log-likelihood ratio. Using the ground truth γ, we can now compute the theoretical probability of the log-likelihood being positive as P (L > 0) = cdf( −0.00846 √N ) and its corrected version (with λmax = 0 .6) as Pcorr (L > 0) = cdf( −0.012 √N ). We then plot in Fig. 1 the theoretical error rate and the confidence bound given by the corrected probability. We see that the numerical decay-rate is slightly larger than the theoretical one, but well within the confidence bounds, demonstrating the effectiveness of this detection mechanism. 
+
+B. Observer design for friction system Setup: In this section, we investigate how the log-likelihood ratio can be leveraged to design observers that maximize the detectability of deviations. We consider a friction system stabilized around an operating point, with state space dynamics described by 
+
+A =
+
+Ts(−fv − Kp) −TsKi
+
+Ts 1
+
+
+
+, Q =
+
+0.1 00 0
+
+
+
+,C = 1 0 , R = 0.5 ,
+
+with Ts = 0 .2 s , fv = 2 .0 Nms , Kp = 5 .0 Nms and 
+
+Ki = 2 .5 Nm . We then include an observer ( ( ˆL, ˆC), to be designed) by augmenting the state to ¯x = x⊤ ˆx⊤ v⊤,which contains the estimated state ˆx and the observation noise v, treated as process noise; the resulting system is: 
+
+¯A =
+
+
+
+A 0 0
+
+− ˆL ˆC ˆL ˆC I
+
+0 0 0
+
+ , ¯Q =
+
+
+
+Q 0 00 0 00 0 R
+
+ ,
+
+¯C = C − ˆC I , ¯R = 0 .
+
+Note that the new output of the system is the innovation of the observer yk − ˆC ˆxk. Finally, we consider one deviation: an increase in viscous friction, defined as ¯A∆ 
+
+> i
+
+= ∂ ¯A/∂f v .
+
+Fig. 2: Contours of tr(Σ y
+
+> ∗
+
+) and Λ for different gains of the observer L. Red areas show unstable observer configuration. 
+
+Observer design: The goal now is to leverage the log-likelihood ratio to select an observer that maximizes detectability. To this end, for a range of possible observer gains L = [ L1, L 2], we compute: 1) matrix Λ characterizing detectability, and 2) tr(Σ y ), which represents the average squared innovation. We plot the resulting values in Fig. 2 as a heatmap in the (L1, L 2)-plane. As expected, the Kalman filter gain minimizes tr(Σ y ) (left plot). However, the Kalman gain fails to maximize detectability (right plot), which in-stead is achieved by the gain LΛ = [0 .35 , 0.05] . On the other hand, LΛ attains a value of tr(Σ y ) that is twice as large as that of the Kalman gain. This highlights an important trade-off between the observer’s accuracy and its detectability. 
+
+Fig. 3: Experimental (solid line) and theoretical (dashed line) error rates with 3 different observer configurations. 
+
+Numerical evaluation: We now compare the detectabil-ity when employing no observer ( L = [0 , 0] ), the Kalman filter, and LΛ. Specifically, we consider γ = 0 .5 (the weight on the friction deviation), and the hypothesis models α = 0 
+
+and β = γ. Following the same procedure as in section V-A, we plot in Fig. 3 the numerical and theoretical error rates for all three gain choices, along with their respective confidence bounds. We can see that LΛ, chosen to maximize Λ, indeed significantly improves detectability, while the detectability with the Kalman gain (or without observer) is quite poor. However, the Kalman gain reduces the gap between the theoretical and numerical error rates. This is because the Kalman filter makes innovation measurements uncorrelated, and, as shown in section IV-B.2, this implies that Lemma 2 provides a good approximation of the empirical error rate. This again highlights the need to find the right balance between observer accuracy and detectability. VI. C ONCLUSIONS 
+
+In this paper, we have investigated a detection mechanism for dynamical systems subject to small deviations from the nominal behavior. This method relies on the cumulative log-likelihood ratio, which allows us to theoretically charac-terize the detector’s error rate. We have then showcased the promise of this approach with applications to detection and observer design. This work opens several directions for future research. These include extending to non-autonomous systems and leveraging input for more accurate detection, and exploring our observer design approach for larger-scale systems. USAGE OF GENERATIVE AI ChatGPT (OpenAI) was used to assist with language refinement. Grammarly was used for grammar and spelling checks. All content was reviewed and verified by the authors. APPENDIX 
+
+A. Proof of Lemma 1 
+
+The cumulative log-likelihood ratio between two zero-mean normal distributions Σα and Σβ for a sequence of i.i.d. observations distributed each as yk ∼ N (0 , Σγ ) is given by: 
+
+L({yk}Nk=1 |Σα, Σβ ) = 12
+
+
+
+N log |Σβ ||Σα|
+
++
+
+> N
+
+X
+
+> k=1
+
+y⊤ 
+
+> k
+
+(Σ −1 
+
+> β
+
+− Σ−1 
+
+> α
+
+)yk
+
+#
+
+(17) The first component is constant, so we focus on the second. We first define F = Σ 12
+
+> γ
+
+
+
+Σ−1 
+
+> β
+
+− Σ−1
+
+> α
+
+
+
+Σ 12 
+
+> γ
+
+, and since F = F ⊤, we can diagonalize it with the eigenvalue decomposition F = U SU ⊤, where S = diag( λ1, λ 2, . . . ),
+
+λi being the i-th eigenvalue of F . We can then define the variable zk = U ⊤Σ− 12 
+
+> γ
+
+yk, with covariance given by 
+
+E[zkz⊤ 
+
+> k
+
+] = I. We use these two definitions to rewrite the second component of (17) as 
+
+12
+
+> N
+
+X
+
+> k=1
+
+y⊤
+
+> k
+
+
+
+Σ−1 
+
+> β
+
+− Σ−1
+
+> α
+
+
+
+yk = 12
+
+> N
+
+X
+
+> k=1
+
+z⊤ 
+
+> k
+
+Sz k
+
+= 12
+
+> N
+
+X
+
+> k=1
+> n
+
+X
+
+> d=1
+
+λdz2
+
+> k,d
+
+, = 12
+
+> n
+
+X
+
+> d=1
+
+λdNX
+
+> k=1
+
+z2
+
+> k,d
+
+,
+
+where we have used the fact that S is diagonal to write the result as a sum. For the next step, we use the property that the values of zk,d are uncorrelated to obtain a χ2 distribution with N degrees of freedom, and due to the assumption of 
+
+N being large, we approximate the distribution as normal: 
+
+12
+
+> n
+
+X
+
+> d=1
+
+λdNX
+
+> k=1
+
+z2 
+
+> k,d
+
+∼ 12
+
+> n
+
+X
+
+> d=1
+
+λdχ2 
+
+> N
+
+≈
+
+> n
+
+X
+
+> d=1
+
+λd
+
+2 N (N, 2N )=
+
+> n
+
+X
+
+> d=1
+
+N
+
+ N
+
+2 λd, N
+
+2 λ2
+
+> d
+
+
+
+= N N
+
+2
+
+> n
+
+X
+
+> d=1
+
+λd, N
+
+2
+
+> n
+
+X
+
+> d=1
+
+λ2
+
+> d
+
+!
+
+.
+
+To compute the sum of the eigenvalues and the squared eigenvalues of F , we use the property that these are equal to the traces of F and F 2, respectively, and simplifying the expression with the property tr( AB ) = tr( BA ):
+
+> n
+
+X
+
+> d=1
+
+λd = tr [ F ] = tr 
+
+h
+
+Σ 12
+
+> γ
+
+
+
+Σ−1 
+
+> β
+
+− Σ−1
+
+> α
+
+
+
+Σ 12
+
+> γ
+
+i
+
+= tr 
+
+h 
+
+Σ−1 
+
+> β
+
+− Σ−1
+
+> α
+
+
+
+Σγ
+
+i
+
+> n
+
+X
+
+> d=1
+
+σ2
+
+> d
+
+(F ) = tr [ F F ]= tr 
+
+h
+
+Σ 12
+
+> γ
+
+
+
+Σ−1 
+
+> β
+
+− Σ−1
+
+> α
+
+
+
+Σ 12 
+
+> γ
+
+Σ 12
+
+> γ
+
+
+
+Σ−1 
+
+> β
+
+− Σ−1
+
+> α
+
+
+
+Σ 12
+
+> γ
+
+i
+
+= tr 
+
+h 
+
+Σ−1 
+
+> β
+
+− Σ−1
+
+> α
+
+
+
+Σγ
+
+
+
+Σ−1 
+
+> β
+
+− Σ−1
+
+> α
+
+
+
+Σγ
+
+i
+
+Adding to the mean the first component of (17), we obtain the expression shown in the lemma. 
+
+B. Proof of Lemma 2 
+
+We can compute the derivatives of the mean and the variance using the standard rules of derivation for matrices, namely: 
+
+∂ log |Σ|
+
+∂x = tr 
+
+
+
+Σ−1 ∂Σ
+
+∂x 
+
+
+
+, ∂Σ−1
+
+∂x = Σ −1 ∂Σ
+
+∂x Σ−1,
+
+and from our parameterization of the matrices considered, we have 
+
+∂Σα
+
+∂α i
+
+= ∂Σβ
+
+∂β i
+
+= ∂Σγ
+
+∂γ i
+
+= Σ ∆ 
+
+> i
+
+∀i. 
+
+Following these standard derivation rules, the first and second order derivatives of μ and σ2 can be obtained and evaluated at Σα = Σ β = Σ γ = Σ ∗:
+
+∂μ ∂α i ∗
+
+= ∂μ ∂β i ∗
+
+= ∂μ ∂γ i ∗
+
+= 0 
+
+∂2μ∂α i∂α j ∗
+
+= ∂2μ∂β i∂γ j ∗
+
+= N
+
+2 tr Σ−1 
+
+> ∗
+
+Σ∆ 
+
+> i
+
+Σ−1 
+
+> ∗
+
+Σ∆
+
+> j
+
+
+
+∂2μ∂β i∂β j ∗
+
+= ∂2μ∂α i∂γ j ∗
+
+= − N
+
+2 tr Σ−1 
+
+> ∗
+
+Σ∆ 
+
+> i
+
+Σ−1 
+
+> ∗
+
+Σ∆
+
+> j
+
+
+
+∂2μ∂γ i∂γ j ∗
+
+= ∂2μ∂α i∂β j ∗
+
+= 0 
+
+Defining Λ as a matrix where each entry is Λij =tr(Σ −1 
+
+> ∗
+
+Σ∆ 
+
+> i
+
+Σ−1 
+
+> ∗
+
+Σ∆ 
+
+> j
+
+), the resulting quadratic expansion can be written as 
+
+μ ≈ 12
+
+N
+
+2
+
+α⊤ β⊤ γ⊤
+
+Λ 0 −Λ0 −Λ Λ
+
+−Λ Λ 0
+
+
+
+αβγ
+
+
+
+= N
+
+4 (α + β − 2γ)⊤Λ( α − β)
+
+For the variances, the same process is followed to obtain 
+
+∂σ 2
+
+∂α i ∗
+
+= ∂σ 2
+
+∂β i ∗
+
+= ∂σ 2
+
+∂γ i ∗
+
+= 0 
+
+∂2σ2
+
+∂α i∂α j ∗
+
+= ∂2σ2
+
+∂β i∂β j ∗
+
+= N tr Σ−1 
+
+> ∗
+
+Σ∆ 
+
+> i
+
+Σ−1 
+
+> ∗
+
+Σ∆
+
+> j
+
+
+
+∂2σ2
+
+∂α i∂β j ∗
+
+= −N tr Σ−1 
+
+> ∗
+
+Σ∆ 
+
+> i
+
+Σ−1 
+
+> ∗
+
+Σ∆
+
+> j
+
+
+
+∂2σ2
+
+∂α i∂μ j ∗
+
+= ∂2σ2
+
+∂β i∂μ j ∗
+
+= ∂2σ2
+
+∂μ i∂μ j ∗
+
+= 0 
+
+The resulting quadratic expansion is then 
+
+σ2 ≈ 12 N α⊤ β⊤ γ⊤
+
+Λ −Λ 0
+
+−Λ Λ 00 0 0
+
+
+
+αβγ
+
+
+
+= N
+
+2 (α − β)⊤Λ( α − β)
+
+C. Proof of Lemma 3 
+
+We consider a sequence of measurements yk ∈ R. Each measurement has zero mean and variance σ2 
+
+> y
+
+, and measure-ments at different steps are correlated by a factor λ ∈ [0 , 1) 
+
+that decays with the number of steps between them. The vector of all measurements ¯y is then defined and distributed as 
+
+¯y =
+
+
+
+y1
+
+y2
+
+...
+
+ = N (0 , ¯Σy ), ¯Σy = σ2
+
+> y
+
+
+
+1 λ λ2 · · · 
+
+λ 1 λ · · · 
+
+λ2 λ 1 · · · 
+
+... ... ... . . .
+
+ .
+
+We consider again the use of the cumulative log-likelihood ratio with two candidate variances σ2 
+
+> α
+
+and σ2 
+
+> β
+
+. To estimate its distribution after N samples, we follow the same approach as for the uncorrelated case: 
+
+L({yk}Nk=1 |σ2
+
+> α
+
+, σ 2 
+
+> β
+
+) = 12
+
+"
+
+N log σ2
+
+> β
+
+σ2
+
+> α
+
++
+
+> N
+
+X
+
+> k=1
+
+(σ−2 
+
+> β
+
+− σ−2 
+
+> α
+
+)y2
+
+> k
+
+#
+
+Analogous to the proof of Lemma 1, we obtain the eigenvalue decomposition ¯Σy = U SU ⊤, with S =diag( λ1, λ 2, · · · ) and λ being the eigenvalues of ¯Σy . Then we define ¯z = U ⊤ ¯Σ− 12 
+
+> y
+
+¯y, so it fulfills E[¯ z ¯z⊤] = I, that is, the terms are uncorrelated. We can then reduce the second term of the previous formula, exploiting the fact that S is diagonal: 
+
+> N
+
+X
+
+> k=1
+
+(σ−2 
+
+> β
+
+− σ−2 
+
+> α
+
+)y2 
+
+> k
+
+= ( σ2 
+
+> β
+
+− σ2
+
+> α
+
+)¯ y ¯y⊤
+
+= ( σ2 
+
+> β
+
+− σ2
+
+> α
+
+)¯ zS ¯z⊤ = ( σ2 
+
+> β
+
+− σ2
+
+> α
+
+)
+
+> N
+
+X
+
+> k=1
+
+λkz2
+
+> k
+
+Each term has mean λk, variance 2λk and, since the terms of ¯z are uncorrelated, we can use the Central Limit Theorem to approximate the distribution of this last expression with a normal distribution for a large value of N . The mean and variance of this distribution are given by: 
+
+μ = ( σ−2 
+
+> β
+
+− σ−2 
+
+> α
+
+)
+
+> N
+
+X
+
+> k=1
+
+λk
+
+= ( σ−2 
+
+> β
+
+− σ−2 
+
+> α
+
+)tr( ¯Σy ) = N (σ−2 
+
+> β
+
+− σ−2 
+
+> α
+
+)σ2
+
+> y
+
+σ2 = ( σ2 
+
+> β
+
+− σ2
+
+> α
+
+)2
+
+> N
+
+X
+
+> k=1
+
+λ2 
+
+> k
+
+= ( σ2 
+
+> β
+
+− σ2
+
+> α
+
+)tr( ¯Σy ¯Σy )
+
+For the μ, this is equal to N σ 2 
+
+> y
+
+, so the expected value of the cumulative log-likelihood is not affected by the corre-lation between steps. For the variance, we use the fact that 
+
+tr[ ¯Σy ¯Σy ] = PNi=1 
+
+PNj=1 ( ¯Σy ¯Σy )2 
+
+> ij
+
+since ¯Σy = ¯Σ⊤ 
+
+> y
+
+and get its asymptotic rate of increase when N → ∞ :
+
+σ2
+
+
+
+σ−2 
+
+> α
+
+− σ−2
+
+> β
+
+2 = tr[ ¯Σy ¯Σy ] = 
+
+> N
+
+X
+
+> i=1
+> N
+
+X
+
+> j=1
+
+  ¯Σy
+
+2
+
+> ij
+
+As we are interested in asymptotic behavior, we compute how the last expression increases with N as N → ∞ by taking the limit: 
+
+1
+
+N
+
+> N
+
+X
+
+> i=1
+> N
+
+X
+
+> j=1
+
+(Σ y )2 
+
+> ij
+
+= σ4
+
+> y
+
+"
+
+N + 2 
+
+> N
+
+X
+
+> i=1
+
+λi (N − i)
+
+# 
+
+> N→∞
+
+= σ2 
+
+> y
+
+N
+
+"
+
+1 + 2 
+
+> N
+
+X
+
+> i=1
+
+λi
+
+#
+
+= σ4 
+
+> y
+
+N
+
+"
+
+1 + 2 λ2
+
+> N
+
+X
+
+> i=0
+
+λ2i
+
+#
+
+= σ4 
+
+> y
+
+N
+
+
+
+1 + 2λ2
+
+1 − λ2
+
+
+
+= N σ 4
+
+> y
+
+1 + λ2
+
+1 − λ2
+
+The correlation between measurements, then, introduces a factor (1 + λ2)/(1 − λ2) to the covariance, increasing it and therefore spreading the distribution of the cumulative log-likelihood ratio. REFERENCES [1] S. Li, B. Zhou, J. Shang, X. Chen, and J. Yu, “Review of recent applications and future perspectives on process monitoring approaches in industrial processes,” Journal of Manufacturing Systems , vol. 82, pp. 509–530, Oct. 2025. [2] M. S. Reis and G. Gins, “Industrial Process Monitoring in the Big Data/Industry 4.0 Era: from Detection, to Diagnosis, to Prognosis,” 
+
+Processes , vol. 5, no. 3, p. 35, Sep. 2017. [3] “Validating control of extreme disturbance of an organic Rankine cycle using VMGsim,” in Computer Aided Chemical Engineering . Elsevier, Jan. 2018, vol. 44, pp. 745–750. [4] S. X. Ding, Model-Based Fault Diagnosis Techniques: Design Schemes, Algorithms and Tools , ser. Advances in Industrial Control. London: Springer, 2013. [5] R. Dion, M. Alamir, and T. Le Magueresse, “Anticipation, earliness, alarm cardinality: A new metric for industrial time-series anomaly detection,” IFAC-PapersOnLine , vol. 58, no. 4, pp. 192–197, Jan. 2024. [6] J. Yang and C. Delpha, “An incipient fault diagnosis methodology using local Mahalanobis distance: Detection process based on empir-ical probability density estimation,” Signal Processing , vol. 190, p. 108308, Jan. 2022. [7] E. Grant and R. Leavenworth, Statistical Quality Control . New York, N.Y London: McGraw-Hill Science/Engineering/Math, 1996. [8] P. M. Frank, “Fault diagnosis in dynamic systems using analytical and knowledge-based redundancy: A survey and some new results,” 
+
+Automatica , vol. 26, no. 3, pp. 459–474, May 1990. [9] R. Isermann, Fault-Diagnosis Applications: Model-Based Condition Monitoring: Actuators, Drives, Machinery, Plants, Sensors, and Fault-tolerant Systems . Berlin, Heidelberg: Springer, 2011. [10] R. Iqbal, T. Maniak, F. Doctor, and C. Karyotis, “Fault Detection and Isolation in Industrial Processes Using Deep Learning Approaches,” 
+
+IEEE Transactions on Industrial Informatics , vol. 15, no. 5, pp. 3077– 3084, May 2019. [11] A. Rodr´ ıguez-Ramos, C. Verde, and O. Llanes-Santiago, “An inte-grated monitoring system based on deep learning tools for industrial process*,” IFAC-PapersOnLine , vol. 58, no. 4, pp. 168–173, Jan. 2024. [12] S. Shalev-Shwartz, Understanding Machine Learning , 1st ed. New York: Cambridge University Press, Jul. 2014. [13] M. Basseville and I. V. Nikiforov, Detection of Abrupt Changes: Theory and Application . Englewood Cliffs, N.J: Prentice Hall, 1993. [14] F. Gustafsson, Adaptive Filtering and Change Detection , 1st ed. Chichester New York: Wiley, Sep. 2000. [15] A. Wald, “Sequential Tests of Statistical Hypotheses,” The Annals of Mathematical Statistics , vol. 16, no. 2, pp. 117–186, Jun. 1945. [16] H.-A. Kang, “Sequential Generalized Likelihood Ratio Tests for Online Item Monitoring,” Psychometrika , vol. 88, no. 2, pp. 672–696, Jun. 2023. [17] T. M. Cover and J. A. Thomas, Elements of Information Theory 2nd Edition , 2nd ed. Hoboken, N.J: Wiley-Interscience, Jul. 2006.

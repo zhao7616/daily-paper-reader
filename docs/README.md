@@ -6,64 +6,61 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-04-13
-- 运行时间：2026-04-13 19:54:23 UTC
+- 最新运行日期：2026-04-14
+- 运行时间：2026-04-14 20:50:10 UTC
 - 运行状态：成功
-- 本次总论文数：14
-- 精读区：3
-- 速读区：11
+- 本次总论文数：13
+- 精读区：4
+- 速读区：9
 
 ### 今日简报（AI）
-今日深度复盘 14 篇工业 AI 论文，聚焦旋转机械自监督监测与涡扇发动机健康评估的突破性进展。
-核心结论指出，LoRM 框架通过学习机械“语言”实现了高效状态监控，而逆问题建模则为复杂动力系统寿命预测提供了新思路。
-建议普通读者重点关注物理残差网络（DSPR）在提升工业预测可信度与多尺度表征方面的应用潜力。
-- 详情：[/202604/13/README](/202604/13/README)
+今日深度研读 13 篇工业智能运维前沿论文，重点攻克旋转机械与涡扇发动机的健康监测难题。
+核心突破在于利用自监督学习构建旋转机械“语言”模型，并结合逆问题建模显著提升了复杂系统的健康评估精度。
+建议关注物理知识与深度学习融合的趋势，特别是如何通过残差网络与不确定性量化提升预测的可靠性。
+- 详情：[/202604/14/README](/202604/14/README)
 
 ### 精读区论文标签
-1. [LoRM: Learning the Language of Rotating Machinery for Self-Supervised Condition Monitoring](/202604/13/2604.05863v1-lorm-learning-the-language-of-rotating-machinery-for-self-supervised-condition-monitoring)  
+1. [LoRM: Learning the Language of Rotating Machinery for Self-Supervised Condition Monitoring](/202604/14/2604.05863v1-lorm-learning-the-language-of-rotating-machinery-for-self-supervised-condition-monitoring)  
+   标签：评分：9.5/10、query:rul
+   evidence：旋转机械的自监督状态监测与未来信号预测
+2. [A Machine Learning Framework for Turbofan Health Estimation via Inverse Problem Formulation](/202604/14/2604.08460v1-a-machine-learning-framework-for-turbofan-health-estimation-via-inverse-problem-formulation)  
    标签：评分：9.0/10、query:rul
-   evidence：用于旋转机械信号理解和状态监测的自监督框架
-2. [A Machine Learning Framework for Turbofan Health Estimation via Inverse Problem Formulation](/202604/13/2604.08460v1-a-machine-learning-framework-for-turbofan-health-estimation-via-inverse-problem-formulation)  
+   evidence：涡扇发动机健康评估与退化模式
+3. [A Multi-head Attention Fusion Network for Industrial Prognostics under Discrete Operational Conditions](/202604/14/2604.10248v1-a-multi-head-attention-fusion-network-for-industrial-prognostics-under-discrete-operational-conditions)  
    标签：评分：9.0/10、query:rul
-   evidence：涡扇发动机健康估计和基于传感器数据的部件级健康指标
-3. [PD-SOVNet: A Physics-Driven Second-Order Vibration Operator Network for Estimating Wheel Polygonal Roughness from Axle-Box Vibrations](/202604/13/2604.06620v1-pd-sovnet-a-physics-driven-second-order-vibration-operator-network-for-estimating-wheel-polygonal-roughness-from-axle-box-vibrations)  
+   evidence：变工况下工业机械的寿命预测，使用多头注意力融合网络
+4. [A comprehensive study on causal discovery between degradation paths](/202604/14/2604.10618v1-a-comprehensive-study-on-causal-discovery-between-degradation-paths)  
    标签：评分：8.0/10、query:rul
-   evidence：用于状态监测的物理驱动振动算子网络
+   evidence：退化路径之间的因果发现，用于精确的退化建模
 
 ### 速读区论文标签
-1. [Delve into the Applicability of Advanced Optimizers for Multi-Task Learning](/202604/13/2604.08939v1-delve-into-the-applicability-of-advanced-optimizers-for-multi-task-learning)  
+1. [A Hybrid Intelligent Framework for Uncertainty-Aware Condition Monitoring of Industrial Systems](/202604/14/2604.09932v1-a-hybrid-intelligent-framework-for-uncertainty-aware-condition-monitoring-of-industrial-systems)  
    标签：评分：7.5/10、query:phm
-   evidence：基于优化的多任务学习，用于同时学习多个任务
-2. [DSPR: Dual-Stream Physics-Residual Networks for Trustworthy Industrial Time Series Forecasting](/202604/13/2604.07393v1-dspr-dual-stream-physics-residual-networks-for-trustworthy-industrial-time-series-forecasting)  
+   evidence：结合数据驱动和物理模型的混合状态监测
+2. [A Physics-Aware Variational Graph Autoencoder for Joint Modal Identification with Uncertainty Quantification](/202604/14/2604.11237v1-a-physics-aware-variational-graph-autoencoder-for-joint-modal-identification-with-uncertainty-quantification)  
+   标签：评分：7.5/10、query:rul
+   evidence：基于振动数据的结构健康监测联合模态识别
+3. [DSPR: Dual-Stream Physics-Residual Networks for Trustworthy Industrial Time Series Forecasting](/202604/14/2604.07393v1-dspr-dual-stream-physics-residual-networks-for-trustworthy-industrial-time-series-forecasting)  
    标签：评分：7.0/10、query:rul
-   evidence：工业时间序列预测与物理残差网络
-3. [Auto-Configured Networks for Multi-Scale Multi-Output Time-Series Forecasting](/202604/13/2604.07610v1-auto-configured-networks-for-multi-scale-multi-output-time-series-forecasting)  
-   标签：评分：7.0/10、query:rul
-   evidence：工业应用中的多尺度多输出时间序列预测
-4. [Cooperative Observer-Based $\mathcal{H}_\infty$ Fault-Tolerant Tracking Control for Networked Processes with Sensor Faults](/202604/13/2604.03921v1-cooperative-observer-based-mathcalhinfty-fault-tolerant-tracking-control-for-networked-processes-with-sensor-faults)  
-   标签：评分：6.0/10、query:phm
-   evidence：联合重构状态和传感器故障以实现容错控制
-5. [Cross-Machine Anomaly Detection Leveraging Pre-trained Time-series Model](/202604/13/2604.05335v1-cross-machine-anomaly-detection-leveraging-pre-trained-time-series-model)  
-   标签：评分：6.0/10、query:phm
-   evidence：利用预训练模型进行制造业跨机器异常检测
-6. [Channel-wise Retrieval for Multivariate Time Series Forecasting](/202604/13/2604.05543v1-channel-wise-retrieval-for-multivariate-time-series-forecasting)  
+   evidence：基于物理残差网络的工业时间序列预测
+4. [On-board Telemetry Monitoring in Autonomous Satellites: Challenges and Opportunities](/202604/14/2604.08424v1-on-board-telemetry-monitoring-in-autonomous-satellites-challenges-and-opportunities)  
+   标签：评分：7.0/10、query:phm
+   evidence：卫星反作用轮的在轨故障检测与隔离
+5. [Drift-Aware Online Dynamic Learning for Nonstationary Multivariate Time Series: Application to Sintering Quality Prediction](/202604/14/2604.09358v1-drift-aware-online-dynamic-learning-for-nonstationary-multivariate-time-series-application-to-sintering-quality-prediction)  
+   标签：评分：6.5/10、query:rul
+   evidence：工业时间序列的多输出预测性能
+6. [PD-SOVNet: A Physics-Driven Second-Order Vibration Operator Network for Estimating Wheel Polygonal Roughness from Axle-Box Vibrations](/202604/14/2604.06620v1-pd-sovnet-a-physics-driven-second-order-vibration-operator-network-for-estimating-wheel-polygonal-roughness-from-axle-box-vibrations)  
    标签：评分：6.0/10、query:rul
-   evidence：具有通道检索的多变量时间序列预测
-7. [On-board Telemetry Monitoring in Autonomous Satellites: Challenges and Opportunities](/202604/13/2604.08424v1-on-board-telemetry-monitoring-in-autonomous-satellites-challenges-and-opportunities)  
-   标签：评分：6.0/10、query:phm
-   evidence：反作用轮遥测中的故障检测与定位
-8. [Joint Interference Detection and Identification via Adversarial Multi-task Learning](/202604/13/2604.08607v1-joint-interference-detection-and-identification-via-adversarial-multi-task-learning)  
-   标签：评分：6.0/10、query:phm
-   evidence：用于联合检测和识别的多任务学习框架
-9. [CAD 100K: A Comprehensive Multi-Task Dataset for Car Related Visual Anomaly Detection](/202604/13/2604.09023v1-cad-100k-a-comprehensive-multi-task-dataset-for-car-related-visual-anomaly-detection)  
-   标签：评分：6.0/10、query:phm
-   evidence：用于制造质量评估的多任务视觉异常检测
-10. [Exact Bayesian Planning for Simple Step-Stress Accelerated Life Testing with Competing Risks](/202604/13/2604.09259v1-exact-bayesian-planning-for-simple-step-stress-accelerated-life-testing-with-competing-risks)  
+   evidence：用于轨道车辆状态监测的物理驱动振动算子网络
+7. [Exact Bayesian Planning for Simple Step-Stress Accelerated Life Testing with Competing Risks](/202604/14/2604.09259v1-exact-bayesian-planning-for-simple-step-stress-accelerated-life-testing-with-competing-risks)  
    标签：评分：6.0/10、query:rul
-   evidence：加速寿命测试和失效时间分布的贝叶斯框架
-11. [Drift-Aware Online Dynamic Learning for Nonstationary Multivariate Time Series: Application to Sintering Quality Prediction](/202604/13/2604.09358v1-drift-aware-online-dynamic-learning-for-nonstationary-multivariate-time-series-application-to-sintering-quality-prediction)  
-   标签：评分：6.0/10、query:rul
-   evidence：工业系统中非平稳多元时间序列的预测
+   evidence：加速寿命试验和失效时间分布的贝叶斯框架
+8. [Model-free Anomaly Detection for Dynamical Systems with Gaussian Processes](/202604/14/2604.11629v1-model-free-anomaly-detection-for-dynamical-systems-with-gaussian-processes)  
+   标签：评分：6.0/10、query:phm
+   evidence：针对退化导致的动力学变化的异常检测
+9. [Detectability of Subtle Anomalies in Dynamical Systems via Log-Likelihood Ratio](/202604/14/2604.11631v1-detectability-of-subtle-anomalies-in-dynamical-systems-via-log-likelihood-ratio)  
+   标签：评分：6.0/10、query:phm
+   evidence：工业控制应用的实时异常检测器
 
 
 <div class="dpr-home-promo-card">
