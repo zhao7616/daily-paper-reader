@@ -1,0 +1,38 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.12440v1/fig-001.webp",
+      "caption": "Figure 2: Task coverage of existing IAD approaches. Only IAD-Unify covers all three tasks under a unified protocol. △ = related but different evaluation protocol.",
+      "page": 2,
+      "index": 1,
+      "width": 498,
+      "height": 288
+    },
+    {
+      "url": "assets/figures/arxiv/2604.12440v1/fig-002.webp",
+      "caption": "Figure 8: Qualitative generation comparison. Given a clean source image and a defect mask, IAD-Unify synthesizes realistic defects while preserving background fidelity, whereas SD2 Inpainting produces artifacts or alters unmasked regions.",
+      "page": 7,
+      "index": 2,
+      "width": 500,
+      "height": 384
+    },
+    {
+      "url": "assets/figures/arxiv/2604.12440v1/fig-003.webp",
+      "caption": "Figure 7: Qualitative segmentation comparison. Our categoryagnostic expert produces precise masks closely matching ground truth, while per-category specialists yield diffuse anomaly maps.",
+      "page": 7,
+      "index": 3,
+      "width": 506,
+      "height": 394
+    },
+    {
+      "url": "assets/figures/arxiv/2604.12440v1/fig-004.webp",
+      "caption": "Figure 3: Architecture of IAD-Unify. Qwen3.5 VLM provides global understanding; a frozen DINOv2 region expert provides anomaly localization. Region tokens are injected via placeholder replacement into the shared backbone.",
+      "page": 4,
+      "index": 4,
+      "width": 984,
+      "height": 456
+    }
+  ]
+}

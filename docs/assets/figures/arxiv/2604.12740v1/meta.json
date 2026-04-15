@@ -1,0 +1,46 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.12740v1/fig-001.webp",
+      "caption": "Figure 3: Log-transformed serum creatinine trajectories for a randomly selected subset of patients from the GPKC dataset. Solid red lines represent patients who experienced the composite event, while dashed red lines represent censored patients.",
+      "page": 6,
+      "index": 1,
+      "width": 950,
+      "height": 729
+    },
+    {
+      "url": "assets/figures/arxiv/2604.12740v1/fig-002.webp",
+      "caption": "Table 1: Baseline characteristics and key covariates of the GPKC dataset. Percentages are shown in parentheses.",
+      "page": 4,
+      "index": 2,
+      "width": 643,
+      "height": 457
+    },
+    {
+      "url": "assets/figures/arxiv/2604.12740v1/fig-003.webp",
+      "caption": "Figure 1: Kaplan–Meier survival curve estimating the probability of remaining free from acute kidney injury (AKI), chronic kidney disease (CKD), or death over time in the GPKC dataset.",
+      "page": 4,
+      "index": 3,
+      "width": 571,
+      "height": 375
+    },
+    {
+      "url": "assets/figures/arxiv/2604.12740v1/fig-004.webp",
+      "caption": "Table 2: Posterior summaries of joint model parameters for the survival and longitudinal outcomes in the GPKC dataset for model M5. Mean and SD denote the posterior mean and standard deviation, respectively, and 95% CI denotes 95% credible intervals.",
+      "page": 12,
+      "index": 4,
+      "width": 667,
+      "height": 392
+    },
+    {
+      "url": "assets/figures/arxiv/2604.12740v1/fig-005.webp",
+      "caption": "Figure 2: Distribution of serum creatinine and its log-transformed values in the GPKC dataset.",
+      "page": 5,
+      "index": 5,
+      "width": 571,
+      "height": 447
+    }
+  ]
+}

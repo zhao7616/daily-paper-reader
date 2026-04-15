@@ -1,0 +1,1810 @@
+Title: Microsoft Word - Final Manuscript (R1)
+
+URL Source: https://arxiv.org/pdf/2604.10969v1
+
+Published Time: Tue, 14 Apr 2026 01:41:28 GMT
+
+Number of Pages: 10
+
+Markdown Content:
+RESEARCH ARTICLE 
+
+# Towards Automated Solar Panel Integrity: Hybrid Deep 
+
+# Feature Extraction for Advanced Surface Defect 
+
+# Identification 
+
+Muhammad Junaid Asif 1,3 , Muhammad Saad Rafaqat 1,2 , Usman Nazakat 1,2, Uzair Khan 1,2 , Rana Fayyaz Ahmad 2    
+
+> 1Artificial Intelligence Technology Centre (AITeC), National Centre for Physics (NCP), Islamabad 44000, Pakistan
+> 2School of Computing, Pak-Austria Fachhochschule: Institute of Applied Sciences and Technology (PAFIAST), Haripur 22620, Pakistan
+> 3Faculty of IT and Computer Sciences, University of Central Punjab Lahore, Pakistan
+> Correspondence
+> Muhammad Junaid Asif, Artificial Intelligence Technology Centre (AITeC), National Centre for Physics (NCP), Islamabad 44000, Pakistan.
+> Email: junaid.asif@ncp.edu.pk
+
+ABSTRACT 
+
+To ensure energy efficiency and reliable operations, it is essential to monitor solar panels in generation plants to detect defects. 
+
+It is quite labor-intensive, time consuming and costly to manually monitor large-scale solar plants and those installed in remote 
+
+areas. Manual inspection may also be susceptible to human errors. Consequently, it is necessary to create an automated, 
+
+intelligent defect-detection system, that ensures continuous monitoring, early fault detection, and maximum power generation. 
+
+We proposed a novel hybrid method for defect detection in SOLAR plates by combining both handcrafted and deep learning 
+
+features. Local Binary Pattern (LBP), Histogram of Gradients (HoG) and Gabor Filters were used for the extraction of 
+
+handcrafted features. Deep features extracted by leveraging the use of DenseNet-169. Both handcrafted and deep features were 
+
+concatenated and then fed to three distinct types of classifiers, including Support Vector Machines (SVM), Extreme Gradient 
+
+Boost (XGBoost) and Light Gradient-Boosting Machine (LGBM). Experimental results evaluated on the augmented dataset 
+
+show the superior performance, especially DenseNet-169 + Gabor (SVM), had the highest scores with 99.17% accuracy which 
+
+was higher than all the other systems. In general, the proposed hybrid framework offers better defect-detection accuracy, 
+
+resistance, and flexibility that has a solid basis on the real-life use of the automated PV panels monitoring system. 
+
+Keywords: Solar Surface Defect, Computer Vision, Deep Learning, HoG, LBP, GLCM, DenseNet169, CNN 
+
+## 1. INTRODUCTION 
+
+Electricity is a vital energy source that underpins 
+
+residential, industrial, and technological applications. It can be 
+
+generated both by conventional and renewable sources. Oil, 
+
+coal, nuclear, and natural gas are among the transitional sources 
+
+[1], and are linked to severe health and ecological problems 
+
+because they release hazardous pollutants and industrial waste. 
+
+Alternatively, renewable energy sources such as SOLAR, 
+
+wind, hydropower and geothermal are healthier, more resilient, 
+
+and have a considerably lower environmental impact [2]. 
+
+To achieve global sustainability and establish an 
+
+acceptable way of life for everyone, the most crucial step is to 
+
+increase energy efficiency by switching to the use of renewable 
+
+energy sources [3]. As people are getting more concerned about 
+
+the environment, health, and society, they are actively moving 
+
+towards the renewable energy sources for electricity 
+
+generation. Renewable energy sources can be broadly 
+
+categorized into five main categories: solar energy harnessed 
+
+from the sun [4], wind energy obtained through moving air [5], 
+
+biomass power derived from organic sources [6], hydropower 
+
+energy generated through flowing water [7], and geothermal 
+
+energy obtained from the internal heat of the earth [8], [9]. 
+
+Among all renewable energy sources, solar is one of the 
+
+cleanest sources that harnesses the sunlight, transforming it 
+
+effortlessly to generate power [4], [10]. It can be installed on 
+
+rooftops and other open areas and is most effective in areas with 
+
+abundant sunlight, such as deserts. Solar energy is flexible, 
+
+capable of supplying power to individual appliances, residential 
+
+buildings, and even entire cities without emitting harmful 
+
+pollutants, making it environmentally friendly. It is also 
+
+beneficial for off-grid facilities that cannot connect to 
+
+conventional energy sources or cannot access them at all [11]. 
+
+Despite its advantages, solar energy sources have numerous 
+
+challenges. One of the major challenges is the gradual 
+
+depreciation of solar panels over time, which results in a 
+
+decrease in overall efficiency, and highlights the need for 
+
+effective fault detection and monitoring strategies [12]. Another 
+
+critical challenge is that solar power generation is highly 
+
+susceptible to weather conditions - factors such as rain and cloud 
+
+cover can significantly reduce system performance [13]. 
+
+Solar panels may also face an array of challenges that make 
+
+them less efficient at generating electricity. Some common 
+
+visual problems (as shown in Fig. 01) include dust, bird 
+
+droppings, snow cover, electrical faults, and physical damage. 
+
+Dust particles may accumulate on the surface of solar plates, 
+
+making it harder for sunlight to reach them and reducing the 
+
+generation capacity of electrical power. The same thing happens 
+
+when bird droppings build up: they block light from entering. In 
+
+colder areas, snow may accumulate on solar panels for extended 2
+
+periods, making it even harder to generate energy. 
+
+External factors, including hail hitting the solar glass or 
+
+cells, can cause physical damage, such as cracks. Overheating 
+
+may result in electrical issues, leading to burnout of solar cells 
+
+overheating of solar panels leading to the burn out of solar cells 
+
+[14]. The quality inspection processes heavily rely on defect 
+
+detection. Defect or anomaly detection (AD) process aims at 
+
+detecting abnormal features that may lead to quality or 
+
+functionality issues of a particular object [15], [16], [17]. 
+
+As solar installations continue to expand globally, it has 
+
+become essential to ensure they operate effectively and last a 
+
+long time. Regular physical inspection is one of the most 
+
+essential steps to maintain the quality and reliability of solar 
+
+plates. It is quite a challenging and laborious task to perform 
+
+the manual inspection of large-scale solar plants installed at 
+
+governmental or industrial scale. Manual inspection is 
+
+becoming impractical as the number of solar panel installations 
+
+continues to increase [18].  
+
+> Fig. 1. Visual Samples Depicting Various Surface Conditions of PV
+> Panels for Defect Detection: (a) Clean, (b) Dust, (c) Snow-covered, (d)
+> Bird Droppings, (e) Physical Damage, and (f) Electrical Fault
+
+There is a pressing need to propose an accurate and 
+
+efficient method for automatic inspection of PV panels to 
+
+ensure their long operational life span and maintain high energy 
+
+efficiency. Due to recent advancements in the field of artificial 
+
+intelligence, computer vision and deep learning, researchers 
+
+from different research domains are entering in the areas of 
+
+automated defect detection such as surface crack detection 
+
+[19], [20], product defect detection [21] , and damage detection 
+
+[22], [23], [24], [25]. 
+
+To address the challenges associated with manual 
+
+inspection, we proposed a hybrid framework combining both 
+
+deep and machine learning techniques for efficient and 
+
+accurate inspection of solar plates. The proposed framework 
+
+consists of four major components: data augmentation, data 
+
+preprocessing, feature extraction network (FEN) and defect 
+
+classification. A publicly available dataset on KAGGLE [22], 
+
+consisting of 1,574 images, is used for experimentation 
+
+purposes. Due to the low volume of the dataset and to reduce 
+
+the risk of overfitting, three different data augmentation 
+
+operations, such as rotation, flipping, and image translation 
+
+were applied. This overall augmentation process resulted in a 
+
+fourfold increase in dataset size, reaching about 6,060 images. 
+
+Different image pre-processing techniques were then 
+
+employed to improve the image quality by minimizing 
+
+background noise. A hybrid feature extraction network based 
+
+on the combination of traditional machine learning approaches 
+
+and deep learning models, designed to capture both handcrafted 
+
+and deep features from PV plate images. For handcrafted 
+
+features extraction, different methods such as Linear Binary 
+
+Patterns (LBP) [26], Histogram of Oriented Gradients (HOG) 
+
+[27], and Gabor Filters [28], were used to effectively represent 
+
+texture, edge, and frequency-based characteristics of the images. 
+
+On the other hand, Convolutional neural networks (CNNs) 
+
+[29], [30] were used to extract deep features. Handcrafted and 
+
+deep features were concatenated to generate a combined feature 
+
+matrix yielding stronger representation and better classification 
+
+performance. These features were used to train such classifiers 
+
+as Support Vector Machines (SVM) [31], [32] Artificial Neural 
+
+Networks (ANN) [33], [34], Logistic Regression (LR) [35], 
+
+[36], XGBoost [37] to obtain precise defect classification. The 
+
+block diagram of the proposed system is (as shown in Fig. 02). 
+
+The contributions of this research are as follows: 
+
+ An optimized data augmentation pipeline is proposed, 
+
+resulting in a fourfold increase in data volume to improve 
+
+model generalization. 
+
+ Proposed an automatic, accurate and efficient inspection 
+
+system based on a hybrid network that combines 
+
+handcrafted features (extracted using LBP, HoG and Gabor) 
+
+with deep learning features extracted by leveraging the use 
+
+of CNN to enhance the classification accuracy. 
+
+ The novel feature-level fusion method combines both 
+
+handcrafted and deep features through a concatenation into 
+
+a single feature matrix, to obtain optimal classification by 
+
+combining the limited strengths of other features. 
+
+ Fused features were tested with various machine learning 
+
+classifiers (SVM, XGBoost, ANN, Logistic Regression) 
+
+and comparable results showed improved performance of 
+
+fused features compared to current single feature models.  
+
+> Fig. 2. Block diagram illustrates the overall architecture of the
+> proposed system for PV panel defect detection.
+
+The paper will be structured as follows: Section 2 will provide 
+
+an overview of recent methodologies applied for detecting 
+
+defects in SOLAR panels. Section 3 outlines the proposed 
+
+methodology, which includes a description of the dataset used, 
+
+data processing, and hybrid feature extraction. Section 4
+
+describes the experimental design, presents the qualitative and 
+
+quantitative findings, and offers a comparison with previous 
+
+methods. Section 5 discusses the relevance of the findings and 
+
+their implications to real-world use of PV monitoring. Lastly, 
+
+Section 6 concludes the paper by summarizing the main 
+
+contributions and outlining possible future research directions. 3
+
+## 2. LITERATURE REVIEW 
+
+Recent research has utilized both manual feature-based 
+
+approaches (e.g., texture and edge descriptors) and deep 
+
+learning-based approaches (e.g., CNNs and Transformers) for 
+
+PV panel monitoring. The following section will analyze these 
+
+existing methods in more detail, outlining the major challenges 
+
+and motivating the design and development of a hybrid feature 
+
+extraction framework that would integrate the advantages of 
+
+the two methodologies and enhance the precision of defect 
+
+detection. 
+
+2.1. Traditional Approaches: 
+
+Earlier approaches to product defect detection primarily 
+
+focused on traditional image processing techniques that 
+
+generally concentrated on capturing handcrafted features such 
+
+as geometric structure, color, shape, edge patterns, and surface 
+
+roughness or intensity variations, using traditional feature 
+
+descriptors or statistical techniques. For instance, Tsai et al. 
+
+[38] used Fourier image reconstruction to detect defects, such 
+
+as cracks, breaks, and interruptions, in electroluminescence 
+
+(EL) images of polycrystalline solar modules. They used their 
+
+methodology of filtering the high-frequency components in the 
+
+Fourier domain and identifying defects comparing the intensity 
+
+of the original and reconstructed images. The method, 
+
+however, demonstrated lower effectiveness when subjected to 
+
+the defects of a difficult nature. Author proposed another 
+
+method for solar plate defect-detection based on Independent 
+
+Component Analysis (ICA) by optimizing the feature 
+
+extraction and reconstruction steps and making them much 
+
+more effective in slight variations in texture and intensity in EL 
+
+images. On the same note, Zhang et al. [39] came up with an 
+
+Independent Component Analysis (ICA)-based reconstruction 
+
+algorithm, where a defect-free image was used as a reference 
+
+to help in the extraction of independent components that would 
+
+be used in defect detection. The reconstructed images were 
+
+very effective at highlighting local anomalies; hence, the 
+
+technique was appropriate for revealing local defects on 
+
+textured surfaces with periodic features. Both Fourier image 
+
+reconstruction and ICA-based methods have severe limitations 
+
+in handling complex, irregular shaped defects. The Fourier-
+
+based method is sensitive to noise and light variations, thus 
+
+limiting its accuracy across diverse environmental conditions. 
+
+Similarly, ICA also depends on high-quality reference images 
+
+and experiences challenges with periodic or less visible 
+
+anomalies, thus limiting its practical usefulness for inspecting 
+
+solar panels. 
+
+2.2. Deep Learning Approaches: 
+
+Due to the challenges faced by traditional image 
+
+processing and machine learning approaches, deep learning 
+
+approaches have emerged as state-of-the-art techniques for 
+
+tasks related to image analysis. In this regard, Convolutional 
+
+neural networks CNNs) shows promising results by capturing 
+
+both local as well as global features for identification and 
+
+classification of defects. 
+
+Shaik et al. [40] proposed a novel approach to enhance the 
+
+monitoring and defect-detection for solar panels, addressing 
+
+the challenges of traditional manual inspections, particularly at 
+
+scale. By utilizing Unmanned Aerial Vehicles (UAVs) and 
+
+satellite imagery, a more rapid and efficient monitoring system 
+
+has been established. A deep learning-based segmentation U-
+
+NET model integrated with an Atrous Spatial Pyramid 
+
+Pooling (ASPP) module was proposed, achieving an impressive 
+
+overall accuracy of 98% and a Mean Intersection-Over-Union 
+
+(IoU) Score of 95%. The proposed system efficiently detects 
+
+five classes of damage, including undamaged solar panels, 
+
+demonstrating high level of effectiveness in defect 
+
+identification. 
+
+Another author [41] proposed a deep learning-based 
+
+framework that utilizes the thermal images for the identification 
+
+and classification of defects in PV plates. The proposed model, 
+
+based on Convolutional Neural Network with VGG16 
+
+backbone, achieves an impressive F1-Score of 84.12% and 
+
+Mean Minimum Precision (MMP) of 71%, which may be 
+
+explained by using localization heatmaps to identify errors with 
+
+high precision. Furthermore, the model’s adaptability and 
+
+strong competitiveness were demonstrated through a
+
+comparative analysis with advanced models including Yolo-v8 
+
+and transformer-based architectures such as Visual 
+
+Transformers (ViT) and Swin Transformers. Both techniques, as 
+
+suggested [40], [41] rely heavily on modalities of images such 
+
+as EL or thermal imaging and hence, their usability in a variety 
+
+of environmental situations is limited. UAV- and satellite-based 
+
+systems, although efficient, face the problem of scaling, which 
+
+is driven by high computational and operational costs. A
+
+framework based on MobileNet-V3 was proposed by Mansurov 
+
+et al. [42], achieving 100% accuracy in identifying and 
+
+classifying PV panel defects, such as bird-dropping and snow 
+
+cover. Another author, Kazmi et al. [43] suggested using transfer 
+
+learning with a pretrained VGG-16 model as a backbone and 
+
+achieved an accuracy of 74%. These findings indicate 
+
+remarkable progress toward the automatic diagnosis of faults in 
+
+solar panels, opening a new horizon for energy efficiency and 
+
+fewer manual inspections for privacy. DenseNet-121, also 
+
+suggested by another author [44], achieves an accuracy of 
+
+86.44%. 
+
+Nagar et al. [45] explored the DenseNet169 model using a 
+
+dataset of 11,000 images across six classes: bird droppings, dust, 
+
+electrical damage, physical damage, clean panels, and snow-
+
+covered panels. Impressively, the DenseNet169 model achieved 
+
+high training accuracy and demonstrated robust performance on 
+
+the test dataset, demonstrating its powers in enhancing the 
+
+efficiency of solar panel inspection and maintenance procedures. 
+
+Numerous deep learning algorithms as suggested by [42], [43], 
+
+[44], [45] including VGG16, DenseNet and MobileNetV3 
+
+requires large, annotated data sets and are not generalized to new 
+
+defect types or real-world changes in brightness, particulate and 
+
+specular reflection. In addition, models that have been trained 
+
+using constrained data tend to perform poorly under diverse field 
+
+conditions. Finally, privacy-preserving strategies, such as 
+
+federated learning, are frequently compromised for detection 
+
+accuracy, indicating the need for more balanced and dynamic 
+
+models. Recent studies have analyzed the use of YOLO 9, 10, 
+
+and 11 models for defect-detection in photovoltaic panels, using 
+
+three datasets that include both thermal infrared and RGB 
+
+images. The datasets cover a range of defects, including dirt, 
+
+snow, bird droppings, and electrical-mechanical and structural 
+
+failures. Comparative analysis shows that YOLOv10 and v11 
+
+have significantly better performance compared to traditional 
+
+classifier, including the support vector machine (SVM) and 
+
+region-based convolutional neural network (R-CNN), with 
+
+YOLOv11 being the most efficient one, achieving a 89.7% 
+
+precision, 87.7% recall, and 92.7 mean average precision (mAP) 
+
+and as a result highlighting its superior accuracy and operational 4
+
+capability in detecting defects in photovoltaic panel [46], [47]. 
+
+Recent research has made a valuable contribution to the 
+
+methodology for detecting and classifying the defects in solar 
+
+panels; however, several critical issues remain. The existing 
+
+literature is limited primarily to focusing on a limited list of 
+
+types of defects. It is based on relatively limited volume of 
+
+images, typically fewer than 1,500 samples, thus limiting the 
+
+ability of the models to apply to a wide range of environmental 
+
+conditions. Even though network architectures like VGG16 
+
+and YOLO have shown significant promise in the deep-
+
+learning paradigm, their performance is highly dependent on 
+
+large, labelled data sets and they often struggle with real-world 
+
+variability. In addition, the potential advantages of hybrid 
+
+models combining handcrafted feature engineering with deep-
+
+learning models are not studied thoroughly, which ends up in 
+
+poor accuracy and robustness. To address these shortcomings, 
+
+the current paper proposes a hybrid model, that combines 
+
+handcrafted and deep feature extraction methods and is further 
+
+supported by extensive data augmentation. The proposed 
+
+strategy will increase datasets, thereby improving the 
+
+effectiveness and accuracy of defect detection systems. 
+
+## 3. MATERIALS AND METHODS 
+
+3.1. Data Acquisition: 
+
+The PV Panel Defect Dataset is publicly available on 
+
+KAGGLE, generally designed and developed for detection and 
+
+classification of different faults in photovoltaic (PV) panels. It 
+
+contains six classes representing real-world conditions for solar 
+
+panels, including clean, dusty, bird-dropping, electrical 
+
+damage, physical damage and snow-covered panels. Each 
+
+image in the dataset has distinct visual qualities that influence 
+
+solar energy production, creating a dynamic and demanding 
+
+setting for model training and evaluation.           
+
+> TABLE 1 PV Panel Defect Dataset Summary
+> Class Description No. of
+> Images
+> Clean Images of clean solar panels. 289
+> Snow-covered Images of solar panels covered with
+> snow.
+> 262
+> Dusty Images of solar panels covered with
+> dust
+> 275
+> Electrical Fault Images of solar panels damaged due
+> to electrical fault.
+> 225
+> Physical Damage Images of physically damaged solar
+> panels
+> 225
+> Bird Droppings Images of solar panels covered with
+> bird droppings
+> 298
+
+The dataset contains high-resolution RGB photographs 
+
+taken under various lighting and environmental conditions, 
+
+ensuring the resilience and generalizability of deep learning 
+
+and computer vision-based fault detection systems. Table 1 
+
+presents an overview of the PV Panel Defect Dataset. 
+
+3.2. Data Preprocessing: 
+
+During the preprocessing phase, all augmented images 
+
+undergo two transformations: noise reduction and image 
+
+enhancement. 
+
+3.2.1. Noise Reduction 
+
+The methods employed to improve the image quality are 
+
+Non-Local Means (NLM) denoising and Bilateral filtering. 
+
+Non-Local Means (NLM) denoising was effective at reducing 
+
+noise without losing important textural and structural features 
+
+needed to detect defects accurately, whereas Bilateral filtering 
+
+improved image smoothness while preserving important edge 
+
+details. A bilateral filter with a diameter of 9 , sigmaColor of 75 ,
+
+and sigmaSpace of 75 was applied, which was sufficient to 
+
+reduce image noise while retaining the important features such 
+
+as edges. NLM denoising was also applied with the following 
+
+parameters: h=10, hColor=10, the size of the template window 
+
+= 7 and the size of the search window = 21 . This overall 
+
+denoising operation helped successfully remove noise without 
+
+damaging any important textural and structural information of 
+
+the image. 
+
+3.2.2. Image Enhancement 
+
+Two different image enhancement techniques were employed to 
+
+improve contrast and brightness consistency, including Contrast 
+
+Limited Adaptive Histogram Equalization (CLAHE) and 
+
+Gamma Correction . Firstly, the images were downsized to 
+
+640x640 pixels, followed by converting the BGR to the LAB to 
+
+increase luminance while preserving chromaticity. The L
+
+channel was then processed with Contrast-Limited Adaptive 
+
+Histogram Equalizations (CLAHE) with a clip limit of 2.0 and a 
+
+tile grid of 8×8. Lastly, the equalized L channel was 
+
+reassembled with the respective A and B channels and then 
+
+lastly converted to the BGR color model once again, giving the 
+
+images a brighter contrast and clarity improving the ability to 
+
+detect defects. 
+
+In addition, gamma correction was applied to improve image 
+
+contrast. It is a nonlinear enhancement method that changes the 
+
+value of pixel intensities according to power-law function. in 
+
+accordance with a power-law function. The gamma value in our 
+
+research was 1.5, used to lighten mid-tone areas without altering 
+
+the overall image structure. A lookup table was built to 
+
+effectively transform the original pixel values into gamma 
+
+adjusted ones. All the images were resampled to 640x640 pixel 
+
+size and subjected to this transformation, yielding a collection of 
+
+contrast-enhanced images in a different direction. 
+
+3.3. Feature Extraction Network: 
+
+In our research work, we proposed a hybrid feature extraction 
+
+model based on combination of handcrafted feature extraction 
+
+techniques and deep learning-based algorithms to take 
+
+advantage of both approaches. This combination will enable the 
+
+model to capture features simultaneously both at low level 
+
+(textual and edge-related data) and high level (semantic)., 
+
+resulting in development of an accurate and efficient defect 
+
+detection system. 
+
+3.3.1. Handcrafted Features 
+
+For handcrafted features extraction, we employed three different 
+
+approaches: Linear Binary Patterns (LBP), Histogram of 
+
+Gradients (HoG) and Gabor Filters. LBP is applied for textural 
+
+analysis, HoG is used for capturing shape and edges, and Gabor 
+
+filters are used for analyzing the spatial frequency and 
+
+orientation. The combination of these methods can provide an 
+
+extensive overview of surface aspects, thus enhancing overall 
+
+classification accuracy. 
+
+3.3.2. Deep Learning Features 
+
+For deep features extraction, we used Convolutional Neural 
+
+Networks (CNNs) with backbone of DenseNet169, that provides 
+
+high level semantic features. This helped us to extract complex 5
+
+and intricate features that couldn’t be captured by handcrafted 
+
+approaches. 
+
+3.3.3. Feature Fusion 
+
+To leverage the use of both handcrafted features and deep 
+
+features, both were concatenated in the form of single feature 
+
+matrix, which integrated low-level visual characteristics with 
+
+high-level abstractions. 
+
+3.4. Classification: 
+
+The fused features are then fed to classification network, 
+
+comprising three different classifiers: Support Vector 
+
+Machines (SVMs), Extreme Gradient Boosting (XGBoost) and 
+
+Light Gradient Boosting Machine (Light GBM). Each of the 
+
+ML classifiers are selected due to its unique strength in 
+
+handling complex and high-dimensional. We employed SVM 
+
+because of its excellent ability to build optimal decision 
+
+boundaries between the classes by the application of kernel-
+
+based optimization. It is well suited for small-to-medium size 
+
+datasets, and it is stronger at high classification accuracy even 
+
+with restricted training samples, thus suitably applicable to PV 
+
+defect classification where inter-class distances may be very 
+
+fine. 
+
+3.5. Evaluation Metrics: 
+
+Performance of our posed model was being evaluated using 
+
+different evaluation metrics such as accuracy, precision, recall 
+
+and F1-score. These metrics were selected to provide a
+
+comprehensive assessment of the model’s classification 
+
+capability. Accuracy is used to determine the general validity of 
+
+predictions, whereas precision is used to measure the percentage 
+
+of correct samples of defects out of all predicted defects. Recall 
+
+is used to test the sensitivity of the model (in its ability to detect 
+
+actual defects) and the F1-score (harmonic-mean between 
+
+precision and recall) is a balanced measure of model 
+
+performance. Collectively, these indicators provide a credible 
+
+apparatus of assessing the efficiency and strength of the 
+
+proposed PV panel fault detection system [48]. 
+
+Accuracy = ୘୔ା୘୒  
+
+> ୘୔ା୘୒ା୊୔ା୊୒
+
+(1) 
+
+Precision = ୘୔  
+
+> ୘୔ା୊
+
+(2) 
+
+Recall = ୘୔  
+
+> ୘୔ା୊୒
+
+(3) 
+
+F1 − Score = 2 x ୔୰ୣୡ୧ୱ୧୭୬ ୶ ୖୣ ୡୟ୪୪  
+
+> ୔୰ୣୡ୧ୱ୧୭୬ାୖୣୡୟ୪
+
+(4)     
+
+> Original Rotated Flipped Horizontally Translated
+> (a)
+> (b)
+> (c)
+> (d)
+> (e)
+> Fig. 03. Illustration of data augmentation techniques applied to PV panel images. (a) Clean panels, (b) Panels affected by bird droppings, (c)
+> Snow-covered panels, (d) Panels with physical defects, and (e) Panels exhibiting electrical faults.
+> a)
+
+6  
+
+> (b)
+> (c)
+> (d)
+> (e)
+> (f)
+> Fig 04. Illustration of preprocessing techniques applied to PV panel images. (a) Clean panels, (b) Panels covered with Dust, (c) Snow-covered
+> panels, (d) Panels with physical defects, and (e) Panels exhibiting electrical faults, (f). Panels affected by bird droppings .
+> Fig. 05. Overall architecture of the proposed hybrid PV panel defect detection framework.
+
+## 4. RESULTS AND DISCUSSION 
+
+This section demonstrates the experimental results of 
+
+various handcrafted, deep learning, and hybrid methods for 
+
+feature extraction in detecting defects in PV Panels. Different 
+
+evaluation metrics such as accuracy, precision, recall and F1-
+
+score are used to evaluate the performance of proposed 
+
+methods as presented in Table 1-7. 8 
+
+4.1. Performance of Handcrafted Feature Extraction 
+
+Techniques: 
+
+Performance of three different handcrafted feature extraction 
+
+methods such as Local Binary Pattern (LBP), Histogram of 
+
+Oriented Gradients (HOG), and Gabor Filters in combination 
+
+with three machine learning classifiers, which include SVM, 
+
+XGboost, and LightGBM (LGBM). is presented in Table 2. The 
+
+LBP + LGBM combination had the highest accuracy of 91.85%, 
+
+which points to the high discriminative power of LBP to local 
+
+texture differences, including the pattern of dust or snow. 7
+
+Comparatively, HOG-based models recorded relatively low 
+
+accuracy (approximately between 80 ~ 85%) because of their 
+
+low sensitivity to subtle textual variations at different levels of 
+
+illumination. The gabor filters were moderately sensitive to the 
+
+background noise and lighting change as well as frequency and 
+
+orientation analysis with an average accuracy of 89.38%.  
+
+> TABLE 2 Comparative performance analysis of handcrafted feature extraction techniques combined with various classifiers
+> Feature Extraction
+> Method(
+
+s) Classifier (s) Accuracy                                              
+
+> (%)
+> Precision
+> (%)
+> Recall
+> (%)
+> F1-Score
+> (%)
+> LBP SVM 90.01 91.16 90.81 90.81
+> LBP XGBoost 91.35 91.52 91.85 91.84
+> LBP LGBM 91.85 92.01 91.85 91.84
+> Gabor SVM 86.50 86.83 86.60 86.60
+> Gabor XGBoost 89.50 89.80 99.60 89.50
+> Gabor LGBM 89.38 90.01 89.30 89.36
+> HOG SVM 84.77 84.99 84.77 84.80
+> HOG XGBoost 79.42 81.01 79.42 79.44
+> HOG LGBM 81.97 82.32 81.97 81.94
+
+4.2. Performance of Dual Handcrafted Feature Extraction 
+
+Techniques 
+
+As indicated by the summarized results in Table 3, the 
+
+combination of two handcrafted features increased 
+
+classification accuracy through the integration of 
+
+complementary visual data. The best performance was 
+
+obtained using the LightGBM classifier with LBP + Gabor 
+
+combination with the accuracy of 94.23%. The enhanced 
+
+performance is indicative of the fact that the combination of 
+
+textural and spatial frequency features leads to better ability of 
+
+the model to detect various PV panel defects, such as 
+
+microcracks, bird droppings, and snow coverages. Nevertheless, 
+
+the results of combinations like LBP + HOG and HOG + Gabor 
+
+were moderate, indicating that the decision on feature fusion 
+
+needs to take into consideration redundancy and inter-feature 
+
+correlation.                                                 
+
+> TABLE 3 Comparative performance analysis of dual handcrafted feature extraction techniques combined with various classifiers
+> Feature Extraction
+> Method (s) Classifiers Acc.
+> (%)
+> Precis.
+> (%)
+> Recall
+> (%)
+> F1-Score
+> (%)
+> LBP + HOG SVM 85.10 85.83 85.66 85.66
+> LBP + HOG XGBoost 83.70 84.50 84.33 84.16
+> LBP + HOG LGBM 88.14 89.01 88.14 88.08
+> HOG + Gabor SVM 84.60 85.33 85.01 85.01
+> HOG + Gabor XGBoost 84.03 84.50 84.16 84.16
+> HOG + Gabor LGBM 86.01 85.60 85.30 86.01
+> LBP + Gabor SVM 91.17 92.01 91.76 91.76
+> LBP + Gabor XGBoost 91.44 91.33 91.44 91.42
+> LBP + Gabor LGBM 94.23 94.33 94.23 94.42
+
+4.3. Performance of Tripple Handcrafted Feature 
+
+Extraction Techniques: 
+
+Table 4 shows the results of the LBP + HOG + Gabor 
+
+feature combination. The model had the highest accuracy of 
+
+88.80% when using LightGBM classifier, which was less than 
+
+the case of the dual feature. This decrease in performance can 
+
+be explained by redundancy of features and higher 
+
+dimensionality which caused noise and lower discriminative 
+
+effectiveness of fused feature space. This configuration may 
+
+yield more descriptive information although overfitting can be 
+
+caused by over-fusion without dimensionality reduction 
+
+particularly in situations where the dataset is small. 
+
+4.4. Performance of Deep Learning Feature Extraction 
+
+Techniques: 
+
+DenseNet-169 showed the best results compared to any 
+
+handcrafted model, which was found at Table 5. When using 
+
+SVM, the accuracy exhibited by the model was 99.17% which 
+
+is an indication that deep hierarchical features have the ability 
+
+of well approximating both local and global spatial 
+
+dependencies. The good performance of DenseNet-169 in 
+
+terms of semantic patterns demonstrates its capacity to capture 
+
+significant semantic patterns, which is very appropriate in 
+
+complex defects of the surface. Nevertheless, these networks are 
+
+very expensive in terms of computational resources, and some 
+
+large balanced datasets are necessary to maximize their 
+
+performance 
+
+4.5. Performance of Hybrid Feature Extraction 
+
+Techniques: 
+
+A hybrid feature extraction framework was designed to integrate 
+
+the benefits of both deep and handcrafted representations. The 
+
+combined characteristics of DenseNet-169 and LBP, HOG and 
+
+Gabor descriptors were categorized through the SVM, XGBoost 
+
+and LightGBM classifiers. According to Table 6, dual hybrid 
+
+systems, especially DenseNet-169 + Gabor (SVM), had the 
+
+highest scores with 99.17% accuracy which was higher than all 
+
+the other systems. 
+
+This fusion is effectually efficient to capture rich semantic 
+
+properties as well as textural and frequency-related indications, 
+
+offering great strength to change of lighting and any form of 
+
+smog. On the same parameter, the DenseNet-169 + LBP and 
+
+DenseNet-169 + HOG models also provided the highest 
+
+accuracy (more than 98%), confirming that handcrafted features 8
+
+are useful when it comes to stabilizing and adapting the model. 
+
+TABLE 4 Comparative performance analysis of triple handcrafted feature extraction techniques combined with various classifiers 
+
+Feature Extraction 
+
+Method (s) 
+
+Classifiers Accuracy 
+
+(%) 
+
+Precision 
+
+(%) 
+
+Recall 
+
+(%) 
+
+F1-Score 
+
+(%) 
+
+LBP + HOG + Gabor SVM 85.43 86.16 85.43 85.42 
+
+LBP + HOG + Gabor XGBoost 88.39 88.66 88.39 88.34 
+
+LBP + HOG + Gabor LGBM 88.80 89.01 88.87 88.01 
+
+TABLE 5 Comparative performance analysis of deep learning feature extraction techniques combined with various classifiers 
+
+Feature Extraction 
+
+Method (s) 
+
+Classifiers Accuracy 
+
+(%) 
+
+Precision 
+
+(%) 
+
+Recall 
+
+(%) 
+
+F1-Score 
+
+(%) 
+
+DenseNet -169 SVM 99.17 99.01 99.10 99.01 
+
+DenseNet-169 XGBoost 97.03 97.01 97.03 97.02 
+
+DenseNet -169 LGBM 97.94 98.16 97.94 97.93 
+
+TABLE 6 Comparative performance analysis of dual hybrid feature extraction techniques combined with various classifiers 
+
+Feature Extraction Method (s) Classifiers Accuracy 
+
+(%) 
+
+Precision 
+
+(%) 
+
+Recall 
+
+(%) 
+
+F1-Score 
+
+(%) 
+
+DenseNet -169 + LBP SVM 99.01 99.00 98.01 99.01 
+
+DenseNet -169 + LBP XGBoost 97.01 98.00 98.00 98.00 
+
+DenseNet-169 + LBP LGBM 98.10 98.01 98.10 98.10 
+
+DenseNet -169 + Gabor SVM 99.17 99.16 99.01 99.17 
+
+DenseNet-169 + Gabor XGBoost 97.69 97.66 97.55 97.66 
+
+DenseNet -169 + Gabor LGBM 97.94 98.01 97.94 97.93 
+
+DenseNet -169 + HOG SVM 92.75 93.01 92.70 92.75 
+
+DenseNet-169 + HOG XGBoost 97.28 97.01 97.28 97.27 
+
+DenseNet -169 + HOG LGBM 98.18 98.33 98.17 98.18 
+
+TABLE 7 Comparative performance analysis of triple hybrid feature extraction techniques combined with various classifiers 
+
+Feature Extraction Method (s) Classifiers Accuracy 
+
+(%) 
+
+Precision 
+
+(%) 
+
+Recall 
+
+(%) 
+
+F1-Score 
+
+(%) 
+
+DenseNet-169 + LBP + HOG SVM 89.21 89.50 89.21 89.11 
+
+DenseNet -169 + LBP + HOG XGBoost 86.67 87.01 86.67 86.66 
+
+DenseNet-169 + LBP + HOG LGBM 89.01 89.01 88.47 88.46 
+
+DenseNet -169 + Gabor + HOG SVM 88.80 89.16 88.81 88.87 
+
+DenseNet -169 + Gabor + HOG XGBoost 86.74 87.01 86.74 86.78 
+
+DenseNet-169 + Gabor + HOG LGBM 90.12 90.66 90.23 90.16 
+
+TABLE 8 Comparative performance analysis of hybrid feature extraction techniques combined with various classifiers 
+
+Feature Extraction Method (s) Classifiers Accuracy 
+
+(%) 
+
+Precision 
+
+(%) 
+
+Recall 
+
+(%) 
+
+F1-Score 
+
+(%) 
+
+DenseNet-169 + LBP + HOG + Gabor SVM 89.01 89.01 89.01 88.80 
+
+DenseNet -169 + LBP + HOG + Gabor XGBoost 90.04 90.16 90.01 90.01 
+
+DenseNet -169 + LBP + HOG + Gabor LGBM 92.88 93.01 92.42 92.45 
+
+Table 7 and 8 are triple and quadruple combinations of 
+
+traditional as well as deep learning methods, combining 
+
+DenseNet-169 with LBP and HOG with Gabor and tested 
+
+using a variety of classifiers. These combinations obtained 
+
+marginally lower accuracy with LightGBM performing best 
+
+at 92.88 percent. The decline in performance relating to 
+
+Table 5 could be attributed to a variety of reasons: 
+
+ Feature Redundancy: As the number of handcrafted 
+
+features increases, more descriptors that duplicate 
+
+information are added, but they do not add to the 
+
+discriminative power. 
+
+ Curse of Dimensionality: This is caused by the fact that 
+
+additional features prepend more dimensions, and this can 
+
+cause overfitting, particularly when there are few training 
+
+examples. The expansion of the features to a high 
+
+dimension demands larger datasets to be done effectively 
+
+with generalization, which was not performed here. 
+
+ Noise Propagation: With the aggregation of multiple 
+
+hand-crafted descriptors, a small portion of noise 
+
+inherent in each form of feature type will add up 
+
+resulting in a misshapen feature distribution and 
+
+lowering classification accuracy. 
+
+ Computational Complexity: Increased feature volume 
+
+leads to longer training times and higher computational 
+
+costs, which may affect model convergence and 
+
+stability. 
+
+## 5. CONCLUSIONS 
+
+This paper introduces a novel hybrid network by 
+
+concatenating the handcrafted features extracted through 
+
+LBP, HoG and G.F., and deep features extracted by using 
+
+DenseNet169. The comparative analysis reveals that the 
+
+fusion of the dual hybrid feature (DenseNet-169 + Gabor) 
+
+feature is the most balanced trade-off between the accuracy, 
+
+efficiency, and strength feature. This finding demonstrates 
+
+that deep semantic and manual texture characteristics 
+
+complement each other in solar defect analysis. The 
+
+application of powerful classifier models such as XGBoost 
+
+and LightGBM also enhance stability and stop overfitting 
+
+with the help of effective gradient boosting and 
+
+regularization. In general, the hybrid framework proposed 9
+
+has a better defect detecting accuracy, resistance, and 
+
+flexibility that have a solid basis on the real-life use of the 
+
+automated PV panels monitoring system. 
+
+The triple and quadruple hybrid combinations had better 
+
+performance than single model methods, suggesting that 
+
+multiple feature extraction methods can result in higher 
+
+model capabilities at distinguishing various defect 
+
+characteristics. Nevertheless, they were slightly less accurate 
+
+than the dual-hybrid combinations mainly because they are 
+
+more complex in models, feature redundancy and could 
+
+easily overfit because of the high dimensionality of the 
+
+feature spaces. Despite these shortcomings, the results of the 
+
+experiments prove the hypothesis that the suggested hybrid 
+
+structure can be taken as the one that remains stable and 
+
+shows consistent performance. The combination of high-
+
+level features and handcrafted features is effective in 
+
+increasing generalization and detect defects reliably even in 
+
+changing environmental conditions and illumination 
+
+differences .
+
+5.1. Limitations: 
+
+Although the proposed hybrid PV panel defect detection 
+
+framework has good outcomes, several limitations must be 
+
+realized. First, the dataset, though it has been enriched to 
+
+make it more diverse, is still relatively modest in the context 
+
+of large-scale benchmarks that are most often necessary 
+
+when training a deep learning model, which could constrain 
+
+the extrapolation of the system to highly different real-world 
+
+conditions, e.g., extreme lighting, heavy shadows, or 
+
+infrequent defect patterns. Second, the handcrafted feature 
+
+extractors adopted in this paper like LBP, HOG and Gabor 
+
+filters are susceptible to noise and changes in illumination 
+
+and can thus affect their performance when images are taken 
+
+with different camera sensors or even in various 
+
+environmental conditions. Third, hybrid feature fusion 
+
+greatly expands the dimensionality of the feature space 
+
+which may lead to redundancy and increase the 
+
+computational cost of training and inference. This was also 
+
+experienced in the reduced results on multi-feature fusion 
+
+models. Finally, the system is yet to be tested against actual 
+
+real-time deployment platforms, including UAV-based 
+
+inspection pipelines or edge devices, which can provide 
+
+more hardware limitations. Future research will aim at 
+
+correcting these limitations by increasing the dataset, 
+
+decreasing the redundancy of features, adding other types of 
+
+imaging, and optimizing the model to be applied in real-time 
+
+to an industrial environment. 
+
+Funding: Not Applicable 
+
+Data Availability: Data will be made available on request. 
+
+## Declarations 
+
+Competing Interests: The authors declare no competing 
+
+interests 
+
+Contributions: 
+
+Muhammad Junaid Asif and Muhammad Saad Rafaqat conceived 
+
+and designed the experiments. 
+
+Muhammad Junaid Asif and Muhammad Saad Rafaqat performed the 
+
+experiments. 
+
+Muhammad Saad Rafaqat and Usman Nazakat analyzed the data, 
+
+wrote the code, designed the software or performed the computation 
+
+work. 
+
+Muhammad Junaid Asif, Usman Nazakat and Uzair Khan prepared 
+
+the figures and/or tables. 
+
+Muhammad Junaid Asif and Muhammad Saad Rafaqat drafted the 
+
+work or revised it critically for important content. 
+
+## REFERENCES 
+
+[1] L. S. Tiewsoh, M. Sivek and J. Jirásek, "Traditional energy resources 
+
+in India (coal, crude oil, natural gas): A review," Energy Sources, 
+
+Part B: Economics, Planning, and Policy, vol. 12, p. 110– 118, 2017. 
+
+[2] F. Al Mubarak, R. Rezaee and D. A. Wood, "Economic, societal, and 
+
+environmental impacts of available energy sources: A review," Eng, 
+
+vol. 5, p. 1232–1265, 2024. 
+
+[3] A. M. Omer, "Renewable energy resources for electricity generation 
+
+in Sudan," Renewable and Sustainable Energy Reviews, vol. 11, p. 
+
+1481–1497, 2007. 
+
+[4] X. Sun, S. Jiang, H. Huang, H. Li, B. Jia and T. Ma, "Solar energy 
+
+catalysis," Angewandte Chemie, vol. 134, p. e202204880, 2022. 
+
+[5] A. Chaudhuri, R. Datta, M. P. Kumar, J. P. Davim and S. Pramanik, 
+
+"Energy conversion strategies for wind energy system: Electrical, 
+
+mechanical and material aspects," Materials, vol. 15, p. 1232, 2022. 
+
+[6] T. Kalak, "Potential use of industrial biomass waste as a sustainable 
+
+energy source in the future," Energies, vol. 16, p. 1783, 2023. 
+
+[7] R. K. Karre, K. Srinivas, K. Mannan, B. Prashanth and C. R. Prasad, 
+
+"A review on hydro power plants and turbines," in AIP Conference 
+
+Proceedings , 2022. 
+
+[8] T.-Z. Ang, M. Salem, M. Kamarol, H. S. Das, M. A. Nazari and N. 
+
+Prabaharan, "A comprehensive study of renewable energy sources: 
+
+Classifications, challenges and suggestions," Energy strategy 
+
+reviews, vol. 43, p. 100939, 2022. 
+
+[9] C. I. Igwe, "Geothermal energy: a review," Int. J. Eng. Res. 
+
+Technol.(IJERT), vol. 10, p. 655–661, 2021. 
+
+[10] B. Kumar, D. Garg, K. Swamy and P. Kumar, "Clean energy 
+
+production using solar energy resources," in Sustainable and Clean 
+
+Energy Production Technologies , Springer, 2022, p. 269–288. 
+
+[11] A. O. M. Maka and J. M. Alabid, "Solar energy technology and its 
+
+roles in sustainable development," Clean Energy, vol. 6, p. 476– 483, 
+
+2022. 
+
+[12] J. Polo, Advances and Challenges in Solar PV Systems’ Performance, 
+
+vol. 15, MDPI, 2022, p. 6080. 
+
+[13] N. Jannah, T. S. Gunawan, S. H. Yusoff, M. S. A. Hanifah and S. N. 
+
+M. Sapihie, "Recent Advances and Future Challenges of Solar Power 
+
+Generation Forecasting," IEEE Access, 2024. 
+
+[14] Y. Ledmaoui, A. El Maghraoui, M. El Aroussi and R. Saadane, 
+
+"Enhanced fault detection in photovoltaic panels using cnn-based 
+
+classification with pyqt5 implementation," Sensors, vol. 24, p. 7407, 
+
+2024. 
+
+[15] M. Asad, W. Azeem, H. T. Mustafa, Y. Fang, J. Yang, Y. Zuo and 
+
+W. Liu, "Inter-modality feature prediction through multimodal fusion 
+
+for 3D shape defect detection," Neural Networks, vol. 193, p. 108057, 
+
+2026. 
+
+[16] M. Asad, W. Azeem, A. A. Malik, H. Jiang, A. Ali, J. Yang and W. 
+
+Liu, "3D-MMFN: Multi-level multimodal fusion network for 3D 
+
+industrial image anomaly detection," Advanced Engineering 
+
+Informatics, vol. 65, p. 103284, 2025. 
+
+[17] M. Asad, W. Azeem, H. Jiang, H. Tayyab Mustafa, J. Yang and W. 
+
+Liu, "2M3DF: Advancing 3D Industrial Defect Detection With 10 
+
+Multi-Perspective Multimodal Fusion Network," IEEE Transactions 
+
+on Circuits and Systems for Video Technology, vol. 35, pp. 6803-
+
+6815, 2025. 
+
+[18] F. H. K. Al-Zaabi, A. M. S. Al Washahi, R. K. M. Al-Maaini, M. K. 
+
+Boddu and others, "Advancing Solar PV Component Inspection: 
+
+Early Defect Detection with UAV Based Thermal Imaging and 
+
+Machine Learning," in 2023 Middle East and North Africa Solar 
+
+Conference (MENA-SC) , 2023. 
+
+[19] R. Singh, R. Kashyap and A. Kumar, "Prominent solution for solar 
+
+panel defect detection using AI-based computer vision technology 
+
+with IoT sensors in the solar panel manufacturing industry," 
+
+International Journal of Information Technology, p. 1–17, 2024. 
+
+[20] U. Hijjawi, S. Lakshminarayana, T. Xu, G. P. M. Fierro and M. 
+
+Rahman, "A review of automated solar photovoltaic defect detection 
+
+systems: Approaches, challenges, and future orientations," Solar 
+
+Energy, vol. 266, p. 112186, 2023. 
+
+[21] Y. S. Afridi, K. Ahmad and L. Hassan, "Artificial intelligence based 
+
+prognostic maintenance of renewable energy systems: A review of 
+
+techniques, challenges, and future research directions," International 
+
+Journal of Energy Research, vol. 46, p. 21619–21642, 2022. 
+
+[22] A. Lenarczyk, PV Panel Defect Dataset, 2025. 
+
+[23] Z. Sedaghatjoo, H. Hosseinzadeh and B. S. Bigham, "Local binary 
+
+pattern (lbp) optimization for feature extraction," arXiv preprint 
+
+arXiv:2407.18665, 2024. 
+
+[24] S. Divya, L. P. Suresh and A. John, "Image feature generation using 
+
+binary patterns—LBP, SLBP and GBP," in ICT Analysis and 
+
+Applications , Springer, 2022, p. 233–239. 
+
+[25] N. Kaur, N. Nazir and others, "A review of local binary pattern based 
+
+texture feature extraction," in 2021 9th International Conference on 
+
+Reliability, Infocom Technologies and Optimization (Trends and 
+
+Future Directions)(ICRITO) , 2021. 
+
+[26] M. Pietikäinen, "Image analysis with local binary patterns," in 
+
+Scandinavian Conference on Image Analysis , 2005. 
+
+[27] V. A. Saeed, "A framework for recognition of facial expression using 
+
+HOG features," International Journal of Mathematics, Statistics, and 
+
+Computer Science, vol. 2, p. 1–8, 2024. 
+
+[28] E. A. Siddiqui, V. Chaurasia and M. Shandilya, "Detection and 
+
+classification of lung cancer computed tomography images using a 
+
+novel improved deep belief network with Gabor filters," 
+
+Chemometrics and Intelligent Laboratory Systems, vol. 235, p. 
+
+104763, 2023. 
+
+[29] M. J. Asif, "Crowd Scene Analysis Using Deep Learning 
+
+Techniques," arXiv preprint arXiv:2505.08834, 2025. 
+
+[30] A. A. Elngar, M. Arafa, A. Fathy, B. Moustafa, O. Mahmoud, M. 
+
+Shaban and N. Fawzy, "Image classification based on CNN: a 
+
+survey," Journal of Cybersecurity and Information Management, vol. 
+
+6, p. 18–50, 2021. 
+
+[31] M. A. Chandra and S. S. Bedi, "Survey on SVM and their application 
+
+in image classification," International Journal of Information 
+
+Technology, vol. 13, p. 1–11, 2021. 
+
+[32] H. Tanveer, M. A. Adam, M. A. Khan, M. A. Ali and A. Shakoor, 
+
+"Analyzing the performance and efficiency of machine learning 
+
+algorithms, such as deep learning, decision trees, or support vector 
+
+machines, on various datasets and applications," The asian bulletin 
+
+of big data management, vol. 3, p. 126–136, 2023. 
+
+[33] A. Mirakowski, "Comparison of the Effectiveness of ANN and CNN 
+
+in Image Classification," in International Conference on 
+
+Computational Collective Intelligence , 2024. 
+
+[34] S. Sharma and K. Guleria, "Deep learning models for image 
+
+classification: comparison and applications," in 2022 2nd 
+
+International Conference on Advance Computing and Innovative 
+
+Technologies in Engineering (ICACITE) , 2022. 
+
+[35] P. Dinesh, A. S. Vickram and P. Kalyanasundaram, "Medical image 
+
+prediction for diagnosis of breast cancer disease comparing the 
+
+machine learning algorithms: SVM, KNN, logistic regression, 
+
+random forest and decision tree to measure accuracy," in AIP 
+
+Conference Proceedings , 2024. 
+
+[36] M. S. Islam, S. Sultana, F. A. Farid, M. N. Islam, M. Rashid, B. S. 
+
+Bari, N. Hashim and M. N. Husen, "Multimodal hybrid deep learning 
+
+approach to detect tomato leaf disease using attention based dilated 
+
+convolution feature extractor with logistic regressio n classification," 
+
+Sensors, vol. 22, p. 6079, 2022. 
+
+[37] A. Maleki, M. Raahemi and H. Nasiri, "Breast cancer diagnosis from 
+
+histopathology images using deep neural network and XGBoost," 
+
+Biomedical Signal Processing and Control, vol. 86, p. 105152, 2023. 
+
+[38] D.-M. Tsai, S.-C. Wu and W.-Y. Chiu, "Defect detection in solar 
+
+modules using ICA basis images," IEEE Transactions on Industrial 
+
+Informatics, vol. 9, p. 122–131, 2012. 
+
+[39] X. Zhang, H. Sun, Y. Zhou, J. Xi and M. Li, "A novel method for 
+
+surface defect detection of photovoltaic module based on 
+
+independent component analysis," Mathematical problems in 
+
+engineering, vol. 2013, p. 520568, 2013. 
+
+[40] A. Shaik, A. Balasundaram, L. S. Kakarla and N. Murugan, "Deep 
+
+learning-based detection and segmentation of damage in solar 
+
+panels," Automation, vol. 5, p. 128–150, 2024. 
+
+[41] N. Appavu, "AI-Powered VGG16-based Method for Detecting, 
+
+Classifying, and Visualizing Solar Panel Defects," in 2025 4th 
+
+International Conference on Distributed Computing and Electrical 
+
+Circuits and Electronics (ICDCECE) , 2025. 
+
+[42] S. Mansurov, Z. Çetin, E. Aslan and Y. Özüpak, "A Deep Learning 
+
+Approach for Fault Detection in Photovoltaic Systems Using 
+
+MobileNetV3," Gazi University Journal of Science Part A: 
+
+Engineering and Innovation, vol. 12, p. 197–212, 2025. 
+
+[43] K. Kazemi, "Federated Transfer Learning for Image-Based Solar 
+
+Panel Fault Detection," in 2025 12th Iranian Conference on 
+
+Renewable Energies and Distributed Generation (ICREDG) , 2025. 
+
+[44] S. R. Joshua, S. Park and K. Kwon, "Visual Diagnostics: Deep 
+
+Learning with DenseNet121 for Identifying Faults in Solar Panels," 
+
+in 2024 15th International Conference on Information and 
+
+Communication Technology Convergence (ICTC) , 2024. 
+
+[45] S. Nagar, M. K. Mishra and P. K. Rai, "Using Densenet169 for 
+
+Image-Based Classification of Solar Panel Defects," in 2024 7th 
+
+International Conference on Contemporary Computing and 
+
+Informatics (IC3I) , 2024. 
+
+[46] A. Ghahremani, S. D. Adams, M. Norton, S. Y. Khoo and A. Z. 
+
+Kouzani, "Detecting defects in solar panels using the YOLO v10 and 
+
+v11 algorithms," Electronics, vol. 14, p. 344, 2025. 
+
+[47] A. Mohamed, Y. Nacera, B. Ahcene, A. Teta, E. O. Belabbaci, A. 
+
+Rabehi, Y. A. Alsabah and M. Benghanem, "Optimized YOLO based 
+
+model for photovoltaic defect detection in electroluminescence 
+
+images," Scientific Reports, vol. 15, p. 32955, 2025. 
+
+[48] H. Khalid, S. Saqib, M. J. Asif and D. A. Dewi, "Strategic Customer 
+
+Segmentation: Harnessing Machine Learning For Retaining Satisfied 
+
+Customers," Lahore Garrison University Research Journal of 
+
+Computer Science and Information Technology, vol. 8, p. 31– 41, 
+
+2024.

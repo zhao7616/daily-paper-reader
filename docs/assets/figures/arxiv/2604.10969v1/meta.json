@@ -1,0 +1,54 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.10969v1/fig-001.webp",
+      "caption": "Fig. 1. Visual Samples Depicting Various Surface Conditions of PV Panels for Defect Detection: (a) Clean, (b) Dust, (c) Snow-covered, (d) Bird Droppings, (e) Physical Damage, and (f) Electrical Fault",
+      "page": 2,
+      "index": 1,
+      "width": 474,
+      "height": 359
+    },
+    {
+      "url": "assets/figures/arxiv/2604.10969v1/fig-002.webp",
+      "caption": "Fig. 2. Block diagram illustrates the overall architecture of the proposed system for PV panel defect detection. The paper will be structured as follows: Section 2 will provide an overview of recent methodologies applied for detecting defects in SOLAR panels. Section 3 outlines the proposed methodology, which includes a description of the dataset used, data processing, and hybrid feature extraction. Section 4 describes the experimental design, presents the qualitative and quantitative findings, and offers a comparison with previous methods. Section 5 discusses the relevance of the findings and their implications to real-world use of PV monitoring. Lastly, Section 6 concludes the paper by summarizing the main contributions and outlining possible future research directions.",
+      "page": 2,
+      "index": 2,
+      "width": 464,
+      "height": 388
+    },
+    {
+      "url": "assets/figures/arxiv/2604.10969v1/fig-003.webp",
+      "caption": "TABLE 3 Comparative performance analysis of dual handcrafted feature extraction techniques combined with various classifiers",
+      "page": 7,
+      "index": 3,
+      "width": 672,
+      "height": 279
+    },
+    {
+      "url": "assets/figures/arxiv/2604.10969v1/fig-004.webp",
+      "caption": "TABLE 2 Comparative performance analysis of handcrafted feature extraction techniques combined with various classifiers",
+      "page": 7,
+      "index": 4,
+      "width": 664,
+      "height": 253
+    },
+    {
+      "url": "assets/figures/arxiv/2604.10969v1/fig-005.webp",
+      "caption": "TABLE 1 PV Panel Defect Dataset Summary",
+      "page": 4,
+      "index": 5,
+      "width": 532,
+      "height": 277
+    },
+    {
+      "url": "assets/figures/arxiv/2604.10969v1/fig-006.webp",
+      "caption": "TABLE 6 Comparative performance analysis of dual hybrid feature extraction techniques combined with various classifiers",
+      "page": 8,
+      "index": 6,
+      "width": 814,
+      "height": 239
+    }
+  ]
+}
