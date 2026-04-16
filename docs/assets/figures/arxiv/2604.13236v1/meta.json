@@ -1,0 +1,30 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.13236v1/fig-001.webp",
+      "caption": "Fig. 2. Representative examples from each defect class in SEMIFA-930. Each cell shows a 256 × 256 wafer map with its severity badge (top-left) and root cause annotation (bottom). Spatial patterns are clearly distinguishable, though some classes (e.g., local_cluster vs. random_defects) present challenging overlap.",
+      "page": 11,
+      "index": 1,
+      "width": 1076,
+      "height": 1139
+    },
+    {
+      "url": "assets/figures/arxiv/2604.13236v1/fig-002.webp",
+      "caption": "TABLE VIII FIVE QUALITATIVE CASE STUDIES DEMONSTRATING END-TO-END SEMIFA REPORT GENERATION. FOR BREVITY, ONLY THE TOP-RANKED ROOT CAUSE HYPOTHESIS AND PRIMARY RECOMMENDATION ARE SHOWN. FULL REPORTS CONTAIN 2–3 HYPOTHESES AND 3–5 RECOMMENDATIONS EACH.",
+      "page": 8,
+      "index": 2,
+      "width": 1026,
+      "height": 460
+    },
+    {
+      "url": "assets/figures/arxiv/2604.13236v1/fig-003.webp",
+      "caption": "Fig. 1. Pipeline architecture of the SEMIFA system. Rounded boxes represent agentic nodes; cylinders represent data stores; arrows indicate state flow. All agentic nodes share LLaVA-1.6 via a thread-safe ModelRegistry singleton.",
+      "page": 4,
+      "index": 3,
+      "width": 1076,
+      "height": 622
+    }
+  ]
+}

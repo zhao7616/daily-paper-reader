@@ -1,0 +1,483 @@
+Title: IAD-Unify: A Region-Grounded Unified Model for Industrial Anomaly Segmentation, Understanding, and Generation
+
+URL Source: https://arxiv.org/pdf/2604.12440v1
+
+Published Time: Wed, 15 Apr 2026 01:15:30 GMT
+
+Number of Pages: 9
+
+Markdown Content:
+# IAD-Unify: A Region-Grounded Unified Model for Industrial Anomaly Segmentation, Understanding, and Generation 
+
+## Haoyu Zheng, Tianwei Lin, Wei Wang, Zhuonan Wang, Wenqiao Zhang ∗, Jiaqi Zhu, Feifei Shao 
+
+Zhejiang University China 
+
+Figure 1: Overview of IAD-Unify and Anomaly-56K. A unified framework jointly addresses anomaly segmentation, region-grounded understanding, and mask-guided defect generation across 24 industrial categories. Key results are highlighted at the bottom. 
+
+Abstract 
+
+Real-world industrial inspection requires not only localizing de-fects, but also explaining them in natural language and generat-ing controlled defect edits. However, existing approaches fail to jointly support all three capabilities within a unified framework and evaluation protocol. We propose IAD-Unify, a dual-encoder unified framework in which a frozen DINOv2-based region ex-pert supplies precise anomaly evidence to a shared Qwen3.5-4B vision-language backbone via lightweight token injection, jointly enabling anomaly segmentation, region-grounded understanding, and mask-guided generation. To enable unified evaluation, we fur-ther construct Anomaly-56K, a comprehensive unified multi-task IAD evaluation platform, spanning 59,916 images across 24 cat-egories and 104 defect variants. Controlled ablations yield four findings: (i) region grounding is the decisive mechanism for un-derstanding, removing it degrades location accuracy by >76 pp; (ii) predicted-region performance closely matches oracle, confirm-ing deployment viability; (iii) region-grounded generation achieves the best full-image fidelity and masked-region perceptual quality; 
+
+> ∗Corresponding author.
+
+and (iv) pre-initialized joint training improves understanding at negligible generation cost ( −0.16 dB). IAD-Unify further achieves strong performance on the MMAD benchmark, including categories unseen during training, demonstrating robust cross-category gen-eralization. 
+
+1 Introduction 
+
+Industrial anomaly detection (IAD) has traditionally been framed as a detection, localization and segmentation problem, with specialist methods such as PatchCore [ 30 ], EfficientAD [ 1], CutPaste [ 21 ], and DRAEM [ 37 ] achieving strong results on benchmarks such as MVTec AD [ 2 ] and VisA [ 42 ]. However, real-world inspection workflows demand more than merely identifying where defects occur. Beyond detection and localization, operators must also under-stand the underlying causes of defects through grounded natural-language explanations, which are critical for workforce training, process tracing, and production-line optimization. Furthermore, the ability to generate controlled defect variations is essential for data augmentation, failure simulation, and comprehensive quality analy-sis. To date, these three capabilities—segmentation, understanding,    
+
+> arXiv:2604.12440v1 [cs.CV] 14 Apr 2026 Zheng et al. Approach Pixel
+> Seg
+> Grounded
+> Understand
+> Mask-guided
+> Gen
+> Anomaly Seg Specialist
+> PatchCore, EfficientAD, PaDiM, STFPM
+> IAD Vision-Language
+> AnomalyGPT, Myriad, WinCLIP
+> Diffusion Editor
+> InstructPix2Pix, SD2 Inpainting
+> Unified Multimodal
+> Show-o2, Janus-Pro
+> Ours
+> Full support Different protocol Not supported
+> Seg = pixel-level binary mask (Dice/IoU) · Understand = open-ended grounded text · Gen = mask-guided defect editing
+
+Figure 2: Task coverage of existing IAD approaches. Only IAD-Unify covers all three tasks under a unified protocol. 
+
+△ = related but different evaluation protocol. 
+
+and generation—are currently addressed by separate systems with limited cross-task synergy (Figure 2). Recent multimodal approaches have begun to bridge anomaly detection and language understanding. Building on advances in vision-language pretraining [ 25 , 28 ], AnomalyGPT [ 11 ] integrates large vision-language models for anomaly analysis, Myriad [ 22 ]applies external vision experts to guide multimodal reasoning, Win-CLIP [ 15 ] leverages CLIP for zero-/few-shot anomaly classification, while OmniAD [ 40 ] and AD-Copilot [ 17 ] extend toward comprehen-sive anomaly reasoning. Yet these systems address understanding only—none incorporates mask-guided defect generation or shares a backbone across segmentation, understanding, and generation. Conversely, diffusion-based editors built on denoising diffusion models [ 12 , 29 ], such as InstructPix2Pix [ 3 ], can synthesize defect variations but lack any anomaly detection or reasoning capability. Generic unified multimodal systems (e.g., Show-o [ 35 ], Janus [ 34 ], Emu3 [ 32 ]) demonstrate joint understanding and generation in the open domain but do not support the controlled source-plus-mask editing protocol required for fair industrial evaluation. The result is a fragmented landscape where each system covers at most two of the three tasks. A further obstacle lies in the absence of a unified evaluation plat-form that jointly supports all three tasks. Existing IAD benchmarks, such as MVTec AD and VisA, are limited to segmentation, while MMAD [ 18 ] focuses on multiple-choice understanding without sup-porting generation or pixel-level localization. Crucially, no existing benchmark enables the evaluation of mask-guided defect editing, a key capability for controllable defect synthesis and analysis. With-out such a unified platform, it remains unclear whether a single model can effectively integrate segmentation, understanding, and generation, thereby hindering systematic progress in this direction. To address these gaps. We propose IAD-Unify, a unified dual-encoder framework that jointly supports all three tasks. The core principle of our design is to treat anomaly regions as a shared currency. Specifically, a frozen DINOv2-based region expert [ 27 ]extracts dense anomaly evidence, which is injected into a shared Qwen3.5-4B backbone [ 36 ] through a lightweight placeholder-replacement mechanism [ 41 ] that preserves the backbone’s native visual processing. Built upon this shared representation, the under-standing branch generates grounded natural-language responses by jointly attending to global visual context from Qwen’s ViT and region-level evidence from DINO, while the generation branch leverages hidden-state representations to guide a downstream inpainting diffusion model. Both branches operate over the same backbone, enabling unified modeling across tasks. To enable rigorous evaluation, we further construct Anomaly-56K, a unified benchmark comprising 59,916 images across 24 categories and 104 defect variants, with annotations supporting segmentation, region-grounded understanding, and mask-guided generation within a single evaluation protocol. Comprehensive evaluation reveals that explicit region grounding is the decisive mechanism for industrial anomaly understanding and generation alike—removing region evidence degrades location accuracy by >76 pp—while predicted-region performance closely matches oracle, confirming deployment viability. Pre-initialized joint training further improves understanding at negligible gen-eration cost. The model additionally generalizes to the external MMAD benchmark [ 18 ], including categories absent from training. Our contributions are as follows: 
+
+• We propose IAD-Unify, a unified dual-encoder framework com-bining a shared Qwen3.5-4B backbone with a DINOv2-based region expert, unifying segmentation, understanding, and gener-ation through a placeholder-replacement injection mechanism. 
+
+• We construct Anomaly-56K, a unified three-task evaluation plat-form for industrial anomaly detection, enabling joint benchmark-ing of segmentation, understanding, and mask-guided generation under one standardized protocol—a capability no existing bench-mark provides. 
+
+• We demonstrate through a controlled four-mode ablation that explicit region grounding—not whole-image prompting—is the key mechanism for both industrial anomaly understanding and high-fidelity mask-guided defect generation. 
+
+• We show that pre-initialized joint training substantially improves understanding over stage-wise optimization at negligible gen-eration cost ( −0.16 dB), confirming that the two branches are complementary rather than competing. 
+
+2 Related Work 
+
+Industrial anomaly detection. Specialist IAD methods have achieved strong localization and segmentation performance on standard benchmarks. Memory-bank approaches such as Patch-Core [ 30 ], knowledge-distillation methods like EfficientAD [ 1]and RD4AD [ 10 ], self-supervised methods such as CutPaste [ 21 ], discriminative reconstruction approaches like DRAEM [ 37 ], and synthesis-based approaches like GLASS [ 6] represent established baselines. More recent unified methods, including UniAS [ 26 ], as well as zero-/few-shot approaches such as WinCLIP [ 15 ] and AnomalyDINO [ 8 ], further improve performance. While these methods provide additional context, they focus exclusively on local-ization without addressing grounded understanding or generative capabilities. IAD-Unify: A Region-Grounded Unified Model for Industrial Anomaly Segmentation, Understanding, and Generation 
+
+Multimodal anomaly understanding. The integration of large vision-language models (LVLMs) [ 25 , 28 ] into IAD has opened di-rections beyond dense prediction. AnomalyGPT [ 11 ] pioneered LVLM-based anomaly analysis, Myriad [ 22 ] applied external vision experts to guide multimodal IAD reasoning, and MAU-GPT [ 33 ]further explores multi-task anomaly understanding with a hierar-chical task formulation. Subsequent systems such as OmniAD [ 40 ]and AD-Copilot [ 17 ] extend toward comprehensive reasoning and assistant-style interaction. A common limitation is the absence of any generation capability and reliance on separate segmenta-tion modules rather than a shared region representation. Moreover, these methods evaluate on binary anomaly classification or closed-set QA protocols that do not cover the open-ended spatial reasoning (9-way grid location) and free-form defect analysis tasks defined in our benchmark, precluding direct protocol-matched comparison and placing them in a different scope from our unified three-task setting. 
+
+Anomaly generation and image editing. Diffusion-based image synthesis has matured rapidly since the introduction of denoising diffusion probabilistic models [ 12 ]. Latent Diffusion Models [ 29 ]enable high-quality mask-conditioned inpainting, and Instruct-Pix2Pix [ 3] supports instruction-guided editing. In the IAD domain, anomaly generation serves data augmentation and failure analy-sis [ 14 , 19 ], but existing generation methods operate independently of detection and understanding pipelines—and conversely, no mul-timodal IAD system incorporates a generation branch. SD-based inpainting models serve as generation baselines in our experiments, operating on the same source images and masks. Our generation branch differs by integrating shared region evidence, and our evalu-ation focuses on mask-guided industrial defect editing with explicit background preservation. 
+
+Dense visual representations for anomaly detection. Self-supervised visual encoders, from DINO [ 5] to DINOv2 [ 27 ], have shown strong transfer to anomaly segmentation due to their dense, semantically rich features. In our dual-encoder design, a DINOv2-based model serves as the frozen region expert, while a Qwen3.5-4B VLM [ 36 ] with LoRA [ 13 ] adaptation provides the shared language-reasoning backbone. The architectural details of their integration are described in Section 3. 
+
+Unified multimodal understanding and generation. Recent efforts toward unified architectures that jointly handle visual un-derstanding and generation include Show-o [ 35 ], which employs a single transformer with discrete visual tokens, Janus [ 34 ], which decouples visual encoding for understanding and generation, and Emu3 [ 32 ], which frames both tasks as next-token prediction. These systems demonstrate promising cross-task capability in the open domain, but their current model designs do not support the con-trolled source-plus-mask editing protocol required for fair indus-trial generation comparison. We therefore evaluate Show-o2-7B and Janus-Pro-7B as understanding baselines only, while the gen-eration comparison is restricted to methods that accept the same masks and source images as our model. 
+
+3 Method 3.1 Problem Formulation 
+
+We study a unified industrial anomaly framework that jointly ad-dresses three complementary tasks within a single model, enabling shared representations and cross-task reasoning: (i) Understand-ing : given an image 𝑥 ∈ R3×𝐻 ×𝑊 , a task instruction 𝑞 , and optional region evidence 𝑟 , produce a grounded natural-language answer 𝑦 .When 𝑟 is provided, the model can leverage precise spatial cues for substantially more accurate responses (Section 4.6). (ii) Seg-mentation : given a test image 𝑥 ∈ R3×𝐻 ×𝑊 , predict a pixel-level anomaly mask ˆ𝑚 ∈ [ 0, 1]𝐻 ×𝑊 . (iii) Generation : given a source image 𝑥 src , a region mask 𝑚 , and a defect instruction 𝑡 , synthesize a defect-edited image ˆ𝑥 ∈ R3×𝐻 ×𝑊 .The key design principle is to treat anomaly regions as a shared interface across tasks. Specifically, the segmentation module serves as a dense region expert, whose outputs are consistently reused to support both grounded understanding and controllable generation, eliminating the need for separate task-specific modules. 
+
+3.2 Architecture 
+
+The framework comprises four components: a frozen dense region expert 𝐸 seg , a shared region interface R, a shared Qwen3.5-4B vision-language backbone 𝐵 , and task-specific output heads. Notably, the model is built upon a single shared VLM backbone—rather than a pipeline of separate models—through which both understanding and generation are jointly realized. The term dual-encoder refers to the two complementary visual pathways: Qwen’s native ViT captures global visual context and supports multi-image reasoning, while DINOv2 provides precise region-level anomaly evidence. Both streams are integrated into the same backbone, enabling unified semantic reasoning across tasks. 
+
+Frozen Region Expert. We instantiate 𝐸 seg as a DINOv2-L/14 encoder [ 5, 27 ] with a learnable FPN-style [ 24 ] fusion head and upsample decoder, pretrained on Anomaly-56K for anomaly seg-mentation. Given an input image 𝑥 , the region expert produces: 
+
+ˆ𝑚, 𝐹 = 𝐸 seg (𝑥 |𝜃 seg ), (1) where ˆ𝑚 ∈ [0, 1]𝐻 ×𝑊 is the predicted anomaly mask and 𝐹 ∈
+
+R𝐶 ×ℎ×𝑤 are dense intermediate features from the encoder. The FPN fusion aggregates multi-scale features from DINOv2 layers 
+
+{6, 12 , 18 , 24 }, followed by spatial attention and a four-stage up-sample decoder to produce the full-resolution mask. 𝐸 seg remains frozen during unified training, preserving localization quality while providing stable region evidence to downstream tasks. 
+
+Shared Region Interface. The region interface R transforms the dense outputs of 𝐸 seg into a compact representation consumed by both branches. It produces three outputs: 
+
+Region tokens. Inspired by learned query mechanisms in object detection [ 4], a set of 𝐾 learnable query vectors {𝑞 𝑘 }𝐾 𝑘 =1 attend over the mask-weighted feature map via cross-attention: 
+
+𝑟 tok = CrossAttn  {𝑞 𝑘 }, ˆ𝑚 ⊙ 𝐹  ∈ R𝐾 ×𝑑 , (2) where 𝐾 =16 and 𝑑 =256 . These tokens encode rich region-conditioned anomaly evidence that preserves spatial structure beyond what a single pooled vector can capture. Zheng et al. Visual Pre-processing &  Region Interface 
+
+> Region Interface
+> trainable
+> Cross-Attn Pool
+> Geometry Hint
+> Projectors
+> Frozen
+
+Seg 
+
+> pixel mask output
+> K=16 region tokens
+> + 1 geometry token
+> predict,no LLM
+> mask + dense features
+> overlay(source,mask)
+> instruction +
+> query placeholder tokens
+
+Inputs Area 
+
+image 
+
+> anomaly sample
+
+image 
+
+> + mask + question
+> oracle or predicted
+
+source 
+
+> + mask + instruction
+> edit command
+
+Shared Qwen3.5 Backbone 
+
+> One backbone instance, two task outp uts
+> Token Sequence entering Qwen LLM
+
+Qwen ViT       
+
+> image →visual tokens
+> geo regionx16 text ViT tokens queryx256
+> gen only
+> Query Ext
+> n=256 LM Head
+
+Qwen LLM(LoRA r=64,a=128) 
+
+> full self-attention over all tokens,
+> q_proj, k_proj, v_proj, o_proj trainable via LoRA
+> query hid den states (N=256)
+
+Tokenizer      
+
+> (embed_tokens)
+> text →text tokens
+> Region Expert
+> （DINOv2-L/14, frozen)
+> ViT-L/14 Encoder
+> FPN + Spatial Attn
+> Upsample Decoder
+> Seg Understand Generated Trainable Shared (LoRA)
+> Generated
+> region-guided
+> defect image
+> VAE
+> UNet
+> +mask +source(9ch)
+> attn trainable
+> SD2 Inpainting
+> Understand
+> grounded text answer
+> "top_left"
+> "scratch on metal"
+
+VLM Guidance 
+
+> Connector
+> 12-layer
+> Transformer
+> Encoder
+
+Outputs Area 
+
+Figure 3: Architecture of IAD-Unify. Qwen3.5 VLM provides global understanding; a frozen DINOv2 region expert provides anomaly localization. Region tokens are injected via placeholder replacement into the shared backbone. 
+
+Geometry summary. A vector 𝑔 = [¯𝑐 𝑥 , ¯𝑐 𝑦 , 𝑤, ℎ, 𝑎, 𝑠 ] is computed from the predicted mask, encoding the normalized centroid, bound-ing box dimensions, area ratio, and prediction confidence. 
+
+Task-specific projections. Linear projections map region tokens to the target embedding space: 𝜋 𝑢 : R𝑑 → R𝑑 qwen for understanding and 𝜋 𝑔 : R𝑑 → R𝑑 unet for generation. Each projection is a two-layer MLP with GELU activation and layer normalization. 
+
+Region Token Injection via Placeholder Replacement. A cen-tral challenge is injecting DINO-derived region tokens into the VLM without disrupting its native multimodal processing, particu-larly the 3D positional encoding (M-RoPE) that Qwen3.5 uses for visual tokens. Our solution is placeholder replacement: we extend the tokenizer with 𝐾 +1 special tokens (one per region query plus a geometry token) that appear in the text prompt alongside the standard image token. The outer VLM forward pass processes in-put IDs and pixel values normally—executing ViT encoding, visual token merging, and M-RoPE position assignment. A lightweight pre-hook on the inner language model then replaces the placeholder embeddings with the DINO-derived region tokens 𝜋 𝑢 (𝑟 tok ) and ge-ometry token 𝑔 proj before the transformer layers process them. This preserves Qwen’s native visual understanding, including spatial position encoding, while seamlessly incorporating region-specific anomaly evidence. 
+
+Understanding Branch. The understanding branch uses the shared Qwen3.5-4B VLM backbone adapted with LoRA [ 13 ]. The input image is processed through Qwen’s native ViT, producing global visual tokens with proper M-RoPE positional encoding. The geometry summary is projected to the backbone’s hidden dimension: 
+
+𝑔 proj = LN  MLP (𝑔 ) ∈ R𝑑 qwen . (3) The prompt contains both the <image> token (replaced by ViT visual tokens during Qwen’s native forward) and the placeholder tokens (replaced by DINO region tokens via the pre-hook). The back-bone thus attends jointly over global visual context from Qwen’s ViT and region-specific anomaly evidence from DINO, then auto-regressively generates the answer 𝑦 .The understanding branch addresses 4 type tasks: (i) location 
+
+(grounded spatial reasoning on a 3×3 grid), (ii) analysis (free-form semantic explanation), (iii) decision (normal vs. anomalous clas-sification), (iv) defect type (fine-grained categorization across 51 labels). At inference time, the primary protocol is predicted-region understanding : the model uses proposal masks from 𝐸 seg rather than ground-truth masks, reflecting realistic deployment conditions. 
+
+Generation Branch. This branch reuses the same Qwen3.5-4B VLM backbone. The input prompt includes the defect instruction together with 𝑁 =256 metaquery tokens. Qwen’s ViT encodes an overlay image (source image with mask highlight) to provide global visual context. Hidden states at the metaquery positions are pro-jected by a learned connector C (12-layer Qwen2-style encoder) into cross-attention conditioning for an SD2 Inpainting UNet [12, 29]: 
+
+ℎgen = C
+
+
+
+𝐵 𝜋 𝑔 (𝑟 tok ); ViT (𝑥 ov ); Enc (𝑡 )
+
+mq 
+
+
+
+, (4) where 𝑥 ov is the overlay of the source image and mask. The UNet receives ℎgen as cross-attention conditioning alongside the noisy latent, edit mask, and source image encoding. The dual visual input— global context from Qwen’s ViT and region-specific evidence from IAD-Unify: A Region-Grounded Unified Model for Industrial Anomaly Segmentation, Understanding, and Generation Stage I   
+
+> Editing alignment
+> UltraEdit 108K
+> Stage Ⅱ
+> Industrial adapt
+> Anomaly-56K
+> Stage Ⅲ
+> Defect inpainting
+> + visual cond.
+> Seg. pre-train
+> DINOv2-L/14
+
+Unified 
+
+> Joint optimize
+> understand
+> + gen
+> Understanding
+> text generation
+> Generation
+> defect editing
+
+Figure 4: Training pipeline. Generation pre-training (blue) progresses through three stages; segmentation (orange) trains independently. Both converge in the unified stage (purple) with the region expert frozen. 
+
+DINO—enables the generation branch to produce defect edits that are both spatially precise and contextually consistent. 
+
+3.3 Training Strategy 
+
+Training proceeds through a progressive pipeline that first estab-lishes each component independently, then unifies them (Figure 4). 
+
+Generation pre-training. The generation branch is pre-trained through three progressive stages, each building on the previous checkpoint. Stage I (editing alignment) trains the connector on 108K region-editing samples from UltraEdit [ 39 ] with text-only instruc-tions (1 epoch), establishing basic instruction-following capability. 
+
+Stage II (industrial adaptation) transfers this capability to the in-dustrial domain through mask-guided restoration on Anomaly-56K training images (2 epochs), without requiring visual conditioning. 
+
+Stage III (defect-aware inpainting) introduces visual conditioning with real anomaly masks, using both original clean images (when available with high background similarity) and synthetic normal sources (2 epochs). All three stages use the frozen Qwen3.5-4B back-bone and train only the connector ( ∼790 M), selected UNet layers, and metaquery token embeddings. 
+
+Segmentation pre-training. Independently, the DINOv2-L/14 en-coder with its FPN fusion head and upsample decoder is trained for anomaly segmentation on Anomaly-56K (25 epochs). After conver-gence, this model is promoted to the frozen region expert 𝐸 seg in the unified stage. 
+
+Unified joint training. The final stage jointly optimizes under-standing and generation through the shared Qwen backbone. The generation branch is initialized from its Stage III checkpoint, pro-viding a strong starting point for defect editing. We compare this 
+
+pre-initialized joint strategy against stage-wise optimization (each branch trained sequentially) in Section 4.6. The joint objective is: 
+
+Ljoint = 𝜆 𝑢 
+
+Lunderstand 
+
+EMA 𝑢 
+
++ 𝜆 𝑔 
+
+Lgen 
+
+EMA 𝑔 
+
+, (5) where EMA 𝑢 and EMA 𝑔 are exponential moving averages of each task loss for stable multi-task scaling [ 20 ]. The understanding loss is autoregressive cross-entropy, and the generation loss is the standard diffusion denoising objective. 
+
+Parameter budget. During unified training, the Qwen3.5-4B back-bone is adapted via LoRA while its native ViT encoder remains frozen. The DINOv2 region expert and VAE are also frozen. The LoRA-adapted Qwen layers, connector, UNet, region interface, and token embeddings are trainable ( ∼2.45 B in total). This design keeps 
+
+Table 1: Summary of the Anomaly-56K evaluation platform.         
+
+> Property Statistics Total images (normal + anomalous) 59,916 Industrial categories 24 Defect variants 104 Source benchmarks MVTec AD (15), VisA (5), MPDD (4) Segmentation annotations Pixel-level binary masks Understanding task types Location, analysis, decision, defect type Generation protocol Mask-guided defect editing
+
+most parameters frozen and concentrates capacity on the cross-modal connector and task-specific interfaces. 
+
+4 Experiments 4.1 Setup 
+
+Platform and metrics. We evaluate all three tasks on Anomaly-56K, a unified benchmark constructed from MVTec AD [ 2], VisA [ 42 ], and MPDD [ 16 ] (Table 1, Figure 5). Segmentation uses existing pixel-level masks from the source benchmarks. Under-standing annotations (location, analysis, decision, defect type) are generated by Gemini-3-Flash-Preview [ 7] with manual quality review and correction. Segmentation is measured by Dice and IoU. To enable a holistic evaluation across these diverse scenarios, we adopt a unified evaluation protocol. Understanding is evaluated under both oracle (ground-truth mask) and predicted (region-expert proposal) settings; the oracle–predicted gap directly quantifies deployment readiness. Location uses strict 9-way open-ended accuracy on a 3×3 spatial grid (random baseline: 11.1%), which is harder than the multiple-choice format used by benchmarks such as MMAD [ 18 ]; analysis uses ROUGE-L [ 23 ]. Generation reports PSNR (full / background / mask) and LPIPS [ 38 ], with PSNR decomposed to disentangle defect fidelity from background preservation. SSIM is additionally reported in the conditioning ablation. Understanding results default to the predicted-region setting unless stated otherwise. 
+
+Baselines and implementation. Because no prior system supports all three tasks simultaneously, we assemble baselines at three levels of comparability. (i) Input-matched baselines receiving the same inputs: Qwen3.5-4B without region input for understanding; Patch-Core [ 30 ], EfficientAD [ 1], PaDiM [ 9], and STFPM [ 31 ] for seg-mentation; SD2 Inpainting [ 29 ] and a generation-only variant (the Zheng et al. Bottle      
+
+> Hazelnut
+> Screw
+> Pill
+> Zipper
+> Carpet
+> Tile
+> Leather
+> Capsule
+> Metal Nut
+> Wood
+> Grid
+> Transistor
+> Cable
+> Toothbrush
+> Candle
+> Cashew
+> Chewinggum
+> Pipe Fryum
+> Capsules
+> Bracket White
+> Bracket Black
+> Metal Plate
+> Tubes
+> 0
+> 200
+> 400
+> 600
+> 800
+> 1000
+> 1200
+> Number of Images
+> 59,916 images ·24 categories ·104 defect variants MVTec AD (15 categories)
+> VisA (5 categories)
+> MPDD (4 categories)
+
+Figure 5: Category distribution of Anomaly-56K across three source benchmarks. Table 2: Understanding comparison on Anomaly-56K (𝑛 =14 ,844 anomalous test images). IAD-Unify additionally receives region evidence from the frozen expert. 
+
+Method Loc. Acc. (%) ROUGE-L (%) 
+
+IAD-Unify (predicted) 93.28 62.84 
+
+IAD-Unify (oracle) 96.34 65.37 Show-o2-7B [35] 44.83 10.38 Janus-Pro-7B [34] 40.20 29.07 Qwen3.5-4B (no region input) 73.83 44.62 
+
+full Qwen VLM + connector + UNet pipeline, but without DINO-derived region tokens) for generation. (ii) Generic unified models 
+
+(Show-o2-7B [ 35 ], Janus-Pro-7B [ 34 ]) to test whether open-domain architectures transfer to industrial anomaly tasks. (iii) Literature-reported specialist results (UniAS [ 26 ], AnomalyDINO [ 8 ]) for ad-ditional context as reported in their original settings. The region expert uses DINOv2-L/14 with FPN fusion of layers {6, 12 , 18 , 24 },spatial attention, and a 4-stage upsample decoder; it is pre-trained for 25 epochs and then frozen. The shared backbone is Qwen3.5-4B with LoRA (rank 64, 𝛼 =128 ). Unified joint training runs for 1 epoch on 16 ×H20 GPUs (2 nodes, DeepSpeed ZeRO-1, batch size 512, LR 
+
+5×10 −5, 30 warmup steps). 
+
+4.2 Region-Grounded Understanding 
+
+We argue that anomaly regions—not whole-image prompting—are the decisive input for industrial understanding. Three lines of evi-dence support this claim. 
+
+Region grounding substantially improves understanding. Under predicted-region evaluation, IAD-Unify reaches 93.28% location accuracy and 62.84% ROUGE-L (Table 2). The same Qwen3.5-4B backbone without region input achieves 73.83% location accuracy and 44.62% ROUGE-L, leaving a +19 pp location gap that explicit region grounding closes. General-purpose visual reasoning alone is insufficient; precise spatial evidence from the region expert is essential for fine-grained industrial understanding. 
+
+Open-domain unified models lag behind. Open-domain unified models (Show-o2-7B, Janus-Pro-7B) fall well below even the Qwen3.5-4B backbone without region input on both location and analysis (Table 2); a detailed comparison follows in Section 4.5. Note that both Show-o2 and Janus-Pro accept only a single (image, text) pair as input; their architectures do not support a separate Bracket (black)                
+
+> Q: Where is the defect located in the image?
+> GT: center
+> Ours (pred.): The defect is located in the center of the bracket, where surface
+> scratches are visible on the dark coating.
+> Show-o2: top_right
+> Janus-Pro: center_right
+> Bottle
+> Q: Describe the visible evidence in the marked defect region and its
+> likely impact.
+> GT: The highlighted defect region in the center shows large broken
+> glass fragments. This damage may affect the bottle's structural
+> integrity and could lead to leakage.
+> Ours (pred.): The highlighted region shows a large chunk of broken glass in the
+> center of the bottle. This significant damage may compromise the
+> container's integrity and pose a safety risk.
+> Show-o2: The target region is a black circle.
+> Janus-Pro: The highlighted region shows a visible crack or damage in the
+> material, indicating a structural flaw.
+> Cable
+> Q: Describe the visible evidence in the marked defect region and its
+> likely impact.
+> GT: The highlighted defect region shows a missing internal wire within
+> the cable assembly. This absence may result in a loss of
+> electrical functionality or signal transmission.
+> Ours (pred.): The highlighted region shows the cable assembly with a missing
+> internal wire among the three conductors. This absence may affect
+> electrical performance and could lead to connectivity failure.
+> Show-o2: The red circle is not concentric with the other two circles.
+> Janus-Pro: The highlighted region shows a defect in the insulation of the
+> electrical cable. The insulation appears to be damaged or
+> degraded, exposing the copper core. This can lead to electrical
+> shorts or failures in the cable's performance.
+
+Figure 6: Qualitative understanding comparison. The defect overlay is produced by the frozen region expert’s predicted 
+
+mask; all models receive the same overlaid image. IAD-Unify identifies defect-specific details, while Show-o2 and Janus-Pro—which lack a dedicated region channel—produce generic or off-target descriptions. Table 3: Segmentation comparison on Anomaly-56K (𝑛 =14 ,844 ). Specialist baselines maintain per-category models; our method uses a single category-agnostic region expert. 
+
+Method Dice (%) IoU (%) Prec. (%) Rec. (%) 
+
+IAD-Unify 79.2 69.2 75.7 86.5 
+
+PatchCore [30] 30.1 21.7 47.3 51.8 EfficientAD [1] 16.2 11.2 23.5 50.3 PaDiM [9] 18.8 12.6 22.1 51.5 STFPM [31] 20.8 13.9 23.0 51.7 
+
+mask or region specification channel. To ensure a fair comparison, we embed the region information visually into the input image (defect area highlighted with a colored overlay produced by our frozen region expert’s predicted mask)—the most informative input their interface permits. The performance gap therefore reflects an 
+
+architectural difference: IAD-Unify has a dedicated region expert that supplies structured spatial evidence, whereas the baselines must infer region semantics from the overlay alone. 
+
+Oracle–predicted gap is narrow. Predicted-region conditioning closely matches oracle: 93.28% vs. 96.34% on location, 62.84% vs. 65.37% on ROUGE-L. This narrow gap confirms that the frozen region expert produces sufficiently accurate proposals to serve as a practical replacement for ground-truth masks at deployment. 
+
+4.3 Anomaly Segmentation 
+
+A key advantage of our dual-encoder design is that the region expert remains frozen during unified training, preserving full localization IAD-Unify: A Region-Grounded Unified Model for Industrial Anomaly Segmentation, Understanding, and Generation 
+
+Figure 7: Qualitative segmentation comparison. Our category-agnostic expert produces precise masks closely matching ground truth, while per-category specialists yield diffuse anomaly maps. Table 4: Generation quality. All methods receive identical masks and source images. †Same backbone, no region expert. 
+
+Method PSNR ↑ LPIPS ↓
+
+Full BG Mask Mask 
+
+IAD-Unify 30.03 33.34 17.32 .020 
+
+Generation-only † 29.45 31.31 18.16 .025 SD2 Inpainting [29] 28.92 33.00 15.79 .032 
+
+quality while enabling downstream branches to leverage its outputs. Table 3 confirms this. On the full Anomaly-56K test set ( 𝑛 =14 ,844 ), the frozen expert achieves 79.2% Dice and 69.2% IoU with 75.7% precision and 86.5% recall, substantially outperforming all per-category specialist base-lines (Table 3). Figure 7 illustrates representative examples where our category-agnostic expert produces sharper and more complete masks than the per-category specialists, which reach at most 30.1% Dice despite maintaining separate memory banks per category . The lower absolute scores of these specialists compared to their pub-lished per-dataset results reflect the greater diversity of Anomaly-56K: the test set spans 24 categories across three source benchmarks, requiring generalization across material types and defect scales that per-category models are not designed for. Because 𝐸 seg remains frozen, these scores are unchanged after joint optimization—adding understanding and generation incurs zero segmentation cost. 
+
+4.4 Region-Grounded Generation 
+
+Mask-guided defect generation is a capability absent from existing multimodal IAD systems. Our unified model not only understands defects but also synthesizes them with spatial precision. Table 4 evaluates generation under a matched-pair protocol: all methods receive identical source images, masks, and instructions. Capsule    
+
+> Source Mask Ours SD2 Inpaint
+> Metal plate Transistor
+
+Figure 8: Qualitative generation comparison. Given a clean source image and a defect mask, IAD-Unify synthesizes real-istic defects while preserving background fidelity, whereas SD2 Inpainting produces artifacts or alters unmasked re-gions. Table 5: MMAD benchmark evaluation [ 18 ] (39,670 questions, 7 subtasks). All values are accuracy (%); anomaly detection uses balanced accuracy.                                                        
+
+> Subtask API Models Unified Models Gemini 3 Flash GPT-5-mini Show-o2-7B Janus-Pro-7B IAD-Unify Qwen3.5-4B
+> Defect-centric subtasks
+> Anomaly Det. 73.62 54.60 65.9 51.9 75.2 68.3 Defect Classif. 71.48 50.23 61.2 46.8 59.8 54.8 Defect Localiz. 69.43 47.11 66.3 34.5 71.5 46.5 Defect Desc. 80.79 59.89 68.0 58.7 68.2 63.8 Defect Analysis 86.20 68.28 78.4 69.3 74.8 70.0
+> Object-centric subtasks
+> Object Classif. 93.38 91.76 90.2 82.7 86.8 84.5 Object Analysis 85.3 78.8 82.8 75.5 79.5 77.1
+> Overall 79.48 63.98 71.6 57.8 72.5 66.8
+
+IAD-Unify surpasses SD2 Inpainting on both masked-region fi-delity ( +1.53 dB mask PSNR) and full-image preservation ( +1.11 dB), and outperforms the generation-only variant (same backbone, no region expert) on full-image PSNR and mask LPIPS (Table 4). The generation-only variant achieves marginally higher mask PSNR at the cost of weaker background preservation (31.31 vs. 33.34 BG PSNR), highlighting the value of region grounding for confining edits to the masked area. 
+
+4.5 External Validation on MMAD 
+
+To test generalization beyond Anomaly-56K, we evaluate on MMAD [ 18 ], a 39,670-question multiple-choice benchmark cover-ing five data sources—including categories absent from our training data. Following the official MMAD evaluation setup, we report re-sults across seven subtasks (five defect-centric, two object-centric), where several fine-grained question types are consolidated into their parent subtask categories as defined in the original paper. IAD-Unify achieves 72.5% overall accuracy under 1-shot evalua-tion (Table 5), surpassing the Qwen3.5-4B backbone without region Zheng et al. 
+
+Table 6: Region grounding ablation. The same trained model is evaluated under four inference modes without retraining.                            
+
+> Mode Location (%) Classification (%) Accuracy Within-1 Manh. ↓Decision BA Defect Type Oracle 96.34 99.42 0.04 99.12 95.87
+> Predicted 93.28 98.95 0.08 98.46 95.21
+> Full image as region 24.63 51.28 0.82 72.35 31.47 No region 16.71 42.36 0.95 58.24 22.63
+
+Table 7: Generation conditioning ablation. Text-only omits visual input to Qwen; visual adds the overlay image. Both use the same diffusion backbone. 
+
+Conditioning PSNR ↑ SSIM ↑ LPIPS ↓
+
+Full BG Mask Mask Mask Text-only 28.67 31.82 15.94 .412 .038 
+
+Visual (ours) 30.03 33.34 17.32 .483 .020 
+
+input (66.8%) by +5.7 pp. Notably, IAD-Unify leads all models— including Gemini 3 Flash—on the two most region-sensitive sub-tasks: anomaly detection (75.2% vs. 73.62%) and defect localization (71.5% vs. 69.43%), confirming that explicit region evidence transfers effectively to external benchmarks. Among open-source unified models, Show-o2-7B reaches 71.6% with strong object-centric ac-curacy but trails IAD-Unify on defect-centric subtasks ( +1.9 pp average); Janus-Pro-7B reaches 57.8%. 
+
+4.6 Ablation Studies 
+
+Having established strong results across all three tasks, we now ask 
+
+which design choices matter most through three controlled ablations. 
+
+4.6.1 What Happens Without Region Evidence? We evaluate a sin-gle trained model under four inference-time configurations without any retraining (Table 6): oracle mask, predicted mask, full image as region (entire image treated as the defect), and no region (region tokens zeroed out). Predicted regions achieve 93.28% location accuracy, closely matching oracle (96.34%). Removing region evidence entirely (no region) drops accuracy to 16.71%, and treating the full image as a region fares similarly (24.63%). The >76 pp drop from predicted to no-region is the single-variable answer to the question posed in our title: region grounding is not a marginal improvement but the mechanism that makes industrial anomaly understanding work. The effect extends to classification: decision balanced accuracy drops from 98.46% to 58.24% and defect type accuracy from 95.21% to 22.63% without region evidence (Table 6). Combined with the 
+
++19 pp gap over Qwen3.5-4B without region input (Table 2), these results separate two effects: region-aware training provides the foundation, and region-conditioned inference provides the remaining lift. 
+
+4.6.2 Does Visual Conditioning Help Generation? The generation branch receives two visual signals: the overlay image through Qwen’s ViT and region tokens from DINO. Table 7 ablates the over-lay by comparing text-only conditioning (edit instruction only, no 
+
+Table 8: Training strategy ablation. Understanding: predicted-region location accuracy (%); generation: masked-region PSNR (dB). “—” = no generation branch.        
+
+> Strategy Understanding (Loc. Acc.) Generation Oracle Predicted PSNR mask
+> GT mask only 96.82 41.35 —GT
+
+→predicted transition 95.47 87.42 —Stage-wise 96.08 91.56 17.48 IAD-Unify (joint) 96.34 93.28 17.32 
+
+visual input to Qwen) against our full visual conditioning. Adding the overlay improves masked-region PSNR by +1.38 dB and reduces LPIPS by 0.018, while background PSNR remains comparable. Visual conditioning thus specifically improves defect synthesis quality— the model leverages the surrounding material context to produce more faithful edits—while background preservation remains com-parably strong in both settings. 
+
+4.6.3 Pre-initialized Joint vs. Stage-wise Training. Our default strat-egy initializes the generation branch from its pre-trained check-point before jointly optimizing both branches. Table 8 compares this against three alternatives. Training exclusively with ground-truth masks reaches high accu-racy under oracle evaluation but collapses under predicted masks, revealing overfitting to inputs unavailable at deployment. Grad-ually transitioning from ground-truth to predicted masks during training partially mitigates this but underperforms on both settings. Stage-wise training—where each branch is optimized sequentially— achieves 91.56% predicted-region location accuracy, below our joint result of 93.28%. On generation, stage-wise training attains a slightly higher 17.48 dB masked-region PSNR compared with 17.32 dB for joint, as the generation branch receives its full training budget without competing gradients. The net trade-off favors joint op-timization: +1.72 pp understanding improvement at a negligible 
+
+−0.16 dB generation cost, confirming that the two branches are complementary. Across all three ablations, explicit region evidence emerges as the decisive factor, while joint training unifies understanding and generation without meaningful compromise on either. 
+
+5 Conclusion 
+
+We present IAD-Unify, a unified architecture for industrial anomaly segmentation, region-grounded understanding, and mask-guided defect generation. Our results show that explicit region ground-ing from a frozen DINOv2 expert is the key mechanism behind this unification, substantially strengthening industrial understand-ing while preserving high-fidelity defect generation under joint training. Together with Anomaly-56K—a three-task evaluation plat-form covering segmentation, understanding, and generation under a single protocol—this work provides both a strong baseline and a standardized benchmark for future unified IAD research. More broadly, the dual-encoder design opens a practical path toward few-shot anomaly reasoning and adaptation to new industrial domains by updating only the region expert. IAD-Unify: A Region-Grounded Unified Model for Industrial Anomaly Segmentation, Understanding, and Generation 
+
+References 
+
+[1] Kilian Batzner, Lars Heckler, and Rebecca König. 2024. Efficientad: Accurate visual anomaly detection at millisecond-level latencies. In Proceedings of the IEEE/CVF winter conference on applications of computer vision . 128–138. [2] Paul Bergmann, Michael Fauser, David Sattlegger, and Carsten Steger. 2019. MVTec AD–A comprehensive real-world dataset for unsupervised anomaly detection. In Proceedings of the IEEE/CVF conference on computer vision and pattern recognition . 9592–9600. [3] Tim Brooks, Aleksander Holynski, and Alexei A Efros. 2023. Instructpix2pix: Learning to follow image editing instructions. In Proceedings of the IEEE/CVF conference on computer vision and pattern recognition . 18392–18402. [4] Nicolas Carion, Francisco Massa, Gabriel Synnaeve, Nicolas Usunier, Alexan-der Kirillov, and Sergey Zagoruyko. 2020. End-to-end object detection with transformers. In European conference on computer vision . Springer, 213–229. [5] Mathilde Caron, Hugo Touvron, Ishan Misra, Hervé Jégou, Julien Mairal, Piotr Bojanowski, and Armand Joulin. 2021. Emerging properties in self-supervised vision transformers. In Proceedings of the IEEE/CVF international conference on computer vision . 9650–9660. [6] Qiyu Chen, Huiyuan Luo, Chengkan Lv, and Zhengtao Zhang. 2024. A unified anomaly synthesis strategy with gradient ascent for industrial anomaly detection and localization. In European Conference on Computer Vision . Springer, 37–54. [7] Gheorghe Comanici et al . 2025. Gemini 2.5: Pushing the Frontier with Ad-vanced Reasoning, Multimodality, Long Context, and Next Generation Agentic Capabilities. arXiv preprint arXiv:2507.06261 (2025). [8] Simon Damm, Mike Laszkiewicz, Johannes Lederer, and Asja Fischer. 2025. Anomalydino: Boosting patch-based few-shot anomaly detection with dinov2. In 2025 IEEE/CVF Winter Conference on Applications of Computer Vision (WACV) .IEEE, 1319–1329. [9] Thomas Defard, Aleksandr Setkov, Angelique Loesch, and Romaric Audigier. 2021. Padim: a patch distribution modeling framework for anomaly detection and localization. In International conference on pattern recognition . Springer, 475–489. [10] Hanqiu Deng and Xingyu Li. 2022. Anomaly detection via reverse distillation from one-class embedding. In Proceedings of the IEEE/CVF conference on computer vision and pattern recognition . 9737–9746. [11] Zhaopeng Gu, Bingke Zhu, Guibo Zhu, Yingying Chen, Ming Tang, and Jinqiao Wang. 2024. Anomalygpt: Detecting industrial anomalies using large vision-language models. In Proceedings of the AAAI conference on artificial intelligence ,Vol. 38. 1932–1940. [12] Jonathan Ho, Ajay Jain, and Pieter Abbeel. 2020. Denoising diffusion probabilistic models. Advances in neural information processing systems 33 (2020), 6840–6851. [13] Edward J Hu, Yelong Shen, Phillip Wallis, Zeyuan Allen-Zhu, Yuanzhi Li, Shean Wang, Liang Wang, Weizhu Chen, et al . 2022. Lora: Low-rank adaptation of large language models. Iclr 1, 2 (2022), 3. [14] Teng Hu, Jiangning Zhang, Ran Yi, Yuzhen Du, Xu Chen, Liang Liu, Yabiao Wang, and Chengjie Wang. 2024. Anomalydiffusion: Few-shot anomaly image generation with diffusion model. In Proceedings of the AAAI conference on artificial intelligence , Vol. 38. 8526–8534. [15] Jongheon Jeong, Yang Zou, Taewan Kim, Dongqing Zhang, Avinash Ravichan-dran, and Onkar Dabeer. 2023. Winclip: Zero-/few-shot anomaly classification and segmentation. In Proceedings of the IEEE/CVF conference on computer vision and pattern recognition . 19606–19616. [16] Stepan Jezek, Martin Jonak, Radim Burget, Pavel Dvorak, and Milos Skotak. 2021. Deep learning-based defect detection of metal parts: evaluating current methods in complex conditions. In 2021 13th International congress on ultra modern telecommunications and control systems and workshops (ICUMT) . IEEE, 66–71. [17] Xi Jiang, Yue Guo, Jian Li, Yong Liu, Bin-Bin Gao, Hanqiu Deng, Jun Liu, Heng Zhao, Chengjie Wang, and Feng Zheng. 2026. AD-Copilot: A Vision-Language Assistant for Industrial Anomaly Detection via Visual In-context Comparison. 
+
+arXiv preprint arXiv:2603.13779 (2026). [18] Xi Jiang, Jian Li, Hanqiu Deng, Yong Liu, Bin-Bin Gao, Yifeng Zhou, Jialin Li, Chengjie Wang, and Feng Zheng. 2024. Mmad: A comprehensive benchmark for multimodal large language models in industrial anomaly detection. arXiv preprint arXiv:2410.09453 (2024). [19] Ying Jin, Jinlong Peng, Qingdong He, Teng Hu, Jiafu Wu, Hao Chen, Haox-uan Wang, Wenbing Zhu, Mingmin Chi, Jun Liu, et al . 2025. Dual-interrelated diffusion model for few-shot anomaly image generation. In Proceedings of the IEEE/CVF conference on computer vision and pattern recognition . 30420–30429. [20] Alex Kendall, Yarin Gal, and Roberto Cipolla. 2018. Multi-Task Learning Using Uncertainty to Weigh Losses for Scene Geometry and Semantics. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR) .7482–7491. [21] Chun-Liang Li, Kihyuk Sohn, Jinsung Yoon, and Tomas Pfister. 2021. Cutpaste: Self-supervised learning for anomaly detection and localization. In Proceedings of the IEEE/CVF conference on computer vision and pattern recognition . 9664–9674. [22] Yuanze Li, Haolin Wang, Shihao Yuan, Ming Liu, Debin Zhao, Yiwen Guo, Chen Xu, Guangming Shi, and Wangmeng Zuo. 2023. Myriad: Large multimodal model by applying vision experts for industrial anomaly detection. arXiv preprint arXiv:2310.19070 (2023). [23] Chin-Yew Lin. 2004. Rouge: A package for automatic evaluation of summaries. In Text summarization branches out . 74–81. [24] Tsung-Yi Lin, Piotr Dollár, Ross Girshick, Kaiming He, Bharath Hariharan, and Serge Belongie. 2017. Feature pyramid networks for object detection. In Proceed-ings of the IEEE conference on computer vision and pattern recognition . 2117–2125. [25] Haotian Liu, Chunyuan Li, Qingyang Wu, and Yong Jae Lee. 2023. Visual in-struction tuning. Advances in neural information processing systems 36 (2023), 34892–34916. [26] Wenxin Ma, Qingsong Yao, Xiang Zhang, Zhelong Huang, Zihang Jiang, and S Kevin Zhou. 2025. Towards accurate unified anomaly segmentation. In 2025 IEEE/CVF Winter Conference on Applications of Computer Vision (WACV) . IEEE, 1342–1352. [27] Maxime Oquab, Timothée Darcet, Théo Moutakanni, Huy Vo, Marc Szafraniec, Vasil Khalidov, Pierre Fernandez, Daniel Haziza, Francisco Massa, Alaaeldin El-Nouby, et al . 2023. Dinov2: Learning robust visual features without supervision. 
+
+arXiv preprint arXiv:2304.07193 (2023). [28] Alec Radford, Jong Wook Kim, Chris Hallacy, Aditya Ramesh, Gabriel Goh, Sandhini Agarwal, Girish Sastry, Amanda Askell, Pamela Mishkin, Jack Clark, Gretchen Krueger, and Ilya Sutskever. 2021. Learning Transferable Visual Models From Natural Language Supervision. In Proceedings of the International Confer-ence on Machine Learning (ICML) . 8748–8763. [29] Robin Rombach, Andreas Blattmann, Dominik Lorenz, Patrick Esser, and Björn Ommer. 2022. High-resolution image synthesis with latent diffusion models. In 
+
+Proceedings of the IEEE/CVF conference on computer vision and pattern recognition .10684–10695. [30] Karsten Roth, Latha Pemula, Joaquin Zepeda, Bernhard Schölkopf, Thomas Brox, and Peter Gehler. 2022. Towards total recall in industrial anomaly detection. In 
+
+Proceedings of the IEEE/CVF conference on computer vision and pattern recognition .14318–14328. [31] Guodong Wang, Shumin Han, Errui Ding, and Di Huang. 2021. Student-teacher feature pyramid matching for anomaly detection. arXiv preprint arXiv:2103.04257 
+
+(2021). [32] Xinlong Wang, Xiaosong Zhang, Zhengxiong Luo, Quan Sun, Yufeng Cui, Jin-sheng Wang, Fan Zhang, Yueze Wang, Zhen Li, Qiying Yu, et al . 2024. Emu3: Next-token prediction is all you need. arXiv preprint arXiv:2409.18869 (2024). [33] Zhuonan Wang, Zhenxuan Fan, Siwen Tan, Yu Zhong, Yuqian Yuan, Haoyuan Li, Hao Jiang, Wenqiao Zhang, Feifei Shao, Hongwei Wang, et al . 2026. MAU-GPT: Enhancing Multi-type Industrial Anomaly Understanding via Anomaly-aware and Generalist Experts Adaptation. In Proceedings of the AAAI Conference on Artificial Intelligence , Vol. 40. 26787–26795. [34] Chengyue Wu, Xiaokang Chen, Zhiyu Wu, Yiyang Ma, Xingchao Liu, Zizheng Pan, Wen Liu, Zhenda Xie, Xingkai Yu, Chong Ruan, et al . 2025. Janus: Decou-pling visual encoding for unified multimodal understanding and generation. In 
+
+Proceedings of the Computer Vision and Pattern Recognition Conference . 12966– 12977. [35] Jinheng Xie, Weijia Mao, Zechen Bai, David Junhao Zhang, Weihao Wang, Kevin Qinghong Lin, Yuchao Gu, Zhijie Chen, Zhenheng Yang, and Mike Zheng Shou. 2024. Show-o: One single transformer to unify multimodal understanding and generation. arXiv preprint arXiv:2408.12528 (2024). [36] An Yang, Anfeng Li, Baosong Yang, Beichen Zhang, Binyuan Hui, Bo Zheng, Bowen Yu, Chang Gao, Chengen Huang, Chenxu Lv, et al . 2025. Qwen3 technical report. arXiv preprint arXiv:2505.09388 (2025). [37] Vitjan Zavrtanik, Matej Kristan, and Danijel Skočaj. 2021. Draem-a discrimi-natively trained reconstruction embedding for surface anomaly detection. In 
+
+Proceedings of the IEEE/CVF international conference on computer vision . 8330– 8339. [38] Richard Zhang, Phillip Isola, Alexei A Efros, Eli Shechtman, and Oliver Wang. 2018. The unreasonable effectiveness of deep features as a perceptual metric. In Proceedings of the IEEE conference on computer vision and pattern recognition .586–595. [39] Haozhe Zhao, Xiaojian Ma, Liang Chen, Shuzheng Si, Rujie Wu, Kaikai An, Peiyu Yu, Minjia Zhang, Qing Li, and Baobao Chang. 2024. Ultraedit: Instruction-based fine-grained image editing at scale. Advances in Neural Information Processing Systems 37 (2024), 3058–3093. [40] Shifang Zhao, Yiheng Lin, Lu Han, Yao Zhao, and Yunchao Wei. 2025. Omniad: Detect and understand industrial anomaly via multimodal reasoning. arXiv preprint arXiv:2505.22039 (2025). [41] Haoyu Zheng, Yun Zhu, Yuqian Yuan, Bo Yuan, Wenqiao Zhang, Siliang Tang, and Jun Xiao. 2026. PILOT: Planning via Internalized Latent Optimization Trajectories for Large Language Models. arXiv preprint arXiv:2601.19917 (2026). [42] Yang Zou, Jongheon Jeong, Latha Pemula, Dongqing Zhang, and Onkar Dabeer. 2022. Spot-the-difference self-supervised pre-training for anomaly detection and segmentation. In European conference on computer vision . Springer, 392–408.

@@ -1,0 +1,46 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.13924v1/fig-001.webp",
+      "caption": "Table 1: Comparison of TSAD methods on the PSM, PUMP, SWAT and CATSv2 datasets. Baseline results are directly taken from TAB benchmark [49], and for fairness our results are computed using the same benchmark. Best and second best results are bold-faced and underlined, respectively.",
+      "page": 11,
+      "index": 1,
+      "width": 716,
+      "height": 443
+    },
+    {
+      "url": "assets/figures/arxiv/2604.13924v1/fig-002.webp",
+      "caption": "Fig. 2: Detailed description of the Perturbator architecture. It includes a complete Variational Auto-Encoder (purple), with an encoder qϕ that maps the input features Ct to latent matrix Z(i), and a decoder gθ. The pseudo-anomalies are generated using the additional decoder pψ (red), starting from the same latent matrix. We also use positional encoding added to the inputs of each sub-network.",
+      "page": 8,
+      "index": 2,
+      "width": 718,
+      "height": 331
+    },
+    {
+      "url": "assets/figures/arxiv/2604.13924v1/fig-003.webp",
+      "caption": "Fig. 3: Main differences between previous methods and ASTER; (a) the pseudoanomaly generation, (b) the scoring technique. Previous methods curate a list of augmentations to simulate the possible anomalies that exist in the time-series datasets. However, our method is free from these assumptions and learn to generate the pseudo-anomalies automatically in the latent space. Also, the training objective of these methods is to maximise the distance between pseudo-anomalies and normal data. This approach results in specialised distance metrics (e.g., cosine, L2) for each dataset based on the characteristics. ASTER relaxes this by training a binary classifier. Red and blue dots denote anomalies and normal data, respectively.",
+      "page": 17,
+      "index": 3,
+      "width": 614,
+      "height": 572
+    },
+    {
+      "url": "assets/figures/arxiv/2604.13924v1/fig-004.webp",
+      "caption": "Table 2: Ablation studies analysing (a) the impact of LLM-based feature extraction and (b) the effect of window size.",
+      "page": 12,
+      "index": 4,
+      "width": 725,
+      "height": 184
+    },
+    {
+      "url": "assets/figures/arxiv/2604.13924v1/fig-005.webp",
+      "caption": "Fig. 1: Overview of the proposed method. It consists of three components: Contextual Embedding (Φ) extractor, Perturbator (P), and Classifier (Ψ). The Contextual Embedding maps the input time series to a high-dimensional space using a pre-trained LLM. The Perturbator learns a latent representation via reconstruction (Pn) and generates pseudo-anomalies (Pa). The Classifier distinguishes between normal and pseudo-anomalous data.",
+      "page": 5,
+      "index": 5,
+      "width": 705,
+      "height": 400
+    }
+  ]
+}

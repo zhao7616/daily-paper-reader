@@ -1,0 +1,38 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.13928v1/fig-001.webp",
+      "caption": "TABLE III: Average performance metrics for the evaluated models in the presented industrial case study. Reported values are means ± standard deviation (MSE for standard AE, ELBO for VAE).",
+      "page": 4,
+      "index": 1,
+      "width": 470,
+      "height": 277
+    },
+    {
+      "url": "assets/figures/arxiv/2604.13928v1/fig-002.webp",
+      "caption": "Fig. 2: Differences in anomaly detection performance across models with TCN variants achieving the most desirable results. Shown are the F1-scores of the top 5 models for each architecture. Note: IF is excluded from this visualization due to its significantly lower performance (cf. Table III), which would distort the scale and clarity of the plot.",
+      "page": 5,
+      "index": 2,
+      "width": 529,
+      "height": 362
+    },
+    {
+      "url": "assets/figures/arxiv/2604.13928v1/fig-003.webp",
+      "caption": "Fig. 1: Plot of a process sample from the dataset, showing readings from four selected sensors captured during a single run executed on one machine. Each sensor records different physical quantities over time, exhibiting distinct behaviors including stable operational phases, gradual drifts, and abrupt changes indicative of process transitions or anomalies. The view of the data has been deliberately perturbed to protect sensitive operational information, while preserving the underlying structure and complexity.",
+      "page": 3,
+      "index": 3,
+      "width": 1076,
+      "height": 348
+    },
+    {
+      "url": "assets/figures/arxiv/2604.13928v1/fig-004.webp",
+      "caption": "TABLE I: Architectural configurations of the AE models used in the study. VAE models include an encoded normal distribution signified by mean (µ) and standard deviation (σ).",
+      "page": 3,
+      "index": 4,
+      "width": 756,
+      "height": 183
+    }
+  ]
+}
