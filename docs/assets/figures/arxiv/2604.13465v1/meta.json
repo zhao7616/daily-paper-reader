@@ -1,0 +1,86 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.13465v1/fig-001.webp",
+      "caption": "Figure 2: Schematic for the proposed unknown fault detection method",
+      "page": 6,
+      "index": 1,
+      "width": 704,
+      "height": 351
+    },
+    {
+      "url": "assets/figures/arxiv/2604.13465v1/fig-002.webp",
+      "caption": "Figure 5: Photo of the UMW machine with sensors [28].",
+      "page": 11,
+      "index": 2,
+      "width": 362,
+      "height": 477
+    },
+    {
+      "url": "assets/figures/arxiv/2604.13465v1/fig-003.webp",
+      "caption": "Figure 9: BIRCH clustering results",
+      "page": 15,
+      "index": 3,
+      "width": 706,
+      "height": 256
+    },
+    {
+      "url": "assets/figures/arxiv/2604.13465v1/fig-004.webp",
+      "caption": "Figure 10: Clustering result in the selected cosine similarity space",
+      "page": 15,
+      "index": 4,
+      "width": 475,
+      "height": 478
+    },
+    {
+      "url": "assets/figures/arxiv/2604.13465v1/fig-005.webp",
+      "caption": "Figure 4: Online monitoring system for UMW.",
+      "page": 10,
+      "index": 5,
+      "width": 720,
+      "height": 188
+    },
+    {
+      "url": "assets/figures/arxiv/2604.13465v1/fig-006.webp",
+      "caption": "Figure 8: Classification accuracy as a function of the number of unknown classes and the number of labeled samples per class. Error bars denote one standard deviation over 20 repeated trials, reflecting the variability of model performance under different data sampling conditions.",
+      "page": 14,
+      "index": 6,
+      "width": 706,
+      "height": 257
+    },
+    {
+      "url": "assets/figures/arxiv/2604.13465v1/fig-007.webp",
+      "caption": "Figure 7: Confusion matrix after incorporating one new fault class using five labeled samples",
+      "page": 13,
+      "index": 7,
+      "width": 553,
+      "height": 539
+    },
+    {
+      "url": "assets/figures/arxiv/2604.13465v1/fig-008.webp",
+      "caption": "Figure 3: Model updating process of continual learning",
+      "page": 8,
+      "index": 8,
+      "width": 464,
+      "height": 357
+    },
+    {
+      "url": "assets/figures/arxiv/2604.13465v1/fig-009.webp",
+      "caption": "Figure 6: Unknown fault detection results: (a) damaged tool and (b) new tool.",
+      "page": 12,
+      "index": 9,
+      "width": 712,
+      "height": 364
+    },
+    {
+      "url": "assets/figures/arxiv/2604.13465v1/fig-010.webp",
+      "caption": "Figure 1: Overview of the proposed adaptive monitoring framework, consisting of unknown fault detection, cluster-assisted labeling, and few-shot continual learning.",
+      "page": 5,
+      "index": 10,
+      "width": 688,
+      "height": 456
+    }
+  ]
+}

@@ -1,0 +1,102 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.14766v1/fig-001.webp",
+      "caption": "Figure 3: MGT-40 gas turbine. Industrial data collection setup [22]",
+      "page": 6,
+      "index": 1,
+      "width": 604,
+      "height": 396
+    },
+    {
+      "url": "assets/figures/arxiv/2604.14766v1/fig-002.webp",
+      "caption": "Figure 8: Comparison of training and testing accuracy for the baseline FD and teacher models. Both models were trained using identical hyperparameter configurations. The teacher model demonstrates rapid convergence and achieves near-perfect accuracy (≈100%) by epoch 50. In contrast, the baseline model exhibits a lower learning rate and higher volatility, plateauing below 90% accuracy.",
+      "page": 11,
+      "index": 2,
+      "width": 894,
+      "height": 436
+    },
+    {
+      "url": "assets/figures/arxiv/2604.14766v1/fig-003.webp",
+      "caption": "Figure 9: Comparative performance analysis of the baseline FD, teacher, and student models. The blue trajectories illustrate the performance enhancement achieved by the student model through the TCMKD framework. Despite using the baseline architecture, the student model significantly",
+      "page": 11,
+      "index": 3,
+      "width": 894,
+      "height": 435
+    },
+    {
+      "url": "assets/figures/arxiv/2604.14766v1/fig-004.webp",
+      "caption": "Figure 4: Architecture of the FD model. Feature extractor (. ) is comprised of five convolutional layers, and for the classifier, there is a 3-layer MLP (. ) with SoftMax activation function at the final layer.",
+      "page": 7,
+      "index": 4,
+      "width": 600,
+      "height": 393
+    },
+    {
+      "url": "assets/figures/arxiv/2604.14766v1/fig-005.webp",
+      "caption": "Figure 12:Feature distribution for industrial GT: a) Feature distribution for pre-trained student model.",
+      "page": 13,
+      "index": 5,
+      "width": 802,
+      "height": 716
+    },
+    {
+      "url": "assets/figures/arxiv/2604.14766v1/fig-006.webp",
+      "caption": "Figure 11: Feature distribution for MaFaulDa: a) Feature distribution for pre-trained student model. b) Feature distribution for pre-trained teacher model. c) Feature distribution for retrained student model (TCMKD-TL).",
+      "page": 13,
+      "index": 6,
+      "width": 427,
+      "height": 356
+    },
+    {
+      "url": "assets/figures/arxiv/2604.14766v1/fig-007.webp",
+      "caption": "Figure 5: Overview of the teacher-student training framework. The teacher model is optimized via supervised learning using as input and a standard Cross-Entropy loss. The student model is trained using a multi-task objective: the TCMKD loss facilitates the distillation of the teacher’s latent representations. At the same time, a separate Cross-Entropy term ensures diagnostic accuracy for fault classification.",
+      "page": 8,
+      "index": 7,
+      "width": 894,
+      "height": 398
+    },
+    {
+      "url": "assets/figures/arxiv/2604.14766v1/fig-008.webp",
+      "caption": "Figure 1: Schematic overview of the proposed FD framework. The process initiates with the training of a teacher model ( ) on extended temporal signal windows. Subsequently, a student model ( ) is optimized using a composite objective function integrating Cross-Entropy and TCMKD loss components. Following source-domain training, knowledge is transferred to the target domain via weight initialization. The unsupervised AD model is then derived through two distinct strategies: (a) employing the student model with transferred source weights, and (b) training the student model using feature representations extracted from the pre-trained teacher model.",
+      "page": 4,
+      "index": 8,
+      "width": 1031,
+      "height": 589
+    },
+    {
+      "url": "assets/figures/arxiv/2604.14766v1/fig-009.webp",
+      "caption": "Figure 10: Comparative analysis of confusion matrices for different models ((a) Baseline FD, (b) Teacher, and (c) Student). The baseline model (a) exhibits significant performance degradation, particularly in the classification of fault categories 0 and 13. This deficiency is effectively mitigated in the teacher model (b), which demonstrates high FD dominance. Notably, both the baseline and teacher models exhibit a persistent misclassification of class 11 as class 10. This suggests a high degree of signal similarity or feature-space overlap between these specific fault classes, possibly indicating an inherent limit to separability. The student model (c) achieves performance parity with the teacher, successfully inheriting the enhanced discriminative capabilities provided by the TCMKD framework.",
+      "page": 12,
+      "index": 9,
+      "width": 866,
+      "height": 303
+    },
+    {
+      "url": "assets/figures/arxiv/2604.14766v1/fig-010.webp",
+      "caption": "Figure 6: Mapping of vibrational signals for anomaly detection. This process utilizes the isolated feature extractor (⋅) to derive feature representations . By analyzing the distribution of these embeddings, anomalies are detected as out-of-distribution samples. In the latent manifold, points outside the dense cluster of normal operating conditions indicate faulty behavior, enabling a qualitative assessment of system health.",
+      "page": 9,
+      "index": 10,
+      "width": 894,
+      "height": 260
+    },
+    {
+      "url": "assets/figures/arxiv/2604.14766v1/fig-011.webp",
+      "caption": "Figure 7: Comparative frameworks for unsupervised anomaly detection via Transfer Learning. The left panel (Scenario A) illustrates a direct transfer approach, where the student feature extractor is pre-trained on the source domain, , (⋅), is utilized to derive latent representations, , , from the target domain without further adaptation. The central panel depicts the integration of TCMKD with TL. In this configuration, the student model is specifically optimized for the target domain, resulting in an adapted feature extractor, , (⋅), capable of capturing domain-specific characteristics.",
+      "page": 9,
+      "index": 11,
+      "width": 894,
+      "height": 397
+    },
+    {
+      "url": "assets/figures/arxiv/2604.14766v1/fig-012.webp",
+      "caption": "Figure 2: Benchmark data collection setup.",
+      "page": 5,
+      "index": 12,
+      "width": 736,
+      "height": 193
+    }
+  ]
+}

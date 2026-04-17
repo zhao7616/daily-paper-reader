@@ -1,0 +1,46 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.14130v1/fig-001.webp",
+      "caption": "Figure 2: Identification error of MLE and OLS estimators for different dimensions (256 samples, log scale, shadowed confidence interval).",
+      "page": 15,
+      "index": 1,
+      "width": 706,
+      "height": 285
+    },
+    {
+      "url": "assets/figures/arxiv/2604.14130v1/fig-002.webp",
+      "caption": "Figure 1: Identification error of MLE, SME and OLS estimators for different sample sizes (2-d Student-t family, log scale, shadowed confidence interval).",
+      "page": 14,
+      "index": 2,
+      "width": 706,
+      "height": 285
+    },
+    {
+      "url": "assets/figures/arxiv/2604.14130v1/fig-003.webp",
+      "caption": "Figure 5: Identification error of MLE estimators for mis-specified base densities at different error levels (2-d perturbed Student-t family, log scale, shadowed confidence interval).",
+      "page": 17,
+      "index": 3,
+      "width": 706,
+      "height": 285
+    },
+    {
+      "url": "assets/figures/arxiv/2604.14130v1/fig-004.webp",
+      "caption": "Figure 4: Average computation time of MLE, SME and OLS estimators for different dimensions (Student-t family, log scale).",
+      "page": 16,
+      "index": 4,
+      "width": 704,
+      "height": 305
+    },
+    {
+      "url": "assets/figures/arxiv/2604.14130v1/fig-005.webp",
+      "caption": "Figure 3: Identification error of different implementations of MLE for different sample sizes (2-d Student-t family, log scale, shadowed confidence interval).",
+      "page": 16,
+      "index": 5,
+      "width": 706,
+      "height": 285
+    }
+  ]
+}
