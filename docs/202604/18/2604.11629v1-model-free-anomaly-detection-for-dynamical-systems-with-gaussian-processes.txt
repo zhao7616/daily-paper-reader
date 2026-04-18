@@ -1,0 +1,1369 @@
+Title: Model-free Anomaly Detection for Dynamical Systems with Gaussian Processes
+
+URL Source: https://arxiv.org/pdf/2604.11629v1
+
+Published Time: Tue, 14 Apr 2026 02:32:11 GMT
+
+Number of Pages: 6
+
+Markdown Content:
+Model-free Anomaly Detection for 
+
+# Dynamical Systems with Gaussian 
+
+# Processes 
+
+Alejandro Penacho Riveiros  * Nicola Bastianello  *
+
+Matthieu Barreau  * 
+
+> *
+
+Digital Futures and KTH Royal Institute of Technology, Stockholm, 
+
+Sweden  (email: alejpr@kth.se, nicolba@kth.se, barreau@kth.se) 
+
+Abstract:  In this paper we address the problem of detecting differences or anomalies in a 
+
+dynamical system, based on historical data of nominal operations. This problem encompasses 
+
+quality control, where newly manufactured systems are tested against desired nominal opera 
+
+tions, and the detection of changes in the dynamics due to degradation or repairs. We propose a 
+
+model  free approach based on Gaussian processes (GPs). The idea is to train offline a GP based 
+
+on nominal data, which is then deployed online to detect whether measurements of the system’s 
+
+state are compatible with nominal operations or if they deviate. Detecting this deviation is made 
+
+more challenging by the presence of process and measurement noise, which might obfuscate 
+
+deviations in the dynamics. The detection then is based on a threshold that ensures a specific 
+
+false positive rate. We showcase the promising performance of the proposed method with two 
+
+systems, and highlight several interesting future research questions. 
+
+Keywords:  fault detection and diagnosis, Gaussian Process, non  linear system identification 
+
+1.  INTRODUCTION 
+
+Consider a classical problem in quality control: first, we 
+
+have a set of products considered satisfactory. We then 
+
+receive a new one, and we must determine if, by its proper 
+
+ties, it belongs to this initial set. This is the  discriminant 
+
+analysis  problem, which attracted considerable attention 
+
+in the field of statistics during the first half of the 20 th ,
+
+leading to the development of tools like the  𝜒 2 test or 
+
+the Fisher  Irwin test. These tools are still used to this 
+
+day in quality control and clinical testing, as discussed in 
+
+Salsburg (1992) .
+
+The techniques developed during this period had a strong 
+
+theoretical foundation, but were limited to static objects, 
+
+in which all properties of interest could be observed 
+
+at once. The extension to dynamical system took place 
+
+mostly during the 70 ′s and 80 ′s, and was later synthesized 
+
+in works such as  Frank (1990)  or  Patton & Chen (1997) ,
+
+always with the focus of detecting anomalous or faulty 
+
+behavior of a system. Although well grounded, these 
+
+methods relied on a nominal prescribed model against 
+
+which new data was to be compared. Unfortunately, such 
+
+nominal model can not always be obtained, as some sys 
+
+tems are too complex to be modeled accurately, or their 
+
+properties evolve in unknown ways during their operation. 
+
+The work of was partially supported by the European 
+
+Union’s Horizon Research and Innovation Actions pro 
+
+gramme under grant agoreement No. 101070162, and by 
+
+the Wallenberg AI, Autonomous Systems and Software 
+
+Program (WASP) funded by the Knut and Alice Wallen 
+
+berg Foundation. 
+
+When the nominal behavior of the system is only known 
+
+through data, the usual approach is to first do system 
+
+identification to obtain a model, and then apply model 
+
+based techniques (Simani et al. (2003) ). There are, 
+
+however, two limitations to this technique. First, the 
+
+identification of a model from data always leads to some 
+
+level of uncertainty which can be unfeasible to quantify, 
+
+and must be taken into account to perform a correct 
+
+analysis. Second, the models used for identification are 
+
+parametric, so their expressiveness is limited, and their 
+
+design requires some prior knowledge of the system under 
+
+study. 
+
+The study of uncertainty quantification in system identifi 
+
+cation has received a good amount of attention, as covered 
+
+by  Latifi & Scoglio (2025) , and have found some uses in 
+
+fault and anomaly detection, like in  Liao et al. (2024) .
+
+For non  parametric models, their development can be 
+
+linked to the field of machine learning, which led to 
+
+development of highly expressive architectures such as 
+
+neural networks. These architectures are able to exploit 
+
+the exponentialy increasing availability of computation 
+
+resources to approximate functions of any kind, proved by 
+
+Cybenko (1989) . This has led to a major influx of data 
+
+driven fault detection techniques, capable of dealing with 
+
+very complex systems for which no model is available: the 
+
+paper by  Neupane et al. (2025)  offers a good review on 
+
+the topic. Unfortunately, although effective in their pur 
+
+pose, these methods usually provide a yes/no diagnostic, 
+
+without much consideration for statistical concerns. 
+
+Combining both advances, uncertainty quantification and 
+
+non  parametric models, has proven challenging. Some 
+
+approaches, like Bayesian Neural Networks, have been 
+
+applied succesfully to fault detection, as in  Maged & Xie (2022) . However, these techniques are very complex and 
+
+usually require large quantities of data to work correctly. 
+
+A more satisfactory solution for non  parametric architec 
+
+tures with uncertainty quantification can be found in 
+
+Gaussian processes, explained in detail by  Rasmussen 
+
+& Williams (2005) . GPs have been applied succesfully 
+
+to a wide variety of tasks, from classification ( Opper 
+
+& Winther (2000) ) to control of dynamical systems 
+
+(Scampicchio et al. (2025) ). For the latter, researchers 
+
+have been able to infuse GPs with a wide variety of prop 
+
+erties:  Beckers et al. (2022)  imposed a Port  Hamiltonian 
+
+structure to the resulting model, while  Marino & Cicirello 
+
+(2023)  allowed for switching behavior of the resulting 
+
+system. This makes them extremely versatile, as an user 
+
+can select how expressive their model needs to be, from 
+
+universal approximator to linear system, all under the 
+
+same framework. 
+
+In this paper, we use GP to solve the following problem: 
+
+given a “nominal” system which we know only through 
+
+several trajectories generated by it, we must determine if 
+
+new trajectory has been generated by this same model, 
+
+or by a different one. 
+
+The motivation behind using GPs is their data efficiency 
+
+and, most importantly, their capability to assess uncer 
+
+tainty in their approximations. The contributions of the 
+
+paper are the following: 
+
+1.  We use a GP to estimate the sampled  time dynam 
+
+ics of a system with the purpose of generating 
+
+residuals for a new trajectory. 
+
+2.  We fully characterize the distribution of the resid 
+
+uals produced by our method and use them to set 
+
+a threshold adjusted to the rate of false positives 
+
+allowed by the algorithm. 
+
+3.  We discuss the trade  offs present in the detection 
+
+of anomalous behavior, considering the relation 
+
+between the difference in the dynamics between the 
+
+nominal and non  nominal systems, the noise pre 
+
+sent in the system and the amount of data available 
+
+for training the GP. 
+
+2.  PROBLEM FORMULATION 
+
+In this section we introduce the model of the system con 
+
+sidered in the paper, and then proceed with the problem 
+
+statement. 
+
+2.1  System model 
+
+We consider a continuous autonomous system on which 
+
+we have full state observations, with dynamics given by: ̇
+
+𝑥 (𝑡 ) = 𝑓 (𝑥 (𝑡 )) + 𝜂 (𝑡 )̂
+
+𝑥 (𝑡 ) = 𝑥 (𝑡 ) + 𝑣 (𝑡 ) (1) 
+
+where  𝑥 ,̂ 𝑥 , 𝜂 , 𝑣  ∈ ℝ𝑛 𝑥  , and  𝜂 (𝑡 ) and  𝑣 (𝑡 ) are continuous 
+
+uncorrelated white noises. The system is sampled at a 
+
+constant rate  Δ𝑇  :
+
+𝑥 𝑘 +1 = 𝑥 ((𝑘  + 1)Δ𝑇  ) = 𝑥 𝑘  + 𝐹  (𝑥 𝑘 ) + 𝑤 𝑘 ̂
+
+𝑥 𝑘  =̂ 𝑥 (𝑘 Δ𝑇  ) = 𝑥 𝑘  + 𝑣 𝑘 , (2) 
+
+In this paper, we consider a system to have a constant 
+
+sampling time, as is the case with most systems. Under 
+
+this condition, we can ignore the continuous dynamics 
+
+presented in  (1)  and instead focus on the discrete dynam 
+
+ics. Since this approach is purely data  driven, we do not 
+
+use a priori information about  𝑓 (𝑥 ) and  𝐹  (𝑥 ). We do, 
+
+on the other hand, assume that the latter can be approx 
+
+imated by a GP. 
+
+2.2  System Discrimination Problem 
+
+The problem tackled in this paper is as follows: consider 
+
+that we have a dataset  𝐷  of  𝑁 𝐷  trajectories, each one of 
+
+length  𝑁 ℓ, produced by the system described in  (2) ,
+
+𝐷  = {{̂𝑥 ℓ
+
+> 𝑘
+
+}𝑛 ℓ
+
+> 𝑘 =1
+
+}𝑛 𝐷 
+
+> ℓ=1
+
+. (3) 
+
+Note that the trajectories do not need to have the same 
+
+lenght, but we will assume so for the sake simplicity. 
+
+Although these trajectories may have different initial con 
+
+ditions, they have all been produced using the same tran 
+
+sition function  𝐹 𝐷 (𝑥 ), and have known observation and 
+
+model error covariances  𝔼 [𝑤 𝑘 𝑤 𝑇  
+
+> 𝑘
+
+] = Σ𝑤  and  𝔼 [𝑣 𝑘 𝑣 𝑇  
+
+> 𝑘
+
+] =
+
+Σ𝑣 . From now on we use term  nominal system  to refer 
+
+to a system whose sampled observations follow  (2)  with 
+
+transition function  𝐹 𝐷 (𝑥 ), regardless of the covariance of 
+
+𝑤  and  𝑣 , and we call a  nominal trajectory  any trajectory 
+
+generated by the nominal system. 
+
+We then receive a new trajectory 
+
+𝑄  = {̂𝑥 𝑘 }𝑛 steps  
+
+> 𝑘 =1
+
+, (4) 
+
+produced by a system with known noise covariances  Σ𝑣 
+
+and  Σ𝑤  (which do not need to be the same as in  𝐷 ), but 
+
+unknown transition function  𝐹  (𝑥 ). The objective in this 
+
+paper is to devise an algorithm that determines whether 
+
+the trajectory was generated with transition function 
+
+𝐹 𝐷 (𝑥 ), known only through the dataset  𝐷 , with a tunable 
+
+level of confidence adjusted by the maximum acceptable 
+
+false positive rate. 
+
+3.  PROPOSED ALGORITHM 
+
+3.1  Algorithm description 
+
+To solve the problem defined in  Section 2.2 , we propose 
+
+a technique in two stages. In the first stage, performed 
+
+offline, we train a GP with the dataset  𝐷  to produce an 
+
+estimation of the transition function  ̂  𝐹 𝐷 (𝑥 ). In the second 
+
+stage, done online, we compare the observed trajectory 
+
+𝑄  with  ̂  𝐹 𝐷 (𝑥 ) to obtain a residual  𝜀  that quantifies its 
+
+deviation from the nominal behavior. With our knowledge 
+
+of the distribution of  𝜀 , we produce a  𝑝  value of  𝑄  that can 
+
+be used to determine whether it fits with the dataset  𝐷 .
+
+Note that the training of the GP must only be done once, 
+
+and it can then be used to test as many trajectories  𝑄 
+
+as needed. 
+
+3.2  Estimation of  ̂  𝐹 𝐷  with a Gaussian Process 
+
+The first step is to create a function  ̂  𝐹 𝐷 (𝑥 ) that approx 
+
+imates the function  𝐹 𝐷 (𝑥 ), only from knowledge of the 
+
+trajectories in  𝐷 .
+
+To do this, we first turn each trajectory in the dataset 
+
+into a sequence of pairs of observations before and after 
+
+every transition: 𝑋 ℓ =
+
+[<<<=̂ 𝑥 ℓ
+
+> 1
+
+̂
+
+𝑥 ℓ
+
+> 2
+
+⋮̂
+
+𝑥 ℓ
+
+> 𝑁 ℓ−1
+
+]BBBC
+
+, 𝑌 ℓ =
+
+[<<<=̂ 𝑥 ℓ
+
+> 2
+
+̂
+
+𝑥 ℓ
+
+> 3
+
+⋮̂
+
+𝑥 ℓ 
+
+> 𝑁 ℓ
+
+]BBBC
+
+(5) 
+
+A complete dataset is obtained by concatenating all the 
+
+trajectories: 
+
+𝑋 𝐷  =
+
+[<<<= 𝑋 1
+
+𝑋 2
+
+⋮
+
+𝑋 𝑁 𝐷  ]BBBC
+
+, 𝑌 𝐷  =
+
+[<<<= 𝑌 1
+
+𝑌 2
+
+⋮
+
+𝑌 𝑁 𝐷  ]BBBC
+
+, (6) 
+
+where both  𝑋 𝐷  and  𝑌 𝐷  belong to  ℝ𝑛 𝐷 (𝑛 ℓ−1)×𝑛 𝑥  . The 
+
+number of samples do not need to be too large: in our 
+
+examples, we use around 20 trajectories with 10 points 
+
+each. We define our GP estimation of  𝐹 𝐷  as ̂
+
+𝐹 𝐷 (𝑥 ) = 𝑘 (𝑥 , 𝑋 𝐷 )[𝑘 (𝑋 𝐷 , 𝑋 𝐷 )]−1𝑌 𝐷 , (7) 
+
+where  𝑘  is a kernel function, which must be positive semi 
+
+definite. Additionally, we can compute the covariance of 
+
+the error of this approximation in two different points  𝑥 1
+
+and  𝑥 2 by: 
+
+𝔼 [(̂𝐹 𝐷 (𝑥 1) − 𝐹  (𝑥 1))(̂ 𝐹 𝐷 (𝑥 2) − 𝐹  (𝑥 2))𝑇 
+
+]
+
+= 𝑘 (𝑥 1, 𝑥 2) − 𝑘 (𝑥 1, 𝑋 𝐷 )[𝑘 (𝑋 𝐷 , 𝑋 𝐷 )]−1𝑘 (𝑋 𝐷 , 𝑥 2)
+
+(8) 
+
+The kernel determines how the GP estimates the function 
+
+away from the training points, considerable discussion has 
+
+taken place on how to choose the best for a particular 
+
+problem. In our method we will use the squared  expo 
+
+nential function due to its popularity and its universal 
+
+approximation property, as shown by  Maged & Xie 
+
+(2022) . This kernel is defined as: 
+
+𝑘 (𝑥 , 𝑥 ′) = 𝜎 2 
+
+> 𝑓
+
+exp [−(‖𝑥  − 𝑥 ′‖2)/(2ℓ2)] + 𝛿 𝑥 ,𝑥 ′ 𝜎 2
+
+> 𝑛
+
+, (9) 
+
+where the hyperparameters  𝜎 𝑓  and  ℓ are optimized to 
+
+maximize the log  likelihood of the data in  𝑋 𝐷  and  𝑌 𝐷 ,
+
+and  𝜎 2 
+
+> 𝑛
+
+is chosen to be equal to the diagonal elements 
+
+of  Σ𝑤 .
+
+3.3  Generation of residuals 
+
+Once the approximation  ̂  𝐹 𝐷  has been obtained, we can 
+
+compute for each step a residual 
+
+𝜀 𝑘  = (̂𝑥 𝑘 +1 −̂ 𝑥 𝑘 ) −̂ 𝐹 𝐷 (̂𝑥 𝑘 ) (10) 
+
+that denotes how the observed transition of state is dif 
+
+ferent from the one expected by the GP. These residuals 
+
+can then be concatenated in a residual vector: 
+
+𝜀  = [𝜀 1 𝜀 2 ⋯ 𝜀 𝑛 steps −1]𝑇 
+
+∈ ℝ(𝑛 steps −1)·𝑛 𝑥  . (11) 
+
+Intuitively, a large error is related to a difference between 
+
+the dynamics of  𝑄  and  𝐹 𝐷 , and a common approach 
+
+in system discrimination is to set a threshold  𝜃  for the 
+
+squared norm of the error, so that we declare that  𝑄 
+
+was not generated by  𝐹 𝐷  if  ‖𝜀 ‖2 > 𝜃 . However, designing 
+
+this threshold is not trivial, as the residuals are affected 
+
+by several components, most of them unrelated to actual 
+
+differences between the transition functions. Instead, we 
+
+will characterize the distribution of  ‖𝜀 ‖2, so when we 
+
+obtain the residual of a trajectory  𝑄 , we can determine 
+
+how likely it is to be produced by  𝐹 𝐷 (𝑥 ).
+
+3.4  Characterization of residuals 
+
+There are several sources of uncertainty in the computa 
+
+tion of the residual. In order to determine its distribution, 
+
+we must first decompose it into different components. In 
+
+particular, we consider 4 components of the residual: 
+
+𝜀 𝑘  = (̂ 𝑥 𝑘 +1 −̂ 𝑥 𝑘 ) −̂ 𝑓 𝐷 (𝑦 𝑘 )
+
+= 𝜀 𝑛 ,𝑘  + 𝜀 𝐹  ,𝑘  + 𝜀 GP ,𝑘  + 𝜀 obs ,𝑘 , (12) 
+
+with each component defined as follows: 
+
+Noise error:  𝜀 𝑛 ,𝑘  = (̂𝑥 𝑘 +1 −̂ 𝑥 𝑘 ) − 𝐹 𝑄 (𝑥 𝑘 )
+
+Dynamics error:  𝜀 𝐹  ,𝑘  = 𝐹 𝑄 (𝑥 𝑘 ) − 𝐹 𝐷 (𝑥 𝑘 )
+
+GP error:  𝜀 GP ,𝑘  = 𝐹 𝐷 (𝑥 𝑘 ) −̂ 𝐹 𝐷 (𝑥 𝑘 )
+
+Observation error:  𝜀 obs ,𝑘  =̂ 𝐹 𝐷 (𝑥 𝑘 ) −̂ 𝐹 𝐷 (̂𝑥 𝑘 )
+
+(13) 
+
+In these expressions, we define  𝐹 𝑄  as the transition func 
+
+tion that has produced the trajectory  𝑄 , which might or 
+
+might not be  𝐹 𝐷 . We can now explain each component 
+
+and estimate their distribution. 
+
+Noise error ( 𝜀 𝑛 ,𝑘 ) The first component is the difference 
+
+between the observed evolution of the state of the system 
+
+and its actual evolution, due purely to noise in the obser 
+
+vation and in the dynamics of the system. It can be 
+
+characterized as: 
+
+𝜀 𝑛 ,𝑘  = (̂𝑥 𝑘 +1 −̂ 𝑥 𝑘 ) − 𝐹 𝑄 (𝑥 𝑘 )
+
+= (𝑥 𝑘 +1 + 𝑣 𝑘 +1 − 𝑥 𝑘  − 𝑣 𝑘 ) − (𝑥 𝑘 +1 − 𝑥 𝑘  − 𝑤 𝑘 )
+
+= 𝑣 𝑘 +1 − 𝑣 𝑘  + 𝑤 𝑘 
+
+(14) 
+
+Dynamics error ( 𝜀 𝐹  ,𝑘 ) This error is due to differences 
+
+between the transition function of the nominal system 
+
+and the system that produced  𝑄 . Since the transition 
+
+functions are deterministic, this component is determin 
+
+istic as well, and depends only on the state  𝑥 𝑘 :
+
+𝜀 𝐹  ,𝑘  = 𝐹 𝑄 (𝑥 𝑘 ) − 𝐹 𝐷 (𝑥 𝑘 ) = 𝜀 𝐹  (𝑥 𝑘 ) (15) 
+
+GP error ( 𝜀 GP ,𝑘 ) The GP error is due to the difference 
+
+between the estimation of the transition function  ̂  𝐹 𝐷 (𝑥 )
+
+and the actual transition function  𝐹 𝐷 (𝑥 ). As we chose a 
+
+GP for the estimation, this error is expected to follow 
+
+a normal distribution with zero mean and covariance 
+
+function given by 
+
+ΣGP (𝑥 1, 𝑥 2) =
+
+𝑘 (𝑥 1, 𝑥 2) − 𝑘 (𝑥 1, 𝑋 𝐷 )[𝑘 (𝑋 𝐷 , 𝑋 𝐷 )]−1𝑘 (𝑋 𝐷 , 𝑥 2)) (16) 
+
+Observation error ( 𝜀 obs ,𝑘 ) In practice, only the noisy 
+
+observation of the state  ̂  𝑥 𝑘  are available to the algorithm. 
+
+Thus, the observation error quantifies the error we intro 
+
+duce when applying the GP to the noisy state state 
+
+observation rather than the true state. This error can be 
+
+characterized by assuming a small observation noise  𝑣 𝑘 
+
+and linearizing the GP estimation: 
+
+𝜀 obs ,𝑘  =̂ 𝐹 𝐷 (𝑥 𝑘 ) −̂ 𝐹 𝐷 (̂ 𝑥 𝑘 )
+
+=̂ 𝐹 𝐷 (̂𝑥 𝑘  − 𝑣 𝑘 ) −̂ 𝐹 𝐷 (̂𝑥 𝑘 )
+
+≈̂ 𝐹 𝐷 (̂𝑥 𝑘 ) − 𝐽 𝑘 𝑣 𝑘  −̂ 𝐹 𝐷 (̂𝑥 𝑘 ) = −𝐽 𝑘 𝑣 𝑘 ,
+
+(17) 
+
+where  𝐽 𝑘  is the Jacobian of the GP obtained at  𝑥 𝑘 :
+
+𝐽 𝑘  = ∇̂𝐹 𝐷 (𝑥 )|𝑥 =̂ 𝑥 𝑘  . (18) 
+
+Since the estimation  ̂  𝐹 𝐷 (𝑥 ) is given by the analytical 
+
+expression  (7) , the Jacobian can be obtained through symbolic differentiation. Note that this result is an ap 
+
+proximation, and may fail if  𝐹 𝐷  changes in smaller length 
+
+scales than those of the observation noise. Here, we do 
+
+not consider such scenario. 
+
+Total error ( 𝜀 𝑘 ) With all components estimated, we can 
+
+now obtain an expression of the total residual at each 
+
+step: 
+
+𝜀 𝑘  = 𝜀 𝑛 ,𝑘  + 𝜀 𝐹  ,𝑘  + 𝜀 GP ,𝑘  + 𝜀 obs ,𝑘 
+
+= (𝑣 𝑘 +1 − 𝑣 𝑘  + 𝑤 𝑘 ) + 𝜀 𝐹  (𝑥 𝑘 ) − 𝐽 𝑘 𝑣 𝑘  + 𝜀 𝐷 ,𝑘 
+
+= −(𝐽 𝑘  + 𝐼 )𝑣 𝑘  + 𝑣 𝑘 +1 + 𝑤 𝑘  + 𝜀 𝐹  (𝑥 𝑘 ) + 𝜀 GP ,𝑘 
+
+(19) 
+
+Note that the error is the sum of 3 elements that follow a 
+
+Gaussian distribution plus a deterministic error  𝜀 𝐹  (𝑥 𝑘 ),
+
+so the complete residual follows a Gaussian distribution 
+
+as well, with mean  ̄  𝜀  and covariance  Σ𝑇  :
+
+𝜀  ∼𝒩︀  (̄𝜀 , Σ𝑇  ). (20) 
+
+The mean of the residual at each step is given by ̄
+
+𝜀  = 𝔼 [𝜀 𝑘 ]
+
+= 𝔼 [−(𝐽 𝑘  + 𝐼 )𝑣 𝑘  + 𝑣 𝑘 +1 + 𝑤 𝑘  + 𝜀 𝐹  (𝑥 𝑘 ) + 𝜀 GP, k ]
+
+= 𝜀 𝐹  (𝑥 𝑘 )
+
+(21) 
+
+as all the other components follow Gaussian distributions 
+
+with zero mean. 
+
+Regarding the covariance, we can compute it for every 
+
+pair of steps  𝑘  and  𝑙 :
+
+Σ𝑘 𝑙  = 𝔼 [(𝜀 𝑘  − 𝔼 [𝜀 𝑘 ])(𝜀 𝑙  − 𝔼 [𝜀 𝑙 ])𝑇  ]
+
+= [−(𝐽 𝑘  + 𝐼 )𝑣 𝑘  − 𝑣 𝑘 +1 + 𝑤 𝑘  + 𝜀 GP ,𝑘 ]
+
+× [−𝑣 𝑇  
+
+> 𝑙
+
+(𝐽 𝑙  + 𝐼 )𝑇  − 𝑣 𝑇  
+
+> 𝑙 +1
+
++ 𝑤 𝑇  
+
+> 𝑙
+
++ 𝜀 𝑇 
+
+> 𝐷 ,𝑙
+
+]
+
+= 𝛿 𝑘 𝑙 [(𝐽 𝑘  + 𝐼 )Σ𝑣 (𝐽  𝑇  
+
+> 𝑙
+
++ 𝐼 ) + Σ𝑣  + Σ𝑤 ]
+
+−𝛿 𝑘 +1,𝑙 [Σ𝑣 (𝐽 𝑙  + 𝐼 )] − 𝛿 𝑘 ,𝑙 +1(𝐽 𝑘  + 𝐼 )Σ𝑣  + ΣGP ,𝑘 𝑙 ,
+
+(22) 
+
+where most cross  products are  0 due to the independence 
+
+in the process and observation noises. The error in the 
+
+estimation of the GP depends only on the noise realization 
+
+in  𝐷 , which makes it uncorrelated with the noise in the 
+
+analyzed trajectory. 
+
+The complete covariance function of the residual is then 
+
+𝔼 [(𝜀  − 𝔼 [𝜀 ])(𝜀  − 𝔼 [𝜀 ])𝑇  ] = Σ𝑇  , where 
+
+Σ𝑇  =
+
+[<<<<= Σ1,1
+
+Σ2,1
+
+⋮
+
+Σ𝑛 steps −1,1
+
+Σ1,2
+
+Σ2,2
+
+⋮
+
+Σ𝑛 steps −1,2
+
+⋯
+
+⋯
+
+⋱
+
+⋯
+
+Σ1,𝑛 steps −1
+
+Σ2,𝑛 steps −1
+
+⋮
+
+Σ𝑛 steps −1,𝑛 steps −1]BBBBC
+
+. (23) 
+
+The covariance matrix can be used to produced a normal 
+
+ized residual  ̃  𝜀  = Σ−1 
+
+> 2
+> 𝑇
+
+𝜀 , with the following distribution: ̃
+
+𝜀  ∼𝒩︀  (Σ−1/2 
+
+> 𝑇
+
+[𝐹 𝑄 (𝑥 ) − 𝐹 𝐷 (𝑥 )], 𝐼 ) (24) 
+
+3.5  Anomaly Detection 
+
+The purpose of the residual is to use it to detetermine 
+
+whether  𝑄  was generated by the transition function  𝐹 𝐷 .
+
+Based on the  𝜒 2 test, we define the  𝑝  value of the trajec 
+
+tory as 
+
+𝑝 (̃𝜀 ) = ℙ(𝑥  > ‖̃ 𝜀 ‖2 | 𝑥  ∼ 𝜒 2
+
+> 𝑛 𝑥 ⋅(𝑛 steps −1)
+
+), (25) 
+
+which corresponds to the probability that a nominal tra 
+
+jectory from  𝐷  produces a residual with a norm higher 
+
+than  ‖̃𝜀 ‖2. This produces a natural way of setting the 
+
+threshold  𝑝 thr , by selecting the highest acceptable false 
+
+positive rate, that is, probabilty of a nominal trajectory to 
+
+be classified as anomalous. Our condition for classification 
+
+becomes: 
+
+𝑄  is declared to not have been 
+
+generated by  𝐹 𝐷  if  𝑝 (̃𝜀 ) < 𝑝 thr . (26) 
+
+Finally, the complete algorithm can be summarized in 
+
+these nine steps, split in offline training and online de 
+
+ployment: 
+
+1.  Offline training 
+
+1.  Obtain  𝑋 𝐷  and  𝑌 𝐷  from  𝐷 .
+
+2.  Train a GP using  𝑋 𝐷  and  𝑌 𝐷 .
+
+3.  Select  𝑝 thr  according to our false positive 
+
+tolerance. 
+
+2.  Online deployment 
+
+4.  Compute observed dynamics of the new tra 
+
+jectory  𝑄  as  Δ̂𝑥 𝑘  =̂ 𝑥 𝑘 +1 −̂ 𝑥 𝑘 .
+
+5.  Obtain residual  𝜀  = Δ̂ 𝑥 𝑘  −̂ 𝐹 𝐷 (̂ 𝑥 𝑘 ).
+
+6.  Compute covariance  Σ𝑇  .
+
+7.  Normalize residual as  ̄  𝜀  = Σ−1/2 
+
+> 𝑇
+
+𝜀 .
+
+8.  Compute  𝑝  from  ̄  𝜀  and  𝜒 2
+
+> 𝑛 𝑥 ·(𝑛 steps −1)
+
+.
+
+9.  Declare that  𝑄  does not follow  𝐹 𝐷  if  𝑝  < 𝑝 thr .
+
+4.  NUMERICAL EXPERIMENTS 
+
+In this section, we present the results of two experiments 
+
+that were run to assess the performance of the proposed 
+
+algorithm. We evaluate its detection capability by testing 
+
+many different realization of datasets  𝐷  and trajectories 
+
+𝑄 , and computing how many of them are correctly clas 
+
+sified as anomalous depending on the  𝑝 thr  selected. 
+
+4.1  Experimental setup 
+
+For each experiment, we follow the following procedure: 
+
+1.  We generate 500 different datasets  𝐷  using a nom 
+
+inal system  𝑓 𝐷 , each one with  𝑁 𝐷  trajectories with 
+
+𝑁 ℓ points, using different realizations of  𝑤 𝑘 .
+
+2.  We train 20 GPs using 20 of those datasets and 
+
+optimizing the hyperparameters. 
+
+3.  We train 480 additional GPs with the remaining 
+
+datasets, using as hyperparameters the average of 
+
+those obtained in the first 20 trainings. 
+
+4.  We generate 800 trajectories using  𝑓 𝑄  with random 
+
+realizations of  𝑤 𝑘  and  𝑣 𝑘 .
+
+5.  For each pair of trajectory and GP, we obtain a 
+
+𝑝  value  using the algorithm described in  Section 3 .
+
+The complete collection of values of  𝑝  is used deter 
+
+mine the ratio of trajectories with  𝑝  value below 
+
+𝑝 thr , for a range of thresholds between  0 and  1.
+
+By generating many datasets and trajectories, we can 
+
+obtain numerically a reliable approximation of the ac 
+
+tual distribution of  ̃  𝑝  when the algorithm is run on a 
+
+trajectory generated by  𝑓 𝑄 . A repository with the imple 
+
+mentation of the algorithm and the experiments can 
+
+be found in  https://github.com/AlejandroPenacho/GP 
+
+system  discrimination .4.2  Damped pendulum with mass imbalance 
+
+We define a nominal and an anomalous systems given by 
+
+𝑓 𝐷 (𝑥 ) = [ 𝑥 2
+
+− sin (𝑥 1) − 0.1𝑥 2
+
+],
+
+𝑓 𝑄 (𝑥 ) = [ 𝑥 2
+
+− sin (𝑥 1 + 0.3) − 0.1𝑥 2
+
+],
+
+(27) 
+
+with sampling time  Δ𝑇  = 0.3.
+
+To visualize the system, we show in  Fig. 1  the trajectories 
+
+in the training dataset  𝐷 , together with 5 realizations 
+
+of a trajectory generated with  𝑓 𝑄 . The algorithm, then, 
+
+must determine if these trajectories has been produced 
+
+by the same system that produced the dataset  𝐷 . The 
+
+training dataset has 10 trajectories of 14 steps each, gen 
+
+erated with  Σ𝑤  = 10−2𝐼 , Σ𝑣  = 0, starting from randomly 
+
+selected initial positions in  [−2, 2] × [−2, 2]. The trajec 
+
+tories generated with  𝑓 𝑄 (𝑥 ) use  Σ𝑤  = Σ𝑣  = 4 · 10−4𝐼  and 
+
+start from  𝑥 0 = [0.7 0.4].
+
+Fig. 1. Setup for the pendulum example. Left plot: tra 
+
+jectories in  𝐷  with 5 realizations of a trajectory generated 
+
+with  𝑓 𝑄 . Right plot: squared error between the dynamics 
+
+of  𝑓 𝑄  and  𝑓 𝐷 .
+
+We follow the procedure explained in  Section 4.1  to obtain 
+
+a total of 400,000  𝑝  values, and we analyze their distrib 
+
+ution in  Fig. 2 , left plot. Since  𝑝 thr  corresponds to the 
+
+ratio of trajectories generated by  𝑓 𝐷  that are classified 
+
+as anomalous, this plot is equivalent to the Receiver 
+
+Operating Characteristic curve commonly used in binary 
+
+testing. 
+
+Fig. 2. Results for the pendulum example. Left plot: 
+
+ROC curve obtained using different number of steps for 
+
+the classification. Right plot: covariance and square error 
+
+at each step of the analyzed trajectories. 
+
+In the plot we can observe that, setting a threshold 
+
+of  𝑝 thr  = 0.2, we get a detection probability of  60% for 
+
+trajectories generated with  𝑓 𝑄  when we analyze the first 
+
+10 steps of the trajectory. Interestingly, this detection 
+
+decreases to around  45% when use 20 steps, implying that 
+
+analyzing less steps leads to better results. 
+
+To understand the reason, we show in the right plot of 
+
+Fig. 2  the covariance of  𝜀  at each step, together with the 
+
+square error produced by the difference between  𝐹 𝐷 (𝑥 )
+
+and  𝐹 𝑄 (𝑥 ). This difference becomes noticeable only be 
+
+tween steps  8 and  11, and is what allows the algorithm 
+
+to detect a difference in the dynamics. Between steps 
+
+11 and  20, the difference in the dynamics is minimal 
+
+compared to the covariance of the residual, so analyzing 
+
+20 steps instead  10 does not provide an improvement in 
+
+the detection. 
+
+For the right plot of  Fig. 2  we can also observe the uncer 
+
+tainty produced by the GP approximation (green area) 
+
+and that produced by the noise (blue area). This results 
+
+provide an important insight on how the detection can 
+
+be improved: if we collect more data, we can reduce the 
+
+uncertainty  𝜎 GP . Meanwhile, we would need to decrease 
+
+the observation noise  𝑣  if we want to reduce  𝜎 n. In this 
+
+experiment, both have a similar contribution to the total 
+
+uncertainty, so both options are equally valid to improve 
+
+the effectiveness of the algorithm. 
+
+4.3  Van der Pol oscillator 
+
+We now consider a second system with nominal and 
+
+anomalous dynamics given by 
+
+𝑓 𝐷 (𝑥 ) = [ 𝑥 2
+
+0.4(1 − 𝑥 2
+
+> 1
+
+)𝑥 2 − 𝑥 1
+
+],
+
+𝑓 𝑄 (𝑥 ) = [ 𝑥 2
+
+0.55(1 − 𝑥 2
+
+> 1
+
+)𝑥 2 − 𝑥 1
+
+],
+
+(28) 
+
+again with sampling time  Δ𝑇  = 0.3. As with the case of 
+
+the pendulum, we show in  Fig. 3  the trajectories used to 
+
+train the GP and 5 realizations of the trajectory gener 
+
+ated by  𝑓 𝑄 (𝑥 ). For this problem, the training set has 30 
+
+trajectories of 8 steps each, generated with  Σ𝑤  = 0.01𝐼 
+
+and  Σ𝑣  = 0. The trajectories  𝑄  have  Σ𝑤  = Σ𝑣  = 10−3,
+
+and start at  𝑥 0 = [0.7 0.4].
+
+Fig. 3. Setup for the Van der Pol example. Left plot: tra 
+
+jectories in  𝐷  and 5 realizations of a trajectory generated 
+
+with  𝑓 𝑄 . Right plot: squared error between the dynamics 
+
+of  𝑓 𝑄 (𝑥 ) and  𝑓 𝐷 (𝑥 ).Following again the procedure from  Section 4.1 , we obtain 
+
+the probability of classifying a trajectory generated with 
+
+𝑓 𝑄  as anomalous as a function of the threshold  𝑝 thr  and 
+
+the number of steps we consider. 
+
+Fig. 4. Results for the Van der Pol example. Left plot: 
+
+ROC curve obtained using different number of steps for 
+
+the classification. Right plot: covariance and square error 
+
+at each step of the analyzed trajectories. 
+
+For this problem, the results are significantly better than 
+
+for the damped pendulum: analyzing 20 steps, we can 
+
+achieve a detection probability of  80% with  𝑝 thr  = 0.05.
+
+Also, we can now see how the results obtained analyzing 
+
+20 steps are better than analyzing 10 steps. To under 
+
+stand the difference with the previous example, we look 
+
+at the squared residual produced by the difference in 
+
+the dynamics compared with the covariance of the total 
+
+residual in  Fig. 4 , right plot. We see that between steps 15 
+
+and 18, the value of  𝜀 2 
+
+> 𝐹
+
+increases well above the covariance 
+
+of the residual. By taking residuals in these steps, the 
+
+detection probability increases significantly. 
+
+If we compare the uncertainty produced by the noise ( 𝜎 2
+
+> 𝑛
+
+)
+
+and by the GP ( 𝜎 2
+
+> GP
+
+), we can observe that the second 
+
+is much smaller, mostly due to the fact that the train 
+
+ing dataset has more trajectories than in the pendulum 
+
+example. This difference also indicates that the function 
+
+approximation has a high level of confidence, and having 
+
+a larger dataset  𝐷  would then not improve the detection 
+
+capability of the algorithm. The bottleneck for the detec 
+
+tion, in this case, is in the covariance of the noise  𝜎 2
+
+> 𝑛
+
+,
+
+which can be improved by reducing the observation noise. 
+
+5.  CONCLUSION 
+
+We have established a model  free approach to discrimina 
+
+tion analysis for dynamical systems, used to test whether 
+
+a trajectory fits with the dynamics observed in a dataset. 
+
+In this approach, we use a GP to approximate the dynam 
+
+ics of the dataset, obtaining a measure of the uncertainty 
+
+of the approximation. This uncertainty is combined with 
+
+the effect of the process and observation noise to obtain 
+
+a distribution of the residual between the observed and 
+
+predicted dynamics, so we can apply the concept of  𝑝 
+
+value to the new trajectory. 
+
+This first work into establishing the framework hightli 
+
+hgts several research directions to explore in the future. 
+
+First of all, the capability to quantify the uncertainty of 
+
+the estimated dynamics can be used to design optimal 
+
+sampling techniques to maximize the detection capability 
+
+of the algorithm. Second, we can use prior knowledge 
+
+of the nominal dynamics of the system to improve the 
+
+approximation of the GP, possibly by modifying its kernel 
+
+function. Last, we can use knowledge of the possible 
+
+deviation of the dynamics of the system to, for example, 
+
+weight the residual obtained in certain states higher than 
+
+others, in order to fine  tune the algorithm to different 
+
+anomalies. In any case, by retaining the uncertainty quan 
+
+tification properties of the algorithm, we can maintain the 
+
+statistical properties of the algorithm that let us select a 
+
+desired false positive rate with  𝑝 thr .
+
+REFERENCES 
+
+Beckers, T., Seidman, J., Perdikaris, P., & Pappas, G. J. 
+
+(2022). Gaussian Process Port  Hamiltonian Systems: 
+
+Bayesian Learning with Physics Prior.  2022 IEEE 61st 
+
+Conference on Decision and Control (CDC) , 1447– 
+
+1453. 
+
+Cybenko, G. (1989). Approximation by superpositions of 
+
+a sigmoidal function.  Mathematics of Control, Signals 
+
+and Systems , 2(4), 303–314. 
+
+Frank, P. M. (1990). Fault diagnosis in dynamic systems 
+
+using analytical and knowledge  based redundancy: A 
+
+survey and some new results.  Automatica , 26 (3), 459– 
+
+474. 
+
+Latifi, A., & Scoglio, C. M. (2025). A Survey on Uncer 
+
+tainty Quantification in Dynamical Systems.  IEEE 
+
+Transactions on Systems, Man, And Cybernetics: Sys 
+
+tems , 55 (8), 5137–5151. 
+
+Liao, Y., Zhang, Y., You, J., Jin, L., Xu, Z., & Shen, Z. 
+
+(2024). Uncertainty  Informed Threshold Assessment 
+
+of Model  Based Fault Detection for Modular Multi 
+
+level Converters.  IEEE Open Journal of Power Elec 
+
+tronics , 5, 802–811. 
+
+Maged, A., & Xie, M. (2022). Uncertainty utilization in 
+
+fault detection using Bayesian deep learning.  Journal 
+
+of Manufacturing Systems , 64 , 316–329. 
+
+Marino, L., & Cicirello, A. (2023). A switching Gaussian 
+
+process latent force model for the identification of 
+
+mechanical systems with a discontinuous nonlinearity. 
+
+Data  Centric Engineering , 4, e18. 
+
+Neupane, D., Bouadjenek, M. R., Dazeley, R., & Aryal, 
+
+S. (2025). Data  driven Machinery Fault Diagnosis: 
+
+A Comprehensive Review.  Neurocomputing , 627 ,
+
+129588. 
+
+Opper, M., & Winther, O. (2000). Gaussian Processes for 
+
+Classification: Mean  Field Algorithms.  Neural Com 
+
+putation , 12 (11), 2655–2684. 
+
+Patton, R. J., & Chen, J. (1997). Observer  based fault 
+
+detection and isolation: Robustness and applications. 
+
+Control Engineering Practice , 5(5), 671–682. 
+
+Rasmussen, C. E., & Williams, C. K. I. (2005).  Gaussian 
+
+Processes for Machine Learning . The MIT Press. 
+
+Salsburg, D. S. (1992).  The Use of Restricted Significance 
+
+Tests in Clinical Trials . Springer. 
+
+Scampicchio, A., Arcari, E., Lahr, A., & Zeilinger, M. N. 
+
+(2025).  Gaussian processes for dynamics learning in 
+
+model predictive control . arXiv. 
+
+Simani, S., Fantuzzi, C., & Patton, R. J. (2003).  Model 
+
+based Fault Diagnosis in Dynamic Systems Using 
+
+Identification Techniques  (M. J. Grimble & M. A. 
+
+Johnson, Eds.). Springer.
