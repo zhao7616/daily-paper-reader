@@ -1,0 +1,46 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.12180v1/fig-001.webp",
+      "caption": "Fig. 3 Year-by-year performance comparisons between CycloneMAE and operational numerical models in the WP basin. a-e, Forecast errors of MSLP achieved by different models in the year 2020 to 2024 sequentially. Errors are evaluated by using mean absolute error. f-j and k-o are the same as a-e but for the MSW and the Track errors, respectively.",
+      "page": 6,
+      "index": 1,
+      "width": 737,
+      "height": 519
+    },
+    {
+      "url": "assets/figures/arxiv/2604.12180v1/fig-002.webp",
+      "caption": "Fig. 4 Case studies of full lifecycle evolution and uncertainty estimation for representative TCs. Analysis of In-fa (WP), Doksuri (WP), Earl (NA), and Teddy (NA), showcasing trajectory tracking (Rows 1 and 3) and probabilistic boxplots at specific target times (Rows 2 and 4).",
+      "page": 7,
+      "index": 2,
+      "width": 738,
+      "height": 590
+    },
+    {
+      "url": "assets/figures/arxiv/2604.12180v1/fig-003.webp",
+      "caption": "Fig. 5 IG attribution analysis for CycloneMAE. The relative contribution weights of 16 predictors are evaluated across different lead times for MSW, MSLP, and Track forecasts. Predictors are color-coded into four groups: satellite imagery (purple), surface fields (blue), 850 hPa lower troposphere (green), and 200 hPa upper troposphere (red).",
+      "page": 10,
+      "index": 3,
+      "width": 737,
+      "height": 819
+    },
+    {
+      "url": "assets/figures/arxiv/2604.12180v1/fig-004.webp",
+      "caption": "Fig. 1 Schematic of the CycloneMAE model. a, Pre-training architecture. A TC structureaware MAE model is designed to learn generalizable representations from multi-modal input data. b, Fine-tuning architecture. The pre-trained encoders are transferred to downstream forecasting tasks and only the forecasting head is needed to train. For each forecasting head, a discrete probabilistic gridding scheme is designed to generate probabilistic forecasts.",
+      "page": 3,
+      "index": 4,
+      "width": 738,
+      "height": 279
+    },
+    {
+      "url": "assets/figures/arxiv/2604.12180v1/fig-005.webp",
+      "caption": "Fig. 2 Performance comparison between CycloneMAE and global operational numerical models in three different basins. a, Forecast results achieved by CycloneMAE, ECMWF-IFS, NCEP-GFS and CMA-GFS in the WP basin. For each model, three forecasting variables (i.e., MSLP, MSW and Track) are evaluated using mean absolute error. b and c are the same as a but in the EP basin and the NA basin, respectively.",
+      "page": 5,
+      "index": 5,
+      "width": 738,
+      "height": 292
+    }
+  ]
+}

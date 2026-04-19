@@ -1,0 +1,86 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.12905v1/fig-001.webp",
+      "caption": "Fig. 4. Visualization of the collected hydraulic dataset. The upper two panels show 12 collected trajectories of ∆q4 and ∆p4. The lower two panels show the decomposed fx and my trajectories of the ‘Stiff-2’ episode with fc = 1 Hz and fdn c = 15 Hz.",
+      "page": 6,
+      "index": 1,
+      "width": 527,
+      "height": 537
+    },
+    {
+      "url": "assets/figures/arxiv/2604.12905v1/fig-002.webp",
+      "caption": "TABLE I OVERVIEW OF THE COLLECTED HYDRAULIC MANIPULATION DATA.",
+      "page": 6,
+      "index": 2,
+      "width": 1076,
+      "height": 302
+    },
+    {
+      "url": "assets/figures/arxiv/2604.12905v1/fig-003.webp",
+      "caption": "TABLE II HIGH-FREQUENCY WINDOWED RMS ERRORS OF MODELS.",
+      "page": 7,
+      "index": 3,
+      "width": 529,
+      "height": 296
+    },
+    {
+      "url": "assets/figures/arxiv/2604.12905v1/fig-004.webp",
+      "caption": "Fig. 1. Illustration of the proposed Frequency-aware Decomposition Network (FDN).",
+      "page": 3,
+      "index": 4,
+      "width": 1056,
+      "height": 590
+    },
+    {
+      "url": "assets/figures/arxiv/2604.12905v1/fig-005.webp",
+      "caption": "TABLE III LOW-FREQUENCY POINTWISE RMSE OF MODELS.",
+      "page": 8,
+      "index": 5,
+      "width": 529,
+      "height": 296
+    },
+    {
+      "url": "assets/figures/arxiv/2604.12905v1/fig-006.webp",
+      "caption": "TABLE IV CONTINUOUSLY RANKED PROBABILITY SCORES OF MODELS.",
+      "page": 8,
+      "index": 6,
+      "width": 529,
+      "height": 295
+    },
+    {
+      "url": "assets/figures/arxiv/2604.12905v1/fig-007.webp",
+      "caption": "Fig. 6. Test episode reconstructions with tdelay = 100 ms. We visualize the fx and my , which are representative channels in our experimental setting described in Section IV-A. The upper two rows correspond to the ‘Soft-1’ episode, and the lower rows correspond to the ‘Stiff-1’ episode. Colored areas illustrate the prediction interval defined by µ± 3σ.",
+      "page": 9,
+      "index": 7,
+      "width": 1072,
+      "height": 565
+    },
+    {
+      "url": "assets/figures/arxiv/2604.12905v1/fig-008.webp",
+      "caption": "TABLE VI TRANSFER LEARNING RESULTS ON NORMALIZED SCALE. LP REFERS TO LINEAR PROBING, AND FT REFERS TO FINE-TUNING. A AND R DENOTE ABSOLUTE AND RELATIVE POSITION INPUTS. 0% CORRESPONDS TO TRAINING FROM SCRATCH.",
+      "page": 9,
+      "index": 8,
+      "width": 529,
+      "height": 308
+    },
+    {
+      "url": "assets/figures/arxiv/2604.12905v1/fig-009.webp",
+      "caption": "Fig. 2. Detailed visualization of frequency-aware layers. FFT and IFFT denote the Fast Fourier Transform and its inverse. (Left) A learnable frequency enhancement filter (FEF) layer. (Right) Low-pass and denoising high-pass filters (FPFlow,FPFhigh) for imposing the frequency band prior.",
+      "page": 5,
+      "index": 9,
+      "width": 1072,
+      "height": 342
+    },
+    {
+      "url": "assets/figures/arxiv/2604.12905v1/fig-010.webp",
+      "caption": "Fig. 3. Illustration of our hydraulic manipulator and grinding excavation. (Left) Overview of our experimental setting. J1 to J6 indicate the joint numbers, and ‘EE’ denotes the end-effector. Fixed components are colored in grey, while moving components are marked in yellow. (Right) The grinder end-effector rotates about the +y axis and excavates the block by moving in −x and −z directions.",
+      "page": 5,
+      "index": 10,
+      "width": 524,
+      "height": 320
+    }
+  ]
+}

@@ -1,0 +1,482 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-04-19T20:06:36.551915+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 3,
+    "deep_cap": 6,
+    "deep_selected": 3,
+    "quick_candidates": 9,
+    "quick_skim_target": 11,
+    "quick_selected": 9
+  },
+  "deep_dive": [
+    {
+      "id": "2604.10248v1",
+      "source": "arxiv",
+      "title": "A Multi-head Attention Fusion Network for Industrial Prognostics under Discrete Operational Conditions",
+      "abstract": "Complex systems such as aircraft engines, turbines, and industrial machinery often operate under dynamically changing conditions. These varying operating conditions can substantially influence degradation behavior and make prognostic modeling more challenging, as accurate prediction requires explicit consideration of operational effects. To address this issue, this paper proposes a novel multi-head attention-based fusion neural network. The proposed framework explicitly models and integrates three signal components: (1) the monotonic degradation trend, which reflects the underlying deterioration of the system; (2) discrete operating states, identified through clustering and encoded into dense embeddings; and (3) residual random noise, which captures unexplained variation in sensor measurements. The core strength of the framework lies in its architecture, which combines BiLSTM networks with attention mechanisms to better capture complex temporal dependencies. The attention mechanism allows the model to adaptively weight different time steps and sensor signals, improving its ability to extract prognostically relevant information. In addition, a fusion module is designed to integrate the outputs from the degradation-trend branch and the operating-state embeddings, enabling the model to capture their interactions more effectively. The proposed method is validated using a dataset from the NASA repository, and the results demonstrate its effectiveness.",
+      "authors": [
+        "Yuqi Su",
+        "Xiaolei Fang"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-04-11T15:19:06+00:00",
+      "link": "https://arxiv.org/pdf/2604.10248v1",
+      "tags": [
+        "keyword:PHM",
+        "query:PHM"
+      ],
+      "llm_score": 9.5,
+      "llm_evidence_en": "industrial prognostics for aircraft engines and machinery under varying conditions",
+      "llm_evidence_cn": "针对飞机发动机和机械在多变工况下的工业预测",
+      "llm_evidence": "针对飞机发动机和机械在多变工况下的工业预测",
+      "canonical_evidence": "针对飞机发动机和机械在多变工况下的工业预测",
+      "llm_tldr_en": "Proposes a multi-head attention fusion network for RUL prediction under discrete operational conditions.",
+      "llm_tldr_cn": "提出一种多头注意力融合网络，用于离散运行工况下的工业剩余寿命预测。",
+      "llm_tldr": "提出一种多头注意力融合网络，用于离散运行工况下的工业剩余寿命预测。",
+      "llm_tags": [
+        "query:rul:composite"
+      ],
+      "matched_query_tag": "query:rul:composite",
+      "matched_query_text": "Papers central to 剩余寿命预测和旋转机械设备剩余寿命预测, especially work that connects or combines: Remaining Useful Life (RUL) prediction methods; Health monitoring and RUL for rotating machinery; Remaining useful life prediction for rolling element bearings; Deep learning architectures for RUL estimation; State of the art methods for remaining useful life prediction of rotating machinery; Deep learning based RUL estimation for industrial bearings and motors; Data driven vs physics informed models for RUL prediction; Real time health assessment and RUL forecasting for rotating components.",
+      "matched_requirement_id": "req-composite-rul",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2604.13459v1",
+      "source": "arxiv",
+      "title": "Asymmetric-Loss-Guided Hybrid CNN-BiLSTM-Attention Model for Industrial RUL Prediction with Interpretable Failure Heatmaps",
+      "abstract": "Turbofan engine degradation under sustained operational stress necessitates robust prognostic systems capable of accurately estimating the Remaining Useful Life (RUL) of critical components. Existing deep learning approaches frequently fail to simultaneously capture multi-sensor spatial correlations and long-range temporal dependencies, while standard symmetric loss functions inadequately penalize the safety-critical error of over-estimating residual life. This study proposes a hybrid architecture integrating Twin-Stage One-Dimensional Convolutional Neural Networks (1D-CNN), a Bidirectional Long Short-Term Memory (BiLSTM) network, and a custom Bahdanau Additive Attention mechanism. The model was trained and evaluated on the NASA Commercial Modular Aero-Propulsion System Simulation (C-MAPSS) FD001 sub-dataset employing a zero-leakage preprocessing pipeline, piecewise-linear RUL labeling capped at 130 cycles, and the NASA-specified asymmetric exponential loss function that disproportionately penalizes over-estimation to enforce industrial safety constraints. Experiments on 100 test engines achieved a Root Mean Squared Error (RMSE) of 17.52 cycles and a NASA S-Score of 922.06. Furthermore, extracted attention weight heatmaps provide interpretable, per-engine insights into the temporal progression of degradation, supporting informed maintenance decision-making. The proposed framework demonstrates competitive performance against established baselines and offers a principled approach to safe, interpretable prognostics in industrial settings.",
+      "authors": [
+        "Mohammed Ezzaldin Babiker Abdullah"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI",
+        "eess.SY"
+      ],
+      "published": "2026-04-15T04:25:38+00:00",
+      "link": "https://arxiv.org/pdf/2604.13459v1",
+      "tags": [
+        "keyword:PHM",
+        "query:PHM"
+      ],
+      "llm_score": 9.5,
+      "llm_evidence_en": "turbofan engine RUL prediction using hybrid CNN-BiLSTM-Attention",
+      "llm_evidence_cn": "使用混合CNN-BiLSTM-Attention进行涡扇发动机剩余寿命预测",
+      "llm_evidence": "使用混合CNN-BiLSTM-Attention进行涡扇发动机剩余寿命预测",
+      "canonical_evidence": "使用混合CNN-BiLSTM-Attention进行涡扇发动机剩余寿命预测",
+      "llm_tldr_en": "A hybrid deep learning model with asymmetric loss for robust industrial RUL prediction and failure visualization.",
+      "llm_tldr_cn": "一种采用非对称损失的混合深度学习模型，用于鲁棒的工业RUL预测及故障可视化。",
+      "llm_tldr": "一种采用非对称损失的混合深度学习模型，用于鲁棒的工业RUL预测及故障可视化。",
+      "llm_tags": [
+        "query:rul:composite"
+      ],
+      "matched_query_tag": "query:rul:composite",
+      "matched_query_text": "Papers central to 剩余寿命预测和旋转机械设备剩余寿命预测, especially work that connects or combines: Remaining Useful Life (RUL) prediction methods; Health monitoring and RUL for rotating machinery; Remaining useful life prediction for rolling element bearings; Deep learning architectures for RUL estimation; State of the art methods for remaining useful life prediction of rotating machinery; Deep learning based RUL estimation for industrial bearings and motors; Data driven vs physics informed models for RUL prediction; Real time health assessment and RUL forecasting for rotating components.",
+      "matched_requirement_id": "req-composite-rul",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2604.12073v1",
+      "source": "arxiv",
+      "title": "Resilience Quantification and its Support for Operational Resilience",
+      "abstract": "We present a method to quantify a system's resilience capacity, i.e., the set of degradation magnitudes for which all functional requirements remain satisfied. These requirements come from human stakeholders (e.g., operators, planners) who define the acceptable performance envelope. By representing the resilience capacity in degradation space, we obtain an application -- agnostic resilience metric (e.g., capacity volume). To approximate the capacity efficiently in high-dimensional spaces, we pair machine-learning classifiers with entropy-based active sampling, reducing costly feasibility tests. The learned model then drives diagnosis (current health estimation) and prognostics (health-state forecasting) that estimates useful life. These two steps can be complemented by a reconfiguration step implemented by human operators to prolong the system's functionality. An illustrative case study, i.e., a manufacturing production line meeting weekly human set part demand, demonstrates the proposed workflow.",
+      "authors": [
+        "Ion Matei",
+        "Maksym Zhenirovskyy"
+      ],
+      "primary_category": "math.OC",
+      "categories": [
+        "math.OC"
+      ],
+      "published": "2026-04-13T21:26:02+00:00",
+      "link": "https://arxiv.org/pdf/2604.12073v1",
+      "tags": [
+        "keyword:PHM",
+        "query:PHM"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "learned model drives diagnosis (current health) and prognostics (useful life)",
+      "llm_evidence_cn": "学习模型驱动诊断（当前健康）和预测（剩余寿命）",
+      "llm_evidence": "学习模型驱动诊断（当前健康）和预测（剩余寿命）",
+      "canonical_evidence": "学习模型驱动诊断（当前健康）和预测（剩余寿命）",
+      "llm_tldr_en": "Presents a resilience quantification method that integrates health diagnosis and useful life forecasting.",
+      "llm_tldr_cn": "提出了一种集成健康诊断和剩余寿命预测的韧性量化方法。",
+      "llm_tldr": "提出了一种集成健康诊断和剩余寿命预测的韧性量化方法。",
+      "llm_tags": [
+        "query:phm:composite"
+      ],
+      "matched_query_tag": "query:phm:composite",
+      "matched_query_text": "Papers central to 同时涉及故障诊断与剩余寿命预测的研究论文, especially work that connects or combines: joint modeling of diagnosis and prognosis; multi-task learning for diagnosis and RUL; simultaneous fault diagnosis and remaining useful life prediction; integrated approach for machinery fault diagnosis and prognosis; multi task deep learning for PHM applications; joint diagnosis and RUL estimation research papers.",
+      "matched_requirement_id": "req-composite-phm",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2604.10618v1",
+      "source": "arxiv",
+      "title": "A comprehensive study on causal discovery between degradation paths",
+      "abstract": "Existing studies indicate that complex system degradation is characterized by degradation of multiple dependent parameters. Capturing the dependencies is crucial for accurate degradation modeling and effective degradation control. This work aims to uncover these dependencies through causal analysis, focusing on pairwise causal discovery. Firstly, considering the steady-state characteristic of physical dependencies between parameters, a causal discovery strategy using degradation increments is proposed combined with non-temporal causal discovery techniques. Then, five types of non-temporal causal discovery techniques, including constraint-based, score-based, functional causal model-based, gradient-based and the emerging ordering-based technique, are selected as benchmark methods to identify the most suitable approach. Numerical studies based on Wiener process are first conducted to investigate the method effectiveness on both independent and causally dependent degradation paths. Additionally, sensitivity analysis is performed to evaluate how degradation process characteristics affect the accuracy of causal discovery. Then, two engineering applications are given to show the practical applicability of the approach, including a second-order multiple-feedback band pass filter and a turbofan engine. Our findings indicate that the proposed strategy, which uses degradation increments, outperforms methods that rely on raw degradation data. Among all evaluated techniques, stable Peter-Clark and greedy equivalence search exhibit robust and accurate performance across both numerical and engineering cases, which are recommended for causal discovery between degradation paths. The code is available on GitHub: https://github.com/dirge1/causal_deg_data.",
+      "authors": [
+        "Shi-Shun Chen",
+        "Shuai Gao",
+        "Xiao-Yang Li",
+        "Enrico Zio"
+      ],
+      "primary_category": "stat.AP",
+      "categories": [
+        "stat.AP"
+      ],
+      "published": "2026-04-12T12:51:18+00:00",
+      "link": "https://arxiv.org/pdf/2604.10618v1",
+      "tags": [
+        "query:PHM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "causal discovery between degradation paths for accurate degradation modeling",
+      "llm_evidence_cn": "退化路径之间的因果发现，用于精确的退化建模",
+      "llm_evidence": "退化路径之间的因果发现，用于精确的退化建模",
+      "canonical_evidence": "退化路径之间的因果发现，用于精确的退化建模",
+      "llm_tldr_en": "This paper explores causal discovery techniques to model dependencies between degradation parameters in complex systems.",
+      "llm_tldr_cn": "本文探讨了因果发现技术，用于建模复杂系统中退化参数之间的依赖关系，有助于提升寿命预测精度。",
+      "llm_tldr": "本文探讨了因果发现技术，用于建模复杂系统中退化参数之间的依赖关系，有助于提升寿命预测精度。",
+      "llm_tags": [
+        "query:rul:composite"
+      ],
+      "matched_query_tag": "query:rul:composite",
+      "matched_query_text": "Papers central to 剩余寿命预测和旋转机械设备剩余寿命预测, especially work that connects or combines: Remaining Useful Life (RUL) prediction methods; Health monitoring and RUL for rotating machinery; Remaining useful life prediction for rolling element bearings; Deep learning architectures for RUL estimation; State of the art methods for remaining useful life prediction of rotating machinery; Deep learning based RUL estimation for industrial bearings and motors; Data driven vs physics informed models for RUL prediction; Real time health assessment and RUL forecasting for rotating components.",
+      "matched_requirement_id": "req-composite-rul",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2604.12440v1",
+      "source": "arxiv",
+      "title": "IAD-Unify: A Region-Grounded Unified Model for Industrial Anomaly Segmentation, Understanding, and Generation",
+      "abstract": "Real-world industrial inspection requires not only localizing defects, but also explaining them in natural language and generating controlled defect edits. However, existing approaches fail to jointly support all three capabilities within a unified framework and evaluation protocol. We propose IAD-Unify, a dual-encoder unified framework in which a frozen DINOv2-based region expert supplies precise anomaly evidence to a shared Qwen3.5-4B vision-language backbone via lightweight token injection, jointly enabling anomaly segmentation, region-grounded understanding, and mask-guided generation. To enable unified evaluation, we further construct Anomaly-56K, a comprehensive unified multi-task IAD evaluation platform, spanning 59,916 images across 24 categories and 104 defect variants. Controlled ablations yield four findings: (i) region grounding is the decisive mechanism for understanding, removing it degrades location accuracy by >76 pp; (ii) predicted-region performance closely matches oracle, confirming deployment viability; (iii) region-grounded generation achieves the best full-image fidelity and masked-region perceptual quality; and (iv) pre-initialized joint training improves understanding at negligible generation cost (-0.16 dB). IAD-Unify further achieves strong performance on the MMAD benchmark, including categories unseen during training, demonstrating robust cross-category generalization.",
+      "authors": [
+        "Haoyu Zheng",
+        "Tianwei Lin",
+        "Wei Wang",
+        "Zhuonan Wang",
+        "Wenqiao Zhang",
+        "Jiaqi Zhu",
+        "Feifei Shao"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.AI"
+      ],
+      "published": "2026-04-14T08:29:31+00:00",
+      "link": "https://arxiv.org/pdf/2604.12440v1",
+      "tags": [
+        "keyword:PHM",
+        "query:PHM"
+      ],
+      "llm_score": 6.5,
+      "llm_evidence_en": "unified multi-task framework for industrial anomaly segmentation and understanding",
+      "llm_evidence_cn": "工业异常分割与理解的统一多任务框架",
+      "llm_evidence": "工业异常分割与理解的统一多任务框架",
+      "canonical_evidence": "工业异常分割与理解的统一多任务框架",
+      "llm_tldr_en": "Proposes a unified model for industrial anomaly segmentation and understanding using a multi-task platform.",
+      "llm_tldr_cn": "提出一个用于工业异常分割与理解的统一模型，并构建了多任务评估平台。",
+      "llm_tldr": "提出一个用于工业异常分割与理解的统一模型，并构建了多任务评估平台。",
+      "llm_tags": [
+        "query:phm"
+      ],
+      "matched_query_tag": "query:phm",
+      "matched_query_text": "multi task deep learning for PHM applications",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.11237v1",
+      "source": "arxiv",
+      "title": "A Physics-Aware Variational Graph Autoencoder for Joint Modal Identification with Uncertainty Quantification",
+      "abstract": "Reliable modal identification from output-only vibration data remains a challenging problem under measurement noise, sparse sensing, and structural variability. These challenges intensify when global modal quantities and spatially distributed mode shapes must be estimated jointly from frequency-domain data. This work presents a physics-aware variational graph autoencoder, termed UResVGAE, for joint modal identification with uncertainty quantification from power spectral density (PSD) representations of truss structures. The framework represents each structure as a graph in which node attributes encode PSD and geometric information, while edges capture structural connectivity. A residual GraphSAGE-based encoder, attention-driven graph pooling, and a variational latent representation are combined to learn both graph-level and node-level modal information within a single, unified formulation. Natural frequencies and damping ratios are predicted through evidential regression, and full-field mode shapes are reconstructed through a dedicated node-level decoder that fuses global latent information with local graph features. Physical consistency is promoted via mode-shape reconstruction and orthogonality regularisation. The framework is assessed on numerically generated truss populations under varying signal-to-noise ratios and sensor availability. Results demonstrate accurate prediction of natural frequencies, damping ratios, and mode shapes, with high modal assurance criterion values and stable performance under noisy and sparse sensing conditions. Reliability analysis indicates that the predictive uncertainty is broadly consistent with empirical coverage. The proposed framework offers a coherent and physically grounded graph-based route for joint modal identification with calibrated uncertainty from frequency-domain structural response data.",
+      "authors": [
+        "Bhargav Nath",
+        "Mehulkumar Lakhadive",
+        "Anshu Sharma",
+        "Basuraj Bhowmik"
+      ],
+      "primary_category": "cs.CE",
+      "categories": [
+        "cs.CE"
+      ],
+      "published": "2026-04-13T09:42:15+00:00",
+      "link": "https://arxiv.org/pdf/2604.11237v1",
+      "tags": [
+        "query:PHM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "joint modal identification from vibration data with uncertainty quantification for structures",
+      "llm_evidence_cn": "基于振动数据的结构联合模态识别与不确定性量化",
+      "llm_evidence": "基于振动数据的结构联合模态识别与不确定性量化",
+      "canonical_evidence": "基于振动数据的结构联合模态识别与不确定性量化",
+      "llm_tldr_en": "A physics-aware graph autoencoder for joint modal identification and health assessment of truss structures.",
+      "llm_tldr_cn": "一种物理感知的图自编码器，用于桁架结构的联合模态识别和健康评估。",
+      "llm_tldr": "一种物理感知的图自编码器，用于桁架结构的联合模态识别和健康评估。",
+      "llm_tags": [
+        "query:rul:composite"
+      ],
+      "matched_query_tag": "query:rul:composite",
+      "matched_query_text": "Papers central to 剩余寿命预测和旋转机械设备剩余寿命预测, especially work that connects or combines: Remaining Useful Life (RUL) prediction methods; Health monitoring and RUL for rotating machinery; Remaining useful life prediction for rolling element bearings; Deep learning architectures for RUL estimation; State of the art methods for remaining useful life prediction of rotating machinery; Deep learning based RUL estimation for industrial bearings and motors; Data driven vs physics informed models for RUL prediction; Real time health assessment and RUL forecasting for rotating components.",
+      "matched_requirement_id": "req-composite-rul",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.12180v1",
+      "source": "arxiv",
+      "title": "CycloneMAE: A Scalable Multi-Task Learning Model for Global Tropical Cyclone Probabilistic Forecasting",
+      "abstract": "Tropical cyclones (TCs) rank among the most destructive natural hazards, yet their forecasting faces fundamental trade-offs: numerical weather prediction (NWP) models are computationally prohibitive and struggle to leverage historical data, while existing deep learning (DL)-based intelligent models are variable-specific and deterministic, which fail to generalize across different forecasting variables. Here we present CycloneMAE, a scalable multi-task forecasting model that learns transferable TC representations from multi-modal data using a TC structure-aware masked autoencoder. By coupling a discrete probabilistic gridding mechanism with a pre-train/fine-tune paradigm, CycloneMAE simultaneously delivers deterministic forecasts and probability distributions. Evaluated across five global ocean basins, CycloneMAE outperforms leading NWP systems in pressure and wind forecasting up to 120 hours and in track forecasting up to 24 hours. Attribution analysis via integrated gradients reveals physically interpretable learning dynamics: short-term forecasts rely predominantly on the internal core convective structure from satellite imagery, whereas longer-term forecasts progressively shift attention to external environmental factors. Our framework establishes a scalable, probabilistic, and interpretable pathway for operational TC forecasting.",
+      "authors": [
+        "Renlong Hang",
+        "Zihao Xu",
+        "Jiuwei Zhao",
+        "Runling Yu",
+        "Leye Cheng",
+        "Qingshan Liu"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "published": "2026-04-14T01:21:55+00:00",
+      "link": "https://arxiv.org/pdf/2604.12180v1",
+      "tags": [
+        "keyword:PHM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "multi-task forecasting model for transferable representations",
+      "llm_evidence_cn": "用于可迁移表征的多任务预测模型",
+      "llm_evidence": "用于可迁移表征的多任务预测模型",
+      "canonical_evidence": "用于可迁移表征的多任务预测模型",
+      "llm_tldr_en": "A scalable multi-task learning model for probabilistic forecasting using masked autoencoders.",
+      "llm_tldr_cn": "一种使用掩码自编码器进行概率预测的可扩展多任务学习模型。",
+      "llm_tldr": "一种使用掩码自编码器进行概率预测的可扩展多任务学习模型。",
+      "llm_tags": [
+        "query:phm"
+      ],
+      "matched_query_tag": "query:phm",
+      "matched_query_text": "multi task deep learning for PHM applications",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.12905v1",
+      "source": "arxiv",
+      "title": "Frequency-aware Decomposition Learning for Sensorless Wrench Forecasting on a Vibration-rich Hydraulic Manipulator",
+      "abstract": "Force and torque (F/T) sensing is critical for robot-environment interaction, but physical F/T sensors impose constraints in size, cost, and fragility. To mitigate this, recent studies have estimated force/wrench sensorlessly from robot internal states. While existing methods generally target relatively slow interactions, tasks involving rapid interactions, such as grinding, can induce task-critical high-frequency vibrations, and estimation in such robotic settings remains underexplored. To address this gap, we propose a Frequency-aware Decomposition Network (FDN) for short-term forecasting of vibration-rich wrench from proprioceptive history. FDN predicts spectrally decomposed wrench with asymmetric deterministic and probabilistic heads, modeling the high-frequency residual as a learned conditional distribution. It further incorporates frequency-awareness to adaptively enhance input spectra with learned filtering and impose a frequency-band prior on the outputs. We pretrain FDN on a large-scale open-source robot dataset and transfer the learned proprioception-to-wrench representation to the downstream. On real-world grinding excavation data from a 6-DoF hydraulic manipulator and under a delayed estimation setting, FDN outperforms baseline estimators and forecasters in the high-frequency band and remains competitive in the low-frequency band. Transfer learning provides additional gains, suggesting the potential of large-scale pretraining and transfer learning for robotic wrench estimation. Code and data will be made available upon acceptance.",
+      "authors": [
+        "Hyeonbeen Lee",
+        "Min-Jae Jung",
+        "Tae-Kyeong Yeu",
+        "Jong-Boo Han",
+        "Daegil Park",
+        "Jin-Gyun Kim"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO",
+        "cs.LG"
+      ],
+      "published": "2026-04-14T15:54:29+00:00",
+      "link": "https://arxiv.org/pdf/2604.12905v1",
+      "tags": [
+        "keyword:PHM",
+        "query:PHM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "short-term forecasting of vibration-rich wrench from sensor history",
+      "llm_evidence_cn": "基于传感器历史的富振动扭矩短期预测",
+      "llm_evidence": "基于传感器历史的富振动扭矩短期预测",
+      "canonical_evidence": "基于传感器历史的富振动扭矩短期预测",
+      "llm_tldr_en": "A frequency-aware network for forecasting mechanical states in vibration-rich robotic environments.",
+      "llm_tldr_cn": "一种用于在富振动机器人环境中预测机械状态的频率感知网络。",
+      "llm_tldr": "一种用于在富振动机器人环境中预测机械状态的频率感知网络。",
+      "llm_tags": [
+        "query:rul:composite"
+      ],
+      "matched_query_tag": "query:rul:composite",
+      "matched_query_text": "Papers central to 剩余寿命预测和旋转机械设备剩余寿命预测, especially work that connects or combines: Remaining Useful Life (RUL) prediction methods; Health monitoring and RUL for rotating machinery; Remaining useful life prediction for rolling element bearings; Deep learning architectures for RUL estimation; State of the art methods for remaining useful life prediction of rotating machinery; Deep learning based RUL estimation for industrial bearings and motors; Data driven vs physics informed models for RUL prediction; Real time health assessment and RUL forecasting for rotating components.",
+      "matched_requirement_id": "req-composite-rul",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.13236v1",
+      "source": "arxiv",
+      "title": "SemiFA: An Agentic Multi-Modal Framework for Autonomous Semiconductor Failure Analysis Report Generation",
+      "abstract": "Semiconductor failure analysis (FA) requires engineers to examine inspection images, correlate equipment telemetry, consult historical defect records, and write structured reports, a process that can consume several hours of expert time per case. We present SemiFA, an agentic multi-modal framework that autonomously generates structured FA reports from semiconductor inspection images in under one minute. SemiFA decomposes FA into a four-agent LangGraph pipeline: a DefectDescriber that classifies and narrates defect morphology using DINOv2 and LLaVA-1.6, a RootCauseAnalyzer that fuses SECS/GEM equipment telemetry with historically similar defects retrieved from a Qdrant vector database, a SeverityClassifier that assigns severity and estimates yield impact, and a RecipeAdvisor that proposes corrective process adjustments. A fifth node assembles a PDF report. We introduce SemiFA-930, a dataset of 930 annotated semiconductor defect images paired with structured FA narratives across nine defect classes, drawn from procedural synthesis, WM-811K, and MixedWM38. Our DINOv2-based classifier achieves 92.1% accuracy on 140 validation images (macro F1 = 0.917), and the full pipeline produces complete FA reports in 48 seconds on an NVIDIA A100-SXM4-40 GB GPU. A GPT-4o judge ablation across four modality conditions demonstrates that multi-modal fusion improves root cause reasoning by +0.86 composite points (1-5 scale) over an image-only baseline, with equipment telemetry as the more load-bearing modality. To our knowledge, SemiFA is the first system to integrate SECS/GEM equipment telemetry into a vision-language model pipeline for autonomous FA report generation.",
+      "authors": [
+        "Shivam Chand Kaushik"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.AI",
+        "eess.IV"
+      ],
+      "published": "2026-04-14T19:08:54+00:00",
+      "link": "https://arxiv.org/pdf/2604.13236v1",
+      "tags": [
+        "keyword:PHM",
+        "query:PHM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "multi-agent framework for semiconductor failure analysis and root cause analysis",
+      "llm_evidence_cn": "半导体失效分析与根因分析的多智能体框架",
+      "llm_evidence": "半导体失效分析与根因分析的多智能体框架",
+      "canonical_evidence": "半导体失效分析与根因分析的多智能体框架",
+      "llm_tldr_en": "An agentic framework for semiconductor failure analysis that integrates classification and root cause analysis.",
+      "llm_tldr_cn": "一种用于半导体失效分析的智能体框架，集成了分类与根因分析任务。",
+      "llm_tldr": "一种用于半导体失效分析的智能体框架，集成了分类与根因分析任务。",
+      "llm_tags": [
+        "query:phm:composite"
+      ],
+      "matched_query_tag": "query:phm:composite",
+      "matched_query_text": "Papers central to 同时涉及故障诊断与剩余寿命预测的研究论文, especially work that connects or combines: joint modeling of diagnosis and prognosis; multi-task learning for diagnosis and RUL; simultaneous fault diagnosis and remaining useful life prediction; integrated approach for machinery fault diagnosis and prognosis; multi task deep learning for PHM applications; joint diagnosis and RUL estimation research papers.",
+      "matched_requirement_id": "req-composite-phm",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.13788v1",
+      "source": "arxiv",
+      "title": "Failure Identification in Imitation Learning Via Statistical and Semantic Filtering",
+      "abstract": "Imitation learning (IL) policies in robotics deliver strong performance in controlled settings but remain brittle in real-world deployments: rare events such as hardware faults, defective parts, unexpected human actions, or any state that lies outside the training distribution can lead to failed executions. Vision-based Anomaly Detection (AD) methods emerged as an appropriate solution to detect these anomalous failure states but do not distinguish failures from benign deviations. We introduce FIDeL (Failure Identification in Demonstration Learning), a policy-independent failure detection module. Leveraging recent AD methods, FIDeL builds a compact representation of nominal demonstrations and aligns incoming observations via optimal transport matching to produce anomaly scores and heatmaps. Spatio-temporal thresholds are derived with an extension of conformal prediction, and a Vision-Language Model (VLM) performs semantic filtering to discriminate benign anomalies from genuine failures. We also introduce BotFails, a multimodal dataset of real-world tasks for failure detection in robotics. FIDeL consistently outperforms state-of-the-art baselines, yielding +5.30% percent AUROC in anomaly detection and +17.38% percent failure-detection accuracy on BotFails compared to existing methods.",
+      "authors": [
+        "Quentin Rolland",
+        "Fabrice Mayran de Chamisso",
+        "Jean-Baptiste Mouret"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO",
+        "cs.CV"
+      ],
+      "published": "2026-04-15T12:27:32+00:00",
+      "link": "https://arxiv.org/pdf/2604.13788v1",
+      "tags": [
+        "keyword:PHM",
+        "query:PHM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "failure identification and anomaly detection for hardware faults",
+      "llm_evidence_cn": "硬件故障的故障识别与异常检测",
+      "llm_evidence": "硬件故障的故障识别与异常检测",
+      "canonical_evidence": "硬件故障的故障识别与异常检测",
+      "llm_tldr_en": "Introduces FIDeL for identifying execution failures and hardware faults in imitation learning policies.",
+      "llm_tldr_cn": "引入 FIDeL 用于识别模仿学习策略中的执行失败和硬件故障。",
+      "llm_tldr": "引入 FIDeL 用于识别模仿学习策略中的执行失败和硬件故障。",
+      "llm_tags": [
+        "query:phm:composite"
+      ],
+      "matched_query_tag": "query:phm:composite",
+      "matched_query_text": "Papers central to 同时涉及故障诊断与剩余寿命预测的研究论文, especially work that connects or combines: joint modeling of diagnosis and prognosis; multi-task learning for diagnosis and RUL; simultaneous fault diagnosis and remaining useful life prediction; integrated approach for machinery fault diagnosis and prognosis; multi task deep learning for PHM applications; joint diagnosis and RUL estimation research papers.",
+      "matched_requirement_id": "req-composite-phm",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.13924v1",
+      "source": "arxiv",
+      "title": "ASTER: Latent Pseudo-Anomaly Generation for Unsupervised Time-Series Anomaly Detection",
+      "abstract": "Time-series anomaly detection (TSAD) is critical in domains such as industrial monitoring, healthcare, and cybersecurity, but it remains challenging due to rare and heterogeneous anomalies and the scarcity of labelled data. This scarcity makes unsupervised approaches predominant, yet existing methods often rely on reconstruction or forecasting, which struggle with complex data, or on embedding-based approaches that require domain-specific anomaly synthesis and fixed distance metrics. We propose ASTER, a framework that generates pseudo-anomalies directly in the latent space, avoiding handcrafted anomaly injections and the need for domain expertise. A latent-space decoder produces tailored pseudo-anomalies to train a Transformer-based anomaly classifier, while a pre-trained LLM enriches the temporal and contextual representations of this space. Experiments on three benchmark datasets show that ASTER achieves state-of-the-art performance and sets a new standard for LLM-based TSAD.",
+      "authors": [
+        "Romain Hermary",
+        "Samet Hicsonmez",
+        "Dan Pineau",
+        "Abd El Rahman Shabayek",
+        "Djamila Aouada"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI",
+        "cs.CV"
+      ],
+      "published": "2026-04-15T14:32:35+00:00",
+      "link": "https://arxiv.org/pdf/2604.13924v1",
+      "tags": [
+        "keyword:PHM",
+        "query:PHM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "unsupervised time-series anomaly detection for industrial monitoring",
+      "llm_evidence_cn": "用于工业监测的无监督时间序列异常检测",
+      "llm_evidence": "用于工业监测的无监督时间序列异常检测",
+      "canonical_evidence": "用于工业监测的无监督时间序列异常检测",
+      "llm_tldr_en": "ASTER generates latent pseudo-anomalies to improve unsupervised time-series anomaly detection in industrial settings.",
+      "llm_tldr_cn": "ASTER通过生成潜在伪异常，提升了工业环境下的无监督时间序列异常检测性能。",
+      "llm_tldr": "ASTER通过生成潜在伪异常，提升了工业环境下的无监督时间序列异常检测性能。",
+      "llm_tags": [
+        "query:rul:composite"
+      ],
+      "matched_query_tag": "query:rul:composite",
+      "matched_query_text": "Papers central to 剩余寿命预测和旋转机械设备剩余寿命预测, especially work that connects or combines: Remaining Useful Life (RUL) prediction methods; Health monitoring and RUL for rotating machinery; Remaining useful life prediction for rolling element bearings; Deep learning architectures for RUL estimation; State of the art methods for remaining useful life prediction of rotating machinery; Deep learning based RUL estimation for industrial bearings and motors; Data driven vs physics informed models for RUL prediction; Real time health assessment and RUL forecasting for rotating components.",
+      "matched_requirement_id": "req-composite-rul",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.14805v1",
+      "source": "arxiv",
+      "title": "From Boundaries to Semantics: Prompt-Guided Multi-Task Learning for Petrographic Thin-section Segmentation",
+      "abstract": "Grain-edge segmentation (GES) and lithology semantic segmentation (LSS) are two pivotal tasks for quantifying rock fabric and composition. However, these two tasks are often treated separately, and the segmentation quality is implausible albeit expensive, time-consuming, and expert-annotated datasets have been used. Recently, foundation models, especially the Segment Anything Model (SAM), have demonstrated impressive robustness for boundary alignment. However, directly adapting SAM to joint GES and LSS is nontrivial due to 1) severe domain gap induced by extinction-dependent color variations and ultra-fine grain boundaries, and 2) lacking novel modules for joint learning on multi-angle petrographic image stacks. In this paper, we propose Petro-SAM, a novel two-stage, multi-task framework that can achieve high-quality joint GES and LSS on petrographic images. Specifically, based on SAM, we introduce a Merge Block to integrate seven polarized views, effectively solving the extinction issue. Moreover, we introduce multi-scale feature fusion and color-entropy priors to refine the detection.",
+      "authors": [
+        "Yili Ren",
+        "Shiqi Wen",
+        "Li Hou",
+        "Dingwen Xiao",
+        "Weiming Zhang",
+        "Caleb Chen Cao",
+        "Lin Wang",
+        "Zilu Zheng",
+        "Qianxiao Su",
+        "Mingjun Zhao",
+        "Lei Chen"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-04-16T09:28:52+00:00",
+      "link": "https://arxiv.org/pdf/2604.14805v1",
+      "tags": [
+        "keyword:PHM",
+        "query:PHM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "multi-task learning for joint grain-edge and lithology segmentation",
+      "llm_evidence_cn": "用于联合颗粒边缘和岩性分割的多任务学习",
+      "llm_evidence": "用于联合颗粒边缘和岩性分割的多任务学习",
+      "canonical_evidence": "用于联合颗粒边缘和岩性分割的多任务学习",
+      "llm_tldr_en": "Adapts multi-task learning for joint boundary and semantic segmentation in petrographic thin-section images.",
+      "llm_tldr_cn": "采用多任务学习进行岩相薄片图像的联合边界和语义分割。",
+      "llm_tldr": "采用多任务学习进行岩相薄片图像的联合边界和语义分割。",
+      "llm_tags": [
+        "query:phm:composite"
+      ],
+      "matched_query_tag": "query:phm:composite",
+      "matched_query_text": "Papers central to 同时涉及故障诊断与剩余寿命预测的研究论文, especially work that connects or combines: joint modeling of diagnosis and prognosis; multi-task learning for diagnosis and RUL; simultaneous fault diagnosis and remaining useful life prediction; integrated approach for machinery fault diagnosis and prognosis; multi task deep learning for PHM applications; joint diagnosis and RUL estimation research papers.",
+      "matched_requirement_id": "req-composite-phm",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}
