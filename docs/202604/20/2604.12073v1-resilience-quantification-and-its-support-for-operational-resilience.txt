@@ -1,0 +1,230 @@
+Title: Resilience Quantification and its Support for Operational Resilience
+
+URL Source: https://arxiv.org/pdf/2604.12073v1
+
+Published Time: Wed, 15 Apr 2026 00:13:26 GMT
+
+Number of Pages: 9
+
+Markdown Content:
+# RESILIENCE QUANTIFICATION AND ITS SUPPORT FOR 
+
+# OPERATIONAL RESILIENCE 
+
+A P REPRINT 
+
+Ion Matei 
+
+Fujitsu Research of America 
+
+imatei@fujitsu.com 
+
+Maksym Zhenirovskyy 
+
+Fujitsu Research of America 
+
+mzhenirovskyy@fujitsu.com 
+
+April 15, 2026 
+
+# ABSTRACT 
+
+We present a method to quantify a system’s resilience capacity , i.e., the set of degradation magnitudes for which all functional requirements remain satisfied. These requirements come from human stake-holders (e.g., operators, planners) who define the acceptable performance envelope. By representing the resilience capacity in degradation space, we obtain an application - agnostic resilience metric (e.g., capacity volume). To approximate the capacity efficiently in high -dimensional spaces, we pair machine -learning classifiers with entropy - based active sampling, reducing costly feasibility tests. The learned model then drives diagnosis (current health estimation) and prognostics (health -state forecasting) that estimates useful life. These two steps can be complemented by a reconfiguration 
+
+step implemented by human operators to prolong the system’s functionality. An illustrative case study, i.e., a manufacturing production line meeting weekly human set part demand, demonstrates the proposed workflow. 
+
+Keywords manufacturing systems · automation · machine learning · modeling · fault diagnosis 
+
+# 1 Introduction 
+
+This article develops a methodology for quantifying resilience and using it to predict and, when possible, extend a system’s remaining useful life (RUL) under degradations. Building on power - system concepts [ 29 ], we define resilience as the ability to withstand, adapt to, and recover from disruptive events while continuing to meet functional requirements. The central construct is the resilience capacity : the set of degradation vectors from which the system can recover without loss of functionality. In degradation space, this capacity marks a “human -acceptability” region, as it safeguards requirements like safety limits or throughput quotas defined by human stakeholders. Explicitly tying capacity to user - defined requirements is critical for human - machine teaming, ensuring that automated decisions remain transparent and trustworthy. The volume of this capacity induces a quantitative resilience metric. To operationalize this metric, we introduce a health - state vector, parameterizing how degradations (e.g., tool wear) affect system behavior. As long as the health state remains within the learned capacity, functionality is preserved; crossing its boundary signals imminent loss of functionality. Accurate health - state estimation and forecasting enable proactive measures, such as adjusting task requirements or scheduling maintenance. Together with a decision -support dashboard, this approach allows reconfiguration recommendations to be implemented by human operators, illustrating how human intervention can augment system resilience while balancing cost, risk, and service quality. The workflow has offline and online phases. Offline, an active -sampling routine explores the degradation space within a fixed test - budget, invoking a requirement -satisfaction (feasibility) oracle to label points as feasible or infeasible. These labeled data train a classifier that approximates the capacity boundary. Online, sensor data feed a diagnosis module that updates the health state, while a prognostics model forecasts when the degradation trajectory will cross this boundary, yielding RUL estimates. If a violation appears imminent, a reconfiguration optimizer can propose schedule adjustments or mode switches to keep the system within its resilience capacity as long as possible. The online reconfiguration step 
+
+> arXiv:2604.12073v1 [math.OC] 13 Apr 2026
+
+Resilience Quantification and its Support for Operational Resilience A P REPRINT 
+
+is not explicitly addressed in this paper. More details on the implementation of the operational online phase can be found in [25]. 
+
+Contributions and paper structure: We introduce the resilience capacity , a formal volume - based resilience metric tied to functional requirements. We employ active learning , an entropy -guided sampler augmented with monotonic logic labels, to efficiently trace the high -dimensional capacity using few oracle queries. We estimate RUL under uncertainty 
+
+by propagating the resilience -capacity model uncertainty into the RUL prediction. Section 2 outlines the problem and workflow, Section 3 describes the manufacturing case study, Section 4 details the active - learning approach, Section 5 integrates diagnosis, prognostics, and Section 6 places the approach within the broader context of system resilience. 
+
+# 2 Problem description 
+
+In this section, we define the resilience capacity and introduce an implicit representation that can be queried. We consider a system S that executes function - related tasks while meeting a set of Boolean requirements R = {r1, r2, . . . rnR },where nR is the number of requirements for the system. These requirements formalize objectives specified by human stakeholders: plant managers that translate customer orders into production -rate bounds, safety engineers that codify regulatory limits, and operators that impose workload constraints. A system is deemed functional when every requirement ri evaluates to true . Degradations are represented by the normalized vector d = [ d1, d2, . . . , dnd ] ∈ [0, 1]nd
+
+(with nd denoting the number of degradations that can affect the system, e.g., machine production capacity reductions), and the resulting degradation space is the hypercube D = [ 0, 1]nd . We define the resilience capacity C = d ∈
+
+D V 
+
+> r∈R
+
+r = true , namely the set of all degradation magnitudes under which every human -defined requirement remains satisfied. Because the requirements encode what users perceive as mission -critical, C corresponds to a “human-acceptability region” in the degradation space. Although the geometry of C may be convex in some applications, it is generally difficult to characterize analytically, especially in high dimensions. We therefore view the partition D = C ∪ (D \ C ) as a binary classification problem and introduce a classifier c : D → { 0, 1} given by c(d) = 1 for d ∈ C , and c(d) = 0 for d ∈ D \ C . Labels are obtained by querying an expensive “oracle” (based on simulation or optimization) that checks all requirements. To minimize these costly queries, we exploit the following degradation monotonicity properties that hold for our use case: 
+
+d ∈ C =⇒ { ˆd ∈ D| ˆdi ≤ di} ⊆ C , (1) 
+
+d ∈ D \ C =⇒ { ˆd ∈ D| ˆdi > di} ⊆ D \ C , (2) where indices indicate vector entries. The property (1) states that if the system is functional under a degradation vector then it is functional for degradations that are less intense. These properties can be used to generate additional labels, without the need for querying the oracle. Thus one oracle call can label infinitely many neighbors, guiding an entropy-based sampler toward the most informative points near the boundary of C .After learning a surrogate for C , we can approximate its volume, which serves as a scalar resilience metric: a volume close to 1 (the volume of D) indicates that most degradation scenarios are tolerable. While exact volume computation is #P -hard ([ 17 ], Theorem 1), random - walk algorithms [ 18 , 14 ] allow polynomial -time estimates; here, the learned classifier plays that oracle role. Boundary analysis of C further identifies the directions in degradation space that most threaten functionality, informing the prognostics and health management (PHM) procedures discussed in the next sections. 
+
+# 3 Manufacturing Line Use Case 
+
+Inspired by a real industrial scenario, we present a use case for demonstrating the proposed methodology, where multiple part types are processed sequentially through three stages, denoted A, B, and C. Each process is supported by a distinct group of specialized machine tools. Machines in stages A and C are restricted to one part type at a time, while machines in stage B may serve multiple types simultaneously. The workflow begins in process A, where raw materials are handled and then set aside for an aging period. Subsequent processing stages proceed without delay. Each machine exhibits part-specific production rates. The manufacturing line contains approximately 50 machines of types 
+
+A and C, around 20 machines of type B, and supports 40 distinct part types. The machines can be manually, (i.e., by human operators) configured to process specific part types. Weekly demand forecasts are issued by human planners and must be met through scheduling. These human-issued requirements represent explicit performance targets and embed a human-in-the-loop dimension into the scheduling process. Each machine must be manually configured to process a given part type, and frequent reconfigurations are discouraged due to setup time. Inspired by queuing theory and process-flow models [35], we formulate the scheduling problem mathematically. 2Resilience Quantification and its Support for Operational Resilience A P REPRINT 
+
+Let μi, j be the production rate of machine i when processing part j, and let θi indicate the machine’s current mode (including an idle mode), i.e., a physical configuration of machine i, enabling it to process a part j. Index i ranges from 1 to the total number of machines ( ∼ 110). Index j ranges from 1 to the number of distinct parts ( ∼ 40). Each machine i maintains part-specific queues, whose evolution is governed by Qi, j[k + 1] = Qi, j[k] + λi, j[k] − ¯μi, j[k], where 
+
+λi, j denotes the part type j input rate at machine i, ¯μi, j[k] = 1{θi[k]= j} μi, j, with 1 denoting the indicator function, and k
+
+representing the time index. Changing machine i’s mode to process type j parts incurs a setup time Ti, j. Assuming that the control interval T exceeds Ti, j, the production rate is temporarily reduced after switching: μsi, j = μi, j(T − Ti, j)/T .Thus, the output rate expression becomes: ¯μi, j[k] = 1{θi[k]= j,θi[k−1]= j} μi, j + 1{θi[k]= j,θi[k−1]̸= j} μsi, j. The effect of aging in process A is modeled by deadline shifting. For instance, producing 100 parts in 5 days with 1 day aging implies a production window of 4 days. The process flow model includes three main constraints. The queue bounds , i.e., 0 ≤ Qi, j[k] ≤ Qmax   
+
+> i,j
+
+, with Qmax   
+
+> i,j
+
+a positive scalar, limit the number of accumulated parts of type j at machine i. The input rate bounds , i.e., 0 ≤ λi, j[k] ≤ λ max i, j
+
+enforce the non-negativity of the input rates, where the positive scaler λ max i, j imposes limits on the available raw materials. The flow conservation , i.e., ∑i ¯μi, j[k] = ∑l λl, j[k], ∀ j mathematically states that only parts that have been processed at a previous stage can move to the next stage, and that their total number must be preserved. Here ¯μi, j[k] represents part j output rate from the machine i at a previous stage (e.g., type A machine), and λi, j[k] denotes part j input rate to machine l in the next stage (e.g., type B machine). Machines in process B may operate on multiple parts in parallel; for modeling simplicity, we treat them as parallel virtual machines, each processing a single type. Let Td = nd T denote the deadline for delivering Nj units of part j. This demand corresponds to an average output rate of: 1 
+
+> nd
+
+∑nd 
+
+> k=1
+
+¯μCj [k] = μdj ,with μdj = Nj/Td , where ¯μCj denotes the output rate for part type j, produced by type C machines. To check whether this target is achievable under degradation, we solve a mixed-integer linear program (MILP). Let xi, j[k] = 1{θi[k]= j}
+
+be binary variables encoding machine-mode configurations, λi, j[k] the input rates, and ¯ μCj [k] the outputs from process 
+
+C. Let bold letters denote the optimization variables over the time horizon Td . We group these variables into a single decision vector z = ( Q, x, λ , μC) and write: min  
+
+> z
+
+cT z, (3) s.t. Aeq z = beq ,
+
+Aineq z ≤ bineq ,
+
+zlb ≤ z ≤ zub ,
+
+with the binary variables xi, j ∈ { 0, 1}. The goal of this formulation is to generate a schedule that ensures a target production rate (implemented explicitly as a inequality constraint the enforces the output rates of machines C to be at least as large as a target rate), while minimizing a linear cost. The cost vector c include manufacturing costs (e.g., energy), and it can be made zero in feasibility checks. The linear equality constraints, defined by matrix Aeq 
+
+and vector beq , enforce queue dynamics and flow conservation. The inequality bounds constrain queue lengths and enforce nonnegativity, while the linear inequalities, defined by matrix Aineq and vector bineq , are used to set the minimal production targets. Given our manufacturing line topology and machine capabilities, each time step introduces approximately 10,000 optimization variables, with roughly half of them being binary variables. The total variable count scales linearly with the horizon length. When the integrality of the machine modes is enforced, the resulting MILP becomes challenging to solve for long time horizons. Then, we either apply variable relaxations or split the time horizon into smaller intervals and solve for each interval, while updating the queues after each interval solution. Both approaches were used to generate (approximate) schedules. 
+
+# 4 Resilience Capacity 
+
+We model machine degradations as a reduction in the maximum achievable production rates. For a machine i processing part j, the degraded rate is given by (1 − di)μi, j, where di ∈ [0, 1] quantifies the degradation. A value of di = 0 indicates full functionality, while di = 1 indicates complete failure. Here we assume that the changes in degradations are much slower than machine scheduling interval. The parameters of problem (3) (e.g., matrices in the linear equalities and inequalities) become functions of the degradation vector d. To test if a target production rate is feasible under a given degradation vector, we relax the MILP to an LP by allowing binary variables to vary in [0, 1] and model one aggregated weekly interval. This produces a necessary condition for feasibility. The intuition of this condition is as follows: we need at least one feasible schedule to find (average) production rates. If however no feasible production rate exists due to the infeasibility of the relaxed LP, then no valid schedule exists. Even this LP has nearly 5,000 variables and thousands of constraints. Solving this LP is equivalent to querying an oracle to check feasibility. Solving this problem for various d defines the feasible degradation set, or resilience capacity C . Under the LP formulation in (3), it can be 3Resilience Quantification and its Support for Operational Resilience A P REPRINT 
+
+shown that C forms a convex polytope. Characterizing C is equivalent to projecting a high-dimensional polytope into the lower-dimensional d-space, which is computationally impractical due to exponential vertex growth. Other methods such as Fourier-Motzkin Elimination [21] also suffer from the same combinatorial explosion. 
+
+Baseline method: We first build a baseline using random sampling. This approach extends a relaxed version of (3) by making the entries of the degradation vector optimization variables. The discrete optimization variables xi, j are removed and ¯μi, j become optimization variables. Additional inequality constraints of the form 0 ≤ ¯μi, j ≤ (1 − di)μi, j reflect the degradation effects. The resulting optimization problem is an LP. Starting from axis-aligned directions, we maximize each di individually while keeping others at zero to locate feasible vertices. New points are then randomly generated by averaging feasible pairs and computing the maximum magnitude of the extending rays in their direction under constraints. All such points will belong to the boundary of an approximate baseline capacity region ˆCb. An untested degradation vector ˆd is labeled feasible if there exists some d ∈ ˆCb such that ˆd ≤ d (element-wise): W 
+
+> d∈ˆCb
+
+ˆd ≤ d = true .
+
+Degradation space exploration: We make use of the initial step in the baseline approach to collect points on the boundary of C that maximizes each di direction, while all other degradation directions are kept at zero. We augment this set with additional feasible and unfeasible points using the monotonicity rules from equations (1)–(2) to propagate labels to additional points for free, enabling balancing the classes in the training data. For a vector d we either add 
+
+dnew = d/2 (feasible), or dnew = d + ( 1 − d)/2 (infeasible). We use this initial set to train a first classifier. We adopt an entropy-based active learning strategy to sample new points. Let c(d) be the current classifier, represented via the predicted class probability. The next query maximizes uncertainty by solving arg min  
+
+> d
+
+c(d) log c(d) + ( 1 − c(d)) log (1 − c(d)) ,
+
+subject to 0 ≤ d ≤ 1 . This approach targets points near the boundary. The selected point is tested by querying the feasibility oracle. With these new points and points generated via class balancing, we update the classifier. Uncertainty sampling in active learning [ 22 ] includes strategies such as query-by-committee, diversity sampling, or variance reduction [ 33 , 13 ]. While entropy-based sampling may focus too narrowly on borderline cases, this is desirable here, as we aim to delineate the resilience boundary precisely. 
+
+Figure 1: Resilience capacity approximation accuracy comparison between the baseline and the active learning approach as a function of the number of training samples used. The results highlight the benefits of active learning (orange), especially when the number of available samples is limited to a few hundred. 4Resilience Quantification and its Support for Operational Resilience A P REPRINT 
+
+Results: We compared a random forest (RF) classifier guided by active sampling to the baseline. At each round, entropy is maximized via a gradient-free solver. We train RFs for a set of oracle query budgets ranging from 41 to from 10241 feasibility tests, where samples are generated as described above. RFs were selected over neural networks to reduce architecture-related uncertainty. We used the scikit-learn package [ 30 ] to fit the RFs with the default settings (e.g., 100 estimators, gini criterion for splitting). Fig. 1 shows accuracy as a function of the number of training samples. Detailed classification metrics for training budgets of 1281 and 2561 points are reported in Tables 1–4. The reports were generated using the classification_report function included in the scikit-learn package The reports are based on roughly 10k test points, split equally between feasible and unfeasible classes. The test points were generated by randomly sampling the degradation cube and applying the feasibility test until reaching the target number of test points. Not unexpectedly, the active learning approach achieves superior accuracy with fewer queries. Table 1: Classification Report for Baseline Model (1281 points) 
+
+Precision Recall F1-Score Support Class 0.0 (unfeasible) 1.00 0.50 0.67 10834 
+
+Class 1.0 (feasible) 0.00 0.00 0.00 0
+
+Accuracy 0.50 10834 
+
+Macro avg 0.50 0.25 0.33 10834 
+
+Weighted avg 1.00 0.50 0.67 10834 Table 2: Classification Report for Random Forest Model (1281 points) 
+
+Precision Recall F1-Score Support Class 0.0 (unfeasible) 0.65 0.98 0.78 3602 
+
+Class 1.0 (feasible) 0.99 0.74 0.84 7232 
+
+Accuracy 0.82 10834 
+
+Macro avg 0.82 0.86 0.81 10834 
+
+Weighted avg 0.87 0.82 0.82 10834 Table 3: Classification Report for Baseline Model (2561 points) 
+
+Precision Recall F1-Score Support Class 0.0 (unfeasible) 1.00 0.63 0.77 8568 
+
+Class 1.0 (feasible) 0.42 1.00 0.59 2266 
+
+Accuracy 0.71 10834 
+
+Macro avg 0.71 0.82 0.68 10834 
+
+Weighted avg 0.88 0.71 0.74 10834 
+
+# 5 Operational Resilience via Prognostics and Health Management 
+
+This section demonstrates how the resilience capacity supports operational decisions through PHM steps such as diagnosis, prognostics. We briefly touch on how these steps can be completed by a reconfiguration step. 
+
+Diagnosis estimates the current system health by identifying degradation magnitudes, which are modeled as reductions in machine capacity. In a model-based setting [ 16 ], the diagnosis engine uses the system model to detect and isolate faults, returning an estimated degradation vector d with associated uncertainties. The resulting degradation estimates are input to the prognostics module that forecasts future values of d using a degradation model. Models may be physics-based (e.g., Archard wear model [ 3]), parametric (e.g., exponential decay [ 6]), or data-driven (e.g., recurrent neural networks [ 25 ]). We adopt an exponential model of the form di(t) = φi + θieβit+εi−σ 2 
+
+> i/2
+
+, where φi is constant, 
+
+θi is log-normally distributed, and βi, εi are Gaussian variables. With this type of model we can explicitly compute the likelihood function for fitting the model parameters. Taking logarithms yields a linear-in-parameters model 
+
+yi(t) = log (di(t) − φi) = ˆθi + βit + εi, with ˆθi = log θi − σ 2 
+
+> i
+
+/2 . Model parameters are estimated using maximum likelihood or MCMC [ 2], based on diagnosis data. Once the forecast model is fit, we evaluate the probability of the 5Resilience Quantification and its Support for Operational Resilience A P REPRINT 
+
+Table 4: Classification Report for Random Forest Model (2561 points) 
+
+Precision Recall F1-Score Support Class 0.0 (unfeasible) 0.81 0.99 0.89 4428 
+
+Class 1.0 (feasible) 0.99 0.84 0.91 6406 
+
+Accuracy 0.90 10834 
+
+Macro avg 0.90 0.92 0.90 10834 
+
+Weighted avg 0.92 0.90 0.91 10834 (discretized) time when d(t) will exit the resilience region. Denoting the time to the boundary of the resilience capacity as 
+
+TRUL , its distribution satisfies: P(TRUL = tk) = E ∏k−1 
+
+> i=1
+
+c d(ti)  1 − c d(tk) , where c(·) is the probabilistic classifier for resilience capacity, and the expectation is taken over forecast uncertainty. This estimate includes uncertainty from both the degradation model and the resilience classifier. We simulate exponential degradation for type B machines. The resulting RUL predictions are shown in Fig. 2. Early estimates are uncertain due to limited data but improve over time. We show the mean RUL, maximum likelihood, ground truth, and uncertainty bands based on classifier approximation from 2561 samples. 
+
+Figure 2: Evolution of the system’s RUL over time under machine degradations. Diagnosis results are used to fit the parameters of an exponential degradation model, which is then used to predict future degradation and estimate the RUL. The figure shows the ground truth (blue), mean estimate (orange), maximum -likelihood estimate (green), and uncertainty range (gray). The uncertainty band reflects both the approximation of the resilience capacity and the parametric degradation model. A system affected by degradations may require reconfiguration to adapt its resource allocation and preserve functionality. This can be formulated similarly to the feasibility oracle, but extended over longer horizons to account for future uncertainty in d. Given long -term production targets, such a problem can determine if any allocation scheme can satisfy those targets despite anticipated degradations. If delaying maintenance is a priority, the formulation can be adapted to postpone reaching the boundary of the resilience capacity (remaining within C ) while still trying to meet production objectives. However, the feasibility oracle must be modified to reflect the stochastic nature of d(t). A 6Resilience Quantification and its Support for Operational Resilience A P REPRINT 
+
+common approach is to enforce chance constraints [ 20 ], ensuring feasibility with high probability. Alternatively, 
+
+sampling -based approximations [10 ] consider multiple scenarios and solve the optimization for each, selecting solutions that minimize expected cost or maximize worst -case performance. Though accurate, this approach is computationally intensive. A simpler approach replaces d with its expected value, yielding a deterministic formulation. For more conservative decisions, robust optimization [ 9] finds solutions feasible under worst -case realizations of d within a defined confidence set. 
+
+# 6 Discussion 
+
+The resilience concept proved to be impactful in supply chains and manufacturing, especially in the aftermath of the global disruptions [ 28 ] induced by the recent COVID-19 pandemic. Although numerous metrics have been proposed to evaluate system resilience, capturing aspects such as output degradation, fault tolerance, and recovery, they remain largely application-specific and lack standardization. A recent survey of Cyber-Physical Production Systems (CPPS) metrics [ 5] highlights a wide range of definitions. These include the ability to maintain production under disruption [ 36 ], penalties for system adjustments [ 1], disturbance insensitivity [ 34 ], survival under high-impact events [ 12 ], and adherence to operational thresholds during faults [ 23 ]. These metrics employ diverse tools, e.g., max-plus algebra, fuzzy logic, Monte Carlo simulation, and mixed-integer programming, to evaluate context-specific resilience indicators like throughput or capacity. In contrast, our approach defines resilience with respect to generic, user-defined functional requirements. As long as requirement satisfaction can be evaluated (e.g., through optimization), the method is application-agnostic. That said, domain expertise is still needed to identify degradation mechanisms and construct system models. These models may be built manually or with automated tools, possibly with the help of large language models and generative methods [ 26 ]. The authors of [ 11 ] propose a quantitative resilience metric for linear systems under actuator malfunctions, defined in terms of time-to-target, and derive analytical bounds using Lyapunov theory to estimate this metric, emphasizing the key role of redundancy. This aspect is key in our use case as well, and originates in the multi-part functionality of machines. In our approach, the time-to-target would be a requirement, and the uncontrollable actuators would be degradation modes. An interesting perspective on the interplay between robustness and resilience is discussed in [ 32 ] where resilience is viewed from a safety perspective. Unlike approaches focusing on isolated failures, our method characterizes the full degradation space and uses active learning to explore it efficiently. We use classifiers to learn the resilience capacity and apply this construct beyond quantification, supporting diagnostic [ 27 ], prognostic [ 8], and reconfiguration planning. Fault detection, diagnostic disambiguation, and predictive maintenance [ 31 ] also benefit from the same feasibility model. Our prognostics generalize traditional threshold -based RUL estimates to set -based boundaries, allowing uncertainty propagation throughout the pipeline. While we use an exponential degradation model, the framework can also accommodate alternatives, such as neural networks [7]. Feasibility testing closely mirrors reconfiguration planning, as both optimize resource allocations under current or anticipated degradations. These tasks align with model predictive control [ 19 ] and planning strategies [ 4], sharing a similar constraint structure. The computational cost of the approach stems from three main sources. First, feasibility testing often involves solving large-scale optimization problems with nonlinear, mixed discrete–continuous dynamics. Surrogate models [ 15 ] can alleviate some of this load. Second, optimizing large systems is expensive and may benefit from differentiable programming tools [ 24 ], which enable gradient -based solvers and parallel execution. Third, learning the resilience capacity involves training classifiers. While decision - tree methods like random forests are highly interpretable, they scale poorly with data size and dimensionality. In contrast, neural networks better handle high -dimensional inputs, support GPU parallelism, and enable rapid updating via transfer learning. Together, these components form a flexible but computationally demanding framework for resilience analysis. 
+
+Remark 6.1. The main steps of the proposed methodology, applicable across domains, are as follows. The approach starts with a system model and associated simulation engine, along with a set of functional requirements and known degradations or faults. To enable learning of the resilience capacity, the model is augmented for parametric injection of degradations. A simulation budget is then defined, based on the simulation complexity and available training time, to generate training data. An active learning algorithm uses this budget to select informative scenarios, yielding samples for a surrogate model (e.g., RF or NN) that approximates resilience capacity. During operation, this learned model estimates the system’s RUL relative to its requirements. Diagnosis algorithms track degradation states, and the resulting data is used to fit a prognostic model (e.g., exponential decay) that predicts future degradation. Combined with the resilience capacity model, this allows RUL estimation. Finally, reconfiguration algorithms can adjust the system’s configuration or operational settings to extend its RUL. Details on the diagnosis, prognostics, and reconfiguration methods can be found in [25]. 
+
+7Resilience Quantification and its Support for Operational Resilience A P REPRINT 
+
+# 7 Conclusions 
+
+We presented a methodology for quantifying system resilience by defining and approximating its resilience capacity. Our approach combines classification models and active learning to efficiently characterize high -dimensional degradation spaces. This framework naturally supports PHM activities such as diagnosis and prognostics, enabling proactive measures to sustain functionality. While applied on a manufacturing case, the approach generalizes across domains. However, several challenges remain. As system complexity grows, differentiable surrogate models can reduce simulation costs, and generative AI and large language models offer promising avenues for automated degradation - space modeling and requirement extraction. Additionally, many real -world systems involve hybrid dynamics or nonlinear effects that complicate optimization. Extending this work to incorporate such dynamics, by using specialized solvers or differentiable programming, would further expand its applicability. Moreover, such representations would enable real-time implementations of reconfiguration steps that prolong the RUL under degradations. By connecting resilience quantification with actionable reconfiguration strategies, the proposed framework offers a holistic approach to managing system performance as degradations evolve. 
+
+# References 
+
+[1] Kosmas Alexopoulos, Ioannis Anagiannis, Nikolaos Nikolakis, and George Chryssolouris. A quantitative approach to resilience in manufacturing systems. Int. J. Prod. Res. , 60(24):7178–7193, 2022. [2] Christophe Andrieu, Nando de Freitas, Arnaud Doucet, and Michael I. Jordan. An introduction to MCMC for machine learning. Machine Learning , 50:5–43, 2003. [3] J. F. Archard. Contact and rubbing of flat surfaces. Journal of Applied Physics , 24(8):981–988, 1953. [4] N. Arshad and D. Heimbigner. A comparison of planning based models for component reconfiguration. Technical Report CU-CS-995-05, Colorado University, 2005. [5] T. Aruväli, M. De Marchi, and E. Rauch. Analysis of quantitative metrics for assessing resilience of human-centered CPPS workstations. Scientific Reports , 13(1):2914, 2023. [6] Islem Bejaoui, Dario Bruneo, and Maria Gabriella Xibilia. A data-driven prognostics technique and RUL prediction of rotating machines using an exponential degradation model. In 7th International Conference on Control, Decision and Information Technologies , volume 1, pages 703–708, 2020. [7] O. Bektas and J. A. Jones. NARX time series model for remaining useful life estimation of gas turbine engines. In 
+
+PHM Society European Conference , volume 3, 2016. [8] O. Bektas, J. Marshall, and J. Jones. Comparison of computational prognostic methods for complex systems under dynamic regimes: A review of perspectives. Arch. Comput. Methods Eng. , 27(4):9–1011, 2020. [9] Dimitris Bertsimas and Melvyn Sim. The price of robustness. Operations Research , 52(1):35–53, 2004. [10] John R. Birge and Franois Louveaux. Introduction to Stochastic Programming . Springer Publishing Company, Incorporated, 2nd edition, 2011. [11] Jean-Baptiste Bouvier and Melkior Ornik. Quantitative resilience of linear systems. In European Control Conference (ECC) , pages 485–490, 2022. [12] Antonio C. Caputo, Pacifico M. Pelagagge, and Paolo Salini. A methodology to estimate resilience of manufactur-ing plants. IFAC-PapersOnLine , 52(13):808–813, 2019. [13] David A. Cohn, Zoubin Ghahramani, and Michael I. Jordan. Active learning with statistical models. J. Artif. Int. Res. , 4(1):129–145, 1996. [14] Daniel Dadush. Faster Deterministic Volume Estimation in the Oracle Model via Thin Lattice Coverings. In Lars Arge and János Pach, editors, 31st International Symposium on Computational Geometry (SoCG 2015) ,volume 34 of Leibniz International Proceedings in Informatics (LIPIcs) , pages 704–718, Dagstuhl, Germany, 2015. Schloss Dagstuhl – Leibniz-Zentrum für Informatik. [15] S. Davis, S. Cremaschi, and M. Eden. Efficient surrogate model development: Optimum model form based on input function characteristics. In 27th European Symposium on Computer Aided Process Engineering , volume 40 of Computer Aided Chemical Engineering , pages 457–462. Elsevier, 2017. [16] Johan de Kleer and James Kurien. Fundamentals of model-based diagnosis. IFAC Proceedings Volumes , 36(5):25 – 36, 2003. 5th IFAC Symposium on Fault Detection, Supervision and Safety of Technical Processes 2003, Washington DC, 9-11 June 1997. [17] M. E. Dyer and A. M. Frieze. On the complexity of computing the volume of a polyhedron. SIAM Journal on Computing , 17(5):967–974, 1988. 8Resilience Quantification and its Support for Operational Resilience A P REPRINT 
+
+[18] Martin Dyer, Alan Frieze, and Ravi Kannan. A random polynomial-time algorithm for approximating the volume of convex bodies. J. ACM , 38(1):1–17, January 1991. [19] C. Garcia, D. Prett, and M. Morari. Model predictive control: Theory and practice-A survey. Automatica ,25(3):335–348, 1989. [20] Abebe Geletu, Michael Klöppel, Hui Zhang, and Pu Li. Advances and applications of chance-constrained approaches to systems optimisation under uncertainty. Int. J. Syst. Sci. , 44(7):1209–1232, 2013. [21] Leonid Khachiyan. Fourier–Motzkin elimination method. In Christodoulos A. Floudas and Panos M. Pardalos, editors, Encyclopedia of Optimization , pages 1074–1077. Springer US, Boston, MA, 2009. [22] David D. Lewis and William A. Gale. A sequential algorithm for training text classifiers. In Bruce W. Croft and C. J. van Rijsbergen, editors, SIGIR ’94 , pages 3–12, London, 1994. Springer London. [23] Ruiying Li, Xiaoyu Tian, Li Yu, and Rui Kang. A systematic disturbance analysis method for resilience evaluation: A case study in material handling systems. Sustainability , 11(5), 2019. [24] I. Matei, C. Zheng, S. Chowdhury, and J. de Kleer. Controlling draft interactions between quadcopter unmanned aerial vehicles with physics-aware modeling. Journal of Intelligent and Robotics Systems , 101(21):1–21, 2021. [25] Ion Matei and et al. System resilience through health monitoring and reconfiguration. ACM Trans. Cyber-Phys. Syst. , 8(1), 2024. [26] John T. Maxwell, Johan de Kleer, Ion Matei, and Maksym Zhenirovsky. Preliminary experiments using LLMs for design. In 36th International Workshop on Qualitative Reasoning , pages 97–104, 2023. [27] R. Minhas and et al. Using fault augmented Modelica models for diagnostics. In International Modelica Conference , pages 437–445, 2014. [28] Dilek Ozdemir, Mahak Sharma, Amandeep Dhir, and Tugrul Daim. Supply chain resilience during the COVID-19 pandemic. Technology in Society , 68:101847, 2022. [29] M. Panteli, P. Mancarella, D. N. Trakas, E. Kyriakides, and N. D. Hatziargyriou. Metrics and quantification of operational and infrastructure resilience in power systems. IEEE Trans. Power Syst. , 32(6):4732–4742, 2017. [30] F. Pedregosa and et al. Scikit-learn: Machine learning in Python. J. Mach. Learn. Res. , 12:2825–2830, 2011. [31] B. Saha and et al. Model-based approach for optimal maintenance strategy. In European Conference of the Prognostics and Health Management Society , August, 2014. [32] Rodolphe Sepulchre. Robust performance? resilient safety! [from the editor]. IEEE Control Systems Magazine ,43(3):3–4, 2023. [33] H. S. Seung, M. Opper, and H. Sompolinsky. Query by committee. In Proceedings of the Fifth Annual Workshop on Computational Learning Theory , COLT ’92, page 287–294, New York, NY, USA, 1992. Association for Computing Machinery. [34] Hao Song, Xiaonong Lu, Xu Zhang, Xiaoan Tang, and Qiang Zhang. A HRGO approach for resilience en-hancement service composition and optimal selection in cloud manufacturing. Mathematical Biosciences and Engineering , 17(6):6838–6872, 2020. [35] Daria Terekhov, Tony T. Tran, Douglas G. Down, and J. Christopher Beck. Integrating queueing theory and scheduling for dynamic scheduling problems. J. Artif. Intell. , 50(1):535–572, 2014. [36] Ding Zhang, Min Xie, Hong Yan, and Qiang Liu. Resilience dynamics modeling and control for a reconfigurable electronic assembly line under spatio-temporal disruptions. Int. J. Manuf. Syst. , 60:852–863, 2021. 9

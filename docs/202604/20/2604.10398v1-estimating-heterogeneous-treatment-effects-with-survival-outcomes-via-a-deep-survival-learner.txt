@@ -1,0 +1,3493 @@
+Title: Estimating heterogeneous treatment effects with survival outcomes via a deep survival learner
+
+URL Source: https://arxiv.org/pdf/2604.10398v1
+
+Published Time: Tue, 14 Apr 2026 00:57:56 GMT
+
+Number of Pages: 28
+
+Markdown Content:
+# ESTIMATING HETEROGENEOUS TREATMENT EFFECTS WITH SURVIVAL OUTCOMES VIA A DEEP SURVIVAL LEARNER 
+
+Yuming Sun 
+
+Department of Mathematics William & Mary, Williamsburg 
+
+ysun30@wm.edu 
+
+Jian Kang 
+
+Department of Biostatistics University of Michigan, Ann Arbor 
+
+jiankang@umich.edu 
+
+Yi Li 
+
+Department of Biostatistics University of Michigan, Ann Arbor 
+
+yili@umich.edu 
+
+## ABSTRACT 
+
+Estimating heterogeneous treatment effects in survival settings is complicated by right censoring as well as the time-varying nature of the estimand. While the conditional average treatment effect (CATE) provides a natural target, most existing approaches focus on a single prespecified time point and do not account for temporal trajectory, leading to instability in estimation. We propose a deep survival learner (DSL) for estimating heterogeneous treatment effects with right-censored outcomes. The method is based on a doubly robust pseudo-outcome whose conditional expectation identifies time-specific CATEs under standard assumptions. This construction remains unbiased if either the outcome model or the treatment assignment model is correctly specified, when properly accounting for censoring. To estimate CATEs over a clinically relevant time spectrum, DSL employs a multi-output deep neural network with shared representations, enabling joint estimation of treatment effect trajectories. From a theoretical perspective, we derive error bounds for both pointwise and joint estimation over time. We show that joint estimation can leverage temporal structure to control estimation error without incurring much additional approximation cost under smoothness conditions, leading to improved stability relative to separate estimation. Cross-fitting is incorporated to reduce overfitting and mitigate bias arising from flexible nuisance estimation. Simulation studies demonstrate favorable finite-sample performance, particularly under nuisance model misspecification. Applied to the Boston Lung Cancer Study, DSL reveals heterogeneity in the effects of perioperative chemotherapy across patient characteristics and over time. 
+
+Keywords Causal Inference · Conditional Average Treatment Effect · Double Robustness · Deep Neural Network 
+
+## 1 Introduction 
+
+A substantial literature has examined heterogeneity in treatment effects, often summarized by the conditional average treatment effect (CATE) within the counterfactual framework [Imbens and Rubin, 2016]. Modeling CATE as a function of pre-treatment covariates enables systematic assessment of variation across patient subgroups, a central goal in precision medicine, where large-scale studies have documented marked heterogeneity in patient characteristics, disease awareness, and clinical outcomes across populations [Dharmarajan et al., 2017]. In survival settings, this task is further complicated by censoring and the time-to-event nature of the outcome. Moreover, biomedical outcomes frequently arise from complex, interdependent processes involving treatment, exposure, and patient characteristics, as illustrated in HPV-related cancers [Haddad et al., 2008] and lung cancer [Zhai et al., 2022]. These features challenge the adequacy of traditional parametric and semiparametric approaches. Recently, metalearner frameworks, including the M-learner, R-learner, and X-learner, have been developed. These approaches leverage the flexibility of modern machine learning methods by decomposing CATE estimation into a sequence of regression problems that can be solved with off-the-shelf algorithms. For instance, the M-learner constructs pseudo-outcomes based on inverse probability weighting. The pseudo-outcome formulation is appealing, as it reduces the problem of estimating CATEs to a regression on covariates [Horvitz and Thompson, 1952]. The X-learner [Künzel et al., 2019] fits separate outcome models in the treated and control groups and uses them to impute individual treatment effects, while the R-learner [Nie and Wager, 2021] formulates the problem as a residual-on-residual regression. More broadly, doubly robust learners have been 
+
+> arXiv:2604.10398v1 [stat.ME] 12 Apr 2026
+
+Estimating heterogeneous treatment effects with survival outcomes via a deep survival learner developed to improve statistical efficiency and to mitigate sensitivity to nuisance model misspecification [Kennedy, 2020]. Building on developments for continuous outcomes, recent work has extended metalearner approaches to survival settings. For example, Yang et al. [2025] propose a doubly robust learner that combines inverse probability of censoring weighting with nonparametric failure-time Bayesian additive regression trees to construct pseudo-outcomes for CATE estimation. Similarly, Bo et al. [2025] develop alternative pseudo-outcome constructions and extend a range of metalearners, including the X-learner, M-learner, and R-learner, to right-censored data. Beyond the metalearner framework, tree-based and forest-based methods have also been adapted to estimate heterogeneous treatment effects with survival outcomes. Cui et al. [2023] introduce causal survival forests, which extend causal forests to accommodate censoring, while Dandl et al. [2024] develop related model-based forest approaches. In a different direction, Hu [2024] propose a random-intercept accelerated failure time model combined with Bayesian additive regression trees to estimate differences in log survival time between treatment groups. Finally, Curth et al. [2021] introduce SurvITE, a neural network approach that models treatment-specific discrete-time hazard functions to capture treatment effect heterogeneity. Several methodological challenges remain. Many pseudo-outcome based approaches rely on complete-case information and do not fully account for censoring, which can lead to bias or loss of efficiency in CATE estimation [Xu et al., 2023]. Survival outcomes are inherently time-dependent, and treatment effects may evolve over follow-up due to delayed onset, attenuation, or time-varying biological mechanisms. In many applications, the primary scientific target is therefore the trajectory of heterogeneous treatment effects over a clinically relevant time interval, rather than a contrast at a single prespecified time point. Most existing methods, however, estimate CATE at a fixed time and treat different time points as unrelated, without leveraging the underlying temporal structure. This can result in unstable estimation and reduced statistical efficiency. To address these limitations, we propose a deep survival learner (DSL) for estimating heterogeneous treatment effects with right-censored survival outcomes. We adopt a pseudo-outcome formulation that enables the use of flexible function approximators, such as deep neural networks, to learn its conditional expectation. Our approach distinguishes from existing methods by unifying causal identification, temporal modeling, and robust estimation within a single framework. First, we introduce a doubly robust pseudo-outcome for survival settings whose conditional expectation identifies the CATE on survival probabilities at each time point. The construction, when properly accounting for right censoring, is unbiased if either the outcome model or the treatment assignment model is correctly specified. Second, we cast CATE estimation as a joint learning problem over time and develop a multi-output neural network to estimate the entire treatment effect trajectory simultaneously. By sharing representations across time points, the method exploits temporal structure in the CATE, enabling information borrowing and leading to smoother and more stable estimates than separate models fit at each time point. From a theoretical perspective, we derive error bounds for both pointwise estimation and joint estimation over a time grid. We show that, under mild smoothness conditions on the treatment effect trajectory, joint estimation can control estimation error without incurring much additional approximation cost, thereby improving stability relative to separate estimation. Third, we incorporate cross-fitting to separate nuisance estimation from target estimation, which mitigates overfitting and enhances robustness when more flexible methods are used. The remainder of the paper is organized as follows. Section 2 introduces the data structure, notation, and target estimand, and presents the proposed DNN estimator. Section 3 establishes the error rates at both a fixed time point and over a grid of time points. Section 4 reports simulations under varying degrees of nuisance model misspecification and different choices of time grids. Section 5 applies the proposed method to the Boston Lung Cancer Study to examine heterogeneous effects of perioperative chemotherapy among patients with early-stage non-small cell lung cancer. 
+
+## 2 Methods 
+
+2.1 Data Structure, Estimand and Pseudo-outcome Construction 
+
+Let T and C denote the event time and censoring time, respectively. With right censoring, we observe U = min( T, C)
+
+and the event indicator ∆ = I(T ≤ C ). We observe i.i.d. data D = {(Ui, ∆i, X i, W i) : i = 1 , . . . , N }, where 
+
+Xi ∈ Rd denotes pre-treatment covariates and Wi ∈ { 0, 1} denotes treatment assignment. Under the potential outcomes framework Imbens and Rubin [2016], let T wi denote the potential survival time under treatment w ∈ { 0, 1}.The observed event time satisfies Ti = WiT 1 
+
+> i
+
++ (1 − Wi)T 0 
+
+> i
+
+. Our target estimand is the conditional average treatment effect (CATE) on the survival probability at any time t in the support of U , defined as 
+
+τ0(x; t) = P (T 1 
+
+> i
+
+> t | Xi = x) − P (T 0 
+
+> i
+
+> t | Xi = x). (1) Since the potential survival times T 0 
+
+> i
+
+and T 1 
+
+> i
+
+in (1) cannot be observed simultaneously (even in the absence of censoring), direct estimation of CATE is infeasible. We propose to construct a pseudo-outcome whose expectation conditional on 2Estimating heterogeneous treatment effects with survival outcomes via a deep survival learner 
+
+Xi equals the target estimand: 
+
+φi(t) = π1 
+
+> i
+
+(t) − π0 
+
+> i
+
+(t), with 
+
+πwi (t) = Sw(Xi; t) + I(Wi = w)
+
+ew(Xi)
+
+ Yi(t)
+
+Gw(Xi; t) − Sw(Xi; t)
+
+
+
+, w ∈ { 0, 1}, (2) where Sw(x; t), Gw(x; t), and ew(x) denote the nuisance functions corresponding to the conditional survival function 
+
+P (Ti > t | Xi = x, W i = w), the conditional censoring survival function P (Ci > t | Xi = x, W i = w), and the propensity score P (Wi = w | Xi = x), respectively. Here, for a fixed time point t, the at-risk indicator 
+
+Yi(t) = I(Ui > t ). In practice, these nuisance functions are unknown and must be estimated from the data, and may be subject to model misspecification. Despite this, the pseudo-outcome in (2) remains unbiased under partial misspecification due to its double robustness. Building on this property, we estimate the pseudo-outcome by evaluating it over a prespecified grid of time points, reflecting that the target CATE is indexed by time and typically of interest over an interval rather than at a single time point. We then model its conditional expectation given baseline covariates using a deep neural network (DNN) introduced in the next subsection and obtain a flexible estimator of the time-varying CATE function. 
+
+2.2 Deep Neural Network: Architecture and Implementation 
+
+Let 0 ≤ tmin < t max , where [tmin , t max ] is a compact subset of the support of U . The time window [tmin , t max ] is specified to balance clinical relevance and data support. For example, in our motivating lung cancer study, tmin = 0 
+
+represents the time of diagnosis, whereas tmax is chosen to ensure that a sufficient number of patients remain at risk at that time for stable estimation. We estimate τ0(x; t) on a prespecified grid of J time points 
+
+tmin = t1 < t 2 < · · · < t J = tmax .
+
+This leads to the problem of learning a vector-valued function 
+
+x ∈ Rp 7 → τ0(x) =  τ0(x; t1), . . . , τ 0(x; tJ )⊤ ∈ RJ ,
+
+which we approximate using a deep neural network f : Rp → RJ . We consider a fully connected feedforward network with L hidden layers. Let p0 = p denote the input dimension and pL+1 = J denote the output dimension. For each hidden layer ℓ = 1 , . . . , L , let pℓ denote its width. Define the layer-wise transformations recursively. Set 
+
+h(0) (x) = x ∈ Rp0 . For each hidden layer ℓ = 1 , . . . , L , define 
+
+h(ℓ)(x) = σ Wℓh(ℓ−1) (x) + bℓ
+
+ ∈ Rpℓ ,
+
+where Wℓ ∈ Rpℓ×pℓ−1 , b ℓ ∈ Rpℓ , and σ(u) = max( u, 0) is the RELU activation function, applied componentwise. The output layer is given by 
+
+f (x) = WL+1 h(L)(x) + bL+1 ∈ RpL+1 = RJ ,
+
+where WL+1 ∈ RJ×pL , b L+1 ∈ RJ . Let Fn denote the class of such networks with the following structural constraints: (Depth ) L ≤ Ln;(Width ) max 1≤ℓ≤L pℓ ≤ pn;(Sparsity ) the total number of nonzero parameters satisfies PL+1  
+
+> ℓ=1
+
+∥Wℓ∥0 + PL+1  
+
+> ℓ=1
+
+∥bℓ∥0 ≤ sn;
+
+(Magnitude constraint ) all entries of {Wℓ, b ℓ} are bounded in absolute value by Bn.With these structural constraints, regularization is implicitly achieved through sparsity and boundedness of the DNN class 
+
+Fn, which control model complexity and limit the magnitude of fitted values. These properties help stabilize estimation. Another key feature of the DNN class Fn is its multi-output structure across time points, with hidden layers shared to capture temporal coherence in the CATE. Specifically, an f (x) ∈ F n jointly estimates  τ0(x; t1), . . . , τ 0(x; tJ ),
+
+thereby leveraging smoothness and dependence across time. The parameters {Wℓ, b ℓ}L+1  
+
+> ℓ=1
+
+are estimated by minimizing the empirical squared loss averaged over subjects and time points (Algorithm 1), with hyperparameters selected via cross-validation. 
+
+2.3 Estimation and Implementation 
+
+Let ˆφi =   ˆφi(t1), . . . , ˆφi(tJ )⊤ denote the vector of estimated pseudo-outcomes for subject i on a prespecified grid of J time points, tmin = t1 < t 2 < · · · < t J = tmax . To reduce overfitting and permit flexible nuisance estimation, 3Estimating heterogeneous treatment effects with survival outcomes via a deep survival learner we employ K-fold cross-fitting throughout. Let the observed data be D = {(Ui, ∆i, X i, W i)}Ni=1 , and randomly partition D into K approximately equal-sized, disjoint folds D1, . . . , DK . For each fold k, let D−k = D \ D k denote the corresponding training sample, and use Dk as the held-out sample. Within each training sample D−k, we estimate the nuisance functions needed for pseudo-outcome construction. Specifically, for each treatment group w ∈ { 0, 1}, we estimate Sw(x; t), and Gw(x; t) using only subjects in D−k with 
+
+Wi = w. These nuisance components may be estimated using Cox-type models, or, when greater flexibility is desired, using nonparametric survival learners such as random survival forests. Also, the propensity score ew(x) is estimated on 
+
+D−k using a classification method, such as logistic regression or a more flexible tree-based ensemble learner. These estimators are then evaluated only on observations in the held-out fold Dk. Thus, for each subject i ∈ D k, the pseudo-outcome vector ˆφi is constructed using nuisance estimates obtained from data that do not include subject i.Repeating this procedure over all K folds yields cross-fitted pseudo-outcomes for every subject in the sample. We then estimate the CATE function τ (x; tj ), j = 1 , . . . , J , by solving 
+
+ˆτ = arg min  
+
+> τ∈F n
+
+1
+
+N J 
+
+> N
+
+X
+
+> i=1
+
+ˆφi − τ (Xi) 22. (3) where τ (Xi) =  τ (Xi; t1), . . . , τ (Xi; tJ )⊤. That is, we find the optimizer ˆτ (·, ·) within the deep neural network class Fn with shared hidden layers and J output nodes, each corresponding to a time point on the grid. The resulting procedure, referred to as the Deep Survival Learner (DSL), is summarized in Algorithm 1. Regardless of the specific choice of nuisance estimators, our theoretical analysis shows that the error of the DNN estimator decomposes into nuisance estimation error as well as approximation error and statistical error arising from fitting the DNN. 
+
+Algorithm 1 Deep Survival Learner (DSL) 
+
+Require: Observed data D = {(Ui, ∆i, X i, W i)}Ni=1 , time grid {t1, . . . , t J }, number of folds K
+
+Ensure: Estimated CATE ˆτ (·; t) on {t1, . . . , t J }
+
+1: Randomly partition D into K disjoint folds D1, . . . , DK
+
+2: for k = 1 , . . . , K do 
+
+3: Let D−k = D \ D k
+
+4: Estimate nuisance functions ˆSw (x; t), ˆGw (x; t), and ˆew (x) using D−k
+
+5: for each i ∈ D k do 
+
+6: Construct estimated pseudo-outcomes ˆφi =   ˆφi(t1), . . . , ˆφi(tJ )⊤ using the fitted nuisance models 7: end for 
+
+8: end for 
+
+9: Fit a multi-output DNN ˆτ ∈ F n by minimizing the objective in (3) 
+
+1
+
+N J 
+
+> N
+
+X
+
+> i=1
+
+ˆφi − τ (Xi) 22
+
+## 3 Theoretical Properties 
+
+Notation: For w ∈ { 0, 1} and t ∈ [tmin , t max ], define 
+
+Sw 
+
+> 0
+
+(x; t) = P (Ti > t | Xi = x, W i = w), e w 
+
+> 0
+
+(x) = P (Wi = w | Xi = x),Gw 
+
+> 0
+
+(x; t) = P (Ci > t | Xi = x, W i = w). Let ˆSw(x; t), ˆew(x), and ˆGw(x; t) denote the corresponding estimators. For subject i, let Oi = ( Ui, ∆i, X i, W i) denote the observed data. For any measurable function g, define the empirical measure by Png = 1
+
+> n
+
+Pni=1 g(Oi). Further, for a random function ˆg(·) constructed independently of Oi,the quantities E{ˆg(Oi)} and E{ˆg(Oi) | Xi} are understood as expectations taken with respect to Oi only, or 
+
+E{ˆg(Oi)} = R ˆg(o) dP O (o), and E{ˆg(Oi)|Xi = x} = R ˆg(o) dP O|X (o|x). For a vector x = ( x1, . . . , x d)⊤ ∈ Rd,define its ℓq -norm by ∥x∥q =
+
+Pdj=1 |xj |q
+
+1/q 
+
+, 1 ≤ q < ∞, and ∥x∥∞ = max 1≤j≤d |xj |. Let PX denote the probability distribution of the covariate vector X on X . For a measurable function f : X → R, define ∥f ∥Lq (PX ) =
+
+ R  
+
+> X
+
+|f (x)|q dP X (x)1/q , 1 ≤ q < ∞, and ∥f ∥L∞(PX ) = sup x∈X |f (x)|.
+
+We impose the following assumptions to establish the statistical properties of the proposed estimator. 4Estimating heterogeneous treatment effects with survival outcomes via a deep survival learner 
+
+Assumption 1 (Consistency) . For each individual, Ti = T Wi 
+
+> i
+
+.
+
+Assumption 2 (Unconfoundedness) . {T 0 
+
+> i
+
+, T 1 
+
+> i
+
+} ⊥ ⊥ Wi | Xi.
+
+Assumption 3 (Overlap) . Assume the support of X is X = [0 , 1] d, and PX has a density bounded away from 0 and ∞
+
+on X . There exists a constant c > 0 such that ew 
+
+> 0
+
+(x) ≥ c, for all x ∈ X and w ∈ { 0, 1}.
+
+Assumption 4 (Noninformative censoring) . For each w ∈ { 0, 1}, we assume that Ci ⊥⊥ T wi | (Xi, W i = w).
+
+Assumption 5 (Censoring positivity) . There exists a constant c > 0 such that Gw 
+
+> 0
+
+(x; t) ≥ c, for all (x, t ) in the support of (Xi, T i) and all w ∈ { 0, 1}.
+
+Assumption 6 (Uniform convergence rate) . For a fixed t ∈ [tmin , t max ], assume the estimates, corresponding to 
+
+Sw 
+
+> 0
+
+(x; t), G w 
+
+> 0
+
+(x; t) and ew 
+
+> 0
+
+(x), satisfy 
+
+sup 
+
+> x
+
+| ˆSw(x; t) − Sw 
+
+> 0
+
+(x; t)| = Op(r(S) 
+
+> n
+
+), sup 
+
+> x
+
+| ˆGw(x; t) − Gw 
+
+> 0
+
+(x; t)| = Op(r(G) 
+
+> n
+
+),
+
+sup 
+
+> x
+
+|ˆew(x) − ew 
+
+> 0
+
+(x)| = Op(r(e) 
+
+> n
+
+),
+
+for some positive sequences r(S) 
+
+> n
+
+, r (G) 
+
+> n
+
+, r (e) 
+
+> n
+
+that converge to 0. 
+
+Assumptions 1–3 are standard in causal inference and ensure identification of the potential outcome distributions [Rosenbaum and Rubin, 1983, Imbens and Rubin, 2015]. Assumptions 4–5 are commonly imposed in survival analysis to guarantee identifiability of the survival and censoring mechanisms [Andersen and Gill, 1982, Tsiatis, 2006]. Assumption 6 requires uniform convergence of the estimated nuisance functions, which is standard in semiparametric and machine learning-based inference and determines the convergence rate of the proposed estimator [van der Vaart, 1998, Chernozhukov et al., 2018a]. 
+
+Theorem 1 (Identification) . Under Assumptions 1-5, if all nuisance functions in (2) equal their true counterparts, it holds that 
+
+E{φi(t) | Xi = x} = τ0(x; t).
+
+Theorem 1 establishes identification of τ0(x; t) via the conditional expectation of φi(t) given Xi, thereby reducing the problem of estimating heterogeneous treatment effects under censoring to a conditional mean regression problem. 
+
+Theorem 2 (Double robustness) . Under Assumptions 1-5, suppose the censoring model is correctly specified, i.e., 
+
+Gw(x; t) = P (Ci > t | Xi = x, W i = w). If either the survival model is correctly specified, i.e., Sw(x; t) = P (Ti >t | Xi = x, W i = w), or the propensity score model is correctly specified, i.e., ew(x) = P (Wi = w | Xi = x), it holds that 
+
+E{φi(t) | Xi = x} = τ0(x; t).
+
+The double robustness of the proposed pseudo-outcome, established in Theorem 2, is especially appealing in observa-tional survival studies, where it is often difficult to correctly specify all nuisance components. The consistency of the final estimator further relies on the approximation and estimation properties of the DNN. We establish consistency of ˆτ (x; t) for τ0(x; t) at a fixed time point t (i.e., J = 1 ); the extension to J > 1 is analogous. Recall that τ0(x; t) = Eφ0 
+
+> i
+
+(t) | Xi = x, where φ0 
+
+> i
+
+(t) is the oracle pseudo-outcome and ˆφi(t) is its cross-fitted counterpart (Section 2.3). The DNN estimator is obtained via 
+
+ˆτ (·; t) = arg min  
+
+> f∈F n
+
+Pn
+
+{ ˆφi(t) − f (Xi)}2,
+
+where Fn is the DNN class. We begin with the decomposition 
+
+ˆτ (x; t) − τ0(x; t) = ˆ τ (x; t) − E ˆφi(t) | Xi = x| {z }
+
+> regression error
+
++ E ˆφi(t) − φ0 
+
+> i
+
+(t) | Xi = x| {z }
+
+> nuisance-induced error
+
+.
+
+The first term reflects the error from nonparametric regression, while the second term captures the impact of estimating nuisance functions. We bound the second term using the following results. 
+
+Theorem 3 (Bias decomposition with estimated nuisance functions) . Suppose Assumptions 3, 5, and 6 hold. Let ˆφi(t)
+
+and φ0 
+
+> i
+
+(t) denote the estimated and population pseudo-outcomes, respectively, obtained by plugging the cross-fitted and true nuisance functions into (2) . Then, it holds that 
+
+E ˆφi(t) − φ0 
+
+> i
+
+(t) | Xi = x =
+
+> 1
+
+X
+
+> w=0
+
+(−1) w+1 
+
+"
+
+ˆew(x) − ew 
+
+> 0
+
+(x)ˆew(x)
+
+ ˆSw(x; t) − Sw 
+
+> 0
+
+(x; t)
+
++ ew 
+
+> 0
+
+(x)ˆew(x)
+
+Sw 
+
+> 0
+
+(x; t)ˆGw(x; t)
+
+Gw 
+
+> 0
+
+(x; t) − ˆGw(x; t)
+
+#
+
+. (4) 5Estimating heterogeneous treatment effects with survival outcomes via a deep survival learner 
+
+Consequently, it follows that 
+
+sup 
+
+> x
+
+E ˆφi(t) − φ0 
+
+> i
+
+(t) | Xi = x = Op
+
+
+
+r(e) 
+
+> n
+
+r(S) 
+
+> n
+
++ r(G)
+
+> n
+
+
+
+.
+
+In particular, if ˆGw(x; t) = Gw 
+
+> 0
+
+(x; t), then we have 
+
+sup 
+
+> x
+
+E ˆφi(t) − φ0 
+
+> i
+
+(t) | Xi = x = Op
+
+
+
+r(e) 
+
+> n
+
+r(S)
+
+> n
+
+
+
+.
+
+We impose smoothness conditions on the CATE function in x and additional regularity conditions on the cross-fitted pseudo-outcomes and the network class, which are required for the consistency and error rate results at a fixed time point. 
+
+Definition 1 (Hölder class) . Let X = [0 , 1] d and let β > 0. Write 
+
+β = q + α, q = ⌊β⌋, α ∈ (0 , 1] ,
+
+where q = ⌊β⌋ is the integer part of β. Let ν = ( ν1, . . . , ν d), where each νj is a nonnegative integer. For x =(x1, . . . , x d), define Dνx = ∂∥ν∥1 
+
+> ∂x ν11··· ∂x νdd
+
+. For M > 0, define Hβ (M ) as the class of functions f : X → R such that, for all mixed partial derivatives Dνx f (x) with ∥ν∥1 ≤ q, these derivatives exist and are uniformly bounded by M , that is, 
+
+max  
+
+> ∥ν∥1≤q
+
+sup 
+
+> x∈X
+
+|Dνx f (x)| ≤ M, 
+
+and moreover, 
+
+sup 
+
+> x̸=y
+
+|Dνx f (x) − Dνx f (y)|∥x − y∥α
+
+> 2
+
+≤ M, ∥ν∥1 = q. 
+
+Assumption 7 (Bounded second moments) . The cross-fitted ˆφi satisfies sup 1≤i≤n E ˆφ2 
+
+> i
+
+(t) < ∞.
+
+Assumption 8 (Network approximation capacity) . The network class Fn is rich such that there exists f ⋆n ∈ F n
+
+satisfying 
+
+∥f ⋆n − τ0(·; t)∥L∞(PX ) ≤ Cn −β/ (2 β+d).
+
+Assumption 9 (Uniform convergence over network) . The empirical squared-loss process satisfies 
+
+sup  
+
+> f∈F n
+
+Pn
+
+{ ˆφi(t) − f (Xi)}2 − E{ ˆφi(t) − f (Xi)}2 = Op(ρn),
+
+for some ρn → 0.
+
+Assumption 10 (Controlled optimization error) . The optimization error is controlled in the sense that 
+
+Pn
+
+{ ˆφi(t) − ˆτ (Xi; t)}2 ≤ inf  
+
+> f∈F n
+
+Pn
+
+{ ˆφi(t) − f (Xi)}2 + δ2
+
+> n
+
+,
+
+where δn = op(1) .
+
+The Hölder class in Definition 1 is a standard smoothness condition in nonparametric regression used to characterize approximation error and minimax rates [Tsybakov, 2009, Györfi et al., 2006]. Assumption 7 imposes a bounded second moment condition on the pseudo-outcomes, ensuring well-behaved risk and concentration properties [Chernozhukov et al., 2018b]. Assumption 8 requires that the network class Fn can approximate τ0(·; t) at the optimal rate, consistent with approximation results for ReLU networks under Hölder smoothness [Schmidt-Hieber, 2020]. Assumption 9 ensures uniform convergence of the empirical loss to its population counterpart over Fn, providing control of the estimation error in empirical risk minimization [van der Vaart and Wellner, 1996, Bartlett et al., 2017]. Finally, Assumption 10 controls the optimization error arising from approximate minimization of the empirical loss [Schmidt-Hieber, 2020]. 
+
+Theorem 4 (Consistency of the constructed estimator at a fixed t). Suppose Assumptions 1– 9 hold and that the convergence rates of nuisance functions in Assumption 6 satisfy that r(e) 
+
+> n
+
+r(S) 
+
+> n
+
++ r(G) 
+
+> n
+
+→ 0. It follows that 
+
+∥ˆτ (·; t) − τ0(·; t)∥L2(PX )
+
+> p
+
+−→ 0.
+
+.
+
+Theorem 5 (Rate for the constructed CATE estimator at a fixed t). Suppose τ0(·; t) ∈ H β (M ) for some β > 0 and 
+
+M > 0, and that Assumptions 1–10 hold. It follows that 
+
+∥ˆτ (·; t) − τ0(·; t)∥L2(PX ) = Op
+
+
+
+n−β/ (2 β+d) + ρ1/2 
+
+> n
+
++ δn + r(e) 
+
+> n
+
+r(S) 
+
+> n
+
++ r(G)
+
+> n
+
+
+
+.
+
+In particular, if ρn ≲ n−2β/ (2 β+d), it holds that 
+
+∥ˆτ (·; t) − τ0(·; t)∥L2(PX ) = Op
+
+
+
+n−β/ (2 β+d) + δn + r(e) 
+
+> n
+
+r(S) 
+
+> n
+
++ r(G)
+
+> n
+
+
+
+.
+
+6Estimating heterogeneous treatment effects with survival outcomes via a deep survival learner 
+
+Remark 1. Cross-fitting ensures that the pseudo-outcome ˆφi(t) is constructed using nuisance estimators that are independent of observation i. This allows us to treat the estimated nuisance functions as fixed when taking conditional expectations, which is critical for establishing the bias decomposition in Theorem 3. In particular, it justifies the expansion E{ ˆφi(t) | Xi = x}, leading to the second-order term r(e) 
+
+> n
+
+r(S) 
+
+> n
+
+arising from the product of estimation errors in the propensity score and outcome model. Without cross-fitting, additional first-order bias terms of order r(e) 
+
+> n
+
++ r(S)
+
+> n
+
+may appear due to overfitting. We note that estimation of the censoring model introduces an additional first-order term 
+
+r(G) 
+
+> n
+
+, as reflected in the bias decomposition. 
+
+To quantify the gain from joint estimation of {τ0(x; tj )}Jj=1 , we impose additional regularity on the CATE surface in the time dimension. In contrast to the single-time-point setting, where only smoothness in x is required, joint estimation exploits cross-time dependence by modeling τ0(x; t) as a function that is jointly smooth in (x, t ). We formalize this through a bivariate Hölder class and prove that it induces a low-complexity representation in the time direction and enables control of the joint approximation error. The following lemma establishes this representation, and the subsequent theorem uses it to characterize the advantage of shared network estimation across time. Without loss of generality, we take [tmin , t max ] = [0 , 1] throughout the development. 
+
+Definition 2 (Hölder smoothness in (x, t )). Let X = [0 , 1] d and T = [0 , 1] . For βx > 0 and βt > 0, write 
+
+βx = qx + αx, qx = ⌊βx⌋, αx ∈ (0 , 1] ,
+
+and 
+
+βt = qt + αt, qt = ⌊βt⌋, αt ∈ (0 , 1] .
+
+Let ν = ( ν1, . . . , ν d), where νj is a nonnegative integer. For x = ( x1, . . . , x d), define Dνx = ∂∥ν∥1 
+
+> ∂x ν11··· ∂x νdd
+
+. For M > 0,define Hβx,β t (M ) as the class of functions f : X × T → R such that, for all mixed derivatives 
+
+Dνx ∂mt f (x, t ), ∥ν∥1 ≤ qx, m = 0 , 1, . . . , q t,
+
+these derivatives exist and are uniformly bounded by M , and moreover satisfy 
+
+sup 
+
+> t∈T
+
+sup 
+
+> x̸=y
+
+Dνx ∂mt f (x, t ) − Dνx ∂mt f (y, t )
+
+∥x − y∥αx
+
+> 2
+
+≤ M, ∥ν∥1 = qx, m = 0 , 1, . . . , q t,
+
+and 
+
+sup 
+
+> x∈X
+
+sup 
+
+> s̸=t
+
+Dνx ∂qt 
+
+> t
+
+f (x, t ) − Dνx ∂qt 
+
+> t
+
+f (x, s )
+
+|t − s|αt ≤ M, ∥ν∥1 ≤ qx.
+
+Lemma 1 (Basis expansion under Hölder smoothness) . Suppose τ0(·; ·) ∈ H βx,β t (M ) in the sense of Definition 2. Then for every integer Kn ≥ 1, there exist basis functions ψ1, . . . , ψ Kn on [0 , 1] and coefficient functions b1, . . . , b Kn ∈Hβx (M ) : X → R such that 
+
+sup 
+
+> 1≤j≤J
+
+τ0(·; tj ) −
+
+> Kn
+
+X
+
+> m=1
+
+bm(·)ψm(tj ) 
+
+> 2
+> L2(PX)
+
+≤ CK −2βt 
+
+> n
+
+,
+
+where C > 0 depends only on M and βt. Consequently, it holds that 
+
+> J
+
+X
+
+> j=1
+
+τ0(·; tj ) −
+
+> Kn
+
+X
+
+> m=1
+
+bm(·)ψm(tj ) 
+
+> 2
+> L2(PX)
+
+≤ CJK −2βt 
+
+> n
+
+.
+
+Theorem 6 (Error rate for joint estimation over time) . Let the joint estimator ˆτ (x) =
+
+ ˆτ (x; t1), . . . , ˆτ (x; tJ )⊤, with J > 1, be defined by 
+
+ˆτ = arg min  
+
+> f∈F n
+
+Pn
+
+
+
+> J
+
+X
+
+> j=1
+
+{ ˆφi(tj ) − fj (Xi)}2
+
+ ,
+
+where Fn is a class of J-output neural networks with shared hidden layers. Suppose τ0 ∈ H βx,β t (M ). Under Assumptions 1–10, it holds that 
+
+> J
+
+X
+
+> j=1
+
+∥ˆτ (·; tj ) − τ0(·; tj )∥2  
+
+> L2(PX)
+
+=
+
+Op
+
+
+
+J1/(2 βt+1) n− 4βtβx/{(2 βt+1)(2 βx+d)} +
+
+
+
+J n 2βx/(2 βx+d)1/(2 βt+1) 
+
+ρn + δ2 
+
+> n,J
+
++ J{r(e) 
+
+> n
+
+r(S) 
+
+> n
+
++ r(G) 
+
+> n
+
+}2
+
+
+
+,
+
+where δn,J is the optimization error defined in the proof. 
+
+7Estimating heterogeneous treatment effects with survival outcomes via a deep survival learner 
+
+Remark 2. If one instead fits J separate DNNs, one for each time point tj , without using smoothness in t, then the leading order of approximation error is n−2βx/(2 βx+d) for each j by Theorem 5, so the aggregate approximation error is of order J n −2βx/(2 βx+d). By contrast, the joint estimator achieves a leading order of approximation error 
+
+J1/(2 βt+1) n− 4βtβx/{(2 βt+1)(2 βx+d)}. Since 1/(2 βt + 1) < 1 for βt > 0, the dependence on J is strictly sublinear. Therefore, the joint estimator achieves a smaller approximation rate than fitting J separate DNNs independently. 
+
+## 4 Simulation Study 
+
+To evaluate the finite-sample performance of DSL and to empirically verify its double robustness property, we conducted simulation studies under settings where either the survival model or the propensity score model is misspecified. We compared DSL with several commonly used causal machine learning methods, including the M-learner [Bo et al., 2025], X-learner [Künzel et al., 2019], and R-learner [Nie and Wager, 2021]. We also included two doubly robust learners based on nonparametric failure time Bayesian additive regression trees (NFT-BART), namely DRL-NFT-BART and PSDRL-NFT-BART [Yang et al., 2025], and the causal survival forest [Cui et al., 2023]. Across all scenarios, we generated independent datasets consisting of 800 training samples and 400 testing samples. For each subject i, a 30-dimensional covariate vector Xi was generated independently from a uniform distribution on 
+
+[−3, 3] 30 .
+
+Case 1: Correct survival and propensity score models In this setting, both the survival model and the propensity score model were correctly specified. The treatment assignment Wi was generated from a logistic regression model, 
+
+logit {P (Wi = 1 | Xi)} = α⊤Xi,
+
+where logit( p) = log {p/ (1 − p)}. The survival time followed a Weibull-Cox proportional hazards model, 
+
+λi(t) = λνt ν−1 exp  β⊤Xi + Wi θ⊤Xi
+
+,
+
+and the censoring time followed an Exponential-Cox model, 
+
+λCi (t) = λC exp( γ⊤Xi).
+
+We set λ = 0 .1, ν = 1 .2, and λC = 0 .2, so the average censoring rate is approximately 35%. The coefficient vectors α, β, θ, γ ∈ R30 were generated as evenly spaced values on the intervals [−1, 1] , [0 .4, −0.2] , [0 .3, −0.1] , and 
+
+[0 .3, −0.3] , respectively. Additional simulation results under a simplified setting with lower-dimensional covariates and a larger sample size are provided in the appendix for comparison. 
+
+Case 2: Correct survival model, misspecified propensity score This setting evaluates robustness to misspecification of the propensity score model. The survival and censoring mechanisms were identical to those in Case 1, while the treatment assignment followed a nonlinear model, 
+
+logit {P (Wi = 1 | Xi)} = 0 .5 + 0 .45 tanh( ηi/1.2) + 0 .25 I(ηi > 0) − 0.15 I(ηi < 1) + 0 .1 sin( η2 
+
+> i
+
+/3) ,
+
+where ηi = α⊤Xi and α is defined as in Case 1. The resulting censoring rate was approximately 40%. 
+
+Case 3: Misspecified survival model, correct propensity score This setting evaluates robustness to misspecification of the survival model. The propensity score was generated as in Case 1, while the survival time followed a non-proportional hazards model with time-varying treatment effects, 
+
+λi(t) = λ0 exp g(Xi) + Wi · h(Xi) · sin  v(Xi) t ,
+
+where 
+
+g(Xi) = β⊤Xi, u(Xi) = γ⊤Xi, v(Xi) = θ⊤Xi,h(Xi) = 0 .5 cos  u(Xi) + 0 .2u(Xi)2.
+
+The coefficient vectors β, γ, θ were generated as evenly spaced values on the intervals [−0.3, 0.5] , [−0.2, 0.3] , and 
+
+[−0.2, 0.4] , respectively. We set λ0 = 0 .05 . The censoring mechanism was the same as in Case 1, except that 
+
+λC = 0 .05 , yielding a censoring rate of approximately 50%. In each simulation setting, we evaluated CATE over a grid of J time points, with J ∈ { 1, 50 , 100 }. The time grid consisted of J equally spaced points between the 20th and 80th percentiles of the observed survival time distribution. When J = 1 , the evaluation time corresponded to the median observed survival time. 8Estimating heterogeneous treatment effects with survival outcomes via a deep survival learner We generated 200 independent replicates. For each replicate, DSL was trained on the training sample and evaluated on the testing sample. For replicate r = 1 , . . . , 200 , we computed the bias and mean squared error (MSE) averaged over test subjects and time points, 
+
+Bias (r) = 1
+
+N J 
+
+> n
+
+X
+
+> i=1
+> J
+
+X
+
+> j=1
+
+n
+
+ˆτ (r)(X(r) 
+
+> i
+
+; t(r) 
+
+> j
+
+) − τ0(X(r) 
+
+> i
+
+; t(r) 
+
+> j
+
+)
+
+o
+
+,
+
+MSE (r) = 1
+
+N J 
+
+> n
+
+X
+
+> i=1
+> J
+
+X
+
+> j=1
+
+n
+
+ˆτ (r)(X(r) 
+
+> i
+
+; t(r) 
+
+> j
+
+) − τ0(X(r) 
+
+> i
+
+; t(r) 
+
+> j
+
+)
+
+o2
+
+,
+
+where N = 400 denotes the number of test samples. We report the average bias and MSE across replicates, along with their corresponding 95% Monte Carlo confidence intervals, in Tables 1 and 2. We employed five-fold cross-fitting to construct the estimated pseudo-outcomes. The nuisance functions for the survival and censoring time was estimated using Cox proportional hazards models with linear predictors, and the treatment assignment was modeled using a logistic regression with linear covariates. The DSL architecture consists of three fully connected hidden layers with 128, 64, and 32 neurons, respectively, each using ReLU activation functions, and was trained using the Adam optimizer with a learning rate of 0.003. Regularization is achieved through the architectural design of the network, including its depth and width, which implicitly control model complexity. All neural network models were implemented in PyTorch . For competing methods, the M-Learner used logistic regression (via glm ) for propensity score estimation and generalized boosted regression models (GBM; gbm package) for outcome regression, with inverse probability of censoring weights estimated using random survival forests. The X-Learner employed survival random forests implemented in randomForestSRC , with tuning over terminal node sizes from 1 to 100 and candidate splitting variables starting at 15. The outcome regressions for the X-Learner were also fitted using GBM. The Causal Survival Forest was implemented using the grf package with 2000 trees and a minimum node size of 5. Finally, we implemented two doubly robust learners, DRL-NFT-BART and SDRL-NFT-BART[Yang et al., 2025] via nftbart . DRL-NFT-BART combines inverse probability of censoring weighting with outcome regression, while PSDRL-NFT-BART uses a propensity-score-weighted pseudo-outcome. Propensity scores were estimated via Super Learner, censoring probabilities via random survival forests, and NFT-BART was fitted with 1000 burn-in and 2000 posterior samples; CATE was estimated using a regression forest with 2000 trees. Table 1 summarizes the mean bias and corresponding 95% Monte Carlo confidence intervals across all simulation settings. Overall, the proposed DSL consistently exhibits the smallest bias among competing approaches. When both the survival and treatment models are correctly specified, the confidence intervals for DSL include zero at J = 1 and 
+
+J = 50 , indicating negligible bias; similar behavior persists when only the survival model is correctly specified, with coverage maintained across all J. In contrast, competing learners, including M-, X-, and R-learners, exhibit substantial and persistent bias that does not diminish with increasing J. Among the doubly robust methods, DRL-NFT-BART shows partial robustness, with bias substantially reduced under treatment model misspecification but remaining non-negligible when the survival model is misspecified. PSDRL-NFT-BART, which relies on propensity-score-weighted pseudo-outcomes, exhibits consistently large bias across all scenarios, indicating limited robustness in finite samples. When only the treatment model is correctly specified, DSL continues to outperform all competitors, achieving markedly smaller bias. For example, at J = 100 , DSL attains a bias of 0.011 (95% CI: 0.005, 0.016), compared with 0.219 (95% CI: 0.203, 0.234) for the R-learner and 0.236 (95% CI: 0.217, 0.255) for DRL-NFT-BART. Table 2 reports the corresponding mean squared error (MSE). Across all scenarios, DSL achieves competitive per-formance, with only a mild increase in MSE as the number of time points J grows. In the fully correctly specified setting, DRL-NFT-BART and the X-learner attain slightly lower MSE than DSL, although the differences are modest. Under nuisance misspecification, DSL demonstrates a clear advantage. When only the survival model is correctly specified, DSL substantially outperforms all competing methods, with MSE increasing only slightly from 0.070 (95% CI: 0.068, 0.072) at J = 1 to 0.076 (95% CI: 0.074, 0.077) at J = 100 , compared to higher MSEs for alternatives such as the X-learner. When the survival model is misspecified, DRL-NFT-BART achieves lower MSE at small J,but this advantage diminishes as J increases, and DSL remains competitive. In contrast, PSDRL-NFT-BART exhibits consistently higher MSE across all settings, consistent with its large bias. In summary, DSL remains competitive under correct specification, incurring minimal efficiency loss, while offering clear advantages under nuisance misspecification through reduced bias and enhanced robustness, particularly as model complexity increases. 9Estimating heterogeneous treatment effects with survival outcomes via a deep survival learner Table 1: Bias of conditional average treatment effect estimators across time under nuisance model misspecification Case 1: Correct Survival Correct Treatment Case 2: Correct Survival Wrong Treatment Case 3: Wrong Survival Correct Treatment 
+
+J = 1 
+
+Deep Survival Learner 0.002(-0.003, 0.007) 0.003(-0.003, 0.010) 0.012(0.005, 0.018) M-Learner 0.199(0.193, 0.204) 0.221(0.213, 0.229) 0.305(0.300, 0.310) R-Learner 0.068(0.054, 0.082) 0.030(0.011, 0.049) 0.223(0.207, 0.239) X-Learner 0.204(0.198, 0.211) 0.221(0.210, 0.232) 0.297(0.289, 0.305) DRL-NFT-BART 0.177(0.161, 0.194) -0.033(-0.067, 0.001) 0.209(0.188, 0.231) PSDRL-NFT-BART 0.360(0.354, 0.367) 0.372(0.364, 0.380) 0.386(0.380, 0.391) Causal Survival Forest 0.378(0.371, 0.384) 0.392(0.382, 0.402) 0.475(0.468, 0.481) 
+
+J = 50 
+
+Deep Survival Learner -0.001(-0.006, 0.004) 0.001(-0.006, 0.007) 0.012(0.006, 0.018) M-Learner 0.199(0.194, 0.204) 0.221(0.213, 0.229) 0.305(0.299, 0.310) R-Learner 0.068(0.054, 0.081) 0.022(0.003, 0.041) 0.220(0.205, 0.234) X-Learner 0.206(0.200, 0.213) 0.226(0.216, 0.236) 0.300(0.292, 0.308) DRL-NFT-BART 0.167(0.147, 0.187) -0.024(-0.056, 0.009) 0.238(0.221, 0.255) PSDRL-NFT-BART 0.360(0.354, 0.366) 0.373(0.364, 0.381) 0.386(0.380, 0.392) Causal Survival Forest 0.378(0.372, 0.384) 0.393(0.383, 0.403) 0.474(0.468, 0.481) 
+
+J = 100 
+
+Deep Survival Learner -0.007(-0.012, -0.002) -0.001(-0.008, 0.005) 0.011(0.005, 0.016) M-Learner 0.198(0.193, 0.204) 0.221(0.213, 0.229) 0.305(0.299, 0.310) R-Learner 0.073(0.061, 0.086) 0.028(0.010, 0.047) 0.219(0.203, 0.234) X-Learner 0.205(0.198, 0.212) 0.229(0.219, 0.240) 0.295(0.286, 0.303) DRL-NFT-BART 0.158(0.136, 0.180) -0.037(-0.071, -0.002) 0.236(0.217, 0.255) PSDRL-NFT-BART 0.360(0.354, 0.367) 0.373(0.364, 0.381) 0.384(0.378, 0.389) Causal Survival Forest 0.378(0.372, 0.384) 0.393(0.384, 0.403) 0.474(0.468, 0.481)         
+
+> 1Mean bias and 95% Monte Carlo confidence intervals are computed based on 200 simulation replicates.
+> 2Conditional average treatment effects are evaluated at J∈ { 1,50 ,100 }time points, equally spaced between the 20th and 80th percentiles of the observed survival time distribution.
+> 3Columns correspond to combinations of correctly and incorrectly specified survival and treatment assignment models; the censoring model is correctly specified in all scenarios.
+
+## 5 Boston Lung Cancer Study 
+
+We apply the proposed method to investigate heterogeneous treatment effects of perioperative chemotherapy using data from the Boston Lung Cancer Study (BLCS), a large prospective longitudinal cancer cohort initiated in 1992 and followed through 2022 [Zhai et al., 2022, Alvarez et al., 2026, Wang et al., 2023]. The BLCS has enrolled over 12,000 patients treated at Massachusetts General Hospital and includes detailed clinical, pathological, and follow-up information, including treatment history and survival outcomes. We evaluate the effect of perioperative chemotherapy on overall survival among patients with non–small cell lung cancer (NSCLC). The primary outcome is the time from diagnosis to death or censoring. Because perioperative chemotherapy is primarily administered to patients with early-stage disease, we restrict the analysis to patients with stage II or III NSCLC who underwent surgical resection. Within this subset, we compare patients who received perioperative chemotherapy with those who did not. Patients with missing information on cancer histology, stage, treatment status, or diagnosis date are excluded. After applying these inclusion and exclusion criteria, a total of 784 patients from the BLCS cohort are included in the analysis. Based on the descriptive statistics in Table 3, the study cohort consists of 784 patients, among whom 521 (66%) deaths were observed during follow-up. The median survival time for the overall population is 5.4 years (95% CI: 4.7–6.1). Patients who received surgery plus perioperative chemotherapy are defined as the treatment group, whereas those who underwent surgery alone constitute the control group. A total of 214 patients (27%) received perioperative chemotherapy. Baseline characteristics differ between the two groups. Patients in the treatment group are younger (median age 64 years, IQR: 58–71) than those in the control group (median age 68 years, IQR: 60–75), and a higher proportion of treated patients are male (54% vs. 48%). Survival outcomes appear more favorable in the treatment group: 110 deaths (51%) were observed among treated patients compared with 411 deaths (72%) in the control group. The median survival time is 6.5 years (95% CI: 5.3–8.6) for the treatment group, versus 4.8 years (95% CI: 4.1–5.8) for the control group. Missing values in age, BMI, and smoking intensity are imputed using their respective sample means (mean imputation). Kaplan–Meier curves (Figure 1) further illustrate differences in survival probabilities between patients who received perioperative chemotherapy and those who did not. 10 Estimating heterogeneous treatment effects with survival outcomes via a deep survival learner Table 2: Mean squared error of conditional average treatment estimators across time under nuisance model misspecifi-cation Case 1: Correct Survival Correct Treatment Case 2: Correct Survival Wrong Treatment Case 3: Wrong Survival Correct Treatment 
+
+J = 1 
+
+Deep Survival Learner 0.077(0.075, 0.080) 0.070(0.068, 0.072) 0.104(0.101, 0.106) M-Learner 0.114(0.110, 0.117) 0.122(0.117, 0.127) 0.190(0.185, 0.194) R-Learner 0.174(0.168, 0.180) 0.235(0.227, 0.244) 0.260(0.251, 0.269) X-Learner 0.081(0.078, 0.084) 0.093(0.089, 0.098) 0.154(0.150, 0.159) DRL-NFT-BART 0.070(0.064, 0.075) 0.133(0.113, 0.153) 0.087(0.077, 0.097) PSDRL-NFT-BART 0.142(0.138, 0.146) 0.152(0.147, 0.157) 0.152(0.148, 0.156) Causal Survival Forest 0.156(0.151, 0.160) 0.170(0.163, 0.176) 0.229(0.222, 0.235) 
+
+J = 50 
+
+Deep Survival Learner 0.084(0.082, 0.086) 0.074(0.072, 0.076) 0.112(0.109, 0.115) M-Learner 0.114(0.110, 0.117) 0.122(0.117, 0.127) 0.189(0.185, 0.194) R-Learner 0.174(0.168, 0.180) 0.237(0.229, 0.245) 0.261(0.251, 0.270) X-Learner 0.083(0.080, 0.085) 0.094(0.090, 0.098) 0.157(0.152, 0.161) DRL-NFT-BART 0.077(0.062, 0.091) 0.126(0.108, 0.143) 0.087(0.081, 0.094) PSDRL-NFT-BART 0.141(0.137, 0.146) 0.152(0.147, 0.158) 0.152(0.148, 0.156) Causal Survival Forest 0.156(0.152, 0.160) 0.170(0.164, 0.177) 0.228(0.222, 0.235) 
+
+J = 100 
+
+Deep Survival Learner 0.084(0.082, 0.086) 0.076(0.074, 0.077) 0.114(0.111, 0.117) M-Learner 0.114(0.110, 0.117) 0.123(0.118, 0.128) 0.190(0.185, 0.194) R-Learner 0.173(0.167, 0.179) 0.233(0.225, 0.241) 0.260(0.252, 0.269) X-Learner 0.082(0.080, 0.085) 0.096(0.091, 0.100) 0.154(0.150, 0.158) DRL-NFT-BART 0.082(0.066, 0.098) 0.139(0.117, 0.161) 0.088(0.082, 0.094) PSDRL-NFT-BART 0.142(0.138, 0.146) 0.152(0.147, 0.158) 0.150(0.146, 0.155) Causal Survival Forest 0.156(0.152, 0.161) 0.171(0.164, 0.177) 0.228(0.222, 0.234)         
+
+> 1Mean squared error and 95% Monte Carlo confidence intervals are computed based on 200 simulation replicates.
+> 2Conditional average treatment effects are evaluated at J∈ { 1,50 ,100 }time points, equally spaced between the 20th and 80th percentiles of the observed survival time distribution.
+> 3Columns correspond to combinations of correctly and incorrectly specified survival and treatment assignment models; the censoring model is correctly specified in all scenarios.
+
+Figure 1: Kaplan–Meier survival curves by treatment group. 
+
+We estimate CATEs at 10 prespecified time points ranging from 1 to 23 years after surgery. At each time point t, the CATE is defined as the difference in survival probabilities at time t between surgery plus perioperative chemotherapy and surgery alone, conditional on pre-treatment covariates. In our implementation, DSL employs a three-layer feedforward network with hidden layers of sizes 64, 32, and 16, respectively, and uses ReLU activation functions. Figure 2 presents the estimated CATEs across key baseline covariates, including gender, tumor stage, age, body mass index (BMI), and smoking intensity. Across all subgroups, perioperative chemotherapy is associated with positive treatment effects over the time horizon considered, corresponding to higher survival probabilities relative to surgery 11 Estimating heterogeneous treatment effects with survival outcomes via a deep survival learner Table 3: Clinical Characteristics of Patients from the Boston Lung Cancer Cohort Characteristic Overall 
+
+N = 784 1
+
+Surgery 
+
+N = 570 1
+
+Surgery + Chemotherapy 
+
+N = 214 1
+
+Death 521 (66%) 411 (72%) 110 (51%) Median Survival Time (years) 5.4 (4.7, 6.1) 4.8 (4.1, 5.8) 6.5 (5.3, 8.6) Age at disgonsis (yrs) 67 (59, 74) 68 (60, 75) 64 (58, 71) Unknown 19 12 7BMI (kg/m 2) 25.8 (22.9, 29.5) 25.8 (22.8, 29.6) 26.3 (23.5, 29.5) Unknown 60 53 7Tumor Stage II 445 (57%) 333 (58%) 112 (52%) III 339 (43%) 237 (42%) 102 (48%) Gender Female 394 (50%) 296 (52%) 98 (46%) Male 390 (50%) 274 (48%) 116 (54%) Race White 746 (95%) 547 (96%) 199 (93%) Asian 15 (1.9%) 7 (1.2%) 8 (3.7%) Black 8 (1.0%) 5 (0.9%) 3 (1.4%) Other 15 (1.9%) 11 (1.9%) 4 (1.9%) Smoking Status Current Smoker 213 (27%) 166 (29%) 47 (22%) Former Smoker 490 (62%) 353 (62%) 137 (64%) Never Smoker 81 (10%) 51 (8.9%) 30 (14%) 
+
+> 1
+> Median (IQR); n (%)
+
+alone. The magnitude of the estimated CATE increases during the first ten years following surgery and attenuates thereafter. Gender-specific results (Figure 2(a)) indicate larger treatment effects for female patients. Holding other covariates at their mean or mode, the estimated increases in 5-, 10-, and 20-year survival probabilities are 3.9%, 9.7%, and 6.8% for female patients, compared with 2.7%, −2.8% , and −0.5% for male patients. Substantial heterogeneity is also observed by tumor stage (Figure 2(b)). For patients with stage II NSCLC, perioperative chemotherapy is associated with increases of 3.9%, 9.7%, and 6.8% in 5-, 10-, and 20-year survival probabilities, respectively. In contrast, the estimated effects for stage III patients are smaller, with corresponding increases of 3.3%, 3.7%, and 3.3%. Age-specific effects (Figure 2(c)) are relatively stable. Holding other covariates at their mean or mode, the estimated increases in 5-, 10-, and 20-year survival probabilities are 3.9%, 10.1%, and 7.1% for patients aged 65 years, and 3.6%, 6.7%, and 5.1% for patients aged 75 years. Figure 2(d) suggests that patients with higher BMI experience larger treatment effects: patients with BMI = 32 show increases of 4.0%, 10.1%, and 7.1% at 5, 10, and 20 years, compared with 3.8%, 8.1%, and 5.9% for patients with BMI = 22 . Smoking intensity also modifies treatment effects (Figure 2(e)). Patients smoking 10 cigarettes per day exhibit larger survival gains (4.3%, 13.2%, and 8.9%) than those smoking 30 cigarettes per day (3.7%, 7.6%, and 5.6%). Overall, perioperative chemotherapy is associated with meaningful survival benefits for patients with early-stage NSCLC, with effects concentrated in the first ten years following surgery and attenuating thereafter. This temporal pattern is consistent with long-term follow-up from the International Adjuvant Lung Cancer Trial, which reported a significant interaction between treatment and follow-up time, with benefits diminishing beyond five years [Arriagada et al., 2010]. The observed heterogeneity by gender and tumor stage aligns with prior studies reporting greater benefits among female patients [Leiter et al., 2022, Sandler et al., 2016] and stronger effects in stage II disease relative to more advanced stages [Douillard et al., 2006]. The findings on smoking intensity are also consistent with prior evidence linking lower smoking exposure to improved chemotherapy outcomes [Zhang et al., 2008]. Finally, patients with higher BMI appear to benefit more from perioperative chemotherapy, a pattern consistent with the reported obesity paradox in lung cancer [Sakin et al., 2021]. These results underscore the importance of accounting for treatment effect heterogeneity and equity in evaluating treatment effectiveness [Arriagada et al., 2010, Leiter et al., 2022, Sandler et al., 2016, Douillard et al., 2006, Zhang et al., 2008]. 12 Estimating heterogeneous treatment effects with survival outcomes via a deep survival learner 
+
+Figure 2: Estimated conditional average treatment effects across key baseline covariates. Each panel displays the estimated CATE as a function of one covariate of interest (gender, tumor stage, age, body mass index, or smoking intensity), with all remaining covariates fixed at their sample means or modal values. 
+
+## 6 Discussion 
+
+We propose the Deep Survival Learner (DSL), a causal deep learning framework for estimating heterogeneous treatment effects with right-censored survival outcomes. The key contribution is the integration of a doubly robust pseudo-outcome for time-specific conditional average treatment effects with joint learning across time via shared representations. This formulation directly targets treatment effect trajectories over clinically relevant follow-up intervals and improves efficiency relative to pointwise approaches that ignore temporal dependence. The method relies on standard identification conditions, including unconfoundedness and appropriate handling of censoring. While the doubly robust construction mitigates misspecification of either the outcome or treatment model, correct specification of the censoring mechanism remains essential. This highlights the need for extensions that relax noninformative censoring, for example through joint modeling, sensitivity analysis, or alternative identification strategies. From a statistical perspective, DSL performs joint estimation of a vector-valued target over a time grid, trading bias and variance through shared representations. This raises questions on optimal grid design, regularization, and approximation error in high-dimensional settings. Extensions to competing risks would further broaden the framework to multivariate event processes and require redefining target functionals. Finally, our current analysis focuses on point estimation. Developing valid uncertainty quantification for time-indexed CATEs under censoring remains an important open problem, requiring new theoretical tools that account for dependence across time and the complexity of deep learners. 
+
+## Acknowledgements 
+
+This work was supported by NIH grants 2R01CA249096-05 and R01CA269398. We are grateful to the Editor, the Associate Editor, and the two referees for their insightful reviews, which substantially improved the article. We also thank our long-term collaborator, Dr. David Christiani, for providing the BLCS data and for his many insightful clinical suggestions. 
+
+## References 
+
+Guido W Imbens and Donald B Rubin. Causal inference for statistics, social, and biomedical sciences: An introduction .Taylor & Francis, 2016. Sai H. Dharmarajan, Jennifer L. Bragg-Gresham, Hal Morgenstern, Brenda W. Gillespie, Yi Li, Neil R. Powe, Delphine S. Tuot, Tanushree Banerjee, Nilka Ríos Burrows, Deborah B. Rolka, Sharon H. Saydah, and Rajiv Saran. State-level awareness of chronic kidney disease in the US. American Journal of Preventive Medicine , 53(3):300–307, 2017. doi:10.1016/j.amepre.2017.03.023. 13 Estimating heterogeneous treatment effects with survival outcomes via a deep survival learner Robert Haddad, Christopher Crum, Zigui Chen, Jeffrey Krane, Marshall Posner, Yi Li, and Robert Burk. HPV16 transmission between a couple with HPV-related head and neck cancer. Oral Oncology , 44(8):812–815, 2008. doi:10.1016/j.oraloncology.2007.09.004. Ting Zhai, Yi Li, Robert Brown, Michael Lanuti, Justin F Gainor, and David C Christiani. Spirometry at diagnosis and overall survival in non-small cell lung cancer patients. Cancer Medicine , 11(24):4796–4805, 2022. Daniel G Horvitz and Donovan J Thompson. A generalization of sampling without replacement from a finite universe. 
+
+Journal of the American Statistical Association , 47(260):663–685, 1952. Sören R Künzel, Jasjeet S Sekhon, Peter J Bickel, and Bin Yu. Metalearners for estimating heterogeneous treatment effects using machine learning. Proceedings of the National academy of Sciences , 116(10):4156–4165, 2019. Xinkun Nie and Stefan Wager. Quasi-oracle estimation of heterogeneous treatment effects. Biometrika , 108(2):299–319, 2021. Edward H Kennedy. Towards optimal doubly robust estimation of heterogeneous causal effects. arXiv preprint arXiv:2004.14497 , 2020. Yuhui Yang, Weiwei Hu, Zhenli Liao, and Fangyao Chen. Doubly robust estimators for heterogeneous treatment effects in heteroskedastic survival data. Statistics in Medicine , 44(23-24):e70301, 2025. Na Bo, Jong-Hyeon Jeong, Erick Forno, and Ying Ding. Evaluating meta-learners to analyze treatment heterogeneity in survival data: Application to electronic health records of pediatric asthma care in covid-19 pandemic. Statistics in Medicine , 44(3-4):e10333, 2025. Yifan Cui, Michael R Kosorok, Erik Sverdrup, Stefan Wager, and Ruoqing Zhu. Estimating heterogeneous treatment effects with right-censored data via causal survival forests. Journal of the Royal Statistical Society Series B: Statistical Methodology , 85(2):179–211, 2023. Susanne Dandl, Andreas Bender, and Torsten Hothorn. Heterogeneous treatment effect estimation for observational data using model-based forests. Statistical Methods in Medical Research , 33(3):392–413, 2024. Liangyuan Hu. A new method for clustered survival data: Estimation of treatment effect heterogeneity and variable selection. Biometrical Journal , 66(1):2200178, 2024. Alicia Curth, Changhee Lee, and Mihaela van der Schaar. Survite: Learning heterogeneous treatment effects from time-to-event data. Advances in Neural Information Processing Systems , 34:26740–26753, 2021. Yizhe Xu, Nikolaos Ignatiadis, Erik Sverdrup, Scott Fleming, Stefan Wager, and Nigam Shah. Treatment heterogeneity with survival outcomes. In Handbook of matching and weighting adjustments for causal inference , pages 445–482. Chapman and Hall/CRC, 2023. Paul R Rosenbaum and Donald B Rubin. The central role of the propensity score in observational studies for causal effects. Biometrika , 70(1):41–55, 1983. Guido W Imbens and Donald B Rubin. Causal Inference for Statistics, Social, and Biomedical Sciences: An Introduction .Cambridge University Press, 2015. Per Kragh Andersen and Richard D Gill. Cox’s regression model for counting processes: A large sample study. Annals of Statistics , 10(4):1100–1120, 1982. Anastasios A Tsiatis. Semiparametric Theory and Missing Data . Springer, 2006. Aad W van der Vaart. Asymptotic Statistics . Cambridge University Press, 1998. Victor Chernozhukov, Denis Chetverikov, Mert Demirer, Esther Duflo, Christian Hansen, Whitney Newey, and James Robins. Double/debiased machine learning for treatment and structural parameters. The Econometrics Journal , 21 (1):C1–C68, 2018a. Alexandre B. Tsybakov. Introduction to Nonparametric Estimation . Springer Series in Statistics. Springer, 2009. doi:10.1007/b13794. László Györfi, Michael Kohler, Adam Krzy˙ zak, and Harro Walk. A Distribution-Free Theory of Nonparametric Regression . Springer, 2006. Victor Chernozhukov, Denis Chetverikov, Mert Demirer, Esther Duflo, Christian Hansen, Whitney Newey, and James Robins. Double/debiased machine learning for treatment and structural parameters. The Econometrics Journal , 21 (1):C1–C68, 2018b. doi:10.1111/ectj.12097. Johannes Schmidt-Hieber. Deep relu network approximation of functions on a manifold. Journal of Machine Learning Research , 21(52):1–26, 2020. Aad W. van der Vaart and Jon A. Wellner. Weak Convergence and Empirical Processes . Springer, 1996. 14 Estimating heterogeneous treatment effects with survival outcomes via a deep survival learner Peter L. Bartlett, Dylan J. Foster, and Matus Telgarsky. Spectrally-normalized margin bounds for neural networks. In 
+
+Advances in Neural Information Processing Systems , volume 30, 2017. A. A. R. Alvarez, Y. Sun, Y. Li, and D. C. Christiani. Effects of sex on mortality in patients with lung cancer: A multiple mediation analysis of the Boston Lung Cancer Study. Clinical Lung Cancer , 27(2):201–209.e3, March 2026. Xinan Wang, Christopher W Romero-Gutierrez, Jui Kothari, Andrea Shafer, Yi Li, and David C Christiani. Prediagnosis smoking cessation and overall survival among patients with non–small cell lung cancer. JAMA Network Open , 6(5): e2311966, 2023. Rodrigo Arriagada, Ariane Dunant, Jean-Pierre Pignon, Bengt Bergman, Mariusz Chabowski, Dominique Grunenwald, Miroslaw Kozlowski, Cécile Le Péchoux, Robert Pirker, Maria-Izabel Sathler Pinel, et al. Long-term results of the international adjuvant lung cancer trial evaluating adjuvant cisplatin-based chemotherapy in resected lung cancer. 
+
+Journal of Clinical Oncology , 28(1):35–42, 2010. Amanda Leiter, Chung Yin Kong, Michael K Gould, Minal S Kale, Rajwanth R Veluswamy, Cardinale B Smith, Grace Mhango, Brian Z Huang, Juan P Wisnivesky, and Keith Sigel. The benefits and harms of adjuvant chemotherapy for non-small cell lung cancer in patients with major comorbidities: A simulation study. Plos one , 17(11):e0263911, 2022. Britt J Sandler, Zuoheng Wang, Jacquelyn G Hancock, Daniel J Boffa, Frank C Detterbeck, and Anthony W Kim. Gender, age, and comorbidity status predict improved survival with adjuvant chemotherapy following lobectomy for non-small cell lung cancers larger than 4 cm. Annals of surgical oncology , 23:638–645, 2016. Jean-Yves Douillard, Rafael Rosell, Mario De Lena, Francesco Carpagnano, Rodryg Ramlau, Jose Luis Gonzáles-Larriba, Tomasz Grodzki, Jose Rodrigues Pereira, Alain Le Groumellec, Vito Lorusso, et al. Adjuvant vinorelbine plus cisplatin versus observation in patients with completely resected stage ib–iiia non-small-cell lung cancer (adjuvant navelbine international trialist association [anita]): a randomised controlled trial. The Lancet Oncology , 7 (9):719–727, 2006. Zhenfa Zhang, Feng Xu, Shengguang Wang, Ni Li, and Changli Wang. Influence of smoking on histologic type and the efficacy of adjuvant chemotherapy in resected non-small cell lung cancer. Lung Cancer , 60(3):434–440, 2008. Aysegul Sakin, Suleyman Sahin, Muhammed Mustafa Atci, Nurgul Yasar, Cumhur Demir, Caglayan Geredeli, Abdullah Sakin, and Sener Cihan. The effect of body mass index on treatment outcomes in patients with metastatic non-small cell lung cancer treated with platinum-based therapy. Nutrition and Cancer , 73(8):1411–1418, 2021. 15 Estimating heterogeneous treatment effects with survival outcomes via a deep survival learner 
+
+## Supplementary Materials for “estimating heterogeneous treatment effects with survival outcomes via a deep survival learner" 
+
+Proofs of Theorems 
+
+Proof of Theorem 1: It suffices to show that, for each w ∈ { 0, 1},
+
+E{πwi (t) | Xi = x} = P (T wi > t | Xi = x),
+
+since this immediately implies 
+
+E{φi(t) | Xi = x} = P (T 1 
+
+> i
+
+> t | Xi = x) − P (T 0 
+
+> i
+
+> t | Xi = x) = τ0(x; t).
+
+We prove the result for w = 1 ; the case w = 0 follows by symmetry. Recall that 
+
+π1 
+
+> i
+
+(t) = S1(x; t) + I(Wi = 1) 
+
+e1(x)
+
+ I(Ui > t )
+
+G1(x; t) − S1(x; t)
+
+
+
+,
+
+where S1(x; t) = P (Ti > t | Xi = x, W i = 1) , e1(x) = P (Wi = 1 | Xi = x), and G1(x; t) = P (Ci > t | Xi =
+
+x, W i = 1) .Taking conditional expectation given Xi = x yields 
+
+E{π1 
+
+> i
+
+(t) | Xi = x} = S1(x; t) + E
+
+ I(Wi = 1) 
+
+e1(x)
+
+ I(Ui > t )
+
+G1(x; t) − S1(x; t)
+
+
+
+Xi = x
+
+
+
+.
+
+By the law of iterated expectations, the second term can be written as 
+
+E
+
+
+
+E
+
+ I(Wi = 1) 
+
+e1(x)
+
+ I(Ui > t )
+
+G1(x; t) − S1(x; t)
+
+
+
+Xi = x, W i
+
+
+
+Xi = x
+
+
+
+.
+
+Conditioning on Wi, and noting that I(Wi = 1) is deterministic given Wi, we obtain 
+
+= E
+
+
+
+I(Wi = 1) 1
+
+e1(x)
+
+
+
+E
+
+ I(Ui > t )
+
+G1(x; t) Xi = x, W i = 1 
+
+
+
+− S1(x; t)
+
+
+
+Xi = x
+
+
+
+.
+
+Using the definition Ui = min( Ti, Ci), we have I(Ui > t ) = I(Ti > t, Ci > t ). Under Assumption 4, Ci ⊥ T wi |
+
+(Xi, W i = w) for w ∈ { 0, 1}. Under Assumption 1, when conditioning on Wi = w we have Ti = T wi , which implies 
+
+Ci ⊥ Ti | (Xi, W i = w), and in particular, Ti ⊥ C i | (Xi, W i = 1) . This implies 
+
+E[ I(Ti > t, Ci > t )| Xi = x, W i = 1] = P (Ti > t | Xi = x, W i = 1) P (Ci > t | Xi = x, W i = 1) .
+
+Therefore, 
+
+E
+
+ I(Ui > t )
+
+G1(x; t) Xi = x, W i = 1 
+
+
+
+= P (Ti > t | Xi = x, W i = 1) P (Ci > t | Xi = x, W i = 1) 
+
+P (Ci > t | Xi = x, W i = 1) = S1(x; t).
+
+Substituting back yields 
+
+E{π1 
+
+> i
+
+(t) | Xi = x} = S1(x; t) + E
+
+
+
+I(Wi = 1) 1
+
+e1(x)
+
+S1(x; t) − S1(x; t) Xi = x
+
+
+
+= S1(x; t).
+
+Finally, by Assumptions 1 and 2, 
+
+S1(x; t) = P (Ti > t | Xi = x, W i = 1) = P (T 1 
+
+> i
+
+> t | Xi = x).
+
+This completes the proof. 1Estimating heterogeneous treatment effects with survival outcomes via a deep survival learner 
+
+Proof of Theorem 2: It suffices to show that for each w ∈ { 0, 1},
+
+E{πwi (t) | Xi = x} = P (T wi > t | Xi = x),
+
+because then E{φi(t) | Xi = x} = P (T 1 
+
+> i
+
+> t | Xi = x) − P (T 0 
+
+> i
+
+> t | Xi = x) = τ0(x; t). We prove the claim for 
+
+w = 1 ; the case w = 0 follows by symmetry. Recall the definition 
+
+π1 
+
+> i
+
+(t) = S1(Xi; t) + I(Wi = 1) 
+
+e1(Xi)
+
+ Yi(t)
+
+G1(Xi; t) − S1(Xi; t)
+
+
+
+,
+
+where Yi(t) = I(Ui > t ) = I(Ti > t, Ci > t ), and where the nuisance functions S1(x; t), G1(x; t) and e1(x) are intended to approximate 
+
+S10 (x; t) = P (Ti > t | Xi = x, W i = 1) , G10(x; t) = P (Ci > t | Xi = x, W i = 1) ,e10(x) = P (Wi = 1 | Xi = x).
+
+Throughout, Assumptions 1–5 ensure that these conditional probabilities are well-defined and that G10(x; t) > 0.
+
+Case A: the survival model is correctly specified. Assume S1(x; t) = S10 (x; t) and the censoring model is correctly specified, i.e., G1(x; t) = G10(x; t). Then, regardless of whether the propensity score model e1(·) is correct, the argument in Theorem 1 applies verbatim and yields 
+
+E{π1 
+
+> i
+
+(t) | Xi = x} = S10 (x; t) = P (T 1 
+
+> i
+
+> t | Xi = x),
+
+where the last equality follows from Assumptions 1 and 2. For completeness, we provide the key step: 
+
+E
+
+ Yi(t)
+
+G10(x; t) Xi = x, W i = 1 
+
+
+
+= P (Ti > t, Ci > t | Xi = x, W i = 1) 
+
+P (Ci > t | Xi = x, W i = 1) = P (Ti > t | Xi = x, W i = 1) ,
+
+where the second equality uses Assumption 4 (noninformative censoring), i.e., Ti ⊥ C i | (Xi, W i = 1) . This establishes unbiasedness in Case A. 
+
+Case B: the propensity score model is correctly specified. Now assume the censoring model is correctly specified, 
+
+G1(x; t) = G10(x; t), and the propensity score is correctly specified, e1(x) = e10(x) = P (Wi = 1 | Xi = x), while allowing the survival model S1(x; t) to be misspecified. We show that E{π1 
+
+> i
+
+(t) | Xi = x} = S10 (x; t).Condition on Xi = x. Using the definition of π1 
+
+> i
+
+(t),
+
+E{π1 
+
+> i
+
+(t) | Xi = x} = S1(x; t) + E
+
+ I(Wi = 1) 
+
+e10(x)
+
+ Yi(t)
+
+G10(x; t) − S1(x; t)
+
+
+
+Xi = x
+
+
+
+.
+
+Apply the law of iterated expectations conditioning on (Xi, W i):
+
+E
+
+ I(Wi = 1) 
+
+e10(x)
+
+ Yi(t)
+
+G10(x; t) − S1(x; t)
+
+
+
+Xi = x
+
+
+
+= E
+
+
+
+E
+
+ I(Wi = 1) 
+
+e10(x)
+
+ Yi(t)
+
+G10(x; t) − S1(x; t)
+
+
+
+Xi = x, W i
+
+
+
+Xi = x
+
+
+
+.
+
+Inside the inner expectation, I(Wi = 1) is fixed given Wi. Hence 
+
+= E
+
+ I(Wi = 1) 
+
+e10(x)
+
+
+
+E
+
+ Yi(t)
+
+G10(x; t) Xi = x, W i = 1 
+
+
+
+− S1(x; t)
+
+
+
+Xi = x
+
+
+
+.
+
+We next compute the conditional mean term. Since Yi(t) = I(Ti > t, Ci > t ) and G10(x; t) = P (Ci > t | Xi =
+
+x, W i = 1) ,
+
+E
+
+ Yi(t)
+
+G10(x; t) Xi = x, W i = 1 
+
+
+
+= E[I(Ti > t, Ci > t ) | Xi = x, W i = 1] 
+
+P (Ci > t | Xi = x, W i = 1) .
+
+By Assumption 4 and a similar argument in the Proof of Theorem 1, Ti ⊥ C i | (Xi, W i = 1) , so 
+
+P (Ti > t, Ci > t | Xi = x, W i = 1) = P (Ti > t | Xi = x, W i = 1) P (Ci > t | Xi = x, W i = 1) .
+
+2Estimating heterogeneous treatment effects with survival outcomes via a deep survival learner Therefore, 
+
+E
+
+ Yi(t)
+
+G10(x; t) Xi = x, W i = 1 
+
+
+
+= P (Ti > t | Xi = x, W i = 1) = S10 (x; t).
+
+Substituting this back, 
+
+E{π1 
+
+> i
+
+(t) | Xi = x} = S1(x; t) + E
+
+ I(Wi = 1) 
+
+e10(x)
+
+S10 (x; t) − S1(x; t) Xi = x
+
+
+
+= S1(x; t) + S10 (x; t) − S1(x; t) E
+
+ I(Wi = 1) 
+
+e10(x) Xi = x
+
+
+
+.
+
+Because e10(x) = P (Wi = 1 | Xi = x), we have 
+
+E
+
+ I(Wi = 1) 
+
+e10(x) Xi = x
+
+
+
+= E{I(Wi = 1) | Xi = x}
+
+e10(x) = P (Wi = 1 | Xi = x)
+
+P (Wi = 1 | Xi = x) = 1 .
+
+This identity follows from correct specification of the propensity score and Assumption 3, which guarantees 0 <e10(x) < 1. Hence, 
+
+E{π1 
+
+> i
+
+(t) | Xi = x} = S10 (x; t) = P (Ti > t | Xi = x, W i = 1) .
+
+Finally, by Assumptions 1 and 2, 
+
+P (Ti > t | Xi = x, W i = 1) = P (T 1 
+
+> i
+
+> t | Xi = x),
+
+so E{π1 
+
+> i
+
+(t) | Xi = x} = P (T 1 
+
+> i
+
+> t | Xi = x), completing the proof for w = 1 .The proof for w = 0 is identical after replacing 1 by 0 throughout. 
+
+Proof of Theorem 3: We first analyze the treatment-specific component ˆπwi (t) for fixed w ∈ { 0, 1}. As defined in the notation section, conditioning on Xi = x, and using cross-fitting so that ˆSw(x; t), ˆew(x), and ˆGw(x; t) are fixed, we take expectation with respect to Ti, Ci:
+
+E{ˆπwi (t) | Xi = x} = ˆSw(x; t) + 1ˆew(x) E
+
+"
+
+I(Wi = w)
+
+(
+
+Yi(t)ˆGw(x; t) − ˆSw(x; t)
+
+)
+
+Xi = x
+
+#
+
+.
+
+By iterated expectation, 
+
+E
+
+"
+
+I(Wi = w)
+
+(
+
+Yi(t)ˆGw(x; t) − ˆSw(x; t)
+
+)
+
+Xi = x
+
+#
+
+= ew 
+
+> 0
+
+(x)
+
+(
+
+E
+
+"
+
+Yi(t)ˆGw(x; t) Xi = x, W i = w
+
+#
+
+− ˆSw(x; t)
+
+)
+
+.
+
+Since Yi(t) = I(Ti > t, Ci > t ), by noninformative censoring, 
+
+E
+
+"
+
+Yi(t)ˆGw(x; t) Xi = x, W i = w
+
+#
+
+= P (Ti > t, Ci > t | Xi = x, W i = w)ˆGw(x; t)= P (Ti > t | Xi = x, W i = w) P (Ci > t | Xi = x, W i = w)ˆGw(x; t)= Sw 
+
+> 0
+
+(x; t) Gw 
+
+> 0
+
+(x; t)ˆGw(x; t) .
+
+Hence, 
+
+E{ˆπwi (t) | Xi = x} = ˆSw(x; t) + ew 
+
+> 0
+
+(x)ˆew(x)
+
+(
+
+Sw 
+
+> 0
+
+(x; t) Gw 
+
+> 0
+
+(x; t)ˆGw(x; t) − ˆSw(x; t)
+
+)
+
+.
+
+Subtracting Sw 
+
+> 0
+
+(x; t) from both sides gives 
+
+E{ˆπwi (t) | Xi = x} − Sw 
+
+> 0
+
+(x; t)= ˆSw(x; t) − Sw 
+
+> 0
+
+(x; t) + ew 
+
+> 0
+
+(x)ˆew(x)
+
+(
+
+Sw 
+
+> 0
+
+(x; t) Gw 
+
+> 0
+
+(x; t)ˆGw(x; t) − ˆSw(x; t)
+
+)
+
+.
+
+3Estimating heterogeneous treatment effects with survival outcomes via a deep survival learner Add and subtract ew   
+
+> 0(x)ˆew(x)
+
+Sw 
+
+> 0
+
+(x; t) to obtain 
+
+E{ˆπwi (t) | Xi = x} − Sw 
+
+> 0
+
+(x; t)=
+
+
+
+1 − ew 
+
+> 0
+
+(x)ˆew(x)
+
+  ˆSw(x; t) − Sw 
+
+> 0
+
+(x; t) + ew 
+
+> 0
+
+(x)ˆew(x)
+
+(
+
+Sw 
+
+> 0
+
+(x; t) Gw 
+
+> 0
+
+(x; t)ˆGw(x; t) − Sw 
+
+> 0
+
+(x; t)
+
+)
+
+= ˆew(x) − ew 
+
+> 0
+
+(x)ˆew(x)
+
+ ˆSw(x; t) − Sw 
+
+> 0
+
+(x; t) + ew 
+
+> 0
+
+(x)ˆew(x)
+
+Sw 
+
+> 0
+
+(x; t)ˆGw(x; t)
+
+Gw 
+
+> 0
+
+(x; t) − ˆGw(x; t) .
+
+Now use 
+
+ˆφi(t) = ˆ π1 
+
+> i
+
+(t) − ˆπ0 
+
+> i
+
+(t), φ0 
+
+> i
+
+(t) = π1
+
+> i, 0
+
+(t) − π0
+
+> i, 0
+
+(t),
+
+together with 
+
+E{πwi, 0(t) | Xi = x} = Sw 
+
+> 0
+
+(x; t), w = 0 , 1,
+
+to obtain 
+
+E ˆφi(t) − φ0 
+
+> i
+
+(t) | Xi = x =
+
+
+
+E{ˆπ1 
+
+> i
+
+(t) | Xi = x} − S10 (x; t)
+
+
+
+−
+
+
+
+E{ˆπ0 
+
+> i
+
+(t) | Xi = x} − S00 (x; t)
+
+
+
+,
+
+which yields (4). It remains to bound the right-hand side uniformly in x. By positivity and uniform consistency of ˆew and ˆGw (Assumption 6) , with probability tending to one, 
+
+inf  
+
+> x
+
+ˆew(x) ≥ c/ 2, inf 
+
+> x
+
+ˆGw(x; t) ≥ c/ 2.
+
+Also 0 ≤ Sw 
+
+> 0
+
+(x; t) ≤ 1. Therefore, 
+
+sup 
+
+> x
+
+ˆew(x) − ew 
+
+> 0
+
+(x)ˆew(x)
+
+ ˆSw(x; t) − Sw 
+
+> 0
+
+(x; t) = Op
+
+
+
+r(e) 
+
+> n
+
+r(S)
+
+> n
+
+
+
+,
+
+sup 
+
+> x
+
+ew 
+
+> 0
+
+(x)ˆew(x)
+
+Sw 
+
+> 0
+
+(x; t)ˆGw(x; t)
+
+Gw 
+
+> 0
+
+(x; t) − ˆGw(x; t) = Op
+
+
+
+r(G)
+
+> n
+
+
+
+.
+
+Summing over w = 0 , 1 yields 
+
+sup 
+
+> x
+
+E ˆφi(t) − φ0 
+
+> i
+
+(t) | Xi = x = Op
+
+
+
+r(e) 
+
+> n
+
+r(S) 
+
+> n
+
++ r(G)
+
+> n
+
+
+
+.
+
+If ˆGw = Gw 
+
+> 0
+
+, the second term vanishes and the bound reduces to 
+
+Op
+
+
+
+r(e) 
+
+> n
+
+r(S)
+
+> n
+
+
+
+.
+
+This completes the proof. 
+
+Proof of Theorem 4: For notational simplicity, write 
+
+ˆφi = ˆ φi(t), φ0 
+
+> i
+
+= φ0 
+
+> i
+
+(t), τ0(x) = τ0(x; t).
+
+Define the conditional mean of the estimated pseudo-outcome by 
+
+mn(x) := E[ ˆ φi | Xi = x].
+
+Then 
+
+ˆτ (x) − τ0(x) = {ˆτ (x) − mn(x)} + {mn(x) − τ0(x)},
+
+and therefore 
+
+∥ˆτ − τ0∥L2(PX ) ≤ ∥ ˆτ − mn∥L2(PX ) + ∥mn − τ0∥L2(PX ). (5) We study the two terms separately. By definition of τ0,
+
+τ0(x) = E[φ0 
+
+> i
+
+| Xi = x].
+
+4Estimating heterogeneous treatment effects with survival outcomes via a deep survival learner Hence 
+
+mn(x) − τ0(x) = E[ ˆ φi − φ0 
+
+> i
+
+| Xi = x].
+
+By Theorem 3, 
+
+sup 
+
+> x
+
+|mn(x) − τ0(x)| = sup 
+
+> x
+
+E[ ˆ φi − φ0 
+
+> i
+
+| Xi = x] = Op
+
+ r(e) 
+
+> n
+
+r(S) 
+
+> n
+
++ r(G)
+
+> n
+
+.
+
+Since r(e) 
+
+> n
+
+r(S) 
+
+> n
+
++ r(G) 
+
+> n
+
+→ 0,
+
+sup 
+
+> x
+
+|mn(x) − τ0(x)| = op(1) .
+
+Therefore, 
+
+∥mn − τ0∥L2(PX ) ≤ sup 
+
+> x
+
+|mn(x) − τ0(x)| = op(1) . (6) For any measurable function f ,
+
+Rn(f ) := E( ˆ φi − f (Xi)) 2 < ∞
+
+by Assumption 7 Expanding the square conditional on Xi,
+
+Rn(f ) = E
+
+
+
+E( ˆ φi − f (Xi)) 2 | Xi
+
+
+
+= E
+
+
+
+Var( ˆ φi | Xi) + {mn(Xi) − f (Xi)}2
+
+.
+
+Thus, 
+
+Rn(f ) = E[Var( ˆ φi | Xi)] + ∥f − mn∥2 
+
+> L2(PX)
+
+.
+
+Therefore mn is the unique population minimizer of Rn(f ) over all square-integrable functions, and over Fn the excess risk satisfies 
+
+Rn(f ) − Rn(mn) = ∥f − mn∥2 
+
+> L2(PX)
+
+. (7) Let 
+
+f ∗ 
+
+> n
+
+∈ arg min  
+
+> f∈F n
+
+Rn(f )
+
+be a population risk minimizer over Fn. Since ˆτ minimizes the empirical risk, 
+
+Pn[( ˆ φi − ˆτ (Xi)) 2] ≤ Pn[( ˆ φi − f ∗ 
+
+> n
+
+(Xi)) 2].
+
+Subtract Rn(ˆ τ ) from the left-hand side and Rn(f ∗ 
+
+> n
+
+) from the right-hand side: 
+
+Rn(ˆ τ ) − Rn(f ∗ 
+
+> n
+
+) ≤
+
+n
+
+Rn(ˆ τ ) − Pn[( ˆ φi − ˆτ (Xi)) 2]
+
+o
+
++
+
+n
+
+Pn[( ˆ φi − f ∗ 
+
+> n
+
+(Xi)) 2] − Rn(f ∗ 
+
+> n
+
+)
+
+o
+
+.
+
+Hence 
+
+Rn(ˆ τ ) − Rn(f ∗ 
+
+> n
+
+) ≤ 2 sup  
+
+> f∈F n
+
+Pn[( ˆ φi − f (Xi)) 2] − Rn(f ) = op(1) 
+
+by Assumption 9. Using (7), 
+
+∥ˆτ − mn∥2  
+
+> L2(PX)
+
+≤ ∥ f ∗ 
+
+> n
+
+− mn∥2  
+
+> L2(PX)
+
++ op(1) . (8) We now relate mn to τ0. For any f ∈ F n,
+
+∥f − mn∥L2(PX ) ≤ ∥ f − τ0∥L2(PX ) + ∥τ0 − mn∥L2(PX ).
+
+Taking infima over f ∈ F n and using Assumption 8 together with (6), we obtain 
+
+inf  
+
+> f∈F n
+
+∥f − mn∥L2(PX ) ≤ inf  
+
+> f∈F n
+
+∥f − τ0∥L2(PX ) + ∥τ0 − mn∥L2(PX ) =inf  
+
+> f∈F n
+
+∥f − τ0∥L∞(PX ) + op(1) = op(1) .
+
+Since f ∗ 
+
+> n
+
+minimizes Rn(f ) over Fn, equivalently it minimizes ∥f − mn∥2  
+
+> L2(PX)
+
+over Fn. Therefore, 
+
+∥f ∗ 
+
+> n
+
+− mn∥L2(PX ) = op(1) . (9) 5Estimating heterogeneous treatment effects with survival outcomes via a deep survival learner Combining (8) and (9) yields 
+
+∥ˆτ − mn∥L2(PX ) = op(1) .
+
+Finally, substitute this and (6) into (5): 
+
+∥ˆτ − τ0∥L2(PX ) ≤ ∥ ˆτ − mn∥L2(PX ) + ∥mn − τ0∥L2(PX ) = op(1) .
+
+Hence 
+
+∥ˆτ (·; t) − τ0(·; t)∥L2(PX )
+
+> p
+
+−→ 0.
+
+This completes the proof. 
+
+Proof of Theorem 5: Write 
+
+ˆφi = ˆ φi(t), φ0 
+
+> i
+
+= φ0 
+
+> i
+
+(t), τ0(x) = τ0(x; t),
+
+and define 
+
+mn(x) := E( ˆ φi | Xi = x).
+
+Because ˆτ (·; t) is obtained by regressing the cross-fitted pseudo-outcome on Xi, the relevant population regression target is mn, not τ0 directly. We therefore decompose 
+
+∥ˆτ − τ0∥L2(PX ) ≤ ∥ ˆτ − mn∥L2(PX ) + ∥mn − τ0∥L2(PX ). (10) We first control the second term using the explicit construction of the pseudo-outcome. By definition, 
+
+mn(x) − τ0(x) = E{ ˆφi − φ0 
+
+> i
+
+| Xi = x},
+
+since 
+
+τ0(x) = E{φ0 
+
+> i
+
+| Xi = x}.
+
+By Theorem 3, 
+
+sup 
+
+> x
+
+|mn(x) − τ0(x)| = Op
+
+ r(e) 
+
+> n
+
+r(S) 
+
+> n
+
++ r(G)
+
+> n
+
+.
+
+Hence 
+
+∥mn − τ0∥L2(PX ) ≤ sup 
+
+> x
+
+|mn − τ0| = Op
+
+ r(e) 
+
+> n
+
+r(S) 
+
+> n
+
++ r(G)
+
+> n
+
+, (11) which accommodates censoring estimation error with r(G) 
+
+> n
+
+.Next, consider the population risk associated with the constructed pseudo-outcome, 
+
+Rn(f ) := E( ˆ φi − f (Xi)) 2.
+
+Since mn(x) = E( ˆ φi | Xi = x), conditioning on Xi gives 
+
+Rn(f ) = Rn(mn) + ∥f − mn∥2 
+
+> L2(PX)
+
+.
+
+Thus mn is the population least-squares target for the regression step, and 
+
+Rn(f ) − Rn(mn) = ∥f − mn∥2 
+
+> L2(PX)
+
+. (12) We now use the fact that τ0 is Hölder smooth. By Assumption 8, there exists f ⋆n ∈ F n such that 
+
+∥f ⋆n − τ0∥L∞(PX ) ≤ Cn −β/ (2 β+d).
+
+Therefore, 
+
+∥f ⋆n − mn∥L2(PX ) ≤ ∥ f ⋆n − τ0∥L2(PX ) + ∥τ0 − mn∥L2(PX ) = Op
+
+
+
+n−β/ (2 β+d) + r(e) 
+
+> n
+
+r(S) 
+
+> n
+
++ r(G)
+
+> n
+
+
+
+,
+
+where we used (11) and the density bound in Assumption 3. Consequently, 
+
+Rn(f ⋆n ) − Rn(mn) = ∥f ⋆n − mn∥2  
+
+> L2(PX)
+
+= Op
+
+
+
+n−2β/ (2 β+d) + {r(e) 
+
+> n
+
+r(S) 
+
+> n
+
++ r(G) 
+
+> n
+
+}2
+
+. (13) Because ˆτ is an approximate empirical minimizer, it follows that 
+
+Pn
+
+( ˆ φi − ˆτ (Xi)) 2 ≤ Pn
+
+( ˆ φi − f ⋆n (Xi)) 2 + δ2
+
+> n
+
+,
+
+6Estimating heterogeneous treatment effects with survival outcomes via a deep survival learner by Assumption 10. Adding and subtracting population risks yields 
+
+Rn(ˆ τ ) − Rn(f ⋆n ) ≤ Rn(ˆ τ ) − Pn[( ˆ φi − ˆτ (Xi)) 2]
+
++ Pn[( ˆ φi − f ⋆n (Xi)) 2] − Rn(f ⋆n ) + δ2
+
+> n
+
+≤ 2 sup  
+
+> f∈F n
+
+Pn
+
+( ˆ φi − f (Xi)) 2 − Rn(f ) + δ2
+
+> n
+
+= Op(ρn) + δ2
+
+> n
+
+,
+
+where the last equality is due to Assumption 9. Combining this with (13), we obtain 
+
+Rn(ˆ τ ) − Rn(mn) = Op
+
+
+
+n−2β/ (2 β+d) + ρn + δ2 
+
+> n
+
++ {r(e) 
+
+> n
+
+r(S) 
+
+> n
+
++ r(G) 
+
+> n
+
+}2
+
+.
+
+Applying (12), 
+
+∥ˆτ − mn∥2  
+
+> L2(PX)
+
+= Op
+
+
+
+n−2β/ (2 β+d) + ρn + δ2 
+
+> n
+
++ {r(e) 
+
+> n
+
+r(S) 
+
+> n
+
++ r(G) 
+
+> n
+
+}2
+
+,
+
+and hence 
+
+∥ˆτ − mn∥L2(PX ) = Op
+
+
+
+n−β/ (2 β+d) + ρ1/2 
+
+> n
+
++ δn + r(e) 
+
+> n
+
+r(S) 
+
+> n
+
++ r(G)
+
+> n
+
+
+
+. (14) Finally, combine (10), (11), and (14) to conclude 
+
+∥ˆτ − τ0∥L2(PX ) = Op
+
+
+
+n−β/ (2 β+d) + ρ1/2 
+
+> n
+
++ δn + r(e) 
+
+> n
+
+r(S) 
+
+> n
+
++ r(G)
+
+> n
+
+
+
+.
+
+This completes the proof. 
+
+Proof. of Lemma 1 We give a constructive proof based on a local polynomial approximation in the time direction. We aim to show that the coefficient functions in this expansion inherit the βx-Hölder smoothness of τ0(x, t ) in the covariate direction. Write 
+
+βt = qt + αt, qt = ⌊βt⌋, αt ∈ (0 , 1] .
+
+Fix an integer K ≥ 1. Partition [0 , 1] into K equal subintervals 
+
+Im =
+
+h m − 1
+
+K , mK
+
+
+
+, m = 1 , . . . , K − 1, IK =
+
+h K − 1
+
+K , 1
+
+i
+
+.
+
+Let um denote the midpoint of Im. For each interval Im, we approximate τ0(x, t ) in the time variable t by its Taylor polynomial of order qt around um.For m = 1 , . . . , K and ℓ = 0 , . . . , q t, define 
+
+ψm,ℓ (t) := ( t − um)ℓ1{t ∈ Im},
+
+and define the corresponding coefficient functions 
+
+bm,ℓ (x) := ∂ℓt τ0(x, u m)
+
+ℓ! , x ∈ X .
+
+Then, for t ∈ Im, qtX
+
+> ℓ=0
+
+bm,ℓ (x)ψm,ℓ (t) = 
+
+> qt
+
+X
+
+> ℓ=0
+
+∂ℓt τ0(x, u m)
+
+ℓ! (t − um)ℓ,
+
+which is the Taylor polynomial of τ0(x, ·) at um.We now verify that, uniformly over m and ℓ, the function bm,ℓ belongs to a βx-Hölder ball on X .Write 
+
+βx = qx + αx, qx = ⌊βx⌋, αx ∈ (0 , 1] .
+
+Fix m ∈ { 1, . . . , K } and ℓ ∈ { 0, . . . , q t}. By definition, 
+
+bm,ℓ (x) = ∂ℓt τ0(x, u m)
+
+ℓ! .
+
+For any multi-index ν with |ν| ≤ qx,
+
+Dνx bm,ℓ (x) = Dνx ∂ℓt τ0(x, u m)
+
+ℓ! .
+
+7Estimating heterogeneous treatment effects with survival outcomes via a deep survival learner Because τ0 ∈ H βx,β t (M ), Definition 2 implies that all such derivatives exist and are uniformly bounded: 
+
+sup 
+
+> x∈X
+
+|Dνx bm,ℓ (x)| ≤ 1
+
+ℓ! sup 
+
+> x∈X
+
+|Dνx ∂ℓt τ0(x, u m)| ≤ Mℓ! ≤ M. 
+
+Next, for any multi-index ν with |ν| = qx, the Hölder condition in the x-direction yields 
+
+|Dνx bm,ℓ (x) − Dνx bm,ℓ (y)|∥x − y∥αx = |Dνx ∂ℓt τ0(x, u m) − Dνx ∂ℓt τ0(y, u m)|
+
+ℓ! ∥x − y∥αx ≤ Mℓ! ≤ M. 
+
+Thus each bm,ℓ lies in a βx-Hölder class on X , with Hölder radius bounded by a constant depending only on M, β x, β t.In particular, there exists a constant CM > 0, depending only on M, β x, β t, such that 
+
+bm,ℓ ∈ H βx (CM ) for all m = 1 , . . . , K, ℓ = 0 , . . . , q t.
+
+Fix j ∈ { 1, . . . , J }, and let m(j) denote the unique index such that tj ∈ Im(j). Define the local polynomial approximation at the grid point tj by 
+
+Pj (x) := 
+
+> qt
+
+X
+
+> ℓ=0
+
+bm(j),ℓ (x)ψm(j),ℓ (tj ) = 
+
+> qt
+
+X
+
+> ℓ=0
+
+∂ℓt τ0(x, u m(j))
+
+ℓ! (tj − um(j))ℓ.
+
+We claim that 
+
+sup 
+
+> x∈X
+
+|τ0(x, t j ) − Pj (x)| ≤ CK −βt ,
+
+uniformly in j.To see this, fix x ∈ X . By Taylor’s theorem in the one-dimensional variable t, applied to the function t 7 → τ0(x, t )
+
+around the point um(j), there exists a point ξx,j between um(j) and tj such that 
+
+τ0(x, t j ) − Pj (x) = ∂qt 
+
+> t
+
+τ0(x, ξ x,j ) − ∂qt 
+
+> t
+
+τ0(x, u m(j))
+
+qt! (tj − um(j))qt .
+
+Because τ0 ∈ H βx,β t (M ), the derivative ∂qt 
+
+> t
+
+τ0(x, ·) is αt-Hölder uniformly in x, so 
+
+|∂qt 
+
+> t
+
+τ0(x, ξ x,j ) − ∂qt 
+
+> t
+
+τ0(x, u m(j))| ≤ M |ξx,j − um(j)|αt ≤ M |tj − um(j)|αt .
+
+Therefore, 
+
+|τ0(x, t j ) − Pj (x)| ≤ C|tj − um(j)|qt+αt = C|tj − um(j)|βt .
+
+Since both tj and um(j) lie in the same interval Im(j), whose length is K−1, we have 
+
+|tj − um(j)| ≤ K−1.
+
+Hence 
+
+sup 
+
+> x∈X
+
+|τ0(x, t j ) − Pj (x)| ≤ CK −βt ,
+
+uniformly in j. Since PX is a probability measure, 
+
+∥τ0(·, t j ) − Pj ∥2  
+
+> L2(PX)
+
+≤ sup 
+
+> x∈X
+
+|τ0(x, t j ) − Pj (x)|2 ≤ CK −2βt .
+
+Taking the supremum over j gives 
+
+sup 
+
+> 1≤j≤J
+
+∥τ0(·, t j ) − Pj ∥2  
+
+> L2(PX)
+
+≤ CK −2βt .
+
+So far we have constructed (qt + 1) K basis functions ψm,ℓ and the same number of coefficient functions bm,ℓ . Each approximant Pj can be written as 
+
+Pj (x) = 
+
+> K
+
+X
+
+> m=1
+> qt
+
+X
+
+> ℓ=0
+
+bm,ℓ (x)ψm,ℓ (tj ).
+
+Relabel the collection 
+
+{ψm,ℓ : 1 ≤ m ≤ K, 0 ≤ ℓ ≤ qt}
+
+as 
+
+ψ1, . . . , ψ (qt+1) K ,
+
+8Estimating heterogeneous treatment effects with survival outcomes via a deep survival learner and similarly relabel the coefficient functions 
+
+{bm,ℓ : 1 ≤ m ≤ K, 0 ≤ ℓ ≤ qt}
+
+as 
+
+b1, . . . , b (qt+1) K .
+
+Then 
+
+Pj (x) = 
+
+> (qt+1) K
+
+X
+
+> m=1
+
+bm(x)ψm(tj ),
+
+and each bm ∈ H βx (CM ).Now define 
+
+Kn := ( qt + 1) K. 
+
+Since qt depends only on βt, this is only a constant rescaling of K, and thus 
+
+K−2βt ≍ K−2βt 
+
+> n
+
+.
+
+Absorbing constants into C, we obtain 
+
+sup 
+
+> 1≤j≤J
+
+τ0(·, t j ) −
+
+> Kn
+
+X
+
+> m=1
+
+bm(·)ψm(tj ) 
+
+> 2
+> L2(PX)
+
+≤ CK −2βt 
+
+> n
+
+.
+
+Finally, 
+
+> J
+
+X
+
+> j=1
+
+τ0(·, t j ) −
+
+> Kn
+
+X
+
+> m=1
+
+bm(·)ψm(tj ) 
+
+> 2
+> L2(PX)
+
+≤ J sup 
+
+> 1≤j≤J
+
+τ0(·, t j ) −
+
+> Kn
+
+X
+
+> m=1
+
+bm(·)ψm(tj ) 
+
+> 2
+> L2(PX)
+
+≤ CJK −2βt 
+
+> n
+
+.
+
+This completes the proof. 
+
+Proof of Theorem 6: We first define the joint risk, empirical risk, and stochastic term in the setting of joint estimation. For any f = ( f1, . . . , f J ) ∈ F n, define the joint empirical risk 
+
+Rn,J (f ) := Pn
+
+
+
+> J
+
+X
+
+> j=1
+
+{ ˆφi(tj ) − fj (Xi)}2
+
+ ,
+
+and the corresponding population risk 
+
+RJ (f ) := E
+
+
+
+> J
+
+X
+
+> j=1
+
+{ ˆφi(tj ) − fj (Xi)}2
+
+ .
+
+Define also the joint approximation error 
+
+An,J := inf  
+
+> f∈F n
+> J
+
+X
+
+> j=1
+
+∥fj − τ0(·; tj )∥2 
+
+> L2(PX)
+
+.
+
+We define the joint empirical process fluctuation by 
+
+ρn,J := sup  
+
+> f∈F n
+
+|Rn,J (f ) − RJ (f )| .
+
+This is the multi-output analogue of the single-time fluctuation term ρn in the proof of Theorem 5. We also define the optimization error 
+
+δ2 
+
+> n,J
+
+:= Rn,J (ˆ τ ) − inf  
+
+> f∈F n
+
+Rn,J (f ),
+
+where 
+
+Rn,J (f ) := Pn
+
+
+
+> J
+
+X
+
+> j=1
+
+{ ˆφi(tj ) − fj (Xi)}2
+
+ .
+
+9Estimating heterogeneous treatment effects with survival outcomes via a deep survival learner We next derive the basic inequality from approximate empirical risk minimization. By definition of δ2 
+
+> n,J
+
+, it holds that 
+
+Rn,J (ˆ τ ) ≤ Rn,J (f ⋆) + δ2 
+
+> n,J
+
+,
+
+for any fixed f ⋆ ∈ F n. Hence, 
+
+RJ (ˆ τ ) − RJ (f ⋆) = {RJ (ˆ τ ) − Rn,J (ˆ τ )} + {Rn,J (ˆ τ ) − Rn,J (f ⋆)} + {Rn,J (f ⋆) − RJ (f ⋆)}.
+
+Using the approximate minimization property, 
+
+Rn,J (ˆ τ ) − Rn,J (f ⋆) ≤ δ2 
+
+> n,J
+
+,
+
+and by definition of ρn,J ,
+
+|RJ (ˆ τ ) − Rn,J (ˆ τ )| ≤ ρn,J , |Rn,J (f ⋆) − RJ (f ⋆)| ≤ ρn,J .
+
+Therefore, 
+
+RJ (ˆ τ ) ≤ RJ (f ⋆) + 2 ρn,J + δ2 
+
+> n,J
+
+.
+
+We now Relate RJ (f ) to the target L2 error. For each j, write 
+
+ˆφi(tj ) = τ0(Xi; tj ) + ηij ,
+
+where ηij denotes the pseudo-outcome error. Then 
+
+ˆφi(tj ) − fj (Xi) = {τ0(Xi; tj ) − fj (Xi)} + ηij .
+
+Expanding the square, 
+
+RJ (f ) = 
+
+> J
+
+X
+
+> j=1
+
+∥fj − τ0(·; tj )∥2  
+
+> L2(PX)
+
++ 2 
+
+> J
+
+X
+
+> j=1
+
+E[ηij {τ0(Xi; tj ) − fj (Xi)}] + 
+
+> J
+
+X
+
+> j=1
+
+E(η2 
+
+> ij
+
+).
+
+The last term does not depend on f . By the same argument used in the proof of Theorem 5, the cross term is bounded by 
+
+> J
+
+X
+
+> j=1
+
+E[ηij {τ0(Xi; tj ) − fj (Xi)}] ≤ C
+
+> J
+
+X
+
+> j=1
+
+∥fj − τ0(·; tj )∥2  
+
+> L2(PX)
+
++ CJ {r(e) 
+
+> n
+
+r(S) 
+
+> n
+
++ r(G) 
+
+> n
+
+}2.
+
+Hence, up to multiplicative constants and additive terms independent of f ,
+
+RJ (f ) ≍
+
+> J
+
+X
+
+> j=1
+
+∥fj − τ0(·; tj )∥2  
+
+> L2(PX)
+
++ J{r(e) 
+
+> n
+
+r(S) 
+
+> n
+
++ r(G) 
+
+> n
+
+}2.
+
+Applying this bound to f = ˆ τ and f = f ⋆ in the inequality gives 
+
+> J
+
+X
+
+> j=1
+
+∥ˆτ (·; tj ) − τ0(·; tj )∥2  
+
+> L2(PX)
+
+≤ C
+
+> J
+
+X
+
+> j=1
+
+∥f ⋆j − τ0(·; tj )∥2  
+
+> L2(PX)
+
++ Cρ n,J + Cδ 2 
+
+> n,J
+
++ CJ {r(e) 
+
+> n
+
+r(S) 
+
+> n
+
++ r(G) 
+
+> n
+
+}2.
+
+Taking the infimum over f ⋆ ∈ F n, we obtain 
+
+> J
+
+X
+
+> j=1
+
+∥ˆτ (·; tj ) − τ0(·; tj )∥2  
+
+> L2(PX)
+
+= Op
+
+
+
+An,J + ρn,J + δ2 
+
+> n,J
+
++ J{r(e) 
+
+> n
+
+r(S) 
+
+> n
+
++ r(G) 
+
+> n
+
+}2
+
+.
+
+We then bound the approximation term An,J . By Lemma 1, there exist basis functions ψ1, . . . , ψ Kn on [0 , 1] and coefficient functions b1, . . . , b Kn ∈ H βx (C) such that 
+
+> J
+
+X
+
+> j=1
+
+τ0(·; tj ) −
+
+> Kn
+
+X
+
+> m=1
+
+bm(·)ψm(tj ) 
+
+> 2
+> L2(PX)
+
+≤ CJK −2βt 
+
+> n
+
+.
+
+Since each bm is βx-Hölder, the standard ReLU approximation theorem gives functions ˜bm satisfying 
+
+∥˜bm − bm∥2  
+
+> L2(PX)
+
+≤ Cn −2βx/(2 βx+d), m = 1 , . . . , K n.
+
+10 Estimating heterogeneous treatment effects with survival outcomes via a deep survival learner Define 
+
+˜gj (x) := 
+
+> Kn
+
+X
+
+> m=1
+
+˜bm(x)ψm(tj ), j = 1 , . . . , J. 
+
+Assume the basis is stable on the grid {tj }Jj=1 , in the sense that the Gram matrix 
+
+Gn := 
+
+ JX
+
+> j=1
+
+ψm(tj )ψm′ (tj )
+
+
+
+> 1≤m,m ′≤Kn
+
+satisfies 
+
+λmax (Gn) ≤ C. 
+
+Then, as before, 
+
+> J
+
+X
+
+> j=1
+> Kn
+
+X
+
+> m=1
+
+{˜bm(·) − bm(·)}ψm(tj ) 
+
+> 2
+> L2(PX)
+
+≤ C
+
+> Kn
+
+X
+
+> m=1
+
+∥˜bm − bm∥2  
+
+> L2(PX)
+
+≤ CK nn−2βx/(2 βx+d).
+
+Hence 
+
+An,J ≤ C
+
+
+
+Knn−2βx/(2 βx+d) + JK −2βt
+
+> n
+
+
+
+.
+
+We then show ρn,J ≲ Knρn, a key stochastic bound. Let Hn denote the scalar-valued network class used in the single-time analysis of Theorem 5. Consider the basis-induced joint subclass 
+
+Fn,K n := 
+
+(
+
+f = ( f1, . . . , f J ) : fj (x) = 
+
+> Kn
+
+X
+
+> m=1
+
+bm(x)ψm(tj ), bm ∈ H n
+
+)
+
+.
+
+Thus, instead of J unrelated output functions, the joint class is indexed by only Kn scalar coefficient functions 
+
+b1, . . . , b Kn .For the scalar class Hn, let ρn denote the corresponding empirical process fluctuation from Theorem 5. So ρn is the bound obtained for the scalar squared-loss class 
+
+L(1)  
+
+> n
+
+= (x, y ) 7 → (y − h(x)) 2 : h ∈ H n .
+
+Now define the joint loss class 
+
+Ln,J =
+
+(x, y 1, . . . , y J ) 7 →
+
+> J
+
+X
+
+> j=1
+
+(yj − fj (x)) 2 : f ∈ F n,K n
+
+ .
+
+We compare the complexity of Ln,J with that of the Kn-fold product class generated by Hn. Let 
+
+b = ( b1, . . . , b Kn ) ∈ H Kn 
+
+> n
+
+.
+
+The map 
+
+T : b 7 → f, fj (x) = 
+
+> Kn
+
+X
+
+> m=1
+
+bm(x)ψm(tj ),
+
+is linear. By basis stability, it is Lipschitz from the coefficient space into the joint output space under the aggregated metric. Indeed, for two coefficient collections b, ˜b,
+
+> J
+
+X
+
+> j=1
+> Kn
+
+X
+
+> m=1
+
+{bm − ˜bm}ψm(tj ) 
+
+> 2
+> L2(PX)
+
+≤ C
+
+> Kn
+
+X
+
+> m=1
+
+∥bm − ˜bm∥2 
+
+> L2(PX)
+
+.
+
+Therefore, if each coordinate class Hn is covered by N (ε, Hn) balls of radius ε, then the product class HKn 
+
+> n
+
+is covered by at most 
+
+N (ε, Hn)Kn
+
+product balls, and the Lipschitz map T transfers this to a cover of Fn,K n . Consequently, 
+
+log N (ε, Fn,K n , ∥ · ∥ joint ) ≤ CK n log N (cε, Hn, ∥ · ∥ L2(PX ))
+
+11 Estimating heterogeneous treatment effects with survival outcomes via a deep survival learner for some constants C, c > 0.Now apply the same symmetrization, contraction, and entropy-integral argument used in Theorem 5. Since the metric entropy of the joint class is at most Kn times that of the scalar class, the resulting empirical process fluctuation satisfies 
+
+ρn,J ≲ Knρn.
+
+Finally, we combine the bounds and optimize Kn. Substituting the bounds for An,J and ρn,J into the inequality yields 
+
+> J
+
+X
+
+> j=1
+
+∥ˆτ (·; tj ) − τ0(·; tj )∥2  
+
+> L2(PX)
+
+= Op
+
+
+
+Knn−2βx/(2 βx+d) + JK −2βt 
+
+> n
+
++ Knρn + δ2 
+
+> n,J
+
++ J{r(e) 
+
+> n
+
+r(S) 
+
+> n
+
++ r(G) 
+
+> n
+
+}2
+
+.
+
+Balancing the first two approximation terms, 
+
+Knn−2βx/(2 βx+d) and JK −2βt 
+
+> n
+
+,
+
+gives 
+
+Kn ≍
+
+
+
+J n 2βx/(2 βx+d)1/(2 βt+1) 
+
+.
+
+Substituting this choice, we obtain 
+
+Knn−2βx/(2 βx+d) ≍ JK −2βt 
+
+> n
+
+≍ J1/(2 βt+1) n− 4βtβx/{(2 βt+1)(2 βx+d)}.
+
+Hence 
+
+> J
+
+X
+
+> j=1
+
+∥ˆτ (·; tj ) − τ0(·; tj )∥2  
+
+> L2(PX)
+
+=
+
+Op
+
+
+
+J1/(2 βt+1) n− 4βtβx/{(2 βt+1)(2 βx+d)} +
+
+
+
+J n 2βx/(2 βx+d)1/(2 βt+1) 
+
+ρn + δ2 
+
+> n,J
+
++ J{r(e) 
+
+> n
+
+r(S) 
+
+> n
+
++ r(G) 
+
+> n
+
+}2
+
+
+
+.
+
+This completes the proof. 
+
+Additional Simulation Results 
+
+To further investigate the finite-sample behavior observed in Case 1, we conducted an additional set of simulations under a simplified setting with lower-dimensional covariates ( d = 10 ) and a larger training sample size ( N = 2000 ). This setting is closer to those often considered in prior methodological work and therefore provides a useful benchmark for assessing whether the performance patterns in Case 1 were driven by limited sample size and model complexity. The results are reported in Table A.1. As shown in Table A.1, all methods worked better under this easier setting, and several competing approaches achieve noticeably smaller MSE than DSL. In particular, PSDRL-NFT-BART attains the lowest MSE overall, approximately 
+
+0.014 across all choices of J, while X-Learner and causal survival forest also perform strongly, with MSEs around 0.020 
+
+and 0.021 , respectively. DRL-NFT-BART improves substantially as the number of evaluation time points increases, with MSE decreasing from 0.042 at J = 1 to 0.022 at J = 100 . By comparison, DSL yields MSEs of 0.042 , 0.046 ,and 0.047 for J = 1 , 50 , 100 , respectively, which are somewhat larger but remain reasonably stable across grid sizes. A notable feature of DSL is its very small bias. Its bias remains close to zero across all three values of J, around 0.005 ,and is clearly smaller than that of several competitors, including M-Learner, PSDRL-NFT-BART, and causal survival forest, all of which exhibit substantially larger systematic bias. R-Learner and DRL-NFT-BART also have relatively small bias, but their MSE is not uniformly better than that of the strongest competitors. Taken together, these results suggest that in a simpler and more data-rich setting, competing methods can achieve very strong predictive accuracy, sometimes surpassing DSL in MSE, while DSL continues to provide stable estimation with consistently low bias. This supports our interpretation that the larger performance gaps seen in Case 1 may be primarily attributable to the more challenging finite-sample and high-complexity setting. 12 Estimating heterogeneous treatment effects with survival outcomes via a deep survival learner Table A.1: Performance comparison under simplified setting 
+
+J = 1 J = 50 J = 100 
+
+MSE 
+
+Deep Survival Learner 0.042(0.041, 0.043) 0.046(0.045, 0.048) 0.047(0.045, 0.048) M-Learner 0.049(0.047, 0.051) 0.049(0.047, 0.051) 0.049(0.047, 0.051) R-Learner 0.049(0.047, 0.051) 0.051(0.049, 0.053) 0.048(0.046, 0.050) X-Learner 0.020(0.019, 0.021) 0.020(0.019, 0.021) 0.020(0.019, 0.021) DRL-NFT-BART 0.042(0.026, 0.057) 0.025(0.020, 0.030) 0.022(0.020, 0.024) PSDRL-NFT-BART 0.014(0.013, 0.015) 0.014(0.014, 0.015) 0.014(0.014, 0.015) Causal Survival Forest 0.021(0.020, 0.022) 0.021(0.020, 0.022) 0.021(0.020, 0.022) 
+
+Bias 
+
+Deep Survival Learner 0.005(0.001, 0.010) 0.005(0.000, 0.009) 0.005(0.000, 0.009) M-Learner 0.109(0.105, 0.113) 0.109(0.105, 0.113) 0.109(0.105, 0.113) R-Learner 0.012(0.006, 0.017) 0.007(0.000, 0.014) 0.012(0.006, 0.018) X-Learner 0.037(0.031, 0.043) 0.041(0.036, 0.046) 0.038(0.032, 0.043) DRL-NFT-BART 0.013(0.003, 0.023) 0.012(0.005, 0.020) 0.013(0.007, 0.020) PSDRL-NFT-BART 0.083(0.079, 0.087) 0.084(0.081, 0.088) 0.084(0.080, 0.088) Causal Survival Forest 0.107(0.103, 0.111) 0.107(0.102, 0.111) 0.107(0.102, 0.111)                
+
+> 1The simulation setting uses a training sample size of N= 2000 and a testing sample size of 400 , with covariate dimension d= 10 and approximately 35% censoring.
+> 2Mean squared error and 95% Monte Carlo confidence intervals are computed based on 200 simulation replicates.
+> 3Conditional average treatment effects are evaluated at J∈ { 1,50 ,100 }time points, equally spaced between the 20th and 80th percentiles of the observed survival time distribution.
+
+13

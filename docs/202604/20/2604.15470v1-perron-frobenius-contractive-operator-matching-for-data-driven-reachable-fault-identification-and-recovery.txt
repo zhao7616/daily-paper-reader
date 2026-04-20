@@ -1,0 +1,2431 @@
+Title: Perron-Frobenius Contractive Operator Matching for Data-Driven Reachable Fault Identification and Recovery
+
+URL Source: https://arxiv.org/pdf/2604.15470v1
+
+Published Time: Mon, 20 Apr 2026 00:06:42 GMT
+
+Number of Pages: 8
+
+Markdown Content:
+# Perron-Frobenius Contractive Operator Matching for Data-Driven Reachable Fault Identification and Recovery 
+
+Joshua D. Ibrahim, Mahdi Taheri, Soon-Jo Chung, Fred Y. Hadaegh 
+
+Abstract — This paper focuses on data-driven fault detection, identification, and recovery (FDIR) for nonlinear control-affine systems under actuator faults. We create a unified framework in the space of probability densities, rather than on individual tra-jectories, using fault-indexed Perron–Frobenius (PF) operators to predict the evolution of state distributions under different fault profiles. By leveraging the probability-flow representation of the Fokker–Planck equation, we construct deterministic PF operators that reproduce exact stochastic marginals, define forward reachable density families, and establish certifiable 2-Wasserstein bounds on the divergence between fault-driven and nominal density evolutions. These provide quantitative conditions for the detectability and identifiability of various faults. The fault-indexed operators are learned from trajectory data via flow map matching (FMM), and we demonstrate that the observable FMM residual directly bounds the ap-proximation error of the operator in the 2-Wasserstein metric. Additionally, we co-train a contraction certificate that bounds the gap between the learned operator family, the actual fault-driven density flow, and the nominal dynamics. The operator library is then used online for continuous fault parameter fitting over a continuous parameter space to generalize the learned operators to out-of-distribution (OOD) scenarios. To carry out the recovery control, we employ reachable density propagation and Gaussian mixture covariance steering. The proposed framework is validated on a 10-state spacecraft attitude-control system with four reaction wheels. 
+
+Autonomous systems operating in safety-critical envi-ronments, including spacecraft, uncrewed aerial vehicles (UAVs), and robotic platforms, must maintain reliable per-formance under unforeseen actuator and sensor faults [1], [2]. Faults that go undetected or unmitigated can lead to catastrophic failures, motivating integrated fault detection, identification, and recovery (FDIR) control frameworks suit-able for real-time deployment [1], [3]. While the problems of fault detection and identification (FDI) and fault-tolerant control (FTC) have each received significant attention in-dependently, a unified framework that reasons about fault signatures and recovery control in a common mathematical language remains largely lacking in the literature. Classical FDI approaches rely on residual generation using model-based estimators and parity equations and have been widely adopted in aerospace and industrial systems due to their interpretability and real-time feasibility [4], [5]. How-ever, these methods assume accurate known system models and degrade in the presence of nonlinearities, simultaneous  
+
+> Ph.D. Student, Control and Dynamical Systems, California Institute of Technology, Pasadena, CA. Postdoctoral Scholar, Computing and Mathematical Sciences, California Institute of Technology, Pasadena, CA. Bren Professor of Control and Dynamical Systems, California Institute of Technology, Pasadena, CA. Research Professor in Aerospace, California Institute of Technology, Pasadena, CA. Emails: {jdibrahi, mtaheri, sjchung, hadaegh }@caltech.edu. This research is funded in part by the DARPA Learning Introspective Control (LINC) program.
+
+actuator and sensor faults, and stochastic uncertainties [6], [7]. On the fault recovery side, adaptive control methods offer strong stability guarantees when the fault structure is known a priori, but their effectiveness depends critically on accurate system modeling and knowledge of fault char-acteristics [1], [3]. Data-driven controllers based on deep neural networks provide a promising alternative by learning complex system models directly from data [8]. Yet, their performance can decline under distributional shift and out-of-distribution (OOD) scenarios at runtime [9], [10]. Density-based reachability [11] learns reachable state distributions but does not address fault identification or provide such certificates. A key limitation of many existing FDI and recovery approaches is that they operate primarily on individual tra-jectories rather than on the evolution of state distributions. At the distribution level, deterministic dynamics transport densities through the Liouville equation, whereas stochastic dynamics evolve densities according to the Fokker–Planck equation [12], [13]. Under this viewpoint, distinct fault profiles induce distinct density flows on the state space, and these flows may be compared using transport-based discrepancies such as the 2-Wasserstein distance [14], [15]. Reasoning directly in density space naturally incorporates uncertainty, provides distribution-level fault signatures, and supports principled formulations of uncertainty-aware reach-ability, safety analysis, and recovery via Perron–Frobenius (PF) operator methods [11], [16]. In this work, we operate in the space of probability densities rather than on individual trajectories. The key idea is that each fault profile drives the state distribution along a distinct density flow, and these flows can be predicted, compared, and corrected using fault-indexed PF operators. We first construct deterministic PF operators that reproduce the stochastic density evolution by leveraging the probability-flow representation of the Fokker–Planck equation. We then learn these operators from offline trajectory data using flow map matching and co-train a contraction certificate to ensure stability over long prediction horizons. The learned opera-tor library is deployed online to identify faults, including faults outside the training library, i.e., OOD scenarios, via continuous parameter fitting. Moreover, the learned operator library is utilized for recovery control, where the identified fault operator and the nominal operator are used to propagate reachable densities forward and steer the faulty distribution back toward the nominal target through Gaussian mixture covariance steering. This density-level formulation addresses several limita-tions of existing approaches. Unlike classical residual-based FDI methods, which assume accurate known models and degrade under nonlinearities and stochastic uncertainties, the 
+
+> arXiv:2604.15470v1 [eess.SY] 16 Apr 2026
+
+probability-flow construction converts the stochastic prob-lem into a deterministic one that reproduces the stochastic marginals. Unlike trajectory-level data-driven controllers, which degrade under distributional shift, our framework provides certifiable W2 bounds on long-horizon stability via contraction regularization. We have three main con-tributions in this paper. First, we derive fault-indexed PF operators for stochastic fault dynamics via their probability-flow representation, establish explicit W2 bounds relating fault-driven and nominal density evolutions, and learn the associated transport maps directly from trajectory data. Sec-ond, we prove that the observable endpoint flow-matching residual controls the deployed operator error in W2, and that contraction regularization provides explicit long-horizon 
+
+W2 bounds between the learned operator family, the true fault-driven density flow, and the nominal system. Third, we show that the resulting operator library supports an online FDIR architecture for fault inference and recovery through reachable-density propagation and Gaussian-mixture-based tracking. I. P RELIMINARIES 
+
+We consider a safety-critical nonlinear system subject to unknown fault inputs trained from a finite library. Our goal is to detect and identify the active fault by tracking how each fault reshapes the state distribution over time, and to syn-thesize a corrective control that steers the distribution back toward its nominal trajectory. To this end, we work in the space of probability densities and characterize fault-induced distributional shifts via fault-indexed Perron-Frobenius oper-ators, which propagate densities forward under each inferred fault profile. Let (X , B(X ), μ ) be a measurable state space, where 
+
+B(X ) is the Borel σ-algebra on X ⊆ Rn and μ is a reference measure on (X , B(X )) . Consider the nonlinear control-affine system 
+
+˙x = f (x, t ) + g(x, t )u + ψ(x, t )w, (1) where x : R≥0 → X is the state, u : X × R≥0 → Rm is the control input, and w : R≥0 → Rp is the fault. Moreover, 
+
+f : X × R≥0 → Rn, g : X × R≥0 → Rn×m, and ψ : X ×
+
+R≥0 → Rn×p are sufficiently smooth, and ucl : X ×R≥0 →
+
+Rm is a nominal control feedback law. During the offline learning and inference stages, we have u = ucl . During recovery, an additive corrective input urec is synthesized and the applied control becomes u = ucl + urec . The admissible fault library is F = {w0, w1, . . . , wNf }, with nominal, i.e., fault-free, profile w0 defined as w0(t) = 0 .For each w ∈ F , the closed-loop fault-indexed vector field Fw : X × R≥0 → Rn is expressed by Fw(x, t ) := 
+
+f (x, t ) + g(x, t )ucl (x, t ) + ψ(x, t )w(t). Each Fw defines a distinct closed-loop vector field with associated flow map. Under stochastic disturbance, the state density evolves ac-cording to the Fokker–Planck equation. Assume Fw gener-ates a two-time flow map ΦFw 
+
+> s,t
+
+: X → X , ΦFw 
+
+> s,t
+
+(xs) = xt,for 0 ≤ s ≤ t. Under stochastic disturbance, the system evolves as the Itˆ o SDE 
+
+dx = Fw(x, t ) dt + σ(x, t ) dW (t), x0 ∼ ρ0, (2) where σ : X × R≥0 → Rn×q is the diffusion coefficient, 
+
+W : R≥0 → Rq is a standard q-dimensional Brownian motion, and ρ(x, 0) = ρ0(x) is the initial density. We assume 
+
+∃ L1, L 2 > 0 such that 
+
+‖Fw(x, t )‖2 + ‖σ(x, t )‖2 
+
+> F
+
+≤ L1(1 + ‖x‖2),
+
+‖Fw(x, t ) − Fw(y, t )‖ + ‖σ(x, t ) − σ(y, t )‖ ≤ L2‖x − y‖,
+
+for all x, y ∈ X and t ∈ R≥0, where ‖ · ‖ F denotes the Frobenius norm. These conditions ensure the existence and uniqueness of strong solutions to (2) [17]. Let ρ(x, t ) denote the density of (2). Rather than tracking individual trajecto-ries, we track the evolution of the entire state density ρ(x, t ),which is formalized via the Perron-Frobenius operator. 
+
+Definition 1 (Perron–Frobenius operators): For deterministic dynamics ˙x = Fw(x, t ) that generates flow map ΦFw 
+
+> s,t
+
+for 0 ≤ s ≤ t, the Perron–Frobenius operator [17] on measures PFw 
+
+> s,t
+
+: P2(X ) → P 2(X ), where 
+
+P2(X ) denotes the set of Borel probability measures on 
+
+X with finite second moments, is defined by pushforward along the flow map, PFw 
+
+> s,t
+
+μ := (ΦFw
+
+> s,t
+
+)
+
+> #
+
+μ. That is, for every Borel set A ⊆ X ,
+
+(PFw 
+
+> s,t
+
+μ)(A) = μ
+
+((ΦFw
+
+> s,t
+
+)−1(A)
+
+)
+
+,
+
+and bounded measurable ϕ : X → R,
+
+∫
+
+ϕ d (PFw 
+
+> s,t
+
+μ) =
+
+∫
+
+ϕ ◦ ΦFw 
+
+> s,t
+
+dμ. 
+
+If μs(dx) = ρs(x) dx with ρs ∈ D (X ), the density-level Perron–Frobenius operator PFw 
+
+> s,t
+
+: D(X ) → D (X ) is the Radon–Nikodym representation of PFw 
+
+> s,t
+
+, (PFw 
+
+> s,t
+
+ρs
+
+)(x) := 
+
+> d
+
+(PFw  
+
+> s,t μs
+
+) 
+
+> dx
+
+(x), such that 
+
+(PFw 
+
+> s,t
+
+ρs
+
+)(x) = ρs
+
+((ΦFw
+
+> s,t
+
+)−1(x)
+
+)∣ ∣∣det D(ΦFw
+
+> s,t
+
+)−1(x)
+
+∣∣∣,
+
+whenever ΦFw 
+
+> s,t
+
+is a C1-diffeomorphism. To measure the separation between densities propagated under different fault hypotheses, which is the foundation of fault detectability, we equip P2(X ) with the 2-Wasserstein metric. 
+
+Definition 2 (2-Wasserstein metric): Let P2(X ) be the set of Borel probability measures on X with finite second moments, and let Π( μ, ν ) denote the set of measures on 
+
+X × X with marginals μ, ν ∈ P 2(X ). The 2-Wasserstein distance is 
+
+W2(μ, ν ) := 
+
+(
+
+inf 
+
+> π∈Π( μ,ν )
+
+∫ 
+
+> X×X
+
+‖x − y‖2 dπ (x, y)
+
+)1/2
+
+.
+
+If μ, ν ∈ P 2(X ) are absolutely continuous with respect to Lebesgue measure, then the Radon–Nikodym theorem implies there exists densities ρ = dμ  
+
+> dx
+
+and η = dν  
+
+> dx
+
+such that μ(dx) = ρ(x) dx and ν(dx) = η(x) dx. In that case we also write W2(ρ, η ). We also denote the space of admissible probability densities on X with finite second moments by 
+
+D(X ) := 
+
+{
+
+ρ ∈ L1(X ) : ρ ≥ 0, ∫ 
+
+> X
+
+ρ(x) dx = 1 ,
+
+∫ 
+
+> X
+
+‖x‖2ρ(x) dx < ∞
+
+}
+
+,
+
+where L1(X ) denotes the space of Lebesgue-integrable functions on X .Both families {PFw 
+
+> s,t
+
+}0≤s≤t and {PFw 
+
+> s,t
+
+}0≤s≤t satisfy the two-time semigroup property 
+
+PFw 
+
+> s,s
+
+= I, PFw 
+
+> r,t
+
+= PFw 
+
+> s,t
+
+PFw 
+
+> r,s
+
+, 0 ≤ r ≤ s ≤ t. 
+
+with the same identity for PFw 
+
+> s,t
+
+.In practice, the system is subject to stochastic disturbance. Hence, x is governed by the Itˆ o SDE (2) and the state density satisfies the Fokker–Planck equation below. Crucially, this stochastic density evolution can be exactly reproduced by the deterministic probability-flow ODE, whose pushforward defines a fault-indexed PF operator (PFO). The density ρ
+
+satisfies the Fokker–Planck equation 
+
+∂ρ 
+
+∂t = −∇ x ·(ρ Fw
+
+)+ 1
+
+2 ∇x ·∇ x ·(ρ Σ) , Σ := σσ ⊤. (3) 
+
+Theorem 1 (Probability Flow PF Operator): Let w ∈
+
+F . Consider ρ(x, t ) as a strictly positive solution of (3) on 
+
+[s, T ] with ρ(x, s ) = ρs(x). Define 
+
+vw(x, t ) := Fw − 1
+
+2
+
+[
+
+(∇x · Σ) + Σ ∇x log ρ
+
+]
+
+, (4) where [( ∇x · Σ) ( x, t )] i = ∑nj=1  
+
+> ∂Σij
+> ∂x j
+
+(x, t ), for i = 1 , . . . , n 
+
+denotes the row-wise divergence of Σ. Assume vw generates the deterministic flow Φvw 
+
+> s,t
+
+: X → X with PFO Pvw 
+
+> s,t
+
+:
+
+D(X ) → D (X ). Consequently, ρ satisfies 
+
+∂ρ 
+
+∂t + ∇x ·(vw(x, t )ρ(x, t )) = 0 , (5) and therefore, ρ(·, t ) = Pvw 
+
+> s,t
+
+ρs, for s ≤ t ≤ T . Hence, the deterministic probability flow PFO reproduces the marginals of the stochastic fault dynamics. 
+
+Proof: Rewrite (3) as 
+
+∂ρ 
+
+∂t = −∇ x · (Fwρ) + 1
+
+2 ∇x ·(∇x · (Σ ρ)).
+
+Considering the product rule, we have ∇x · (Σ ρ) = ( ∇x ·
+
+Σ) ρ+Σ ∇xρ. Since ρ > 0 and ∇xρ = ρ∇x log ρ, one obtains 
+
+∇x · (Σ ρ) = 
+
+[
+
+(∇x · Σ) + Σ ∇x log ρ
+
+]
+
+ρ. 
+
+Substituting into the Fokker–Planck equation yields 
+
+∂ρ 
+
+∂t = −∇ x ·
+
+[( 
+
+Fw − 1
+
+2
+
+[(∇x · Σ) + Σ ∇x log ρ])
+
+ρ
+
+]
+
+,
+
+which is exactly (5) by (4). Thus, ρ satisfies the Liouville equation driven by vw with the initial condition ρs [18]. By uniqueness of solutions to that transport equation [19], one has ρ(·, t ) = Pvw 
+
+> s,t
+
+ρs for all t ∈ [s, T ].
+
+For the probability flow ˙x = vw(x, t ) of (2) (Theorem 1), combining (4) with the decomposition of Fw yields the perturbed form 
+
+Fw(x, t ) = Fw0 (x, t ) + ψ(x, t )w(t), (6) 
+
+˙x = Fw0 (x, t ) + dw(x, t ), (7) 
+
+dw(x, t ) := ψw − 1 
+
+> 2
+
+(∇x · Σ) − 1 
+
+> 2
+
+Σ∇x log ρ. (8) Let xFw0 and xvw solve (10) and (7), respectively, and let 
+
+q(λ, t ), λ ∈ [0 , 1] , smoothly interpolate q(0 , t ) = xFw0 (t)
+
+to q(1 , t ) = xvw (t). A family of particular solutions is 
+
+˙q(λ, t ) = Fw0 (q(λ, t ), t ) + λ dw(xvw (t), t ). (9) Thus, the probability-flow ODE is a deterministic perturba-tion of the nominal closed-loop dynamics, which motivates the use of contraction theory to analyze the gap between these two systems and to regularize operator learning during training. 
+
+A. Wasserstein Contraction of Density 
+
+Consider the nominal closed-loop dynamics of (1), i.e., 
+
+w = 0 , given by 
+
+˙x = Fw0 (x, t ), δ ˙x = ∂Fw0
+
+∂x δx, x(0) = x0, (10) where δx is the infinitesimal displacement of any two trajectories of (10) defined as x2 − x1 = ∫ x2 
+
+> x1
+
+δx, and 
+
+Fw0 (x, t ) := f (x, t ) + g(x, t )ucl with some desired closed-loop controller ucl .
+
+Lemma 1 (Deterministic Contraction): If there exists a uniformly positive definite metric M(x, t ) =Θ( x, t )⊤Θ( x, t ) ≻ 0, ∀x, t , with a smooth coordinate transformation of the virtual displacement δz = Θ( x, t )δx,and for α ∈ R, such that 
+
+˙M(x, t ) + 2 sym 
+
+(
+
+M(x, t ) ∂Fw0
+
+∂x
+
+)
+
+ 2αM(x, t ), (11) 
+
+∀x, t , where sym( A) := 1
+
+> 2
+
+(A + A⊤) for any square ma-trix A, holds for (10), then any two trajectories of (10) are bounded according to ‖δz(t)‖ = ‖Θ( x, t )δx(t)‖ ≤‖δz(0) ‖eαt . If α < 0, the system is said to be contracting. 
+
+Proof: See [20], [21] for more details. 
+
+Theorem 2 (Contraction of Probability Flow): 
+
+Assume that (10) satisfies the deterministic contraction condition (11) of Lemma 1, where ∃m, m ∈ R>0,such that mI  M(x, t )  mI, ∀x, t . Suppose for the perturbed dynamics (7), ∃d ∈ R>0 such that 
+
+d = sup x,t ‖dw(x, t )‖ < ∞, then the Wasserstein distance between the distributions μt in (10) and νt of (7) with initial conditions xFw0 (0) ∼ μ0 and xvw (0) ∼ ν0 is bounded as 
+
+W2 (μt, ν t) ≤ κe αt W2 (μ0, ν 0) + δt, (12) where κ := √m/m and δt := κd ∫ t 
+
+> 0
+
+eα(t−r)dr .
+
+Proof: Using the contraction condition (11) of Lemma 1, for M(x, t ) = Θ( x, t )⊤Θ( x, t ), we have 
+
+d
+
+dt ‖Θ( q, t )∂λq‖ = (2 ‖Θ( q, t )∂λq‖)−1 d
+
+dt ∂λq⊤M(q, t )∂λq
+
+≤ α‖Θ( q, t )∂λq‖ + ‖Θ( q, t )∂λdλ‖,
+
+where ∂λq = ∂q/∂λ and ∂λdλ = ∂dλ/∂λ = dw (xvw , t ).Let V (q, δ q, t ) = ∫ xvw  
+
+> xFw 0
+
+‖Θ( q, t )δq‖ be the generalized length with respect to the Riemannian metric M(q, t ). Tak-ing the integral with respect to λ gives 
+
+d
+
+dt 
+
+∫ 10
+
+‖Θ∂λq‖ dλ ≤
+
+∫ 10
+
+α ‖Θ∂λq‖ + ‖Θdw (xvw , t )‖ dλ, 
+
+which implies ˙V (q, δ q, t ) ≤ αV (q, δ q, t ) +sup q,xvw ,t ‖Θ( q, t )dw (xvw , t ) ‖. By Gronwall’s inequality, 
+
+V (q, δ q, t ) ≤ eαt V (q, δ q, 0) + √md
+
+∫ t
+
+> 0
+
+eα(t−r)dr. 
+
+Now define the Riemannian distance induced by M as 
+
+dM(xFw0 (t), xvw (t), t ) := inf   
+
+> q∈Γ( xFw 0(t),xvw (t))
+
+V (q, δ q, t ),
+
+where Γ( xFw0 (t), xvw (t)) denotes the set of smooth paths connecting xFw0 (t) and xvw (t). Since the above bound holds for every admissible path, it also holds for the infi-mum. Using the metric bounds √m ∥∥xFw0 (t) − xvw (t)∥∥ ≤
+
+dM(xFw0 (t), xvw (t), t ) ≤ √m ∥∥xFw0 (t) − xvw (t)∥∥, ∀t, we have 
+
+‖xFw0 (t)−xvw (t)‖ ≤ κe αt ‖xFw0 (0) −xvw (0) ‖+δt. (13) Take π0 ∈ Π( μ0, ν 0), (X0, Y0) ∼ π0, and Xt := ΦFw0 
+
+> 0,t
+
+(X0), Yt := Φvw 
+
+> 0,t
+
+(Y0), so μt = (Φ Fw0 
+
+> 0,t
+
+)#μ0 and 
+
+νt = (Φ vw 
+
+> 0,t
+
+)#ν0. Then πt := Law( Xt, Yt) ∈ Π( μt, ν t).Since the pointwise bound (13) holds π0-a.s., taking L2norms and applying Minkowski, then using W2(μt, ν t) ≤
+
+(E‖Xt − Yt‖2)1/2 and the infimum over π0, yields 
+
+‖Xt − Yt‖ ≤ κ e αt ‖X0 − Y0‖ + δt,
+
+(E‖Xt − Yt‖2)1/2 ≤ κ e αt (E‖X0 − Y0‖2)1/2 + δt,
+
+W2(μt, ν t) ≤ κ e αt W2(μ0, ν 0) + δt.
+
+B. Density Reachability and Fault Detectability 
+
+Theorem 2 quantifies how fast the distributional gap be-tween the nominal and faulty densities grows (or decays) as a function of the perturbation magnitude d and the contraction rate α. We now use this bound to formalize when the fault-induced density shift is large enough to be reliably detected and when two distinct faults produce sufficiently separated density evolutions to be distinguished from one another. 
+
+Definition 3 (Forward Reachable Densities): Let Ds ⊆D(X ) be a family of admissible initial densities. The forward reachable density family under fault profile w is 
+
+R+
+
+> s,t
+
+(Ds, w) := {Pvw 
+
+> s,t
+
+ρs : ρs ∈ Ds
+
+} .
+
+When the initial density is fixed as ρs ∈ D (X ), the fault-indexed reachable density family is 
+
+R+
+
+> s,t
+
+(ρs) := {Pvw 
+
+> s,t
+
+ρs : w ∈ F } . (14) The PFO on measures PFw 
+
+> s,t
+
+for the above definitions can be shown to recover classical state reachability by considering and initial law as Dirac masses. The classical reachable set is recovered exactly as a special case, while the density framework additionally quantifies uncertainty over initial conditions and stochastic disturbances, generalizing set-based reachability. 
+
+Proposition 1 (Dirac recovery of state reachability): 
+
+Fix w ∈ F , let R+ 
+
+> s,t
+
+(Ss) := ΦFw 
+
+> s,t
+
+(Ss), and define 
+
+E(S) := {δx : x ∈ S} , where δx denotes the Dirac measure at x. Consequently, E
+
+(
+
+ΦFw 
+
+> s,t
+
+(Ss)
+
+)
+
+=
+
+{
+
+PFw 
+
+> s,t
+
+δx : x ∈ S s
+
+}
+
+,
+
+such that the full reachable set is recovered exactly from the Dirac embedding of Ss.
+
+Proof: Let ϕ : X → R be any bounded measurable test function. For any x ∈ S s, one has 
+
+∫
+
+> X
+
+ϕ(y) d
+
+(
+
+PFw 
+
+> s,t
+
+δx
+
+)
+
+(y) = 
+
+∫
+
+> X
+
+ϕ
+
+(
+
+ΦFw 
+
+> s,t
+
+(y)
+
+)
+
+dδ x(y)= ϕ
+
+(
+
+ΦFw 
+
+> s,t
+
+(x)
+
+)
+
+.
+
+On the other hand, we have ∫
+
+> X
+
+ϕ(y) dδ ΦFw  
+
+> s,t (x)
+
+(y) = ϕ
+
+(
+
+ΦFw 
+
+> s,t
+
+(x)
+
+)
+
+.
+
+Thus, PFw 
+
+> s,t
+
+δx = δΦFw   
+
+> s,t (x)
+
+for every x ∈ S s. Hence, we obtain 
+
+{δΦFw   
+
+> s,t (x)
+
+: x ∈ S s} = E
+
+(
+
+ΦFw 
+
+> s,t
+
+(Ss)
+
+)
+
+. Since ΦFw 
+
+> s,t
+
+(Ss) = 
+
+R+
+
+> s,t
+
+(Ss) by definition, the identity follows immediately. 
+
+Definition 4 (Density detectability and identifiability): 
+
+Fix ρs ∈ D (X ), an interval [s, t ], and ε > 0. A fault 
+
+w 6 = w0 is ε-detectable in density on [s, t ] from ρs if 
+
+W2
+
+(Pvw 
+
+> s,t
+
+ρs, Pvw0 
+
+> s,t
+
+ρs
+
+) ≥ ε. (15) Two fault profiles wi, wj ∈ F are ε-identifiable in density on [s, t ] from ρs if 
+
+W2
+
+(
+
+Pvwi 
+
+> s,t
+
+ρs, Pvwj 
+
+> s,t
+
+ρs
+
+)
+
+≥ ε. (16) 
+
+Theorem 3 (Fault detectability bound): Fix wi, wj ∈ F .Let sw(x, t ) := ∇x log ρw(x, t ) denote the score of the fault-indexed marginal along (2), and assume ∃ ¯ψ, ¯σ, ¯sij < ∞,such that 
+
+sup 
+
+> x,t
+
+‖ψ(x, t )‖F ≤ ¯ψ, sup 
+
+> x,t
+
+‖Σ( x, t )‖F ≤ ¯σ, 
+
+sup 
+
+> x,t
+
+∥∥swj (x, t ) − swi (x, t )∥∥ ≤ ¯sij . (17) Let ρwi (·, t ), ρwj (·, t ) be the marginals of (2) with 
+
+ρwi (·, 0) = ρwj (·, 0) = ρ0. Suppose the probability-flow dy-namics for wi are contracting in Mij (x, t ) = (Θ ij )⊤Θij ≻
+
+0 with rate αij and mij I  Mij (x, t )  ¯mij I. Set ∆wij := sup t≥0 ‖wi(t) − wj (t)‖ and κij := √ ¯mij /m ij , and define 
+
+¯dij := ¯ψ ∆wij + 1 
+
+> 2
+
+¯σ ¯sij .
+
+For all t ≥ 0, one has 
+
+W2(ρwi (·, t ), ρ wj (·, t )) ≤ κij ¯dij 
+
+∫ t
+
+> 0
+
+eαij (t−r) dr. (18) Identifiability with margin ε in the sense of Definition 4 and (16) on [0 , T ] is possible only if 
+
+ε ≤ κij ¯dij 
+
+∫ T
+
+> 0
+
+eαij (T −r) dr. (19) If αij < 0, then W2(ρwi 
+
+> ∞
+
+, ρ wj 
+
+> ∞
+
+) ≤ κij ¯dij /|αij |.
+
+Proof: By (4) and (6), one obtains vwj = vwi + dij 
+
+with dij = ψ(x, t )[ wj (t) − wi(t)] + 1 
+
+> 2
+
+Σ( x, t )[swi (x, t ) −
+
+swj (x, t )]. Inequalities (17) imply ‖dij (x, t )‖ ≤ ¯dij .Applying Theorem 2 with nominal vwi , perturbed vwj ,
+
+μ0 = ν0, κ = κij , α = αij , ¯d = ¯dij yields (18). If 
+
+W2(ρwi (·, T ), ρ wj (·, T )) ≥ ε, we obtain (19), which follows from (18) at t = T .
+
+The score-difference bound sij can be estimated em-pirically from trajectory data by fitting score networks to the fault-indexed marginals during offline training, making assumption (17) verifiable in practice. II. F AULT -I NDEXED PF O PERATOR MATCHING 
+
+The contraction and detectability results of the pre-vious section assume access to the exact fault-indexed PFO Pw
+
+> s,t
+
+. In practice, this operator is not available in closed-form. Hence, considering the offline trajectory data 
+
+{(x(i) 
+
+> si
+
+, x(i) 
+
+> ti
+
+, w(i))}Ni=1 collected under each fault profile, our objective is to learn a parameterized flow map whose push-forward approximates Pw 
+
+> s,t
+
+for all w ∈ F . This has been achieved using flow map matching (FMM). For fixed w ∈ F and physical endpoints s < t , let ρw 
+
+> s
+
+and 
+
+ρw 
+
+> t
+
+denote the corresponding marginals. Following [22], [23], define the stochastic interpolant Iw 
+
+> τ
+
+= ατ xs +βτ xt +γτ z, for 
+
+τ ∈ [0 , 1] , where (xs, xt) ∼ πw 
+
+> s,t
+
+∈ Π( ρw 
+
+> s
+
+, ρ w 
+
+> t
+
+), z ∼ N (0 , I)
+
+is independent of (xs, xt), and α, β, γ ∈ C1([0 , 1]) satisfy the standard endpoint conditions. The pathwise velocity 
+
+˙Iw 
+
+> τ
+
+= ˙ ατ xs + ˙βτ xt + ˙ γτ z is directly observable from data pairs (xs, xt). Let ρw 
+
+> τ
+
+denote the density of Iw 
+
+> τ
+
+.Under standard regularity assumptions, the density curve 
+
+(ρw 
+
+> τ
+
+)τ ∈[0 ,1] is reproduced by the auxiliary-time probability flow 
+
+d
+
+dτ x(τ ) = bw 
+
+> τ
+
+(x(τ )) ,
+
+bw 
+
+> τ
+
+: X → Rn, bw 
+
+> τ
+
+(x) := E
+
+[ ˙Iw 
+
+> τ
+
+| Iw 
+
+> τ
+
+= x
+
+]
+
+.
+
+(20) For each fixed 0 ≤ τ0 ≤ τ1 ≤ 1, let Φbw 
+
+> τ0,τ 1
+
+: X → X
+
+denote the corresponding two-time flow map. Its terminal map induces the exact fault-indexed PF operator Pw 
+
+> s,t
+
+:
+
+D(X ) → D (X ), where Pw
+
+> s,t
+
+ρ := 
+
+(
+
+Φbw
+
+> 0,1
+
+)
+
+> #
+
+ρ. We will use 
+
+Pw 
+
+> s,t
+
+for notational convenience whenever dependence on the probability flow is understood. Let us define the interpolant path map 
+
+Ψw 
+
+> τ0,τ 1
+
+: supp( ρw 
+
+> τ0
+
+) → X , Ψw
+
+> τ0,τ 1
+
+(Iw
+
+> τ0
+
+) := Iw 
+
+> τ1
+
+a.s. The ODE flow Φbw
+
+propagates marginals and Ψw is the samplewise transport observable from trajectory pairs. The FMM [24] supervises this pathwise object and uses the learned terminal map to induce a density operator. The offline dataset consists of stochastic trajectory pairs 
+
+{(x(i) 
+
+> si
+
+, x(i) 
+
+> ti
+
+, s i, t i, w(i))}Ni=1 , for w(i) ∈ F . We parameterize a learned fault-indexed two-time map ̂ Φbw 
+
+> ψ,τ 0,τ 1
+
+: X → X ,for ̂ Φbw 
+
+> ψ,τ,τ
+
+(x) = x, parameterized jointly by (τ0, τ 1, s, t, w).Following the direct flow-map matching formulation of [24], the direct FMM loss LFMM (ψ) can be defined as 
+
+E
+
+> w,(s,t )
+
+∫
+
+> [0 ,1] 2
+
+ω(τ0, τ 1) E
+
+[∥∥∂τ1̂ Φbw
+
+> ψ,τ 0,τ 1
+
+(̂ Φbw 
+
+> ψ,τ 1,τ 0
+
+(Iw 
+
+> τ1
+
+)) − ˙Iw
+
+> τ1
+
+∥∥2
+
++ ∥∥̂ Φbw 
+
+> ψ,τ 0,τ 1
+
+(̂ Φbw  
+
+> ψ,τ 1,τ 0
+
+(Iw 
+
+> τ1
+
+)) − Iw
+
+> τ1
+
+∥∥2]
+
+dτ 0 dτ 1,
+
+where ω : [0 , 1] 2 → R≥0 has full support on {(τ0, τ 1) : 0 ≤ τ0 ≤ τ1 ≤ 1}. Supervision uses only observable interpolant velocities, and bw 
+
+> τ
+
+is the theoretical generator. To enforce the semigroup structure, we add 
+
+Lsg (ψ) := E
+
+[∥∥∥̂ Φbw 
+
+> ψ,τ 0,τ 2
+
+(Iw 
+
+> τ0
+
+) −̂ Φbw
+
+> ψ,τ 1,τ 2
+
+(̂ 
+
+Φbw 
+
+> ψ,τ 0,τ 1
+
+(Iw 
+
+> τ0
+
+)
+
+)∥ ∥∥2]
+
+.
+
+The terminal-path restriction of the FMM loss is also in-cluded in the following form: 
+
+Lep (ψ) := Ew,(s,t )
+
+∫ 10
+
+ω0(r) E
+
+[∥∥∥∂r̂ Φbw 
+
+> ψ, 0,r
+
+(xs) − ˙Iw
+
+> r
+
+∥∥∥2]
+
+dr, 
+
+(21) 
+
+where (xs, xt) ∼ πw
+
+> s,t
+
+, Iw 
+
+> 0
+
+= xs, Iw 
+
+> 1
+
+= xt, and ω0 :[0 , 1] → R>0. One can then optimize min ψ LFMM (ψ) + 
+
+λep Lep (ψ) + λsg Lsg (ψ). The semigroup term enforces two-time consistency. The endpoint term supervises the deployed terminal map ̂ Φbw
+
+> ψ, 0,1
+
+.Under the hypotheses on ω and on τ 7 →̂ Φbw 
+
+> τ0,τ
+
+(Iw 
+
+> τ0
+
+) stated in [24], vanishing direct FMM loss LFMM (̂Φ) = 0 implies that the learned two-time maps agree with the interpolant path. In particular, ̂ Φbw 
+
+> τ0,τ 1
+
+(Iw 
+
+> τ0
+
+) = Iw 
+
+> τ1
+
+almost surely for ω-almost every (τ0, τ 1), and hence, ̂ Φbw 
+
+> 0,1
+
+(xs) = xt almost surely under πw
+
+> s,t
+
+.The learned terminal map induces ̂ Pw 
+
+> s,t
+
+: D(X ) →D(X ), where ̂ Pw
+
+> s,t
+
+ρ := 
+
+(̂ 
+
+Φbw
+
+> ψ, 0,1
+
+) 
+
+> #
+
+ρ. Because ̂ Φbw
+
+> ψ,τ 0,τ 1
+
+is parameterized jointly by (τ0, τ 1, s, t, w), the learned PF-operator family defines a single conditional model in w,rather than a separate operator for each library element. Consequently, ̂ Pw 
+
+> s,t
+
+can be evaluated for any continuous parameter set w ∈ W , where W ⊆ Rp denotes a continuous fault-parameter set containing the discrete library F , beyond 
+
+F .
+
+Lemma 2 (Induced PF Operator): Fix w ∈ F and 0 ≤
+
+s ≤ t ≤ T . Set ̂ Φ := ̂ Φbw
+
+> ψ, 0,1
+
+. Assume ̂ Φ is a C1-diffeomorphism. Consequently, ̂ Pw 
+
+> s,t
+
+is a valid density push-forward and (̂ Pw
+
+> s,t
+
+ρ)(x) = ρ(̂ Φ−1(x))∣ ∣det D̂ Φ−1(x)∣∣. If ̂
+
+Φ = Φ bw 
+
+> 0,1
+
+, one has ̂ Pw 
+
+> s,t
+
+= Pw 
+
+> s,t
+
+and ̂ Pw
+
+> s,t
+
+ρw 
+
+> s
+
+= ρw 
+
+> t
+
+.
+
+Proof: The first claim is the change-of-variables formula for the pushforward of densities by a C1-diffeomorphism. If the learned terminal map equals the exact terminal map, the induced pushforwards coincide pointwise on every input density. Applying this identity to ρw 
+
+> s
+
+yields ̂
+
+Pw
+
+> s,t
+
+ρw 
+
+> s
+
+= ρw 
+
+> t
+
+.
+
+The next theorem converts the observable endpoint FMM residual into a W2-bound for the deployed operator. 
+
+Theorem 4 (FMM Residual Controls PFO Error): Fix 
+
+w ∈ F and 0 ≤ s ≤ t ≤ T . Write ̂ Φr := ̂ Φbw
+
+> ψ, 0,r
+
+with (Xs, X t) ∼ πw 
+
+> s,t
+
+and let Iw 
+
+> r
+
+be the associated stochastic interpolant, so Iw 
+
+> 0
+
+= Xs and Iw 
+
+> 1
+
+= Xt. Assume 
+
+r 7 →̂ Φr(Xs) is absolutely continuous and ̂ Φ0 = Id . Define the endpoint residual 
+
+Rw 
+
+> r
+
+:= ∂r̂ Φr(Xs) − ˙Iw 
+
+> r
+
+, Ew
+
+> ep
+
+(ψ) := 
+
+∫ 10
+
+ω0(r) E[‖Rw 
+
+> r
+
+‖2] dr, 
+
+where ω0 : [0 , 1] → (0 , ∞) is the terminal-path restriction sampling density from (21). Thus, ̂
+
+Φbw
+
+> ψ, 0,1
+
+(Xs) − Xt =
+
+∫ 10
+
+Rw 
+
+> r
+
+dr a.s. (22) and therefore, 
+
+W2
+
+(̂ 
+
+Pw
+
+> s,t
+
+ρw 
+
+> s
+
+, Pw
+
+> s,t
+
+ρw
+
+> s
+
+)
+
+≤
+
+(
+
+E
+
+[∥∥̂ Φbw
+
+> ψ, 0,1
+
+(Xs) − Xt
+
+∥∥2]) 1/2
+
+.
+
+(23) Moreover, 
+
+E
+
+[∥∥̂ Φbw
+
+> ψ, 0,1
+
+(Xs) − Xt
+
+∥∥2]
+
+≤
+
+∫ 10
+
+E[‖Rw 
+
+> r
+
+‖2] dr. 
+
+If ω0(r) ≥ ω0 > 0 on [0 , 1] , one has 
+
+W2
+
+(̂ 
+
+Pw
+
+> s,t
+
+ρw 
+
+> s
+
+, Pw
+
+> s,t
+
+ρw
+
+> s
+
+)
+
+≤ ω−1/20
+
+(Ew
+
+> ep
+
+(ψ))1/2. (24) 
+
+Proof: Since Iw 
+
+> 0
+
+= Xs, Iw 
+
+> 1
+
+= Xt, and ̂ Φ0(Xs) = Xs,the fundamental theorem of calculus gives ̂
+
+Φ1(Xs) − Xt =
+
+∫ 10
+
+∂r̂ Φr(Xs) dr −
+
+∫ 10
+
+˙Iw 
+
+> r
+
+dr =
+
+∫ 10
+
+Rw 
+
+> r
+
+dr, 
+
+which is (22). Jensen’s inequality then implies 
+
+E
+
+[∥∥̂ Φ1(Xs) − Xt
+
+∥∥2]
+
+≤
+
+∫ 10
+
+E[‖Rw 
+
+> r
+
+‖2] dr. 
+
+Now set ̂ Xt := ̂ Φbw
+
+> ψ, 0,1
+
+(Xs). Then Law( ̂Xt) = ̂ Pw
+
+> s,t
+
+ρw 
+
+> s
+
+and 
+
+Law( Xt) = Pw
+
+> s,t
+
+ρw 
+
+> s
+
+= ρw 
+
+> t
+
+, so Law( ̂Xt, X t) is a coupling of the learned and true terminal densities. By definition of 
+
+W2,
+
+W22
+
+(̂ 
+
+Pw
+
+> s,t
+
+ρw 
+
+> s
+
+, Pw
+
+> s,t
+
+ρw
+
+> s
+
+)
+
+≤ E
+
+[∥∥̂ Φbw
+
+> ψ, 0,1
+
+(Xs) − Xt
+
+∥∥2]
+
+.
+
+Taking square roots yields (23). If ω0(r) ≥ ω0, then 
+
+∫ 10
+
+E[‖Rw 
+
+> r
+
+‖2] dr ≤ ω−10
+
+∫ 10
+
+ω0(r) E[‖Rw 
+
+> r
+
+‖2] dr = ω−10 Ew
+
+> ep
+
+(ψ),
+
+which proves (24). 
+
+Theorem 4 is the static training-marginal counterpart to the long-horizon contraction bounds in Theorem 2 and Section III. It bounds one-shot operator mismatch from 
+
+Ew
+
+> ep
+
+. Contraction regularization controls propagation under general input densities. III. C ONTRACTIVE OPERATOR LEARNING 
+
+Theorem 4 bounds operator error from the FMM residual but not long-horizon stability. We regularize the learned flow map ̂ Φbw 
+
+> ψ,τ 0,τ 1
+
+with a contraction certificate [20], [21], [25]. Its induced velocity field is defined by ∂τ1̂ Φbw 
+
+> ψ,τ 0,τ 1
+
+(x) = ̂
+
+bw
+
+> ψ,τ 1
+
+(̂ 
+
+Φbw 
+
+> ψ,τ 0,τ 1
+
+(x)
+
+)
+
+. Let ϑ parameterize a metric network and set Mw 
+
+> ϑ
+
+(x, τ ) = (Θw 
+
+> ϑ
+
+(x, τ ))⊤Θw 
+
+> ϑ
+
+(x, τ ) ≻ 0, with optimized rate αw ∈ R. Let us define the contraction residual 
+
+Rw 
+
+> ctr
+
+:= ˙Mw 
+
+> ϑ
+
++(D̂ bw
+
+> ψ,τ
+
+)⊤Mw 
+
+> ϑ
+
++Mw 
+
+> ϑ
+
+D̂ bw
+
+> ψ,τ
+
+−2αwMw 
+
+> ϑ
+
+, (25) where [·]+ denotes projection onto the cone of symmetric positive semidefinite matrices. The contraction and certificate losses are 
+
+Lctr (ψ, ϑ, α ) := E
+
+[∥∥[Rw
+
+> ctr
+
+(x, τ )] +
+
+∥∥2
+
+> F
+
+]
+
+,
+
+Lcert (ϑ, α ) := Ew
+
+[cα[αw]2+ + cκ
+
+(log mw − log mw)] ,
+
+with uniform metric bounds mwI  Mw 
+
+> ϑ
+
+ mwI. The joint objective is 
+
+min  
+
+> ψ,ϑ,α
+
+LFMM (ψ) + λep Lep (ψ) + λsg Lsg (ψ)+ λctr Lctr (ψ, ϑ, α ) + λcert Lcert (ϑ, α ). (26) The weights λep , λ sg , λ ctr , λ cert > 0 balance five terms. The 
+
+Lep supervises the terminal map and feeds Theorem 4 and 
+
+Lctr drives the contraction residual to zero. Moreover, Lcert 
+
+penalizes eαw
+
+and κw = √mw/m w and shrinks the bias 
+
+δw in (31). One can write the exact auxiliary field as a perturbation of the learned one, such that bw 
+
+> τ
+
+(x) = ̂ bw 
+
+> ψ,τ
+
+(x) + dw 
+
+> τ
+
+(x).
+
+Theorem 5 (Approximate Wasserstein bound): Fix w ∈
+
+F . Set ̂ Φτ := ̂ Φbw 
+
+> ψ, 0,τ
+
+, and assume τ 7 →̂ Φτ (x) is C1 for each x, Rw 
+
+> ctr
+
+is continuous, ρw 
+
+> τ
+
+has full support on X , and 
+
+mwI  Mw 
+
+> ϑ
+
+(x, τ )  mwI ∀(x, τ ) ∈ X × [0 , 1] .
+
+Let 
+
+εw 
+
+> ctr
+
+:= sup   
+
+> (x,τ )∈X×[0 ,1]
+
+∥∥[Rw
+
+> ctr
+
+(x, τ )]
+
+> +
+
+∥∥F ≥ 0, (27) and define 
+
+˜αw := αw + εw
+
+> ctr
+
+2 mw . (28) Suppose bw 
+
+> τ
+
+(x) =̂ bw 
+
+> ψ,τ
+
+(x) + dw 
+
+> τ
+
+(x) with dw := sup x,τ ‖dw 
+
+> τ
+
+(x)‖ < ∞. Then, along the auxiliary flow, 
+
+˙Mw 
+
+> ϑ
+
++ 2 sym 
+
+(
+
+Mw 
+
+> ϑ
+
+D̂ bw
+
+> ψ,τ
+
+)
+
+ 2 ˜ αwMw 
+
+> ϑ
+
+,
+
+and with κw := √mw/m w and ˜δw 
+
+> τ
+
+:= 
+
+κwdw ∫ τ 
+
+> 0
+
+e˜αw (τ −r) dr , Theorem 2 applies with rate ˜αw and perturbation level dw. Thus, for any μ0, ν 0 ∈ P 2(X ) and 
+
+τ ∈ [0 , 1] ,
+
+W2
+
+(
+
+(̂Φbw 
+
+> ψ, 0,τ
+
+)#μ0, (Φ bw 
+
+> 0,τ
+
+)#ν0
+
+)
+
+≤ κwe˜αw τ W2(μ0, ν 0) + ˜δw 
+
+> τ
+
+.
+
+(29) In particular, for any ρs, η s ∈ D (X ), one has 
+
+W2
+
+(̂ 
+
+Pw
+
+> s,t
+
+ρs, Pw
+
+> s,t
+
+ηs
+
+)
+
+≤ κwe˜αw
+
+W2(ρs, η s) + ˜δw 
+
+> 1
+
+. (30) For the same input density ρs, define the terminal bias 
+
+δw := ˜δw 
+
+> 1
+
+= κwdw
+
+∫ 10
+
+e˜αw (1 −r) dr. (31) Consequently, we have 
+
+W2
+
+(̂ 
+
+Pw
+
+> s,t
+
+ρs, Pw
+
+> s,t
+
+ρs
+
+)
+
+≤ δw. (32) 
+
+Proof: The definition (25) and the Frobenius bound (27) on [Rw
+
+> ctr
+
+]+ imply the Jacobian analogue of Lemma 1 along the learned auxiliary flow with rate ˜αw in (28), as in the standard quadratic-form argument [20], [21]. Applying The-orem 2 on τ ∈ [0 , 1] with nominal field ̂ bw 
+
+> ψ,τ
+
+, perturbation 
+
+dw 
+
+> τ
+
+, homotopy (9), rate ˜αw, and κw, dw as above yields (29). The operator bound (30) follows at τ = 1 , and (31)–(32) specialize (30) to ηs = ρs.
+
+Theorem 5 gives the main long-horizon W2 error bound for the learned operator family under contraction regulariza-tion. 
+
+Corollary 1 (Exact contraction regularization): If 
+
+Lctr (ψ, ϑ, α ) = 0 under the hypotheses of Theorem 5, then 
+
+εw 
+
+> ctr
+
+= 0 , ˜αw = αw, and ˜δw 
+
+> τ
+
+coincides with the bias term obtained by replacing ˜αw with αw throughout Theorem 5. IV. F AULT INFERENCE AND RECOVERY CONTROL 
+
+We extend the fault-indexed density-transport framework of Sections II and III to fault identification and recovery via density tracking control. The learned operator library Plib := 
+
+{̂ Pw 
+
+> s,t
+
+: w ∈ F } is computed offline and queried online for both inference and recovery. 
+
+A. Fault Inference 
+
+Recall that F = {w0, . . . , wNf } is the fault library and let ̂ ρ(j) 
+
+> k|k
+
+= 1
+
+> Np
+
+∑Np 
+
+> i=1
+
+δxi, (j)
+
+> k|k
+
+denote the posterior under hypothesis wj for j ∈ { 0, . . . , N f }. For each wj , prediction uses the corresponding fault-indexed flow map, 
+
+xi, (j) 
+
+> k+1 |k
+
+= Φ Fwj 
+
+> tk,t k+1
+
+(xi, (j)
+
+> k|k
+
+).
+
+At time tk, let Yk := {y0, . . . , yk} such that for each candidate w, the one-step predicted density and predictive likelihood are with observations yk = h(xk) + εk, where 
+
+h : X → Rny is the observation map and εk ∼ pε is i.i.d. measurement noise with known density pε on Rny . The conditional measurement density is p(y | x) = pε(y−h(x)) .Denote the current filtered density by ̂ ρ(j) 
+
+> k|k
+
+∈ D (X ). The predictive likelihood is then ̂
+
+ρ(j) 
+
+> k+1 |k
+
+:= ̂ Pwj 
+
+> tk,t k+1
+
+̂ ρ(j)
+
+> k|k
+
+, (33) 
+
+L(j) 
+
+> k+1
+
+:= 
+
+∫
+
+> X
+
+p(yk+1 | x)̂ ρ(j)
+
+> k+1 |k
+
+(x) dx. (34) If pε = N (0 , R), i.e., εk ∼ N (0 , R), one has 
+
+L(j) 
+
+> k+1
+
+∝ 1
+
+NpNp
+
+∑
+
+> i=1
+
+exp 
+
+(
+
+− 1
+
+2 ‖h(xi, (j)
+
+> k+1 |k
+
+) − yk+1 ‖2
+
+> R−1
+
+)
+
+. (35) Instead of selecting a discrete library, we perform iterative fault inference over a continuous parameter set W using the maximum-likelihood estimator (MLE) ̂
+
+wMLE ,k ∈ argmin 
+
+> w∈W
+> k
+
+∑
+
+> ℓ=0
+
+1
+
+2 ‖h(xℓ(w)) − yℓ‖2 
+
+> R−1
+
+(36) subject to the nonlinear dynamics 
+
+xℓ+1 (w) = Φ Fw 
+
+> tℓ,t ℓ+1
+
+(xℓ(w)) , x0(w) = x0.
+
+Since (36) optimizes over w ∈ W , the estimate ̂ wMLE ,k 
+
+is not restricted to F . Thus, online fault inference can be viewed as a continuous fault-fitting problem over W, with density reachability estimated by evaluating the learned fault-indexed PF-operator family at ̂ wMLE ,k .With positive prior mass on the true fault and predictive likelihoods separating the hypotheses (Definition 4), the posterior is expected to concentrate on the best matching op-erator, consistent with standard Bayesian concentration [26]. The predicted family {̂ ρ(j)
+
+> k+1 |k
+
+}Nf 
+
+> j=0
+
+is the learned analog of (14), so fault detection, identifiability, and recovery are evaluated in the density space through density reachability. 
+
+B. Recovery via Contractive GMM control 
+
+Let ˆρk|k := ˆρ̂ wMLE ,k  
+
+> k|k
+
+where ̂ wMLE ,k ∈ W. Once the posterior concentrates, we propagate the current filtered density over a finite recovery horizon {tk, . . . , t k+Nr }, where 
+
+Nr ∈ N, and N is the set of positive integers, under both the inferred fault operator and the nominal operator: ̂
+
+ρfault  
+
+> k+ℓ|k
+
+:= ̂ P̂ wMLE ,k  
+
+> tk,t k+ℓ
+
+̂ ρk|k, (37) ̂
+
+ρnom  
+
+> k+ℓ|k
+
+:= ̂ Pw0 
+
+> tk,t k+ℓ
+
+̂ ρk|k, ℓ = 0 , . . . , N r . (38) Here (37) is the estimated fault reachable density and (38) the nominal recovery target. 
+
+Lemma 3 (Recovery target surrogate bound): Assume the true active fault on [tk, t k+Nr ] is w⋆ =̂ wMLE ,k , let ρk|k
+
+denote the true filtered density, and define the true terminal fault reachable density ρfault  
+
+> k+Nr
+
+:= Pw⋆  
+
+> tk,t k+Nr
+
+ρk|k. Suppose the Gaussian Mixture Model (GMM) approximation of the estimated terminal fault reachable density satisfies, for some 
+
+εf > 0, we have W2
+
+(̂ 
+
+ρfault  
+
+> k+Nr|k
+
+, ρ fault GMM 
+
+)
+
+≤ εf . Consequently, one has 
+
+W2
+
+(ρfault  
+
+> k+Nr
+
+, ρ fault GMM 
+
+) ≤ κw⋆ eαw⋆
+
+W2(ρk|k ,̂ ρk|k) + δw⋆ 
+
+> 1
+
++ εf .
+
+Proof: By the triangle inequality, one has 
+
+W2
+
+(ρfault  
+
+> k+Nr
+
+, ρ fault GMM 
+
+) ≤ W2
+
+(
+
+ρfault  
+
+> k+Nr
+
+,̂ ρfault  
+
+> k+Nr|k
+
+)
+
++ εf .
+
+Applying (30) with w = w⋆, ρs = ρk|k, and ηs =̂ ρk|k gives the stated bound. 
+
+To synthesize recovery control, let us approximate the terminal fault and nominal reachable densities by matched-weight Gaussian mixtures with M ∈ N components, ̂
+
+ρfault  
+
+> k+Nr|k
+
+(x) ≈ ∑Mi=1 βi N (x; mfi , Σfi ) and ̂ ρnom  
+
+> k+Nr|k
+
+(x) ≈
+
+∑Mi=1 βi N (x; mni , Σni ). Matched weights preserve compo-nent correspondence, so recovery is posed componentwise from (mfi , Σfi ) to (mni , Σni ). Let 
+
+γi(xk ) := βi ϕ(xk ; mfi , Σfi )
+
+∑Mr=1 βr ϕ(xk; mfr , Σfr )
+
+denote the fault-component responsibility at the current state 
+
+xk. For each retained component i ∈ I k, linearizing about the faulted component mean yields the local model 
+
+xℓ+1 = A(i) 
+
+> ℓ
+
+xℓ + B(i) 
+
+> ℓ
+
+δuℓ + c(i) 
+
+> ℓ
+
+, ℓ = 0 , . . . , N r − 1,
+
+with affine law δu(i) 
+
+> ℓ
+
+= ν(i) 
+
+> ℓ
+
++ K(i)
+
+> ℓ
+
+(xℓ − μ(i)
+
+> ℓ
+
+). The induced mean–covariance recursion is 
+
+μ(i) 
+
+> ℓ+1
+
+= A(i) 
+
+> ℓ
+
+μ(i) 
+
+> ℓ
+
++ B(i) 
+
+> ℓ
+
+ν(i) 
+
+> ℓ
+
++ c(i) 
+
+> ℓ
+
+,
+
+Σ(i) 
+
+> ℓ+1
+
+= (A(i) 
+
+> ℓ
+
++ B(i) 
+
+> ℓ
+
+K(i)
+
+> ℓ
+
+)Σ(i)
+
+> ℓ
+
+(A(i) 
+
+> ℓ
+
++ B(i) 
+
+> ℓ
+
+K(i)
+
+> ℓ
+
+)⊤ + W (i) 
+
+> ℓ
+
+,
+
+initialized at μ(i)0 = mfi and Σ(i)0 = Σ fi where W (i) 
+
+> ℓ
+
+ 0 is the residual covariance of the propagated fault tube. Define Qℓ  0, Rℓ ≻ 0, and PNr = λT QNr −1. We can compute a contraction metric Pℓ backward along the nominal linearization by 
+
+Pℓ = Qℓ + ( Anom  
+
+> ℓ
+
+)⊤Pℓ+1 Anom  
+
+> ℓ
+
+−
+
+(Anom  
+
+> ℓ
+
+)⊤Pℓ+1 Bnom  
+
+> ℓ
+
+S−1 
+
+> ℓ
+
+(Bnom  
+
+> ℓ
+
+)⊤Pℓ+1 Anom  
+
+> ℓ
+
+, (39) where Sℓ := Rℓ + ( Bnom  
+
+> ℓ
+
+)⊤Pℓ+1 Bnom  
+
+> ℓ
+
+. It can be shown by application of the converse contraction theorem applied to control contraction metrics [25], [27] that (39) defines a valid contraction metric. For each i ∈ I k, we solve 
+
+min   
+
+> {ν(i)
+> ℓ,K (i)
+> ℓ}Nr ℓ=0
+
+J(i) := 
+
+> Nr
+
+∑
+
+> ℓ=0
+
+[
+
+ωℓ ℓ(i)trk ,ℓ +ρν ‖ν(i) 
+
+> ℓ
+
+‖22+ρK ‖K(i) 
+
+> ℓ
+
+‖2
+
+> F
+
+]
+
+,
+
+where 
+
+ℓ(i)trk ,ℓ := qm‖μ(i) 
+
+> ℓ+1
+
+− mni ‖22 + qΣ‖Σ(i) 
+
+> ℓ+1
+
+− Σni ‖2
+
+> F
+
++ λm‖μ(i) 
+
+> ℓ+1
+
+− xnom 
+
+> k+ℓ+1
+
+‖2 
+
+> Pℓ+1
+
++ λΣ Tr (Pℓ+1 Σ(i)
+
+> ℓ+1
+
+).
+
+Here ωℓ ≥ 0 is a stage weight, and qm, q Σ, λ m, λ Σ, ρ ν , ρ K >
+
+0 are the weights for mean matching, covariance matching, contraction-metric regularization, and control effort. The controls are then the blended normalized responsibilities, 
+
+δu⋆k = ∑
+
+> i∈I k
+
+¯γi(xk)
+
+(
+
+ν(i)0 + K(i)0 (xk − mfi )
+
+)
+
+,
+
+with ¯γi(xk) := γi(xk )∑   
+
+> r∈I kγr(xk)
+
+. Lemma 3 bounds the gap between the true and GMM-approximated fault reachable densities, justifying the use of the learned target. The recov-ery correction is applied iteratively to the baseline controller as uk = ucl ,k + urec ,k where urec ,k := δu⋆k.V. S IMULATIONS 
+
+We validate the proposed contractive Perron–Frobenius reachability FDI and recovery framework on a 10-state spacecraft attitude-control benchmark with four tetrahedrally mounted reaction wheels, where x = [θ⊤, ω ⊤, ω ⊤
+
+> w
+
+]⊤ col-lects attitude, body rates, and wheel speeds. The spacecraft parameters follow [28] with I = diag(1 .0, 1.0, 0.8) kg m 2
+
+and Jw = 0 .01 kg m 2. The nominal controller is a satu-rated PD tracker with Kp = diag(22 .5, 18 .0, 15 .0) , Kd =diag(12 .0, 9.0, 7.5) , wheel-torque limit 0.14 Nm, and sam-pling time ∆t = 0.02 s , designed to follow θd(t) =[0 .05 sin(0 .2πt ), 0.05 cos(0 .2πt ), (π/ 250) t]⊤ via unom =
+
+−Kp (θ − θd) − Kdω and uw = sat (A†unom , 0.14 ). Faults are modeled as constant wheel loss-of-effectiveness coeffi-cients α ∈ [0 , 1] 4. The filter uses full-state noisy measure-ments, and recovery combines the learned fault-indexed PF operator, continuous OOD fault refinement, and contractive GMM replanning under matched nonlinear rollout-noise re-alizations. For the OOD case α⋆ = [0 .15 , 0.4, 0.2, 0.25] ⊤ over a 10 s horizon (500 steps), the inferred fault is ̂ α =[0 .14972 , 0.40174 , 0.19999 , 0.24871] ⊤, with ℓ2 error 2.19 ×
+
+10 −3. Over 25 uniformly sampled OOD faults in [0 , 1] 4, the continuous estimator attains mean fault error 7.34 × 10 −3
+
+in ℓ2, which indicates accurate generalization beyond the discrete training library. The empirical terminal reachable-density separation is 4.38 × 10 −1 in W2, which is consis-tent with the sampled rollout-restricted median bound 6.48 
+
+from (19) over one inference step ∆t = 0 .02 s . The faulted, 0.0 2.5 5.0 7.5 10 .0
+
+Time t [s] 
+
+> 036912
+> ‖xk − xnom
+> k ‖2
+
+(a) State Error     
+
+> Faulted Recovered
+> 0.02.55.07.510 .0
+
+Time t [s] 
+
+> 0.00 0.08 0.16 0.24 0.32 0.40
+> Fault Error
+
+(b) Fault and Density Error      
+
+> ‖̂wk−w⋆‖2
+> MMD 2(̂
+> ρk,
+> ρk)
+> 0.00.30.60.91.2
+> MMD 2
+
+Fig. 1. OOD FDIR performance for α⋆ = [0 .15 , 0.4, 0.2, 0.25] ⊤. (a) The reduction in full-state tracking error under recovery control. (b) Continuous fault-estimation error and reachable-density discrepancy MMD 2(̂ρk , ρ k ).
+
+i.e., without recovery control, and recovered trajectories are driven by the same state-dependent multiplicative noise realization on the body rates and wheel speeds, whereas the nominal trajectory remains noise-free. Using the proposed FDIR, the terminal full-state error relative to nominal drops from 1.058 ×10 1 under fault to 9.909 ×10 −1 under recovery, a 10 .68 × improvement, while the mean full-state error decreases from 7.478 to 5.745 × 10 −1, a 13 .02 × pathwise improvement. Figure 1(b) further shows that the continuous fault-estimation error decreases to 8.18 × 10 −2, and the empirical terminal operator gap W2(̂Pw 
+
+> 0,T
+
+ρ0, Pw 
+
+> 0,T
+
+ρ0) ≈
+
+3.02 remains below the sampled rollout-restricted worst-case bound δw ≈ 2.26 × 10 2 from (31). VI. C ONCLUSION 
+
+This paper presented a Perron-Frobenius (PF) operator-based framework for data-driven fault detection, identifica-tion, and recovery (FDIR) in nonlinear stochastic systems via density reachability. Using probability-flow PF operators and contraction theory, we defined fault-indexed reachable density families and established W2 conditions for density-based fault detectability and identifiability. We utilized flow map matching to learn the fault-indexed operators from trajectory data, and demonstrated that the observable end-point residual directly bounds the deployed operator error in W2. Furthermore, we co-trained a contraction certificate that provides explicit long-horizon guarantees relative to the true fault-driven and nominal density evolutions. The learned operator library was then used online for recursive Bayesian fault inference and continuous fault parameter fitting to generalize the learned map to out-of-distribution (OOD) scenarios. To carry out the recovery control, we em-ployed reachable-density propagation and Gaussian-mixture covariance steering. The proposed density reachability-based framework in this paper provides a systematic framework in which stochastic diagnosis, operator learning, and recovery control can be posed and analyzed together. REFERENCES [1] R. Isermann, Fault-diagnosis systems: an introduction from fault detection to fault tolerance . Springer Science & Business Media, 2005. [2] J. Ragan, B. Riviere, F. Y. Hadaegh, and S.-J. Chung, “Online tree-based planning for active spacecraft fault estimation and collision avoidance,” Science Robotics , vol. 9, no. 93, p. eadn4722, 2024. [3] M. O’Connell, J. Cho, M. Anderson, and S.-J. Chung, “Learning-based minimally-sensed fault-tolerant adaptive flight control,” IEEE Robot. Autom. Lett. , vol. 9, no. 6, pp. 5198–5205, 2024. [4] V. Venkatasubramanian, R. Rengaswamy, K. Yin, and S. N. Kavuri, “A review of process fault detection and diagnosis: Part i: Quantitative model-based methods,” Comput. Chem. Eng. , vol. 27, no. 3, pp. 293– 311, 2003. [5] J. Chen and R. J. Patton, Robust model-based fault diagnosis for dynamic systems . Springer Science & Business Media, 2012, vol. 3. [6] H. A. Talebi, K. Khorasani, and S. Tafazoli, “A recurrent neural-network-based sensor and actuator fault detection and isolation for nonlinear systems with application to the satellite’s attitude control subsystem,” IEEE Trans. Neural Netw. , vol. 20, no. 1, pp. 45–60, 2008. [7] F. Fu, D. Wang, W. Li, and P. Liu, “Evaluation of fault diagnosability for dynamic systems with unknown uncertainties,” IEEE Access ,vol. 6, pp. 16 737–16 745, 2018. [8] M. Bakhtiaridoust, M. Yadegar, and N. Meskin, “Data-driven fault detection and isolation of nonlinear systems using deep learning for koopman operator,” ISA transactions , vol. 134, pp. 200–211, 2023. [9] J. D. Ibrahim, M. Taheri, S.-J. Chung, and F. Y. Hadaegh, “Data-driven probabilistic fault detection and identification via density flow matching,” arXiv preprint arXiv:2603.25982 , 2026. [10] A. Farid, S. Veer, and A. Majumdar, “Task-driven out-of-distribution detection with statistical guarantees for robot learning,” in Conf. Robot Learning . PMLR, 2022, pp. 970–980. [11] Y. Meng, D. Sun, Z. Qiu, M. T. B. Waez, and C. Fan, “Learning density distribution of reachable states for autonomous systems,” in 
+
+Conference on Robot Learning . PMLR, 2022, pp. 124–136. [12] R. Brockett, “Optimal control of the liouville equation,” 2007. [13] H. Risken, “Fokker-Planck equation,” in The Fokker-Planck equation: methods of solution and applications . Springer, 1989, pp. 63–95. [14] J.-D. Benamou and Y. Brenier, “A computational fluid mechanics so-lution to the Monge-Kantorovich mass transfer problem,” Numerische Mathematik , vol. 84, no. 3, pp. 375–393, 2000. [15] C. Villani, Topics in optimal transportation . Amer. Math. Soc., 2021, vol. 58. [16] S. Jafarpour and Y. Chen, “Probabilistic reachability of stochas-tic control systems: A contraction-based approach,” arXiv preprint arXiv:2407.12225 , 2024. [17] A. Lasota and M. C. Mackey, Chaos, fractals, and noise: stochastic aspects of dynamics . Springer Science & Business Media, 2013, vol. 97. [18] N. M. Boffi and E. Vanden-Eijnden, “Probability flow solution of the fokker–planck equation,” Machine Learning: Science and Technology ,vol. 4, no. 3, p. 035012, 2023. [19] L. Ambrosio and G. Crippa, “Continuity equations and ode flows with non-smooth velocity,” Proc. Roy. Soc. Edinb., Sect. A. , vol. 144, no. 6, pp. 1191–1244, 2014. [20] W. Lohmiller and J. Slotine, “On contraction analysis for nonlinear systems,” Automatica , 1998. [21] H. Tsukamoto, S.-J. Chung, and J.-J. E. Slotine, “Contraction theory for nonlinear stability analysis and learning-based control: A tutorial overview,” Annual Reviews in Control , vol. 52, pp. 135–169, 2021. [22] M. S. Albergo, N. M. Boffi, and E. Vanden-Eijnden, “Stochas-tic interpolants: A unifying framework for flows and diffusions,” 
+
+arXiv:2303.08797 , 2023. [23] M. S. Albergo and E. Vanden-Eijnden, “Building normalizing flows with stochastic interpolants,” ICLR , 2023. [24] N. M. Boffi, M. S. Albergo, and E. Vanden-Eijnden, “Flow map matching with stochastic interpolants: A mathematical framework for consistency models,” arXiv preprint arXiv:2406.07507 , 2024. [25] I. R. Manchester and J. Slotine, “Control contraction metrics: Convex and intrinsic criteria for nonlinear feedback design,” IEEE Trans. Autom. Control , vol. 62, no. 6, pp. 3046–3053, 2017. [26] S. Ghosal and A. van der Vaart, Fundamentals of Nonparametric Bayesian Inference . Cambridge University Press, 2017. [27] P. Giesl, S. Hafstein, and C. Kawan, “Review on contraction analysis and computation of contraction metrics,” arXiv preprint arXiv:2203.01367 , 2022. [28] D. Y. Lee, R. Gupta, U. V. Kalabi´ c, S. Di Cairano, A. M. Bloch, J. W. Cutler, and I. V. Kolmanovsky, “Geometric mechanics based nonlinear model predictive spacecraft attitude control with reaction wheels,” J. Guid. Control, Dyn. , vol. 40, no. 2, pp. 309–319, 2017.

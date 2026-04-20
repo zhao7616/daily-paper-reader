@@ -1,0 +1,46 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.12238v1/fig-001.webp",
+      "caption": "Table 3: Rigid-body oracle results (600 samples, 3 runs per geometry)",
+      "page": 7,
+      "index": 1,
+      "width": 850,
+      "height": 198
+    },
+    {
+      "url": "assets/figures/arxiv/2604.12238v1/fig-002.webp",
+      "caption": "Table 1: Rigid-body oracle parameters",
+      "page": 7,
+      "index": 2,
+      "width": 528,
+      "height": 339
+    },
+    {
+      "url": "assets/figures/arxiv/2604.12238v1/fig-003.webp",
+      "caption": "Table 5: Complete invariant vector: oloid vs. cylinder across five physical domains",
+      "page": 10,
+      "index": 3,
+      "width": 621,
+      "height": 226
+    },
+    {
+      "url": "assets/figures/arxiv/2604.12238v1/fig-004.webp",
+      "caption": "Table 4: Hertz oracle results: CDS vs. SDS (600 samples, 3 runs per geometry)",
+      "page": 9,
+      "index": 4,
+      "width": 912,
+      "height": 225
+    },
+    {
+      "url": "assets/figures/arxiv/2604.12238v1/fig-005.webp",
+      "caption": "Figure 1: Left: CDS scores under the rigid-body oracle (log scale). The oloid (gold) scores 8.2×10−7; the cylinder (red) scores 4.75×10−5 (58× worse). Green bars show three asymmetric two-circle roller variants, all within 2.4× of the oloid. Right: Oloid construction from two generating circles C1 and C2 in perpendicular planes.",
+      "page": 8,
+      "index": 5,
+      "width": 920,
+      "height": 380
+    }
+  ]
+}
