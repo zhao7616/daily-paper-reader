@@ -1,0 +1,38 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.16589v1/fig-001.webp",
+      "caption": "Table 1: Data organization and re-formatting from raw displacement signals to stacked per-window representations that concatenate samples 𝑥(𝑚) with features 𝐳(𝑚).",
+      "page": 6,
+      "index": 1,
+      "width": 1029,
+      "height": 380
+    },
+    {
+      "url": "assets/figures/arxiv/2604.16589v1/fig-002.webp",
+      "caption": "Table 6",
+      "page": 11,
+      "index": 2,
+      "width": 497,
+      "height": 306
+    },
+    {
+      "url": "assets/figures/arxiv/2604.16589v1/fig-003.webp",
+      "caption": "Figure 6: Classification accuracy (𝑆∗) versus optimal lag (𝜏). Best lag (𝜏∗) exhibits a scattered distribution across larger values, whereas knee lag (𝜏𝑘) forms a dense cluster at smaller values, indicating that 𝜏𝑘 provides a more stable and compact characterization of time-dependent dynamics.",
+      "page": 10,
+      "index": 3,
+      "width": 498,
+      "height": 261
+    },
+    {
+      "url": "assets/figures/arxiv/2604.16589v1/fig-004.webp",
+      "caption": "Figure 1: Larger pairwise overlaps (e.g., no_mass vs. mass_pos1) imply harder classification, while more distinct shapes (e.g., mass_pos3, mass_pos4) imply easier separability.",
+      "page": 3,
+      "index": 4,
+      "width": 498,
+      "height": 417
+    }
+  ]
+}

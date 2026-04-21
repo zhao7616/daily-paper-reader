@@ -6,46 +6,63 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-04-20
-- 运行时间：2026-04-20 20:08:02 UTC
+- 最新运行日期：2026-04-21
+- 运行时间：2026-04-21 19:50:31 UTC
 - 运行状态：成功
-- 本次总论文数：8
-- 精读区：2
-- 速读区：6
+- 本次总论文数：14
+- 精读区：3
+- 速读区：11
 
 ### 今日简报（AI）
-今日聚焦工业设备寿命预测与系统韧性量化，深度解析 CNN-BiLSTM-Attention 模型在 RUL 领域的突破。
-重点推荐非对称损失引导的 RUL 预测及可解释性热图技术，以及支撑运维决策的韧性量化新框架。
-建议优先研读高分论文中的故障热图可视化方法，以提升工业预测模型的可信度与实操价值。
-- 详情：[/202604/20/README](/202604/20/README)
+今日聚焦14篇前沿成果，深度解析工业设备寿命预测与医疗风险评估的AI新范式。
+重点推荐获满分评价的CNN-BiLSTM-Attention混合模型，其通过非对称损失与故障热力图实现了高精度的可解释RUL预测
+- 详情：[/202604/21/README](/202604/21/README)
 
 ### 精读区论文标签
-1. [Asymmetric-Loss-Guided Hybrid CNN-BiLSTM-Attention Model for Industrial RUL Prediction with Interpretable Failure Heatmaps](/202604/20/2604.13459v1-asymmetric-loss-guided-hybrid-cnn-bilstm-attention-model-for-industrial-rul-prediction-with-interpretable-failure-heatmaps)  
+1. [Asymmetric-Loss-Guided Hybrid CNN-BiLSTM-Attention Model for Industrial RUL Prediction with Interpretable Failure Heatmaps](/202604/21/2604.13459v1-asymmetric-loss-guided-hybrid-cnn-bilstm-attention-model-for-industrial-rul-prediction-with-interpretable-failure-heatmaps)  
    标签：评分：10.0/10、query:rul
-   evidence：涡扇发动机退化的工业剩余寿命预测
-2. [Resilience Quantification and its Support for Operational Resilience](/202604/20/2604.12073v1-resilience-quantification-and-its-support-for-operational-resilience)  
+   evidence：使用混合CNN-BiLSTM进行涡扇发动机工业剩余寿命预测
+2. [Asymmetric-Loss-Guided Hybrid CNN-BiLSTM-Attention Model for Industrial RUL Prediction with Interpretable Failure Heatmaps](/202604/21/2604.13459v2-asymmetric-loss-guided-hybrid-cnn-bilstm-attention-model-for-industrial-rul-prediction-with-interpretable-failure-heatmaps)  
+   标签：评分：9.5/10、query:rul
+   evidence：使用混合CNN-BiLSTM-Attention和非对称损失进行涡扇发动机工业剩余寿命预测
+3. [Resilience Quantification and its Support for Operational Resilience](/202604/21/2604.12073v1-resilience-quantification-and-its-support-for-operational-resilience)  
    标签：评分：9.0/10、query:phm
-   evidence：学习模型驱动诊断与寿命预测
+   evidence：学习模型驱动诊断（当前健康评估）和预测（健康状态预报）以估计使用寿命
 
 ### 速读区论文标签
-1. [Neuromorphic Parameter Estimation for Power Converter Health Monitoring Using Spiking Neural Networks](/202604/20/2604.15714v1-neuromorphic-parameter-estimation-for-power-converter-health-monitoring-using-spiking-neural-networks)  
+1. [OC-Distill: Ontology-aware Contrastive Learning with Cross-Modal Distillation for ICU Risk Prediction](/202604/21/2604.16878v1-oc-distill-ontology-aware-contrastive-learning-with-cross-modal-distillation-for-icu-risk-prediction)  
+   标签：评分：7.5/10、query:phm
+   evidence：临床恶化预测与剩余住院时间预测
+2. [Neuromorphic Parameter Estimation for Power Converter Health Monitoring Using Spiking Neural Networks](/202604/21/2604.15714v1-neuromorphic-parameter-estimation-for-power-converter-health-monitoring-using-spiking-neural-networks)  
    标签：评分：7.0/10、query:rul
-   evidence：功率转换器健康监测与参数估计
-2. [Estimating heterogeneous treatment effects with survival outcomes via a deep survival learner](/202604/20/2604.10398v1-estimating-heterogeneous-treatment-effects-with-survival-outcomes-via-a-deep-survival-learner)  
-   标签：评分：6.0/10、query:rul
-   evidence：用于时变结果和轨迹的深度生存学习器
-3. [A comprehensive study on causal discovery between degradation paths](/202604/20/2604.10618v1-a-comprehensive-study-on-causal-discovery-between-degradation-paths)  
-   标签：评分：6.0/10、query:rul
-   evidence：退化路径之间的因果发现用于建模
-4. [A Physics-Aware Variational Graph Autoencoder for Joint Modal Identification with Uncertainty Quantification](/202604/20/2604.11237v1-a-physics-aware-variational-graph-autoencoder-for-joint-modal-identification-with-uncertainty-quantification)  
+   evidence：使用脉冲神经网络进行功率变换器健康监测和参数估计
+3. [Efficient Bayesian inference for non-linear association structures in joint models: A hierarchical approach via INLA](/202604/21/2604.18057v1-efficient-bayesian-inference-for-non-linear-association-structures-in-joint-models-a-hierarchical-approach-via-inla)  
+   标签：评分：7.0/10、query:phm
+   evidence：健康研究中纵向数据与事件发生时间数据的联合模型
+4. [Teaching Robots to Interpret Social Interactions through Lexically-guided Dynamic Graph Learning](/202604/21/2604.10895v1-teaching-robots-to-interpret-social-interactions-through-lexically-guided-dynamic-graph-learning)  
+   标签：评分：6.5/10、query:phm
+   evidence：推断内部状态并预测未来行为的多任务学习框架
+5. [Causally-Constrained Probabilistic Forecasting for Time-Series Anomaly Detection](/202604/21/2604.17998v1-causally-constrained-probabilistic-forecasting-for-time-series-anomaly-detection)  
+   标签：评分：6.5/10、query:phm
+   evidence：工业监控中的多变量时间序列异常检测
+6. [Bayesian Nonparametric Modeling for Multivariate Conditional Copula Regression with Varying Coefficients](/202604/21/2604.12859v1-bayesian-nonparametric-modeling-for-multivariate-conditional-copula-regression-with-varying-coefficients)  
    标签：评分：6.0/10、query:phm
-   evidence：基于振动数据的结构健康监测联合模态识别
-5. [Computational Validation of the Oloid as a Local Optimum in the Developable Roller Family](/202604/20/2604.12238v1-computational-validation-of-the-oloid-as-a-local-optimum-in-the-developable-roller-family)  
-   标签：评分：6.0/10、query:rul
-   evidence：评估滚动表面的接触疲劳和几何失效模式
-6. [Perron-Frobenius Contractive Operator Matching for Data-Driven Reachable Fault Identification and Recovery](/202604/20/2604.15470v1-perron-frobenius-contractive-operator-matching-for-data-driven-reachable-fault-identification-and-recovery)  
+   evidence：对依赖结构随时间变化的多元结果进行联合建模
+7. [SemiFA: An Agentic Multi-Modal Framework for Autonomous Semiconductor Failure Analysis Report Generation](/202604/21/2604.13236v1-semifa-an-agentic-multi-modal-framework-for-autonomous-semiconductor-failure-analysis-report-generation)  
    标签：评分：6.0/10、query:phm
-   evidence：非线性系统的驱动故障检测与识别
+   evidence：融合设备遥测数据进行根因分析和严重程度分类
+8. [Unsupervised Anomaly Detection in Process-Complex Industrial Time Series: A Real-World Case Study](/202604/21/2604.13928v1-unsupervised-anomaly-detection-in-process-complex-industrial-time-series-a-real-world-case-study)  
+   标签：评分：6.0/10、query:phm
+   evidence：全运行工业机械中的异常检测
+9. [MS-SSE-Net: A Multi-Scale Spatial Squeeze-and-Excitation Network for Structural Damage Detection in Civil and Geotechnical Engineering](/202604/21/2604.14711v1-ms-sse-net-a-multi-scale-spatial-squeeze-and-excitation-network-for-structural-damage-detection-in-civil-and-geotechnical-engineering)  
+   标签：评分：6.0/10、query:phm
+   evidence：利用深度学习进行结构损伤检测与分类
+10. [xFODE+: Explainable Type-2 Fuzzy Additive ODEs for Uncertainty Quantification](/202604/21/2604.14880v1-xfode-explainable-type-2-fuzzy-additive-odes-for-uncertainty-quantification)  
+   标签：评分：6.0/10、query:rul
+   evidence：预测建模的系统辨识和不确定性量化
+11. [Hybrid Spectro-Temporal Fusion Framework for Structural Health Monitoring](/202604/21/2604.16589v1-hybrid-spectro-temporal-fusion-framework-for-structural-health-monitoring)  
+   标签：评分：6.0/10、query:rul
+   evidence：利用振动动力学进行结构健康监测
 
 
 <div class="dpr-home-promo-card">
