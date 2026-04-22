@@ -1,0 +1,86 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.19658v1/fig-001.webp",
+      "caption": "Table 2. Damage states of the openLAB dataset.",
+      "page": 6,
+      "index": 1,
+      "width": 502,
+      "height": 523
+    },
+    {
+      "url": "assets/figures/arxiv/2604.19658v1/fig-002.webp",
+      "caption": "Figure 7. Mahalanobis distances computed from zdmg for signal windows under excitation type 4. Colours indicate different damage states. The dashed line denotes the baseline median, and the solid line denotes the 95th percentile threshold derived from the baseline subset.",
+      "page": 11,
+      "index": 2,
+      "width": 477,
+      "height": 477
+    },
+    {
+      "url": "assets/figures/arxiv/2604.19658v1/fig-003.webp",
+      "caption": "Table 3. Number of signal windows from openLAB dataset.",
+      "page": 7,
+      "index": 3,
+      "width": 489,
+      "height": 324
+    },
+    {
+      "url": "assets/figures/arxiv/2604.19658v1/fig-004.webp",
+      "caption": "Figure 3. Training and validation loss curves of the proposed framework on openLAB dataset. The total loss and individual loss components, including time-domain reconstruction (Loss 1), frequency-domain reconstruction (Loss 2), and VICReg self-supervised loss (Loss 3), are shown over 500 training epochs.",
+      "page": 7,
+      "index": 4,
+      "width": 506,
+      "height": 335
+    },
+    {
+      "url": "assets/figures/arxiv/2604.19658v1/fig-005.webp",
+      "caption": "Table 10. Confusion matrices and performance metrics for damage detection using Mahalanobis distance of all signal windows.",
+      "page": 14,
+      "index": 5,
+      "width": 503,
+      "height": 826
+    },
+    {
+      "url": "assets/figures/arxiv/2604.19658v1/fig-006.webp",
+      "caption": "Figure 12. Mahalanobis distances for all signal windows in the validation and test sets. Colours indicate different damage states. The dashed line denotes the baseline median, and the solid line denotes the 95th percentile threshold derived from the baseline subset: (a) Results from zdmg; (b) Results from zndmg",
+      "page": 14,
+      "index": 6,
+      "width": 477,
+      "height": 1007
+    },
+    {
+      "url": "assets/figures/arxiv/2604.19658v1/fig-007.webp",
+      "caption": "Figure 10. Training and validation loss curves of the proposed framework on MCC5 dataset. The total loss and individual loss components, including time-domain reconstruction (Loss 1), frequency-domain reconstruction (Loss 2), and VICReg self-supervised loss (Loss 3), are shown over 500 training epochs.",
+      "page": 13,
+      "index": 7,
+      "width": 506,
+      "height": 336
+    },
+    {
+      "url": "assets/figures/arxiv/2604.19658v1/fig-008.webp",
+      "caption": "Figure 5. Mahalanobis distances over time for all signal windows in the validation and test sets. Colours indicate different damage states. The dashed line denotes the baseline median, and the solid line denotes the 95th percentile threshold derived from the baseline subset: (a) Results from zdmg; (b) Results from zndmg",
+      "page": 8,
+      "index": 8,
+      "width": 477,
+      "height": 1007
+    },
+    {
+      "url": "assets/figures/arxiv/2604.19658v1/fig-009.webp",
+      "caption": "Table 8. Damage states of the MCC5 dataset.",
+      "page": 12,
+      "index": 9,
+      "width": 483,
+      "height": 373
+    },
+    {
+      "url": "assets/figures/arxiv/2604.19658v1/fig-010.webp",
+      "caption": "Table 12. Damage detection performance of different model variants under various excitation conditions. Results for deep learning models are reported as mean ± standard deviation over three runs.",
+      "page": 16,
+      "index": 10,
+      "width": 1003,
+      "height": 608
+    }
+  ]
+}

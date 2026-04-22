@@ -1,0 +1,38 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.17949v1/fig-001.webp",
+      "caption": "Fig. 4. Qualitative visualization of language-guided two-hop grounding. Each example is arranged from left to right as: (1) RGB input; (2–4) the top-3 Slot Attention maps; (5) the aggregated coarse support map Mslot; (6) the final pixel-level prediction M̂; and (7) the ground-truth mask.",
+      "page": 7,
+      "index": 1,
+      "width": 522,
+      "height": 371
+    },
+    {
+      "url": "assets/figures/arxiv/2604.17949v1/fig-002.webp",
+      "caption": "TABLE II PERFORMANCE ON MM-IAD-REPORTBENCH. WE REPORT DETECTION, LOCALIZATION, REPORT QUALITY, AND FAITHFULNESS METRICS. FOR METHODS THAT CANNOT PRODUCE PIXEL-LEVEL MASKS OR STRUCTURED REPORTS, THE CORRESPONDING METRICS ARE MARKED AS “–”. * INDICATES THE MODEL IS FINE-TUNED ON OUR DATASET. ALL METRICS ARE REPORTED IN PERCENTAGE (%).",
+      "page": 7,
+      "index": 2,
+      "width": 1058,
+      "height": 362
+    },
+    {
+      "url": "assets/figures/arxiv/2604.17949v1/fig-003.webp",
+      "caption": "Fig. 3. Qualitative examples of multimodal grounded reporting. Each example is arranged from left to right as: RGB, sensor, point cloud, coarse map, predicted mask, ground-truth mask, predicted report, and ground-truth report. We display key evidence from Reasoning for readability.",
+      "page": 7,
+      "index": 3,
+      "width": 1070,
+      "height": 257
+    },
+    {
+      "url": "assets/figures/arxiv/2604.17949v1/fig-004.webp",
+      "caption": "TABLE V ABLATIONS ON MM-IAD-REPORTBENCH (%).",
+      "page": 9,
+      "index": 4,
+      "width": 500,
+      "height": 431
+    }
+  ]
+}
