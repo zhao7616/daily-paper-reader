@@ -1,0 +1,46 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.20735v1/fig-001.webp",
+      "caption": "FIG. 9: Posterior predictive checks for a Batch Process Shutdown (Scenario 2). Top panel: generated sensor",
+      "page": 11,
+      "index": 1,
+      "width": 483,
+      "height": 806
+    },
+    {
+      "url": "assets/figures/arxiv/2604.20735v1/fig-002.webp",
+      "caption": "FIG. 4: Prior probability densities for the changepoint time τ , fouling strength βf , leak rate βl, and fouling-event arrival rate λ used in the heat-exchanger model. Vertical dashed lines mark true parameter values for the study scenarios reported in Table I.",
+      "page": 7,
+      "index": 2,
+      "width": 394,
+      "height": 741
+    },
+    {
+      "url": "assets/figures/arxiv/2604.20735v1/fig-003.webp",
+      "caption": "FIG. 8: Continuous Ranked Probability Score (CRPS) distributions comparing the sharpness and accuracy of MCMC and SBI posterior predictions for each parameter.",
+      "page": 10,
+      "index": 3,
+      "width": 503,
+      "height": 511
+    },
+    {
+      "url": "assets/figures/arxiv/2604.20735v1/fig-004.webp",
+      "caption": "FIG. 7: Normalized, 1-dimensional Wasserstein distance between MCMC and amortized SBI posterior samples for the same failure parameter, scaled by the absolute value of the true parameter. Color coding follows the one in Figure 5",
+      "page": 10,
+      "index": 4,
+      "width": 503,
+      "height": 525
+    },
+    {
+      "url": "assets/figures/arxiv/2604.20735v1/fig-005.webp",
+      "caption": "FIG. 6: The marginalized distributions of the posterior medians inferred via MCMC (orange) and SBI (blue) across 500 noisy observations per scenario. The red dashed lines indicate the ground-truth parameter values. Each row represents a single continuous parameter, while each column corresponds to a specific failure scenario.",
+      "page": 9,
+      "index": 5,
+      "width": 1060,
+      "height": 710
+    }
+  ]
+}

@@ -1,0 +1,660 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-04-23T19:55:32.749973+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 6,
+    "deep_cap": 6,
+    "deep_selected": 6,
+    "quick_candidates": 15,
+    "quick_skim_target": 11,
+    "quick_selected": 11
+  },
+  "deep_dive": [
+    {
+      "id": "2604.13459v1",
+      "source": "arxiv",
+      "title": "Asymmetric-Loss-Guided Hybrid CNN-BiLSTM-Attention Model for Industrial RUL Prediction with Interpretable Failure Heatmaps",
+      "abstract": "Turbofan engine degradation under sustained operational stress necessitates robust prognostic systems capable of accurately estimating the Remaining Useful Life (RUL) of critical components. Existing deep learning approaches frequently fail to simultaneously capture multi-sensor spatial correlations and long-range temporal dependencies, while standard symmetric loss functions inadequately penalize the safety-critical error of over-estimating residual life. This study proposes a hybrid architecture integrating Twin-Stage One-Dimensional Convolutional Neural Networks (1D-CNN), a Bidirectional Long Short-Term Memory (BiLSTM) network, and a custom Bahdanau Additive Attention mechanism. The model was trained and evaluated on the NASA Commercial Modular Aero-Propulsion System Simulation (C-MAPSS) FD001 sub-dataset employing a zero-leakage preprocessing pipeline, piecewise-linear RUL labeling capped at 130 cycles, and the NASA-specified asymmetric exponential loss function that disproportionately penalizes over-estimation to enforce industrial safety constraints. Experiments on 100 test engines achieved a Root Mean Squared Error (RMSE) of 17.52 cycles and a NASA S-Score of 922.06. Furthermore, extracted attention weight heatmaps provide interpretable, per-engine insights into the temporal progression of degradation, supporting informed maintenance decision-making. The proposed framework demonstrates competitive performance against established baselines and offers a principled approach to safe, interpretable prognostics in industrial settings.",
+      "authors": [
+        "Mohammed Ezzaldin Babiker Abdullah"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI",
+        "eess.SY"
+      ],
+      "published": "2026-04-15T04:25:38+00:00",
+      "link": "https://arxiv.org/pdf/2604.13459v1",
+      "tags": [
+        "keyword:PHM",
+        "query:PHM"
+      ],
+      "llm_score": 10.0,
+      "llm_evidence_en": "hybrid CNN-BiLSTM-Attention model for industrial RUL prediction of turbofan engines",
+      "llm_evidence_cn": "用于涡扇发动机工业剩余寿命预测的混合CNN-BiLSTM-Attention模型",
+      "llm_evidence": "用于涡扇发动机工业剩余寿命预测的混合CNN-BiLSTM-Attention模型",
+      "canonical_evidence": "用于涡扇发动机工业剩余寿命预测的混合CNN-BiLSTM-Attention模型",
+      "llm_tldr_en": "Develops a hybrid deep learning model with asymmetric loss for accurate turbofan engine RUL prediction.",
+      "llm_tldr_cn": "开发了一种带有非对称损失函数的混合深度学习模型，用于精确预测涡扇发动机剩余寿命。",
+      "llm_tldr": "开发了一种带有非对称损失函数的混合深度学习模型，用于精确预测涡扇发动机剩余寿命。",
+      "llm_tags": [
+        "query:rul:composite"
+      ],
+      "matched_query_tag": "query:rul:composite",
+      "matched_query_text": "Papers central to 剩余寿命预测和旋转机械设备剩余寿命预测, especially work that connects or combines: Remaining Useful Life (RUL) prediction methods; Health monitoring and RUL for rotating machinery; Remaining useful life prediction for rolling element bearings; Deep learning architectures for RUL estimation; State of the art methods for remaining useful life prediction of rotating machinery; Deep learning based RUL estimation for industrial bearings and motors; Data driven vs physics informed models for RUL prediction; Real time health assessment and RUL forecasting for rotating components.",
+      "matched_requirement_id": "req-composite-rul",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2604.13459v2",
+      "source": "arxiv",
+      "title": "Asymmetric-Loss-Guided Hybrid CNN-BiLSTM-Attention Model for Industrial RUL Prediction with Interpretable Failure Heatmaps",
+      "abstract": "Turbofan engine degradation under sustained operational stress necessitates robust prognostic systems capable of accurately estimating the Remaining Useful Life (RUL) of critical components. Existing deep learning approaches frequently fail to simultaneously capture multi-sensor spatial correlations and long-range temporal dependencies, while standard symmetric loss functions inadequately penalize the safety-critical error of over-estimating residual life. This study proposes a hybrid architecture integrating Twin-Stage One-Dimensional Convolutional Neural Networks (1D-CNN), a Bidirectional Long Short-Term Memory (BiLSTM) network, and a custom Bahdanau Additive Attention mechanism. The model was trained and evaluated on the NASA Commercial Modular Aero-Propulsion System Simulation (C-MAPSS) FD001 sub-dataset employing a zero-leakage preprocessing pipeline, piecewise-linear RUL labeling capped at 130 cycles, and the NASA-specified asymmetric exponential loss function that disproportionately penalizes over-estimation to enforce industrial safety constraints. Experiments on 100 test engines achieved a Root Mean Squared Error (RMSE) of 17.52 cycles and a NASA S-Score of 922.06. Furthermore, extracted attention weight heatmaps provide interpretable, per-engine insights into the temporal progression of degradation, supporting informed maintenance decision-making. The proposed framework demonstrates competitive performance against established baselines and offers a principled approach to safe, interpretable prognostics in industrial settings.",
+      "authors": [
+        "Mohammed Ezzaldin Babiker Abdullah"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI",
+        "eess.SY"
+      ],
+      "published": "2026-04-15T04:25:38+00:00",
+      "link": "https://arxiv.org/pdf/2604.13459v2",
+      "tags": [
+        "keyword:PHM",
+        "query:PHM"
+      ],
+      "llm_score": 10.0,
+      "llm_evidence_en": "industrial RUL prediction for turbofan engines using CNN-BiLSTM-Attention",
+      "llm_evidence_cn": "基于CNN-BiLSTM-Attention的涡扇发动机工业剩余寿命预测",
+      "llm_evidence": "基于CNN-BiLSTM-Attention的涡扇发动机工业剩余寿命预测",
+      "canonical_evidence": "基于CNN-BiLSTM-Attention的涡扇发动机工业剩余寿命预测",
+      "llm_tldr_en": "A hybrid CNN-BiLSTM-Attention model with asymmetric loss for accurate and interpretable RUL prediction.",
+      "llm_tldr_cn": "一种结合非对称损失的CNN-BiLSTM-Attention混合模型，用于准确且可解释的RUL预测。",
+      "llm_tldr": "一种结合非对称损失的CNN-BiLSTM-Attention混合模型，用于准确且可解释的RUL预测。",
+      "llm_tags": [
+        "query:rul:composite"
+      ],
+      "matched_query_tag": "query:rul:composite",
+      "matched_query_text": "Papers central to 剩余寿命预测和旋转机械设备剩余寿命预测, especially work that connects or combines: Remaining Useful Life (RUL) prediction methods; Health monitoring and RUL for rotating machinery; Remaining useful life prediction for rolling element bearings; Deep learning architectures for RUL estimation; State of the art methods for remaining useful life prediction of rotating machinery; Deep learning based RUL estimation for industrial bearings and motors; Data driven vs physics informed models for RUL prediction; Real time health assessment and RUL forecasting for rotating components.",
+      "matched_requirement_id": "req-composite-rul",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2604.19175v1",
+      "source": "arxiv",
+      "title": "Digital twin-based hybrid framework for steam generator clogging prognostics",
+      "abstract": "We present a hybrid framework to support prognostics of the clogging degradation phenomenon in tube support plates for digital twins of steam generators in pressurized water reactors. The proposed approach combines a physics-based simulation code, heterogeneous and sparse observational data, and several uncertainty quantification techniques to obtain a robust estimate of the steam generator remaining useful life associated with the clogging rate. The proposed framework is compatible with a digital twin platform to assist maintenance planning of EDF steam generators.",
+      "authors": [
+        "Edgar Jaber",
+        "Emmanuel Remy",
+        "Vincent Chabridon",
+        "Morgane Garo-Sail",
+        "Mathilde Mougeot",
+        "Didier Lucor",
+        "Jerome Delplace",
+        "Maxime Lointier"
+      ],
+      "primary_category": "stat.CO",
+      "categories": [
+        "stat.CO"
+      ],
+      "published": "2026-04-21T07:39:53+00:00",
+      "link": "https://arxiv.org/pdf/2604.19175v1",
+      "tags": [
+        "query:PHM"
+      ],
+      "llm_score": 9.5,
+      "llm_evidence_en": "hybrid framework for steam generator remaining useful life associated with the clogging rate",
+      "llm_evidence_cn": "用于蒸汽发生器剩余寿命预测的混合框架，涉及堵塞退化率",
+      "llm_evidence": "用于蒸汽发生器剩余寿命预测的混合框架，涉及堵塞退化率",
+      "canonical_evidence": "用于蒸汽发生器剩余寿命预测的混合框架，涉及堵塞退化率",
+      "llm_tldr_en": "Proposes a hybrid digital twin framework for steam generator RUL estimation using physics and data.",
+      "llm_tldr_cn": "提出一种结合物理模拟与数据的数字孪生混合框架，用于蒸汽发生器剩余寿命预测。",
+      "llm_tldr": "提出一种结合物理模拟与数据的数字孪生混合框架，用于蒸汽发生器剩余寿命预测。",
+      "llm_tags": [
+        "query:rul:composite"
+      ],
+      "matched_query_tag": "query:rul:composite",
+      "matched_query_text": "Papers central to 剩余寿命预测和旋转机械设备剩余寿命预测, especially work that connects or combines: Remaining Useful Life (RUL) prediction methods; Health monitoring and RUL for rotating machinery; Remaining useful life prediction for rolling element bearings; Deep learning architectures for RUL estimation; State of the art methods for remaining useful life prediction of rotating machinery; Deep learning based RUL estimation for industrial bearings and motors; Data driven vs physics informed models for RUL prediction; Real time health assessment and RUL forecasting for rotating components.",
+      "matched_requirement_id": "req-composite-rul",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2604.19451v1",
+      "source": "arxiv",
+      "title": "Heterogeneity-Aware Personalized Federated Learning for Industrial Predictive Analytics",
+      "abstract": "Federated prognostics enable clients (e.g., companies, factories, and production lines) to collaboratively develop a failure time prediction model while keeping each client's data local and confidential. However, traditional federated models often assume homogeneity in the degradation processes across clients, an assumption that may not hold in many industrial settings. To overcome this, this paper proposes a personalized federated prognostic model designed to accommodate clients with heterogeneous degradation processes, allowing them to build tailored prognostic models. The prognostic model iteratively facilitates the underlying pairwise collaborations between clients with similar degradation patterns, which enhances the performance of personalized federated learning. To estimate parameters jointly using decentralized datasets, we develop a federated parameter estimation algorithm based on proximal gradient descent. The proposed approach addresses the limitations of existing federated prognostic models by simultaneously achieving model personalization, preserving data privacy, and providing comprehensive failure time distributions. The superiority of the proposed model is validated through extensive simulation studies and a case study using the turbofan engine degradation dataset from the NASA repository.",
+      "authors": [
+        "Yuhan Hu",
+        "Xiaolei Fang"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "stat.ML"
+      ],
+      "published": "2026-04-21T13:32:44+00:00",
+      "link": "https://arxiv.org/pdf/2604.19451v1",
+      "tags": [
+        "keyword:PHM",
+        "query:PHM"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "personalized federated prognostic model for industrial failure time prediction",
+      "llm_evidence_cn": "用于工业失效时间预测的个性化联邦预测模型",
+      "llm_evidence": "用于工业失效时间预测的个性化联邦预测模型",
+      "canonical_evidence": "用于工业失效时间预测的个性化联邦预测模型",
+      "llm_tldr_en": "Introduces a personalized federated learning approach for RUL prediction across heterogeneous industrial clients.",
+      "llm_tldr_cn": "引入一种个性化联邦学习方法，用于解决异构工业客户端之间的剩余寿命预测问题。",
+      "llm_tldr": "引入一种个性化联邦学习方法，用于解决异构工业客户端之间的剩余寿命预测问题。",
+      "llm_tags": [
+        "query:rul:composite"
+      ],
+      "matched_query_tag": "query:rul:composite",
+      "matched_query_text": "Papers central to 剩余寿命预测和旋转机械设备剩余寿命预测, especially work that connects or combines: Remaining Useful Life (RUL) prediction methods; Health monitoring and RUL for rotating machinery; Remaining useful life prediction for rolling element bearings; Deep learning architectures for RUL estimation; State of the art methods for remaining useful life prediction of rotating machinery; Deep learning based RUL estimation for industrial bearings and motors; Data driven vs physics informed models for RUL prediction; Real time health assessment and RUL forecasting for rotating components.",
+      "matched_requirement_id": "req-composite-rul",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2604.20735v1",
+      "source": "arxiv",
+      "title": "Fast Bayesian equipment condition monitoring via simulation based inference: applications to heat exchanger health",
+      "abstract": "Accurate condition monitoring of industrial equipment requires inferring latent degradation parameters from indirect sensor measurements under uncertainty. While traditional Bayesian methods like Markov Chain Monte Carlo (MCMC) provide rigorous uncertainty quantification, their heavy computational bottlenecks render them impractical for real-time process control. To overcome this limitation, we propose an AI-driven framework utilizing Simulation-Based Inference (SBI) powered by amortized neural posterior estimation to diagnose complex failure modes in heat exchangers. By training neural density estimators on a simulated dataset, our approach learns a direct, likelihood-free mapping from thermal-fluid observations to the full posterior distribution of degradation parameters. We benchmark this framework against an MCMC baseline across various synthetic fouling and leakage scenarios, including challenging low-probability, sparse-event failures. The results show that SBI achieves comparable diagnostic accuracy and reliable uncertainty quantification, while accelerating inference time by a factor of82$\\times$ compared to traditional sampling. The amortized nature of the neural network enables near-instantaneous inference, establishing SBI as a highly scalable, real-time alternative for probabilistic fault diagnosis and digital twin realization in complex engineering systems.",
+      "authors": [
+        "Peter Collett",
+        "Alexander Johannes Stasik",
+        "Simone Casolo",
+        "Signe Riemer-Sørensen"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "eess.SY",
+        "physics.comp-ph"
+      ],
+      "published": "2026-04-22T16:21:25+00:00",
+      "link": "https://arxiv.org/pdf/2604.20735v1",
+      "tags": [
+        "keyword:PHM",
+        "query:PHM"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "condition monitoring and diagnosis of failure modes in industrial heat exchangers",
+      "llm_evidence_cn": "工业换热器的状态监测与故障模式诊断",
+      "llm_evidence": "工业换热器的状态监测与故障模式诊断",
+      "canonical_evidence": "工业换热器的状态监测与故障模式诊断",
+      "llm_tldr_en": "Uses simulation-based inference for fast Bayesian condition monitoring and diagnosis of industrial equipment.",
+      "llm_tldr_cn": "利用基于模拟的推理进行工业设备的快速贝叶斯状态监测与诊断。",
+      "llm_tldr": "利用基于模拟的推理进行工业设备的快速贝叶斯状态监测与诊断。",
+      "llm_tags": [
+        "query:phm"
+      ],
+      "matched_query_tag": "query:phm",
+      "matched_query_text": "integrated approach for machinery fault diagnosis and prognosis",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2604.20175v1",
+      "source": "arxiv",
+      "title": "Physics-Enhanced Deep Learning for Proactive Thermal Runaway Forecasting in Li-Ion Batteries",
+      "abstract": "Accurate prediction of thermal runaway in lithium-ion batteries is essential for ensuring the safety, efficiency, and reliability of modern energy storage systems. Conventional data-driven approaches, such as Long Short-Term Memory (LSTM) networks, can capture complex temporal dependencies but often violate thermodynamic principles, resulting in physically inconsistent predictions. Conversely, physics-based thermal models provide interpretability but are computationally expensive and difficult to parameterize for real-time applications. To bridge this gap, this study proposes a Physics-Informed Long Short-Term Memory (PI-LSTM) framework that integrates governing heat transfer equations directly into the deep learning architecture through a physics-based regularization term in the loss function. The model leverages multi-feature input sequences, including state of charge, voltage, current, mechanical stress, and surface temperature, to forecast battery temperature evolution while enforcing thermal diffusion constraints. Extensive experiments conducted on thirteen lithium-ion battery datasets demonstrate that the proposed PI-LSTM achieves an 81.9% reduction in root mean square error (RMSE) and an 81.3% reduction in mean absolute error (MAE) compared to the standard LSTM baseline, while also outperforming CNN-LSTM and multilayer perceptron (MLP) models by wide margins. The inclusion of physical constraints enhances the model's generalization across diverse operating conditions and eliminates non-physical temperature oscillations. These results confirm that physics-informed deep learning offers a viable pathway toward interpretable, accurate, and real-time thermal management in next-generation battery systems.",
+      "authors": [
+        "Salman Khan",
+        "Muhammad Zunair Zamir",
+        "Syed Sajid Ullah",
+        "Jie Li"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "published": "2026-04-22T04:34:39+00:00",
+      "link": "https://arxiv.org/pdf/2604.20175v1",
+      "tags": [
+        "query:PHM"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Proactive thermal runaway forecasting in Li-Ion batteries using PI-LSTM",
+      "llm_evidence_cn": "使用物理信息 LSTM 进行锂电池热失控主动预测",
+      "llm_evidence": "使用物理信息 LSTM 进行锂电池热失控主动预测",
+      "canonical_evidence": "使用物理信息 LSTM 进行锂电池热失控主动预测",
+      "llm_tldr_en": "Integrates physics into deep learning for accurate and physically consistent battery safety forecasting.",
+      "llm_tldr_cn": "将物理学集成到深度学习中，以实现准确且物理一致的电池安全预测。",
+      "llm_tldr": "将物理学集成到深度学习中，以实现准确且物理一致的电池安全预测。",
+      "llm_tags": [
+        "query:rul:composite"
+      ],
+      "matched_query_tag": "query:rul:composite",
+      "matched_query_text": "Papers central to 剩余寿命预测和旋转机械设备剩余寿命预测, especially work that connects or combines: Remaining Useful Life (RUL) prediction methods; Health monitoring and RUL for rotating machinery; Remaining useful life prediction for rolling element bearings; Deep learning architectures for RUL estimation; State of the art methods for remaining useful life prediction of rotating machinery; Deep learning based RUL estimation for industrial bearings and motors; Data driven vs physics informed models for RUL prediction; Real time health assessment and RUL forecasting for rotating components.",
+      "matched_requirement_id": "req-composite-rul",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2604.15714v1",
+      "source": "arxiv",
+      "title": "Neuromorphic Parameter Estimation for Power Converter Health Monitoring Using Spiking Neural Networks",
+      "abstract": "Always-on converter health monitoring demands sub-mW edge inference, a regime inaccessible to GPU-based physics-informed neural networks. This work separates spiking temporal processing from physics enforcement: a three-layer leaky integrate-and-fire SNN estimates passive component parameters while a differentiable ODE solver provides physics-consistent training by decoupling the ODE physics loss from the unrolled spiking loop. On an EMI-corrupted synchronous buck converter benchmark, the SNN reduces lumped resistance error from $25.8\\%$ to $10.2\\%$ versus a feedforward baseline, within the $\\pm 10\\%$ manufacturing tolerance of passive components, at a projected ${\\sim}270\\times$ energy reduction on neuromorphic hardware. Persistent membrane states further enable degradation tracking and event-driven fault detection via a $+5.5$ percentage-point spike-rate jump at abrupt faults. With $93\\%$ spike sparsity, the architecture is suited for always-on deployment on Intel Loihi 2 or BrainChip Akida.",
+      "authors": [
+        "Hyeongmeen Baik",
+        "Hamed Poursiami",
+        "Maryam Parsa",
+        "Jinia Roy"
+      ],
+      "primary_category": "cs.NE",
+      "categories": [
+        "cs.NE",
+        "cs.LG",
+        "eess.SY"
+      ],
+      "published": "2026-04-17T05:34:53+00:00",
+      "link": "https://arxiv.org/pdf/2604.15714v1",
+      "tags": [
+        "query:PHM"
+      ],
+      "llm_score": 7.5,
+      "llm_evidence_en": "parameter estimation for power converter health monitoring using spiking neural networks",
+      "llm_evidence_cn": "使用脉冲神经网络进行功率转换器健康监测的参数估计",
+      "llm_evidence": "使用脉冲神经网络进行功率转换器健康监测的参数估计",
+      "canonical_evidence": "使用脉冲神经网络进行功率转换器健康监测的参数估计",
+      "llm_tldr_en": "Uses SNNs for low-power parameter estimation in power converter health monitoring and diagnostics.",
+      "llm_tldr_cn": "利用脉冲神经网络实现功率转换器健康监测中的低功耗参数估计。",
+      "llm_tldr": "利用脉冲神经网络实现功率转换器健康监测中的低功耗参数估计。",
+      "llm_tags": [
+        "query:rul:composite"
+      ],
+      "matched_query_tag": "query:rul:composite",
+      "matched_query_text": "Papers central to 剩余寿命预测和旋转机械设备剩余寿命预测, especially work that connects or combines: Remaining Useful Life (RUL) prediction methods; Health monitoring and RUL for rotating machinery; Remaining useful life prediction for rolling element bearings; Deep learning architectures for RUL estimation; State of the art methods for remaining useful life prediction of rotating machinery; Deep learning based RUL estimation for industrial bearings and motors; Data driven vs physics informed models for RUL prediction; Real time health assessment and RUL forecasting for rotating components.",
+      "matched_requirement_id": "req-composite-rul",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2604.17998v1",
+      "source": "arxiv",
+      "title": "Causally-Constrained Probabilistic Forecasting for Time-Series Anomaly Detection",
+      "abstract": "Anomaly detection in multivariate time series is a central challenge in industrial monitoring, as failures frequently arise from complex temporal dynamics and cross-sensor interactions. While recent deep learning models, including graph neural networks and Transformers, have demonstrated strong empirical performance, most approaches remain primarily correlational and offer limited support for causal interpretation and root-cause localization. This study introduces a causally-constrained probabilistic forecasting framework which is a Causally Guided Transformer (CGT) model for multivariate time-series anomaly detection, integrating an explicit time-lagged causal graph prior with deep sequence modeling. For each target variable, a dedicated forecasting block employs a hard parent mask derived from causal discovery to restrict the main prediction pathway to graph-supported causes, while a latent Gaussian head captures predictive uncertainty. To leverage residual correlational information without compromising the causal representation, a shadow auxiliary path with stop-gradient isolation and a safety-gated blending mechanism is incorporated to suppress non-causal contributions when reliability is low. Anomalies are identified using negative log-likelihood scores with adaptive streaming thresholding, and root-cause variables are determined through per-dimension probabilistic attribution and counterfactual clamping. Experiments on the ASD and SMD benchmarks indicate that the proposed method achieves state-of-the-art detection performance, with F1-scores of 96.19% on ASD and 95.32% on SMD, and enhances variable-level attribution quality. These findings suggest that causal structural priors can improve both robustness and interpretability in detecting deep anomalies in multivariate sensor systems.",
+      "authors": [
+        "Pooyan Khosravinia",
+        "João Gama",
+        "Bruno Veloso"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-04-20T09:24:28+00:00",
+      "link": "https://arxiv.org/pdf/2604.17998v1",
+      "tags": [
+        "keyword:PHM",
+        "query:PHM"
+      ],
+      "llm_score": 6.5,
+      "llm_evidence_en": "multivariate time-series anomaly detection for industrial monitoring",
+      "llm_evidence_cn": "用于工业监测的多变量时间序列异常检测",
+      "llm_evidence": "用于工业监测的多变量时间序列异常检测",
+      "canonical_evidence": "用于工业监测的多变量时间序列异常检测",
+      "llm_tldr_en": "Introduces a causally-constrained Transformer for industrial time-series anomaly detection and root-cause analysis.",
+      "llm_tldr_cn": "引入了一种因果约束的Transformer，用于工业时间序列异常检测和根因分析。",
+      "llm_tldr": "引入了一种因果约束的Transformer，用于工业时间序列异常检测和根因分析。",
+      "llm_tags": [
+        "query:phm:composite"
+      ],
+      "matched_query_tag": "query:phm:composite",
+      "matched_query_text": "Papers central to 同时涉及故障诊断与剩余寿命预测的研究论文, especially work that connects or combines: joint modeling of diagnosis and prognosis; multi-task learning for diagnosis and RUL; simultaneous fault diagnosis and remaining useful life prediction; integrated approach for machinery fault diagnosis and prognosis; multi task deep learning for PHM applications; joint diagnosis and RUL estimation research papers.",
+      "matched_requirement_id": "req-composite-phm",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.14019v1",
+      "source": "arxiv",
+      "title": "Log-based vs Graph-based Approaches to Fault Diagnosis",
+      "abstract": "Modern distributed systems generate large volumes of logs that can be analyzed to support essential AIOps tasks such as fault diagnosis, which plays a crucial role in maintaining system reliability. Most existing approaches rely on log-based models that treat logs as linear sequences of events. However, such representations discard the structural context between events that are often present in execution logs, such as parent-child dependencies, fan-out (branching), or temporal features. To better capture these relationships, recent works on Graph Neural Networks (GNNs) suggest that representing logs as graphs offers a promising alternative. Building on these observations, this paper conducts a comparative study of log-based encoder architectures (e.g., BERT) and graph-based models (e.g., GNNs) for automated fault diagnosis. We evaluate our models on TraceBench, a trace-oriented log dataset, and on BGL, a more traditional system log dataset, covering both anomaly detection and fault type classification. Our results show that graph-only models fail to outperform encoder baselines. However, integrating learned representations from log encoders into graph-based models achieves the strongest overall performance. These findings highlight conditions under which graph-augmented architectures can outperform traditional log-based approaches.",
+      "authors": [
+        "Mathis Nguyen",
+        "Mohamed Ali Lajnef"
+      ],
+      "primary_category": "cs.SE",
+      "categories": [
+        "cs.SE"
+      ],
+      "published": "2026-04-15T15:59:22+00:00",
+      "link": "https://arxiv.org/pdf/2604.14019v1",
+      "tags": [
+        "keyword:PHM",
+        "query:PHM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Log-based vs graph-based approaches to fault diagnosis in distributed systems",
+      "llm_evidence_cn": "分布式系统中基于日志与基于图的故障诊断方法对比",
+      "llm_evidence": "分布式系统中基于日志与基于图的故障诊断方法对比",
+      "canonical_evidence": "分布式系统中基于日志与基于图的故障诊断方法对比",
+      "llm_tldr_en": "Compares different neural architectures for fault diagnosis in complex distributed systems.",
+      "llm_tldr_cn": "比较了复杂分布式系统中故障诊断的不同神经架构。",
+      "llm_tldr": "比较了复杂分布式系统中故障诊断的不同神经架构。",
+      "llm_tags": [
+        "query:phm:composite"
+      ],
+      "matched_query_tag": "query:phm:composite",
+      "matched_query_text": "Papers central to 同时涉及故障诊断与剩余寿命预测的研究论文, especially work that connects or combines: joint modeling of diagnosis and prognosis; multi-task learning for diagnosis and RUL; simultaneous fault diagnosis and remaining useful life prediction; integrated approach for machinery fault diagnosis and prognosis; multi task deep learning for PHM applications; joint diagnosis and RUL estimation research papers.",
+      "matched_requirement_id": "req-composite-phm",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2604.13924v1",
+      "source": "arxiv",
+      "title": "ASTER: Latent Pseudo-Anomaly Generation for Unsupervised Time-Series Anomaly Detection",
+      "abstract": "Time-series anomaly detection (TSAD) is critical in domains such as industrial monitoring, healthcare, and cybersecurity, but it remains challenging due to rare and heterogeneous anomalies and the scarcity of labelled data. This scarcity makes unsupervised approaches predominant, yet existing methods often rely on reconstruction or forecasting, which struggle with complex data, or on embedding-based approaches that require domain-specific anomaly synthesis and fixed distance metrics. We propose ASTER, a framework that generates pseudo-anomalies directly in the latent space, avoiding handcrafted anomaly injections and the need for domain expertise. A latent-space decoder produces tailored pseudo-anomalies to train a Transformer-based anomaly classifier, while a pre-trained LLM enriches the temporal and contextual representations of this space. Experiments on three benchmark datasets show that ASTER achieves state-of-the-art performance and sets a new standard for LLM-based TSAD.",
+      "authors": [
+        "Romain Hermary",
+        "Samet Hicsonmez",
+        "Dan Pineau",
+        "Abd El Rahman Shabayek",
+        "Djamila Aouada"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI",
+        "cs.CV"
+      ],
+      "published": "2026-04-15T14:32:35+00:00",
+      "link": "https://arxiv.org/pdf/2604.13924v1",
+      "tags": [
+        "keyword:PHM",
+        "query:PHM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "unsupervised time-series anomaly detection for industrial monitoring",
+      "llm_evidence_cn": "用于工业监测的无监督时间序列异常检测",
+      "llm_evidence": "用于工业监测的无监督时间序列异常检测",
+      "canonical_evidence": "用于工业监测的无监督时间序列异常检测",
+      "llm_tldr_en": "Generates latent pseudo-anomalies to improve unsupervised time-series anomaly detection.",
+      "llm_tldr_cn": "通过生成潜空间伪异常来改进无监督时间序列异常检测。",
+      "llm_tldr": "通过生成潜空间伪异常来改进无监督时间序列异常检测。",
+      "llm_tags": [
+        "query:rul:composite"
+      ],
+      "matched_query_tag": "query:rul:composite",
+      "matched_query_text": "Papers central to 剩余寿命预测和旋转机械设备剩余寿命预测, especially work that connects or combines: Remaining Useful Life (RUL) prediction methods; Health monitoring and RUL for rotating machinery; Remaining useful life prediction for rolling element bearings; Deep learning architectures for RUL estimation; State of the art methods for remaining useful life prediction of rotating machinery; Deep learning based RUL estimation for industrial bearings and motors; Data driven vs physics informed models for RUL prediction; Real time health assessment and RUL forecasting for rotating components.",
+      "matched_requirement_id": "req-composite-rul",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.16589v1",
+      "source": "arxiv",
+      "title": "Hybrid Spectro-Temporal Fusion Framework for Structural Health Monitoring",
+      "abstract": "Structural health monitoring plays a critical role in ensuring structural safety by analyzing vibration responses from engineering systems. This paper proposes a Spectro-Temporal Alignment framework and a Hybrid Spectro-Temporal Fusion framework that integrate arrival-time interval descriptors with spectral features to capture both fine-scale and coarse-scale vibration dynamics. Experiments conducted on data collected from an LDS V406 electrodynamic shaker demonstrate that the proposed spectro-temporal representations significantly outperform conventional input formulations. The results indicate that a temporal resolution (Δτ) of 0.008 of 0.02 favors traditional machine learning models, whereas a finer resolution (Δτ) of 0.008 effectively unlocks the performance potential of deep learning architectures. Beyond classification accuracy, a comprehensive stability analysis based on condensed indices, including mean performance, standard deviation, coefficient of variation, and balanced score, shows that the proposed hybrid framework consistently achieves higher accuracy with substantially lower variability compared to baseline and alignment-only approaches. Overall, these results demonstrate that the proposed framework provides a robust, accurate, and reliable solution for vibration-based structural health monitoring.",
+      "authors": [
+        "Jongyeop Kim",
+        "Jinki Kim",
+        "Doyun Lee"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "published": "2026-04-17T15:34:47+00:00",
+      "link": "https://arxiv.org/pdf/2604.16589v1",
+      "tags": [
+        "query:PHM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "structural health monitoring and vibration response analysis",
+      "llm_evidence_cn": "结构健康监测与振动响应分析",
+      "llm_evidence": "结构健康监测与振动响应分析",
+      "canonical_evidence": "结构健康监测与振动响应分析",
+      "llm_tldr_en": "A hybrid spectro-temporal fusion framework for structural health monitoring using vibration data.",
+      "llm_tldr_cn": "一种利用振动数据进行结构健康监测的混合谱时融合框架。",
+      "llm_tldr": "一种利用振动数据进行结构健康监测的混合谱时融合框架。",
+      "llm_tags": [
+        "query:rul:composite"
+      ],
+      "matched_query_tag": "query:rul:composite",
+      "matched_query_text": "Papers central to 剩余寿命预测和旋转机械设备剩余寿命预测, especially work that connects or combines: Remaining Useful Life (RUL) prediction methods; Health monitoring and RUL for rotating machinery; Remaining useful life prediction for rolling element bearings; Deep learning architectures for RUL estimation; State of the art methods for remaining useful life prediction of rotating machinery; Deep learning based RUL estimation for industrial bearings and motors; Data driven vs physics informed models for RUL prediction; Real time health assessment and RUL forecasting for rotating components.",
+      "matched_requirement_id": "req-composite-rul",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2604.13928v1",
+      "source": "arxiv",
+      "title": "Unsupervised Anomaly Detection in Process-Complex Industrial Time Series: A Real-World Case Study",
+      "abstract": "Industrial time-series data from real production environments exhibits substantially higher complexity than commonly used benchmark datasets, primarily due to heterogeneous, multi-stage operational processes. As a result, anomaly detection methods validated under simplified conditions often fail to generalize to industrial settings. This work presents an empirical study on a unique dataset collected from fully operational industrial machinery, explicitly capturing pronounced process-induced variability.   We evaluate which model classes are capable of capturing this complexity, starting with a classical Isolation Forest baseline and extending to multiple autoencoder architectures. Experimental results show that Isolation Forest is insufficient for modeling the non-periodic, multi-scale dynamics present in the data, whereas autoencoders consistently perform better. Among them, temporal convolutional autoencoders achieve the most robust performance, while recurrent and variational variants require more careful tuning.",
+      "authors": [
+        "Sergej Krasnikov",
+        "Lukas Meitz",
+        "Samineh Bagheri",
+        "Michael Heider",
+        "Thorsten Schöler",
+        "Jörg Hähner"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-04-15T14:35:20+00:00",
+      "link": "https://arxiv.org/pdf/2604.13928v1",
+      "tags": [
+        "keyword:PHM",
+        "query:PHM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "anomaly detection in process-complex industrial time series",
+      "llm_evidence_cn": "过程复杂工业时间序列中的异常检测",
+      "llm_evidence": "过程复杂工业时间序列中的异常检测",
+      "canonical_evidence": "过程复杂工业时间序列中的异常检测",
+      "llm_tldr_en": "Evaluates anomaly detection models on real-world industrial machinery data with high process variability.",
+      "llm_tldr_cn": "在具有高过程变异性的真实工业机械数据上评估异常检测模型。",
+      "llm_tldr": "在具有高过程变异性的真实工业机械数据上评估异常检测模型。",
+      "llm_tags": [
+        "query:rul:composite"
+      ],
+      "matched_query_tag": "query:rul:composite",
+      "matched_query_text": "Papers central to 剩余寿命预测和旋转机械设备剩余寿命预测, especially work that connects or combines: Remaining Useful Life (RUL) prediction methods; Health monitoring and RUL for rotating machinery; Remaining useful life prediction for rolling element bearings; Deep learning architectures for RUL estimation; State of the art methods for remaining useful life prediction of rotating machinery; Deep learning based RUL estimation for industrial bearings and motors; Data driven vs physics informed models for RUL prediction; Real time health assessment and RUL forecasting for rotating components.",
+      "matched_requirement_id": "req-composite-rul",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.18765v1",
+      "source": "arxiv",
+      "title": "Multi-Level Temporal Graph Networks with Local-Global Fusion for Industrial Fault Diagnosis",
+      "abstract": "Fault detection and diagnosis are critical for the optimal and safe operation of industrial processes. The correlations among sensors often display non-Euclidean structures where graph neural networks (GNNs) are widely used therein. However, for large-scale systems, local, global, and dynamic relations extensively exist among sensors, and traditional GNNs often overlook such complex and multi-level structures for various problems including the fault diagnosis. To address this issue, we propose a structure-aware multi-level temporal graph network with local-global feature fusion for industrial fault diagnosis. First, a correlation graph is dynamically constructed using Pearson correlation coefficients to capture relationships among process variables. Then, temporal features are extracted through long short-term memory (LSTM)-based encoder, whereas the spatial dependencies among sensors are learned by graph convolution layers. A multi-level pooling mechanism is used to gradually coarsen and learn meaningful graph structures, to capture higher-level patterns while keeping important fault related details. Finally, a fusion step is applied to combine both detailed local features and overall global patterns before the final prediction. Experimental evaluations on the Tennessee Eastman process (TEP) demonstrate that the proposed model achieves superior fault diagnosis performance, particularly for complex fault scenarios, outperforming various baseline methods.",
+      "authors": [
+        "Bibek Aryal",
+        "Gift Modekwe",
+        "Qiugang Lu"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "published": "2026-04-20T19:20:29+00:00",
+      "link": "https://arxiv.org/pdf/2604.18765v1",
+      "tags": [
+        "keyword:PHM",
+        "query:PHM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "multi-level temporal graph network for industrial fault diagnosis",
+      "llm_evidence_cn": "用于工业故障诊断的多级时间图网络",
+      "llm_evidence": "用于工业故障诊断的多级时间图网络",
+      "canonical_evidence": "用于工业故障诊断的多级时间图网络",
+      "llm_tldr_en": "Develops a temporal graph network with local-global fusion for complex industrial fault diagnosis tasks.",
+      "llm_tldr_cn": "开发了一种具有局部-全局融合的时间图网络，用于复杂的工业故障诊断任务。",
+      "llm_tldr": "开发了一种具有局部-全局融合的时间图网络，用于复杂的工业故障诊断任务。",
+      "llm_tags": [
+        "query:phm"
+      ],
+      "matched_query_tag": "query:phm",
+      "matched_query_text": "integrated approach for machinery fault diagnosis and prognosis",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2604.15470v1",
+      "source": "arxiv",
+      "title": "Perron-Frobenius Contractive Operator Matching for Data-Driven Reachable Fault Identification and Recovery",
+      "abstract": "This paper focuses on data-driven fault detection, identification, and recovery (FDIR) for nonlinear control-affine systems under actuator faults. We create a unified framework in the space of probability densities, rather than on individual trajectories, using fault-indexed Perron--Frobenius (PF) operators to predict the evolution of state distributions under different fault profiles. By leveraging the probability-flow representation of the Fokker--Planck equation, we construct deterministic PF operators that reproduce exact stochastic marginals, define forward reachable density families, and establish certifiable 2-Wasserstein bounds on the divergence between fault-driven and nominal density evolutions. These provide quantitative conditions for the detectability and identifiability of various faults. The fault-indexed operators are learned from trajectory data via flow map matching (FMM), and we demonstrate that the observable FMM residual directly bounds the approximation error of the operator in the 2-Wasserstein metric. Additionally, we co-train a contraction certificate that bounds the gap between the learned operator family, the actual fault-driven density flow, and the nominal dynamics. The operator library is then used online for continuous fault parameter fitting over a continuous parameter space to generalize the learned operators to out-of-distribution (OOD) scenarios. To carry out the recovery control, we employ reachable density propagation and Gaussian mixture covariance steering. The proposed framework is validated on a 10-state spacecraft attitude-control system with four reaction wheels.",
+      "authors": [
+        "Joshua D. Ibrahim",
+        "Mahdi Taheri",
+        "Soon-Jo Chung",
+        "Fred Y. Hadaegh"
+      ],
+      "primary_category": "eess.SY",
+      "categories": [
+        "eess.SY",
+        "eess.SP"
+      ],
+      "published": "2026-04-16T18:44:02+00:00",
+      "link": "https://arxiv.org/pdf/2604.15470v1",
+      "tags": [
+        "query:PHM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "data-driven fault identification and recovery for nonlinear systems",
+      "llm_evidence_cn": "非线性系统的数据驱动故障识别与恢复",
+      "llm_evidence": "非线性系统的数据驱动故障识别与恢复",
+      "canonical_evidence": "非线性系统的数据驱动故障识别与恢复",
+      "llm_tldr_en": "Uses Perron-Frobenius operators for data-driven fault identification and recovery in control systems.",
+      "llm_tldr_cn": "利用Perron-Frobenius算子在控制系统中进行数据驱动的故障识别与恢复。",
+      "llm_tldr": "利用Perron-Frobenius算子在控制系统中进行数据驱动的故障识别与恢复。",
+      "llm_tags": [
+        "query:phm:composite"
+      ],
+      "matched_query_tag": "query:phm:composite",
+      "matched_query_text": "Papers central to 同时涉及故障诊断与剩余寿命预测的研究论文, especially work that connects or combines: joint modeling of diagnosis and prognosis; multi-task learning for diagnosis and RUL; simultaneous fault diagnosis and remaining useful life prediction; integrated approach for machinery fault diagnosis and prognosis; multi task deep learning for PHM applications; joint diagnosis and RUL estimation research papers.",
+      "matched_requirement_id": "req-composite-phm",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.19658v1",
+      "source": "arxiv",
+      "title": "Disentangling Damage from Operational Variability: A Label-Free Self-Supervised Representation Learning Framework for Output-Only Structural Damage Identification",
+      "abstract": "Damage identification is a core task in structural health monitoring. In practice, however, its reliability is often compromised by confounding non-damage effects, such as variations in excitation and environmental conditions, which can induce changes comparable to or larger than those caused by structural damage. To address this challenge, this study proposes a self-supervised label-free disentangled representation learning framework for robust vibration-based structural damage identification. The proposed framework employs an autoencoder with two latent representations to learn directly from raw vibration acceleration signals. A self-supervised invariance regularization, implemented via Variance-Invariance-Covariance Regularization (VICReg), is imposed on one latent representation using baseline data where structural damage is assumed constant but operational and environmental conditions vary. In addition, a frequency-domain constraint is introduced to enforce agreement between the power spectral density reconstructed from the latent representation and that computed from the corresponding input time series. Together, these mechanisms promote disentanglement, enabling the learned representation to be sensitive to damage-related characteristics while remaining invariant to nuisance variability. The framework is trained in a fully end-to-end and label-free manner, requiring no prior information on damage, excitation, or environmental conditions, making it well-suited for real-world applications. Its effectiveness is validated on two distinct real-world vibration datasets, including a bridge and a gearbox. The results demonstrate robustness to operational variability, strong generalization capability, and good performance in both damage detection and quantification.",
+      "authors": [
+        "Xudong Jian",
+        "Charikleia Stoura",
+        "Simon Scandella",
+        "Eleni Chatzi"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-04-21T16:45:38+00:00",
+      "link": "https://arxiv.org/pdf/2604.19658v1",
+      "tags": [
+        "keyword:PHM",
+        "query:PHM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "structural health monitoring and damage identification from vibration signals",
+      "llm_evidence_cn": "基于振动信号的结构健康监测与损伤识别",
+      "llm_evidence": "基于振动信号的结构健康监测与损伤识别",
+      "canonical_evidence": "基于振动信号的结构健康监测与损伤识别",
+      "llm_tldr_en": "Proposes a self-supervised framework to disentangle structural damage from operational variability in SHM.",
+      "llm_tldr_cn": "提出了一种自监督框架，用于在结构健康监测中将损伤与工况变化解耦。",
+      "llm_tldr": "提出了一种自监督框架，用于在结构健康监测中将损伤与工况变化解耦。",
+      "llm_tags": [
+        "query:rul:composite"
+      ],
+      "matched_query_tag": "query:rul:composite",
+      "matched_query_text": "Papers central to 剩余寿命预测和旋转机械设备剩余寿命预测, especially work that connects or combines: Remaining Useful Life (RUL) prediction methods; Health monitoring and RUL for rotating machinery; Remaining useful life prediction for rolling element bearings; Deep learning architectures for RUL estimation; State of the art methods for remaining useful life prediction of rotating machinery; Deep learning based RUL estimation for industrial bearings and motors; Data driven vs physics informed models for RUL prediction; Real time health assessment and RUL forecasting for rotating components.",
+      "matched_requirement_id": "req-composite-rul",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2604.17616v1",
+      "source": "arxiv",
+      "title": "Conditional Attribution for Root Cause Analysis in Time-Series Anomaly Detection",
+      "abstract": "Root cause analysis (RCA) for time-series anomaly detection is critical for the reliable operation of complex real-world systems. Existing explanation methods often rely on unrealistic feature perturbations and ignore temporal and cross-feature dependencies, leading to unreliable attributions. We propose a conditional attribution framework that explains anomalies relative to contextually similar normal system states. Instead of using marginal or randomly sampled baselines, our method retrieves representative normal instances conditioned on the anomalous observation, enabling dependency-preserving and operationally meaningful explanations. To support high-dimensional time-series data, contextual retrieval is performed in learned low-dimensional representations using both variational autoencoder latent spaces and UMAP manifold embeddings. By grounding the retrieval process in the system's learned manifold, this strategy avoids out-of-distribution artifacts and ensures attribution fidelity while maintaining computational efficiency. We further introduce confidence-aware and temporal evaluation metrics for assessing explanation reliability and responsiveness. Experiments on the SWaT and MSDS benchmarks demonstrate that the proposed approach consistently improves root-cause identification accuracy, temporal localization, and robustness across multiple anomaly detection models. These results highlight the practical utility of conditional attribution for explainable anomaly diagnosis in complex time-series systems. Code and models will be publicly released.",
+      "authors": [
+        "Shashank Mishra",
+        "Karan Patil",
+        "Cedric Schockaert",
+        "Didier Stricker",
+        "Jason Rambach"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-04-19T21:01:52+00:00",
+      "link": "https://arxiv.org/pdf/2604.17616v1",
+      "tags": [
+        "keyword:PHM",
+        "query:PHM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "root cause analysis for time-series anomaly detection in complex systems",
+      "llm_evidence_cn": "复杂系统中时间序列异常检测的根因分析",
+      "llm_evidence": "复杂系统中时间序列异常检测的根因分析",
+      "canonical_evidence": "复杂系统中时间序列异常检测的根因分析",
+      "llm_tldr_en": "Introduces a conditional attribution framework for root cause analysis in time-series anomaly detection.",
+      "llm_tldr_cn": "介绍了一种用于时间序列异常检测根因分析的条件归因框架。",
+      "llm_tldr": "介绍了一种用于时间序列异常检测根因分析的条件归因框架。",
+      "llm_tags": [
+        "query:phm:composite"
+      ],
+      "matched_query_tag": "query:phm:composite",
+      "matched_query_text": "Papers central to 同时涉及故障诊断与剩余寿命预测的研究论文, especially work that connects or combines: joint modeling of diagnosis and prognosis; multi-task learning for diagnosis and RUL; simultaneous fault diagnosis and remaining useful life prediction; integrated approach for machinery fault diagnosis and prognosis; multi task deep learning for PHM applications; joint diagnosis and RUL estimation research papers.",
+      "matched_requirement_id": "req-composite-phm",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.20485v1",
+      "source": "arxiv",
+      "title": "Co-State Based Data Fusion and Risk Aware Filtering for Spacecraft Navigation and Hazard Prediction",
+      "abstract": "This paper develops a co-state based fusion frame work for spacecraft navigation, consistency monitoring, and hazard forecasting. A differential algebraic co-state is introduced as an instantaneous Lagrange multiplier that enforces measurement dynamics compatibility at the differential level and provides a physically interpretable signal of geometric inconsistency. On a longer time scale, co-state and innovation trajectories are used to learn a continuous time Markov generator governing transitions between coarse behavioural regimes, enabling intrinsic probabilistic risk forecasting through mode probabilities and mean first-passage time (MFPT). The resulting architecture unifies geometric projection, stochastic inference, and probabilistic risk assessment in a single online pipeline without requiring predefined fault models, labelled failure data, or heuristic thresholds. The framework is demonstrated on real lunar powered-descent telemetry, where it detects structural internal model inconsistency significantly earlier than physical divergence or statistical inconsistency in an Extended Kalman Filter (EKF). The results show that geometric inconsistency, stochastic drift, and probabilistic risk rise coherently prior to failure, yielding interpretable and operationally meaningful early-warning capability for autonomous landing systems.",
+      "authors": [
+        "Surya Ratna Prakash D",
+        "Soumyendu Raha"
+      ],
+      "primary_category": "math.DS",
+      "categories": [
+        "math.DS"
+      ],
+      "published": "2026-04-22T12:16:51+00:00",
+      "link": "https://arxiv.org/pdf/2604.20485v1",
+      "tags": [
+        "query:PHM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "joint framework for consistency monitoring and hazard forecasting",
+      "llm_evidence_cn": "一致性监测与危险预测的联合框架",
+      "llm_evidence": "一致性监测与危险预测的联合框架",
+      "canonical_evidence": "一致性监测与危险预测的联合框架",
+      "llm_tldr_en": "Develops a co-state fusion framework for spacecraft navigation and hazard forecasting using Markov generators.",
+      "llm_tldr_cn": "开发了一种用于航天器导航和危险预测的共态融合框架，利用马尔可夫生成器进行风险预测。",
+      "llm_tldr": "开发了一种用于航天器导航和危险预测的共态融合框架，利用马尔可夫生成器进行风险预测。",
+      "llm_tags": [
+        "query:phm"
+      ],
+      "matched_query_tag": "query:phm",
+      "matched_query_text": "joint modeling of diagnosis and prognosis",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    }
+  ]
+}

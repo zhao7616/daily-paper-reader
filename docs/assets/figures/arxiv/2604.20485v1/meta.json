@@ -1,0 +1,14 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.20485v1/fig-001.webp",
+      "caption": "Fig. 4. Comparison of EKF innovation and co-state-based consistency signals for the failed descent (Lander–1). The co-state and whitened innovation rise earlier than the EKF innovation.",
+      "page": 7,
+      "index": 1,
+      "width": 529,
+      "height": 383
+    }
+  ]
+}

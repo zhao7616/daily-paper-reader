@@ -1,0 +1,78 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.14019v1/fig-001.webp",
+      "caption": "Figure 4: RQ1 – Comparison of semantic (BERT) and structural (GNN) models on BGL for anomaly detection.",
+      "page": 6,
+      "index": 1,
+      "width": 500,
+      "height": 315
+    },
+    {
+      "url": "assets/figures/arxiv/2604.14019v1/fig-002.webp",
+      "caption": "Figure 5: RQ2 – Comparison of semantic (BERT) and structural (GNN) models on fault classification.",
+      "page": 6,
+      "index": 2,
+      "width": 554,
+      "height": 348
+    },
+    {
+      "url": "assets/figures/arxiv/2604.14019v1/fig-003.webp",
+      "caption": "Figure 6: RQ3 – Hybrid model performance (GNN + BERT) on TraceBench for anomaly detection and fault classification.",
+      "page": 7,
+      "index": 3,
+      "width": 607,
+      "height": 271
+    },
+    {
+      "url": "assets/figures/arxiv/2604.14019v1/fig-004.webp",
+      "caption": "Table VI: Precision, recall, and F1-score comparison on TraceBench and BGL (w/ Hybrid Models).",
+      "page": 7,
+      "index": 4,
+      "width": 529,
+      "height": 374
+    },
+    {
+      "url": "assets/figures/arxiv/2604.14019v1/fig-005.webp",
+      "caption": "Figure 7: RQ3 – Hybrid model performance (GNN + BERT) on BGL for anomaly detection.",
+      "page": 7,
+      "index": 5,
+      "width": 500,
+      "height": 281
+    },
+    {
+      "url": "assets/figures/arxiv/2604.14019v1/fig-006.webp",
+      "caption": "Figure 1: Overview of our end-to-end pipeline.",
+      "page": 3,
+      "index": 6,
+      "width": 505,
+      "height": 472
+    },
+    {
+      "url": "assets/figures/arxiv/2604.14019v1/fig-007.webp",
+      "caption": "Table I: Default Fault Types in TraceBench.",
+      "page": 3,
+      "index": 7,
+      "width": 554,
+      "height": 283
+    },
+    {
+      "url": "assets/figures/arxiv/2604.14019v1/fig-008.webp",
+      "caption": "Figure 2: TraceBench Dataset (Simplified).",
+      "page": 3,
+      "index": 8,
+      "width": 442,
+      "height": 281
+    },
+    {
+      "url": "assets/figures/arxiv/2604.14019v1/fig-009.webp",
+      "caption": "Figure 3: RQ1 – Comparison of semantic (BERT) and structural (GNN) models on TraceBench for anomaly detection.",
+      "page": 5,
+      "index": 9,
+      "width": 500,
+      "height": 316
+    }
+  ]
+}

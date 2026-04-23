@@ -1,0 +1,134 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.17616v1/fig-001.webp",
+      "caption": "Fig. 4: Spike anomaly on Feature 58. The figure shows a representative synthetic spike anomaly, where Feature 58 exhibits large abnormal values at randomly selected time steps, simulating a sudden transient disturbance or brief sensor surge.",
+      "page": 25,
+      "index": 1,
+      "width": 581,
+      "height": 1104
+    },
+    {
+      "url": "assets/figures/arxiv/2604.17616v1/fig-002.webp",
+      "caption": "Fig. 5: Shift anomaly on Feature 26. Feature 26 is affected by a synthetic shift anomaly, where a constant offset is added across the window, altering the baseline level of the signal.",
+      "page": 26,
+      "index": 2,
+      "width": 581,
+      "height": 1104
+    },
+    {
+      "url": "assets/figures/arxiv/2604.17616v1/fig-003.webp",
+      "caption": "Table 7: Impact of attribution size on RCA performance. Results for CondAttr-VAE and CondAttr-UMAP across different attribution sizes, evaluated using Top@3R, CW@3, and TempHM@3. Performance generally stabilizes for larger attribution sizes.",
+      "page": 21,
+      "index": 3,
+      "width": 658,
+      "height": 255
+    },
+    {
+      "url": "assets/figures/arxiv/2604.17616v1/fig-004.webp",
+      "caption": "Fig. 9: Signal dropout anomaly on Feature 11. Feature 11 is affected by a synthetic signal dropout anomaly, where the signal abruptly drops to zero over the affected interval, and the attribution pattern correctly highlights the anomalous feature.",
+      "page": 30,
+      "index": 4,
+      "width": 581,
+      "height": 1104
+    },
+    {
+      "url": "assets/figures/arxiv/2604.17616v1/fig-005.webp",
+      "caption": "Fig. 8: Saturation anomaly on Feature 3. Feature 3 exhibits a synthetic saturation anomaly, in which the signal is clipped at a limit, and the anomaly is correctly identified.",
+      "page": 29,
+      "index": 5,
+      "width": 581,
+      "height": 1104
+    },
+    {
+      "url": "assets/figures/arxiv/2604.17616v1/fig-006.webp",
+      "caption": "Fig. 1: Comparison of retrieval performance across spaces. Representation-space retrieval (VAE latent and UMAP manifold) achieves higher CW-RCS than raw input space.",
+      "page": 22,
+      "index": 6,
+      "width": 652,
+      "height": 323
+    },
+    {
+      "url": "assets/figures/arxiv/2604.17616v1/fig-007.webp",
+      "caption": "Table 11: Per-attack performance of CondAttr-UMAP on the SWaT dataset. For each attack instance, we report Top@3R, CW-RCS@3, and TemporalHM@3, alongside the ground-truth sensors correctly identified within the Top-3.",
+      "page": 34,
+      "index": 7,
+      "width": 588,
+      "height": 871
+    },
+    {
+      "url": "assets/figures/arxiv/2604.17616v1/fig-008.webp",
+      "caption": "Fig. 3: Root cause feature heatmaps for representative Paul Wurth samples. The left panel shows a real test sample with feature26 identified as the root cause, while the right panel shows a synthetic anomaly with perturbations injected in feature2 and feature3 after a given time point.",
+      "page": 14,
+      "index": 8,
+      "width": 725,
+      "height": 308
+    },
+    {
+      "url": "assets/figures/arxiv/2604.17616v1/fig-009.webp",
+      "caption": "Table 10: Per-attack performance of CondAttr-VAE on the SWaT dataset. For each attack instance, we report Top@10R, CW-RCS@10, and TemporalHM@10, alongside the ground-truth sensors correctly identified within the Top-10.",
+      "page": 33,
+      "index": 9,
+      "width": 618,
+      "height": 848
+    },
+    {
+      "url": "assets/figures/arxiv/2604.17616v1/fig-010.webp",
+      "caption": "Table 12: Per-attack performance of CondAttr-UMAP on the SWaT dataset. For each attack instance, we report Top@5R, CW-RCS@5, and TemporalHM@5, alongside the ground-truth sensors correctly identified within the Top-5.",
+      "page": 35,
+      "index": 10,
+      "width": 598,
+      "height": 871
+    },
+    {
+      "url": "assets/figures/arxiv/2604.17616v1/fig-011.webp",
+      "caption": "Fig. 7: Drift anomaly on Feature 45. Feature 45 exhibits a gradual temporal change corresponding to a synthetic drift anomaly, which is correctly identified by the attribution method.",
+      "page": 28,
+      "index": 11,
+      "width": 581,
+      "height": 1104
+    },
+    {
+      "url": "assets/figures/arxiv/2604.17616v1/fig-012.webp",
+      "caption": "Table 13: Per-attack performance of CondAttr-UMAP on the SWaT dataset. For each attack instance, we report Top@10R, CW-RCS@10, and TemporalHM@10, alongside the ground-truth sensors correctly identified within the Top-10.",
+      "page": 36,
+      "index": 12,
+      "width": 618,
+      "height": 871
+    },
+    {
+      "url": "assets/figures/arxiv/2604.17616v1/fig-013.webp",
+      "caption": "Table 9: Per-attack performance of CondAttr-VAE on the SWaT dataset. For each attack instance, we report Top@5R, CW-RCS@5, and TemporalHM@5, alongside the ground-truth sensors correctly identified within the Top-5.",
+      "page": 32,
+      "index": 13,
+      "width": 588,
+      "height": 871
+    },
+    {
+      "url": "assets/figures/arxiv/2604.17616v1/fig-014.webp",
+      "caption": "Fig. 6: Noise anomaly on Feature 22. Feature 22 is perturbed by a mild synthetic noise anomaly, and the corresponding attribution pattern shows that the anomalous signal is still correctly detected despite the relatively small disturbance.",
+      "page": 27,
+      "index": 14,
+      "width": 581,
+      "height": 1104
+    },
+    {
+      "url": "assets/figures/arxiv/2604.17616v1/fig-015.webp",
+      "caption": "Table 8: Per-attack performance of CondAttr-VAE on the SWaT dataset. For each attack instance, we report Top@3R, CW-RCS@3, and TemporalHM@3, alongside the ground-truth sensors correctly identified within the Top-3.",
+      "page": 31,
+      "index": 15,
+      "width": 588,
+      "height": 828
+    },
+    {
+      "url": "assets/figures/arxiv/2604.17616v1/fig-016.webp",
+      "caption": "Table 6: Sensitivity analysis of RCA performance across varying window sizes.",
+      "page": 20,
+      "index": 16,
+      "width": 627,
+      "height": 231
+    }
+  ]
+}

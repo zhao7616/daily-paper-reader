@@ -1,0 +1,1429 @@
+Title: Hybrid Spectro-Temporal Fusion Framework for Structural Health Monitoring
+
+URL Source: https://arxiv.org/pdf/2604.16589v1
+
+Published Time: Tue, 21 Apr 2026 00:10:39 GMT
+
+Number of Pages: 15
+
+Markdown Content:
+# Hybrid Spectro–Temporal Fusion Framework for Structural Health Monitoring 
+
+## Jongyeop Kim* a, Jinki Kim b and Doyun Lee c
+
+> a
+
+Department of Information Technology, Georgia Southern University Statesboro, GA, USA 
+
+> b
+
+Department of Mechanical Engineering, Georgia Southern University Statesboro, GA, USA 
+
+> c
+
+Department of Civil Engineering and Construction, Georgia Southern University Statesboro, GA, USA 
+
+A R T I C L E I N F O 
+
+Keywords :Structural health monitoring Vibration-based damage detection Deep learning Spectro temporal analysis Machine learning Signal processing 
+
+A B S T R A C T 
+
+Structural health monitoring plays a critical role in ensuring structural safety by analyzing vibration responses from engineering systems. This paper proposes a Spectro–Temporal Alignment framework and a Hybrid Spectro–Temporal Fusion framework that integrate arrival-time interval descriptors with spectral features to capture both fine-scale and coarse-scale vibration dynamics. Experiments conducted on data collected from an LDS V406 electrodynamic shaker demonstrate that the proposed spectro–temporal representations significantly outperform conventional input formulations. The re-sults indicate that a temporal resolution of Δ𝜏 = 0 .02 favors traditional machine learning models, whereas Δ𝜏 = 0 .008 effectively unlocks the performance potential of deep learning architectures. Beyond classification accuracy, a comprehensive stability analysis based on condensed indices, including mean performance, standard deviation, coefficient of variation, and balanced score, shows that the proposed hybrid framework consistently achieves higher accuracy with substantially lower variability compared to baseline and alignment-only approaches. Overall, these results demonstrate that the proposed framework provides a robust, accurate, and reliable solution for vibration-based structural health monitoring. 
+
+## 1. Introduction 
+
+Structural Health Monitoring (SHM) is a cornerstone of infrastructure safety and lifecycle management, providing continuous, data-driven insight into the evolving condition of civil and mechanical structures Mishra et al. (2022); Benfenati et al. (2025). Within SHM, Vibration-based struc-tural health monitoring (SHM) has emerged as a reliable strategy for detecting damage and assessing the integrity of complex civil and mechanical systems. Recent studies have highlighted the importance of low-cost and energy-aware sensing technologies, reliable acquisition of synchronized vibration signals, and advanced data-driven techniques such as operational modal analysis, deep learning, and com-pressed sensing to improve the accuracy and efficiency of structural diagnosis while ensuring long-term applicability in real-world environments (Yang et al., 2021; Zonzini et al., 2021, 2020; Gomez-Cabrera and Escamilla-Ambrosio, 2022). Over the past decade, the rapid advancement of sens-ing technologies, networking infrastructures, and computa-tional power has driven a paradigm shift in structural health monitoring (SHM), moving from traditional hand-crafted feature engineering toward machine learning (ML)—and particularly deep learning (DL)—which enables automated feature extraction and significantly enhances damage detec-tion accuracy across diverse structural applications (Avci 
+
+> ∗
+
+Corresponding author  
+
+> jongyeopkim@georgiasouthern.edu
+
+(J. Kim*);  
+
+> jinkikim@georgiasouthern.edu
+
+(J. Kim); doyunlee@georgiasouthern.edu (D. Lee) 
+
+> ORCID
+
+(s): 
+
+> 1
+
+ORCID: https://orcid.org/0000-0002-1068-9855 
+
+> 2
+
+ORCID: https://orcid.org/0000-0002-0921-9450 
+
+> 3
+
+ORCID: https://orcid.org/0000-0002-0976-2488 
+
+et al., 2020a; Gomez-Cabrera and Escamilla-Ambrosio, 2022; Zhang, 2022; Spencer Jr., 2025). Recent deep learning (DL) methods in structural health monitoring (SHM) exhibit superior robustness to noise, environmental variability, and operational changes com-pared to conventional approaches. For example, DBNs have sustained high accuracy under substantial Gaussian noise (Presno Velez and et al., 2025), while ResNet-based architectures enable effective vibration signal denoising (Fan and et al., 2020). Broader surveys reinforce these findings, noting DL’s flexibility and reliability in real-world SHM tasks (Toh et al., 2020). Concurrently, compres-sion techniques like model-assisted Rak-CS offer compact, redundancy-reduced signal representations while preserving critical time–frequency content (Zonzini et al., 2022). Yet, a persistent challenge remains: how to retain critical tem-poral transients and rich spectral content—an issue long-recognized in SHM’s time–frequency literature—while ob-taining compact, redundancy-reduced representations. Tech-niques such as non-parametric time–frequency analysis, adaptive decomposition, and deconvolution have long been employed to preserve localized signal features in non-stationary vibration data (Zhou et al., 2025). More recently, sparse, sub-Nyquist frameworks like compressive sensing integrated with time–frequency dictionaries offer compact representations that retain essential dynamics (Sejdić et al., 2017), and Bayesian compressive sensing approaches en-able signal compression with uncertainty quantification, mitigating the trade-off between compactness and fidelity (Huang et al., 2014). Nevertheless, these approaches often rely on artificially defined time–frequency representations and strong prior assumptions, which limit their adaptability to complex, real–world vibration data. 
+
+This manuscript is a preprint version prepared prior to journal submission. Page 1 of 15 
+
+> arXiv:2604.16589v1 [cs.LG] 17 Apr 2026 Hybrid Spectro–Temporal Fusion Framework for Structural Health Monitoring
+
+This limitation has motivated the emergence of spectro– temporal deep learning methods, which aim to automatically learn compact yet expressive representations that preserve temporal coherence and spectral richness while remaining robust to noise, environmental variability, and domain shifts (Yuan et al., 2020; Avci et al., 2020b; Jia et al., 2023). Although these approaches represent an important step for-ward, they still face notable challenges: a lack of physical interpretability, persistent sensitivity to domain shifts, and difficulty in capturing fine-grained transient dynamics in near-frequency regimes. Building on these insights, we in-troduce a hybrid spectro–temporal framework that explicitly integrates alignment, adaptive fusion, and explainability to deliver robust and trustworthy SHM classification. Specifi-cally, our contributions are threefold: (1) Spectro–Temporal Alignment(STA): We introduce a physically grounded reformatting procedure for vi-bration sequences using interpretable alignment met-rics—Best 𝜏 , Knee 𝜏 , and 𝑆 ⋆—to achieve compact and phase-consistent temporal representations while preserving essential dynamic behavior. (2) Hybrid Spectro–Temporal Fusion (HSTF) : We de-velop a fusion framework that jointly encodes arrival-time intervals ( Δ𝜏 ) and spectral descriptors, including dominant frequency, bandwidth, and harmonic ratios. This hybridization enables richer joint time–frequency representations suitable for complex dynamic environ-ments. (3) Enhanced Discriminative Representation: By inte-grating STA and HSTF, we construct a unified spectro– temporal embedding that captures both coarse- and fine-grained signal dynamics. This hybrid representation sig-nificantly improves classification accuracy and robust-ness, particularly under near-frequency. 
+
+## 2. Preliminary 
+
+When deep learning models receive input signals with nearly identical temporal and spectral characteristics, their ability to discriminate between classes becomes fundamen-tally limited. In this study, five experimental conditions (no_mass –mass_pos4 ) were defined; however, the resulting vi-bration signals exhibit highly correlated temporal and spec-tral patterns, making class separation inherently difficult. Minor changes in the attached mass position induce only subtle variations in amplitude and frequency composition, leading to overlapping statistical features such as sample entropy, harmonic flatness, and RMS energy. The strongest overlap occurs between no_mass and mass_pos1 , whereas  
+
+> mass_pos3
+
+demonstrates limited distinctiveness. These in-trinsic similarities highlight the need for spectro–temporal alignment and hybrid fusion strategies to enhance discrim-inability across closely spaced dynamic regimes. 
+
+2.1. Class Overlap and Misclassifications Risk 
+
+Classes and feature representation. To analyze the sim-ilarity among input signals, time–series data obtained under the five experimental conditions 
+
+𝐶 = { 𝐶 0 ∶ no_mass , 𝐶 1 ∶ mass_pos1 , 𝐶 2 ∶ mass_pos2 ,
+
+} 𝐶 3 ∶ mass_pos3 , 𝐶 4 ∶ mass_pos4 } (1) were transformed into seven-dimensional feature vectors derived from statistical, spectral, and nonlinear time–series analyses, including Sample Entropy (Richman and Moor-man, 2000), Permutation Entropy (Bandt and Pompe, 2002), Higuchi fractal Dimension (Higuchi, 1988), Spectral Flat-ness and Spectral Centroid (Tzanetakis and Cook, 2002), Root Mean Square (Randall, 2011), Peak/Percentile Abso-lute Amplitude (Antoni, 2006). Each class 𝐶 𝑖 is represented by 
+
+𝐱 𝑖 = [ sampen 𝑑 , permen 𝑑 , hfd 𝑑 ,
+
+sf lat 𝑑 , scent 𝑑 , rms 𝑑 , pabs 𝑑 
+
+] 
+
+> 𝑖
+
+∈ ℝ7, (2) where these descriptors respectively capture temporal irreg-ularity, spectral complexity, and signal energy distribution. 
+
+Normalization. Each feature component is scaled to a common range using min–max normalization: 
+
+𝐱 min = min  
+
+> 𝑘
+
+𝐱 𝑘 , 𝐱 max = max  
+
+> 𝑘
+
+𝐱 𝑘 ,
+
+where min/max operations are applied component–wise across all classes. The normalized feature vector is then given by ̃
+
+𝐱 𝑖 = ( 𝐱 𝑖 − 𝐱 min ) ⊘ (𝐱 max − 𝐱 min ),
+
+allowing visualization as polygons in a radar plot. 
+
+Classification objective. The goal is to learn a mapping function 
+
+𝑓 ∶̃ 𝐱 ↦ 𝐶 𝑖 , 𝑖 ∈ {0 , 1, 2, 3, 4} ,
+
+that minimizes the overall misclassification probability. 
+
+Overlap quantification. Let 𝑝 (̃𝐱 ∣ 𝐶 𝑖 ) denote the class-conditional probability density function in the normalized seven-dimensional feature space. Following the statisti-cal pattern recognition framework, the degree of class overlap—directly related to the Bayes misclassification er-ror—can be quantified by integrating the minimum of the class-conditional densities. Accordingly, the aggregate over-lap functional is defined as 
+
+Ω = ∑ 
+
+> 𝑖 ≠𝑗
+
+∫ℝ7
+
+min (𝑝 (̃𝐱 ∣ 𝐶 𝑖 ), 𝑝 (̃ 𝐱 ∣ 𝐶 𝑗 )) 𝑑̃ 𝐱 ,
+
+where larger values of Ω indicate stronger inter-class overlap and, consequently, a higher risk of misclassification (De-vroye et al., 1996; Fukunaga, 1990; Abellán et al., 2021).  
+
+> This manuscript is a preprint version prepared prior to journal submission. Page 2 of 15 Hybrid Spectro–Temporal Fusion Framework for Structural Health Monitoring
+
+Analysis of class separability. Radar-plot visualizations reveal that no_mass and mass_pos1 share nearly identical fea-ture profiles, corresponding to the largest overlap and thus the highest classification risk. Conversely, mass_pos3 exhibits distinctive patterns in hfd_d , rms_d , and p95_abs_d , indicating improved separability. Intermediate overlap is observed for  
+
+> mass_pos2
+
+and mass_pos4 , suggesting moderate classification difficulty. To quantify these relationships, the centroid of each class is computed as 
+
+𝝁 𝐶 𝑖 = 1
+
+𝑛 𝑖 𝑛 𝑖 ∑
+
+> 𝑘 =1
+
+̃
+
+𝐱 (𝐶 𝑖 ) 
+
+> 𝑘
+
+,
+
+and pairwise separability is measured by the Euclidean distance 
+
+𝑑 (𝐶 𝑖 , 𝐶 𝑗 ) = ‖𝝁 𝐶 𝑖 − 𝝁 𝐶 𝑗 ‖2.
+
+Smaller distances (e.g., between no_mass and mass_pos1 )correspond to larger Ω and greater misclassification risk, while larger distances (e.g., between mass_pos3 and the other classes) indicate higher separability. Overall, class separability follows the relation:  
+
+> no_mass
+
+↔ mass_pos1 > mass_pos2 > (mass_pos3 , mass_pos4 ),
+
+where “ >” denotes increasing ease of discrimination (i.e., decreasing overlap and misclassification risk).      
+
+> Figure 1: Larger pairwise overlaps (e.g., no_mass vs. mass_pos1 )imply harder classification, while more distinct shapes (e.g.,
+> mass_pos3 ,mass_pos4 ) imply easier separability.
+
+2.2. Motivation 
+
+Directly feeding highly similar raw displacement signals into recurrent neural networks (RNNs) without reformula-tion or feature restructuring makes it difficult to achieve reliable classification performance. In our baseline study (Table 3), seven traditional models and seven recent deep learning models were applied directly to the original signals without any preprocessing. The results show that even recent RNN-based architectures failed to achieve sufficiently high accuracy under this setting. This observation is consistent with recent studies re-porting that raw displacement sequences often lead to poor classification performance due to long redundant sequences, misaligned temporal dynamics, and the difficulty of captur-ing long-term dependencies in sequential data (He et al., 2024; Fang et al., 2024; Ye et al., 2024). Although aggressive sequence shortening can reduce redundancy, it may also remove critical temporal transitions and frequency com-ponents, thereby degrading discriminative information and increasing misclassification rates (Ye et al., 2024; Hermiz et al., 2021; Bao et al., 2022). To address these limitations, we propose a reformulation and preprocessing framework that segments the displace-ment signals into multiple physically meaningful compo-nents while preserving their overall dynamic characteris-tics. Specifically, the original sequences are reformatted into cumulative displacement states aligned at physically interpretable arrival times. Three descriptors are used for alignment: Best 𝜏 , which captures the dominant time con-stant of the system; Knee 𝜏 , which identifies the transition between fast and slow responses; and 𝑆 ⋆, which serves as a reliability measure to preserve trustworthy temporal patterns. This reformulation shortens sequence length, im-proves feature compactness, and enhances temporal align-ment across signals, consistent with recent advances in time-series representation learning and RNN training. 
+
+2.3. Optimal Sampling Interval Selection 
+
+Determining an appropriate sampling interval Δ𝜏 for time-series alignment requires balancing spectral coverage with class discriminability. Overly dense sampling intro-duces redundancy and amplifies noise, leading to overfitting and unstable training, whereas excessively sparse sampling discards essential temporal transitions. According to com-pressed sensing theory , when signals exhibit sparsity, sub-Nyquist sampling can preserve their essential structure while reducing data requirements Dai et al. (2018). For spectral guidance, the critical frequency 𝑓 ⋆ can be estimated from the power spectral density (PSD), with the corresponding Nyquist-based reference interval defined as 
+
+Δ𝜏 Nyq ≈ 12𝑓 ⋆ . Furthermore, theoretical studies suggest that when spectral support is unknown, stable reconstruction may require sampling at up to twice the Nyquist rate Landau et al. (2009). 
+
+2.3.1. Spectral Guideline 
+
+For each class 𝑐 , the power spectral density (PSD) 𝑃 𝑐 (𝑓 )
+
+is estimated, and the critical frequency 𝑓 ⋆𝑐 is defined as the frequency below which 95% of the signal energy is contained Oppenheim et al. (2010): 
+
+∫ 
+
+> 𝑓 ⋆𝑐
+> 0
+
+𝑃 𝑐 (𝑓 ) 𝑑𝑓 = 0 .95 ∫
+
+> ∞0
+
+𝑃 𝑐 (𝑓 ) 𝑑𝑓 . (3)  
+
+> This manuscript is a preprint version prepared prior to journal submission. Page 3 of 15 Hybrid Spectro–Temporal Fusion Framework for Structural Health Monitoring
+
+The overall reference frequency is then defined as 
+
+𝑓 ⋆ = max  
+
+> 𝑐
+
+𝑓 ⋆𝑐 , Δ𝜏 Nyq ≈ 12𝑓 ⋆ , (4) The admissible search space for the sampling interval Δ𝜏 
+
+is further constrained as 
+
+Δ𝜏 ∈ [ 𝛽 Δ𝜏 Nyq , 𝛾 Δ𝜏 Nyq ], (5) with 𝛽 = 0 .5 and 𝛾 = 3 as typical values following standard signal processing guidelines Papoulis (1977). 
+
+2.3.2. Data-Driven Selection: Discriminability vs. Redundancy 
+
+For each candidate Δ𝜏 , construct a uniform grid 
+
+𝐺 (Δ 𝜏 ) = { 𝜏 𝑗 = 𝑗 Δ𝜏 | 0 ≤ 𝜏 𝑗 ≤ 𝑇 }, 𝑀 = |𝐺 |. (6) 
+
+(a) Discriminability: The ANOVA 𝐹 -score Fisher (1925) at each 𝜏 𝑗 is 
+
+𝐹 (𝜏 𝑗 ) = 
+
+∑𝐾 𝑐 =1 𝑁 𝑐 
+
+(𝜇 𝑐 (𝜏 𝑗 ) − 𝜇 (𝜏 𝑗 ))2
+
+∑𝐾 𝑐 =1 
+
+∑𝑛 ∈𝐷 𝑐 
+
+(
+
+𝑥 (𝑐 ) 
+
+> 𝑛
+
+(𝜏 𝑗 ) − 𝜇 𝑐 (𝜏 𝑗 )
+
+)2
+
++ 𝜖 . (7) 
+
+(b) Redundancy Penalty: The correlation-based redun-dancy penalty, as introduced by Fisher (1925) and inspired by earlier work in sensor placement Krause et al. (2008), is defined as: 
+
+𝑅 = 2
+
+𝑀 (𝑀 − 1) 
+
+∑
+
+> 1≤𝑖<𝑗 ≤𝑀
+
+𝑟 (𝜏 𝑖 , 𝜏 𝑗 ) exp 
+
+(
+
+− |𝜏 𝑖 − 𝜏 𝑗 |
+
+𝓁 
+
+)
+
+. (8) This penalty discourages selecting highly correlated parame-ters that are close in the domain, with 𝓁 controlling the decay of influence. 
+
+(c) Combined Objective: The final objective score, which balances performance, redundancy, and resource constraints, is given by: 
+
+𝑆 (Δ 𝜏 ) = 1
+
+𝑀 
+
+> 𝑀
+
+∑
+
+> 𝑗 =1
+
+𝐹 (𝜏 𝑗 ) − 𝜆 𝑟 𝑅 − 𝜆 𝑚 
+
+𝑀 𝑇 . (9) Here, 𝐹 (𝜏 𝑗 ) represents the utility of parameter 𝜏 𝑗 , while 𝜆 𝑟 
+
+and 𝜆 𝑚 tune the trade-off between redundancy and cardinal-ity. 
+
+2.3.3. Final Selection 
+
+The optimal interval is selected as: 
+
+Δ𝜏 ⋆ = arg max 
+
+> Δ𝜏 ∈[ 𝛽 Δ𝜏 Nyq ,𝛾 Δ𝜏 Nyq ]
+
+{𝑆 (Δ 𝜏 ) }. (10) Unlike traditional sampling strategies that prioritize high-fidelity signal reconstruction, this optimization frame-work prioritizes information density . The resulting opti-mal interval Δ𝜏 ⋆ represents a task-specific resolution that maximizes the neural network’s capacity to learn class-distinguishing patterns while simultaneously minimizing the computational overhead associated with the input sequence length. 
+
+2.4. Short-Time Fourier Transform (STFT) 
+
+To analyze the time-varying spectral characteristics of signals, we employ the Short-Time Fourier Transform (STFT) based on the Δ𝜏 ⋆ interval, which provides a joint time-frequency representation by applying a sliding window across the signal Cohen (1995). Unlike the conventional Fourier Transform, which captures only global frequency content, the STFT localizes spectral content in time Rioul and Duhamel (1991). The STFT of a continuous-time signal 𝑥 (𝑡 ) is defined as: 
+
+𝑋 (𝑡, 𝜔 ) = ∫
+
+> ∞−∞
+
+𝑥 (𝜏 ) 𝑤 (𝜏 − 𝑡 ) 𝑒 −𝑗𝜔𝜏 𝑑𝜏, (11) where 𝑤 (𝜏 − 𝑡 ) is a window function centered at time 
+
+𝑡 , and 𝜔 denotes the angular frequency Oppenheim et al. (1999). The magnitude |𝑋 (𝑡, 𝜔 )| reveals the evolution of frequency components, while the phase ∠𝑋 (𝑡, 𝜔 ) provides complementary information. For discrete-time signals 𝑥 [𝑛 ], the STFT is expressed as: 
+
+𝑋 (𝑚, 𝜔 ) = 
+
+> ∞
+
+∑
+
+> 𝑛 =−∞
+
+𝑥 [𝑛 ] 𝑤 [𝑛 − 𝑚 ] 𝑒 −𝑗𝜔𝑛 , (12) where 𝑚 represents the time shift or frame index Oppenheim et al. (1999). This representation enables the extraction of temporal and spectral features critical for signal classifi-cation Wang et al. (2022a). We compute six features— dominant amplitude, sideband symmetry, second-peak off-set, harmonic ratio, continuous wavelet transform (CWT), and CEEMDAN—over time intervals determined by the optimal Δ𝜏 ⋆, as described in Zhang and Zhou (2022). 1. Dominant Amplitude: 
+
+𝑧 1 = 𝐴 1, (13) where 𝐴 1 is the amplitude of the dominant frequency mode. This captures signal energy, useful when fre-quencies are close but energies differ Lin and Zhao (2020). 2. Sideband Symmetry: 
+
+𝐸 𝐿 = ∑
+
+> 𝑘 1−Δ ≤𝑘<𝑘 1
+
+𝑋 [𝑘 ]2, 𝐸 𝑅 = ∑
+
+> 𝑘 1<𝑘 ≤𝑘 1+Δ
+
+𝑋 [𝑘 ]2,
+
+(14) 
+
+𝑧 2 = 𝑆 = |𝐸 𝐿 − 𝐸 𝑅 |
+
+𝐸 𝐿 + 𝐸 𝑅 
+
+. (15) This measures modulation symmetry, where asymme-try indicates faults or load changes . 3. Second-Peak Offset: 
+
+𝑘 2 = arg max 
+
+> 𝑘 ≠𝑘 1
+
+𝑋 [𝑘 ], 𝑧 3 = |𝑓 𝑘 2 − 𝑓 𝑘 1 |, (16) capturing harmonic or sideband spacing Lin and Zhao (2020).  
+
+> This manuscript is a preprint version prepared prior to journal submission. Page 4 of 15 Hybrid Spectro–Temporal Fusion Framework for Structural Health Monitoring
+
+4. Harmonic Ratio: 
+
+𝑘 2𝑓 = arg min  
+
+> 𝑘
+
+|𝑓 𝑘 −2 𝑓 1|, 𝑧 4 = 𝑋 [𝑘 2𝑓 ]∕ 𝐴 1, (17) quantifying the strength of the second harmonic Wang et al. (2022b). 5. Continuous Wavelet Transform (CWT): 
+
+𝑊 𝑥 (𝑎, 𝑏 ) = 1
+
+√|𝑎 | ∫
+
+> ∞−∞
+
+𝑥 (𝑡 ) 𝜓 ∗( 𝑡 − 𝑏 𝑎 
+
+)
+
+𝑑𝑡, (18) 
+
+𝑧 5 = max  
+
+> 𝑎,𝑏
+
+|𝑊 𝑥 (𝑎, 𝑏 )|, (19) where 𝑥 (𝑡 ) is the input signal, 𝜓 (𝑡 ) is the mother wavelet, 𝑎 is the scale, 𝑏 is the translation, and ∗
+
+denotes the complex conjugate Rioul and Duhamel (1991). This captures localized time-frequency fea-tures. 6. CEEMDAN (Complete Ensemble Empirical Mode Decomposition with Adaptive Noise): Signal 𝑥 (𝑡 )
+
+is decomposed into intrinsic mode functions (IMFs) using noisy EMD realizations with adaptive noise. We extract the energy ratio feature :
+
+𝑧 6 =
+
+∑𝑁 𝑖 =1 ‖IMF 𝑖 (𝑡 )‖2
+
+‖𝑥 (𝑡 )‖2 , (20) where 𝑁 is the number of IMFs. CEEMDAN im-proves stability and mitigates mode mixing compared to classical EMD Torres et al. (2011). Identifying signals that exhibit highly similar character-istics poses a significant challenge for deep learning mod-els. In this chapter, we examine the properties of the sig-nals collected from our experimental setup using a seven-dimensional feature vector. We then describe in detail our proposed methodology, which enables effective splitting of the signals while preserving their intrinsic characteristics, thus improving the performance of deep learning-based signal identification. 
+
+## 3. Methods 
+
+This study proposes a hybrid spectro–temporal prepro-cessing framework that transforms raw displacement signals into structured representations for robust deep learning clas-sification. As illustrated in Fig.2 and Table 1, the proposed pipeline consists of three main stages: Base Line Approach ,
+
+Spectro–Temporal Alignment (STA) , and Hybrid Spectro– Temporal Fusion (HSTF) .
+
+Base Line Approach: The base processing stage estab-lishes baseline performance by evaluating ten representa-tive machine learning models on the raw dataset without any preprocessing, providing a reference for assessing the effectiveness of the proposed framework. 
+
+Spectro–Temporal Alignment (STA): Given raw signals 
+
+(𝑡 𝑖 , 𝑥 𝑖 ), the power spectral density (PSD) of each class is first analyzed to estimate the effective bandwidth. Based on the Nyquist criterion, a reference sampling interval Δ𝜏 is determined and the signals are resampled accordingly. To avoid boundary distortion and unstable transient regions, a trimming margin 𝛼 is applied. This stage preserves the phys-ical characteristics of the original signals while reducing redundant samples. The resampled signals are segmented into uniform temporal windows with interval Δ𝜏 , producing aligned cumulative displacement states 𝑥 (𝑚 ). This window-ing process mitigates temporal misalignment across different experimental conditions and generates structured sequences suitable for sequential deep learning models. For each win-dow, a short-time Fourier transform (STFT) is applied to obtain the spectral map 𝑆 (𝑚 )(𝜔 𝑘 ).
+
+Hybrid Spectro–Temporal Fusion (HSTF): From each spectral map, discriminative spectral features 𝑧 (𝑚 ) are ex-tracted, including dominant amplitude, sideband symmetry, second-peak offset, and harmonic ratio (optionally CWT and CEEMDAN-based features). The temporal representa-tion 𝑥 (𝑚 ) and the spectral feature vector 𝑧 (𝑚 ) are then con-catenated to form stacked per-window tokens [𝑥 (𝑚 )‖𝑧 (𝑚 )].Finally, all tokens are stacked to construct the fused sequence representation 𝐙 𝑖 , which is used as the input to the deep learning classifier. 
+
+3.1. Deep Learning Model for Categorical classification 
+
+Let  denote a domain consisting of vibration-induced displacement signals collected from a single device under a fixed experimental configuration. The signals are obtained from a shaker-excited PLA cantilever beam with an attached lumped mass to emulate defects, and the tip displacement is measured using a laser displacement sensor. Thus, each do-main represents responses acquired under identical physical and sensing conditions. 
+
+ = { 𝜂, 𝛿 1, 𝛿 2, 𝛿 3, 𝛿 4},
+
+where 𝜂 represents the healthy state and 𝛿 𝑘 , 𝑘 = 1 , 2, 3, 4,correspond to different levels of structural damage. Each signal is a time–displacement sequence 
+
+𝑥 = {( 𝑡 𝑗 , 𝑢 𝑗 )} 𝑇 𝑗 =1 ,
+
+where 𝑡 𝑗 ∈ ℝ denotes the time index, 𝑢 𝑗 ∈ ℝ the corre-sponding displacement, and 𝑇 the sequence length. Each condition state is then described as a collection of such signals: 
+
+𝜂 =
+
+{
+
+𝑥 (𝜂 )
+
+> 𝑖
+
+}𝑛 𝜂 
+
+> 𝑖 =1
+
+, 𝛿 𝑘 =
+
+{
+
+𝑥 (𝛿 𝑘 )
+
+> 𝑖
+
+}𝑛 𝛿 𝑘 
+
+> 𝑖 =1
+
+, 𝑘 = 1 , 2, 3, 4.
+
+The learning task is to construct a classifier 
+
+𝑓 ∶  → , 
+
+> This manuscript is a preprint version prepared prior to journal submission. Page 5 of 15
+
+Hybrid Spectro–Temporal Fusion Framework for Structural Health Monitoring 
+
+Level Symbol Shape / Indexing Description 
+
+Raw signals 𝑡 𝑖 ℝ𝑁 𝑖  
+
+> +
+
+Time samples ( 𝑖 = 0 … 4 ). 
+
+𝑥 𝑖 ℝ𝑁 𝑖 Displacement sequence aligned to 𝑡 𝑖 .
+
+𝑦 𝑖 {0 , 1, 2, 3, 4} Class label (five conditions). Resampling Δ𝑡 scalar Uniform Nyquist-safe step. 
+
+𝛼 scalar Safety margin (edge trimming). Windowing 𝑥 (𝑚 ) ℝ𝐿 𝑚 = 1 , … , 𝑀 𝑖 windows of length 𝐿 .
+
+𝑡 (𝑚 ) ℝ𝐿 Time indices per window. Spectrum 𝑤 𝑘 𝑘 = 0 , … , 99 Frequency bins (STFT/CWT). 
+
+𝑆 (𝑚 )(𝑤 𝑘 ) ℝ Spectral magnitude per bin. Features 𝐳 (𝑚 ) ℝ6 [𝑧 1…𝑧 6]⊤: dominant amplitude, sideband symmetry, second-peak offset, harmonic ratio, CWT energy, CEEM-DAN index. Window stack 𝐗 𝑖 ℝ𝑀 𝑖 ×𝐿 Rows are 𝑥 (𝑚 ) for class 𝑖 .Feature matrix 𝐙 𝑖 ℝ𝑀 𝑖 ×6 Rows are 𝐳 (𝑚 ) for class 𝑖 .
+
+Stacked representa-tion ̂
+
+𝐙 𝑖 = [ 𝐗 𝑖 | 𝐙 𝑖 ] ℝ𝑀 𝑖 ×( 𝐿 +6) Column-wise concatenation per window. Learning set ̂  ⋃
+
+> 𝑖
+
+{( ̂ 𝐙 𝑖 , 𝑦 𝑖 )} All stacked matrices with labels. 
+
+Table 1: Data organization and re-formatting from raw displacement signals to stacked per-window representations that concatenate samples 𝑥 (𝑚 ) with features 𝐳 (𝑚 ).             
+
+> Raw signals
+> (𝑡 𝑖 , 𝑥 𝑖 )
+> Resample to Δ𝑡
+> Trim margin 𝛼
+> Windowing
+> 𝑥 (𝑚 )∈ℝ𝐿
+> Spectral map
+> 𝑆 (𝑚 )(𝑤 𝑘 )
+> Feature extractor Φ:
+> 𝑥 (𝑚 )↦𝐳 (𝑚 )
+> Stacked per-window tokens
+> [𝑥 (𝑚 )|𝐳 (𝑚 )]⇒̂𝐙 𝑖
+> Base STA HSTF
+
+Figure 2: Pipeline from raw signals to stacked per-window representation [𝑥 (𝑚 ) | 𝐳 (𝑚 )] ⇒̂ 𝐙 𝑖 .
+
+which maps an input signal 𝑥 ∈  to its corresponding condition label 𝑦 ∈ . Formally, given training data 
+
+ = {( 𝑥 𝑖 , 𝑦 𝑖 )} 𝑁 𝑖 =1 , 𝑦 𝑖 ∈ ,
+
+the objective is to minimize the empirical risk 
+
+min  
+
+> 𝑓 ∈
+
+1
+
+𝑁 
+
+> 𝑁
+
+∑
+
+> 𝑖 =1
+
+𝓁 (𝑓 (𝑥 𝑖 ), 𝑦 𝑖 
+
+),
+
+where 𝓁 (⋅, ⋅) is a suitable loss function (e.g., cross-entropy) and  is the hypothesis space of candidate classifiers. 
+
+3.2. Spectro-Temporal Alignment (STA) 
+
+To ensure uniform temporal representation across vibration-harvested signals, the Spectro-Temporal Alignment (STA) 
+
+module establishes a data-driven sampling interval and segmentation procedure prior to deep learning. Let each raw displacement sequence be denoted as 
+
+𝑥 𝑐 (𝑡 ) = {( 𝑡 𝑗 , 𝑢 𝑗 )} 𝑇 𝑐 
+
+> 𝑗 =1
+
+, 𝑐 ∈ {1 , … , 𝐶 },
+
+where 𝑡 𝑗 represents the time index and 𝑢 𝑗 the measured displacement. The STA process begins by resampling each 
+
+𝑥 𝑐 (𝑡 ) to a uniform sampling interval Δ𝜏 , trimming boundary margins by 𝛼 to suppress transient edge effects. To determine the most informative interval, a bounded score 𝑆 (Δ 𝜏 𝑖 ) ∈ [0 , 1] is evaluated across all Nyquist-aligned candidate lags {Δ 𝜏 𝑖 }𝑁 𝜏 
+
+> 𝑖 =1
+
+. This score jointly captures three complementary aspects: (1) class separability , quantified using the ANOVA 𝐹 -statistic (Ghosh and Patel, 2021); (2) 
+
+temporal redundancy , penalized through correlation-based dependency measures (Li et al., 2023); and (3) sampling complexity , which balances model efficiency with spectral fidelity (Sharma and Kumar, 2022). Together, these criteria ensure that the chosen interval maximizes discriminative information while minimizing redundant or oversampled representations. 
+
+Δ𝜏 ⋆ = arg max  
+
+> 𝑖
+
+𝑆 (Δ 𝜏 𝑖 ), (21) while the knee point 𝜏 𝑘 identifies the onset of diminishing returns in temporal resolution. Once Δ𝜏 ⋆ is fixed, each resampled sequence is win-dowed into overlapping segments 
+
+𝑥 (𝑚 ) ∈ ℝ𝐿 , 𝑚 = 1 , … , 𝑀, 
+
+forming a batch-ready tensor representation for deep learn-ing. This alignment ensures that all input windows are tem-porally synchronized, spectrally balanced, and comparable across classes—allowing the subsequent network to focus on discriminative structural dynamics rather than sampling irregularities. 
+
+3.3. Hybrid spectro–temporal Fusion(HSTF) 
+
+The HSTF operates in conjunction with the neural net-work–based classification described in Subsection 3.4. It 
+
+This manuscript is a preprint version prepared prior to journal submission. Page 6 of 15 Hybrid Spectro–Temporal Fusion Framework for Structural Health Monitoring 
+
+segments the deep learning input sequence into designated Short-Time Analyses (STA) and, at each segment, combines the six feature extraction values introduced in Section 2.2 with the corresponding portion of the original signal. Each displacement signal 𝑥 = {( 𝑡 𝑗 , 𝑢 𝑗 )} 𝑇 𝑗 =1 is first segmented using a sliding window of size 𝑤 , producing subsequences 
+
+𝑥 (𝑚 ) = {( 𝑡 𝑗 , 𝑢 𝑗 )} 𝑚𝑤 𝑗 =( 𝑚 −1) 𝑤 +1 , 𝑚 = 1 , 2, … , 𝑀, 
+
+where 𝑀 = ⌊𝑇 ∕𝑤 ⌋ is the total number of windows. Each subsequence 𝑥 (𝑚 ) is then transformed into a feature vector by a feature extraction operator Φ ∶ 𝑥 (𝑚 ) ↦ 𝐳 (𝑚 ) ∈
+
+ℝ10 , where 
+
+𝐳 (𝑚 ) = [𝑧 (𝑚 )1 , 𝑧 (𝑚 )2 , … , 𝑧 (𝑚 )10 
+
+]⊤, 𝑚 = 1 , 2, … , 𝑀. (22) Here, 𝑧 (𝑚 ) 
+
+> 𝑖
+
+denotes the 𝑖 -th spectral features z1, z2, ..., z6 computed from the 𝑚 -th window (Appendix Fig. 6-8) . Thus, the complete signal 𝑥 is represented by a collection of feature vectors 
+
+ = { 𝐳 (𝑚 )}𝑀 𝑚 =1 , 𝐳 (𝑚 ) ∈ ℝ6. (23) 
+
+Figure 3: Visualization of the healthy-state signal representation. The blue curve shows the original displacement signal 
+
+𝜂 = { 𝑥 (𝜂 ) 
+
+> 𝑖
+
+}𝑛 𝜂 
+
+> 𝑖 =1
+
+, while the red segments highlight its transformed representation 𝜂 = { ̃𝑥 (𝜂 ) 
+
+> 𝑖
+
+}𝑛 𝜂 
+
+> 𝑖 =1
+
+, obtained by segmenting the signal into windows and mapping each subsequence to a feature vector. 
+
+For each displacement signal 𝑥 = {( 𝑡 𝑗 , 𝑢 𝑗 )} 𝑇 𝑗 =1 , the seg-mentation step produces subsequences {𝑥 (𝑚 )}𝑀 𝑚 =1 . Each sub-sequence is then associated with its feature vector 𝐳 (𝑚 ) ∈ ℝ6,and the collection of features is denoted by  = { 𝐳 (𝑚 )}𝑀 𝑚 =1 .Thus, the representation of the original signal 𝑥 is aug-mented as ̃𝑥 =
+
+{(𝑥 (𝑚 ), 𝐳 (𝑚 ))}𝑀 𝑚 =1 , (24) where each pair (𝑥 (𝑚 ), 𝐳 (𝑚 )) consists of the raw subsequence and its corresponding feature vector. For a dataset containing 𝑁 signals {𝑥 𝑖 }𝑁 𝑖 =1 , the complete augmented representation is given by ̃
+
+ =
+
+{̃𝑥 𝑖 
+
+}𝑁 𝑖 =1 =
+
+{(𝑥 (𝑚 ) 
+
+> 𝑖
+
+, 𝐳 (𝑚 )
+
+> 𝑖
+
+)}𝑁, 𝑀 𝑖 
+
+> 𝑖 =1 ,𝑚 =1
+
+, (25) where 𝑀 𝑖 = ⌊𝑇 𝑖 ∕𝑤 ⌋ is the number of windows for the 𝑖 -th signal. After segmentation and feature extraction, each signal 𝑥 (𝜂 ) 
+
+> 𝑖
+
+or 𝑥 (𝛿 𝑘 ) 
+
+> 𝑖
+
+is transformed into an augmented rep-resentation ̃𝑥 (⋅) 
+
+> 𝑖
+
+=
+
+{(𝑥 (𝑚 ) 
+
+> 𝑖
+
+, 𝐳 (𝑚 )
+
+> 𝑖
+
+)}𝑀 𝑖 
+
+> 𝑚 =1
+
+,
+
+where 𝑥 (𝑚 ) 
+
+> 𝑖
+
+denotes the 𝑚 -th subsequence of the 𝑖 -th signal, and 𝐳 (𝑚 ) 
+
+> 𝑖
+
+∈ ℝ6 is the corresponding feature vector. Thus, the original datasets 
+
+𝜂 =
+
+{
+
+𝑥 (𝜂 )
+
+> 𝑖
+
+}𝑛 𝜂 
+
+> 𝑖 =1
+
+, 𝛿 𝑘 =
+
+{
+
+𝑥 (𝛿 𝑘 )
+
+> 𝑖
+
+}𝑛 𝛿 𝑘 
+
+> 𝑖 =1
+
+, 𝑘 = 1 , 2, 3, 4
+
+are transformed into the augmented datasets ̃𝜂 =
+
+{̃𝑥 (𝜂 )
+
+> 𝑖
+
+}𝑛 𝜂 
+
+> 𝑖 =1
+
+,̃ 𝛿 𝑘 =
+
+{̃𝑥 (𝛿 𝑘 )
+
+> 𝑖
+
+}𝑛 𝛿 𝑘 
+
+> 𝑖 =1
+
+, 𝑘 = 1 , 2, 3, 4,
+
+where each ̃𝑥 (⋅) 
+
+> 𝑖
+
+contains both the time–domain subsequences and their associated feature vectors. The following figure shows the transformed signal as an example. 
+
+3.4. Neural Network-Based Classification 
+
+We consider the five-class signal classification problem, where each signal sequence belongs to one of the experi-mental cases ( 𝜂, 𝛿 1, 𝛿 2, 𝛿 3, 𝛿 4). The training dataset is given by 
+
+{( 𝑍 𝑖 , 𝑦 𝑖 )} 𝑁 𝑖 =1 , 𝑦 𝑖 ∈ {0 , 1, 2, 3, 4} , (26) where 𝑍 𝑖 = {𝑧 (𝑚 ) 
+
+> 𝑖
+
+}𝑀 𝑖  
+
+> 𝑚 =1
+
+represents the extracted feature sequence for the 𝑖 -th sample, and 𝑦 𝑖 is its ground-truth class label. We have applied a comprehensive set of 14 algorithms spanning both deep learning and traditional machine learn-ing approaches. The deep learning models include Bi-GRU (Schuster and Paliwal, 1997), Bi-LSTM (Hochre-iter and Schmidhuber, 1997), CNN (LeCun et al., 1998), GRU (Cho et al., 2014), LSTM (Hochreiter and Schmidhu-ber, 1997), TCN (Bai et al., 2018), and Transformer (Vaswani et al., 2017). For comparison, we also implemented classical machine learning methods, namely Decision Tree (Quinlan, 1993), Gaussian Naïve Bayes (NB) (Russell and Norvig, 2010), K-Nearest Neighbors (KNN) (Russell and Norvig, 2010), LightGBM (Ke et al., 2017), Logistic Regression (Log. Reg.) (Cox, 1958), Random Forest (Breiman, 2001), and Support Vector Machine (SVM) (Cortes and Vapnik, 1995). Among these, we provide a detailed explanation of the LSTM (Long Short-Term Memory) (Hochreiter and Schmidhuber, 1997) case to illustrate the methodology. 
+
+3.4.1. Sequence Encoding via LSTM 
+
+Each feature sequence 𝑍 𝑖 is passed through an LSTM encoder parameterized by 𝜃 enc :
+
+{ℎ𝑚 }𝑀 𝑖  
+
+> 𝑚 =1
+
+= LSTM( 𝑍 𝑖 ; 𝜃 enc ), (27) where ℎ𝑚 denotes the hidden state at time step 𝑚 . To obtain a fixed-dimensional representation, we use either the last hidden state 
+
+𝑠 𝑖 = ℎ𝑀 𝑖 , (28) 
+
+This manuscript is a preprint version prepared prior to journal submission. Page 7 of 15 Hybrid Spectro–Temporal Fusion Framework for Structural Health Monitoring 
+
+or an attention-pooled representation 
+
+𝑠 𝑖 =
+
+> 𝑀 𝑖
+
+∑
+
+> 𝑚 =1
+
+𝛼 𝑚 ℎ𝑚 , 𝛼 𝑚 = exp( 𝑢 𝑚 )
+
+∑𝑀 𝑖  
+
+> 𝑗 =1
+
+exp( 𝑢 𝑗 )
+
+, (29) where 𝛼 𝑚 are normalized attention weights. 
+
+3.4.2. Projection to Class Space 
+
+The sequence embedding 𝑠 𝑖 ∈ ℝ𝑑 is projected into a five-dimensional logit vector: 
+
+𝓁 𝑖 = 𝑊 𝑜 𝑠 𝑖 + 𝑏 𝑜 , 𝓁 𝑖 ∈ ℝ5, (30) where 𝑊 𝑜 ∈ ℝ5× 𝑑 and 𝑏 𝑜 ∈ ℝ5.
+
+3.4.3. Softmax Probability Distribution 
+
+Class probabilities are obtained via the softmax function: 
+
+𝑝 (𝑐 ) 
+
+> 𝑖
+
+= exp( 𝓁 (𝑐 ) 
+
+> 𝑖
+
+)
+
+∑4 
+
+> 𝑘 =0
+
+exp( 𝓁 (𝑘 ) 
+
+> 𝑖
+
+) , 𝑐 = 0 , … , 4. (31) 
+
+3.4.4. Training Objective 
+
+The classification loss for sample 𝑖 is the cross-entropy: 
+
+𝐿 𝑖 = − 
+
+> 4
+
+∑
+
+> 𝑐 =0
+
+𝑦 (𝑐 ) 
+
+> 𝑖
+
+log 𝑝 (𝑐 ) 
+
+> 𝑖
+
+, (32) where 𝑦 (𝑐 ) 
+
+> 𝑖
+
+is a one-hot encoding of the true class. The overall objective with 𝓁 2 regularization is 
+
+(𝜃 ) = 1
+
+𝑁 
+
+> 𝑁
+
+∑
+
+> 𝑖 =1
+
+𝐿 𝑖 + 𝜆 ‖𝜃 ‖22, (33) where 𝜆 controls the weight decay. 
+
+3.4.5. Optimization and Inference 
+
+The model parameters 𝜃 = { 𝜃 enc , 𝑊 𝑜 , 𝑏 𝑜 } are optimized via stochastic gradient descent or Adam: 
+
+𝜃 ← 𝜃 − 𝜂 ∇𝜃 (𝜃 ), (34) with learning rate 𝜂 . At inference time, the predicted class label is obtained as ̂𝑦 𝑖 = arg max  
+
+> 𝑐 ∈{0 ,1,2,3,4}
+
+𝑝 (𝑐 ) 
+
+> 𝑖
+
+. (35) 
+
+## 4. Experimental Results 
+
+4.1. Device Setup 
+
+A laser displacement sensor (optoNCDT 1420, Micro-Epsilon) was employed to measure the time response of a 3D-printed PLA cantilever beam (108 mm × 25 mm × 3 mm) subjected to random vibration excitation. The beam’s re-sponse was sampled at a rate of 4 kHz, while the random input from the shaker was measured via an accelerometer (352C33, PCB Piezotronics) mounted on the shaker, with a sampling rate of 1 kHz. 
+
+Algorithm 1 Segmentation, Feature Extraction, and Dataset Augmentation 
+
+Require: 𝜂, {𝛿 𝑘 }4
+
+> 𝑘 =1
+
+, 𝑤, Φ
+
+Ensure: ̃𝜂, {̃ 𝛿 𝑘 }, {𝑖 } 
+
+> 1:
+
+for all 𝐶 ∈ { 𝜂, 𝛿 1, 𝛿 2, 𝛿 3, 𝛿 4} do  
+
+> 2:
+
+for all signals 𝑥 (𝐶 ) 
+
+> 𝑖
+
+= {( 𝑡 𝑗 , 𝑢 𝑗 )} 𝑇 𝑖  
+
+> 𝑗 =1
+
+do  
+
+> 3:
+
+𝑀 𝑖 ← ⌊𝑇 𝑖 ∕𝑤 ⌋
+
+> 4:
+
+̃ 𝑥 (𝐶 ) 
+
+> 𝑖
+
+← ∅, 𝑖 ← ∅ 
+
+> 5:
+
+for 𝑚 = 1 to 𝑀 𝑖 do  
+
+> 6:
+
+𝑥 (𝑚 ) 
+
+> 𝑖
+
+← {( 𝑡 𝑗 , 𝑢 𝑗 )} 𝑚𝑤 𝑗 =( 𝑚 −1) 𝑤 +1  
+
+> 7:
+
+𝐳 (𝑚 ) 
+
+> 𝑖
+
+← Φ(𝑥 (𝑚 )
+
+> 𝑖
+
+) 
+
+> 8:
+
+append (𝑥 (𝑚 ) 
+
+> 𝑖
+
+, 𝐳 (𝑚 )
+
+> 𝑖
+
+) to ̃𝑥 (𝐶 ) 
+
+> 𝑖
+> 9:
+
+append 𝐳 (𝑚 ) 
+
+> 𝑖
+
+to 𝑖  
+
+> 10:
+
+end for  
+
+> 11:
+
+append ̃𝑥 (𝐶 ) 
+
+> 𝑖
+
+to ̃ 𝐶  
+
+> 12:
+
+end for  
+
+> 13:
+
+end for  
+
+> 14:
+
+return ̃𝜂,̃ 𝛿 1, … ,̃ 𝛿 4
+
+Algorithm 2 Five-Class Signal Classification with LSTM 
+
+Require: Training dataset {( 𝑍 𝑖 , 𝑦 𝑖 )} 𝑁 𝑖 =1 , with 𝑍 𝑖 ={𝑧 (𝑚 ) 
+
+> 𝑖
+
+}𝑀 𝑖 
+
+> 𝑚 =1
+
+, 𝑦 𝑖 ∈ {0 , 1, 2, 3, 4} ; LSTM parameters 𝜃 enc ;classifier parameters (𝑊 𝑜 , 𝑏 𝑜 ).
+
+Ensure: Trained parameters 𝜃 = {𝜃 enc , 𝑊 𝑜 , 𝑏 𝑜 }; predic-tions {̂𝑦 𝑖 }. 
+
+> 1:
+
+for epoch = 1 to 𝐸 do  
+
+> 2:
+
+for each sequence 𝑍 𝑖 do  
+
+> 3:
+
+Encoding: {ℎ𝑚 }𝑀 𝑖  
+
+> 𝑚 =1
+
+← LSTM( 𝑍 𝑖 ; 𝜃 enc ) 
+
+> 4:
+
+Obtain representation 𝑠 𝑖 ← ℎ𝑀 𝑖 (last hidden state or attention pooling)  
+
+> 5:
+
+Projection: 𝓁 𝑖 ← 𝑊 𝑜 𝑠 𝑖 + 𝑏 𝑜 ∈ ℝ5 
+
+> 6:
+
+Softmax: 𝑝 (𝑐 ) 
+
+> 𝑖
+
+← exp( 𝓁 (𝑐 )    
+
+> 𝑖 )
+> ∑4
+> 𝑘 =0 exp( 𝓁 (𝑘 )
+> 𝑖 )
+> 7:
+
+Loss: 𝐿 𝑖 ← − ∑4 
+
+> 𝑐 =0
+
+𝑦 (𝑐 ) 
+
+> 𝑖
+
+log 𝑝 (𝑐 ) 
+
+> 𝑖
+> 8:
+
+end for  
+
+> 9:
+
+Parameter Update: 𝜃 ← 𝜃 − 𝜂 ∇𝜃 
+
+( 1
+
+> 𝑁
+
+∑𝑁 𝑖 =1 𝐿 𝑖 +
+
+𝜆 ‖𝜃 ‖22
+
+) 
+
+> 10:
+
+end for  
+
+> 11:
+
+for 𝑖 = 1 , … , 𝑁 do  
+
+> 12:
+
+Prediction: ̂𝑦 𝑖 ← arg max 𝑐 ∈{0 ,1,2,3,4} 𝑝 (𝑐 ) 
+
+> 𝑖
+> 13:
+
+end for  
+
+> 14:
+
+return 𝜃, {̂𝑦 𝑖 }
+
+4.2. Implementation Details 
+
+All experiments were conducted on a Lambda Worksta-tion connected to a local area network with a 1000 Mbps network speed. The workstation was equipped with two NVIDIA RTX 3090 GPUs, an Intel Core i9-10980XE CPU (18 cores), 256 GB of memory, and ran on Ubuntu 12.04. For application development, we employed the PyCharm Integrated Development Environment (IDE), which pro-vides seamless integration with the pip3 utility required for Python-based development. 
+
+This manuscript is a preprint version prepared prior to journal submission. Page 8 of 15 Hybrid Spectro–Temporal Fusion Framework for Structural Health Monitoring 
+
+Figure 4: Experimental setup for vibration testing. The PLA can-tilever beam (right) is mounted on a fixture driven by an LDS V406 shaker (background). A 7.4 g mass is installed in Position 4 to emulate a defect and shift resonance. A laser displacement sensor (optoNCDT 1420) measures tip displacement, while the shaker input is monitored via an accelerometer mounted on the shaker (not shown in labels). 
+
+4.3. Dataset Generation 
+
+A test beam was fabricated using additive manufacturing with a vertical orientation, 0.2 mm layer height, and 100% infill density to ensure structural uniformity. To introduce controlled defect conditions, four holes of 6.25 mm diameter were drilled along the beam at intervals of approximately 26 mm, and in separate experiments, a 7.4 g mass was placed in each hole to emulate localized stiffness and mass variations, generating four defect cases ( 𝛿 1–𝛿 4). Together with the pristine beam ( 𝜂 ), five test cases were considered in total. The beam was excited by a shaker under broadband random vibration, while a laser displacement sensor (4 kHz) measured the beam tip displacement and an accelerometer (1 kHz) recorded the shaker input. Each trial lasted about 10 s, yielding multiple signal segments that were processed in both time and displacement domains to extract dynamic features sensitive to defect conditions, with representative plots provided in Fig. 13 in Appendix. 
+
+4.4. Baseline Approach (Original Data Set) 
+
+During the baseline evaluation, the original dataset was tested without any preprocessing or alignment. The details of the experimental setup used for running the code are sum-marized in Table I. Both traditional machine learning models and recent deep learning approaches were applied directly to the raw signals, providing a reference point against which the accuracy gains of the proposed Spectro-Temporal methods could be measured. In all evaluations, five-fold cross-validation ( 𝑘 = 5)was employed. The choice of five folds reflects a balance between computational efficiency and reliable estimation of generalization performance, ensuring that every subset of the dataset was systematically used for both training and validation. Interestingly, while recent deep learning models (e.g., Bi-GRU, Bi-LSTM, CNN, TCN) exhibited poor predictive 
+
+Table 2 
+
+Experimental Setup Parameters 
+
+Parameter Value Explanation 
+
+Timesteps 24 Each input sequence spans 24 time points. 
+
+𝑛 _𝑠𝑝𝑙𝑖𝑡𝑠 5 Number of cross-validation folds . win_dur_ratio 0.04 Window duration ratio r. sampling_ratio 0.3 20% of the available data. start_row_index 4000 where sequence ex-traction begins. 
+
+Table 3 Baseline - Original Dataset (5-fold). Rows in bold indicate models achieving strong performance across all metrics (Accu-racy, Macro-F1, Macro-AUC ≥ 0.95 ).                                                                                                                                  
+
+> Model Accuracy Macro-F1 Macro-AUC
+> Bi-GRU 0.442 ±0.022 0.350 ±0.030 0.766 ±0.010 Bi-LSTM 0.436 ±0.030 0.317 ±0.049 0.775 ±0.042 CNN 0.432 ±0.011 0.361 ±0.007 0.723 ±0.011 GRU 0.421 ±0.022 0.299 ±0.063 0.764 ±0.028 LSTM 0.416 ±0.027 0.315 ±0.025 0.739 ±0.043 TCN 0.427 ±0.017 0.327 ±0.027 0.766 ±0.005 Trans. 0.508 ±0.032 0.423 ±0.038 0.832 ±0.035 DT 0.859 ±0.012 0.858 ±0.012 0.912 ±0.007 GNB 0.776 ±0.017 0.775 ±0.018 0.946 ±0.005 KNN 0.906 ±0.004 0.906 ±0.004 0.988 ±0.001
+> LGBM 0.958 ±0.004 0.958 ±0.004 0.998 ±0.001
+> LR 0.820 ±0.013 0.819 ±0.013 0.961 ±0.003
+> RF 0.954 ±0.005 0.954 ±0.005 0.998 ±0.000
+> SVM 0.795 ±0.009 0.784 ±0.009 0.962 ±0.003
+
+performance on the original dataset, several traditional clas-sifiers (e.g., RF, LGBM) achieved consistently high accu-racy, Macro-F1, and Macro-AUC ( ≥ 0.95 ), suggesting a dataset bias or representational inefficiency that hinders deep architectures but favors simpler models. 
+
+4.5. Optimal Interval Selection ( Δ𝜏 )
+
+Accurate selection of the sampling interval ( Δ𝜏 ) is cru-cial for time–series signal classification because it governs the balance between capturing informative temporal varia-tions and avoiding redundancy from oversampling. If Δ𝜏 is too small, the signal features become highly redundant, in-flating computational cost without improving discriminative power. Conversely, if Δ𝜏 is too large, important transient fea-tures may be lost, leading to poor classification performance. To address this, we systematically analyzed the objective function 𝑆 (Δ 𝜏 ) across different classes, identifying class-specific trade-offs between temporal resolution and feature relevance. By comparing “best” (accuracy-maximizing) and “knee” (efficiency-driven) interval choices, we derived com-mon optimal intervals that robustly preserve the informative classes ( 𝛿 1–𝛿 3) while minimizing redundancy, as illustrated in Fig. 5, 6 and summarized in Table 4. In Fig. 5, Objective function 𝑆 (Δ 𝜏 ) across classes healty and damaged ( 𝜇, 𝛿 1, 𝛿 2, 𝛿 3, 𝛿 4). Each curve depicts class-specific performance as a function of Δ𝜏 , with vertical dashed lines marking the estimated optimal values. The plot 
+
+This manuscript is a preprint version prepared prior to journal submission. Page 9 of 15 Hybrid Spectro–Temporal Fusion Framework for Structural Health Monitoring 
+
+Table 4 
+
+Time Interval Parameters ( 𝜏 ) and Accuracy ( 𝑆 ⋆) for Multi-Class Signal Classification.                         
+
+> Label Nyquist_dt_s Best_tau_s Knee_tau_s 𝑆 ⋆
+> 𝜇 0.007 0.021 0.007 0.507
+> 𝛿 10.007 0.020 0.010 0.491
+> 𝛿 20.007 0.020 0.007 0.523
+> 𝛿 30.007 0.018 0.008 0.563
+> 𝛿 40.007 0.019 0.008 0.581
+
+highlights how different classes respond to temporal reso-lution, revealing varying trade-offs between discriminative gain and redundancy. Fig. 6. Classification accuracy ( 𝑆 ∗)versus optimal lag ( 𝜏 ). Best lag ( 𝜏 ∗) values appear scattered across larger 𝜏 ,while knee lag ( 𝜏 𝑘 ) values cluster tightly at smaller 𝜏 , in-dicating that 𝜏 𝑘 yields a more compact and stable character-ization of time-dependent dynamics. Table III summarizes the optimal time interval parameters (𝜏 ) and the resulting classification accuracy ( 𝑆 ∗) for the multi-class signal dataset. The most informative classes, 𝛿 2–
+
+𝛿 4, yield the highest accuracies ( 𝑆 ∗ ≈ 0.52 –0.58) with 
+
+𝜏 best values in the range of 18–20 ms. In contrast, 𝜇 and 
+
+𝛿 1 achieve comparatively lower accuracies ( 𝑆 ∗ ≈ 0.49 –0.51), despite similar time lag parameters. These findings indicate that compact intervals around 18–20 ms provide stable discriminative performance, while class 𝜇 contributes less effectively to the overall classification. 
+
+Figure 5: Objective function 𝑆 (Δ 𝜏 ) across healthy and damaged classes ( 𝜇 , 𝛿 1–𝛿 4), showing class-specific performance and esti-mated optimal time intervals. 
+
+Let  = 𝜇, 𝛿 1, 𝛿 2, 𝛿 3, 𝛿 4 denote all classes. For 𝑐 ∈ ,let 𝜏 best  
+
+> 𝑐
+
+be the accuracy–maximizing interval ( s), 𝑆 ∗ 
+
+> 𝑐
+
+the corresponding accuracy, and 𝜏 knee  
+
+> 𝑐
+
+the knee time. 
+
+(1) Accuracy-driven (Best-𝜏 ). Define the 𝑆 ∗–weighted common interval 
+
+𝜏 common ∗ best =
+
+∑ ∗ 𝑐 ∈ 𝑆 ∗ 
+
+> 𝑐
+
+, 𝜏 best ∗ 𝑐 
+
+∑ ∗ 𝑐 ∈ 𝑆 ∗
+
+> 𝑐
+
+. (36) With 
+
+(𝜏 best  
+
+> 𝜇
+
+, 𝑆 ∗ 
+
+> 𝜇
+
+) = (0 .021 , 0.507) , (𝜏 best  
+
+> 𝛿 1
+
+, 𝑆 ∗ 
+
+> 𝛿 1
+
+) = (0 .020 , 0.491) ,
+
+(𝜏 best  
+
+> 𝛿 2
+
+, 𝑆 ∗ 
+
+> 𝛿 2
+
+) = (0 .020 , 0.523) , (𝜏 best  
+
+> 𝛿 3
+
+, 𝑆 ∗ 
+
+> 𝛿 3
+
+) = (0 .018 , 0.563) ,
+
+(𝜏 best  
+
+> 𝛿 4
+
+, 𝑆 ∗ 
+
+> 𝛿 4
+
+) = (0 .019 , 0.581) ,
+
+we obtain 
+
+𝜏 common best =
+
+∑𝑐 ∈{ 𝜇,𝛿 1,…,𝛿 4} 𝑆 ∗ 
+
+> 𝑐
+
+𝜏 best 
+
+> 𝑐
+
+∑𝑐 ∈{ 𝜇,𝛿 1,…,𝛿 4} 𝑆 ∗
+
+> 𝑐
+
+= 0 .0196 s (≈ 𝟎 .𝟎𝟐 s = 20 ms) .
+
+(2) Efficiency-driven (Knee-𝜏 ). Analogously, 
+
+𝜏 common knee =
+
+∑𝑐 ∈ 𝑆 ∗ 
+
+> 𝑐
+
+𝜏 knee 
+
+> 𝑐
+
+∑𝑐 ∈ 𝑆 ∗
+
+> 𝑐
+
+. (37) 
+
+𝜏 common knee =
+
+∑𝑐 ∈{ 𝜇,𝛿 1,…,𝛿 4} 𝑆 ∗ 
+
+> 𝑐
+
+𝜏 knee 
+
+> 𝑐
+
+∑𝑐 ∈{ 𝜇,𝛿 1,…,𝛿 4} 𝑆 ∗
+
+> 𝑐
+
+= 0 .00798 s (≈ 𝟎 .𝟎𝟎𝟖 s = 8 ms) .
+
+Constraint. Sampling must satisfy 
+
+𝜏 ≥ max  
+
+> 𝑐 ∈
+
+{Nyquist_dt_s (𝑐 )} . (38) 
+
+Figure 6: Classification accuracy ( 𝑆 ∗) versus optimal lag ( 𝜏 ). Best lag ( 𝜏 ∗) exhibits a scattered distribution across larger values, whereas knee lag ( 𝜏 𝑘 ) forms a dense cluster at smaller values, indi-cating that 𝜏 𝑘 provides a more stable and compact characterization of time-dependent dynamics. 
+
+4.6. Spectro–Temporal Alignment (STA) 
+
+In the spectro-temporal approach, the value of Δ𝜏 was sampled using two criteria: the common knee interval and the best common interval . These sampled values were then used for subsequent machine learning experiments, and val-idation was performed based on five-fold cross-validation. Five-fold validation was chosen because it provides a good balance between computational efficiency and reliable es-timation of generalization performance, ensuring that each subset of the data is used for both training and validation in a systematic manner. 
+
+4.6.1. STA – Best Common ( 𝜏 best common ,Δ𝜏 = 0 .02 s )
+
+Deep learning models (Bi-GRU, Bi-LSTM, GRU, LSTM, TCN, Transformer) deliver near-perfect performance ( ≥
+
+0.95 across all metrics). GNB, LightGBM, and RF also perform strongly, while CNN and SVM achieve high AUC but slightly lower Accuracy and F1. Traditional models (Decision Tree, KNN, LR) lag behind, showing clear lim-itations. 
+
+This manuscript is a preprint version prepared prior to journal submission. Page 10 of 15 Hybrid Spectro–Temporal Fusion Framework for Structural Health Monitoring 
+
+Table 5 
+
+STA at 𝜏 = 0 .02 s. Bolded values indicate models achieving strong performance across all metrics (Accuracy, Macro-F1, Macro-AUC ≥ 0.95 ).                                                                                                                                  
+
+> Model Accuracy Macro-F1 Macro-AUC Bi-GRU 1.000 ±0.000 1.000 ±0.000 1.000 ±0.000
+> Bi-LSTM 1.000 ±0.000 1.000 ±0.000 1.000 ±0.000
+> CNN 0.941 ±0.030 0.940 ±0.032 0.997 ±0.002
+> GRU 1.000 ±0.000 1.000 ±0.000 1.000 ±0.000
+> LSTM 0.998 ±0.002 0.998 ±0.002 1.000 ±0.000
+> TCN 0.995 ±0.010 0.995 ±0.010 1.000 ±0.000
+> Transformer 1.000 ±0.000 1.000 ±0.000 1.000 ±0.000
+> Decision Tree 0.718 ±0.015 0.717 ±0.015 0.824 ±0.009 GNB 0.990 ±0.003 0.990 ±0.003 0.999 ±0.000
+> KNN 0.685 ±0.008 0.631 ±0.009 0.859 ±0.008 LightGBM 0.997 ±0.003 0.997 ±0.003 1.000 ±0.000
+> LR 0.814 ±0.023 0.814 ±0.024 0.961 ±0.003 RF 0.990 ±0.006 0.990 ±0.006 1.000 ±0.000
+> SVM 0.925 ±0.031 0.921 ±0.033 0.998 ±0.001
+
+Table 6 
+
+STA at 𝜏 = 0 .008 s. Bold rows indicate models with all metrics (Accuracy, Macro-F1, Macro-AUC ≥ 0.95 ).                                                                                                                                  
+
+> Model Accuracy Macro-F1 Macro-AUC
+> Bi-GRU 0.991 ±0.007 0.991 ±0.007 1.000 ±0.000
+> Bi-LSTM 0.946 ±0.043 0.945 ±0.045 0.995 ±0.005 CNN 0.903 ±0.018 0.902 ±0.018 0.991 ±0.003
+> GRU 0.984 ±0.008 0.984 ±0.008 0.999 ±0.001 LSTM 0.977 ±0.007 0.977 ±0.007 0.999 ±0.000 TCN 1.000 ±0.000 1.000 ±0.000 1.000 ±0.000 Transformer 0.999 ±0.002 0.999 ±0.002 1.000 ±0.000
+> DT 0.683 ±0.007 0.683 ±0.007 0.802 ±0.004
+> GNB 0.965 ±0.007 0.965 ±0.007 0.996 ±0.001
+> KNN 0.685 ±0.011 0.633 ±0.013 0.882 ±0.008
+> LGBM 0.966 ±0.007 0.966 ±0.007 0.998 ±0.001
+> LR 0.834 ±0.017 0.833 ±0.016 0.964 ±0.004
+> RF 0.951 ±0.008 0.951 ±0.008 0.995 ±0.001
+> SVM 0.912 ±0.006 0.908 ±0.007 0.995 ±0.001
+
+4.6.2. STA - Best Common Interval (𝜏 best common , Δ𝜏 = 0 .008 s )
+
+Deep learning models (Bi-GRU, GRU, LSTM, TCN, Transformer) achieve consistently strong performance with all metrics ≥ 0.95 . GNB, LGBM, and RF also perform well, while Bi-LSTM and SVM fall slightly short in Accuracy and F1. DT, KNN, and LR perform the weakest. 
+
+4.7. Hybrid Spectro-Temporal Fusion (HSTF) 
+
+Through the Spectro-Temporal Alignment (STA), we demonstrated that preserving the intrinsic characteristics of signals requires careful sampling, and this objective was successfully achieved. To further enhance the model’s performance, we additionally propose the Hybrid Spectro-Temporal Fusion (HSTF) approach. In this method, each time-frame segment is augmented with six features ( 𝑧 1–𝑧 6)extracted from the Short-Time Fourier Transform (STFT), which contributes to improved discriminative power and classification accuracy. 
+
+4.7.1. HSTF – Best Common ( 𝜏 best common , Δ𝜏 = 0 .02 s )
+
+Table VIII presents the performance of the proposed HSTF framework with the best sampling parameter ( Δ𝑇 =0.02 s). Deep learning models (Bi-GRU, Bi-LSTM, GRU, LSTM, TCN, Transformer) achieve near-perfect performance with all metrics ≥ 0.95 , confirming their robustness and consis-tency. Among classical models, LGBM and RF also meet the 
+
+Table 7 
+
+Model Performance Results – Spectro-Temporal Hybrid at 
+
+𝜏 = 0 .02 s. Bold entries highlight models with all metrics 
+
+≥ 0.95 .                                                                                                                                 
+
+> Model Accuracy Macro-F1 Macro-AUC
+> Bi-GRU 1.000 ±0.000 1.000 ±0.000 1.000 ±0.000 Bi-LSTM 0.998 ±0.002 0.998 ±0.002 1.000 ±0.000
+> CNN 0.946 ±0.039 0.945 ±0.041 0.997 ±0.004
+> GRU 1.000 ±0.000 1.000 ±0.000 1.000 ±0.000 LSTM 0.988 ±0.011 0.988 ±0.011 1.000 ±0.000 TCN 1.000 ±0.000 1.000 ±0.000 1.000 ±0.000 Trans. 1.000 ±0.000 1.000 ±0.000 1.000 ±0.000
+> DT 0.914 ±0.015 0.914 ±0.015 0.946 ±0.009 GNB 0.864 ±0.016 0.865 ±0.015 0.970 ±0.005 KNN 0.917 ±0.011 0.919 ±0.010 0.989 ±0.005
+> LGBM 0.997 ±0.003 0.997 ±0.003 1.000 ±0.000
+> LR 0.767 ±0.029 0.768 ±0.030 0.957 ±0.007
+> RF 0.994 ±0.008 0.994 ±0.008 1.000 ±0.000
+> SVM 0.916 ±0.017 0.913 ±0.019 0.994 ±0.003
+
+Table 8 
+
+Model Performance Results – Spectro-Temporal Hybrid (HSTF) at 𝜏 = 0 .008 s. Bold entries highlight models with all metrics ≥ 0.95 .                                                                                                                                 
+
+> Model Accuracy Macro-F1 Macro-AUC
+> Bi-GRU 1.000 ±0.000 1.000 ±0.000 1.000 ±0.000 Bi-LSTM 0.983 ±0.035 0.982 ±0.035 0.999 ±0.003 CNN 0.984 ±0.010 0.984 ±0.011 1.000 ±0.000 GRU 1.000 ±0.001 1.000 ±0.001 1.000 ±0.000 LSTM 0.975 ±0.030 0.975 ±0.030 0.998 ±0.004 TCN 0.999 ±0.001 0.999 ±0.001 1.000 ±0.000 Trans. 1.000 ±0.000 1.000 ±0.000 1.000 ±0.000
+> DT 0.891 ±0.014 0.891 ±0.014 0.932 ±0.009 GNB 0.872 ±0.014 0.871 ±0.014 0.964 ±0.008 KNN 0.904 ±0.008 0.905 ±0.007 0.991 ±0.002
+> LGBM 0.996 ±0.003 0.996 ±0.003 1.000 ±0.000
+> LR 0.872 ±0.015 0.872 ±0.015 0.974 ±0.005
+> RF 0.993 ±0.004 0.993 ±0.004 1.000 ±0.000
+> SVM 0.886 ±0.005 0.877 ±0.007 0.988 ±0.002
+
+≥ 0.95 threshold across all metrics. CNN and SVM reach strong AUC values but slightly underperform in Accuracy and F1. DT, GNB, KNN, and LR perform noticeably weaker, showing clear limitations for this task. 
+
+4.7.2. HSTF – Common Knee (𝜏 knee common , Δ𝜏 = 0 .008 s = 8 ms )
+
+Deep learning models (Bi-GRU, CNN, GRU, LSTM, TCN, Transformer) demonstrate consistently high performance with all metrics ≥ 0.95 , highlighting their robustness. Bi-LSTM also performs strongly but falls just below the thresh-old in Accuracy and F1. Among classical models, LGBM and RF reach strong performance across metrics, while DT, GNB, KNN, LR, and SVM lag behind, showing weaker results. 
+
+4.8. Model Stability Analysis 
+
+In Table XIII, Model stability was evaluated using four con-densed indices: Mean performance ( 𝜇 ), Standard Deviation (𝜎 ), Coefficient of Variation ( 𝐶𝑉 = 𝜎 𝜇 ), and a Balanced Score (BS). Mean reflects the overall predictive ability, Std Dev indicates variability across metrics (Acc, F1, AUC), CV normalizes this variability relative to the mean, and BS combines accuracy and stability into a single score. Based on these measures, the ranking of methods is: HSTF (0.008) 
+
+> HSTF (0.02) > STA (0.008) > STA (0.02) > Base . As shown in Fig. 7, HSTF methods consistently achieve higher 
+
+This manuscript is a preprint version prepared prior to journal submission. Page 11 of 15 Hybrid Spectro–Temporal Fusion Framework for Structural Health Monitoring 
+
+Table 9 
+
+Model stability comparison across Base, STA, and HSTF methods (5-fold). Values are Accuracy, Macro-F1, and Macro-AUC. Bold values indicate Higher scores (Accuracy, Macro-F1, Macro-AUC ≥ 0.95 ).                                                                                                                                                                                                                                                                                                  
+
+> Model Base STA (0.02) STA (0.008) HSTF (0.02) HSTF (0.008) Acc F1 AUC Acc F1 AUC Acc F1 AUC Acc F1 AUC Acc F1 AUC BiGRU 0.442 0.350 0.766 1.000 1.000 1.000 0.991 0.991 1.000 1.000 1.000 1.000 1.000 1.000 1.000
+> BiLSTM 0.436 0.317 0.775 1.000 1.000 1.000 0.946 0.945 0.995 0.998 0.998 1.000 0.983 0.982 0.999
+> CNN 0.432 0.361 0.723 0.941 0.940 0.997 0.903 0.902 0.997 0.946 0.945 0.997 0.984 0.984 1.000
+> GRU 0.421 0.299 0.764 1.000 1.000 1.000 0.984 0.984 0.999 1.000 1.000 1.000 1.000 1.000 1.000
+> LSTM 0.412 0.315 0.738 0.998 0.998 1.000 0.977 0.977 0.999 0.988 0.988 1.000 0.975 0.975 0.998
+> TCN 0.407 0.327 0.766 0.995 0.995 1.000 1.000 1.000 1.000 1.000 1.000 1.000 0.999 0.999 1.000
+> Transformer 0.508 0.423 0.832 1.000 1.000 1.000 0.999 0.999 1.000 1.000 1.000 1.000 1.000 1.000 1.000
+> DT 0.895 0.885 0.912 0.718 0.717 0.824 0.683 0.683 0.802 0.914 0.914 0.946 0.891 0.891 0.932 GNB 0.776 0.775 0.846 0.990 0.990 0.999 0.965 0.965 0.999 0.864 0.865 0.970 0.872 0.871 0.964 KNN 0.906 0.906 0.994 0.685 0.631 0.859 0.685 0.633 0.882 0.917 0.917 0.952 0.904 0.905 0.991 LGBM 0.958 0.958 0.998 0.997 0.997 1.000 0.966 0.966 0.998 0.997 0.997 1.000 0.996 0.996 1.000
+> LR 0.858 0.858 0.994 0.814 0.814 0.961 0.834 0.833 0.964 0.767 0.768 0.957 0.872 0.872 0.974 RF 0.954 0.954 0.986 0.993 0.993 1.000 0.951 0.951 0.995 0.994 0.994 1.000 0.993 0.994 1.000
+> SVM 0.795 0.784 0.962 0.925 0.921 0.998 0.912 0.908 0.995 0.916 0.913 0.994 0.886 0.877 0.988
+> Mean 0.657 0.608 0.861 0.933 0.928 0.974 0.914 0.910 0.973 0.950 0.950 0.987 0.954 0.953 0.989 Std Dev 0.226 0.272 0.104 0.107 0.116 0.055 0.103 0.112 0.056 0.067 0.067 0.020 0.052 0.053 0.019
+> CV 0.344 0.447 0.121 0.114 0.125 0.057 0.113 0.123 0.058 0.070 0.070 0.020 0.055 0.056 0.019
+> Balanced Score 0.431 0.336 0.757 0.826 0.812 0.919 0.811 0.798 0.917 0.883 0.883 0.967 0.902 0.900 0.970
+
+(a) Comparison of Mean, Std Dev, CV, and Balanced Score across Base, STA, and HSTF methods. Higher Mean and Balanced Score indicate better overall performance, while lower Std Dev and CV represent more stable models. 
+
+(b) Radar plot of CV values (Accuracy, F1, AUC) across Base, STA, and HSTF methods. Smaller enclosed areas correspond to lower variability and higher model stability. 
+
+Figure 7 
+
+Model stability comparison across methods. 
+
+Mean and BS while maintaining lower Std Dev and CV, demonstrating both superior accuracy and stability com-pared to Base and STA. 
+
+## 5. Conclusion 
+
+This study proposed a Hybrid Spectro–Temporal Fusion (HSTF) framework for vibration-based Structural Health Monitoring (SHM). The baseline models achieved only moderate performance (Acc = 0.657 , F1 = 0.608 , AUC = 
+
+0.861 ) and exhibited high variability (CV = 0.344 ), indicat-ing instability. In contrast, both STA(0.02) and STA(0.008) substantially improved accuracy and stability (Acc ≈ 0 .91 –
+
+0.93 , CV ≈ 0 .11 ), with STA(0.02) slightly outperforming STA(0.008). Among all methods, the HSTF framework achieved the strongest balance: HSTF(0.02) yielded the lowest variability (CV = 0.037 ), while HSTF(0.008) at-tained the highest Balanced Score ( 0.902 ). The consistent progression from Base → STA → HSTF demonstrates that HSTF not only enhances accuracy but also ensures balanced and reliable performance across metrics, confirming its effectiveness as a robust solution for multi-class vibration-based SHM. 
+
+## References 
+
+Abellán, J., Castellano, J.G., Ríos, M., 2021. Analysis of the impact of class overlap on classification performance. Pattern Recognition 117, 107999. doi: 10.1016/j.patcog.2021.107999 .Antoni, J., 2006. The spectral kurtosis: A useful tool for characterising non-stationary signals. Mechanical Systems and Signal Processing 20, 282–307. doi: 10.1016/j.ymssp.2004.09.001 .Avci, O., Abdeljaber, O., Kiranyaz, S., Hussein, M., Gabbouj, M., Inman, D.J., 2020a. A review of vibration-based damage detection in civil structures: From traditional methods to machine learning and deep learning applications. Mechanical Systems and Signal Processing 147, 107077. doi: 10.1016/j.ymssp.2020.107077 .
+
+This manuscript is a preprint version prepared prior to journal submission. Page 12 of 15 Hybrid Spectro–Temporal Fusion Framework for Structural Health Monitoring 
+
+Avci, O., Abdeljaber, S.O., Ince, Y., Hayalioglu, S., Tufekci, I.N., Soysal, O., 2020b. Structural health monitoring: Current status and perspectives. Mechanical Systems and Signal Processing 138, 106608. URL: https://doi.org/10.1016/j.ymssp.2019.106608 , doi: 10. 1016/j.ymssp.2019.106608 .Bai, S., Kolter, J.Z., Koltun, V., 2018. An empirical evaluation of generic convolutional and recurrent networks for sequence modeling. arXiv preprint arXiv:1803.01271 URL: https://arxiv.org/abs/1803.01271 .Bandt, C., Pompe, B., 2002. Permutation entropy: A natural complexity measure for time series. Physical Review Letters 88, 174102. doi: 10. 1103/PhysRevLett.88.174102 .Bao, X., Xu, Y., Kamavuako, E.N., 2022. The effect of signal duration on the classification of heart sounds: A deep learning approach. Sensors 22, 2261. doi: 10.3390/s22062261 .Benfenati, L., Pagliari, D.J., Zanatta, L., Velez, Y.A.B., Acquaviva, A., Poncino, M., Macii, E., Benini, L., Burrello, A., 2025. Foundation mod-els for structural health monitoring. IEEE Transactions on Sustainable Computing . Breiman, L., 2001. Random forests. Machine Learning 45, 5–32. doi: 10. 1023/A:1010933404324 .Cho, K., Van Merriënboer, B., Gulcehre, C., Bahdanau, D., Bougares, F., Schwenk, H., Bengio, Y., 2014. Learning phrase representations using rnn encoder–decoder for statistical machine translation. arXiv preprint arXiv:1406.1078 URL: https://arxiv.org/abs/1406.1078 .Cohen, L., 1995. Time-Frequency Analysis. Prentice Hall. Cortes, C., Vapnik, V., 1995. Support-vector networks. Machine Learning 20, 273–297. doi: 10.1007/BF00994018 .Cox, D.R., 1958. The regression analysis of binary sequences. Journal of the Royal Statistical Society: Series B 20, 215–232. Dai, J., et al., 2018. Sub-nyquist sampling for sparse signals: A review. IEEE Access 6, 55153–55170. doi: 10.1109/ACCESS.2018.2871324 .Devroye, L., Györfi, L., Lugosi, G., 1996. A Probabilistic Theory of Pattern Recognition. Springer. Fan, G., et al., 2020. Vibration signal denoising for structural health monitoring using residual convolutional neural networks. Mechanical Systems and Signal Processing doi: 10.1016/j.ymssp.2020.107077 .Fang, C., Jiao, Y., Wang, X., Lu, T., Gu, H., 2024. A dam displacement prediction method based on a model combining random forest, a con-volutional neural network, and a residual attention informer. Water 16, 3687. doi: 10.3390/w16243687 .Fisher, R.A., 1925. Statistical methods for research workers. Oliver and Boyd, Edinburgh. Original derivation of the Analysis of Variance (ANOVA) and the F-statistic logic. Fukunaga, K., 1990. Introduction to Statistical Pattern Recognition. 2 ed., Academic Press. Ghosh, S., Patel, M., 2021. Anova-based feature selection for time-series classification. Statistical Methods in Data Science 12, 89–102. Gomez-Cabrera, A., Escamilla-Ambrosio, P.J., 2022. Review of machine-learning techniques applied to structural health monitoring systems for building and bridge structures. Applied Sciences 12, 10754. He, Y., Huang, P., Hong, W., Luo, Q., Li, L., Tsui, K.L., 2024. In-depth insights into the application of recurrent neural networks (rnns) in traffic prediction: A comprehensive review. Algorithms 17, 398. doi: 10.3390/a17090398 .Hermiz, J., Joseph, E., Lee, K.H., Baldacci, I.A., Chung, J.E., Frank, L.M., Bouchard, K.E., Denes, P., 2021. The impact of reducing signal acqui-sition specifications on neuronal spike sorting, in: 2021 43rd Annual In-ternational Conference of the IEEE Engineering in Medicine & Biology Society (EMBC), IEEE. pp. 5914–5918. doi: 10.1109/EMBC46164.2021. 9630669 .Higuchi, T., 1988. Approach to an irregular time series on the basis of the fractal theory. Physica D: Nonlinear Phenomena 31, 277–283. doi: 10.1016/0167-2789(88)90081-4 .Hochreiter, S., Schmidhuber, J., 1997. Long short-term memory. Neural Computation 9, 1735–1780. doi: 10.1162/neco.1997.9.8.1735 .Huang, Y., Beck, J.L., Wu, S., Li, H., 2014. Robust bayesian com-pressive sensing for signals in structural health monitoring. arXiv ArXiv:1412.4383. Jia, J., He, W., Xu, B., Chen, X., 2023. Deep learning for structural health monitoring: A review. Sensors 23, 2238. URL: https://doi.org/10. 3390/s23042238 , doi: 10.3390/s23042238 .Ke, G., Meng, Q., Finley, T., Wang, T., Chen, W., Ma, W., Ye, Q., Liu, T.Y., 2017. Lightgbm: A highly efficient gradient boosting decision tree, in: Advances in Neural Information Processing Systems (NeurIPS). URL: 
+
+> https://arxiv.org/abs/1711.04425
+
+.Krause, A., Singh, A., Guestrin, C., 2008. Near-optimal sensor placements in gaussian processes: Theory, efficient algorithms and empirical stud-ies, in: Proceedings of the 24th International Conference on Machine Learning, pp. 265–272. Landau, H.J., Eldar, Y.C., Mishali, M., 2009. Spectral analysis and the nyquist rate. IEEE Transactions on Signal Processing 57, 2882–2895. doi: 10.1109/TSP.2009.2016446 .LeCun, Y., Bottou, L., Bengio, Y., Haffner, P., 1998. Gradient-based learning applied to document recognition. Proceedings of the IEEE 86, 2278–2324. doi: 10.1109/5.726791 .Li, Y., Zhang, X., Wang, J., 2023. Adaptive collaborative correlation learning-based semi-supervised multi-label feature selection. arXiv preprint arXiv:2406.12193 URL: https://arxiv.org/abs/2406.12193 .Lin, J., Zhao, M., 2020. Vibration signal analysis for gear fault diagnosis using short-time fourier transform and harmonic feature extraction. Journal of Sound and Vibration 483, 115492. Mishra, M., Lourenço, P.B., Ramana, G.V., 2022. Structural health moni-toring of civil engineering structures by using the internet of things: A review. Journal of Building Engineering 48, 103954. doi: 10.1016/j. jobe.2021.103954 .Oppenheim, A.V., Schafer, R.W., Buck, J.R., 1999. Discrete-Time Signal Processing. 2nd ed., Prentice Hall. Oppenheim, A.V., Schafer, R.W., Buck, J.R., 2010. Discrete-Time Signal Processing. 3rd ed., Prentice Hall. Papoulis, A., 1977. Signal Analysis. McGraw-Hill. Presno Velez, A., et al., 2025. Advancing structural health monitoring with deep belief networks: Robustness under noise. Mathematics 13, 1435. doi: 10.3390/math13091435 .Quinlan, J.R., 1993. C4.5: Programs for Machine Learning. Morgan Kaufmann. Randall, R.B., 2011. Vibration-Based Condition Monitoring. Wiley, Chichester, UK. Richman, J.S., Moorman, J.R., 2000. Physiological time-series analysis using approximate entropy and sample entropy. American Journal of Physiology - Heart and Circulatory Physiology 278, H2039–H2049. doi: 10.1152/ajpheart.2000.278.6.H2039 .Rioul, O., Duhamel, P., 1991. Wavelets and signal processing. IEEE Signal Processing Magazine 8, 14–38. Russell, S.J., Norvig, P., 2010. Artificial Intelligence: A Modern Approach. 3 ed., Prentice Hall. (For Gaussian Naïve Bayes and KNN). Schuster, M., Paliwal, K.K., 1997. Bidirectional recurrent neural networks, in: IEEE Transactions on Signal Processing, IEEE. pp. 2673–2681. Sejdić, E., Orović, I., Stanković, S., 2017. Compressive sensing meets time–frequency: An overview of recent advances in time–frequency processing of sparse signals. Digital Signal Processing Review article available via PMC. Sharma, A., Kumar, R., 2022. Spectral analysis for time-series sampling. Journal of Signal Processing 45, 123–135. Spencer Jr., B.F., 2025. Artificial intelligence for structural health mon-itoring: From vibration-based methods to vision-based deep learning. Structural Engineering and Mechanics 87, 123–145. doi: 10.12989/sem. 2025.87.2.123 .Toh, S., et al., 2020. Review of vibration-based structural health monitoring using machine learning. Applied Sciences 10, 1680. doi: 10.3390/ app10051680 .Torres, M.E., Colominas, M.A., Schlotthauer, G., Flandrin, P., 2011. Acomplete ensemble empirical mode decomposition with adaptive noise, in: 2011 IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP), IEEE. pp. 4144–4147. 
+
+This manuscript is a preprint version prepared prior to journal submission. Page 13 of 15 Hybrid Spectro–Temporal Fusion Framework for Structural Health Monitoring 
+
+Tzanetakis, G., Cook, P., 2002. Musical genre classification of audio signals. IEEE Transactions on Speech and Audio Processing 10, 293– 302. doi: 10.1109/TSA.2002.800560 .Vaswani, A., Shazeer, N., Parmar, N., Uszkoreit, J., Jones, L., Gomez, A.N., Kaiser, Ł., Polosukhin, I., 2017. Attention is all you need, in: Advances in Neural Information Processing Systems (NeurIPS). URL: 
+
+> https://arxiv.org/abs/1706.03762
+
+.Wang, J., Li, S., Han, B., 2022a. Time-frequency analysis for machinery fault diagnosis using short-time fourier transform and convolutional neural networks. Mechanical Systems and Signal Processing 165, 108356. Wang, J., Li, S., Han, B., 2022b. Time-frequency analysis for machinery fault diagnosis using short-time fourier transform and convolutional neural networks. Mechanical Systems and Signal Processing 165, 108356. URL: https://www.sciencedirect.com/science/article/pii/ S088832702100356X , doi: 10.1016/j.ymssp.2021.108356 .Yang, Y., Zhang, Y., Tan, X., 2021. Review on vibration-based structural health monitoring techniques and technical codes. Symmetry 13, 1998. Ye, H., Zhang, Y., Liu, H., Li, X., Chang, J., Zheng, H., 2024. Light recurrent unit: Towards an interpretable recurrent neural network for modeling long-range dependency. Electronics 13, 3204. doi: 10.3390/ electronics13163204 .Yuan, F.G., Moaveni, B., Seibel, E.J., Todd, M.D., Aggelis, D.G., Worden, K., Chan, K.C.C., 2020. Machine learning for structural health moni-toring: challenges and opportunities, in: Proceedings of SPIE - Sensors and Smart Structures Technologies for Civil, Mechanical, and Aerospace Systems, SPIE. p. 1137901. URL: https://doi.org/10.1117/12.2561610 ,doi: 10.1117/12.2561610 .Zhang, M.L., Zhou, Z.H., 2022. Adaptive feature selection for multi-label learning with correlation-based redundancy penalty. IEEE Transactions on Pattern Analysis and Machine Intelligence 44, 2567–2582. Zhang, Z., 2022. Deep learning for bridge health monitoring: a survey. Ad-vances in Bridge Engineering 3, 1–27. doi: 10.1186/s43251-022-00078-7 .Zhou, Y., Ma, Z., Fu, L., 2025. A review of key signal processing tech-niques for structural health monitoring: Highlighting non-parametric time-frequency analysis, adaptive decomposition, and deconvolution. Algorithms 18, 318. doi: 10.3390/a18060318 .Zonzini, F., Malatesta, M.M., Bogomolov, D., Testoni, N., Marzani, A., De Marchi, L., 2020. Vibration-based shm with upscalable and low-cost sensor networks. IEEE Transactions on Instrumentation and Measurement 69, 7990–7998. Zonzini, F., Zauli, M., Mangia, M., Testoni, N., De Marchi, L., 2021. Model-assisted compressed sensing for vibration-based structural health monitoring. IEEE Transactions on Industrial Informatics 17, 7338– 7347. Zonzini, F., et al., 2022. Machine learning meets compressed sensing in vibration-based monitoring. International Journal of Machine Learning and Structural Health Monitoring doi: 10.1000/ijmlshm.2022.123456 .
+
+This manuscript is a preprint version prepared prior to journal submission. Page 14 of 15 Hybrid Spectro–Temporal Fusion Framework for Structural Health Monitoring 
+
+## Appendix 
+
+Figure 7. Dominant Amplitude ( 𝑧 1)
+
+Figure 8. Sideband Symmetry ( 𝑧 2)
+
+Figure 9. Second-peak Offset ( 𝑧 3)
+
+Figure 10. Harmonic Ratio ( 𝑧 4)
+
+Figure 11. Continuous Wavelet 
+
+Transform ( 𝑧 5)
+
+Figure 12. CEEMDAN Energy Ratio ( 𝑧 6)
+
+Figure 13. FFT amplitude spectra of the five vibration signals. The spectra indicate that 𝛿 3 and 𝛿 4 are relatively well separated, whereas 
+
+𝜂 , 𝛿 1, and 𝛿 2 exhibit substantial overlap, making them difficult to distinguish. Such spectral overlap can reduce classification accu-racy in multi-class machine-learning-based signal analysis. 
+
+‘
+
+Figure 14. Original signals in the time–displacement domain. Although each state (healthy, damaged-1 to damaged-4) is shown, the signals appear highly similar, making it difficult to distinguish conditions without further analysis. 
+
+This manuscript is a preprint version prepared prior to journal submission. Page 15 of 15

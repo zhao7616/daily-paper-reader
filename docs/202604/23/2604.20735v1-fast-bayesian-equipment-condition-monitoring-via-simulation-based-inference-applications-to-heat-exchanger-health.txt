@@ -1,0 +1,555 @@
+Title: Fast Bayesian equipment condition monitoring via simulation based inference: applications to heat exchanger health
+
+URL Source: https://arxiv.org/pdf/2604.20735v1
+
+Published Time: Thu, 23 Apr 2026 01:19:02 GMT
+
+Number of Pages: 15
+
+Markdown Content:
+# Fast Bayesian equipment condition monitoring via simulation based inference: applications to heat exchanger health 
+
+Peter Collett, 1 Alexander Johannes Stasik, ,2, 3, ∗ Simone Casolo ,1, † and Signe Riemer-Sørensen 3
+
+> 1
+
+Cognite AS, Oslo, Norway 
+
+> 2
+
+Department of Data Science, Norwegian University of Life Sciences, Ås, Norway 
+
+> 3
+
+Department for Mathematics and Cybernetics, SINTEF Digital, Oslo, Norway 
+
+(Dated: April 23, 2026) Accurate condition monitoring of industrial equipment requires inferring latent degradation pa-rameters from indirect sensor measurements under uncertainty. While traditional Bayesian methods like Markov Chain Monte Carlo (MCMC) provide rigorous uncertainty quantification, their heavy computational bottlenecks render them impractical for real-time process control. To overcome this limitation, we propose an AI-driven framework utilizing Simulation-Based Inference (SBI) powered by amortized neural posterior estimation to diagnose complex failure modes in heat exchangers. By training neural density estimators on a simulated dataset, our approach learns a direct, likelihood-free mapping from thermal-fluid observations to the full posterior distribution of degradation pa-rameters. We benchmark this framework against an MCMC baseline across various synthetic fouling and leakage scenarios, including challenging low-probability, sparse-event failures. The results show that SBI achieves comparable diagnostic accuracy and reliable uncertainty quantification, while accelerating inference time by a factor of 82 × compared to traditional sampling. The amortized nature of the neural network enables near-instantaneous inference, establishing SBI as a highly scal-able, real-time alternative for probabilistic fault diagnosis and digital twin realization in complex engineering systems. 
+
+Keywords: condition monitoring, Bayesian statistics, heat exchanger, simulation based inference, predictive maintenance, prognostics and health management, fault diagnosis. 
+
+I. INTRODUCTION 
+
+The operational integrity and thermal efficiency of complex industrial systems are paramount to the eco-nomic performance and safety of modern process plants, driving a paradigm shift toward advanced predictive maintenance (PdM) and condition monitoring [1, 2]. A foundational challenge in industrial asset management is that critical process or health parameters such as ef-ficiency or degradation coefficients, internal component wear, or leak rates often cannot be measured directly with standard instrumentation. Instead, these latent variables can be inferred from observable sensor streams by leveraging mathematical models that simulate the physical behavior of the equipment, often by a costly manual trial-and-error process. While this model-based approach is broadly applicable to a wide range of in-dustrial equipment relying on first-principles or empir-ical simulations, it is particularly vital for systems where internal states are inaccessible during operation [3, 4]. Within this context, direct Bayesian inference provides a rigorous framework for estimating these latent param-eters from sensor data, enabling the uncertainty-aware   
+
+> ∗alexander.stasik@sintef.no
+> †simone.casolo@cognite.com
+
+calibration of physical simulators and digital twins to ac-curately reflect the true equipment or process state. Heat exchangers serve as a prototypical example of in-dustrial equipment where health parameters must be in-directly determined. Machine learning and deep learning methods have been extensively studied in the last decade for condition monitoring of heat exchangers failures [5–9], with recent momentum heavily favoring time-series net-works like LSTMs, explainable gradient boosting (XG-Boost), neural networks [10] and hybrid ML ensembles [11–16]. For these units, essential variables such as the fouling resistance ( Rf ), the effective heat transfer area (A), and internal mass-loss fractions are unobservable directly. Instead, these parameters are estimated from observable data, such as inlet and outlet temperatures or fluid mass flow rates, utilizing thermal-fluid simula-tion tools to bridge the gap between sensor readings and the underlying equipment state [17, 18]. Bayesian in-ference provides a rigorous mathematical framework for resolving this inverse problem by treating these unob-servable parameters as random variables [19]. This al-lows for the quantification of uncertainty through a pos-terior probability distribution, which is essential for risk-aware decision-making and predicting Remaining Use-ful Life (RUL) [20–22]. However, the practical applica-tion of traditional Bayesian tools, such as Markov Chain Monte Carlo (MCMC) [23, 24] or Sequential Monte Carlo (Particle Filtering) [25], is severely constrained by com-putational overhead when scaled to complex systems. To ensure convergence, MCMC samplers typically re-quire thousands of iterative evaluations of the underlying physical simulation model for every single inference call. This computational bottleneck renders MCMC imprac-tical for online monitoring scenarios where rapid, high-
+
+> arXiv:2604.20735v1 [cs.LG] 22 Apr 2026
+
+2frequency diagnostics are required for real-time process control. To address these limitations, modern Artificial Intelligence (AI) paradigms, including normalizing flows and neural-networked variational inference [26–28], and specifically Simulation-Based Inference (SBI) [29, 30], have emerged as scalable alternatives to bypass high-dimensional Bayesian inverse bottlenecks. The primary advantage of SBI is its ability to perform likelihood-free inference by leveraging the forward process of the simula-tor itself. By generating a comprehensive dataset pairing parameter inputs and simulation outputs in a one-time offline phase, SBI employs neural density estimators to learn the direct mapping from observed data to the full distribution of the posterior, likelihood or likelihood ra-tio [29]. Once the neural network is trained, the compu-tational burden is effectively amortized; subsequent in-ference calls for new sensor measurements require only seconds, allowing the method to scale across complex in-dustrial systems and multiple assets simultaneously [31]. Simultaneously, the neural network can be easily updated with additional simulations if observations drift beyond the range covered by the originally sampled pairs of pa-rameter input and simulation output. While SBI is es-tablished as a scientific method [29], the literature lacks examples of industrial applications and performance on such systems. In this study, we present a probabilistic framework for the automated diagnosis of failure modes in a shell-and-tube heat exchanger, focusing specifically on fouling and leakage scenarios. We establish stochas-tic models for two primary failure mechanisms, progres-sive fouling and internal leakage, governed by latent pa-rameters to be determined in a Bayesian fashion. Asystematic comparison is conducted between traditional MCMC sampling and amortized SBI, specifically utiliz-ing sequential Neural Posterior Estimation (NPE, [32]) to identify the onset and evolution of these failures. Our re-sults demonstrate that the SBI approach is orders of mag-nitude faster than MCMC, providing near-instantaneous posterior characterization without sacrificing diagnostic depth. By highlighting this significant gain in compu-tational efficiency, this work establishes a scalable work-flow for deploying high-fidelity Bayesian condition mon-itoring in real-time thermal-fluid applications. Further-more, we remark how this approach is transferrable to the condition monitoring of other multi-parameter in-dustrial processes and equipment making it exceptionally well-suited for legacy systems or "black-box" simulators where the underlying governing equations are inaccessi-ble [33]. Alternative methods include learning fast ap-proximations for the simulator [34] to speed up classi-cal MCMC implementation, replacing legacy simulators with their differentiable counterparts [35], or leveraging Physics-Informed Neural Networks (PINNs) to embed governing physical constraints directly into the learning architecture [36, 37].    
+
+> Shell-and-Tube Heat Exchanger
+> Thot ,in Thot ,out
+> ˙mhot , c p, hot
+> Tcold ,in
+> Tcold ,out ˙mcold , c p, cold
+> U A Q
+
+FIG. 1: Schematic of a counterflow heat exchanger with key variables. The hot fluid (red) enters at Thot ,in with mass flow rate ˙mhot and specific heat cp, hot , and exits at 
+
+Thot ,out . The cold fluid (blue) enters at Tcold ,in with 
+
+˙mcold and cp, cold , and exits at Tcold ,out . Heat, Q, is transferred across the exchanger wall with overall conductance U A . 
+
+> II. METHODS
+
+As physical basis for our diagnostic model, we study a deterministic heat exchanger model (Sec. II A) with stochastic failures (Sec. II B).  
+
+> A. Deterministic Heat Exchanger Model
+
+For the deterministic model, we consider a steady-state counterflow heat exchanger as illustrated in Fig. 1. The heat capacity rates for the hot and cold fluid streams are defined by their respective mass flow rates ˙m and specific heat capacities cp:
+
+Chot = ˙ mhot cp, hot , Ccold = ˙ mcold cp, cold . (1) For a counterflow heat exchanger, the energy (heat) bal-ances are given by 
+
+Q = ˙ mhot cp, hot (Thot ,in − Thot ,out ) , (2) 
+
+Q = ˙ mcold cp, cold (Tcold ,out − Tcold ,in ) , (3) as well as the heat transfer equation, 
+
+Q = U A · ∆TLM , (4) where ∆TLM denotes the log-mean temperature differ-ence (LMTD) between the two streams, defined as 
+
+∆TLM = (Thot ,in − Tcold ,out ) − (Thot ,out − Tcold ,in )ln 
+
+ Thot ,in −Tcold ,out 
+
+> Thot ,out −Tcold ,in
+
+ . (5) While the heat transfer rate Q is traditionally solved using the LMTD method, the nonlinear nature of the LMTD requires iterative root-finding for unknown outlet temperatures. To facilitate efficient Bayesian inference, we utilize the effectiveness-NTU ( ϵ-NTU) method [38], which provides an explicit analytical solution. The heat transfer is expressed as: 
+
+Q = ϵC min (Thot ,in − Tcold ,in ) , (6) 3where Cmin = min( Chot , C cold ). The heat exchanger ef-fectiveness, ϵ, represents the ratio of actual heat transfer to the maximum thermodynamic limit. Here, ϵ is deter-mined by the Number of Transfer Units (NTU) and the capacity rate ratio r:NTU = U A Cmin 
+
+, r = Cmin 
+
+Cmax 
+
+, (7) 
+
+ϵ = 1 − exp[ −NTU (1 − r)] 1 − r exp[ −NTU (1 − r)] . (8) The product of the overall heat transfer coefficient U and the exchange area A is denoted as U A , which character-izes the heat transfer capability of the equipment. The outlet temperatures are then directly recovered from the energy balance: 
+
+Thot ,out = Thot ,in − QChot 
+
+Tcold ,out = Tcold ,in + QCcold 
+
+. 
+
+> B. Stochastic Modeling of Failure Mechanisms
+
+For each of the failure mechanisms object of this study, degradation is modeled by introducing a stochastic time-dependency into the parameters of the determinis-tic model in Sec. II A, aligning with recent reliability frameworks for stochastic degrading devices [39]. These stochastic formulations are selected not because they nec-essarily provide a more accurate physical representation of degradation than existing deterministic models, but rather as tunable, multi-parameter frameworks for fail-ure evolution. By adjusting the event frequency and the severity scales of the failure mechanisms, we can gener-ate a wide spectrum of failure scenarios. This flexibility allows for the systematic creation of datasets that vary in their level of difficulty for anomaly detection and pa-rameter identification. Consequently, the model serves as a rigorous testbed for evaluating the robustness of the Bayesian inference framework across scenarios ranging from subtle, continuous degradation to sporadic, high-impact failure events. In general, we assume failures ini-tiate at an unknown changepoint τ . To maintain differen-tiability for gradient-based inference, we utilize a logistic sigmoid transition S(t) to model the induction period: 
+
+S(t) = 11 + exp( −k(t − τ )) , (9) where k is the transition sharpness. Two primary failure mechanisms are considered: 
+
+1. Tube Fouling. In this work, grounded in recent analyses of physical deposition mechanisms [40], fouling is modeled as a reduction in the overall conductance U A 
+
+via a non-negative, dimensionless fouling factor R(t):
+
+U A (t) = U A clean 
+
+1 + R(t) . (10) 
+
+FIG. 2: Fouling and Leakage evolution in time with the effect of the failure parameters ( λ, β f , β l) over the trajectories at a fixed failure onset time τ .To capture the sporadic, burst-like nature of industrial scaling, R(t) is modelled as a discretized and relaxed Compound Poisson Process [41]. The total fouling at time t is the accumulation of stochastic increments: 
+
+R(t) = 
+
+> t
+
+X
+
+> i=1
+
+∆Ri, ∆Ri = S(i) · Ii · Ji · gf , (11) where gf ∈ { 0, 1} is a binary fouling indicator determined by the sampled failure mode z. Specifically, gf = 1 when the selected mode includes fouling and gf = 0 other-wise. The term S(i) represents a steep sigmoid function centered at the random failure time τ , acting as a tem-poral gate that activates the process for i ≥ τ . The 4stochastic occurrence of a jump is governed by the re-laxed gating variable Ii. At each time step, a jump prob-ability is calculated from the Poisson arrival rate λ as 
+
+Pjump = 1 − exp( −λ). The operator is defined by passing a latent uniform sample ui ∼ Uniform (0 , 1) through a steep sigmoid function: 
+
+Ii = 11 + exp( −k(Pjump − ui)) . (12) The magnitude of the potential jump, Ji, is drawn from an exponential distribution. To ensure a mean jump size of βf , the distribution is parameterized by the rate 1/β f :
+
+Ji ∼ Exp 
+
+ 1
+
+βf
+
+
+
+, where E[Ji] = βf . (13) Overall, the fouling process depends on the arrival rate 
+
+λ and the strength parameter βf . As λ increases, the frequency of stochastic events grows, while a higher βf
+
+increases the average magnitude of each individual jump. The expected growth of the fouling factor can be an-alyzed via the linearity of expectation. For the post-induction phase ( i > τ ), where the temporal gate S(i) ≈
+
+1, the expected increment is the product of the expected jump probability and the expected jump magnitude: 
+
+E[∆ Ri] = E[Ii] · E[Ji] · gf = (1 − e−λ) · βf · gf . (14) For t > τ , the total accumulated fouling is the sum of these independent increments over the active duration of the failure. Thus, by Wald identity, the expectation of 
+
+R(t) is linear in time: 
+
+E[R(t)] ≈ (1 − e−λ) βf gf
+
+ (t − τ ) . (15) compatibly with the well known Ebert-Panchal model [42]. This derivation shows that the process is linear in time relative to the random failure point τ . This formu-lation is consistent with the first-order behavior of deter-ministic fouling laws while retaining the random-event structure necessary to represent the intermittent and un-predictable nature of industrial fouling. 
+
+2. Leakage with Fluid Loss. Internal leakage is modeled as a diversion of fluid from the primary hot-stream flow path, representing a shell-side bypass or a loss of integrity in the tube-to-header seals. We define a time-dependent leak fraction L(t) ∈ [0 , 1) that reduces the effective mass flow rate participating in the heat ex-change: 
+
+˙mhot ,out (t) = ˙ mhot ,in (1 − L(t)) . (16) This reduction in the hot-side thermal mass decreases the heat capacity rate Chot , altering the capacity rate ratio r.This results in a simultaneous reduction in outlet mass flow and a decrease in Thot ,out .In our probabilistic framework, the evolution of the leak fraction L(t) is modeled as a continuous stochastic growth process. Following the changepoint τ , the cumu-lative degradation is driven by exponential increments: 
+
+L(t) = Lmax 1 − exp 
+
+"
+
+−
+
+> t
+
+X
+
+> i=1
+
+S(i) · gl · ∆Li
+
+#! 
+
+, (17) where Lmax = 0 .95 represents the physical saturation of the leak and gl ∈ { 0, 1} is a binary leakage indicator determined by the sampled failure mode z. The incre-ments ∆Li are sampled from an exponential distribution 
+
+∆Li ∼ exp (1 /β l), where the scale parameter βl deter-mines the growth rate of the failure.  
+
+> C. Bayesian Inference and Probabilistic Modeling
+
+Bayesian inference offers a rigorous mathematical framework for quantifying uncertainty in model param-eters θ given observed data y. In the case of industrial simulations, it solves the inverse problem of determin-ing the distribution p(θ | y) representing the probability that a set of parameters θ produce the observed sensor data y. The cornerstone of the Bayesian approach is the posterior distribution, 
+
+p(θ | y) = p(y | θ) p(θ)
+
+p(y) , (18) where p(θ) is the prior, p(y | θ) is the likelihood, and 
+
+p(y) = R p(y | θ) p(θ) dθ is the model evidence. In the context of heat exchanger modeling, θ may include pa-rameters such as the effective heat transfer coefficient, fouling factor, mass flow rates, and failure mode indica-tors. The likelihood is typically constructed based on a well-defined physical model such as the one in Sec. II B, incorporating measurement noise and potential process disturbances: 
+
+yi = f (θ, xi) + ϵi, ϵi ∼ N (0 , σ 2), (19) where f (·) denotes the deterministic model mapping, xi
+
+are covariates or known inputs, and ϵi are independent, normally distributed errors. Posterior inference enables both point and interval esti-mation, as well as predictive uncertainty. The predictive distribution for new data y∗ given new input x∗ is 
+
+p(y∗ | y) = 
+
+Z
+
+p(y∗ | θ, x∗) p(θ | y) dθ, (20) fully accounting for parameter uncertainty. In most re-alistic settings, this integral cannot be evaluated ana-lytically. Instead, posterior inference must rely on nu-merical methods such as Markov Chain Monte Carlo (MCMC, [43]) or variational inference [44]. MCMC con-structs a Markov chain whose stationary distribution is the posterior p(θ | y), which enables asymptotically ex-act sampling-based inference for both continuous and dis-crete latent variables. In this work, we use Hamiltonian 5Monte Carlo through the No-U-Turn Sampler (NUTS) for continuous parameters [45]. For the discrete failure-mode formulation we combine NUTS with a Gibbs up-date over the categorical mode variable. MCMC meth-ods provide a strong posterior benchmark, but becomes computationally expensive as it requires a new sampling procedure for every observation.  
+
+> D. Simulation-Based Inference (SBI)
+
+Simulation-Based Inference (SBI), also known as likelihood-free inference, is a family of techniques for Bayesian inference in models for which the likelihood function p(y | θ) is analytically intractable or unavail-able, but simulation of synthetic data ysim ∼ p(y | θ) is feasible [29]. This is particularly relevant for nonlinear physical systems with complex failure dynamics such as the heat exchanger. One classical SBI approach is Approximate Bayesian Computation (ABC) [46], which defines an approximate posterior as 
+
+pϵ(θ | y) ∝ p(θ)
+
+Z
+
+I (d(y, ysim ) < ϵ ) p(ysim | θ)dysim ,
+
+(21) where d(·, ·) is a distance metric and ϵ is a user-defined tolerance. More recent methods leverage neural density estimators to approximate either the posterior p(θ | y),the likelihood p(y | θ), or the likelihood-to-evidence ratio, typically via simulated data sets [32]: 
+
+ˆpϕ(θ | y) ≈ p(θ | y), (22) where ˆpϕ denotes the neural network approximation pa-rameterized by ϕ. These methods permit inference even in complex models for which classical Bayesian updat-ing is not tractable, provided that forward simulation is possible. For recent advances and theoretical guarantees, see [29]. We apply an amortized sequential neural pos-terior estimation (NPE) [47] as implemented in the sbi toolkit software package [48]. Details on the SBI ap-proach can be found in Figure 3 and Section III C.  
+
+> E. Summary statistics
+
+In Bayesian inference such as MCMC and SBI, the data and models are compared on so-called summary statis-tics. For high-dimensional data, lower dimensional repre-sentations that preserve the relevant information about the parameters of interest enable comparison to simu-lated data. In particular, they are crucial when the sys-tem is complex and the likelihood function is intractable. The lower dimensional representation can be designed from knowledge or learned through an embedding neu-ral network. In this study, we construct a set of sum-mary statistics tailored to the heat exchanger measure-ments. Features are derived from the hot-side tempera-ture difference Thot ,in −Thot ,out , the cold-side temperature difference Tcold ,out − Tcold ,in , the hot-side mass-flow loss 
+
+˙mhot ,in − ˙mhot ,out , and the outlet temperatures Thot ,out 
+
+and Tcold ,out . For each of these five signals, the mean, standard deviation, early-to-late change, dynamic range, and a linear trend measure are computed to yield a 25-dimensional summary statistic vector. These summaries are designed to capture the temporal signatures most in-formative for both failure-mode identification and esti-mation of the associated degradation parameters.  
+
+> F. Scoring and distance measures
+
+To compare performance of SBI against MCMC, we use metrics that assess both the similarity between in-ferred posteriors and their quality with respect to the ground-truth parameters. The Wasserstein distance be-tween the SBI and MCMC posteriors quantifies the dis-crepancy between the amortized SBI posterior and the MCMC reference posterior. The Continuous Ranked Probability Score (CRPS) and credible-interval coverage are used to evaluate the quality of each inferred posterior. These metrics are evaluated separately for each continu-ous parameter of interest. CRPS is a generalization of the Mean Absolute Error (MAE) for probabilistic predictions [49]. It is calculated by comparing the empirical cumulative distribution func-tion (ECDF) of posterior samples with the step function CDF at the true value. Lower CRPS indicates a posterior that is sharper and better aligned with the ground-truth. The Wasserstein distance is instead a similarity metric between two probability distributions. The convergence rate of empirical Wasserstein estimators typically be-haves as n−1/d , where n is the number of samples and d is the dimension, implying that standard empirical Wasser-stein distance becomes a poor measure of similarity for high-dimensional data. It is also sensitive to extreme outliers.  
+
+> III. EXPERIMENTS
+
+The aim is to evaluate the robustness of the Bayesian diagnostic framework by identifying the failure mode and determine the failure parameters: induction time τ
+
+(Eqn. 9), fouling jump scale βf (Eqn. 13), leakage growth 
+
+βl (Eqn. 17) and fouling intensity λ. In the model setup, failure mode is represented by a discrete categorical vari-able z ∈ { none , fouling , leakage , both }, rather than a con-tinuous simplex Dirichlet prior over mode probabilities. This avoids the confounding present in the Dirichlet for-mulation, where the mode weights also scale degradation magnitude. As a result, the categorical formulation leads to clearer failure-mode identification. 6λ βf τ
+
+HX Simulator 
+
+f (λ, τ, β f , etc. )      
+
+> {Thot ,in ,Tcold ,in ,Thot ,out ,
+> Tc out ,mhot ,in ,mhot ,out ,
+> ∆Thot ,∆Tcold ,mloss }.
+
+n simulation runs n summary statistics 
+
+Thot ,in 
+
+mhot ,in       
+
+> {Thot ,in ,Tcold ,in ,Thot ,out ,
+> Tc out ,mhot ,in ,mhot ,out ,
+> ∆Thot ,∆Tcold ,mloss }.
+
+# λ βf τ
+
+observations y summary statistics posteriors’ marginals under observations ˆpϕ(θ | y)
+
+Training 
+
+SNPE (NSF) 
+
+n-parameters draws from priors 
+
+θ1 = {λ1, β f 1, τ 1, etc. }, . . . , θn = {λn, β f n , τ n, etc. }
+
+FIG. 3: The applied SBI scheme. Blue: training data (priors) and process, orange: input data, green: inferred output posteriors. In this work n=50,000 simulations. 
+
+Scenario Failure τ βf βl λ
+
+Weak Fouling Fouling 18 0.005 - 5.0 Batch SD Fouling 18 0.030 - 0.5 Boiler FW Fouling 18 0.050 - 3.0 Mild Leak Leakage 18 - 0.0005 -Severe Leak Leakage 18 - 0.0010 -
+
+TABLE I: Failure parameters for synthetic failure scenarios. τ denotes the failure changepoint (induction time); βf and βl represent the scale parameters for fouling jumps and leakage growth, respectively; and λ
+
+defines the fouling arrival rate (intensity). 
+
+A. Test scenarios 
+
+For evaluation purposes, we define five distinct fail-ure scenarios representing a spectrum of industrial oper-ational conditions. These scenarios are generated using the stochastic model described in Sec. II, with spe-cific parameters detailed in Table I. The scenarios are de-signed to test the model’s ability to distinguish between quasi-continuous degradation and sporadic, high-impact events: 
+
+Weak Fouling (Scenario 1): This represents a well-maintained system where fouling is slow and pro-gresses in a quasi-continuous manner. The high arrival rate ( λ = 5 .0) combined with a low jump scale ( βf = 0 .005 ) simulates frequent, minor depo-sition events that approximate a linear degradation trend. This is typical of systems with high fluid ve-locity or effective surface conditioning, presenting a challenge for early-stage anomaly detection due to the subtle signal-to-noise ratio of the degradation increments. 
+
+Batch Process Shutdown (Scenario 2): This sce-nario simulates fouling that occurs primarily during stagnant periods or process shutdowns (Batch SD). The low arrival rate ( λ = 0 .5) and high jump scale ( βf = 0.03 ) result in rare but severe “shocks” to the heat transfer efficiency. The diagnosis of such low-probability, time-dependent rare events remains a recognized challenge in industrial fault detection [50], particularly under few-shot observability constraints where Bayesian uncertainty calibration is vital [51]. 
+
+Boiler Feedwater System (Scenario 3): 
+
+Representing aggressive scaling in systems with high mineral content (Boiler FW), this scenario utilizes both high frequency and high severity scales. The combination of λ = 3 .0 and βf = 0 .05 
+
+creates a rapid loss of heat transfer capability. This scenario tests the model’s ability to track high-gradient failure progression and its reliability in predicting the remaining useful life of the equipment. The leakage scenarios represent progressive structural failures, such as tube pitting or gasket degradation. In both cases, the failure is characterized by a gradual loss 7of mass flow and a corresponding thermal fingerprint in the outlet temperatures. 
+
+Mild Leak (Scenario 4): A slow-onset failure where the leak fraction grows moderately ( βl = 0 .0005 ). This scenario tests the sensitivity of the Bayesian framework to distinguish small mass-flow discrep-ancies from measurement noise. 
+
+Severe Leak (Scenario 5): A rapid loss of system in-tegrity ( βl = 0 .0010 ). This scenario creates a sig-nificant and fast-evolving divergence between inlet and outlet mass flow, requiring the model to main-tain stability while the heat capacity rate ratio r
+
+shifts rapidly. Finally, we also include a baseline no-failure case: 
+
+No Failure (Scenario 6): This scenario represents normal heat exchanger operation without fouling or leakage. It serves as a baseline for assessing whether the inference framework can correctly identify the absence of failure and avoid false-positive diagnoses. For each scenario, an ensemble of 500 synthetic datasets was generated to ensure statistical significance in the evaluation of the inference methods. For scenario iden-tification, each discrete failure mode is handled by pre-dicting logits, which are transformed via a softmax func-tion to obtain mode probabilities. At inference time, we draw posterior samples, assign each draw the label with the highest softmax probability, and thus obtain discrete samples of the latent realized trajectory, z, anal-ogous to the MCMC output. A scenario is considered correctly identified if the most frequent posterior label matches the true simulated label. In addition to the fail-ure mode status label, we also infer the failure parameters 
+
+{τ, λ, β f , β l} directly from the data and independently of the failure category. 
+
+B. Priors 
+
+For the operational scenario detection, a categorical prior is required. As heat exchangers operate normally more often than they experience failures, we assign higher prior probability to the no-failure mode: p(failure mode) 
+
+= [0.4; 0.2; 0.2; 0.2] (none, fouling, leakage, both). We note that the scenario where both failure mechanisms are active, is a very unlikely situation: albeit we still consider it in defining the categorical prior, we do not generate data with both leakage and fouling and consider it only as a confounding scenario. For the changepoint ( τ ), we assume a uniform prior over the interval τ ∈ [1 , T − 1] , excluding boundary cases in which the failure is either already present (τ ≤ 0) or does not occur within the observation window (τ ≥ T ). The positive degradation parameters are assigned log-normal 0 15 30 45 60 75 90                         
+
+> τ
+> 0.000
+> 0.005
+> 0.010
+> 0.015
+> 0.020
+> τ Prob. Density
+> τ= 18
+> 0.000 0.025 0.050 0.075 0.100 0.125 0.150
+> βf
+> 0
+> 10
+> 20
+> 30
+> 40
+> βf Prob. Density
+> βf= 0.005
+> βf= 0.03
+> βf= 0.05
+> 0.000 0.001 0.002 0.003
+> βl
+> 0
+> 500
+> 1000
+> 1500
+> 2000
+> 2500
+> βl Prob. Density
+> βl= 0.0005
+> βl= 0.001
+> 0.0 2.5 5.0 7.5 10.0 12.5 15.0
+> λ
+> 0.0
+> 0.1
+> 0.2
+> 0.3
+> 0.4
+> λ Prob. Density
+> λ= 5
+> λ= 0.5
+> λ= 3
+
+FIG. 4: Prior probability densities for the changepoint time τ , fouling strength βf , leak rate βl, and fouling-event arrival rate λ used in the heat-exchanger model. Vertical dashed lines mark true parameter values for the study scenarios reported in Table I. priors: 
+
+βf ∼ LogNormal(log 0 .015 , 1.0) ,βl ∼ LogNormal(log 0 .0004 , 0.4) ,λ ∼ LogNormal(log 2 .0, 0.5) .
+
+These priors enforce positivity while remaining broad enough to cover the range of fouling and leakage behav-iors considered in the study as shown in Fig. 4. 8 
+
+> C. Experimental setup
+
+Process data were generated by modelling the heat ex-changer in a two-stage procedure. In the first stage, we specify a parameter vector x that characterizes the sta-tionary properties of the system, such as the failure mode, failure strength, time constant τ , and related quantities. Given these parameters, we generate a trajectory z from a stochastic process. This trajectory represents the latent (unobserved) timeseries for fouling and leakage dynam-ics. In the second stage, the latent trajectory z is used as input to a simulator of the heat exchanger to generate the observable time series y, such as temperatures, flows, and other measured signals. In its most vanilla form, simulation-based inference (SBI) is trained by providing it with query access to the simula-tor, yielding pairs (x, y ). At inference time, SBI produces an approximation to the posterior distribution p(x | y).Since the latent trajectory z is never observed and the inference procedure is not informed about the internal la-tent structure of the simulator SBI has no opportunity to directly infer the realized trajectory z. This is in contrast to MCMC methods, which have access to the full prob-abilistic model. A practical SBI approach is therefore to infer x given y, and then sample trajectories z from the simulator conditioned on the inferred parameters. How-ever, if the latent variable is stochastic this procedure can never recover the actual realized trajectory, only samples from its conditional distribution as implied by the simu-lator. Alternatively, one could modify the inference setup and train SBI on pairs (x, z ) mapped to observations y.At inference time, conditioning on y would then yield a joint posterior over both x and the trajectory z. In prin-ciple, this allows direct estimation of latent trajectories rather than only their distributional family. In practice, however, this substantially increases the complexity of the inference problem, as SBI must explore a very high-dimensional latent space corresponding to the full time series z.We benchmark the amortized SBI approach against a MCMC baseline. For MCMC, the stochastic degrada-tion model is implemented in NumPyro [52, 53], and the No-U-Turn Sampler [45] draws joint samples of the dis-crete failure mode z and the continuous degradation pa-rameters. This requires extensive simulator evaluations for every new observation. We found sufficient a setup made of 4 chains, each of 2, 000 warm up steps and 3, 000 
+
+samples, for a total of 20 , 000 MCMC evaluations per in-ference task. For SBI, we employ the scheme depicted in Figure 3 and in Ref.[32]. The neural density estimator is trained offline on a conservative 50 , 000 forward simula-tions, learning a direct mapping from the 25-dimensional summary statistics of the observed parameters to an approximate posterior distribution for the failure mode and failure parameters. For the neural density estima-tor within the Sequential Neural Posterior Estimation (SNPE) framework, we employed a Neural Spline Flow (NSF) architecture [47, 54]. Unlike simpler affine autore-0 20 40 60 0
+
+> 20
+> 40
+> 60
+> SBI posterior median
+
+τ   
+
+> 00.03 0.06 0.09 0
+> 0.03
+> 0.06
+> 0.09
+> SBI posterior median
+
+βf  
+
+> 00.00075 0.0015
+> MCMC posterior median
+> 0
+> 7.5e-04
+> 1.5e-03
+> SBI posterior median
+
+βl   
+
+> 0123
+> MCMC posterior median
+> 0
+> 1
+> 2
+> 3
+> SBI posterior median
+
+λ
+
+FIG. 5: Scatterplot comparing posterior median parameter estimates inferred by MCMC and SBI across the 2,500 failure-case observations (500 realizations for each of Scenarios 1–5). Colors denote scenarios: blue (Weak Fouling), orange (Batch Shutdown), green (Boiler Feedwater), yellow (Mild Leakage), and lilac (Severe Leakage). The dashed identity line indicates perfect agreement between the two inference methods. gressive flows, NSFs utilize monotonic rational-quadratic splines, providing the high representational capacity re-quired to map the 25-dimensional summary statistics to the complex, potentially multimodal posterior distri-butions of the heat exchanger’s latent degradation pa-rameters. The normalizing flow was configured with a standard multivariate normal base distribution and com-prised 5 sequential transforms. The underlying condi-tioner network was implemented as a multi-layer per-ceptron (MLP) featuring 2 hidden layers with 50 hid-den units each, utilizing Rectified Linear Unit (ReLU) activations. The neural network was trained using the Adam optimizer with an initial learning rate of 5 × 10 −4
+
+and a batch size of 256 . To prevent overfitting during the offline amortization phase, training was subject to an early stopping criterion, halting if the validation log-probability failed to improve over 20 consecutive epochs. All inference architectures were built and trained utiliz-ing the PyTorch-based sbi toolkit [48]. To evaluate robustness, we use the six benchmark sce-narios described in Sec. II. For each scenario, we evalu-ate 500 independent observation records generated with the same ground-truth parameters but differing measure-ment noise realizations. 9
+
+FIG. 6: The marginalized distributions of the posterior medians inferred via MCMC (orange) and SBI (blue) across 500 noisy observations per scenario. The red dashed lines indicate the ground-truth parameter values. Each row represents a single continuous parameter, while each column corresponds to a specific failure scenario.  
+
+> IV. RESULTS
+
+This section compares SBI and MCMC over the six benchmark scenarios using 500 noisy realizations per sce-nario. We first assess failure-mode identification, then compare continuous-parameter inference quality and pos-terior shape agreement, and finally discuss Scenario 2 as a representative stress test under weak observability. Ta-ble II shows that both MCMC and SBI identify fouling and leakage scenarios with near-perfect reliability, assign-ing most posterior mass to the correct failure mode across the 500 datasets per scenario. The healthy state (Sce-nario 6) is slightly more challenging, as transient sen-sor noise can emulate weak degradation and occasion-ally shift posterior mass toward a fault mode. Even in this regime, SBI remains statistically equivalent to the MCMC reference for failure-mode classification. Fig-ure 5 provides a pointwise comparison of posterior me-dians obtained with MCMC (horizontal axis) and SBI (vertical axis) for all failure realizations. Each marker corresponds to one inference task, so the concentration of points around the identity line indicates sample-by-                     
+
+> Scenario Failure MCMC SBI mode accuracy accuracy
+> 1: Weak Fouling Fouling 100% 100% 2: Batch SD Fouling 100% 100% 3: Boiler FW Fouling 100% 100% 4: Mild Leak Leakage 99.8% 100% 5: Severe Leak Leakage 99.6% 100% 6: No Failure None 98.2% 98.6%
+
+TABLE II: Categorical failure-mode identification accuracy for MCMC and SBI across the six scenarios. Examples of time evolution curves for the scenarios are shown in Fig 2. sample agreement between the amortized and sampling-based estimators. Across scenarios, the cloud is tightly aligned with the diagonal for mode-discriminative param-eters, confirming that SBI preserves the same central di-agnostic conclusions as MCMC. The largest spread is ob-served for the changepoint τ , particularly in sparse-event fouling regimes, where delayed and weakly informative 10 Weak F 
+
+> Batch SD
+> Boiler FW
+> Mild Leak
+> Severe Leak 0.0
+> 0.5
+> 1.0
+> Wd(MCMC-SBI)
+
+# τ 
+
+> Weak F
+> Batch SD
+> Boiler FW 0.00
+> 0.25
+> 0.50
+> 0.75
+> 1.00
+
+# βf
+
+> Mild Leak
+> Severe Leak 0.0
+> 0.1
+> 0.2
+> Wd(MCMC-SBI)
+
+# βl
+
+> Weak F
+> Batch SD
+> Boiler FW 0.0
+> 0.5
+> 1.0
+> 1.5
+
+# λ
+
+FIG. 7: Normalized, 1-dimensional Wasserstein distance between MCMC and amortized SBI posterior samples for the same failure parameter, scaled by the absolute value of the true parameter. Color coding follows the one in Figure 5 
+
+> .
+
+transients reduce practical identifiability. An additional pattern in Fig. 5 is the comparatively narrow SBI posterior for λ relative to MCMC. This behavior is consistent with an amortization-induced shrinkage effect in weakly identifiable settings: when the observation carries limited information about jump-arrival intensity, SNPE tends to regularize toward dom-inant simulator-supported regions learned during train-ing, yielding sharper posteriors. In contrast, MCMC ex-plores a flatter likelihood landscape more explicitly and therefore retains wider uncertainty for λ [55, 56]. The key point is that this difference is primarily in posterior width, not in failure-mode decision; both methods still produce consistent classification outcomes. To systematically compare MCMC and SBI, we ana-lyze the inference results over the 500 independent noisy realizations per scenario. Fig. 6 presents the marginal-ized distributions of posterior medians for each param-eter and scenario. These distributions represent varia-tion of point estimates across datasets, not the uncer-tainty width of individual posteriors. For the induction time τ , medians are centered close to the ground truth in all scenarios, with MCMC yielding slightly narrower between-dataset spread. For βf , βl, and λ, SBI and MCMC remain broadly consistent in central tendency, while both methods show reduced accuracy for λ in foul-ing scenarios. This behavior reflects identifiability lim-Weak F 
+
+> Batch SD
+> Boiler FW
+> Mild Leak
+> Severe Leak 0
+> 10
+> 20
+> 30
+> CRPS
+
+# τ
+
+> Weak F
+> Batch SD
+> Boiler FW 0.00
+> 0.01
+> 0.02
+
+# βf
+
+> Mild Leak
+> Severe Leak 0.0000
+> 0.0001
+> 0.0002
+> 0.0003
+> CRPS
+
+# βl
+
+> Weak F
+> Batch SD
+> Boiler FW 0
+> 1
+> 2
+
+# λ
+
+FIG. 8: Continuous Ranked Probability Score (CRPS) distributions comparing the sharpness and accuracy of MCMC and SBI posterior predictions for each parameter. its of the stochastic degradation model rather than a method-specific failure. Consistent with Fig. 5, SBI pos-teriors for λ are often narrower than MCMC in weakly identifiable regimes, whereas MCMC preserves broader uncertainty by exploring near-flat likelihood regions. Im-portantly, despite these limits in continuous-parameter recovery, failure-mode classification remains correct in virtually all 2,500 failure cases. Similar qualitative con-clusions are obtained when using posterior maximum-likelihood point summaries. To assess similarity of full posterior shapes, we eval-uate the 1D Wasserstein distance between MCMC and SBI posteriors for each parameter (Fig. 7). The distribu-tions are generally concentrated at low values, indicating that the amortized SBI posterior remains close to the MCMC reference over most inference tasks. Larger dis-tances appear primarily in weakly identifiable regimes, where multiple parameter combinations explain the ob-servations nearly equally well. This pattern is consistent with the scenario-level analysis above: discrepancies are driven more by structural identifiability limits than by systematic bias of the SBI estimator. Finally, Fig. 8 reports the Continuous Ranked Proba-bility Score (CRPS), a proper scoring rule that jointly evaluates probabilistic sharpness and statistical accuracy. The CRPS distributions for SBI and MCMC are of sim-ilar magnitude across parameters, indicating that SBI preserves most of the probabilistic predictive quality of the MCMC baseline. For the induction time τ and degra-11 
+
+FIG. 9: Posterior predictive checks for a Batch Process Shutdown (Scenario 2). Top panel: generated sensor data for Thot,out (full line), average over 500 realizations (dashed line) and 90% confidence interval. Vertical dashed line show failure onset time ( τ ). Mid panel: Fouling resistance computed for the observed realization (black) together with an example trajectory from parameters sampled from the posteriors inferred by MCMC (orange) and SBI (blue). The average (dashed lines) and 95% confidence intervals (shaded) are shown for trajectories generated from 500 posterior samples. Bottom panel: The inferred posterior probabilities per process parameter from MCMC (orange) and SBI (blue). The ground truth is shown as red lines in the diagonal density plots and crosses in the covariance plots. dation parameters βf , βl, both metrics demonstrate ac-ceptable predictive accuracy levels in most scenarios. The exception is the determination of λ in the Batch Process Shutdown (Scenario 2), where the posterior lo-cation is consistently overestimated due to the extreme sparsity of the fouling jumps. In this regime, the un-derlying degradation is driven by a very low event ar-rival rate ( λ = 0 .5) combined with a large jump scale (βf = 0 .03 ). Because these stochastic shocks are exceed-ingly rare, a given finite observation window may capture very few—or even zero—fouling events. Consequently, the observed thermal-fluid signals carry minimal informa-tion regarding the true arrival rate, resulting in a nearly flat likelihood surface for λ. In the absence of informative data, the posterior distribution naturally shrinks toward the prior. Since the assigned log-normal prior for λ is cen-tered at a median of 2.0 —significantly higher than the true scenario value—both MCMC and SBI predictably overestimate this parameter. This behavior highlights a fundamental limit of structural identifiability in sparse-event regimes, rather than a systematic failure of the inference algorithms. The challenge is compounded by a fundamental identifia-bility trade-off between λ and βf . Infrequent large jumps and frequent small jumps can produce near-identical cu-mulative fouling trajectories, making it difficult to distin-guish the true regime from the dominant prior. MCMC is particularly susceptible because it must simultaneously infer λ alongside 100 hidden per-timestep jump indica-tors, entangling the global arrival rate with local de-cisions about whether each individual timestep carried a jump. SBI avoids this by absorbing the individual timestep variables into the simulation process and in-stead relies on summary statistics. This compresses what little signal exists about the rate of fouling accumulation into a lower-dimensional representation. Even so, neither method can fully overcome the prior dominance when the observation window contains so few events. This highlights a fundamental limit of structural identifiability in sparse-event regimes, rather than a systematic failure of the inference algorithms. Detailed model calibration analyses are provided in the Supplementary Material. Scenario 2 (Batch Process Shutdown) provides therefore a representative stress test for probabilistic diagnosis un-der weak observability. In this regime, fouling evolves through sparse but potentially large stochastic jumps (low event rate, λ = 0 .5, and relatively large jump scale, 
+
+βf = 0 .03 ), so the thermal response can resemble mea-surement noise over extended time windows. This set-ting is therefore informative for assessing whether the inference framework can separate persistent degradation dynamics from transient fluctuations. Both MCMC and SBI assign dominant posterior probability to the fouling mode (Table II) and recover a consistent posterior for the changepoint τ . As shown in Fig. 9, marginal posteri-ors are also in close agreement across methods, indicat-ing that amortized SBI preserves the main uncertainty structure of the MCMC reference posterior. Although both approaches show limited identifiability for λ and, to a lesser extent, βf in this sparse-event regime, pos-terior predictive trajectories remain physically plausible and reproduce the observed trend in fouling resistance. From a reliability perspective, this is the key require-ment for downstream condition monitoring tasks, such as 12 predicting the Remaining Useful Life of the equipment. Even when individual parameters are weakly identifiable, the inferred posterior ensemble still supports robust fault recognition and uncertainty-aware forecasting of degra-dation progression. Accurately recovering these param-eters and their associated uncertainties is a critical first step for downstream  
+
+> A. Resources consumption
+
+The primary motivation for adopting SBI in industrial asset management is its exceptional computational scal-ability at deployment time. As summarized in Table III, MCMC must restart its iterative sampling process from scratch for every new diagnostic request (inference), so its total simulation cost grows linearly with the number of inference tasks. In contrast, SBI training is a one-time offline phase whose upfront cost is rapidly amortized over subsequent diag-noses. We therefore pushed both approaches to a com-pact setup where the simulator calls are as few as possible while retaining acceptable accuracy on the parameters posteriors, in order to test the computational cost of in-ference in the two cases. MCMC was run on 4 chains with 150 burn-in and 75 samples (900 transitions/call) while SBI was trained on 5,000 simulations. As illustrated in Fig. 10, the two methods reach cost parity after fewer than six inference calls, beyond which SBI is 82 times faster per diagnosis while maintaining identical classifi-cation accuracy and τ convergence. In this study, the simulator is a lightweight JAX-JIT-compiled effectiveness-NTU model of a single heat ex-changer, chosen as a toy model for testing. Each simu-lator call is estimated to require 0.03 s of computing on a 4-core CPU Apple M4 Pro with JAX-JIT pre-warmed. Therefore, the absolute time saved per call is modest. However, the 82 × acceleration is a property of the infer-ence algorithms rather than of the particular simulator, and it scales with simulator cost. For networks of inter-acting heat exchangers or plant-wide process simulations where a single forward evaluation can take minutes to hours, the same factor translates to savings of tens of minutes to many hours per diagnosis . Across a modern process plant where condition monitoring must be per-formed simultaneously on dozens of assets at high fre-quency, the near instantaneous posterior evaluation of-fered by SBI provides a pathway to real-time, risk-aware decision-making that is entirely intractable with classical            
+
+> Method Sim. calls Acc. Infer. time Train cost
+> MCMC 900 / call 100 % 2.4s / call —SBI 5,000 (once) 100 % 0.029 s / call 19 s
+
+TABLE III: Computational cost of inference at 100 %
+
+accuracy for MCMC and SBI on an Apple M4 Pro laptop. 0 2 4 6 8 10 12 
+
+> Inference Calls
+> 0
+> 2500
+> 5000
+> 7500
+> 10000
+> Total Simulation Runs
+
+FIG. 10: Resource comparison at the minimal configuration achieving both ≥95% classification accuracy on Scenario 2 (fouling, τ = 18 ). MCMC used 4 chains with 150 burn-in + 75 samples (900 transitions/call); SBI used 5,000 training simulations. SBI is 82 × faster per call after a break-even of ∼6inference calls. Bayesian sampling.  
+
+> V. DISCUSSION
+
+This study demonstrates that simulation-based infer-ence (SBI) provides a practical and scalable alternative to classical Bayesian sampling for condition monitoring of heat exchangers. Across all evaluated scenarios, SBI achieves diagnostic performance comparable to MCMC in both failure-mode classification and parameter esti-mation, while reducing inference time by several orders of magnitude. The close agreement in posterior sum-maries and distributional metrics indicates that SBI with amortized neural posterior estimation can efficiently ap-proximate high-fidelity MCMC baselines, even in non-linear thermo-fluid systems with stochastic degradation dynamics. A key implication is the shift in computational burden enabled by SBI. By front-loading simulation cost into an offline training phase, the framework enables near-instantaneous inference during deployment. This is par-ticularly relevant for industrial settings where continuous monitoring must be performed across multiple assets un-der strict latency constraints. The results suggest that, beyond a small number of inference queries, SBI becomes more computationally efficient than MCMC, making it suitable for real-time diagnostics and large-scale deploy-ment. From a reliability engineering perspective, the frame-work supports probabilistic fault diagnosis by provid-ing full posterior distributions over failure modes and degradation parameters. This enables uncertainty-aware decision-making, which is critical for risk assessment, maintenance planning, and integrating uncertainty infor-mation directly into robust RUL predictions [57]. No-tably, the results indicate that failure onset and mode 13 identification is highly robust, even in regimes where in-dividual parameters are weakly identifiable. This dis-tinction highlights that reliable anomaly detection may be achievable even when precise quantification of degra-dation dynamics remains challenging. Several limitations should be considered. First, param-eter identifiability depends strongly on the observability of the underlying process; for example, the fouling in-tensity and changepoint parameters are difficult to es-timate in scenarios with sparse or inactive degradation. These challenges arise from both measurement noise and structural properties of the stochastic model. Second, the study relies on synthetic data generated from a simpli-fied degradation model, which does not fully capture the complexity of real industrial systems. In particular, as-sumptions such as stationary noise and simplified fouling dynamics may limit direct transferability. Additionally, the use of engineered summary statistics, while computa-tionally efficient, may discard information present in the full time series. Despite these limitations, the approach is broadly ap-plicable due to its model-agnostic nature. SBI does not require an explicit likelihood function and can be applied to black-box simulators, making it suitable for legacy sys-tems where governing equations are inaccessible. Com-pared to purely data-driven methods, the framework re-tains physical interpretability through latent parameters while providing calibrated uncertainty estimates. Future work should focus on validation with real opera-tional data, where additional sources of variability such as sensor drift and unmodeled disturbances are present. However, for real-life industrial systems of increased com-plexity, the MCMC baseline will be computational infea-sible and hence the verification will most likely be limited to few hand-labeled failures. Extensions to adaptive or online training could improve robustness under distribu-tional shift, while joint inference of latent trajectories and parameters may further enhance diagnostic resolution. More generally, integrating SBI-based inference into dig-ital twin frameworks offers a pathway toward scalable, probabilistic condition monitoring in complex industrial systems.  
+
+> VI. CONCLUSIONS
+
+This work introduces a Bayesian framework for heat exchanger condition monitoring using simulation-based inference (SBI) powered by amortized neural posterior estimation. The results show that SBI matches MCMC in diagnostic accuracy while reducing inference time by a factor of 82. This massive computational accelera-tion enables near real-time estimation of failure modes and latent degradation parameters. The method remains robust across a range of scenarios, including sparse-event cases with weak parameter identifiability. From a reliability perspective, the framework provides the uncertainty-aware diagnostics essential for risk-informed decision-making and predictive maintenance. Crucially, its amortized and model-agnostic nature allows for the continuous inference of process and health parameters in realistic, plant-wide industrial settings where traditional MCMC sampling is entirely computationally unfeasible. Future work will focus on validation with real operational data and improving robustness under model mismatch.  
+
+> VII. DATA AND CODE AVAILABILITY
+
+The code and experiments used in this paper are available on GitHub at: https://github.com/ petercollett-cognite/sbi_mcmc_heat_exchanger. git . 
+
+> VIII. AUTHORSHIP CONTRIBUTION STATEMENT
+
+Peter Collet : Writing – review & editing, formal analysis. Simone Casolo : Writing – review & editing, formal analysis, conceptualization. Alexander J. Stasik : Review & editing, supervision, methodology, conceptualization. Signe Riemer-Sørensen : Writing – review & editing, supervision, methodology, conceptu-alization.  
+
+> IX. DECLARATION OF COMPETING INTEREST
+
+The authors declare that they have no known com-peting financial interests or personal relationships that could have appeared to influence the work reported in this paper.  
+
+> X. ACKNOWLEDGEMENTS
+
+This publication has been funded by the SFI NorwAI, (Centre for Research-based Innovation, 309834). The au-thors gratefully acknowledge the financial support from the Research Council of Norway and the partners of the SFI NorwAI.  
+
+> [1] A. Ahmed Murtaza, A. Saher, M. Hamza Zafar, S. Ku-mayl Raza Moosavi, M. Faisal Aftab, and F. Sanfilippo, Results in Engineering 24 , 102935 (2024).
+
+14 
+
+[2] L. Villa and C. Zanini Brusamarello, The Canadian Jour-nal of Chemical Engineering 103 , 1786 (2025). [3] R. Qi, J. Zhang, and K. Spencer, Algorithms 16 , 9 (2022). [4] A. Sahu, S. K. Palei, and A. Mishra, Expert Systems 41 ,10.1111/exsy.13360 (2023). [5] J. Zou, T. Hirokawa, J. An, L. Huang, and J. Camm, Frontiers in Energy Research 11 ,10.3389/fenrg.2023.1294531 (2023). [6] S. Sundar, M. C. Rajagopal, H. Zhao, G. Kuntumalla, Y. Meng, H. C. Chang, C. Shao, P. Ferreira, N. Miljkovic, S. Sinha, and S. Salapaka, Intl. J. of Heat and Mass Transf. 159 , 120112 (2020). [7] Z. Wu, B. Zhang, H. Yu, J. Ren, M. Pan, C. He, and Q. Chen, Chem. Eng. Sci. 282 , 119285 (2023). [8] R. Jradi, C. Marvillet, and M. R. Jeday, Sci. Rep 12 ,20437 (2022). [9] M. Markowski and P. Trzcinski, Sci. Rep 15 , 42078 (2025). [10] A. A. Bash, H. Karah, and A. A. Khail, Engineering Ap-plications of Artificial Intelligence 151 , 110723 (2025). [11] G. Hou, D. Zhang, Q. Yan, S. Wang, L. Ma, and M. Jiang, International Communications in Heat and Mass Transfer 164 , 108809 (2025). [12] G. Hou, Z. An, D. Zhang, X. Du, Y. Ding, and J. Fu, In-ternational Communications in Heat and Mass Transfer 
+
+175 , 111129 (2026). [13] H. Xu, S. Yan, X. Qin, W. An, and J. Wang, Processes 
+
+13 , 10.3390/pr13010219 (2025). [14] S. Hosseini, A. Khandakar, M. E. Chowdhury, M. A. Ayari, T. Rahman, M. H. Chowdhury, and B. Vaferi, En-ergy Reports 8, 8767 (2022). [15] J. Berce, M. Bucci, M. Zupančič, M. Može, and I. Golo-bič, Applied Thermal Engineering 277 , 126954 (2025). [16] A. Aboul Khail and A. Karah Bash, Thermal Science and Engineering Progress 71 , 104565 (2026). [17] R. Ben-Mansour, S. El-Ferik, M. Al-Naser, B. A. Qureshi, M. A. M. Eltoum, A. Abuelyamen, F. Al-Sunni, and R. Ben Mansour, Energies 16 , 10.3390/en16062812 (2023). [18] A. Etminan, K. Pope, and K. Mashayekh, AI Thermal Fluids 4, 100022 (2025). [19] A. Gelman, J. B. Carlin, H. S. Stern, and D. B. Rubin, 
+
+Bayesian data analysis (Chapman and Hall/CRC, 1995). [20] R. Moradi, S. Cofre-Martel, E. Lopez Droguett, M. Modarres, and K. M. Groth, Reliability Engineering & System Safety 222 , 108433 (2022). [21] M. E. Cholette, H. Yu, P. Borghesani, L. Ma, and G. Kent, Reliability Engineering & System Safety 183 ,184 (2019). [22] S. Bardeeniz, C. Panjapornpon, P. Chomchai, and M. A. Hussain, Reliability Engineering & System Safety 262 ,111250 (2025). [23] G. L. Jones and Q. Qin, Annual Review of Statistics and Its Application 9, 557 (2021). [24] S. Xiao and W. Nowak, Reliability Engineering & System Safety 266 , 111718 (2026). [25] E. Zio and G. Peloni, Reliability Engineering & System Safety 96 , 403 (2011). [26] N. Nazemzadeh, J. Loyola-Fuentes, G. Righetti, E. Diaz-Bejarano, S. Mancin, and F. Coletti, AI Thermal Fluids 
+
+5, 100030 (2026). [27] J. Mo and W.-J. Yan, Reliability Engineering & System Safety 264 , 111337 (2025). [28] A. Dasgupta and E. A. Johnson, Reliability Engineering & System Safety 242 , 109729 (2024). [29] K. Cranmer, J. Brehmer, and G. Louppe, Proceedings of the National Academy of Sciences 117 , 30055 (2020). [30] M. Deistler, J. Boelts, P. Steinbach, G. Moss, T. Moreau, M. Gloeckler, P. L. C. Rodrigues, J. Linhart, J. K. Lap-palainen, B. K. Miller, P. J. Gonçalves, J.-M. Lueck-mann, C. Schröder, and J. H. Macke, Simulation-based inference: A practical guide (2025), arXiv:2508.12939 [stat.ML]. [31] Álvaro Tejero-Cantero, J. Boelts, M. Deistler, J.-M. Lueckmann, C. Durkan, P. J. Gonçalves, D. Green-berg, and J. H. Macke, arXiv 10.48550/arxiv.2007.09114 (2020). [32] G. Papamakarios and I. Murray, Fast ϵ-free inference of simulation models with bayesian conditional density es-timation (2018), arXiv:1605.06376 [stat.ML]. [33] G. Papamakarios, D. Sterratt, and I. Murray, in Proceed-ings of the Twenty-Second International Conference on Artificial Intelligence and Statistics , Proceedings of Ma-chine Learning Research, Vol. 89, edited by K. Chaudhuri and M. Sugiyama (PMLR, 2019) pp. 837–848. [34] S. He, Y. Ye, M. Wang, J. Zhang, W. Tian, S. Qiu, and G. Su, Nuclear Engineering and Design 432 , 113759 (2025). [35] J. Degrave, M. Hermans, J. Dambre, and F. Wyffels, A differentiable physics engine for deep learning in robotics (2018), arXiv:1611.01652 [cs.NE]. [36] R. Majumdar, V. Jadhav, A. Deodhar, S. Karande, L. Vig, and V. Runkana, Numerical Heat Transfer, Part B: Fundamentals 86 , 1910 (2025). [37] M. Shi, L. Sun, Z. Bi, and R. He, Computers & Chemical Engineering 201 , 109259 (2025). [38] T. L. Bergman, A. S. Lavine, F. P. Incropera, and D. P. DeWitt, Fundamentals of heat and mass transfer (John Wiley & Sons, 2011). [39] J.-X. Zhang, J.-L. Zhang, Z.-X. Zhang, T.-M. Li, and X.-S. Si, Reliability Engineering & System Safety 250 ,110223 (2024). [40] P. Wang, Q. Liu, D. Xu, G. Jiang, W. Peng, F. Liu, and J. Hou, International Journal of Heat and Mass Transfer 
+
+256 , 128183 (2026). [41] P. Tankov and R. Cont, Financial Modelling with Jump Processes (Chapman and Hall/CRC, Boca Raton, 2003). [42] W. Ebert and C. B. Panchal, in Fouling mitigation in in-dustrial heat exchanger equipment , edited by C. B. Pan-chal, T. R. Bott, E. F. C. Somerscales, and S. Toyama (Begell House, 1997) pp. 451–460. [43] D. van Ravenzwaaij, P. Cassey, and S. D. Brown, Psy-chonomic Bulletin & Review 25 , 143 (2018). [44] D. M. Blei, A. Kucukelbir, and J. D. McAuliffe, Jour-nal of the American Statistical Association 112 , 859–877 (2017). [45] M. D. Hoffman and A. Gelman, J. Mach. Learn. Res. 15 ,1593–1623 (2014). [46] M. Sunnåker, A. G. Busetto, E. Numminen, J. Corander, M. Foll, and C. Dessimoz, PLoS Computational Biology 
+
+9, e1002803 (2013). [47] D. S. Greenberg, M. Nonnenmacher, and J. H. Macke, in 
+
+International Conference on Machine Learning (2019). [48] J. Boelts, M. Deistler, M. Gloeckler, Álvaro Tejero-Cantero, J.-M. Lueckmann, G. Moss, P. Steinbach, T. Moreau, F. Muratore, J. Linhart, C. Durkan, J. Vet-ter, B. K. Miller, M. Herold, A. Ziaeemehr, M. Pals, 15 
+
+T. Gruner, S. Bischoff, N. Krouglova, R. Gao, J. K. Lappalainen, B. Mucsányi, F. Pei, A. Schulz, Z. Ste-fanidi, P. Rodrigues, C. Schröder, F. A. Zaid, J. Beck, J. Kapoor, D. S. Greenberg, P. J. Gonçalves, and J. H. Macke, Journal of Open Source Software 10 , 7754 (2025). [49] J. E. Matheson and R. L. Winkler, Management Science 
+
+22 , 1087 (1976). [50] C. Yang, M. Ai, Z. Tang, and Y. Xie, Engineering Appli-cations of Artificial Intelligence 162 , 112236 (2025). [51] L. Chang and Y.-H. Lin, Engineering Applications of Ar-tificial Intelligence 142 , 109980 (2025). [52] D. Phan, N. Pradhan, and M. Jankowiak, arXiv preprint arXiv:1912.11554 (2019). [53] E. Bingham, J. P. Chen, M. Jankowiak, F. Obermeyer, N. Pradhan, T. Karaletsos, R. Singh, P. A. Szerlip, P. Horsfall, and N. D. Goodman, J. Mach. Learn. Res. 
+
+20 , 28:1 (2019). [54] C. Durkan, A. Ivanov, A. Maddison, and G. Papamakar-ios, in Advances in Neural Information Processing Sys-tems , Vol. 32 (2019) pp. 7511–7522. [55] A. Delaunoy, B. K. Miller, P. Forré, C. Weniger, and G. Louppe, Preprint (2023), arXiv:2304.10978 [stat.ML]. [56] M. Falkiewicz, N. Takeishi, I. Shekhzadeh, A. Wehenkel, A. Delaunoy, G. Louppe, and A. Kalousis, Preprint (2023), arXiv:2310.13402 [stat.ML]. [57] X. Xu, J. Zhou, X. Weng, Z. Zhang, H. He, F. Steyskal, and G. Brunauer, Reliability Engineering & System Safety 250 , 110250 (2024).
