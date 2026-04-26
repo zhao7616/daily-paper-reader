@@ -6,73 +6,64 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-04-23
-- 运行时间：2026-04-23 19:58:07 UTC
+- 最新运行日期：2026-04-26
+- 运行时间：2026-04-26 19:51:56 UTC
 - 运行状态：成功
-- 本次总论文数：17
-- 精读区：6
+- 本次总论文数：14
+- 精读区：3
 - 速读区：11
 
 ### 今日简报（AI）
-今日深度研读 17 篇工业智能运维论文，重点攻克了设备剩余寿命（RUL）预测的高精度建模难题。
-满分论文通过非对称损失引导的混合模型与故障热力图，实现了预测精度与可解释性的双重突破。
-建议关注深度学习在复杂工业场景下的可解释性方案，以及脉冲神经网络在健康监测中的跨界应用。
-- 详情：[/202604/23/README](/202604/23/README)
+今日深挖 14 篇工业智能前沿论文，重点聚焦数字孪生预测与异构联邦学习。
+满分论文提出的数字孪生混合框架为设备堵塞预测提供了新范式，个性化联邦学习则有效解决了工业数据异构难题。
+建议关注数据增强与因果约束在异常检测中的应用，以低成本提升复杂场景下的监测精度。
+- 详情：[/202604/26/README](/202604/26/README)
 
 ### 精读区论文标签
-1. [Asymmetric-Loss-Guided Hybrid CNN-BiLSTM-Attention Model for Industrial RUL Prediction with Interpretable Failure Heatmaps](/202604/23/2604.13459v1-asymmetric-loss-guided-hybrid-cnn-bilstm-attention-model-for-industrial-rul-prediction-with-interpretable-failure-heatmaps)  
+1. [Digital twin-based hybrid framework for steam generator clogging prognostics](/202604/26/2604.19175v1-digital-twin-based-hybrid-framework-for-steam-generator-clogging-prognostics)  
    标签：评分：10.0/10、query:rul
-   evidence：用于涡扇发动机工业剩余寿命预测的混合CNN-BiLSTM-Attention模型
-2. [Asymmetric-Loss-Guided Hybrid CNN-BiLSTM-Attention Model for Industrial RUL Prediction with Interpretable Failure Heatmaps](/202604/23/2604.13459v2-asymmetric-loss-guided-hybrid-cnn-bilstm-attention-model-for-industrial-rul-prediction-with-interpretable-failure-heatmaps)  
-   标签：评分：10.0/10、query:rul
-   evidence：基于CNN-BiLSTM-Attention的涡扇发动机工业剩余寿命预测
-3. [Digital twin-based hybrid framework for steam generator clogging prognostics](/202604/23/2604.19175v1-digital-twin-based-hybrid-framework-for-steam-generator-clogging-prognostics)  
-   标签：评分：9.5/10、query:rul
-   evidence：用于蒸汽发生器剩余寿命预测的混合框架，涉及堵塞退化率
-4. [Heterogeneity-Aware Personalized Federated Learning for Industrial Predictive Analytics](/202604/23/2604.19451v1-heterogeneity-aware-personalized-federated-learning-for-industrial-predictive-analytics)  
+   evidence：蒸汽发生器剩余寿命预测的混合框架，涉及堵塞率
+2. [Heterogeneity-Aware Personalized Federated Learning for Industrial Predictive Analytics](/202604/26/2604.19451v1-heterogeneity-aware-personalized-federated-learning-for-industrial-predictive-analytics)  
    标签：评分：9.0/10、query:rul
-   evidence：用于工业失效时间预测的个性化联邦预测模型
-5. [Physics-Enhanced Deep Learning for Proactive Thermal Runaway Forecasting in Li-Ion Batteries](/202604/23/2604.20175v1-physics-enhanced-deep-learning-for-proactive-thermal-runaway-forecasting-in-li-ion-batteries)  
+   evidence：工业分析中的联邦预测和失效时间预测
+3. [Physics-Enhanced Deep Learning for Proactive Thermal Runaway Forecasting in Li-Ion Batteries](/202604/26/2604.20175v1-physics-enhanced-deep-learning-for-proactive-thermal-runaway-forecasting-in-li-ion-batteries)  
    标签：评分：8.0/10、query:rul
-   evidence：使用物理信息 LSTM 进行锂电池热失控主动预测
-6. [Fast Bayesian equipment condition monitoring via simulation based inference: applications to heat exchanger health](/202604/23/2604.20735v1-fast-bayesian-equipment-condition-monitoring-via-simulation-based-inference-applications-to-heat-exchanger-health)  
-   标签：评分：8.0/10、query:phm
-   evidence：工业换热器的状态监测与故障模式诊断
+   evidence：电池热失控的主动预测及与剩余寿命相关的安全预测
 
 ### 速读区论文标签
-1. [Neuromorphic Parameter Estimation for Power Converter Health Monitoring Using Spiking Neural Networks](/202604/23/2604.15714v1-neuromorphic-parameter-estimation-for-power-converter-health-monitoring-using-spiking-neural-networks)  
+1. [CrackForward: Context-Aware Severity Stage Crack Synthesis for Data Augmentation](/202604/26/2604.19941v1-crackforward-context-aware-severity-stage-crack-synthesis-for-data-augmentation)  
    标签：评分：7.5/10、query:rul
-   evidence：使用脉冲神经网络进行功率转换器健康监测的参数估计
-2. [Log-based vs Graph-based Approaches to Fault Diagnosis](/202604/23/2604.14019v1-log-based-vs-graph-based-approaches-to-fault-diagnosis)  
+   evidence：结构健康监测与用于数据增强的裂纹扩展模式合成
+2. [FryNet: Dual-Stream Adversarial Fusion for Non-Destructive Frying Oil Oxidation Assessment](/202604/26/2604.21321v1-frynet-dual-stream-adversarial-fusion-for-non-destructive-frying-oil-oxidation-assessment)  
+   标签：评分：7.5/10、query:phm
+   evidence：在单次前向传播中共同执行分类和退化指标回归
+3. [Causally-Constrained Probabilistic Forecasting for Time-Series Anomaly Detection](/202604/26/2604.17998v1-causally-constrained-probabilistic-forecasting-for-time-series-anomaly-detection)  
    标签：评分：7.0/10、query:phm
-   evidence：分布式系统中基于日志与基于图的故障诊断方法对比
-3. [Hybrid Spectro-Temporal Fusion Framework for Structural Health Monitoring](/202604/23/2604.16589v1-hybrid-spectro-temporal-fusion-framework-for-structural-health-monitoring)  
+   evidence：工业监测的时间序列异常检测和根本原因定位
+4. [Disentangling Damage from Operational Variability: A Label-Free Self-Supervised Representation Learning Framework for Output-Only Structural Damage Identification](/202604/26/2604.19658v1-disentangling-damage-from-operational-variability-a-label-free-self-supervised-representation-learning-framework-for-output-only-structural-damage-identification)  
+   标签：评分：7.0/10、query:phm
+   evidence：利用振动信号进行结构健康监测和损伤识别
+5. [Trajectory-Aware Reliability Modeling of Democratic Systems](/202604/26/2604.20127v1-trajectory-aware-reliability-modeling-of-democratic-systems)  
    标签：评分：7.0/10、query:rul
-   evidence：结构健康监测与振动响应分析
-4. [Multi-Level Temporal Graph Networks with Local-Global Fusion for Industrial Fault Diagnosis](/202604/23/2604.18765v1-multi-level-temporal-graph-networks-with-local-global-fusion-for-industrial-fault-diagnosis)  
+   evidence：捕捉逐渐退化和失效风险的轨迹感知可靠性建模
+6. [Domain-Aware Hierarchical Contrastive Learning for Semi-Supervised Generalization Fault Diagnosis](/202604/26/2604.20928v1-domain-aware-hierarchical-contrastive-learning-for-semi-supervised-generalization-fault-diagnosis)  
    标签：评分：7.0/10、query:phm
-   evidence：用于工业故障诊断的多级时间图网络
-5. [Disentangling Damage from Operational Variability: A Label-Free Self-Supervised Representation Learning Framework for Output-Only Structural Damage Identification](/202604/23/2604.19658v1-disentangling-damage-from-operational-variability-a-label-free-self-supervised-representation-learning-framework-for-output-only-structural-damage-identification)  
-   标签：评分：7.0/10、query:rul
-   evidence：基于振动信号的结构健康监测与损伤识别
-6. [Co-State Based Data Fusion and Risk Aware Filtering for Spacecraft Navigation and Hazard Prediction](/202604/23/2604.20485v1-co-state-based-data-fusion-and-risk-aware-filtering-for-spacecraft-navigation-and-hazard-prediction)  
-   标签：评分：7.0/10、query:phm
-   evidence：一致性监测与危险预测的联合框架
-7. [Causally-Constrained Probabilistic Forecasting for Time-Series Anomaly Detection](/202604/23/2604.17998v1-causally-constrained-probabilistic-forecasting-for-time-series-anomaly-detection)  
+   evidence：未知工况下的领域泛化故障诊断
+7. [Conditional Attribution for Root Cause Analysis in Time-Series Anomaly Detection](/202604/26/2604.17616v1-conditional-attribution-for-root-cause-analysis-in-time-series-anomaly-detection)  
    标签：评分：6.5/10、query:phm
-   evidence：用于工业监测的多变量时间序列异常检测
-8. [ASTER: Latent Pseudo-Anomaly Generation for Unsupervised Time-Series Anomaly Detection](/202604/23/2604.13924v1-aster-latent-pseudo-anomaly-generation-for-unsupervised-time-series-anomaly-detection)  
-   标签：评分：6.0/10、query:rul
-   evidence：用于工业监测的无监督时间序列异常检测
-9. [Unsupervised Anomaly Detection in Process-Complex Industrial Time Series: A Real-World Case Study](/202604/23/2604.13928v1-unsupervised-anomaly-detection-in-process-complex-industrial-time-series-a-real-world-case-study)  
-   标签：评分：6.0/10、query:rul
-   evidence：过程复杂工业时间序列中的异常检测
-10. [Perron-Frobenius Contractive Operator Matching for Data-Driven Reachable Fault Identification and Recovery](/202604/23/2604.15470v1-perron-frobenius-contractive-operator-matching-for-data-driven-reachable-fault-identification-and-recovery)  
+   evidence：复杂系统时间序列异常检测中的根因分析
+8. [A Hidden Markov Framework for Physically Interpretable Arc Stability Dynamics in Welding Systems](/202604/26/2604.21839v1-a-hidden-markov-framework-for-physically-interpretable-arc-stability-dynamics-in-welding-systems)  
+   标签：评分：6.5/10、query:rul
+   evidence：用于监测系统状态时间演变的概率状态空间框架
+9. [ZSG-IAD: A Multimodal Framework for Zero-Shot Grounded Industrial Anomaly Detection](/202604/26/2604.17949v1-zsg-iad-a-multimodal-framework-for-zero-shot-grounded-industrial-anomaly-detection)  
    标签：评分：6.0/10、query:phm
-   evidence：非线性系统的数据驱动故障识别与恢复
-11. [Conditional Attribution for Root Cause Analysis in Time-Series Anomaly Detection](/202604/23/2604.17616v1-conditional-attribution-for-root-cause-analysis-in-time-series-anomaly-detection)  
+   evidence：工业异常检测与报告的多模态框架
+10. [Feature Perturbation Pool-based Fusion Network for Unified Multi-Class Industrial Defect Detection](/202604/26/2604.19259v1-feature-perturbation-pool-based-fusion-network-for-unified-multi-class-industrial-defect-detection)  
    标签：评分：6.0/10、query:phm
-   evidence：复杂系统中时间序列异常检测的根因分析
+   evidence：统一的多类工业缺陷检测与联合建模
+11. [CrackForward: Context-Aware Severity Stage Crack Synthesis for Data Augmentation](/202604/26/2604.19941v2-crackforward-context-aware-severity-stage-crack-synthesis-for-data-augmentation)  
+   标签：评分：6.0/10、query:rul
+   evidence：为结构健康监测和严重程度阶段分析合成裂纹扩展模式
 
 
 <div class="dpr-home-promo-card">

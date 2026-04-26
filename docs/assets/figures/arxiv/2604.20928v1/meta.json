@@ -1,0 +1,62 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.20928v1/fig-001.webp",
+      "caption": "Fig. 5. Epoch-wise evolution of four metrics for HCL and PCL on task T4: the proportions of available samples from S1 and S2, the proportion of S1 among all available samples, and the pseudo-label accuracy. Subfigures (a)–(f) correspond to HCL and PCL with τ = 0.5, 0.6, 0.7, 0.8, and 0.9, respectively.",
+      "page": 11,
+      "index": 1,
+      "width": 524,
+      "height": 574
+    },
+    {
+      "url": "assets/figures/arxiv/2604.20928v1/fig-002.webp",
+      "caption": "Fig. 1. Visual illustration of differences between (a) previous works and (b) our method.",
+      "page": 2,
+      "index": 2,
+      "width": 586,
+      "height": 326
+    },
+    {
+      "url": "assets/figures/arxiv/2604.20928v1/fig-003.webp",
+      "caption": "TABLE II FAULT CATEGORIES AND SAMPLE QUANTITIES FOR THE PU DATASET UNDER EACH CONDITION",
+      "page": 7,
+      "index": 3,
+      "width": 529,
+      "height": 256
+    },
+    {
+      "url": "assets/figures/arxiv/2604.20928v1/fig-004.webp",
+      "caption": "TABLE X COMPARISON OF ACCURACY (%) ACROSS ALL TASKS ON THE JUST DATASET UNDER TWO SNR SETTINGS",
+      "page": 10,
+      "index": 4,
+      "width": 1060,
+      "height": 229
+    },
+    {
+      "url": "assets/figures/arxiv/2604.20928v1/fig-005.webp",
+      "caption": "TABLE XI ABLATION STUDY: ACCURACY (%) ACROSS ALL TASKS ON SNR = 0 DB.",
+      "page": 10,
+      "index": 5,
+      "width": 1076,
+      "height": 183
+    },
+    {
+      "url": "assets/figures/arxiv/2604.20928v1/fig-006.webp",
+      "caption": "TABLE IX COMPARISON OF ACCURACY (%) ACROSS ALL TASKS ON THE PU DATASET UNDER TWO SNR SETTINGS",
+      "page": 10,
+      "index": 6,
+      "width": 1060,
+      "height": 229
+    },
+    {
+      "url": "assets/figures/arxiv/2604.20928v1/fig-007.webp",
+      "caption": "TABLE VIII COMPARISON OF ACCURACY (%) ACROSS ALL TASKS ON THE CWRU DATASET UNDER TWO SNR SETTINGS",
+      "page": 10,
+      "index": 7,
+      "width": 1060,
+      "height": 231
+    }
+  ]
+}

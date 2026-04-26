@@ -1,0 +1,14 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.20127v1/fig-001.webp",
+      "caption": "Figure 2. Comparative Performance of the Trajectory-Based DCNAR Relative to Hazard and Cox Models. “1” in Figure 2a indicates that DCNAR outperforms the comparative model. Figure 2b shows the differences in performance between DCNAR and comparative models.",
+      "page": 5,
+      "index": 1,
+      "width": 1094,
+      "height": 545
+    }
+  ]
+}

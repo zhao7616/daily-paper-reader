@@ -1,0 +1,733 @@
+Title: Disentangling Damage from Operational Variability: A Label-Free Self-Supervised Representation Learning Framework for Output-Only Structural Damage Identification
+
+URL Source: https://arxiv.org/pdf/2604.19658v1
+
+Published Time: Wed, 22 Apr 2026 01:22:11 GMT
+
+Number of Pages: 18
+
+Markdown Content:
+# Disentangling Damage from Operational Variability: A Label-Free Self-Supervised Representation Learning Framework for Output-Only Structural Damage Identification 
+
+> Journal Title XX(X):1–18 ©The Author(s) 2026 Reprints and permission: sagepub.co.uk/journalsPermissions.nav DOI: 10.1177/ToBeAssigned www.sagepub.com/
+
+SAGE 
+
+## Xudong Jian 1, Charikleia Stoura 2, Simon Scandella 1, Eleni Chatzi 1
+
+Abstract 
+
+Damage identification is a core task in structural health monitoring. In practice, however, its reliability is often compromised by confounding non-damage effects, such as variations in excitation and environmental conditions, which can induce changes comparable to or larger than those caused by structural damage. To address this challenge, this study proposes a self-supervised label-free disentangled representation learning framework for robust vibration-based structural damage identification. The proposed framework employs an autoencoder with two latent representations to learn directly from raw vibration acceleration signals. A self-supervised invariance regularization, implemented via Variance–Invariance–Covariance Regularization (VICReg), is imposed on one latent representation using baseline data where structural damage is assumed constant but operational and environmental conditions vary. In addition, a frequency-domain constraint is introduced to enforce agreement between the power spectral density reconstructed from the latent representation and that computed from the corresponding input time series. Together, these mechanisms promote disentanglement, enabling the learned representation to be sensitive to damage-related characteristics while remaining invariant to nuisance variability. The framework is trained in a fully end-to-end and label-free manner, requiring no prior information on damage, excitation, or environmental conditions, making it well-suited for real-world applications. Its effectiveness is validated on two distinct real-world vibration datasets, including a bridge and a gearbox. The results demonstrate robustness to operational variability, strong generalization capability, and good performance in both damage detection and quantification. 
+
+Keywords 
+
+Structural health monitoring, structural damage identification, deep learning, self-supervised learning, disentangled representation learning, operational variability 
+
+## Introduction 
+
+Engineering structures such as bridges are essential to societal and economic activities. As these assets age and face increasing demands in terms of loads, ensuring their safety and serviceability is of paramount importance 1. Structural health monitoring (SHM) has therefore attracted sustained attention over the past decades as a means to support structural condition assessment using in-situ measurements and data interpretation 2.A typical SHM workflow comprises data acquisition, sig-nal processing, and decision-making for downstream tasks, including damage detection, localization, quantification, and prognosis. From a data acquisition perspective, in the civil infrastructure context, vibration-based SHM is among the most widely-adopted paradigms 3. This is attributed to the strong correlation between the dynamic response of a struc-ture and its structural parameters, such as stiffness, mass, and boundary conditions 4. From a signal processing perspective, SHM methods are commonly grouped into physics-based approaches, data-driven approaches, and hybrid approaches that combine the former two. The vast use of SHM in practice has increased data volume and complexity, making data-driven and hybrid approaches, particularly those based on deep learning, of greater interest 5.However, a major obstacle for reliable SHM using data-driven and hybrid approaches is the presence of confounding non-damage influences. In practical scenarios, variations in operational and environmental conditions (for example, traffic intensity, wind, temperature, humidity, and changing excitation characteristics) can alter structural properties as much as, or more than, actual damage 6,7 . This phenomenon is widely recognized as a central challenge in SHM and is frequently discussed in terms of operational and environmental variability, or, in machine learning terms, as a distribution shift across monitoring conditions 8. In principle, additional measurements and explicit compensation models can mitigate these effects 9, but comprehensive measurement           
+
+> 2Department of Mechanical Engineering, Politecnico di Milano, Italy
+> Corresponding author:
+> Xudong Jian, Department of Civil, Environmental and Geomatic Engineering, ETH Z ¨ urich, Z ¨ urich, Switzerland. Email: xudong.jian@ibk.baug.ethz.ch
+> Prepared using sagej.cls [Version: 2017/01/17 v1.20]
+> arXiv:2604.19658v1 [cs.LG] 21 Apr 2026 2Journal Title XX(X)
+
+of all relevant non-damage factors is rarely feasible for real-world structures 10 . In practice, a robust SHM method should therefore be able to separate damage-sensitive information from nuisance variability even when excitation and environmental factors are only partially observed or not observed at all. To develop such robust SHM methods, a broad range of research has been conducted. Early research in this regard relies on feature engineering and statistical normalization of damage-sensitive indicators. Representative efforts include output-only strategies that seek stable features under changing conditions, and time series-based approaches that explicitly remove non-damage trends from monitored features 10,11 . In particular, cointegration-based methods aim to construct combinations of measured responses or extracted features that remain approximately stationary under benign variability, so that deviations are more likely attributable to damage 12 . Regime-switching extensions further attempt to handle multiple operating regimes by modelling piecewise-stationary behaviour 13 . While effective in some settings, these approaches typically rely on linearity or weak nonlinearity assumptions, require careful selection of features and sensors, and may struggle when nuisance effects are high-dimensional, non-stationary, or strongly coupled with damage. Those limitations caused by manual feature selection and assumptions motivate the use of deep learning to directly extract useful representations from raw vibration signals. In this regard, unsupervised deep learning has been widely explored for damage detection, most com-monly through autoencoders and related reconstruction-based anomaly detection schemes 14 . Extensions include integrating information fusion and active sensing concepts to enhance anomaly detectability 15 , or combining autoencoders with filtering frameworks to explicitly neutralize temperature effects 16 . However, purely reconstruction-driven represen-tations can still entangle damage with nuisance variability, and models trained under one set of operating conditions may exhibit degraded reliability when monitoring conditions shift, which motivates the need for learning strategies that explicitly target robustness to distribution shifts. To address distribution shifts more directly, domain adaptation and domain-aware learning have been introduced into SHM to align feature distributions across environments and operating regimes, enabling more transferable damage classifiers. Examples include domain adaptation applied to bridge monitoring for damage classification across varying conditions 17 , as well as approaches that fuse damage-sensitive features with domain adaptation to improve robustness on real building datasets 18 . More recent work also considers open-set settings where unknown damage classes may appear under varying environments, using open-set domain adaptation to improve reliability under both environmental variability and class uncertainty 19 . Despite these advances, many domain adaptation pipelines still depend on labelled source damage data and may not explicitly separate damage-related factors from nuisance factors in a disentangled manner, which becomes abottleneck when labels are scarce and when quantification or interpretation of the learned representation is desired. Therefore, recent studies have begun to incorporate self-supervised learning and disentanglement concepts into SHM feature learning. For example, contrastive and self-supervised learning have been used to enhance open-set damage recognition when only healthy data and limited minor damage data are available 20–22 . Domain separation has also been explored through architectures such as domain-separated capsule networks 23 , and physics-informed variational autoencoders have been proposed to disentangle confounding sources by augmenting latent spaces with interpretable physics-based variables and regularizing the learning objective 24 . In parallel, self-supervised strategies have been explored at the population level to enhance damage detection and model tuning across similar structures 25 . These efforts collectively support the importance of self-supervision and disentanglement, but they may still require domain labels, partial supervision, or explicit physics models, and they do not typically impose both baseline invariance and accessible physics on a dedicated damage-sensitive latent representation, leaving room for a simpler end-to-end framework that relies only on measured vibration time series. To address the above-mentioned limitations, this study proposes a label-free, self-supervised, disentangled represen-tation learning framework for robust vibration-based struc-tural damage identification under non-stationarity, nonlin-earity, and varying operational conditions. The framework is built on an autoencoder with two latent representations, designed to disentangle damage-sensitive information from nuisance variability using only measured vibration time series, without requiring any damage, excitation, or environ-mental labels during training. The main contributions of this study are as follows: 1. We introduce a self-supervised invariance regular-ization on one latent representation, denoted zdmg ,using Variance Invariance Covariance Regularization (VICReg) 26 . The regularization is applied on signal windows drawn from a baseline period where the structural damage state is assumed constant while operational and environmental conditions vary. This encourages zdmg to remain consistent within the base-line state without requiring excitation or environmen-tal measurements. 2. We propose a frequency-domain loss that constrains 
+
+zdmg across all conditions by matching the power spectral density (PSD) decoded from zdmg with the PSD computed from the corresponding vibration sig-nal windows. This physics-guided constraint improves spectral fidelity and promotes retention of damage-relevant frequency characteristics without using any labels. 3. We systematically evaluate the proposed framework on two real vibration datasets, including a full-scale bridge experiment and a high-fidelity gearbox experiment. The evaluation includes multiple train validation test splits, ablation studies, and latent space analysis using UMAP 27 , demonstrating robustness to operational variability and improved damage detection and quantification performance.  
+
+> Prepared using sagej.cls
+
+3
+
+## Methodology 
+
+## Problem statement 
+
+This study focuses on structural damage detection and quantification using only vibration acceleration measure-ments. This setting is representative of many practical SHM applications, where direct measurements of excitation and environmental conditions are unavailable. As discussed earlier, measured vibration signals contain not only information related to structural damage, but also contributions from non-damage factors, such as operational and environmental variations. The objective of this study is therefore to disentangle these two types of information in a learned latent space. To this end, a deep learning model is employed to map raw vibration signals to two latent representations: 
+
+(zdmg , zndmg ) = fθ (X) , (1) where X ∈ RC×T denotes a signal window extracted from the measured acceleration time series, with C sensing channels and T time samples. The function fθ (·) represents a neural network parameterized by θ, which learns latent representations directly from the input data. The vectors 
+
+zdmg ∈ RH and zndmg ∈ RH denote H-dimensional ( H ≪
+
+T ) latent representations corresponding to damage-sensitive and non-damage-related information, respectively. Based on the learned damage-sensitive representation 
+
+zdmg , a scalar damage score is defined as 
+
+m = g (zdmg ) , (2) where g(·) denotes a mapping from the latent space to a scalar damage indicator m ∈ R. This metric can then be used for both damage detection (e.g., via thresholding) and damage quantification (e.g., via relative magnitude comparison). 
+
+## Model architecture 
+
+Building on prior studies 14,16,24 , this study designs the deep learning model architecture as illustrated in Figure 1. As shown in Figure 1, the proposed architecture consists of three main modules: • Encoder : The encoder processes the input acceler-ation time series X and maps them into two latent representations, zdmg and zndmg , corresponding to damage-sensitive and nuisance-related information, respectively. This design enables the disentanglement of structural damage effects from operational and environmental variability in the latent space. Since the focus of this study is not on network architecture innovation, a one-dimensional convolutional neural network (1D CNN), which is simple yet effective for time series modelling, is adopted as the encoder. • Decoder 1 : Decoder 1 reconstructs the input time series ˆX from the concatenated latent representa-tions [zdmg , zndmg ]. The reconstruction objective is to ensure that the latent space retains sufficient informa-tion from the original signals, enabling the model to learn compact and informative representations. A 1D CNN is again used for Decoder 1, which is standard for time-domain signal reconstruction. • Decoder 2: Decoder 2 takes only the damage-sensitive latent representation zdmg as input and reconstructs the normalized power spectral density ˆS
+
+corresponding to the input signal X. This frequency-domain reconstruction introduces a frequency-domain constraint that encourages zdmg to preserve damage-relevant spectral characteristics. Since this task does not require temporal convolution, a multi-layer perceptron (MLP) is employed for Decoder 2. For brevity, the detailed mechanisms and architectural configurations of the 1D CNN and MLP are not presented herein, as they constitute standard algorithms in the deep learning field. Nonetheless, all implementation details, including network structures and hyperparameters, are provided in our GitHub repository, which has been made publicly available to ensure the reproducibility of this study. 
+
+## Training strategies 
+
+As discussed earlier, a key practical challenge in applying deep learning to structural damage identification is the scarcity of labeled data. In most real-world SHM scenarios, labels related to structural damage, excitation, and environmental conditions are either very limited or entirely unavailable, which makes supervised training difficult and may degrade model performance. To address this challenge, the proposed framework adopts three complementary loss functions (training objectives), as illustrated in Figure 1. Their details are described below: • Loss 1: time-domain reconstruction loss . This loss function, which is fundamental for training autoen-coders, minimizes the discrepancy between the recon-structed acceleration time series ˆX and the measured signals X. By enforcing accurate reconstruction, the model is encouraged to automatically learn informa-tive representations from raw data. The loss is defined as: 
+
+L1 = 1
+
+CT 
+
+> C
+
+X
+
+> c=1
+> T
+
+X
+
+> t=1
+
+(xc,t − ˆxc,t )2 (3) • Loss 2: frequency-domain reconstruction loss . This loss function minimizes the difference between the reconstructed power spectral density ˆS derived from 
+
+zdmg and the magnitude-normalized power spectral density S computed from the input signals X. The motivation is to encourage zdmg to capture frequency-domain characteristics that are closely related to structural properties and comparatively less sensitive to excitation variability. The loss is defined as: 
+
+L2 = 1
+
+CK 
+
+> C
+
+X
+
+> c=1
+> K
+
+X
+
+> k=1
+
+(sc,k − ˆsc,k )2 (4) where K is the number of data points of power spectral density. • Loss 3: self-supervised VICReg loss . This loss function is designed to regularize the damage-sensitive latent representation zdmg in a self-supervised manner, with the objective of suppressing sensitivity to operational and environmental variability while preserving damage-related information.  
+
+> Prepared using sagej.cls
+
+4 Journal Title XX(X)   
+
+> Figure 1. Proposed self-supervised disentangled representation learning architecture. A batch of input vibration signals
+
+X (batch size: B) is encoded into a damage-sensitive latent representation zdmg and a nuisance latent representation zndmg . The model is trained with three objectives: (1) time-domain reconstruction of X, (2) frequency-domain reconstruction to match the PSD, and (3) self-supervised invariance regularization (VICReg) on zdmg using baseline pairs. 
+
+Specifically, as shown in Figure 1, for each training batch of latent representations zdmg ∈ RB×H , a subset of D samples ( D < B ), denoted as zb 
+
+> dmg
+
+∈ RD×H ,is selected from a baseline period, during which the structural state is assumed to remain unchanged, while excitation and environmental conditions may vary. From these D samples, two groups are constructed by selecting latent vectors with odd and even indices, respectively, forming paired representations 
+
+zb1dmg , zb2dmg 
+
+
+
+∈ R(D/ 2) ×H . These pairs are treated as 
+
+positive pairs that share the same structural state but differ in nuisance factors. To enforce invariance while avoiding representa-tion collapse, Variance–Invariance–Covariance Regu-larization (VICReg) 26 is adopted. The overall loss is defined as: 
+
+L3 = λinv Linv + λvar Lvar + λcov Lcov (5) where the three terms are defined as follows: 
+
+(1) Invariance term: 
+
+Linv = 1
+
+H
+
+> H
+
+X
+
+> h=1
+
+1
+
+D/ 2
+
+> D/ 2
+
+X
+
+> d=1
+
+ zb1 
+
+> d,h
+
+− zb2
+
+> d,h
+
+2 (6) This term minimizes the distance between paired representations, encouraging zdmg to be invariant to nuisance variations within the baseline condition. 
+
+(2) Variance term: 
+
+Lvar = 1
+
+H
+
+> H
+
+X
+
+> h=1
+
+max  0, 1 − σh(zb1)
+
++ 1
+
+H
+
+> H
+
+X
+
+> h=1
+
+max  0, 1 − σh(zb2) (7) where σh(·) denotes the standard deviation of the h-th latent dimension across the batch. This term prevents collapse of latent dimensions by ensuring sufficient variability in each feature. 
+
+(3) Covariance term: 
+
+Lcov = 1
+
+H
+
+X
+
+> i̸=j
+
+ Cov( zb1 
+
+> i,j
+
+)2 + Cov( zb2 
+
+> i,j
+
+)2 (8) where Cov( ·) denotes the covariance matrix computed across the batch. This term penalizes correlations between different latent dimensions, encouraging feature decorrelation and improving representation expressiveness. In this study, the weighting coefficients are set to 
+
+λinv = 25 , λvar = 25 , and λcov = 1 , following the original VICReg setting 26 that provides the best performance in extensive experiments. The overall training objective is defined as a weighted combination of the three loss terms: 
+
+L = λ1 L1 + λ2 L2 + λ3 L3 (9) It is worth noting that L1 and L2 correspond to fully unsupervised objectives, requiring no assumptions or prior knowledge of structural damage, excitation, or environmental conditions. In contrast, L3 introduces a self-supervised constraint based on a baseline period, during which the structural state is assumed to remain unchanged while operational and environmental conditions can vary. This assumption is practical for most in-service structures, where damage typically evolves gradually rather than occurring abruptly. 
+
+## Damage identification 
+
+After effective training, the encoder output zdmg is expected to primarily capture damage-sensitive information while being insensitive to nuisance variability. This representation is therefore used for structural damage identification. In this study, the Mahalanobis distance computed from zdmg 
+
+is adopted as the damage score for both detection and quantification. Let zdmg ∈ RN ×H denote the latent representations obtained from N signal windows. Similar to the baseline subset used in the self-supervised learning introduced in Section ”Training strategies” above, a subset corresponding to a baseline period is selected using a mask, denoted as zb 
+
+> dmg
+
+∈ RNb×H , where Nb is the number of baseline samples. It should be noted that the structure does not need to be strictly undamaged during the baseline period. Instead, a weaker and more practical assumption is adopted: the structural damage state remains unchanged during the baseline period, while excitation and environmental conditions may vary.  
+
+> Prepared using sagej.cls
+
+5
+
+The mean vector μ and covariance matrix Σ of the baseline distribution are computed by: 
+
+μ = 1
+
+NbNbX
+
+> n=1
+
+zbn, Σ = Cov( zb). (10) The Mahalanobis distance for each sample zn is then computed by: 
+
+mn = ( zn − μ)⊤Σ−1(zn − μ), (11) yielding a scalar damage score for each sample. The Mahalanobis distance provides a statistically grounded measure of deviation from the baseline distribution while accounting for correlations among latent features. Compared with Euclidean distance, it normalizes each dimension according to its variance and removes redundancy due to correlated features. This is particularly important in the learned latent space, where feature scales and dependencies are generally non-uniform, making the Mahalanobis distance well suited for this problem 20,28 .Damage detection is then formulated as a binary classification problem based on the damage scores. Athreshold is determined from the baseline data as the p-th percentile (with p = 95 in this study) of the baseline Mahalanobis distances: 
+
+τ = Percentile p ({mn | n ∈ baseline }) . (12) Samples with mn > τ are classified as damaged, while those with mn ≤ τ are classified as undamaged. This percentile-based thresholding provides a fully data-driven and label-free decision rule, which is particularly suitable for SHM scenarios with limited or no damage labels. The resulting predictions can be evaluated using standard metrics such as accuracy and true positive rate. Moreover, the magnitude of mn serves as a continuous damage indicator, enabling damage quantification and progression analysis. Finally, a pseudo-code is provided in Algorithm 1 to clearly illustrate the damage identification procedure. 
+
+## Real-world evaluation 1: openLAB bridge dataset 
+
+This section presents the evaluation of the proposed struc-tural damage identification framework using acceleration measurements from a full-scale girder bridge model, namely openLAB 29 . The objective of this evaluation is to assess the effectiveness of the proposed method in a realistic civil infrastructure setting. Specifically, the following research questions are addressed: 1. Can the proposed framework reliably detect and quantify structural damage under varying excitation and environmental conditions? 2. Are all components and loss functions in the proposed deep learning architecture necessary for achieving robust performance? 3. Can the proposed framework outperform traditional handcrafted feature-based methods for structural damage identification? 
+
+Algorithm 1 Damage identification using Mahalanobis distance in latent space 
+
+Require: Vibration signal windows {Xn}Nn=1 ; trained encoder fθ (·); baseline mask b ∈ { 0, 1}N ; percentile p
+
+Ensure: Damage scores {mn}Nn=1 ; threshold τ ; predictions 
+
+{ˆyn}Nn=1  
+
+> 1:
+
+Step 1: Encode signals into latent space  
+
+> 2:
+
+(zdmg , zndmg ) ← fθ (X)
+
+where zdmg = [ z1, . . . , zN ]⊤ ∈ RN ×H 
+
+> 3:
+
+Step 2: Select baseline subset  
+
+> 4:
+
+Nb ← PNn=1 bn 
+
+> 5:
+
+zb 
+
+> dmg
+
+← { zn | bn = 1 }
+
+where zb 
+
+> dmg
+
+= [ zb
+
+> 1
+
+, . . . , zbNb ]⊤ ∈ RNb×H 
+
+> 6:
+
+Step 3: Estimate baseline distribution  
+
+> 7:
+
+μ ← 1
+
+> Nb
+
+PNb 
+
+> n=1
+
+zbn 
+
+> 8:
+
+Σ−1 ←
+
+h
+
+Cov( zb
+
+> dmg
+
+)
+
+i−1 
+
+> 9:
+
+Step 4: Compute Mahalanobis damage scores  
+
+> 10:
+
+for n = 1 to N do  
+
+> 11:
+
+mn = ( zn − μ)⊤Σ−1(zn − μ) 
+
+> 12:
+
+end for  
+
+> 13:
+
+Step 5: Determine detection threshold  
+
+> 14:
+
+τ ← Percentile p ({mn | bn = 1 }) 
+
+> 15:
+
+Step 6: Classify samples  
+
+> 16:
+
+for n = 1 to N do  
+
+> 17:
+
+if mn > τ then  
+
+> 18:
+
+ˆyn ← 1 ▷ damaged  
+
+> 19:
+
+else  
+
+> 20:
+
+ˆyn ← 0 ▷ undamaged  
+
+> 21:
+
+end if  
+
+> 22:
+
+end for  
+
+> 23:
+
+return {mn}Nn=1 , τ, {ˆyn}Nn=1 
+
+## Dataset description 
+
+The research bridge, openLAB, is a prestressed concrete bridge with a total length of approximately 3 × 15 m and a width of 4.5 m, located at the premises of Hentschke Bau GmbH in Bautzen, Germany 29 . As illustrated in Figure 2, the bridge consists of three spans. Spans 1 and 2 are continuous and feature a T-girder cross section, whereas span 3 is simply supported (structurally independent from spans 1 and 2) and has a hollow slab cross section. These structural configurations are representative of typical road bridges, making the dataset well suited for validating the proposed damage identification framework. In this study, only spans 1 and 2 are considered, where artificial excitation and controlled damage were introduced. As shown in Figure 2, six triaxial accelerometers (product name: Kistler K-Beam), labelled A1 to A6, are installed at the bottom of the mid-span cross sections of three T-girders on both spans. These sensors record vibration acceleration at a sampling frequency of 200 Hz. To introduce excitation variability, two electrodynamic shakers, labeled S1 and S2 in Figure 2, are installed at the quarter-span locations of spans 1 and 2 on top of T-girder 1. The shakers generate non-stationary and broadband white-noise excitation in the frequency range of 1–80 Hz.  
+
+> Prepared using sagej.cls
+
+6 Journal Title XX(X)  
+
+> Figure 2. Overview of the openLAB bridge experiment. The top panel shows the full-scale bridge, while the middle panel illustrates the structural layout, including spans, shaker locations (S1–S2), accelerometer positions (A1–A6), the position of applied static load, and damage locations (D1–D3). The bottom panels present the cross sections of spans 1–2 (T-girder) and span 3 (hollow slab).
+
+By activating the shakers in different combinations, four excitation conditions are defined, as summarized in Table 1.  
+
+> Table 1. Excitation types of the openLAB dataset.
+
+Label Description 
+
+1 Shaker 1 off, shaker 2 off (ambient excitation) 2 Shaker 1 on, shaker 2 off 3 Shaker 1 off, shaker 2 on 4 Shaker 1 on, shaker 2 on Regarding environmental conditions, the experiment was conducted from the afternoon of 5 May 2025 to the evening of 7 May 2025. According to historical weather records, all three days were sunny, with temperature ranging from 1 to 14 °C and relative humidity ranging from 42% to 88%, providing environmental variability for this study. However, these environmental variables were not directly measured during the experiment. To simulate structural damage, two types of interventions were applied. First, on 6 May, multi-step static loading was applied to span 2, girder 1 (see Figure 2 for the loading position) until different levels of cracks and permanent deformation were observed. However, the exact locations of the cracks were not recorded. Second, on 7 May, damage was introduced by drilling holes in the concrete and cutting prestressing strands. The corresponding locations are labelled D1 to D3 in Figure 2. More information about the resulting damage states are summarized in Table 2. During the experiment, vibration acceleration signals along with their UTC timestamps were recorded, resulting in a total duration of 340 minutes. The dataset covers various combinations of excitation conditions and damage states. Longitudinal acceleration is not considered in this study, as it is typically negligible for bridge structures. Consequently, a total of 6 × 2 = 12 sensor channels are used.  
+
+> Table 2. Damage states of the openLAB dataset.
+
+Label Time & Date (CET) Description 
+
+1 from 13:30, 5 May to 12:21, 6 May No damage 2 from 12:21, 6 May to 13:40, 6 May Crack width 0.1 mm 3 from 13:40, 6 May to 15:22, 6 May Crack width 0.25 mm 4 from 15:22, 6 May to 16:55, 6 May Crack width 0.3 mm 5 from 16:55, 6 May to 18:56, 6 May Crack width 0.4 mm 6 from 18:56, 6 May to 19:49, 6 May Crack width 0.5 mm 7 from 19:49, 6 May to 10:20, 7 May Permanent deformation 5.7 mm 8 from 10:20, 7 May to 14:50, 7 May Cut steel strands at D1 9 from 14:50, 7 May to 18:03, 7 May Drill holes and cut steel strands at D2 10 after 18:03, 7 May Cut steel strands at D3 To facilitate model implementation, the continuous signals are segmented into 3400 overlapping windows, each with a length of 2048 data points (10.24 seconds) and an overlap of 1024 data points. The distribution of signal windows across different excitation conditions and damage states is summarized in Table 3. Z-score normalization is applied to all windows, where, for each window, the mean and standard deviation computed across all sensor channels are normalized to 0 and 1, respectively. The PSD of each window is estimated using Welch’s method. Specifically, the welch function from the scipy.signal library is used with parameters nperseg =1024, noverlap =512, and nfft =2048, resulting in PSD vectors of length 1025  
+
+> Prepared using sagej.cls
+
+7
+
+and a frequency resolution of 0.1953 Hz. The time series windows and their corresponding PSDs are split into training, validation, and test sets, containing 2040, 680, and 680 windows (0.6:0.2:0.2), respectively.  
+
+> Table 3. Number of signal windows from openLAB dataset.
+
+Exc. 1 Exc. 2 Exc. 3 Exc. 4 Total Dmg. 1 310 280 190 260 1040 
+
+Dmg. 2 120 40 60 40 260 
+
+Dmg. 3 30 40 50 40 160 
+
+Dmg. 4 120 40 50 60 270 
+
+Dmg. 5 120 40 50 50 260 
+
+Dmg. 6 180 0 0 0 180 
+
+Dmg. 7 180 0 0 0 180 
+
+Dmg. 8 240 100 80 40 460 
+
+Dmg. 9 240 50 90 50 430 
+
+Dmg. 10 120 0 40 0 160 
+
+Total 1660 590 610 540 3400 After signal segmentation and dataset splitting, all signal windows from 5 May in the training set are selected as the baseline subset for self-supervised learning. As shown in Table 2, the bridge remains in a healthy state during both the afternoon of 5 May and the morning of 6 May. Nevertheless, only the data from the afternoon of 5 May are used as the baseline subset. This design enables us to evaluate whether the proposed framework can correctly classify the data from the morning of 6 May as healthy, despite differences in excitation and environmental conditions between the two periods. In addition, restricting the baseline subset to the training set prevents data leakage. The validation and test sets are not used to update the learnable parameters of the deep learning model, ensuring a fair and unbiased evaluation of its generalization performance. Finally, it is worth noting that although parts of the openLAB dataset are publicly available 30 , the data used in this study are not publicly accessible due to collaboration agreements with the commercial partner Kistler. More details can be found in the Data Availability Statement section at the end of this paper. 
+
+## Implementation details 
+
+The proposed deep learning model is implemented in 
+
+PyTorch 2.9.1 with CUDA 12.6 support. Model training is performed using the Adam optimizer with standard hyperparameters: a learning rate of 0.001, first- and second-moment decay coefficients β1 = 0 .9 and β2 = 0 .999 ,respectively, and a weight decay of 0.0001 to mitigate overfitting. All computations are executed on an NVIDIA GeForce RTX 4090 GPU for acceleration. The model is trained with a batch size of 256 for 500 epochs. Both the encoder and Decoder 1 consist of four one-dimensional convolutional layers. The latent dimensions of 
+
+zdmg and zndmg are set to H = 128 . The MLP used for PSD reconstruction comprises three layers with a hidden dimension of 512. The loss weighting coefficients are set as 
+
+λ1 = 100 for the time-domain reconstruction loss, λ2 = 100 
+
+for the frequency-domain reconstruction loss, and λ3 = 1 
+
+for the VICReg loss. These values are selected to yield good performance by balancing the contributions of the three loss terms, which differ in magnitude. Figure 3 presents the training and validation loss curves from a representative run, with a total training time of 133.78 seconds. As observed, all loss components decrease smoothly during training, and the validation losses remain slightly higher than the corresponding training losses, indicating stable convergence and no evident overfitting.  
+
+> Figure 3. Training and validation loss curves of the proposed framework on openLAB dataset. The total loss and individual loss components, including time-domain reconstruction (Loss 1), frequency-domain reconstruction (Loss 2), and VICReg self-supervised loss (Loss 3), are shown over 500 training epochs.
+
+The above settings are determined through preliminary hyperparameter tuning. It should be emphasized that the primary objective of this study is to demonstrate the feasibility and effectiveness of the proposed framework, rather than to present a fully optimized model. Although limited tuning has been conducted, extensive optimization is beyond the scope of this work. Interested readers are encouraged to further refine the model using the publicly available code and data provided in our GitHub repository 31 ,which includes full implementation and configuration details. 
+
+## Evaluation results 
+
+After training, the model is evaluated on the validation and test set to assess its generalization capability, as these data are not used to update the learnable model parameters. The reconstructed acceleration time series and the corresponding PSD are first examined. Figure 4 presents the reconstruction results for an example signal window. The close agreement between the original and reconstructed signals demonstrates the model’s ability to accurately capture both time-domain and frequency-domain characteristics. The trained model is then applied to all signal windows in the validation and test sets. For each window, a Mahalanobis distance is computed based on the mean vector μ and covariance matrix Σ estimated from the baseline subset used during training. Figure 5 presents the scatter plot of the Mahalanobis distances for all signal windows, together with the median (50th percentile) and the 95th percentile (used as the damage detection threshold) of the Mahalanobis distances of the baseline subset. For comparison, both zdmg 
+
+and zndmg are used to compute the Mahalanobis distance.  
+
+> Prepared using sagej.cls
+
+8 Journal Title XX(X) 
+
+(a) 
+
+(b) 
+
+Figure 4. Example reconstruction results for a signal window (damage label 1, excitation label 4). Only the first 200 data points are presented to allow clearer observation: (a) Time-domain acceleration signals and their reconstructions across 12 channels. (b) Corresponding PSD and their reconstructions. 
+
+Table 4 presents the confusion matrices for damage detection based on the results shown in Figure 5. In this study, the healthy state is defined as the negative class, while the damaged state is defined as the positive class. Accordingly, a true negative (TN) corresponds to a healthy signal window correctly classified as healthy, whereas a false positive (FP) denotes a healthy signal window incorrectly classified as damaged. Similarly, a false negative (FN) represents a damaged signal window incorrectly classified as healthy, and a true positive (TP) indicates a damaged signal window correctly classified as damaged. Based on the confusion matrix, three evaluation metrics are used to assess the damage detection performance: the True Negative Rate (TNR), the True Positive Rate (TPR), and the balanced accuracy. These metrics are defined as follows: 
+
+TNR = TN TN + FP (13) 
+
+TPR = TP TP + FN (14) 
+
+(a) 
+
+(b) 
+
+Figure 5. Mahalanobis distances over time for all signal windows in the validation and test sets. Colours indicate different damage states. The dashed line denotes the baseline median, and the solid line denotes the 95th percentile threshold derived from the baseline subset: (a) Results from zdmg ; (b) Results from zndmg 
+
+Balanced Accuracy = 12 (TPR + TNR) (15) 
+
+Table 4. Confusion matrices and performance metrics for damage detection using Mahalanobis distance of all signal windows. 
+
+TN FP FN TP TNR TPR Bal. Acc. 
+
+zdmg 344 85 629 302 0.801 0.324 0.563 
+
+zndmg 402 27 890 41 0.937 0.044 0.491 
+
+*Metrics showing better performance are highlighted in bold.  
+
+> Prepared using sagej.cls 9
+
+Results in Figure 5 and Table 4 indicate the following conclusions: 1. As intended, the proposed framework effectively disentangles damage-related and non-damage-related information in the latent space of the autoencoder. The TPR values show that damage detection based on the damage-sensitive representation, zdmg , significantly outperforms that based on zndmg . Although this improvement in TPR is accompanied by a reduction in TNR, this trade-off is acceptable in SHM practice, where detecting damage is of primary importance. Moreover, zdmg still achieves a higher balanced accuracy, indicating overall superior performance. 2. The overall detection accuracy is moderate. However, this outcome is both realistic and expected. In the openLAB experiment, the artificial damage was introduced only to girder 1 of span 2, which represents a relatively minor perturbation for a large-scale bridge structure. In addition, there are many signal windows under the weak ambient excitation. Since damage detection is performed at the level of individual signal windows, it is reasonable that such subtle damage is only detectable in a subset of windows where the non-stationary excitation sufficiently excites the affected structural components. 3. Damage quantification can be achieved by analysing the temporal evolution of the Mahalanobis distance. As shown in Figure 5(a), the Mahalanobis distances exhibit a gradual increasing trend over time, albeit with some variability. This trend is consistent with the progressive introduction of damage during the experiment. To further demonstrate the disentanglement, the latent representations zdmg and zndmg for all signal windows are visualized using UMAP 27 . UMAP is a dimensionality reduction technique commonly used for visualization, similar to the classical t-SNE 32 , but can offer clearer cluster separation. As shown in Figure 6: 1. The damage-related representation zdmg exhibits clearer separation across different damage states and weaker clustering with respect to excitation. In contrast, the nuisance representation zndmg shows the opposite pattern. These results confirm that the proposed framework effectively disentangles damage-related and non-damage-related information. 2. Even so, the clusters corresponding to different damage states in Figure 6 (a) are not completely separated. This is because, as discussed earlier, the artificial damage introduced in this experiment is relatively minor, making it insufficient to produce fully separable clusters across all damage states. This is also consistent with the results in Figure 5, where not all signal windows from damaged states are identified as damaged, and Mahalanobis distances of different damage states partly overlap. Finally, Table 5 presents the confusion matrices and corresponding damage detection metrics under different excitation conditions. It can be observed that the damage detection performance is the lowest under excitation label 1, which corresponds to weak ambient excitation. The performance improves significantly when external excitation from the shakers is introduced. When only one shaker is active, the performance under excitation label 3 (shaker on span 2) is better than that under excitation label 2 (shaker on span 1). This can be explained by the fact that the structural damage is primarily located on span 2, making it more detectable when the excitation is applied closer to the damage location. The best performance is achieved under excitation label 4, where both shakers are active, providing the strongest excitation.  
+
+> Table 5. Confusion matrices and performance metrics for damage detection using Mahalanobis distance of signal windows under different excitation types.
+
+Exc. TN FP FN TP TNR TPR Bal. Acc. 
+
+1 115 4 504 42 0.966 0.077 0.522 2 89 31 61 46 0.742 0.430 0.586 3 71 13 97 76 0.845 0.439 0.642 4 68 38 29 76 0.642 0.724 0.683 All 344 85 629 302 0.802 0.324 0.563 
+
+Overall, these results indicate that stronger excitation leads to improved damage detectability. This observation is further supported by Figure 7, which shows the Mahalanobis distances computed from zdmg for signal windows under excitation type 4 only. Under this strong excitation condition, a clear increasing trend in the Mahalanobis distance over time can be observed, reflecting the progressive introduction of damage during the experiment. 
+
+## Ablation study 
+
+In this section, an ablation study is conducted to demonstrate the necessity of each component in the proposed model architecture. Five model variants are considered: 1. Model F (Full model) . The complete architecture shown in Figure 1, incorporating all three loss func-tions: time-domain reconstruction, self-supervised invariance (VICReg), and frequency-domain recon-struction. 2. Model V1 (Autoencoder only) . A baseline model trained using only the time-domain reconstruction loss (Loss 1), without any disentanglement or additional constraints. 3. Model V2 (Autoencoder + self-supervision) . Amodel trained using the time-domain reconstruction loss (Loss 1) and the self-supervised VICReg loss (Loss 3), aiming to enforce invariance to operational and environmental variations. 4. Model V3 (Autoencoder + PSD reconstruction) . A model trained using the time-domain reconstruction loss (Loss 1) and the frequency-domain reconstruction loss (Loss 2), incorporating spectral information but without explicit disentanglement. 5. Model V4 (Handcrafted features) . A non-deep-learning baseline that extracts statistical and spectral features directly from the input signals. Specifically,  
+
+> Prepared using sagej.cls
+
+10 Journal Title XX(X) 
+
+(a) (b) 
+
+(c) (d)          
+
+> Figure 6. UMAP visualization of the learned latent representations: (a) zdmg coloured by damage state; (b) zdmg coloured by excitation type; (c) zndmg coloured by damage state; (d) zndmg coloured by excitation type.
+
+for each sensor channel, nine features are computed from the raw acceleration time series, including mean, standard deviation, skewness, kurtosis, maximum value, normalized peak frequency index, spectral entropy, normalized spectral centroid, and band power . These features are then concatenated across all channels to form a feature vector for each signal window, leading to a total feature dimension of 9 ×
+
+12 = 108 . This machine learning model serves as a conventional feature-engineering baseline to evaluate the benefit of the proposed deep learning framework. To evaluate the reliability and stability of the deep learning-based models, Model F and Models V1–V3 are each trained three times with different random seeds. The mean and standard deviation of their damage detection metrics are reported in Table 6. Since Model V4 is based on handcrafted features and does not involve any training process, only a single set of metric values is reported. The results in Table 6 show that: 1. Removing either the self-supervised invariance or the frequency-domain constraint leads to a significant drop in TPR, highlighting the importance of both components for robust damage-sensitive representa-tion learning. 2. Incorporating the self-supervised invariance and frequency-domain constraints leads to a reduction in TNR. However, this trade-off is expected and acceptable in the context of SHM, where missing damage (i.e., false negatives) is typically more critical than issuing false alarms. Importantly, Model Fachieves the highest balanced accuracy among all variants, demonstrating that the overall detection performance is improved despite the decrease in TNR. 3. The handcrafted feature-based variant (Model V4) is outperformed by Model F, but exhibits comparable performance to other deep learning variants (Models V1–V3). This suggests that deep learning does not inherently guarantee superior performance over con-ventional feature-based approaches. Instead, effective performance gains rely on carefully designed learning objectives and representations, particularly those that explicitly address nuisance variability and promote damage-sensitive feature extraction.  
+
+> Prepared using sagej.cls
+
+11    
+
+> Table 6. Damage detection performance of different model variants under various excitation conditions. Results for deep learning models are reported as mean ±standard deviation over three runs.
+
+Model Metric Exc. 1 Exc. 2 Exc. 3 Exc. 4 All 
+
+Model F TNR 0.958 ±0.008 0.756 ±0.017 0.865 ±0.045 0.673 ±0.039 0.801 ±0.004 TPR 0.079 ±0.006 0.417 ±0.057 0.347 ±0.087 0.673 ±0.114 0.319 ±0.007 
+
+Bal. Acc. 0.519 ±0.003 0.587 ±0.022 0.606 ±0.049 0.673 ±0.039 0.560 ±0.005 
+
+Model V1 TNR 0.966 ±0.000 0.756 ±0.013 0.948 ±0.007 0.981 ±0.009 0.952 ±0.009 TPR 0.045 ±0.003 0.287 ±0.005 0.064 ±0.017 0.057 ±0.016 0.019 ±0.009 Bal. Acc. 0.505 ±0.001 0.521 ±0.009 0.506 ±0.006 0.519 ±0.005 0.485 ±0.000 Model V2 TNR 0.966 ±0.015 0.767 ±0.008 0.933 ±0.030 0.978 ±0.005 0.967 ±0.020 
+
+TPR 0.062 ±0.023 0.277 ±0.005 0.064 ±0.026 0.010 ±0.010 0.011 ±0.005 Bal. Acc. 0.514 ±0.005 0.522 ±0.002 0.498 ±0.010 0.494 ±0.005 0.489 ±0.008 Model V3 TNR 0.975 ±0.008 0.761 ±0.017 0.952 ±0.012 0.811 ±0.081 0.912 ±0.027 TPR 0.045 ±0.003 0.243 ±0.041 0.062 ±0.027 0.146 ±0.055 0.057 ±0.004 Bal. Acc. 0.510 ±0.004 0.502 ±0.017 0.507 ±0.019 0.479 ±0.019 0.484 ±0.011 Model V4 TNR 0.937 0.701 0.927 0.913 0.919 TPR 0.112 0.261 0.086 0.101 0.108 Bal. Acc. 0.525 0.481 0.506 0.507 0.513    
+
+> *Metrics showing better performance are highlighted in bold.
+> Figure 7. Mahalanobis distances computed from zdmg for signal windows under excitation type 4. Colours indicate different damage states. The dashed line denotes the baseline median, and the solid line denotes the 95th percentile threshold derived from the baseline subset.
+
+## Real-world Evaluation 2: MCC5 gearbox dataset 
+
+This section presents the evaluation of the proposed struc-tural damage identification framework using a publicly avail-able gearbox dataset, namely MCC5 33 . The objective is to evaluate the generalization capability of the proposed method in a mechanical system under different operating conditions. The following research questions are investi-gated: 1. Can the proposed framework reliably detect and quantify damage in mechanical systems under varying excitation conditions? 2. Are all components and loss functions in the proposed deep learning architecture necessary for achieving robust performance? 3. Can the proposed framework outperform traditional handcrafted feature-based methods for structural damage identification? 
+
+## Dataset description 
+
+The MCC5-THU dataset is collected from gearboxes operating under variable working conditions, including time-varying rotational speed and load. The dataset comprises vibration acceleration signals, rotational speed measurements, and torque measurements, and covers a wide range of fault scenarios. These include multiple single-gear faults and combined bearing–gear faults. Figure 8(a) illustrates the experimental setup, which consists of a 2.2 kW three-phase asynchronous motor, a torque sensor, a two-stage parallel gearbox, a magnetic powder brake serving as a controllable load, and a data acquisition and control system. Figure 8(b) presents the internal configuration of the gearbox and the locations of the artificially introduced faults. As shown in Figure 8(a), in this experiment four sensors are used, including a speed sensor that measures motor output shaft key phase signal, a torque sensor that measures gearbox input shaft torque, a three-axis accelerometer that measures the axial, horizontal, and vertical vibration acceleration of the motor drive end, and another three-axis accelerometer that measures the axial, horizontal, and vertical vibration acceleration of gearbox intermediate shaft bearing seat. Together there are 8 sensor channels, and the sampling frequency of all sensors is 12.8 kHz. To introduce excitation variability, the time-varying shaft speed regime is considered in this study. The corresponding excitation profile is illustrated in Figure 9. Each excitation  
+
+> Prepared using sagej.cls
+
+12 Journal Title XX(X) 
+
+(a) (b)   
+
+> Figure 8. Overview of the MCC5-THU gearbox experiment 33 : (a) Experimental setup of the MCC5-THU gearbox test rig, including the motor, torque sensor, parallel gearbox, magnetic powder brake, vibration sensors, and data acquisition system. (b) Schematic of the internal gearbox structure, showing the gear arrangement and the locations of artificially introduced gear and bearing faults.
+
+sequence lasts 60 seconds and consists of multiple speed levels connected by ramp-up and ramp-down transitions. Different colours represent different experimental groups corresponding to distinct nominal rotational speeds. For example, the blue curve in Figure 9 shows one representative time-varying speed condition, where the rotational speed is increased from zero to a predefined level, maintained during specific time intervals (e.g., 10–20 s and 40–50 s), reduced to a lower level during 25–35 s, and finally ramped down to zero.   
+
+> Figure 9. Time-varying rotational speed profiles in the MCC5-THU dataset 33 . Each excitation sequence lasts 60 seconds and consists of piecewise speed levels with ramp transitions. Different colours indicate different experimental groups corresponding to distinct nominal rotational speeds.
+
+Across different experiments, the predefined peak rota-tional speeds are set to 1000 rpm, 2000 rpm, and 3000 rpm. During all experiments considered in this study, the torque is kept constant of 10 Nm while only the rotational speed varies over time. Therefore, the excitation labels in this study are defined in Table 7.  
+
+> Table 7. Excitation labels of the MCC5 dataset.
+
+Label Description 
+
+1 Peak rotational speeds 1000 rpm 2 Peak rotational speeds 2000 rpm 3 Peak rotational speeds 3000 rpm No environmental variability is intentionally introduced in this experiment. The laboratory temperature is controlled within a narrow range of approximately 2 ◦C, ensuring stable environmental conditions throughout the data collection process. The artificially introduced faults include both single gear faults and combined gear–bearing faults. All defects are created using laser etching with a machining precision of 
+
+0.01 mm to ensure repeatability and geometric accuracy. The detailed descriptions of the fault types and their corresponding parameters are summarized in Table 8.  
+
+> Table 8. Damage states of the MCC5 dataset.
+
+Label Type Description 
+
+1 Healthy No damage 2 Gear pitting Fault diameter 1.0 mm 
+
+3 Gear wear Wear over 1/2 of the tooth surface area 4 Missing tooth One tooth removed 5 Tooth breakage and bearing inner fault Inner raceway defect, width 0.3 mm 
+
+6 Tooth breakage and bearing outer fault Outer raceway defect, width 0.3 mm 
+
+7 Tooth breakage Breakage over 1/2
+
+of the tooth width 8 Tooth crack Crack over 1/2
+
+of the tooth height During the experiment, data are collected under combina-tions of three excitation conditions and eight damage states, resulting in 3 × 8 = 24 operating conditions. For each condi-tion, vibration signals are recorded for 60 seconds. Since this study focuses on output-only structural health monitoring, the speed and torque measurements are not used. Instead, only the six vibration channels, corresponding to the three-axis measurements of two accelerometers, are considered. The raw signals are downsampled from 12.8 kHz to 3.2 kHz. This downsampling is performed to balance computational efficiency and temporal resolution. If the original sampling frequency of 12.8 kHz were retained,  
+
+> Prepared using sagej.cls
+
+13 
+
+a 1-second signal window would contain 12,800 data points, leading to excessive computational cost and memory consumption for the 1D CNN employed in this study. Reducing the sampling rate allows sufficiently long signal windows to be used for capturing meaningful temporal dynamics, while keeping the input dimensionality manageable for model training. To facilitate model implementation, the continuous signals are segmented into 4320 overlapping windows, each with a length of 2048 data points (0.64 seconds) and an overlap of 1024 data points between adjacent windows. The distribution of signal windows across different excitation conditions and damage states is summarized in Table 9. Z-score normalization is applied to all windows. For each window, the mean and standard deviation computed across all sensor channels are normalized to 0 and 1, respectively. The power spectral density (PSD) of each window is estimated using Welch’s method. Specifically, the welch function from the scipy.signal library is used with parameters nperseg =1024, noverlap =512, and nfft =2048, resulting in PSD vectors of length 1025 and a frequency resolution of 1.56 Hz. The time-series windows and their corresponding PSDs are randomly divided into training, validation, and test sets with a ratio of 0.6:0.2:0.2, containing 2592, 864, and 864 windows, respectively.  
+
+> Table 9. Number of signal windows from the MCC5-THU dataset.
+
+Exc. 1 Exc. 2 Exc. 3 Total Dmg. 1 180 180 180 540 
+
+Dmg. 2 180 180 180 540 
+
+Dmg. 3 180 180 180 540 
+
+Dmg. 4 180 180 180 540 
+
+Dmg. 5 180 180 180 540 
+
+Dmg. 6 180 180 180 540 
+
+Dmg. 7 180 180 180 540 
+
+Dmg. 8 180 180 180 540 
+
+Total 1440 1440 1440 4320 After signal segmentation and dataset splitting, all signal windows corresponding to the healthy state in the training set are selected as the baseline subset for self-supervised learning. Unlike the openLAB dataset, the MCC5 dataset does not contain time stamps, making it infeasible to define a baseline period based on chronological order. Therefore, the baseline subset must be defined based on a damage state that can reasonably be assumed to remain constant. In this study, the healthy state is chosen as the baseline reference. This choice is motivated by practical considerations: in real-world applications, damage typically accumulates progressively, and the healthy condition represents the nominal structural state prior to degradation. Importantly, damage labels are not used as supervision signals during model training. They are only employed to define a reference subset with approximately constant structural condition, which enables self-supervised invariance learning without introducing label information into the optimization process. Furthermore, restricting the baseline subset to the training set avoids data leakage and ensures an unbiased evaluation on the validation and test sets. 
+
+## Implementation details 
+
+The implementation details of the proposed deep learning model on the MCC5 dataset are identical to those used for the openLAB dataset, as described in Section ”Real-world validation 1: openLAB bridge dataset, Implementation details.” For brevity, they are not repeated here. Figure 10 presents the training and validation loss curves from a representative run, with a total training time of 161.02 seconds. As observed, all loss components decrease smoothly during training, and the validation losses remain slightly higher than the corresponding training losses, indicating stable convergence and no evident overfitting.  
+
+> Figure 10. Training and validation loss curves of the proposed framework on MCC5 dataset. The total loss and individual loss components, including time-domain reconstruction (Loss 1), frequency-domain reconstruction (Loss 2), and VICReg self-supervised loss (Loss 3), are shown over 500 training epochs.
+
+## Evaluation results 
+
+After training, the model is evaluated on the validation and test set to assess its generalization capability. The reconstructed acceleration time series and the corresponding PSD are first examined. Figure 11 presents the reconstruction results for an example signal window. The close agreement between the original and reconstructed signals demonstrates the model’s ability to accurately capture both time-domain and frequency-domain characteristics. The trained model is then applied to all signal windows in the validation and test sets. For each window, a Mahalanobis distance is computed based on the mean vector μ and covariance matrix Σ estimated from the baseline subset used during training. Figure 12 presents the scatter plot of the Mahalanobis distances for all signal windows, together with the median (50th percentile) and the 95th percentile (used as the damage detection threshold) of the Mahalanobis distances of the baseline subset. For comparison, both zdmg 
+
+and zndmg are used to compute the Mahalanobis distance. Table 10 summarizes the confusion matrices for damage detection corresponding to the results in Figure 12. The notation and performance metrics follow those defined previously in Table 10, and are not reiterated here to avoid redundancy. Results in Figure 12 and Table 10 indicate the following conclusions:  
+
+> Prepared using sagej.cls
+
+14 Journal Title XX(X) 
+
+(a) 
+
+(b)   
+
+> Figure 11. Example reconstruction results for a signal window (damage label 3, excitation label 1). Only the first 200 data points are presented to allow clearer observation: (a) Time-domain acceleration signals and their reconstructions across 12 channels. (b) Corresponding PSD and their reconstructions.
+> Table 10. Confusion matrices and performance metrics for damage detection using Mahalanobis distance of all signal windows.
+
+TN FP FN TP TNR TPR Bal. Acc. 
+
+zdmg 197 23 374 1134 0.896 0.752 0.824 
+
+zndmg 204 16 963 545 0.927 0.361 0.644 
+
+> *Metrics showing better performance are highlighted in bold.
+
+1. As intended, the proposed framework effectively disentangles damage-related and non-damage-related information in the latent space of the autoencoder. The TPR values show that damage detection based on the damage-sensitive representation, zdmg , significantly outperforms that based on zndmg . Although this improvement in TPR is accompanied by a slight reduction in TNR, this trade-off is acceptable in SHM practice, where detecting damage is of primary importance. Moreover, zdmg still achieves a much higher balanced accuracy, indicating overall superior performance. 2. Compared with the damage detection results obtained from the openLAB dataset, the MCC5-THU dataset achieves substantially higher detection accuracy. This difference is expected because vibration signals from small mechanical systems, such as the gearbox used in the MCC5-THU experiment, are generally more sensitive to structural faults than those from large civil structures such as the openLAB bridge. In addition, differences in data acquisition conditions likely contribute to this performance gap. The MCC5-THU dataset appears to have been collected under controlled 
+
+(a) 
+
+(b)   
+
+> Figure 12. Mahalanobis distances for all signal windows in the validation and test sets. Colours indicate different damage states. The dashed line denotes the baseline median, and the solid line denotes the 95th percentile threshold derived from the baseline subset: (a) Results from
+
+zdmg ; (b) Results from zndmg 
+
+indoor conditions, resulting in reduced noise and fewer environmental variations (e.g., temperature fluctuations), whereas the openLAB bridge data was acquired in an outdoor environment where such factors introduce additional variability and measurement noise. 3. In addition to damage detection, partial damage quantification can be achieved by examining the Mahalanobis distances shown in Figure 12(a). For example, the Mahalanobis distances corresponding to damage states 5 (tooth breakage with bearing inner race fault) and 6 (tooth breakage with bearing outer race fault) are noticeably larger than those of other  
+
+> Prepared using sagej.cls 15
+
+damage states. This observation is consistent with the descriptions in Table 8, as damage states 5 and 6 involve combinations of multiple faults and are therefore expected to be more severe. However, this form of damage quantification is not fully reliable. For instance, damage state 2 (gear pitting) also exhibits relatively large Mahalanobis distances, even though its severity should be lower than that of damage states 3 (gear wear), 4 (missing tooth), 7 (tooth breakage), and 8 (tooth crack). 4. Although the Mahalanobis distance does not always follow the damage severity ranking, it can reveal differences in damage mechanisms. For example, gear pitting (damage state 2) produces noticeably larger Mahalanobis distances because localized pits generate repeated impulsive excitations during gear meshing, leading to strong broadband and high-frequency components that deviate significantly from the healthy baseline. In contrast, damage states 3, 4, 7, and 8 mainly introduce periodic stiffness modulation and sidebands around the gear-mesh frequency, resulting in more similar vibration characteristics and therefore comparable Mahalanobis distances. This behaviour is consistent with the proposed disentangled representation learning framework, where the latent space zdmg is constrained by the PSD reconstruction loss. Finally, Table 11 presents the confusion matrices and corresponding damage detection metrics under different excitation conditions. Those results show that the proposed framework achieves consistently strong damage detection performance under different excitation conditions. The balanced accuracy ranges from 0.762 to 0.884 across the three excitation regimes, and remains high (0.823) when all excitation conditions are considered together. Among the three cases, excitation type 2 yields the best performance, suggesting that moderate excitation levels enhance the detectability of structural faults. In contrast, excitation type 3 leads to slightly reduced performance, likely due to increased operational variability that introduces additional nuisance factors. Nevertheless, the results demonstrate that the proposed framework maintains robust damage detection capability across varying excitation conditions.  
+
+> Table 11. Confusion matrices and performance metrics for damage detection using Mahalanobis distance of signal windows under different excitation types.
+
+Exc. TN FP FN TP TNR TPR Bal. Acc. 
+
+1 66 6 116 372 0.917 0.762 0.839 2 59 5 81 444 0.922 0.846 0.884 3 70 14 152 343 0.833 0.693 0.763 All 197 23 374 1134 0.895 0.752 0.823 
+
+## Ablation study 
+
+In this section, an ablation study is conducted again to verify the necessity of each component in the proposed architecture. The same five model variants defined in the openLAB study are considered here: 1. Model F : the full model with time-domain recon-struction, self-supervised invariance (VICReg), and frequency-domain reconstruction. 2. Model V1 : autoencoder trained with time-domain reconstruction only. 3. Model V2 : autoencoder with time-domain reconstruc-tion and VICReg self-supervision. 4. Model V3 : autoencoder with time-domain and frequency-domain reconstruction. 5. Model V4 : a handcrafted feature benchmark using nine statistical and spectral features extracted from the vibration signals. The definitions of these variants are identical to those described in the openLAB section and are not repeated here for brevity. To evaluate the reliability and stability of the deep learning-based models, Model F and Models V1–V3 are each trained three times with different random seeds. The mean and standard deviation of their damage detection metrics are reported in Table 12. Since Model V4 is based on handcrafted features and does not involve any training process, only a single set of metric values is reported. The results in Table 12 show that: 1. The full framework (Model F) achieves the best overall performance across all excitation conditions. It consis-tently provides the highest TPR and balanced accu-racy, indicating that combining time-domain recon-struction, VICReg self-supervision, and frequency-domain reconstruction enables the model to capture damage-related information more effectively than any partial variant. 2. Models V1–V3 tend to achieve high TNR but very low TPR. This means that these simplified architectures can correctly recognize healthy states but fail to detect damaged states reliably. In other words, without the full set of constraints, the latent representation does not sufficiently emphasize damage-related features. 3. The handcrafted feature baseline (Model V4) performs better than the simplified deep learning models in terms of balanced accuracy, but is still clearly inferior to Model F. This suggests that deep learning does not automatically outperform traditional feature engineering unless the model architecture is carefully designed. 
+
+## Conclusions 
+
+This study proposes a label-free self-supervised disentangle-ment learning framework for robust output-only vibration-based structural damage identification under operational variations. The framework is systematically evaluated on two structural vibration datasets: one from a full-scale bridge and the other from a high-fidelity gearbox. The key conclusions of this study are summarized as follows: 1. The proposed framework can successfully disentangle damage-related information from non-damage-related information. This is demonstrated by the fact that dam-age detection based on the latent representation zdmg 
+
+significantly outperforms that based on zndmg . Using      
+
+> Prepared using sagej.cls 16 Journal Title XX(X)
+> Table 12. Damage detection performance of different model variants under various excitation conditions. Results for deep learning models are reported as mean ±standard deviation over three runs.
+
+Model Metric Exc. 1 Exc. 2 Exc. 3 All 
+
+Model F TNR 0.917 ±0.000 0.917 ±0.024 0.877 ±0.038 0.911 ±0.016 TPR 0.762 ±0.004 0.865 ±0.020 0.699 ±0.076 0.721 ±0.038 
+
+Bal. Acc. 0.839 ±0.002 0.891 ±0.009 0.788 ±0.046 0.816 ±0.011 
+
+Model V1 TNR 0.926 ±0.008 0.927 ±0.048 0.964 ±0.012 0.952 ±0.009 TPR 0.076 ±0.004 0.099 ±0.053 0.042 ±0.009 0.062 ±0.003 Bal. Acc. 0.501 ±0.005 0.513 ±0.010 0.503 ±0.006 0.507 ±0.005 Model V2 TNR 0.954 ±0.029 0.964 ±0.009 0.972 ±0.014 0.947 ±0.014 TPR 0.112 ±0.100 0.017 ±0.008 0.023 ±0.015 0.037 ±0.009 Bal. Acc. 0.533 ±0.043 0.490 ±0.004 0.498 ±0.004 0.492 ±0.011 Model V3 TNR 0.944 ±0.028 0.969 ±0.000 0.944 ±0.025 0.953 ±0.003 
+
+TPR 0.083 ±0.048 0.040 ±0.002 0.052 ±0.022 0.062 ±0.007 Bal. Acc. 0.514 ±0.016 0.504 ±0.001 0.498 ±0.018 0.508 ±0.005 Model V4 TNR 0.950 0.950 0.950 0.950 TPR 0.327 0.142 0.076 0.138 Bal. Acc. 0.638 0.546 0.513 0.544 
+
+> *Metrics showing better performance are highlighted in bold.
+
+the disentangled damage-related representation, both damage detection and partial damage quantification can be achieved. The effectiveness of the framework is further supported by its successful application to two structurally different systems (a bridge and a gearbox), suggesting good generalizability. 2. The ablation study shows that successful disentan-glement relies on all components of the proposed architecture. Removing any module leads to notice-able performance degradation. The proposed end-to-end framework also significantly outperforms the handcrafted feature benchmark, indicating that it can automatically extract useful information from vibra-tion signals. Nevertheless, this does not imply that deep learning always outperforms handcrafted feature-based methods, as the handcrafted feature benchmark achieves performance comparable to several simplified deep learning variants. 3. Although the proposed framework can effectively dis-entangle damage-related information from nuisance factors, the damage detection performance is still influenced by structural scale and excitation charac-teristics. For example, the damage detection accuracy on the gearbox in the MCC5-THU dataset is higher than that on the bridge in the openLAB dataset, because vibration responses of small mechanical sys-tems are generally more sensitive to structural faults than those of large civil structures. In addition, suf-ficiently strong and informative excitation improves damage detectability. This is supported by the open-LAB results, where damage detection performance improves when the excitation changes from ambient excitation to shaker excitation, and when the shaker is located closer to the damage region. 4. Overall, the proposed framework provides a promising direction for robust and scalable vibration-based structural health monitoring, particularly in practical scenarios where damage labels are unavailable and operational conditions vary significantly. Finally, several directions for future work can be considered to further improve the proposed framework: 1. The evaluation results on the openLAB dataset show that damage detection accuracy is limited when the damage level is weak. To improve detection performance in such scenarios, more powerful representation learning models, such as transformer-based architectures or variational autoencoders, could be explored while maintaining the same self-supervised training strategy. 2. More advanced decision strategies could be adopted for damage detection. For example, instead of evaluating each signal window independently, one could compute the proportion of windows classified as damaged within a test sequence and apply a threshold to this ratio. Such approaches may improve robustness in weak-damage scenarios where only a subset of windows exhibit clear damage signatures. 3. The current damage quantification capability is still limited. Developing more reliable damage scoring methods or combining the learned representation with physics-informed indicators could further improve the reliability of damage quantification. 
+
+## Data availability statement 
+
+The code used to implement the proposed framework and reproduce the main results of this study is publicly available in our GitHub repository: https://github.com/JxdEngineer/SSRL. The repository also includes detailed instructions and configuration files to facilitate reproduction of the reported experiments. The openLAB dataset used in this work cannot be released due to a non-disclosure agreement with Kistler Instrumente AG. Nevertheless, a publicly available openLAB dataset  
+
+> Prepared using sagej.cls
+
+17 
+
+collected with a different sensing system is available in this link 30 , which can be used to reproduce similar experimental settings. The MCC5-THU dataset used in this study is publicly accessible and can be downloaded from the link included this paper 33 .
+
+Declaration of conflicting interests 
+
+The authors declared no potential conflicts of interest with respect to the research, authorship, and publication of this article. 
+
+Acknowledgements 
+
+All model training and validation were conducted on the Euler cluster operated by the High Performance Computing group at ETH Z¨ urich. The second author would like to acknowledge the Marie Skłodowska-Curie Actions (MSCA) program under the OMoRail project, Grant ID: 101104968. 
+
+References 
+
+1. An Y, Chatzi E, Sim SH et al. Recent progress and future trends on damage identification methods for bridge structures. Structural Control and Health Monitoring 2019; 26(10): e2416. 2. Farrar CR and Worden K. An introduction to structural health monitoring. Philosophical Transactions of the Royal Society A: Mathematical, Physical and Engineering Sciences 2007; 365(1851): 303–315. 3. Carden EP and Fanning P. Vibration based condition monitoring: a review. Structural health monitoring 2004; 3(4): 355–377. 4. Doebling SW, Farrar CR, Prime MB et al. Damage identifi-cation and health monitoring of structural and mechanical sys-tems from changes in their vibration characteristics: a literature review. Los Alamos National Laboratory Report LA-13070-MS 
+
+1996; . 5. Farrar CR and Worden K. Structural health monitoring: a machine learning perspective . John Wiley & Sons, 2012. 6. Sohn H. Effects of environmental and operational variability on structural health monitoring. Philosophical Transactions of the Royal Society A: Mathematical, Physical and Engineering Sciences 2007; 365(1851): 539–560. 7. Li Y, Zhu L, Qian C et al. The time-varying modal information of a cable-stayed bridge: some consideration for shm. Engineering Structures 2021; 235: 111835. 8. Figueiredo E, Park G, Farrar CR et al. Machine learning algorithms for damage detection under operational and environmental variability. Structural Health Monitoring 2011; 10(6): 559–572. 9. Peeters B and De Roeck G. One-year monitoring of the z24-bridge: environmental effects versus damage events. 
+
+Earthquake engineering & structural dynamics 2001; 30(2): 149–171. 10. Reynders E, Wursten G and De Roeck G. Output-only structural health monitoring in changing environmental conditions by means of nonlinear system identification. 
+
+Structural Health Monitoring 2014; 13(1): 82–93. 11. Deraemaeker A, Reynders E, De Roeck G et al. Vibration-based structural health monitoring using output-only measure-ments under changing environment. Mechanical systems and signal processing 2008; 22(1): 34–56. 12. Cross EJ, Worden K and Chen Q. Cointegration: a novel approach for the removal of environmental trends in structural health monitoring data. Proceedings of the Royal Society A: Mathematical, Physical and Engineering Sciences 2011; 467(2133): 2712–2732. 13. Shi H, Worden K and Cross EJ. A regime-switching cointe-gration approach for removing environmental and operational variations in structural health monitoring. Mechanical Systems and Signal Processing 2018; 103: 381–397. 14. Eltouny K, Gomaa M and Liang X. Unsupervised learning methods for data-driven vibration-based structural health monitoring: a review. Sensors 2023; 23(6): 3290. 15. Wang Z, Khokhar SA, Jahanshahi MR et al. Unsupervised anomaly detection based on deep autoencoders, information fusion, and active sensing. Structural Health Monitoring 2026; : 14759217251410304. 16. Cadini F, Lomazzi L, Roca MF et al. Neutralization of temperature effects in damage diagnosis of mdof systems by combinations of autoencoders and particle filters. Mechanical Systems and Signal Processing 2022; 162: 108048. 17. Giglioni V, Poole J, Venanzi I et al. A domain adaptation approach to damage classification with an application to bridge monitoring. Mechanical Systems and Signal Processing 2024; 209: 111135. 18. Martakis P, Reuland Y, Stavridis A et al. Fusing damage-sensitive features and domain adaptation towards robust damage classification in real buildings. Soil Dynamics and Earthquake Engineering 2023; 166: 107739. 19. Zhou M and Lai Z. Structural damage classification under varying environmental conditions and unknown classes via open set domain adaptation. Mechanical Systems and Signal Processing 2024; 218: 111561. 20. Duth´ e G, L’Homme Y, Abdallah I et al. Towards unsupervised fault detection for offshore wind turbine cable protection systems using contrastive learning. In Journal of Physics: Conference Series , volume 2767. IOP Publishing, p. 032038. 21. Zhou M, Jian X, Xia Y et al. Transferring self-supervised pretrained models for shm data anomaly detection with scarce labeled data. Structural Control and Health Monitoring 2025; 2025(1): 2414195. 22. Shi S, Du D, Mercan O et al. Contrastive and self-supervised learning for open-set damage classification in structural health monitoring with incomplete and imbalanced vibration data. 
+
+Expert Systems with Applications 2025; 293: 128731. 23. Jiang Q, Huang X, Qu W et al. Domain-separated capsule network for damage detection in aluminum plates under varying vibration conditions. Ultrasonics 2025; 154: 107688. 24. Koune I and Cicirello A. Disentangled representation learning with physics-informed variational autoencoder for structural health monitoring. In Proceedings of the 11th European Workshop on Structural Health Monitoring (EWSHM 2024) .25. Bel-Hadj Y, Weijtjens W and Devriendt C. Structural health monitoring in a population of similar structures with self-supervised learning: a two-stage approach for enhanced damage detection and model tuning. Structural Health Monitoring 2025; : 14759217251324194. 26. Bardes A, Ponce J and Lecun Y. Vicreg: Variance-invariance-covariance regularization for self-supervised learning. In ICLR 2022-International Conference on Learning Representations .27. McInnes L, Healy J and Melville J. Umap: Uniform manifold approximation and projection for dimension reduction. arXiv  
+
+> Prepared using sagej.cls
+
+18 Journal Title XX(X) 
+
+preprint arXiv:180203426 2018; . 28. Deraemaeker A and Worden K. A comparison of linear approaches to filter out environmental effects in structural health monitoring. Mechanical systems and signal processing 
+
+2018; 105: 1–15. 29. Herbers M, Bartels JH, Richter B et al. openlab– eine forschungsbr¨ ucke zur entwicklung eines digitalen br¨ uckenzwillings. Beton-und Stahlbetonbau 2024; 119(3): 169–180. 30. Herrmann R, Hille F and Degener S. openlab bridge bautzen germany - load test 05th - 07th may 2025 - vibration excitation measurements, 2026. DOI:10.5281/zenodo.18546379. URL 
+
+https://doi.org/10.5281/zenodo.18546379 .31. Jian X. Ssrl: Self-supervised representation learning for structural damage identification. https://github.com/ JxdEngineer/SSRL , 2025. GitHub repository, accessed 2026. 32. Van der Maaten L and Hinton G. Visualizing data using t-sne. 
+
+Journal of machine learning research 2008; 9(11). 33. Chen S, Liu Z, He X et al. Multi-mode fault diagnosis datasets of gearbox under variable working conditions. Data in brief 
+
+2024; 54: 110453.

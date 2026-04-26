@@ -1,0 +1,22 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.21839v1/fig-001.webp",
+      "caption": "Fig. 1. Proposed STFT–HMM framework for temporal arc stability modeling, including signal acquisition, feature extraction, observation sequence construction, and probabilistic inference.",
+      "page": 3,
+      "index": 1,
+      "width": 1076,
+      "height": 717
+    },
+    {
+      "url": "assets/figures/arxiv/2604.21839v1/fig-002.webp",
+      "caption": "Fig. 6. Temporal evolution of hidden states obtained via Viterbi decoding.",
+      "page": 9,
+      "index": 2,
+      "width": 539,
+      "height": 482
+    }
+  ]
+}

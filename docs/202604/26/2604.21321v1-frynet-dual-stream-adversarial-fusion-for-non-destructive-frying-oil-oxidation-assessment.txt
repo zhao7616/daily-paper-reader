@@ -1,0 +1,388 @@
+Title: FryNet: Dual-Stream Adversarial Fusion for Non-Destructive Frying Oil Oxidation Assessment
+
+URL Source: https://arxiv.org/pdf/2604.21321v1
+
+Published Time: Fri, 24 Apr 2026 00:33:38 GMT
+
+Number of Pages: 10
+
+Markdown Content:
+# FryNet: Dual-Stream Adversarial Fusion for Non-Destructive Frying Oil Oxidation Assessment 
+
+## Khaled R Ahmed 1, Toqi Tahamid Sarker 1, Taminul Islam 1, Tamany M Alanezi 1,2, Amer AbuGhazaleh 11Southern Illinois University Carbondale, USA 2Qassim University, Saudi Arabia 
+
+{khaled.ahmed, toqitahamid.sarker, taminul.islam, tamany.alanezi, aabugha }@siu.edu 
+
+## Abstract 
+
+Monitoring frying oil degradation is critical for food safety, yet current practice relies on destructive wet-chemistry as-says that provide no spatial information and are unsuit-able for real-time use. We identify a fundamental obstacle in thermal-image-based inspection, the camera-fingerprint shortcut, whereby models memorize sensor-specific noise and thermal bias instead of learning oxidation chemistry, col-lapsing under video-disjoint evaluation. We propose FryNet, a dual-stream RGB-thermal framework that jointly performs oil-region segmentation, serviceability classification, and regression of four chemical oxidation indices (PV, p-AV, To-tox, temperature) in a single forward pass. A ThermalMiT-B2 backbone with channel and spatial attention extracts thermal features, while an RGB-MAE Encoder learns chem-ically grounded representations via masked autoencoding and chemical alignment. Dual-Encoder DANN adversarially regularizes both streams against video identity via Gradient Reversal Layers, and FiLM fusion bridges thermal structure with RGB chemical context. On 7,226 paired frames across 28 frying videos, FryNet achieves 98.97% mIoU, 100% clas-sification accuracy, and 2.32 mean regression MAE, outper-forming all seven baselines. 
+
+## 1. Introduction 
+
+Frying oil degrades through thermal oxidation, accumulating harmful aldehydes and polar compounds that compromise food safety once regulatory thresholds are exceeded [ 22 ]. Compliance today relies on destructive wet-chemistry as-says such as titration for PV and spectrophotometry for p-AV, which take hours, consume reagents, and yield a single scalar per sample with no spatial information about where 
+
+degradation is occurring in the fryer. Imaging-based non-destructive testing (NDT) can overcome all three limitations by providing real-time, spatially resolved quality maps with-out contact. Each existing modality, however, addresses only part of the problem: NIR spectroscopy requires costly point-0 20 40 60 80 100 120 140  
+
+> GFLOPs
+> 20
+> 40
+> 60
+> 80
+> 100
+> mIoU (%)
+> SegFormer
+> ConvNeXt-B DeepLabV3
+> Swin-S
+> DINOv2
+> CMX
+> CMNeXt
+> FryNet (Ours)
+> (31M)
+> Single-modal baseline
+> Multi-modal baseline
+> FryNet (Ours)
+
+Figure 1. mIoU vs. computational cost (GFLOPs). Marker size is proportional to parameter count. FryNet (31M params, 30.3 GFLOPs) achieves the highest mIoU at lower computational cost than all comparable methods. 
+
+probe hardware [ 7], RGB systems capture only surface-color proxies [ 39 ], and thermal imaging has so far been applied to oil-type classification rather than quantitative oxidation regression [ 32 ]. No prior method fuses RGB and thermal streams for direct, dense prediction of chemical oxidation indices across unseen oil batches. Closing this gap, however, exposes a hidden confound. In our 28-video thermal dataset, each video captures a sin-gle frying batch and therefore carries a single quality label. Thermal cameras simultaneously imprint device-specific sig-natures (sensor noise, vignetting, thermal bias) that are con-stant within each video. Because each video pairs exactly one camera with exactly one label, a model can reach 97% training segmentation accuracy within 4,000 iterations by memorizing camera fingerprints rather than learning oxida-tion chemistry. Under video-disjoint evaluation on unseen batches, five backbone architectures (25M to 88M parame-ters) all collapse to 54–62% mIoU. This camera-fingerprint shortcut extends beyond the thermal stream: adding an RGB stream without regularization introduces a second shortcut channel that negates the benefit of fusion entirely. We present FryNet, a dual-stream RGB-thermal system 1           
+
+> arXiv:2604.21321v1 [cs.CV] 23 Apr 2026 Thermal RGB
+> Good
+> PV = 5.0 p-AV = 5.1 Totox = 15.0 Temp = 106°F
+> Replace
+> PV = 16.4 p-AV = 21.8 Totox = 54.5 Temp = 119°F
+> Figure 2. Dataset samples. Top: fresh oil (good). Bottom: de-graded oil (replace). Each frame carries paired thermal/RGB im-ages with four regression targets.
+
+that addresses this shortcut while performing segmentation, classification, and regression in a single forward pass (Fig. 3). Gradient Reversal Layers [ 14 ] adversarially regularize both the thermal backbone and the RGB encoder against video identity, forcing each stream to discard camera-specific nui-sances. A cross-modal chemical alignment loss grounds the RGB encoder in oxidation chemistry, and fused regression routing lets all chemical targets benefit from RGB context. FryNet achieves 98.97% mIoU and a mean regression MAE of 2.32 (Figure 1), a 3.2 × improvement over the best single-modal baseline. Our main contributions are: 1. We identify a camera-fingerprint shortcut that collapses five architectures to 54–62% mIoU under video-disjoint evaluation, and show that unregularized RGB fusion am-plifies the failure. 2. We propose FryNet, a dual-stream multi-task architecture with a ThermalMiT-B2 backbone (TCA/TSA attention), an RGB-MAE Encoder for cross-modal representation learning, FiLM fusion, and Dual-Encoder DANN with a chemical alignment loss that suppresses shortcuts in both streams. 3. We release the FryNet dataset: 7,226 RGB-thermal frame pairs across 28 videos with segmentation masks, service-ability labels, and four regression targets. 
+
+## 2. Related Work 
+
+Non-Destructive Inspection of Edible Oils. Non-destructive testing (NDT) for edible-oil quality aims to re-place wet-chemistry assays with rapid sensor-based alterna-tives. NIR spectroscopy combined with PLS regression is the most established approach, achieving R2 > 0.97 for perox-ide value prediction across multiple oil classes [ 1 , 7, 25 , 30 ], though reliable performance depends on careful calibration and spectral pre-treatment. Hyperspectral imaging extends spectral analysis to spatial domains for adulteration detec-tion [ 3 ], but these systems remain laboratory-bound [ 19 ]. Other sensing modalities (electronic noses [ 11 , 36 ], dielec-tric sensors [ 22 ]) provide sample-level readings without spa-tial resolution. Camera-based approaches offer a path toward spatially resolved inspection. RGB systems correlate CIE L∗a∗b∗
+
+features with FFA/TPM ( R2 > 0.91 ) and achieve 95–97% freshness classification [ 24 , 26 , 39 ], and CNN-based classi-fiers further advance visual food-quality evaluation [ 41 , 47 ]. Thermal imaging has broad utility in food quality assess-ment [ 40 ], with recent work applying CNNs to infrared thermograms for oil-type identification [ 18 , 32 ], yet these approaches classify oil type rather than regressing chemical oxidation indices. 
+
+Domain Adaptation and Shortcut Mitigation. Domain shift from heterogeneous acquisition pipelines is a recurring challenge in applied vision. Domain-Adversarial Neural Networks (DANN) [ 14 ] address this through a Gradient Reversal Layer (GRL) that implements a minimax objective: the domain classifier learns to predict domain identity while the GRL reverses gradients during backpropagation, forcing the encoder to produce domain-invariant representations. Multi-discriminator variants improve robustness at the cost of training complexity [ 15 ], and recent work in microscopy shows that adversarial alignment recovers target-domain performance under optical and magnification changes [ 5]. Compared to MMD minimization, CORAL, and adversarial discriminators with separate source/target networks, DANN requires no architectural separation and trains end-to-end with the task loss. In parallel, work on shortcut learning has shown that mod-els frequently exploit spurious acquisition-driven cues (cam-era fingerprints, compression artifacts, frequency-domain signatures) [ 35 ], yielding strong in-domain accuracy but brit-tle cross-domain generalization. In our setting, we repurpose DANN not for cross-dataset transfer but for intra-dataset reg-ularization: each video/camera constitutes a domain, and the GRL forces the encoder to discard camera-specific patterns. 
+
+Self-Supervised and Masked Representation Learning. 
+
+Self-supervised learning (SSL) has become a dominant strat-egy for label-efficient representation learning. Contrastive methods such as SimCLR [ 9 ] and DINO [ 6] learn transfer-able features by maximising agreement between augmented views, while DINOv2 [ 28 ] scales this approach to produce general-purpose visual features from large curated datasets. Masked Autoencoders (MAE) [ 16 ] show that reconstruct-ing heavily masked (75%) patches from a ViT encoder [ 12 ]yields strong spatial representations transferable with very few labels. VideoMAE [ 38 ] extends MAE to video via temporal tube masking, which we adapt for paired RGB-thermal cross-modal context in our RGB-MAE Encoder. These methods produce general features but are optimized for natural-image semantics, providing no mechanism to suppress acquisition shortcuts when labels correlate with camera identity. 2Stage 1     
+
+> TCA
+> Stage 2
+> TSA
+> TCA
+> Stage 3
+> TSA
+> TCA
+> Stage 4
+> TSA
+> Thermal DANN
+> RGB
+> Thermal Patch
+> Concat
+> ViT-6
+> Context Features
+> MAE
+> TCA
+> TSA
+> Multi-Scale Fusion
+> FiLM Fusion
+> Segmentation Head
+> Regression Head x4
+> GAP
+> MLP
+> Oxidation Targets
+> Chemical Alignment
+> Aux Head
+> RGB DANN
+> ThermalMiT-B2 F1 F2 F3 F4 Thermal Image RGB Image
+> PV
+> p-AV
+> Totox
+> Temp
+> Segmentation Mask
+> RGB-MAE Encoder
+
+Figure 3. FryNet architecture. The thermal stream (top) processes FLIR images through ThermalMiT-B2 with TCA/TSA attention at each stage, producing multi-scale features F1–F4 that are merged via multi-scale fusion. The RGB-MAE encoder (bottom) concatenates thermal patches with RGB inputs and learns context features via masked autoencoding with chemical alignment. FiLM fusion combines both streams before feeding into the segmentation head and four regression heads (PV, p-AV, Totox, Temp). Dual-DANN branches apply gradient reversal to both thermal and RGB features for domain-invariant learning. Dashed boxes indicate training-only components. 
+
+RGB-Thermal Fusion and Multi-Task Dense Prediction. 
+
+RGB-thermal (RGB-T) fusion is widely studied for robust-ness under challenging illumination. Dense prediction sys-tems typically use dual encoders with multi-level fusion and a shared decoder. CMX [ 45 ] introduces cross-modal feature rectification modules that exchange information be-tween RGB and auxiliary encoders at multiple scales, while CMNeXt [ 46 ] extends this with a self-query hub layer that selects informative features across an arbitrary number of modalities. Both are designed for outdoor scene understand-ing (urban driving, indoor scenes) and do not address camera-fingerprint confounds in industrial inspection. As a lighter alternative to cross-attention fusion, Feature-wise Linear Modulation (FiLM) [ 31 ] offers efficient conditioning via learned per-channel scale and shift at O(N C ) cost. On the multi-task side, jointly training dense and scalar objectives provides representation sharing and implicit regu-larization [ 17 , 34 ], but multi-task optimization can be domi-nated by task imbalance and conflicting gradients [ 10 , 44 ]. We sidestep this by gradient-isolating each task head and routing detached post-fusion features to the regression branch. FryNet bridges these gaps by unifying spatially re-solved segmentation with chemical regression under domain-adversarial training that suppresses camera-specific short-cuts. 
+
+## 3. Method 
+
+3.1. Architecture Overview 
+
+FryNet is a dual-stream, multi-task model that jointly seg-ments degraded oil regions, classifies oil serviceability, and regresses chemical quality indicators from paired FLIR ther-mal and RGB inputs (Fig. 3). The model receives a FLIR thermal frame and a co-registered RGB frame, both resized to 512 × 512 . A thermal encoder extracts multi-scale spa-tial features from the FLIR input; an RGB encoder learns chemically grounded representations via auxiliary objectives; a lightweight fusion module conditions thermal features on RGB context; and a multi-task decode head produces segmentation maps and regression predictions. Both en-coders are regularized with gradient reversal [ 14 ] to suppress camera-fingerprint shortcuts (Sec. 3.2). 
+
+ThermalMiT-B2. The thermal stream uses MiT-B2 [ 43 ], whose hierarchical overlapping-patch design yields a four-stage feature pyramid {Fi}4 
+
+> i=1
+
+at strides {4, 8, 16 , 32 } with channel dimensions [64 , 128 , 320 , 512] .A lightweight thermal attention block is inserted after each stage. Each block applies (1) Thermal Channel At-tention (TCA), a CBAM-style [ 42 ] channel-recalibration module that upweights thermally informative channels, and (2) Thermal Spatial Attention (TSA), a 7×7 spatial gate that highlights high-gradient boundary regions between fresh and oxidized oil. Both initialize near-identity, adding <1% parameters and preserving pretrained representations. 
+
+RGB-MAE Encoder. RGB captures complementary chemi-cal signals invisible to thermal imaging: Maillard browning, carotenoid degradation, and surface foam texture are optical proxies for oxidation products (PV, p-AV) [ 39 ]. To extract these cues, we use an RGB-MAE Encoder , a lightweight 6-layer Vision Transformer [ 13 ] with embed dim = 256 and patch size = 16, trained from scratch, that processes a paired RGB frame and produces a dense feature map 3sctx ∈ R256 ×32 ×32 .The encoder is trained jointly with the rest of the model via two auxiliary objectives that reuse existing annotations: 
+
+(i) Masked autoencoding (LMAE ). We adapt Video-MAE [ 38 ] to our paired setting: 75% of the current FLIR frame’s patch tokens are randomly masked, and the encoder receives the concatenation of the remaining visible FLIR tokens and all RGB context tokens; both modalities pass through the same shared transformer blocks. A lightweight two-layer pixel decoder (256 →128 →patch dim) then recon-structs the masked FLIR patches via L1 loss against the original pixels. Because visible FLIR tokens alone cannot reconstruct the masked patches, the encoder must leverage RGB context, learning cross-modal correspondences without explicit supervision. 
+
+(ii) Chemical alignment (Lchem ). After encoding, we global-average-pool the context-frame token sequence to obtain a single descriptor, then project it through a two-layer MLP (256 →128 →3) onto z-score predictions of [p-AV, Totox, temperature]. A Huber loss against the ground-truth chemical measurements grounds the RGB encoder in oxidation chemistry. This head is auxiliary: it is active only during training and adds no cost at inference. 
+
+Multi-scale feature fusion. The four backbone feature maps 
+
+{Fi} span a 8 × resolution range (stride 4 to stride 32). Fol-lowing SegFormer [ 43 ], we unify them into a single repre-sentation: each Fi is projected to C = 256 channels via a 
+
+1×1 convolution with batch normalization, upsampled to the finest resolution ( H/ 4×W/ 4) via bilinear interpolation, and concatenated along the channel axis. A final 1×1 con-volution reduces the 4C-channel tensor back to C channels, yielding Fms ∈ RC×H/ 4×W/ 4.
+
+FiLM fusion. Fms encodes spatial temperature structure but lacks chemical context; sctx encodes oxidation chem-istry but at coarse resolution ( H/ 16 ). We bridge them via Feature-wise Linear Modulation (FiLM) [ 31 ], chosen over cross-attention for its 5 × fewer parameters (50 k vs. 263 k at C = 256 ). Because the two feature maps differ in spatial resolution, Fms is first downsampled to match sctx 
+
+(H/ 16 ×W/ 16 ), fused, then upsampled back to H/ 4×W/ 4.Fusion proceeds in three steps: 
+
+(γ, β) = MLP  GAP( sctx ) ∈ RC , (1) 
+
+m = Fms (1 + γ) + β, (2) 
+
+g = σ Wg sctx 
+
+ ∈ [0 , 1] H′×W ′
+
+, (3) 
+
+Ffused = GN  α m ⊙ g + (1 −α) Fms 
+
+, (4) where γ, β are per-channel scale and shift derived from the global RGB descriptor (Eq. 1), g is a learned spatial gate that selectively emphasizes regions where RGB indicates oxidation activity (Eq. 3), and α is a learnable blend scalar (Eq. 4). We initialize γ = 0 , β = 0 , and gate bias = 4.0 (σ(4) ≈ 0.98 ) so the module begins as a near-identity pass-through, preventing the early training collapse we observed with unconstrained cross-attention fusion. 
+
+Multi-task decode head. The fused representation Ffused 
+
+feeds three task-specific branches: 
+
+Segmentation. A 1×1 convolution produces per-pixel log-its ˆS ∈ R3×H×W (background / good / replace ), upsampled to input resolution at loss time. An auxiliary head ( 3×3 conv + 1×1 conv on F1) provides a secondary segmentation signal. Frame-level classification is derived from the segmentation map by majority vote over the oil region. Since each frame contains a single class, no separate classification head is needed. 
+
+Regression. Four two-layer MLPs ( 256 →256 →1) pre-dict z-scored values of PV, p-AV, Totox, and temperature from global-average-pooled fused features Ffused . Regres-sion heads consume fused features, giving them access to RGB chemical context (Sec. 5.3). Gradient isolation is main-tained via stop-gradient: regression loss trains only the MLP heads, not the backbone or fusion module, preventing regres-sion gradients from corrupting segmentation features. 
+
+3.2. Domain Adaptation via Gradient Reversal 
+
+The camera-fingerprint problem. As described in Sec. 1, the camera-fingerprint shortcut lets models memorize sen-sor identity instead of oxidation chemistry. An analogous shortcut exists in the RGB stream, where per-device white balance, lens distortion, and sensor noise provide camera-identifying features. Suppressing both shortcuts is necessary not only for segmentation generalization but also for accu-rate chemical regression: without adversarial regularization, backbone features remain video-dominant even when seg-mentation performance is high, leaving regression heads unable to recover accurate predictions (Sec. 5.3). 
+
+Gradient reversal. We adopt Domain-Adversarial Neural Networks (DANN) [ 14 ], which enforce feature invariance to domain identity via a minimax objective: 
+
+min  
+
+> θ
+
+max  
+
+> d
+
+Ltask (θ) − λ Ldann (d, θ ), (5) where θ are encoder parameters and d are domain-classifier parameters. A Gradient Reversal Layer (GRL) multiplies the domain-classifier gradient by −α during backpropaga-tion, driving the encoder to produce features that maximally confuse video-ID prediction while minimizing task loss. 
+
+Dual-stream design. Because the FLIR backbone and RGB encoder carry independent camera fingerprints, we apply separate DANN heads to each: 
+
+Ldann = CE  MLP (GRL (GAP (F4))) , v id 
+
+, (6) 
+
+Lrgb-dann = CE  MLP (GRL (GAP (sctx ))) , v id 
+
+, (7) 4Table 1. FryNet dataset statistics. All splits are strictly video-disjoint. Good / replace distribution: 3,909 / 3,317 frames. Oil Type Videos Frames % Train Val Test Corn oil 18 4,861 67.3 3,408 660 793 Canola oil 10 2,365 32.7 1,912 241 212 
+
+Total 28 7,226 100 5,320 901 1,005 
+
+where vid ∈ { 0, . . . , 19 } indexes the 20 training videos (Sec. 4), and each MLP is a two-layer classifier (Linear-BN-ReLU-Dropout( p=0 .5)-Linear). Both heads share λ = 0 .1
+
+and α = 1 .0. Validation and test videos never contribute to either DANN loss. The effect of each component is analyzed in Sec. 5.3. 
+
+Total training objective. The full loss combines segmen-tation, regression, self-supervised, and domain-adaptation terms: 
+
+L = Lseg + Laux + Lreg + LMAE + Lchem + Ldann + Lrgb-dann ,
+
+(8) where Lreg = LPV + Lp-AV + LTotox + Ltemp . All regression and chemical alignment losses use Huber loss; segmentation uses cross-entropy. Loss weights: segmentation 0.1, auxil-iary 0.4, Totox 1.0, PV/p-AV/temperature 0.5 each, MAE and chemical alignment 0.3 each, both DANN heads 0.1. 
+
+## 4. Dataset 
+
+Experimental design. The dataset originates from con-trolled deep-frying experiments designed to monitor lipid oxidation in edible oils during thermal processing. Two oil types commonly used for deep-frying in the United States were selected: corn oil (9 frying cycles) and canola oil (5 fry-ing cycles), yielding 14 cycles total. Each frying cycle lasted approximately 10 minutes. Each cycle is captured twice, once with fresh oil ( before ) and once after prolonged frying (after ), producing 28 video sequences. 
+
+Frying procedure. Falafel samples were fried in a lab-oratory deep fryer containing 1.5 L of oil maintained at 
+
+180 ± 2 ◦C, monitored by a thermocouple probe. Repeated batch frying over several hours induced progressive ther-mal degradation and oxidation. Oil samples were collected before and after each frying session for chemical analysis. 
+
+Chemical evaluation. Three oxidation indices were mea-sured for each oil sample: (i) Peroxide Value (PV), an indi-cator of primary oxidation products, determined by iodomet-ric titration following AOAC protocols [ 4]; (ii) p-Anisidine Value (p-AV), measuring secondary oxidation products (alde-hydes), determined by spectrophotometry following AOCS Cd 18-90 [ 2]; and (iii) Total Oxidation Value (Totox), com-bining both indicators as Totox = 2 × PV + p-AV [37 ]. Frying temperature ( ◦F) is extracted per-frame via OCR from the FLIR on-screen display. Across the 28 videos, To-10     
+
+> 20
+> 30
+> 40
+> 50
+> 60
+> Value
+> PV
+> 0
+> 10
+> 20
+> 30
+> 40
+> p-AV
+> 20
+> 40
+> 60
+> 80
+> Totox = 25
+> Totox
+> Good (Totox < 25) Replace (Totox 25) Corn oil Canola oil
+
+Figure 4. Distribution of chemical oxidation indices across 28 oil samples. Colors indicate segmentation class (green = good, Totox < 25; red = replace, Totox ≥ 25); markers distinguish oil type ( ◦ = corn, △ = canola). Dashed line marks the Totox = 25 classification threshold. 
+
+tox ranges from 5.8 (fresh canola) to 76.6 (degraded canola), spanning an order-of-magnitude variation in oxidation load. Figure 4 shows the distribution of all three indices across the 28 oil samples, colored by segmentation class. The two classes are well separated in Totox space, while PV and p-AV individually reveal distinct oxidation profiles between corn and canola oils: canola shows higher primary oxidation (PV) whereas corn shows elevated secondary products (p-AV). 
+
+Imaging. For each oil sample, an iPhone 15 Pro records a 4K RGB video of the oil surface at room temperature, then the oil is heated and a FLIR GF77 long-wave infrared (LWIR) camera captures the thermal video at 640 ×480 resolution (Figure 2). Both modalities capture the same oil batch and chemical state. Frames are extracted at 1 fps and resized to 
+
+640 ×480 ; RGB portrait frames are rotated to landscape and temporally aligned to their FLIR counterparts via uniform index resampling across each video pair. 
+
+Annotation. Each of the 7,226 frames carries four annota-tion types (Table 1): (i) a pixel-level mask delineating the oil surface from background, generated by Segment Anything 2 (SAM2, Hiera-Large) [ 33 ] with bounding-box prompts ob-tained from Otsu thresholding of the thermal image. FLIR on-screen display elements (battery icon, temperature read-out, color-scale bar) are excluded from masks by cropping 9% top, 8% bottom, and 9% right margins, so OSD regions are labeled as background in the segmentation ground truth; 
+
+(ii) a ternary segmentation label ( background , good : To-tox < 25, replace : Totox ≥ 25), applied uniformly to all oil-surface pixels within a frame; (iii) four continuous regression targets (PV, p-AV, Totox, and temperature), z-score normal-ized using training-set statistics; and (iv) a video-sequence identifier linking each frame to its camera and frying batch. 
+
+Splits and camera-fingerprint constraint. The dataset is partitioned into strictly video-disjoint subsets (Table 1): no video appears in more than one split, ensuring that evaluation measures generalization to entirely unseen oil batches and cameras . An important consequence of per-video labeling is that every video is single-class. A model that memorizes 5Table 2. Main results on the 1,005-frame test set. ‡Classification derived from segmentation majority vote (not a separately learned head). All regression MAEs are in raw (denormalized) units: PV (meq O 2/kg), p-AV, Totox, and temperature ( ◦F). Bold = best.                                                                                                                
+
+> Efficiency Seg / Cls Regression MAE ↓
+> Method Backbone Params GFLOPs FPS mIoU mF1 Cls ‡PV p-AV Totox Temp Mean
+> Single-modal baselines (thermal only)
+> SegFormer MiT-B2 24.9M 25.3 66.2 61.80 72.58 64.7 4.74 6.34 14.35 4.10 7.38 ConvNeXt-B ConvNeXt-B 88.5M 85.8 59.0 62.36 73.40 63.0 4.64 8.88 14.64 4.98 8.29 DeepLabV3 ResNet-50 24.9M 110.0 130.0 59.76 70.78 67.1 3.71 13.58 14.26 2.46 8.50 Swin-S Swin-S 49.6M 54.5 40.4 58.82 69.78 61.2 3.87 10.43 16.64 3.34 8.57 DINOv2 ViT-B 87.8M 119.0 46.4 54.15 64.56 80.1 3.24 11.88 11.99 7.58 8.67
+> Multi-modal fusion baselines (RGB + thermal)
+> CMX MiT-B2 ×266.7M 78.3 31.1 18.12 27.19 47.8 6.41 35.93 23.25 16.92 20.62 CMNeXt MiT-B2 ×258.8M 74.2 31.0 76.39 85.62 78.9 4.18 10.72 10.43 6.76 8.02 FryNet (Ours) MiT-B2 31.0M 30.3 47.1 98.97 99.48 100 2.66 1.98 2.86 1.80 2.32
+
+per-camera sensor signatures (fixed-pattern noise, vignetting gradients, thermal bias) can therefore achieve near-perfect training accuracy without learning any oxidation chemistry. We analyze this camera-fingerprint shortcut and our adver-sarial fix in Sec. 3.2. 
+
+## 5. Experiments 
+
+5.1. Implementation Details 
+
+We used the mmsegmentation [ 27 ] codebase and trained on a single NVIDIA A100-40 GB GPU. All backbones are initialized from ImageNet-1K pre-trained weights, while decode heads, regression heads, and the RGB-MAE En-coder are randomly initialized. During training, we applied random resize (0.5–2.0 ×), horizontal flipping, photometric distortion, and random cropping to 512 ×512 . We trained all models using AdamW [ 23 ] (lr 6×10 −5, weight decay 
+
+10 −2) for 40,000 iterations with a batch size of 4, using a linear warm-up over 1,500 iterations followed by polynomial decay (power 1.0). All single-modal baselines and FryNet variants share identical training hyperparameters. CMX and CMNeXt retain their published optimizer and learning-rate schedule (AdamW, lr 6×10 −5, PolyLR with power 0.9, 30 epochs) but are adapted to our dataset at native FLIR resolu-tion ( 480 ×640 ) with added regression heads for fair multi-task comparison. We report segmentation performance using mIoU and mF1, classification using majority-vote accuracy from the segmentation map, and regression using per-target MAE in raw denormalized units. 
+
+Baselines. The single-modal thermal baselines are Seg-Former [ 43 ] (MiT-B2), ConvNeXt-B [ 21 ], DeepLabV3 [ 8](ResNet-50), Swin-S [ 20 ], and DINOv2-ViT-B [ 29 ]. For multi-modal comparison we evaluate CMX [ 45 ] and CM-NeXt [ 46 ] (Sec. 2), both using dual MiT-B2 encoders with the same paired RGB+thermal inputs as FryNet; neither includes domain adaptation or auxiliary learning, testing whether multi-modal fusion alone overcomes the camera-fingerprint shortcut. 
+
+5.2. Quantitative Results 
+
+We report segmentation, classification, and regression per-formance on the held-out 1,005-frame test set (4 videos) in Table 2. 
+
+Single-modal baselines. Table 2 summarizes segmentation, classification, and regression results along with efficiency metrics for all methods. In the top block, all five single-modal thermal baselines plateau below 63% mIoU, con-sistent with the camera-fingerprint bottleneck identified in Sec. 3.2. SegFormer yields the best single-modal mean MAE of 7.38, while Totox MAE remains consistently above 11 across all baselines. 
+
+Multi-modal fusion baselines. In the middle block, we evaluate two multi-modal RGB-thermal baselines using dual MiT-B2 encoders with the same paired inputs as FryNet. CMX collapses to 18.12% mIoU, worse than majority-class prediction, as fusion without adversarial suppression am-plifies rather than mitigates the camera-fingerprint shortcut. CMNeXt performs better at 76.39% mIoU owing to its FRM module, but still falls 22.6 pp below FryNet while using 2 ×
+
+more parameters and GFLOPs. 
+
+FryNet. As shown in the bottom block of Table 2, FryNet achieves 98.97% mIoU and 100% classification accuracy using only 31.0M parameters and 30.3 GFLOPs, outper-forming all baselines by a wide margin at lower computa-tional cost than all comparable multi-task methods (Figure 1). Mean regression MAE of 2.32 represents a 3.2 × improve-ment over the best single-modal baseline SegFormer at 7.38 and a 3.5 × improvement over CMNeXt at 8.02. As shown in Figure 6, FryNet achieves the lowest MAE on all four regression targets, with Totox MAE of 2.86 compared to 10.43 for CMNeXt and 14.35 for SegFormer. 
+
+Qualitative segmentation results. Figure 5 shows repre-sentative predictions from all eight methods on four test 6Image GT SegFormer DeepLabV3 ConvNeXt Swin DINOv2 CMX CMNeXt FryNet                             
+
+> Good
+> ✓✓×✓✓×✓✓
+> Good
+> ×××××××✓
+> Replace
+> ✓××××✓✓✓
+> Replace
+> ✓×✓××✓✓✓
+
+Figure 5. Qualitative segmentation comparison on representative test frames from two good -class and two replace -class videos. Predictions are overlaid on the thermal image: white = good oil; magenta = replace oil. ✓/× indicates whether the dominant predicted oil class matches ground truth. 
+
+videos. Single-modal baselines show class inversion : the predicted class flips between videos depending on cam-era identity, with no two baselines agreeing on the same frame. DeepLabV3 and DINOv2 fragment the oil surface into patches of both classes, following camera vignetting gradients rather than any physical boundary. CMX predicts 
+
+replace over both oil and background across all videos, while CMNeXt fails on one of four videos (row 2). FryNet assigns 
+
+>99% of oil pixels to the correct class on all four videos with spatially uniform masks. Table 3 isolates the contribution of each FryNet compo-nent through incremental construction, controlled removal, DA method and fusion method comparisons, and architec-tural alternatives. All ablations use the SegFormer (MiT-B2) backbone. 
+
+5.3. Ablation Study 
+
+Pipeline construction. In the top part of Table 3, we report the incremental construction of FryNet. The thermal-only baseline yields 61.80% mIoU and 7.38 mean MAE. Adding DANN alone worsens segmentation to 52.59% mIoU, indi-cating that adversarial training is counterproductive without cross-modal context to compensate. Adding the RGB-MAE Encoder with dual-DANN recovers segmentation to 99.23% PV p-AV Totox Temp    
+
+> 0.0
+> 2.5
+> 5.0
+> 7.5
+> 10.0
+> 12.5
+> 15.0
+> MAE
+> 4.7
+> 6.3
+> 14.3
+> 4.1 4.2
+> 10.7 10.4
+> 6.8
+> 2.7 2.0 2.9
+> 1.8
+> SegFormer
+> CMNeXt
+> FryNet (Ours)
+
+Figure 6. Per-target regression MAE on the test set. 
+
+mIoU with perfect classification, but regression remains poor at 8.42 mean MAE without access to fused features. Enabling fused regression drops mean MAE to 2.32, a 3.6 ×
+
+improvement, while maintaining 98.97% mIoU. 
+
+Component removals. As shown in the second block, re-moving the thermal DANN while keeping the RGB DANN has negligible impact, raising mean MAE only from 2.32 to 2.41. In contrast, removing chemical alignment collapses segmentation to 64.17% mIoU despite both DANN branches remaining active, indicating that it provides a critical early learning signal that guides the RGB encoder before DANN stabilizes. Removing all DANN preserves 98.45% mIoU but degrades regression to 6.75 mean MAE, with temper-ature MAE rising from 1.80 to 14.98, consistent with the feature-space analysis in Figure 7. 
+
+DA method comparison. In the third block, we compare GRL against MMD and CORAL applied to both streams. MMD and CORAL yield slightly higher mIoU of 99.25% (a) Supervised (thermal only) (b) FryNet (SSL+RGB+DANN)  
+
+> Good Replace
+
+Figure 7. t-SNE of backbone features on the test set, colored by class (good vs. replace). 
+
+7Table 3. Ablation study (SegFormer MiT-B2, test set). Enc = RGB-MAE Encoder active. Th/R = Thermal/RGB DANN active. ✓∗ =modified encoder variant. Fused = post-fusion features routed to regression heads. Shaded row = FryNet complete pipeline.                                                                                                                                                                                                                                    
+
+> DANN Seg / Cls Regression MAE ↓
+> Variant Enc Th RRGB Fused mIoU mF1 Cls PV p-AV Totox Temp Mean
+> Pipeline construction
+> Thermal only —————61.80 72.58 64.7 4.74 6.34 14.35 4.10 7.38 + DANN —✓———52.59 61.44 51.4 4.49 10.75 18.41 3.92 9.39 + RGB encoder + dual-DANN ✓✓✓✓—99.23 99.61 100 5.29 7.78 18.20 2.41 8.42 + Fused regression ✓✓✓✓✓98.97 99.48 100 2.66 1.98 2.86 1.80 2.32
+> Component removals
+> −Thermal DANN ✓—✓✓✓99.05 99.52 100 0.85 2.26 2.37 4.15 2.41
+> −Chem alignment ✓✓✓✓✓64.17 75.18 63.9 4.76 5.56 13.85 3.33 6.88
+> −All DANN ✓——✓✓98.45 99.21 100 3.20 2.83 5.98 14.98 6.75
+> DA method comparison
+> GRL ✓✓✓✓✓98.97 99.48 100 2.66 1.98 2.86 1.80 2.32 MMD ✓✓✓✓✓99.25 99.62 100 1.77 2.50 2.56 7.99 3.71 CORAL ✓✓✓✓✓99.29 99.65 100 1.53 2.51 4.42 5.55 3.50
+> Fusion method comparison (no fused reg)
+> FiLM ✓✓✓✓—99.23 99.61 100 5.29 7.78 18.20 2.41 8.42 Attention ✓✓✓✓—98.97 99.48 100 5.04 8.66 16.27 5.93 8.98 Concat ✓✓✓✓—99.00 99.50 100 5.19 6.22 16.29 6.45 8.54
+> Architecture alternatives
+> Dual MiT-B2 (early fusion) —✓—✓—98.81 99.40 100 0.42 10.58 10.55 1.45 5.75 TemporalMeanEncoder ✓∗✓✓✓—98.44 99.21 99.8 5.34 7.61 17.02 6.89 9.21 No MAE loss ✓∗✓✓✓—98.99 99.49 100 5.11 6.81 14.37 9.42 8.92
+
+and 99.29%, but substantially worse mean MAE of 3.71 and 3.50 vs. 2.32 for GRL, driven by elevated temperature MAE of 7.99 and 5.55 vs. 1.80. GRL provides the best overall regression, making it the default choice. 
+
+Fusion method comparison. As reported in the fourth block, we compare three fusion strategies under identical settings with dual-DANN and no fused regression. FiLM achieves the lowest mean MAE of 8.42 vs. 8.54 for concat and 8.98 for attention, the highest mIoU of 99.23%, and is the most parameter-efficient with 5 × fewer parameters than cross-attention (Sec. 3.1). 
+
+Architecture alternatives. Finally, in the bottom part of Table 3, a dual-backbone early-fusion model using two paral-lel MiT-B2 encoders achieves 98.81% mIoU and 5.75 mean MAE, which is 2.5 × worse than FryNet’s 2.32, indicating that doubling backbone capacity cannot substitute for learned cross-modal representations. Replacing the RGB-MAE En-coder with temporal mean pooling degrades mean MAE to 9.21, confirming that learned representations are critical. Disabling MAE reconstruction loss yields 8.92 mean MAE, showing it provides complementary signal beyond chemical alignment alone. 
+
+5.4. Limitations 
+
+The test set comprises four video sequences (1,005 frames) from four unseen oil batches. Because every video is single-class, a single misclassified video shifts mIoU by ∼25 pp; results should be interpreted at the video level. Classification is derived from segmentation majority vote (Table 2, ‡), so it does not test independent classification capability. Dataset scale (28 videos from one facility) may not capture the full diversity of frying conditions and fryer geometries. Future work will expand the dataset to cover more diverse frying conditions, oil types, and fryer geometries beyond the single laboratory setup used in this study. 
+
+## 6. Conclusion 
+
+We presented FryNet, a multi-modal RGB-thermal frame-work for non-destructive frying oil quality inspection that addresses the camera-fingerprint shortcut, a failure mode in which models memorize sensor-specific signa-tures rather than oxidation chemistry. Our Dual-Encoder DANN suppresses this shortcut in both thermal and RGB streams via adversarial video-identity regularization, while a chemistry-grounded alignment loss stabilizes training and a fused regression routing strategy enables a mean regres-sion MAE of 2.32, a 3.2 × improvement over the best single-modal baseline. FryNet achieves 98.97% mIoU with 100% classification accuracy, outperforming five single-modal and two multi-modal baselines by wide mar-gins. 8References 
+
+[1] Amira Al-Alawi et al. Improving prediction of peroxide value of edible oils using regularized regression models. Foods ,2021. 2 [2] AOCS. Official Methods and Recommended Practices of the American Oil Chemists’ Society, Method Cd 18-90: p-Anisidine Value . American Oil Chemists’ Society, 7th edition, 2017. 5 [3] Muhammad Aqeel, Hifza Munawar, Ahmed Sohaib, Khan Ba-hadar Khan, and Yiming Deng. Spectral band selection for nondestructive detection of edible oil adulteration using hy-perspectral imaging and chemometric analysis. Journal of Food Measurement and Characterization , 20(2):1482–1503, 2025. 2 [4] Semanur Aydin, Umut Sayin, Mehmet ¨Ozge Sezer, and Seher Sayar. Antioxidant efficiency of citrus peels on oxidative stability during repetitive deep-fat frying: Evaluation with EPR and conventional methods. Journal of Food Processing and Preservation , 45(7), 2021. 5 [5] Siddhartha Bhattacharya, Aarham Wasit, J Mason Earles, Nitin Nitin, and Jiyoon Yi. Enhancing AI microscopy for foodborne bacterial classification using adversarial domain adaptation to address optical and biological variability. Fron-tiers in Artificial Intelligence , 8, 2025. 2 [6] Mathilde Caron, Hugo Touvron, Ishan Misra, Herv ´e J ´egou, Julien Mairal, Piotr Bojanowski, and Armand Joulin. Emerg-ing properties in self-supervised vision transformers. In 
+
+IEEE/CVF International Conference on Computer Vision (ICCV) , pages 9650–9660, 2021. 2 [7] Jos ´e Antonio Cayuela and Nieves Caliani. The quality predic-tion of olive and sunflower oils using NIR spectroscopy and chemometrics: A sustainable approach. Sensors , 2025. 1, 2 [8] Liang-Chieh Chen, George Papandreou, Florian Schroff, and Hartmut Adam. Rethinking atrous convolution for semantic image segmentation. In arXiv preprint arXiv:1706.05587 ,2017. 6 [9] Ting Chen, Simon Kornblith, Mohammad Norouzi, and Ge-offrey Hinton. A simple framework for contrastive learning of visual representations. In International Conference on Machine Learning (ICML) , pages 1597–1607, 2020. 2 [10] Zhao Chen, Vijay Badrinarayanan, Chen-Yu Lee, and Andrew Rabinovich. GradNorm: Gradient normalization for adaptive loss balancing in deep multitask networks. In International Conference on Machine Learning (ICML) , pages 794–803, 2018. 3 [11] Daniel Cozzolino et al. Digital detection of olive oil rancidity levels and aroma profiles using near-infrared spectroscopy, a low-cost electronic nose and machine learning modelling. 
+
+Chemosensors , 10(5):159, 2022. 2 [12] Alexey Dosovitskiy, Lucas Beyer, Alexander Kolesnikov, Dirk Weissenborn, Xiaohua Zhai, Thomas Unterthiner, Mostafa Dehghani, Matthias Minderer, Georg Heigold, Syl-vain Gelly, Jakob Uszkoreit, and Neil Houlsby. An image is worth 16x16 words: Transformers for image recognition at scale. In International Conference on Learning Representa-tions (ICLR) , 2021. 2 [13] Alexey Dosovitskiy, Lucas Beyer, Alexander Kolesnikov, Dirk Weissenborn, Xiaohua Zhai, Thomas Unterthiner, Mostafa Dehghani, Matthias Minderer, Georg Heigold, Syl-vain Gelly, Jakob Uszkoreit, and Neil Houlsby. An image is worth 16x16 words: Transformers for image recognition at scale. In International Conference on Learning Representa-tions (ICLR) , 2021. 3 [14] Yaroslav Ganin, Evgeniya Ustunova, Hana Ajakan, Pascal Germain, Hugo Larochelle, Fran c¸ ois Laviolette, Mario Marc-hand, and Victor Lempitsky. Domain-adversarial training of neural networks. Journal of Machine Learning Research , 17 (1):2096–2030, 2016. 2, 3, 4 [15] Syed Qasim Gilani, Muhammad Umair, Maryam Naqvi, Oge Marques, and Hee-Cheol Kim. Adversarial training based domain adaptation of skin cancer images. Life , 14(8):1009, 2024. 2 [16] Kaiming He, Xinlei Chen, Saining Xie, Yanghao Li, Piotr Doll ´ar, and Ross Girshick. Masked autoencoders are scalable vision learners. In IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR) , pages 16000–16009, 2022. 2[17] Alex Kendall, Yarin Gal, and Roberto Cipolla. Multi-task learning using uncertainty to weigh losses for scene geometry and semantics. In IEEE Conference on Computer Vision and Pattern Recognition (CVPR) , pages 7482–7491, 2018. 3 [18] Olga Kopelevich et al. Application of infrared thermography in identifying plant oils. Foods , 13(24):4090, 2024. 2 [19] Mian Li, Hongliang Yin, Fei Gu, Yanjun Duan, Wenxu Zhuang, Kang Han, and Xiaojun Jin. Recent advances and applications of nondestructive testing in agricultural products: A review. Processes , 13(9):2674, 2025. 2 [20] Ze Liu, Yutong Lin, Yue Cao, Han Hu, Yixuan Wei, Zheng Zhang, Stephen Lin, and Baining Guo. Swin transformer: Hierarchical vision transformer using shifted windows. In 
+
+IEEE/CVF International Conference on Computer Vision (ICCV) , pages 10012–10022, 2021. 6 [21] Zhuang Liu, Hanzi Mao, Chao-Yuan Wu, Christoph Feicht-enhofer, Trevor Darrell, and Saining Xie. A ConvNet for the 2020s. In IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR) , 2022. 6 [22] Huang Lizhi et al. Frying oil evaluation by a portable sensor based on dielectric constant measurement. Sensors , 19(24): 5375, 2019. 1, 2 [23] Ilya Loshchilov and Frank Hutter. Decoupled weight de-cay regularization. In International Conference on Learning Representations (ICLR) , 2019. 6 [24] Marco Mancini et al. Fast olive quality assessment through RGB images and advanced convolutional neural network mod-eling. European Food Research and Technology , 2022. 2 [25] Taha Mehany, Jos ´e M. Gonz ´alez-S ´aiz, and Consuelo Pizarro. Rapid monitoring and quantification of primary and secondary oxidative markers in edible oils during deep frying using near-infrared spectroscopy and chemometrics. Foods , 15(3):557, 2026. 2 [26] Mohammad Naser et al. Prediction of significant oil properties using image processing based on RGB pixel intensity. Fuel ,2023. 2 
+
+9[27] OpenMMLab. MMSegmentation: Openmmlab semantic seg-mentation toolbox and benchmark. https://github. com/open-mmlab/mmsegmentation , 2020. 6 [28] Maxime Oquab, Timoth ´ee Darcet, Th ´eo Moutakanni, Huy Vo, Marc Szafraniec, Vasil Khalidov, Pierre Fernandez, Daniel Haziza, Francisco Massa, Alaaeldin El-Nouby, et al. DI-NOv2: Learning robust visual features without supervision. 
+
+Transactions on Machine Learning Research (TMLR) , 2024. 2[29] Maxime Oquab, Timoth ´ee Darcet, Th ´eo Moutakanni, Huy Vo, Marc Szafraniec, Vasil Khalidov, Pierre Fernandez, Daniel Haziza, Francisco Massa, Alaaeldin El-Nouby, et al. DI-NOv2: Learning robust visual features without supervision. 
+
+Transactions on Machine Learning Research (TMLR) , 2024. 6[30] Joshua M Ottaway, J Chance Carter, Kristl L Adams, Joseph Camancho, Barry K Lavine, and Karl S Booksh. Compari-son of spectroscopic techniques for determining the peroxide value of 19 classes of naturally aged, plant-based edible oils. 
+
+Applied Spectroscopy , 75(6):733–744, 2021. 2 [31] Ethan Perez, Florian Strub, Harm De Vries, Vincent Du-moulin, and Aaron Courville. FiLM: Visual reasoning with a general conditioning layer. In AAAI Conference on Artificial Intelligence , 2018. 3, 4 [32] Chiara Pirola et al. Infrared thermographic signal analysis of bioactive edible oils using CNNs for quality assessment. 
+
+Signals , 6(3):38, 2024. 1, 2 [33] Nikhila Ravi, Valentin Gabeur, Yuan-Ting Hu, Ronghang Hu, Chaitanya Ryali, Tengyu Ma, Haitham Khedr, Roman R ¨adle, Chloe Rolber, Laura Gustafson, Eric Mintun, Junting Pan, Kalyan Vasudev Alwala, Nicolas Carion, Chao-Yuan Wu, Ross Girshick, Piotr Doll ´ar, and Christoph Feichtenhofer. SAM 2: Segment anything in images and videos. arXiv preprint arXiv:2408.00714 , 2024. 5 [34] Sebastian Ruder. An overview of multi-task learning in deep neural networks. arXiv preprint arXiv:1706.05098 , 2017. 3 [35] Md Sahidullah, Hye-jin Shim, Rosa Gonzalez Hautam ¨aki, and Tomi H. Kinnunen. Shortcut learning in binary classifier black boxes: Applications to voice anti-spoofing and biometrics. 
+
+IEEE Journal of Selected Topics in Signal Processing , 2025. 2[36] Veronica Sberveglieri et al. Review on food quality assess-ment using machine learning and electronic nose system. Re-sults in Engineering , 2023. 2 [37] Fereidoon Shahidi and Udaya N. Wanasundara. Methods for measuring oxidative rancidity in fats and oils. In Food Lipids: Chemistry, Nutrition, and Biotechnology , pages 465– 488. CRC Press, 2002. 5 [38] Zhan Tong, Yibing Song, Jue Wang, and Limin Wang. Video-MAE: Masked autoencoders are data-efficient learners for self-supervised video pre-training. In Advances in Neural Information Processing Systems (NeurIPS) , 2022. 2, 4 [39] Patchimaporn Udomkun et al. Can the image processing technique be potentially used to evaluate quality of frying oil? 
+
+Journal of Food Quality , 2019. 1, 2, 3 [40] Rajagopal Vadivambal and Digvir S Jayas. Applications of thermal imaging in food quality and safety assessment. Food and Bioprocess Technology , 4(2):169–185, 2011. 2 [41] Xinzhi Wang et al. Convolutional neural networks in the realm of food quality and safety evaluation: Current achievements and future prospects. Trends in Food Science & Technology ,2025. 2 [42] Sanghyun Woo, Jongchan Park, Joon-Young Lee, and In So Kweon. CBAM: Convolutional block attention module. In 
+
+European Conference on Computer Vision (ECCV) , pages 3–19, 2018. 3 [43] Enze Xie, Wenhai Wang, Zhiding Yu, Anima Anandkumar, Jose M Alvarez, and Ping Luo. SegFormer: Simple and efficient design for semantic segmentation with transform-ers. In Advances in Neural Information Processing Systems (NeurIPS) , 2021. 3, 4, 6 [44] Tianhe Yu, Saurabh Kumar, Abhishek Gupta, Sergey Levine, Karol Hausman, and Chelsea Finn. Gradient surgery for multi-task learning. In Advances in Neural Information Processing Systems (NeurIPS) , pages 5824–5836, 2020. 3 [45] Jiaming Zhang, Huayao Liu, Kailun Yang, Xinxin Hu, Ruip-ing Liu, and Rainer Stiefelhagen. Cmx: Cross-modal fusion for rgb-x semantic segmentation with transformers. IEEE Transactions on Intelligent Transportation Systems , 2023. 3, 6[46] Jiaming Zhang, Ruiping Liu, Hao Shi, Kailun Yang, Simon Reiß, Kunyu Peng, Haodong Fu, Kaiwei Wang, and Rainer Stiefelhagen. Delivering arbitrary-modal semantic segmenta-tion. In Proceedings of the IEEE/CVF Conference on Com-puter Vision and Pattern Recognition , pages 1136–1147, 2023. 3, 6 [47] Lei Zhou, Chao Zhang, Fei Liu, Zhengjun Qiu, and Yong He. Application of deep learning in food: A review. Com-prehensive Reviews in Food Science and Food Safety , 18(6): 1793–1811, 2019. 2 
+
+10

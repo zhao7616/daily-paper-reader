@@ -1,0 +1,46 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.21321v1/fig-001.webp",
+      "caption": "Figure 1. mIoU vs. computational cost (GFLOPs). Marker size is proportional to parameter count. FryNet (31M params, 30.3 GFLOPs) achieves the highest mIoU at lower computational cost than all comparable methods.",
+      "page": 1,
+      "index": 1,
+      "width": 488,
+      "height": 324
+    },
+    {
+      "url": "assets/figures/arxiv/2604.21321v1/fig-002.webp",
+      "caption": "Table 2. Main results on the 1,005-frame test set. ‡Classification derived from segmentation majority vote (not a separately learned head). All regression MAEs are in raw (denormalized) units: PV (meq O2/kg), p-AV, Totox, and temperature (◦F). Bold = best.",
+      "page": 6,
+      "index": 2,
+      "width": 910,
+      "height": 320
+    },
+    {
+      "url": "assets/figures/arxiv/2604.21321v1/fig-003.webp",
+      "caption": "Figure 5. Qualitative segmentation comparison on representative test frames from two good-class and two replace-class videos. Predictions are overlaid on the thermal image: white = good oil; magenta = replace oil. ✓/× indicates whether the dominant predicted oil class matches ground truth.",
+      "page": 7,
+      "index": 3,
+      "width": 993,
+      "height": 381
+    },
+    {
+      "url": "assets/figures/arxiv/2604.21321v1/fig-004.webp",
+      "caption": "Figure 7. t-SNE of backbone features on the test set, colored by class (good vs. replace).",
+      "page": 7,
+      "index": 4,
+      "width": 481,
+      "height": 286
+    },
+    {
+      "url": "assets/figures/arxiv/2604.21321v1/fig-005.webp",
+      "caption": "Figure 3. FryNet architecture. The thermal stream (top) processes FLIR images through ThermalMiT-B2 with TCA/TSA attention at each stage, producing multi-scale features F1–F4 that are merged via multi-scale fusion. The RGB-MAE encoder (bottom) concatenates thermal patches with RGB inputs and learns context features via masked autoencoding with chemical alignment. FiLM fusion combines both streams before feeding into the segmentation head and four regression heads (PV, p-AV, Totox, Temp). Dual-DANN branches apply gradient reversal to both thermal and RGB features for domain-invariant learning. Dashed boxes indicate training-only components.",
+      "page": 3,
+      "index": 5,
+      "width": 1032,
+      "height": 389
+    }
+  ]
+}
