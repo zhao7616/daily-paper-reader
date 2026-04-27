@@ -1,0 +1,904 @@
+Title: Domain-Aware Hierarchical Contrastive Learning for Semi-Supervised Generalization Fault Diagnosis
+
+URL Source: https://arxiv.org/pdf/2604.20928v1
+
+Published Time: Fri, 24 Apr 2026 00:02:49 GMT
+
+Number of Pages: 14
+
+Markdown Content:
+> 1
+
+# Domain-Aware Hierarchical Contrastive Learning for Semi-Supervised Generalization Fault Diagnosis 
+
+Junyu Ren, Wensheng Gan*, Philip S. Yu, Life Fellow, IEEE 
+
+Abstract —Fault diagnosis under unseen operating conditions remains highly challenging when labeled data are scarce. Semi-supervised domain generalization fault diagnosis (SSDGFD) provides a practical solution by jointly exploiting labeled and unlabeled source domains. However, existing methods still suffer from two coupled limitations. First, pseudo-labels for unlabeled domains are typically generated primarily from knowledge learned on the labeled source domain, which neglects domain-specific geometric discrepancies and thus induces systematic cross-domain pseudo-label bias. Second, unlabeled samples are commonly handled with a hard accept-or-discard strategy, where rigid thresholding causes imbalanced sample utilization across domains, while hard-label assignment for uncertain samples can easily introduce additional noise. To address these issues, we propose a unified framework termed domain-aware hierarchical contrastive learning (DAHCL) for SSDGFD. Specifically, DAHCL introduces a domain-aware learning (DAL) module to explicitly capture source-domain geometric characteristics and calibrate pseudo-label predictions across heterogeneous source domains, thereby mitigating cross-domain bias in pseudo-label generation. In addition, DAHCL develops a hierarchical contrastive learning (HCL) module that combines dynamic confidence stratification with fuzzy contrastive supervision, enabling uncertain samples to contribute to representation learning without relying on unreliable hard labels. In this way, DAHCL jointly improves the quality of supervision and the utilization of unlabeled samples. Furthermore, to better reflect practical industrial scenarios, we incorporate engineering noise into the SSDGFD evaluation protocol. Extensive experiments on three benchmark datasets under severe noise and substantial domain shifts demonstrate that DAHCL consistently outperforms advanced SSDGFD baselines, exhibiting superior robustness and domain generalization capabilities. The code is publicly available at https://github.com/JYREN-Source/DAHCL. 
+
+Index Terms —Intelligent fault diagnosis, semi-supervised do-main generalization, contrastive learning, representation learning. 
+
+I. I NTRODUCTION 
+
+Mechanical systems are fundamental to modern industry, including manufacturing, transportation, and wind energy [1], [2]. Faults in such systems may not only reduce production efficiency but also trigger serious safety incidents [3]. Therefore, reliable fault diagnosis is essential for the safe and stable operation of industrial equipment. Driven by its powerful representation learning capability, deep learning (DL) has 
+
+This research was supported in part by the National Natural Science Foundation of China (No. 62272196) and Guangzhou Basic and Applied Basic Research Foundation (No. 2024A04J9971). Junyu Ren and Wensheng Gan are with the College of Cyber Security, Jinan University, Guangzhou 510632, China. (E-mail: renjunyu193@gmail.com, wsgan001@gmail.com) Philip S. Yu is with the Department of Computer Science, University of Illinois Chicago, Chicago, USA. (E-mail: psyu@uic.edu) Corresponding author: Wensheng Gan 
+
+achieved remarkable success in intelligent fault diagnosis (IFD) [4], [5]. However, most DL-based methods are developed under the assumption that training and test data follow the same distribution. In practical industrial scenarios, variations in operating conditions often induce significant domain shifts, which can severely degrade diagnostic performance [6]. To alleviate this issue, transfer learning has been widely introduced into fault diagnosis [7], [8]. Among existing paradigms, domain adaptation (DA)-based methods [9], [10] improve cross-domain performance by leveraging target-domain data during training, but their dependence on target-domain accessibility limits their practical deployment. By contrast, domain generalization fault diagnosis (DGFD) [6] learns only from source-domain data and aims to generalize to unseen target domains, making it more suitable for real-world applications. In particular, multi-source DGFD exploits multiple labeled source domains to learn domain-generalizable representations and has shown promising performance under varying operating conditions [11]. Nevertheless, its supervised learning paradigm still relies heavily on sufficient high-quality annotations, which are often expensive and difficult to obtain in industrial practice [12]. Semi-supervised domain generalization fault diagnosis (SS-DGFD) provides a more practical alternative for fault diagnosis under unseen operating conditions when labeled data are scarce. It aims to learn a diagnosis model with cross-domain generalization capability by jointly exploiting a small amount of labeled source-domain data and abundant unlabeled source-domain data [13]. Compared with supervised DGFD, the core challenge of SSDGFD lies in constructing sufficiently reliable supervisory signals for unlabeled source domains in the presence of both domain shifts and incomplete annotations [14]. To this end, existing studies typically combine domain-level alignment with category-level regularization, such as pseudo-labeling, to provide approximate supervision for unlabeled samples [15], [16]. Recent efforts have further improved this paradigm from different perspectives, including domain-invariant feature extraction [17], feature disentanglement [18], class-prior modeling [19], pseudo-label filtering [20], and augmentation-based consistency enhancement [13]. Although these methods have achieved encouraging progress, they still predominantly rely on the conventional paradigm of domain-invariant representation learning, with category-level constraints serving mainly as auxiliary supervision for unlabeled samples. Nevertheless, existing SSDGFD methods still face three tightly coupled challenges. (1) Cross-domain bias in pseudo-label generation : most methods generate pseudo-labels mainly according to the decision boundary learned from the labeled source domain, while overlooking the geometric characteristics 
+
+> arXiv:2604.20928v1 [cs.LG] 22 Apr 2026 2
+
+of each unlabeled source domain. As a result, the generated pseudo-labels are implicitly biased toward the labeled domain and can become systematically unreliable when the unlabeled domains exhibit varying degrees of similarity to it. This issue is particularly severe under large domain shifts, where noisy pseudo-labels may be repeatedly reinforced during training. (2) 
+
+Binary sample selection leads to inefficient use of unlabeled data : existing category-level supervision strategies for unlabeled samples often rely on a hard confidence criterion to determine whether a sample should be trusted or ignored. However, a fixed threshold is inherently insensitive to heterogeneous trans-ferability across source domains, often causing samples from domains closer to the labeled source to dominate training while those from more distant domains remain underutilized. More importantly, uncertain samples near the confidence threshold are not truly useless: forcing them into hard labels introduces noise, whereas discarding them entirely wastes potentially informative semantic structure. (3) Insufficient evaluation under realistic noisy conditions : most existing SSDGFD studies are conducted under relatively clean benchmark settings. However, vibration signals acquired in real industrial environments are often subject to substantial engineering noise [21]. Such noise not only blurs class boundaries but also further magnifies pseudo-label bias and the imbalance in unlabeled sample utilization across domains. Source1 (labeled)               
+
+> Source2 (unlabeled)
+> Target (unseen)
+> Real Proxy
+> unknown class
+> Fuzzy Proxy Push apart Pull together Fuzzy disentanglement
+> uncertain sample
+> D1
+> sD2
+> s
+> D3
+> s
+> D2
+> s
+> D1
+> s
+> D3
+> s
+> Dknowlegde 3
+> s
+> Dknowlegde 2
+> s
+> Supervisory signal construction Unlabeled sample utilization
+> (a)
+> Accept
+> Accept
+> Uncertainty exploitation
+> Discard
+> (b)
+> Outcome
+> Noisy pseudo-label Less usable sample Domain imbalance
+> High-quanlity label More usable sample Domain balance
+> Decision boundary Confidence threshold Domain-specific geometry
+> D1
+> sD2
+> s
+> D3
+> s
+> D2
+> s
+> D1
+> s
+> D3
+> s
+> Pseudo-label generation Sample selection & handling
+> (a)
+> Accept
+> Constrastive learning
+> Fuzzy constrastive
+> Discard
+> (b)
+> Outcome
+> Nosiy pseudo-label Less usable sample Domain imbalance
+> High quanlity label More usable sample Domain balance
+> Decision boundary Confidence threshold Domain knowledge
+> Fig. 1. Visual illustration of differences between (a) previous works and (b) our method.
+
+As illustrated in Fig. 1, the above limitations stem from a common issue: existing SSDGFD methods mainly emphasize domain-invariant learning, but underexploit two important sources of information contained in unlabeled source do-mains, namely domain-specific geometric characteristics and uncertainty-aware semantic cues. In other words, domain-specific characteristics are often treated merely as nuisance variations to be suppressed, even though they can provide valuable evidence for correcting cross-domain pseudo-label bias. Meanwhile, uncertain samples are usually handled in a hard accept-or-discard manner, although their prediction distributions still contain useful weak semantic information. To address these issues, we propose domain-aware hierar-chical contrastive learning (DAHCL), a unified framework that improves SSDGFD from two complementary perspectives. First, DAHCL introduces a domain-aware learning scheme to explicitly encode source-domain geometric characteristics into the prediction process, thereby reducing the systematic bias in pseudo-labels across heterogeneous source domains. Second, DAHCL develops hierarchical contrastive learning ,which replaces rigid binary selection with stratified supervision and fuzzy contrastive learning, enabling uncertain samples to contribute to representation learning without relying on unreliable hard labels. In this way, DAHCL jointly achieves bias correction and uncertainty-aware utilization of unlabeled data, leading to more robust generalization under severe noise and large domain shifts. The main contributions of this paper are summarized as follows:  
+
+> •
+
+We propose a unified DAHCL framework for SSDGFD that rethinks the role of unlabeled source domains from two overlooked aspects: domain-specific geometry and uncertainty-aware supervision. Unlike existing methods that mainly pursue domain invariance and hard pseudo-label filtering, DAHCL jointly addresses cross-domain pseudo-label bias and insufficient utilization of uncertain unlabeled samples.  
+
+> •
+
+We design a domain-aware learning (DAL) module to explicitly model source-domain geometric characteristics and build domain-aware experts for pseudo-label calibra-tion. By constraining predictions to be consistent with domain-specific distribution patterns, DAL alleviates the systematic bias caused by transferring labeled-domain decision knowledge directly to heterogeneous unlabeled domains, and further supports adaptive expert selection for unseen target domains during inference.  
+
+> •
+
+We develop hierarchical contrastive learning (HCL) to replace one-shot hard sample filtering with dynamic confidence stratification and fuzzy contrastive supervision. This design allows uncertain samples to provide useful supervisory signals in a soft manner, improving utilization of unlabeled data and mitigating cross-domain imbalance without introducing excessive hard-label noise.  
+
+> •
+
+We extend SSDGFD to a more realistic noisy evaluation setting by incorporating engineering noise into both training and testing. This protocol better reflects practical fault diagnosis scenarios and provides a more rigorous benchmark for assessing robustness under severe signal contamination.  
+
+> •
+
+Extensive experiments on three benchmark datasets demonstrate that DAHCL consistently outperforms ex-isting advanced SSDGFD methods under severe noise and large domain shifts, showing stronger robustness and generalization capability. This paper is organized as follows: Section II reviews related work. Section III presents the proposed method, and Section IV shows experimental results and analysis. Finally, Section V provides conclusions and future research directions. II. R ELATED WORK 
+
+A. Multi-source DG Fault Diagnosis 
+
+Multi-source domain generalization fault diagnosis (MS-DGFD) aims to train a diagnostic model on multiple known source domains and generalize the learned knowledge to unseen operating conditions without access to target-domain data. Owing to its practical significance, this problem has attracted 3
+
+increasing attention in recent years. The key objective is to learn feature representations from multiple labeled source domains that are both class-discriminative and stable across domains [11], [22]. Existing MSDGFD methods can be broadly categorized into two lines of research. The first line improves generalization by expanding the training distribution at the data level, such as through data augmentation, domain augmentation, or cross-domain interpolation. For example, Shi et al. [23] proposed a domain augmentation generalization network that enlarges the support of the source-domain distribution by constructing augmented domains and incorporating adversarial training. Guan et al. [24] further generated linear intermediate domains between different source domains to enhance the continuity of the training distribution and improve model adaptability to out-of-distribution samples. The second line focuses on domain-invariant representation learning, which aims to extract transferable shared diagnostic knowledge from multiple source domains via adversarial alignment, distribution discrepancy minimization, or metric learning. Specifically, Gao 
+
+et al. [25] characterized multi-source domain discrepancies by exploiting the prediction inconsistency among multiple domain-specific classifiers and achieved finer-grained global feature alignment with the Wasserstein distance. In another work, Gao 
+
+et al. [26] introduced feature disentanglement to explicitly separate fault-related representations from domain-related components, thereby obtaining purer and more stable domain-invariant features. Moreover, causal representation learning has also been introduced into MSDGFD, where features are decomposed into causal and non-causal factors to reduce the adverse effect of spurious correlations on generalization performance [27]. Beyond feature learning, some studies have attempted to improve multi-source generalization from the perspective of training paradigms and model organization, such as meta-learning frameworks based on gradient alignment and semantic matching [28], and ensemble learning methods with collaborative multi-branch modeling [29]. Although MSDGFD methods have significantly improved fault diagnosis performance under unseen operating conditions, they are generally built upon the assumption of sufficient labeled data, which does not conform to realistic industrial scenarios. Therefore, effectively exploiting unlabeled source-domain data has become a key issue in advancing DGFD toward practical applications. 
+
+B. Semi-supervised DG Fault Diagnosis 
+
+Semi-supervised domain generalization fault diagnosis (SS-DGFD) assumes that only a portion of the source-domain samples are labeled. Its core challenge lies in how to pro-vide reliable category-level supervision for unlabeled source domains while ensuring effective sample utilization. Since it enables the exploitation of massive yet difficult-to-annotate industrial data, SSDGFD is of greater practical value in label-scarce scenarios. Most existing SSDGFD methods follow a general framework that combines global domain alignment with semi-supervised learning. For instance, Liao et al. [15] integrated a Wasserstein generative adversarial network with a pseudo-labeling strategy for training. Li et al. [30] used the prediction discrepancy between two classifiers to characterize cross-domain representation similarity. Ren et al. [16] achieved global domain alignment through adversarial training and further imposed category-level constraints by incorporating a pseudo-label-based center loss. Subsequently, Ren et al. [31] proposed DIFFN, which extracts discriminative features and domain-invariant features through two separate branches and then performs joint fusion modeling. These methods mainly focus on mitigating domain shift at the global distribution level, while their characterization of category structure is relatively coarse or even absent. Building upon this line of research, subsequent studies began to incorporate feature disentanglement, contrastive learning, and sample selection mechanisms. Zhao et al. [17] proposed a multi-assistance semi-supervised DG network, in which domain alignment is mainly used for pseudo-label assignment, while low-rank decomposition is exploited to guide the training of domain-specific and domain-invariant classifiers. Song et al. [18] proposed a domain-specificity removal network, which obtains purer domain-invariant representations by removing domain-private features and further enhances category-level constraints via proxy-based contrastive learning. Compared with earlier methods, these approaches further improve the extraction of domain-invariant features. However, they fail to account for the similarity differences between unlabeled and labeled source domains, which may easily lead to noisy pseudo labels and inter-domain imbalance in the number of usable samples. To address the above issues, recent studies have further improved SSDGFD from the perspectives of sample utilization and category constraint design. Wei et al. [20] quantified the degree of imbalance according to the number of pseudo-labeled samples in each domain and dynamically adjusted the confidence threshold to improve sample utilization. However, this strategy essentially increases the number of usable samples by relaxing the threshold and therefore still suffers from the risk of introducing more noise. Jiang et al. 
+
+[14] injected category constraints into the network weight generation process, thereby avoiding explicit reliance on pseudo labels. Cui et al. [13] proposed a two-stage semi-supervised domain generalization network, which first improves pseudo-label quality through MMD-driven domain adaptation and then enhances generalization capability using Mixup. Nevertheless, these methods still rely solely on knowledge from labeled source domains to impose category constraints. Overall, although existing SSDGFD methods have achieved encouraging progress, they still suffer from three main limi-tations. First, the modeling of category structure in unlabeled source domains remains insufficient. Pseudo-label generation or implicit category constraints still primarily depend on knowledge from labeled source domains, without explicitly characterizing the geometric structure of unlabeled domains or the similarity differences across domains, which may easily induce cross-domain bias. Second, unlabeled sample utiliza-tion still largely follows fixed-threshold and hard-selection mechanisms, which essentially amount to a binary “accept-or-discard” strategy, making it difficult to balance the number of usable samples across different source domains and to properly exploit uncertain samples. Third, most existing studies are 4
+
+conducted under relatively ideal data conditions and have not adequately considered the influence of engineering noise in rotating machinery systems on SSDGFD performance. III. P ROPOSED METHOD 
+
+A. Problem Definition 
+
+In SSDGFD, data are collected from multiple operating conditions, resulting in multiple source domains with distri-bution discrepancies. Let {D sm}Mm=1 denote the set of M
+
+available source domains, where only one source domain 
+
+Ds 
+
+> 1
+
+= {(xs
+
+> 1,i
+
+, y 1,i )}ns 
+
+> 1
+> i=1
+
+is fully labeled, while the remain-ing source domains Dsm = {xsm,i }nsm
+
+> i=1
+
+, m = 2 , . . . , M are unlabeled. Here, xsm,i denotes the i-th sample from the m-th source domain and y1,i ∈ {1, . . . , K } represents the corresponding fault category. During training, the target domain 
+
+Dt = {xti}nt 
+
+> i=1
+
+is completely inaccessible and is only used for performance evaluation in the testing phase. Although all domains share the same fault label space, their data distributions differ due to varying operating conditions, i.e., 
+
+P1(X s 
+
+> 1
+
+)̸ = · · ·̸ = PM (X sM )̸ = Pt(X t). The goal is to enable reliable fault identification on an unseen target domain using partially labeled source-domain data. 
+
+B. Overview of DAHCL 
+
+The proposed DAHCL consists of a shared feature backbone and two key components: 1) domain-aware learning (DAL), which exploits source-domain geometric characteristics to improve pseudo-label quality during training and enables adaptive expert selection at test time; and 2) hierarchical con-trastive learning (HCL), which stratifies unlabeled samples by confidence and imposes differentiated contrastive supervision to improve utilization of unlabeled data and alleviate cross-domain imbalance. As shown in Fig. 2, the overall framework contains four modules: 1) a feature extractor F : x 7 → h ∈ RD0 , which extracts high-level representations from raw vibration signals; 2) a classifier GC , including a projection layer ϕ : h 7 → z ∈ Rd
+
+and a linear classification head C : z 7 → ℓbase ∈ RK , where z
+
+denotes the feature embedding and ℓbase denotes the logits; 3) a domain-adversarial alignment module composed of a domain discriminator GD : h 7 → ℓD ∈ RM and a gradient reversal layer (GRL) [32], which performs global domain alignment; and 4) a domain knowledge distillation module Mϕ : RK → RK×d,which generates domain-aware modulation matrices for expert construction. The detailed design is described below. 
+
+C. Supervised Classification and Domain-Adversarial Align-ment 
+
+The feature extractor F and the classifier GC form the basic diagnosis backbone. For the labeled source domain Ds
+
+> 1
+
+, the supervised classification loss is defined as 
+
+Lsup = E(x,y )∼D s
+
+> 1
+
+CE  C(ϕ(F(x))) , y  , (1) where CE( ·, ·) denotes the cross-entropy loss. To preliminarily reduce domain shift, we further introduce a domain-adversarial alignment module consisting of GD and a GRL. The domain discrimination loss over all source domains is given by 
+
+Ldom = 1
+
+M
+
+> M
+
+X
+
+> m=1
+
+Ex∼D sm
+
+CE  GD (F(x)) , m  , (2) where m is the domain label. Through the GRL, GD is optimized to minimize Ldom , whereas F receives a reversed gradient and is thus encouraged to learn coarse domain-invariant features [32]. We further develop DAL and HCL on top of the above backbone. 
+
+D. Domain-Aware Learning 
+
+In SSDGFD, pseudo-labels for unlabeled source domains are often generated solely based on the decision boundary learned from the labeled source domain. Under a substantial domain shift, such a strategy easily introduces systematic cross-domain bias and repeatedly reinforces it through noisy pseudo-labels. To address this issue, we propose domain-aware learning 
+
+(DAL), which explicitly embeds domain-specific geometric characteristics into the prediction process for bias correction. 
+
+1) Domain-specific geometry embedding: We first define the 
+
+domain-proxy affinity spectrum (DPAS) to characterize each unlabeled source domain from a geometric perspective. For the base classifier, let Wbase = [ w1, . . . , wK ]⊤ ∈ RK×d, where 
+
+wk is the proxy of the kth fault category. For the mth unlabeled source domain Dsm (m ∈ { 2, . . . , M }), the instantaneous DPAS on a mini-batch Bm in training process is defined as 
+
+sm = 1
+
+|B m|
+
+X
+
+> x∈B m
+
+cos( z(x), w1), . . . , cos( z(x), wK )⊤, (3) To obtain a stable domain descriptor, we then update the domain descriptor by an exponential moving average method: 
+
+am ← (1 − μ)am + μsm, (4) where μ is the momentum coefficient. The resulting am ∈ RK
+
+serves as a compact semantic descriptor of the mth unlabeled source domain, whose kth component represents the average cosine similarity between samples in the unlabeled source domain Dsm and the proxy of class k. This geometry-aware metric, constructed based on affinity distributions, characterizes the feature tendency of a domain and reflects its distinctive distributional properties in the overall class space. 
+
+2) Domain-aware expert classifier: Although am captures the overall geometric tendency of a source domain, a simple linear mapping is insufficient to encode such information into the classifier. Therefore, we introduce a lightweight domain knowledge distillation module Mϕ to adaptively encode the domain knowledge am. Its output Γraw  
+
+> m
+
+is mapped to a modulation matrix via a residual connection and an activation function, which can be formulated as: 
+
+Γraw  
+
+> m
+
+= Mϕ(am), Γm = 1 + ε · tanh( Γraw  
+
+> m
+
+) , (5) where ε controls the modulation magnitude and 1 is an all-one matrix. Based on this design, M − 1 domain-aware expert 5𝐖 b  
+
+> Dynamic
+> thresholding
+> ℒHCL
+> Hierarchical contrastive learning Prediction
+
+Inference stage            
+
+> Target
+> DPAS 𝐚 t
+> Similarity:
+> 𝑪 𝒐𝒔 (𝐚 t,𝐚 𝐦 )
+> Select expert
+> Cb,C2.. Cm
+> Head
+> Selection
+> Inputs 𝒟 m
+> s
+> GRL
+> ℒsup
+> ℒdom
+> Source -1
+> (labeled)
+> Source -2
+> (unlabeled)
+> Domain
+> discriminator
+> ..  Projection
+> layer 𝝓
+> Feature
+> Extractor  ℱ
+> Classification
+> head C
+> Source -m
+> (unlabeled)
+> 𝚪 m
+> Distiller
+> DPAS 𝐚 𝐦
+> Domain expert
+> head Cm
+> 𝐖 𝐦
+> ⊙
+> 𝑸 b
+> 𝑸 𝑚
+> 𝐩 𝐱 𝐚 𝐱
+> PAC score
+> ℒDCR
+> 𝐜 (𝐱 )
+
+Training stage      
+
+> Feature
+> Extractor ℱ
+> 𝐡 𝐳
+> 𝐩 b
+> 𝐩 𝐦
+> 𝐱
+> Forward propagation Algorithm flow Back propagation
+> ℛ
+> 𝒜
+> 𝒰
+> (b) (a)
+> 𝑴 𝝓
+> Fig. 2. Overview of the proposed DAHCL.
+
+heads are constructed for the M − 1 unlabeled source domains. Specifically, the weight matrix of the mth expert is defined as 
+
+Wm = Wbase ⊙ Γm, (6) where ⊙ denotes element-wise multiplication. The logits produced by the base classifier and the mth domain-aware expert are denoted by ℓbase (x) and ℓm(x), respectively. 
+
+3) Domain-aware coherence regularization: During back-propagation, we construct a domain-aware coherence regular-ization (DCR) term that exploits domain geometric characteris-tics to constrain the predictions of domain experts. Specifically, for an unlabeled sample x with prediction probability vector 
+
+p(x) and affinity vector am(x), we define the prediction-affinity coherence score as: 
+
+Q p(x), am(x) = p(x)⊤am(x) = 
+
+> K
+
+X
+
+> k=1
+
+pk(x) am,k (x). (7) This score measures the consistency between the classi-fier prediction distribution and the DPAS vector. Specif-ically, let pbase (x) = softmax( ℓbase (x)) and pm(x) =softmax( ℓm(x)) denote the prediction distributions of the base classifier and the current domain expert, respectively. Their corresponding coherence scores are Qbase (x) =
+
+Q(pbase (x), am(x)) and Qm(x) = Q(pm(x), am(x)) , respec-tively. Here, Qbase is treated as a fixed reference (with gradient detached). The optimization target of DCR is defined as the coherence violation cost: 
+
+LDCR = 1
+
+|B m|
+
+X
+
+> x∈B m
+
+max  0, Q base (x) − Qm(x), (8) This loss drives the prediction distribution of the domain expert to be more coherent with the domain geometric vector than that of the base classifier, thereby allowing the model to adaptively adjust its decision boundary according to the geometric characteristics of the corresponding source domain and suppress semantic mismatch caused by domain shift. 
+
+4) Test-time domain expert selection: During inference, the domain expert classifier that best matches the target domain is selected by computing DPAS similarity scores, thereby adaptively improving diagnostic accuracy. Specifically, the DPAS representation of the target domain, denoted by at,is updated online. For each incoming mini-batch Bt, the instantaneous DPAS st is computed in the same manner as in eq. (3) , and at is updated via exponential moving average as 
+
+at ← (1 − μ) at + μ st. Subsequently, the DPAS vectors are 
+
+L2-normalized, and the similarity between the target domain and each source domain is measured by cosine similarity: 
+
+ρm = a⊤ 
+
+> t
+
+am
+
+∥at∥2∥am∥2
+
+, m ∈ { 2, . . . , M }, (9) According to the nearest-neighbor principle, the index of the source domain with the highest similarity is selected as the expert assignment for the target domain: m∗ = arg max m ρm,and the final prediction is given by the corresponding domain expert classifier: ˆy = arg max k[ℓm∗ (x)] k.
+
+E. Hierarchical contrastive learning 
+
+Existing pseudo-label-based SSDGFD methods usually em-ploy a single threshold to divide unlabeled samples into accepted and discarded sets. However, such a binary strategy cannot accommodate heterogeneous domain gaps, causing over-utilization of samples from domains close to the labeled source and under-utilization of those from distant domains, while also neglecting the useful semantic information carried by uncer-tain samples. To address this issue, we propose hierarchical contrastive learning (HCL), which combines dynamic cross-domain thresholding with stratified contrastive constraints to enable fine-grained confidence partitioning and differentiated supervision for unlabeled samples. 
+
+1) Dynamic cross-domain thresholding: At each iteration, unlabeled samples from all M −1 unlabeled source domains are mixed into a batch Bu. For a sample x ∈ D sm, its confidence score is computed from the corresponding domain-aware expert: 
+
+c(x) = max k pm,k (x), where pm,k (x) is the kth entry of 
+
+pm(x). Collect all confidence scores in Bu as {ci}|B u| 
+
+> i=1
+
+, and sort them in ascending order as {c(i)}|B u| 
+
+> i=1
+
+, where c(1) ≤ · · · ≤ 
+
+c(|B u|).Then, two quantiles are computed as qlow = c(⌈η1|B u|⌉ ),
+
+qmid = c(⌈η2|B u|⌉ ), where 0 < η 1 < η 2 < 1. If only quantiles are used, the thresholds will increase synchronously with the overall confidence level during late training, forcing a fixed proportion of samples to remain in low-confidence regions even when most samples have become reliable. To avoid this issue, we introduce two upper-bound thresholds τ1 < τ 2, and 6
+
+define the actual thresholds as tlow = min( qlow , τ 1), tmid =min( qmid , τ 2). Accordingly, unlabeled samples are partitioned into three subsets: R = {x | c(x) ≥ tmid }, A = {x | tlow ≤
+
+c(x) < t mid }, U = {x | c(x) < t low }, where R, A, and 
+
+U denote the reliable, ambiguous, and unreliable partitions, respectively. Source 2 (unlabeled)         
+
+> Source 1 (labeled)
+> Real proxy
+> Reliable sample
+> Ambiguous sample
+> Fuzzy proxy
+> Positive
+> Negative
+> (a) (b)
+> TS
+> US ෥𝐰 𝐱
+> Trustworthy subset Untrustworthy subset
+> Fig. 3. Illustration of the proposed hierarchical contrastive learning.
+
+2) Stratified contrastive constraints: Based on the three-level partition, HCL imposes differentiated supervision on different subsets. For reliable samples R, standard proxy-based contrastive learning is performed. For unreliable samples U, no pseudo-label supervision or contrastive constraint is imposed to avoid noise propagation. Specifically, for uncertain samples A,we further design a fuzzy contrastive mechanism to exploit their soft semantic information. The feature embedding z is used to construct the contrastive metric space of HCL. To formulate the contrastive learning objective, the feature embedding z and the proxies wk are first L2-normalized: ¯z = z 
+
+> ∥z∥2
+
+, ¯wk = wk  
+
+> ∥wk∥2
+
+.
+
+A temperature coefficient T > 0 is then introduced to define the unified temperature-scaled cosine similarity: s(z, wk) = ¯z⊤ ¯wk 
+
+> T
+
+.
+
+For a reliable sample x ∈ R , the pseudo-label is obtained according to the prediction distribution pm(x) of the Domain-expert: ˆy(x) = arg max k pm,k (x). As illustrated in Fig. 3 (a), the positive sample of x is the proxy wˆy(x) corresponding to its predicted category, while the remaining K − 1 class proxies are treated as negative samples. We employ the proxy-based InfoNCE [33] loss: 
+
+LR(x) = − log exp  s(z, wˆy(x))PKk=1 exp  s(z, wk) . (10) For an uncertain sample x ∈ A, its one-hot pseudo-labels are unreliable, and premature hard assignment may erase potentially informative secondary category information; meanwhile, completely discarding such samples would hinder the learning of critical features. Inspired by fuzzy theory [34], we divide the predicted categories into Trustworthy Classes and Untrustworthy Classes, and construct a fuzzy proxy from the trustworthy class proxies as the sole positive sample, while the remaining untrustworthy class proxies are treated as negative samples, as illustrated in Fig. 3 (b). Specifically, the top-3 classes T3(x) whose predicted probabilities are higher than the random-guessing prior 1/K are defined as the trustworthy classes, i.e., the trustworthy class subset is 
+
+C(x) = k ∈ T3(x) | pm,k (x) > 1/K . Probability normalization is then performed over C(x) to obtain the weights: 
+
+ωk(x) = pm,k (x)
+
+P 
+
+> j∈C (x)
+
+pm,j (x) , k ∈ C (x). (11) The fuzzy proxy is obtained by probability-weighted aggrega-tion over the trustworthy class proxies: 
+
+˜w(x) = X
+
+> k∈C (x)
+
+ωk(x) wk. (12) The untrustworthy class subset is defined as the complement of the trustworthy class subset: N (x) = {1, . . . , K } \ C (x). The denominator performs softmax normalization over the positive sample and all negative samples. Accordingly, the contrastive loss for uncertain samples is defined as: 
+
+LA(x) = − log exp  s(z, ˜w(x)) 
+
+exp  s(z, ˜w(x))  + P 
+
+> k∈N (x)
+
+exp  s(z, wk) .
+
+(13) This design prevents uncertain samples from being forcibly clustered into one-hot categories. Instead, they are first pulled toward the weighted center of the trustworthy class proxies. As the model gradually converges, their prediction distributions naturally become sharper, thereby enabling a smooth transition from fuzzy supervision to deterministic supervision. In summary, the overall loss of HCL can be expressed as: 
+
+LHCL = 1
+
+|R| 
+
+X
+
+> x∈R
+
+LR(x) + 1
+
+|A| 
+
+X
+
+> x∈A
+
+LA(x), (14) where the corresponding term is omitted if R or A is empty in a mini-batch. 
+
+F. Model Training and Inference 
+
+Combining the supervised classification loss (Eq. (1) ), the domain-adversarial alignment loss (Eq. (2) ), the domain-aware coherence regularization (Eq. (8) ), and the hierarchical contrastive loss (Eq. (14) ), the overall training objective of DAHCL is formulated as 
+
+L = Lsup + λ1Ldom + λ2LHCL + λ3LDCR , (15) where λ1, λ2, and λ3 are trade-off hyperparameters that balance the contributions of the respective loss terms. The complete training and inference procedure of DAHCL is summarized in Algorithm 1. During training, the feature extractor F, the classifier GC , the domain discriminator GD ,and the domain knowledge distiller Mϕ are jointly optimized by minimizing the composite objective in Eq. (15) . It is worth noting that the DPAS vectors am are maintained as exponential moving averages (Eq. (4) ) rather than recomputed from scratch at each iteration, ensuring stable and efficient tracking of domain-level geometric characteristics throughout training. At inference time, the target DPAS vector at is computed online from incoming test mini-batches, and the domain expert with the highest cosine similarity is selected to produce the final prediction, enabling label-free adaptation to unseen domains. IV. E XPERIMENTAL RESULTS AND ANALYSIS 
+
+In this section, we present the experimental evaluation of the proposed DAHCL framework. The source code is available at https://github.com/JYREN-Source/DAHCL. 7
+
+Algorithm 1 Training and Inference of DAHCL 
+
+Input: Labeled source domain Ds
+
+> 1
+
+, unlabeled source domains 
+
+{D sm}Mm=2 , loss weights λ1, λ 2, λ 3.
+
+Output: Trained feature extractor F, classifier GC , domain dis-criminator GD , domain knowledge distiller Mϕ, DPAS vectors 
+
+{am}Mm=2 .
+
+— Training Stage —  
+
+> 1:
+
+Initialize all network parameters.  
+
+> 2:
+
+for each training iteration do  
+
+> 3:
+
+Sample mini-batches from Ds 
+
+> 1
+
+and {D sm}Mm=2  
+
+> 4:
+
+Extract features h = F(x), embeddings z = ϕ(h) 
+
+> 5:
+
+Compute supervised loss Lsup on Ds 
+
+> 1
+
+via Eq. (1)  
+
+> 6:
+
+Compute domain-adversarial loss Ldom via Eq. (2) 
+
+% Domain-Aware Learning (DAL)  
+
+> 7:
+
+Update DPAS vectors am for each unlabeled domain  
+
+> 8:
+
+Construct domain-aware expert classifiers {Cm}Mm=2  
+
+> 9:
+
+Compute domain-aware coherence regularization LDCR via Eq. (8) 
+
+% Hierarchical Contrastive Learning (HCL)  
+
+> 10:
+
+Partition unlabeled samples into R, A, U by dynamic thresholding  
+
+> 11:
+
+Compute hierarchical contrastive loss LHCL via Eq. (14)  
+
+> 12:
+
+Update parameters by minimizing: 
+
+L = Lsup + λ1Ldom + λ2LHCL + λ3LDCR  
+
+> 13:
+
+end for — Inference Stage —  
+
+> 14:
+
+Compute target-domain DPAS at online from test mini-batches  
+
+> 15:
+
+Select best-matching expert: m∗ = arg max m ρm, where ρm =  
+
+> a⊤
+> tam
+> ∥at∥2∥am∥2
+> 16:
+
+Predict: ˆy = arg max k [ℓm∗ (x)] k
+
+A. Experimental setup 1) Datasets and preprocessing: To verify the effectiveness of the proposed method, we conducted comprehensive experiments on three public datasets collected under different operating conditions. 
+
+(1) CWRU dataset: The CWRU rolling bearing dataset, a widely used benchmark for rotating machinery fault diagnosis [35], is publicly available from Case Western Reserve Univer-sity 1. The evaluated bearing, SKF 6205-2RS JEM, was tested under four health states: normal, inner-race fault, ball fault, and outer-race fault. Faults with defect diameters of 0.007, 0.014, and 0.021 inches were artificially introduced using electric discharge machining. Experiments were conducted under four operating conditions, i.e., condition 0 (0 HP), condition 1 (1 HP), condition 2 (2 HP), and condition 3 (3 HP), with a sampling frequency of 48 kHz. Vibration signals were acquired from the drive end of the bearing under all conditions. Table I summarizes the fault categories and the corresponding sample quantities. 
+
+(2) PU dataset: The Paderborn University (PU) bearing fault dataset [36] contains vibration signals sampled at 64 kHz from a test rig composed of a measurement shaft, a rolling bearing test module, an electric motor, a flywheel, and a load motor 2. Faults are categorized as either artificially induced or naturally developed through accelerated lifetime testing, covering single, repetitive, and compound damage modes. In this study, only naturally degraded bearing data are used. The   
+
+> 1https://engineering.case.edu/bearingdatacenter
+> 2https://mb.uni-paderborn.de/kat/forschung/kat-datacenter/ bearing-datacenter TABLE I FAULT CATEGORIES AND SAMPLE QUANTITIES FOR THE CWRU DATASET UNDER EACH CONDITION
+
+Fault type Damage size (inch) Label Sample quantity 
+
+Inner fault 0.007 I1 210 0.014 I2 210 0.021 I3 210 Outer fault 0.007 O1 210 0.014 O2 210 0.021 O3 210 Ball fault 0.007 B1 210 0.014 B2 210 0.021 B3 210 Normal – N 210   
+
+> TABLE II FAULT CATEGORIES AND SAMPLE QUANTITIES FOR THE PU DATASET UNDER EACH CONDITION
+
+Damage mode Damage position Combination Label Sample quantity 
+
+FP OR S KA04 250 PDI OR S KA15 250 FP OR R KA16 250 FP OR S KA22 250 PDI OR R KA30 250 FP IR(+OR) M KB23 250 FP IR(+OR) M KB24 250 PDI OR + IR M KB27 250 FP IR M KI14 250 FP IR S KI16 250 FP IR R KI17 250 FP IR S KI18 250 FP IR S KI21 250 
+
+data were collected under four operating conditions: condition 0 (0.7 Nm, 1000 N, 1500 rpm), condition 1 (0.7 Nm, 1000 N, 900 rpm), condition 2 (0.1 Nm, 1000 N, 1500 rpm), and condition 3 (0.7 Nm, 400 N, 1500 rpm), where the three values denote load torque, radial force, and rotational speed, respectively. The corresponding fault categories are listed in Table II. 
+
+(3) JUST dataset: The JUST slewing bearing fault diag-nosis dataset [37] provides vibration and acoustic emission signals collected from a slewing bearing test rig at Jiangsu University of Science and Technology 3. The test specimen is a type-111.10.100 single-row crossed cylindrical roller slewing bearing, and the signals were acquired at 50 kHz using Kistler accelerometers and acoustic emission sensors. The dataset includes one healthy condition and three single-fault modes, collected under four operating conditions: condition 0 (2 rpm, 0 N), condition 1 (2 rpm, 30 N), condition 2 (2 rpm, 60 N), and condition 3 (6 rpm, 0 N), where the two values denote rotational speed and overturning moment, respectively. The fault categories and sample allocations are listed in Table III.   
+
+> 3https://data.mendeley.com/datasets/hwg8v5j8t6/1 8
+> TABLE III FAULT CATEGORIES AND SAMPLE QUANTITIES FOR THE JUST DATASET UNDER EACH CONDITION
+
+Fault type Damage size Label Sample quantity 
+
+Healthy – N 1000 Inner ring Depth: 1 mm I 1000 Outer ring Depth: 1 mm O 1000 Rolling element 1 roller worn B1 1000 
+
+> TABLE IV SEMI -SUPERVISED DOMAIN GENERALIZATION FAULT DIAGNOSIS TASKS
+
+Labeled source Unlabeled source Unseen target CWRU task PU task JUST task 
+
+C0 C2, C3 C1 W1 T1 J1 C0 C1, C3 C2 W2 T2 J2 C0 C1, C2 C3 W3 T3 J3 C1 C0, C3 C2 W4 T4 J4 C1 C0, C2 C3 W5 T5 J5 C2 C0, C1 C3 W6 T6 J6 
+
+For all three datasets, the raw vibration signals are segmented into non-overlapping samples with a segment length of 1024 points. A non-redundant pairwise protocol is then adopted to construct the semi-supervised domain generalization tasks. Specifically, one operating condition is used as the labeled source domain, two conditions are used as unlabeled source domains, and the remaining condition is treated as the unseen target domain for evaluation. The detailed task settings are summarized in Table IV, where W, T, and J denote the task indices for the CWRU, PU, and JUST datasets, respectively, and C0–C3 denote the operating conditions. To evaluate robustness under noisy environments, Gaussian noise is added to each sample during both training and testing for all tasks. Let sraw (t) denote the original vibration signal. The noisy signal captured by the sensor can then be expressed as snoisy (t) = sraw (t) + noise (t), where noise (t) denotes Gaussian noise. The noise intensity is controlled by the signal-to-noise ratio (SNR) [38]: 
+
+SNR dB = 10 log 10 
+
+ Psignal 
+
+Pnoise 
+
+
+
+. (16) where Psignal and Pnoise denote the power of the original signal and the injected noise, respectively. 
+
+2) Parameter and training configuration: As shown in Table V, we provide the detailed architectures of the classifier and domain-related modules. The feature extractor is imple-mented using 1D-ConvNeXt [39]. As reported in Table VI and Table VII, the key hyperparameters and training configurations of DAHCL were determined based on preliminary experiments and empirical experience. Unless otherwise specified, all experiments use the same hyperparameter settings and network architecture. All experiments were implemented in PyTorch based on Python 3.9. The hardware platform consisted of a 14th-generation Intel ® Core™ i9 processor and an NVIDIA ®
+
+GeForce RTX 4060 GPU.                                                                
+
+> TABLE V DETAILED ARCHITECTURE OF MODEL COMPONENTS IN DAHCL
+> Module Input Layers Output
+> Feature extractor (B, 1,1024) ConvNeXt [39] (B, 320 ,32)
+> Projection layer (B, 320 ,32) GAP/FC (B, 64)
+> Classifier head (B, 64) ReLU/FC (B, K )
+> Domain discriminator (B, 320 ,32) GAP/FC (B, 64) (B, 64) ReLU/FC (B, M )
+> Domain distiller (K)FC/ReLU (K, 128) (K, 128) FC (K, 64)
+> TABLE VI KEY HYPERPARAMETER SETTINGS USED IN DAHCL
+> Parameter Description Value
+> μEMA momentum for DPAS 0.1
+> εAmplitude in DAL 0.1
+> TTemperature in HCL 0.07
+> η1, η 2Quantile ratios for thresholds 0.25 ,0.75
+> τ1, τ 2Upper bounds for thresholds 0.6,0.9
+> λ1Weight of Ldom 0.2
+> λ2Weight of LHCL 0.2
+> λ3Weight of LDCR 0.1
+
+3) Comparison methods: To validate the effectiveness of the proposed method, five representative semi-supervised domain generalization methods are selected for comparison.  
+
+> •
+
+Domain-invariant feature fusion network (DIFFN) [31]: DIFFN learns inter-domain-invariant and intra-domain-invariant representations through a dual-branch architec-ture, and further enhances feature discriminability and generalization via mutual learning and feature divergence maximization.  
+
+> •
+
+Contrast-assisted domain-specificity-removal network (CDSRN) [18]: CDSRN explicitly separates domain-invariant features from domain-specific ones via a removal branch, and further improves transferable representation learning using a proxy-contrastive enhancement module.  
+
+> •
+
+Semi-supervised dynamic generalization network with dual feature enhancement strategy (SDGN) [14]: SDGN introduces a sample-adaptive dynamic feature extractor together with a dual feature enhancement strategy to strengthen transferable feature learning under unseen working conditions.  
+
+> •
+
+Domain fuzzy generalization network (DFGN) [16]: DFGN jointly exploits domain fuzzy alignment and metric learning to extract domain-invariant yet discriminative rep-resentations from partially labeled multi-source domains.  
+
+> •
+
+Mutual-assistance semi-supervised domain generalization network (MSDGN) [17]: MSDGN combines mutual-assistance pseudo-labeling, entropy-based sample purifi-cation, and low-rank decomposition to mine domain-invariant features from labeled and unlabeled samples. Accuracy [40] is adopted as the evaluation metric. All exper-iments are repeated five times to ensure statistical reliability, and the reported results correspond to the mean accuracy. 9               
+
+> TABLE VII TRAINING CONFIGURATION FOR DAHCL
+> Setting Values
+> Total training epochs 2000
+> Batch size 32
+> Optimizer AdamW Initial learning rate 1×10 −4
+> Minimum learning rate 1×10 −6
+> Learning rate scheduler CosineAnnealingLR Weight decay 5×10 −4
+
+B. Comparative Analysis 
+
+Tables VIII, IX, and X compare DAHCL with five SSDGFD baselines on the CWRU, PU, and JUST datasets under two SNR settings (10 dB and 0 dB). On CWRU, DAHCL achieves 87.65% at 10 dB, slightly below SDGN (89.07%), but surpasses it under 0 dB with 82.85%, indicating stronger robustness to severe noise. At the task level, DAHCL performs particularly well on W1, W2, W3, and W6. Notably, due to the relatively small inter-domain discrepancy in CWRU, all methods show comparable performance, as conventional alignment is largely sufficient in such mild conditions. On PU, where domain discrepancies are much larger, DAHCL achieves 69.92% at 10 dB, outperforming SDGN (68.31%) by 1.61%. At 0 dB, the gap further increases to 3.52%. DAHCL maintains consistently strong performance across tasks; for instance, it exceeds SDGN by 8.67% on T3 at 0 dB. Although CDSRN is competitive, it exhibits significant instability. On JUST, the most challenging dataset, all methods degrade noticeably. DAHCL achieves 61.15% at 10 dB, surpassing SDGN by 1.77%, with clear advantages on tasks such as J3, J5, and J6 (e.g., 77.54% on J3). At 0 dB, DAHCL reaches 51.42%, further improving over SDGN by 2.84%, and remains consistently competitive on tasks such as J2, J3, and J6. Overall, DAHCL demonstrates consistent superiority across all datasets, particularly under low SNR (0 dB) and large domain gaps (PU and JUST). The training times on CWRU, PU, and JUST are 2632 s, 2895 s, and 3380 s, respectively, indicating moderate computational cost. From 10 dB to 0 dB, DAHCL shows performance drops of 4.80%, 9.53%, and 9.73%, all smaller than those of competing methods, confirming its robustness. These gains stem from the proposed two-level design. DAL leverages domain geometric characteristics to calibrate pseudo-labels, alleviating bias from shared classifiers under large domain discrepancies. HCL introduces a fuzzy contrastive mechanism to provide soft supervision for uncertain samples, avoiding premature rejection and overly hard assignments. Together, they enable more reliable and effective utilization of unlabeled data, leading to superior cross-domain generalization. 
+
+C. Ablation study and validation of effectiveness 1) Ablation study: Table XI presents the ablation results of the key components of the proposed method on the three datasets. Specifically, M1 denotes the backbone model without DAL and HCL; M2 denotes the variant equipped only with HCL while removing DAL; and M3 denotes the model with both DAL and HCL, but without the domain expert selection mechanism during inference. A progressive comparison of these variants clarifies the role of each component. As the baseline, M1 achieves average accuracies of 73.42%, 42.94%, and 34.75% on the CWRU, PU, and JUST datasets, respectively. Its relatively poor performance on PU and JUST suggests that global domain alignment alone is inadequate for scenarios with large inter-domain discrepancies. By introducing HCL into M1, M2 improves the average accuracy by 4.11%, 9.11%, and 12.23% on the three datasets, respectively, confirming the effectiveness of hierarchical contrastive learning. Further comparison between M2 and M3 demonstrates the importance of DAL. Specifically, M3 outperforms M2 by 4.56%, 7.11%, and 3.52% on the three datasets, indicating that DAL can effectively mitigate prediction bias across source domains by incorporating domain geometric characteristics. The impact of removing domain expert selection during inference in M3 is more nuanced. Compared with the full DAHCL model, M3 shows average accuracy drops of 0.76%, 1.23%, and 0.92% on the three datasets, respectively. However, on several tasks (e.g., CWRU-C5 and PU-T2), M3 remains comparable to, or even slightly better than, the full model. This may be because the batch-level dynamic expert selection mechanism is unstable in the early stage of inference adaptation. When the source and target feature distributions are already highly similar, directly using the base classification head can sometimes avoid the adverse effect of inaccurate expert assignment. Fig. 4 presents the t-SNE visualization for task T4. As shown in subfigure (a), M1, which relies only on global domain alignment, fails to learn a stable class-discriminative structure, resulting in blurred inter-class boundaries and evident class mismatch. After incorporating HCL, clearer clustering patterns emerge for both unlabeled source-domain and target-domain samples, as shown in subfigure (b). With both HCL and DAL, DAHCL achieves stronger inter-class separability in subfigure (c), suggesting that DAL further enhances the learning of more accurate class-level domain-invariant representations via domain-geometric constraints, thereby improving cross-domain transfer. Overall, the comparison between DAHCL and its ablation variants demonstrates a clear synergistic effect. Relative to M1, DAHCL improves the average accuracy by 9.43%, 17.45%, and 16.67% on the three datasets, respectively, confirming that the collabora-tion between DAL and HCL substantially enhances diagnostic robustness under noisy conditions and large domain gaps. (a) (b) (c) (d
+
+> Fig. 4. t-SNE visualization of the learned representations on task T4. Subfigures (a)–(c) correspond to M1, M2, and DAHCL, respectively.
+
+2) Effectiveness verification of DAL: To verify the effec-tiveness of DAL in mitigating domain bias and improving pseudo-label quality, we report the pseudo-label accuracy on the two unlabeled source domains, S1 and S2, for all tasks 10 
+
+TABLE VIII COMPARISON OF ACCURACY (%) ACROSS ALL TASKS ON THE CWRU DATASET UNDER TWO SNR SETTINGS 
+
+Method 10 dB 0 dB Training time (s) W1 W2 W3 W4 W5 W6 Avg. W1 W2 W3 W4 W5 W6 Avg. DIFFN 78.47 74.84 78.56 84.73 89.23 88.92 82.46 69.18 69.15 70.38 79.04 88.36 81.22 76.22 2320 CDSRN 80.73 77.38 80.41 88.27 95.65 89.47 85.32 74.18 71.56 74.73 80.92 89.34 83.78 79.09 2868 SDGN 83.06 82.62 84.78 90.54 95.17 95.24 89.07 77.43 74.28 77.56 85.41 89.68 86.92 81.88 3857 DFGN 76.29 72.67 76.34 82.18 87.43 86.91 80.30 70.54 67.38 72.61 77.42 82.76 79.45 75.03 1902 MSDGN 77.35 73.82 77.49 83.36 90.74 85.63 81.40 65.12 68.14 71.38 77.96 82.92 77.74 73.87 932 DAHCL 83.72 79.48 87.29 88.38 94.87 92.18 87.65 78.26 76.72 80.14 84.56 89.13 88.29 82.85 2632 
+
+TABLE IX COMPARISON OF ACCURACY (%) ACROSS ALL TASKS ON THE PU DATASET UNDER TWO SNR SETTINGS 
+
+Method 10 dB 0 dB Training time (s) T1 T2 T3 T4 T5 T6 Avg. T1 T2 T3 T4 T5 T6 Avg. DIFFN 65.06 87.49 54.20 69.23 47.05 50.58 62.27 48.27 84.36 46.53 61.18 41.68 49.24 55.21 2562 CDSRN 70.21 96.87 57.62 74.55 44.85 58.58 67.11 51.26 90.82 52.50 63.46 35.42 50.70 57.36 3133 SDGN 71.50 93.03 58.71 75.83 45.16 65.62 68.31 61.17 85.53 48.76 63.87 29.73 52.14 56.87 4273 DFGN 63.82 85.10 52.91 67.81 31.56 50.39 58.60 44.74 83.15 41.18 57.26 20.45 47.24 49.00 2192 MSDGN 66.80 88.56 55.10 71.10 33.23 54.42 61.54 46.54 83.75 42.74 57.77 22.86 51.50 50.86 1025 DAHCL 73.11 92.34 63.28 81.90 41.15 67.76 69.92 59.32 88.21 57.43 70.18 37.15 50.06 60.39 2895 
+
+TABLE X COMPARISON OF ACCURACY (%) ACROSS ALL TASKS ON THE JUST DATASET UNDER TWO SNR SETTINGS 
+
+Method 10 dB 0 dB Training time (s) J1 J2 J3 J4 J5 J6 Avg. J1 J2 J3 J4 J5 J6 Avg. DIFFN 51.82 55.34 65.28 61.74 39.46 58.72 55.39 42.15 45.28 56.37 51.73 30.64 49.29 45.91 3055 CDSRN 53.73 57.84 68.43 64.35 39.52 61.46 57.55 39.28 42.84 54.38 49.82 25.91 46.47 43.12 3870 SDGN 55.42 59.46 70.57 66.82 40.76 63.28 59.38 45.67 48.15 60.23 53.48 31.84 52.12 48.58 5046 DFGN 49.28 53.92 62.64 58.18 36.24 53.93 52.36 37.84 41.56 51.38 46.29 25.73 42.18 40.83 2587 MSDGN 52.35 56.74 66.92 63.46 40.18 60.37 56.67 39.28 43.37 54.84 50.23 28.12 47.65 43.92 1168 DAHCL 53.36 56.82 77.54 63.73 45.18 69.28 61.15 44.72 49.23 69.79 52.35 34.64 57.84 51.42 3380 
+
+TABLE XI ABLATION STUDY : ACCURACY (%) ACROSS ALL TASKS ON SNR = 0 DB. Method CWRU Dataset PU Dataset JUST Dataset W1 W2 W3 W4 W5 W6 Avg. T1 T2 T3 T4 T5 T6 Avg. J1 J2 J3 J4 J5 J6 Avg. M1 68.81 67.45 70.62 75.48 83.33 76.89 73.42 33.11 78.05 36.90 46.15 22.18 41.22 42.94 28.99 31.13 50.47 35.54 22.10 40.25 34.75 M2 72.19 71.98 74.73 79.64 84.51 83.12 77.53 45.44 85.24 44.78 60.65 30.36 45.83 52.05 38.78 42.01 66.35 47.63 33.51 52.62 46.98 M3 78.08 75.26 79.35 83.21 90.02 86.63 82.09 57.99 88.97 56.21 68.53 34.19 49.06 59.16 43.04 47.43 69.07 50.36 38.40 55.72 50.50 DAHCL 78.26 76.72 80.14 84.56 89.13 88.29 82.85 59.32 88.21 57.43 70.18 37.15 50.06 60.39 44.72 47.23 69.79 52.35 36.64 57.84 51.42 
+
+on the PU dataset. Since the domain-specific expert classifier 
+
+Cm outputs a class probability distribution, the pseudo-labels are obtained using the maximum-confidence criterion, i.e., 
+
+ˆy = arg max k pk(x). As shown in Table XII, Cm consistently outperforms the base classifier C on both unlabeled source domains across all six tasks. Specifically, the average pseudo-label accuracy on S1 and S2 increases from 70.11% and 67.36% to 74.93% and 72.35%, respectively. Averaged over the two unlabeled domains, the pseudo-label accuracy for T1–T6 is improved by 2.77%, 4.85%, 2.99%, 8.43%, 6.14%, and 4.26%, respectively. Notably, DAL tends to yield larger gains in scenarios with more severe domain bias. These results demonstrate that DAL can leverage domain-specific geometric information to calibrate predictions, reduce cross-domain bias, and produce more reliable pseudo-labels. 11                                                                                                                    
+
+> TABLE XII PSEUDO -LABEL ACCURACY (%) OF DAL ACROSS UNLABELED SOURCE DOMAINS ON THE PU DATASET (SNR = 0 DB). Classifier Domain T1 T2 T3 T4 T5 T6 Avg. Base CS190.23 61.38 63.45 58.72 55.63 91.27 70.11 DAL C1S191.19 66.95 68.21 66.84 63.95 92.41 74.93
+> Base CS261.54 61.67 89.75 41.18 75.41 74.58 67.36 DAL C2S266.10 65.79 90.96 49.92 79.37 81.96 72.35
+> TABLE XIII EFFECTIVENESS VERIFICATION OF HCL ON THE PU DATASET UNDER DIFFERENT SNR CONDITIONS .Method SNR = 10 dB SNR = 0 dB Acc. Util. Bal. PL Acc. Acc. Util. Bal. PL Acc. PCL (0.5) 49.68 95.12 0.58 58.36 41.52 90.85 1.46 50.12 PCL (0.6) 55.42 93.34 0.51 63.94 46.96 86.07 0.63 55.67 PCL (0.7) 60.73 90.96 0.78 71.85 49.41 84.53 0.93 57.17 PCL (0.8) 64.88 89.41 0.91 75.92 53.71 82.38 1.50 65.31 PCL (0.9) 58.94 85.65 1.52 72.08 41.76 72.83 2.14 58.64 HCL (Ours) 69.92 94.08 0.59 82.41 60.39 91.74 0.66 73.64
+
+3) Effectiveness verification of HCL: To verify the ef-fectiveness of HCL under different noise conditions, we compare it with the standard pseudo-label-based contrastive learning method (PCL). For PCL, a sample is assigned a one-hot pseudo-label and included in contrastive learning only when the maximum confidence of its predicted distribution exceeds a threshold τ ; otherwise, the sample is excluded from training. Five fixed threshold settings are considered, i.e., 
+
+τ ∈ { 0.5, 0.6, 0.7, 0.8, 0.9}. The evaluation metrics include test accuracy (Acc.), average sample utilization during training (Util.), inter-domain sample utilization balance (Bal.), and pseudo-label accuracy (PL Acc.). Specifically, Bal. is defined as 
+
+Bal = 100 × n1
+
+n1 + n2
+
+− 50 , (17) where n1 and n2 denote the numbers of samples from the two source domains that are actually used for training at the end of training, respectively. A smaller Bal. indicates a more balanced utilization of samples from the two source domains. Table XIII reports the average results of all methods on the PU dataset under SNR = 10 dB and SNR = 0 dB, while Fig. 5 illustrates their training dynamics on task T4. It can be observed that PCL is sensitive to the threshold choice. A lower threshold increases sample utilization, but introduces more noisy pseudo-labels; in contrast, a higher threshold tends to improve pseudo-label quality, yet reduces the number of training samples and aggravates the imbalance in sample utilization across domains. As the noise level increases, i.e., as SNR decreases from 10 dB to 0 dB, the Bal. values of PCL generally increase, indicating that inter-domain imbalance becomes more severe under strong noise, especially at high thresholds. In particular, under SNR = 0 dB, the pseudo-label accuracy of τ = 0 .9
+
+is even lower than that of τ = 0 .8, while its Bal. reaches the highest value. This suggests that an overly strict filtering (a) (b)
+
+(c) (d)
+
+(e) (f)           
+
+> Fig. 5. Epoch-wise evolution of four metrics for HCL and PCL on task T4: the proportions of available samples from S1and S2, the proportion of S1
+> among all available samples, and the pseudo-label accuracy. Subfigures (a)–(f) correspond to HCL and PCL with τ= 0 .5,0.6,0.7,0.8, and 0.9, respectively.
+
+strategy causes the available samples in the early stage to be excessively concentrated in S1, thereby reinforcing the model bias toward S1 and the labeled source domain, and eventually introducing more erroneous high-confidence pseudo-labels from S2 in later training. In contrast, HCL achieves the highest classification accuracy and pseudo-label accuracy under both noise conditions while maintaining high sample utilization and stable inter-domain balance, demonstrating a better tradeoff among multiple objectives. Fig. 6 further presents the partition evolution of the two domains in HCL during training, together with sampled statistics at several key stages. As shown in Fig. 6(a) and Fig. 6(f), S2 and S1 exhibit markedly different confidence distributions throughout training. In the early stage, more samples from the unlabeled domain that are more similar to the labeled source domain fall into the reliable region, whereas more available samples from the more discrepant domain are concentrated in the ambiguous region. This indicates that the mitigation of inter-domain imbalance by HCL mainly stems from its effective utilization of samples in the ambiguous region. These observations show that the fuzzy contrastive mechanism can exploit most uncertain samples while suppressing noise as much as possible, thereby improving inter-domain balance and alleviating the tradeoff between utilization and accuracy inherent in hard selection strategies. 
+
+D. Hyperparameter Sensitivity Analysis 
+
+The proposed method involves several tunable hyperparame-ters during training. To investigate their influence on diagnostic 12 0 500 1000 1500 2000 
+
+> Epoch
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> Proportion
+
+(a)      
+
+> Reliable (R)
+> Ambiguous (A)
+> Unreliable (U)
+> 0.0 0.2 0.4 0.6 0.8 1.0
+> Confidence
+> 0
+> 200
+> 400
+> 600
+> Count
+
+(b)      
+
+> R: n=1,124 (34.8%)
+> A: n=1,263 (39.1%)
+> U: n=845 (26.1%)
+> Usable sample: 73.9%
+> 0.0 0.2 0.4 0.6 0.8 1.0
+> Confidence
+> 0
+> 500
+> 1000
+> Count
+
+(c)      
+
+> R: n=1,667 (51.6%)
+> A: n=938 (29.0%)
+> U: n=627 (19.4%)
+> Usable sample: 80.6%
+> 0.0 0.2 0.4 0.6 0.8 1.0
+> Confidence
+> 0
+> 500
+> 1000
+> 1500
+> Count
+
+(d)      
+
+> R: n=1,944 (60.1%)
+> A: n=832 (25.7%)
+> U: n=456 (14.1%)
+> Usable sample: 85.9%
+> 0.0 0.2 0.4 0.6 0.8 1.0
+> Confidence
+> 0
+> 1000
+> 2000
+> Count
+
+(e)     
+
+> R: n=2,603 (80.5%)
+> A: n=330 (10.2%)
+> U: n=299 (9.3%)
+> Usable sample: 90.7%
+> 0500 1000 1500 2000
+> Epoch
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> Proportion
+
+(f)      
+
+> Reliable (R)
+> Ambiguous (A)
+> Unreliable (U)
+> 0.0 0.2 0.4 0.6 0.8 1.0
+> Confidence
+> 0
+> 200
+> 400
+> 600
+> Count
+
+(g)      
+
+> R: n=1,393 (43.1%)
+> A: n=1,305 (40.4%)
+> U: n=534 (16.5%)
+> Usable sample: 83.5%
+> 0.0 0.2 0.4 0.6 0.8 1.0
+> Confidence
+> 0
+> 500
+> 1000
+> 1500
+> Count
+
+(h)      
+
+> R: n=2,249 (69.6%)
+> A: n=703 (21.8%)
+> U: n=280 (8.7%)
+> Usable sample: 91.3%
+> 0.0 0.2 0.4 0.6 0.8 1.0
+> Confidence
+> 0
+> 500
+> 1000
+> 1500
+> 2000
+> Count
+
+(i)      
+
+> R: n=2,611 (80.8%)
+> A: n=439 (13.6%)
+> U: n=182 (5.6%)
+> Usable sample: 94.4%
+> 0.0 0.2 0.4 0.6 0.8 1.0
+> Confidence
+> 0
+> 1000
+> 2000
+> Count
+
+(j) 
+
+> R: n=2,937 (90.9%)
+> A: n=163 (5.0%)
+> U: n=132 (4.1%)
+> Usable sample: 95.9%
+
+HCL: Partition Evolution & Confidence Distribution Analysis 
+
+Fig. 6. Evolution of domain-specific sample partitions in HCL during training. Subfigures (a) and (f) show the proportions of samples in the R, A, and U
+
+partitions for S2 and S1, respectively, over training epochs. Subfigures (b)–(e) and (g)–(j) present the sampled partition ratios of the two domains at epochs 20, 50, 100, and 2000, respectively. (a) (b) (c)
+
+Fig. 7. Sensitivity analysis of the confidence thresholds τ1 and τ2 on the (a) CWRU, (b) JUST, and (c) PU datasets. 
+
+performance, we analyze the sensitivity of key hyperparameters across the three datasets. The hyperparameters τ1 and τ2
+
+serve as confidence thresholds for pseudo-label assignment and thus directly affect the learning of class-discriminative knowledge. Fig. 7 presents the average results across the three datasets. Overall, the ideal range of τ1 is approximately 
+
+[0 .58 , 0.75] , whereas that of τ2 is approximately [0 .85 , 0.95] .In addition, when τ1 < 0.4 and τ2 < 0.6, the diagnostic accuracy drops significantly. This is because overly small thresholds tend to introduce incorrect pseudo-labels, which interfere with model learning. By contrast, an excessively large 
+
+τ1 often leads to a shortage of available samples, thereby weakening feature learning. The hyperparameters λ2 and λ3,which control the weights of LHCL and LDCR , are further analyzed. Fig. 8 visualizes the average results. It can be observed that the model is relatively insensitive to λ2 and 
+
+λ3. Their optimal values lie approximately in the range of 
+
+[0 .1, 0.3] , while performance remains acceptable when they vary within [0 .1, 0.6] . However, when the weights become excessively large, e.g., within [0 .9, 1.0] , the diagnostic accuracy decreases markedly. Furthermore, we analyze the influence of the temperature parameter T and the exponential moving average (EMA) momentum parameter μ used in DPAS. Fig. 9 shows the average results across the three datasets, where Fig. 9(a) and Fig. 9(b) correspond to the sensitivity analysis of 
+
+T and μ, respectively. Overall, the optimal value of T is around 
+
+0.07 , with a preferable range of approximately [0 .05 , 0.09] .When T is too small, the interference of noisy samples is easily amplified; when T is too large, the contrastive constraint is weakened, resulting in reduced feature discriminability. The optimal value of μ is around 0.1, with a preferable range of approximately [0 .05 , 0.20] . If μ is too small, the domain prototype update becomes sensitive to mini-batch fluctuations; if μ is too large, the update becomes overly slow and fails to effectively capture the dynamic feature distribution. (a) (b) (c)
+
+Fig. 8. Sensitivity analysis of the loss weights λ2 and λ3 on the (a) CWRU, (b) JUST, and (c) PU datasets. (a) (b)
+
+Fig. 9. Sensitivity analysis of (a) temperature parameter T and (b) EMA momentum μ, averaged over the three datasets. 
+
+V. C ONCLUSION 
+
+In this paper, we investigated semi-supervised domain generalization fault diagnosis under noisy environments and proposed a unified framework, termed domain-aware hierar-chical contrastive learning . Unlike existing SSDGFD methods that mainly rely on labeled-source knowledge for pseudo-label generation and handle unlabeled samples in a hard accept-or-discard manner, DAHCL reconsiders the role of unlabeled source domains from two complementary perspec-tives, namely domain-specific geometry and uncertainty-aware supervision. Specifically, DAHCL leverages domain-specific geometric characteristics to mitigate cross-domain pseudo-label bias, while enabling uncertain samples to contribute to representation learning without imposing unreliable hard labels. 13 
+
+To this end, we developed a domain-aware learning module to explicitly model source-domain geometric characteristics and calibrate pseudo-label predictions across heterogeneous source domains. We also developed a hierarchical contrastive learning module to improve the utilization of unlabeled samples through dynamic confidence stratification and fuzzy contrastive supervision. Extensive experiments on the CWRU, PU, and JUST datasets under multiple SNR settings demonstrated that DAHCL consistently outperforms advanced SSDGFD methods, particularly under severe noise and large domain shifts. Ablation studies and effectiveness analyses further verified the complementarity of DAL and HCL in improving pseudo-label reliability, supervisory quality, and cross-domain sample utilization. Overall, the results indicate that integrating domain-aware bias correction with uncertainty-aware supervision is a promising direction for robust SSDGFD. Future work will extend DAHCL to more complex fault patterns and multi-sensor scenarios, strengthen its theoretical foundations, and explore its applicability to online diagnosis, continual learning, and extremely low-label settings. REFERENCES [1] C. Fan, Y. Zhang, H. Ma, and Z. Ma, “A novel deep denoising model integrating transformer and time–frequency loss for gearbox fault diagnosis,” Advanced Engineering Informatics , vol. 66, p. 103400, 2025. [2] H. Yi, D. Li, Z. Lu, Y. Jin, H. Duan, L. Hou, F. Z. Duraihem, E. M. Awwad, and N. A. Saeed, “VibrMamba: A lightweight Mamba-based fault diagnosis of rotating machinery using vibration signal,” Measurement ,vol. 249, p. 116881, 2025. [3] Z. Qi, J. Ren, W. Gan, and P. S. Yu, “Large language models for fault diagnosis,” in IEEE International Conference on Big Data . IEEE, 2025, pp. 6982–6991. [4] Y. LeCun, Y. Bengio, and G. Hinton, “Deep learning,” Nature , vol. 521, no. 7553, pp. 436–444, 2015. [5] H. Chen, J.-M. Li, X.-B. Wang, L.-Q. Yu, and Z.-X. Yang, “Review of intelligent fault diagnosis for rotating machinery under imperfect data conditions,” Expert Systems with Applications , p. 127726, 2025. [6] C. Zhao, E. Zio, and W. Shen, “Domain generalization for cross-domain fault diagnosis: An application-oriented perspective and a benchmark study,” Reliability Engineering & System Safety , vol. 245, p. 109964, 2024. [7] I. Misbah, C. K. Lee, and K. L. Keung, “Fault diagnosis in rotating machines based on transfer learning: Literature review,” Knowledge-Based Systems , vol. 283, p. 111158, 2024. [8] Y. Wang, Z. Zhang, C. Xue, Q. Zhu, X. Li, L. Wang, and X. Ding, “Progressive transfer learning: An intelligent fault diagnosis method for unlabeled rotating machinery with small samples,” IEEE Transactions on Instrumentation and Measurement , vol. 74, pp. 1–12, 2025. [9] Y. Liu, A. Deng, G. Chen, Y. Shi, and Q. Hu, “Universal domain adaptation in rotating machinery fault diagnosis: A self-supervised orthogonal clustering approach,” Reliability Engineering & System Safety ,vol. 257, p. 110828, 2025. [10] J. Ren, W. Gan, G. Zhang, W. Zhong, and P. S. Yu, “Global-focal adaptation with information separation for noise-robust transfer fault diagnosis,” arXiv preprint arXiv:2510.16033 , 2025. [11] Z. Yang, L. Luo, J. Ma, H. Zhang, L. Yang, and Z. Wu, “Enhancing bear-ing fault diagnosis in real damages: A hybrid multi-domain generalization network for feature comparison,” IEEE Transactions on Instrumentation and Measurement , vol. 74, pp. 1–11, 2025. [12] Y. Xiao, H. Shao, S. Yan, J. Wang, Y. Peng, and B. Liu, “Domain generalization for rotating machinery fault diagnosis: A survey,” Advanced Engineering Informatics , vol. 64, p. 103063, 2025. [13] J. Cui, J. Cheng, M. Liu, Z. Cheng, and C. Duan, “A two-stage semi-supervised domain generalization network for fault diagnosis under unknown working conditions,” Reliability Engineering & System Safety ,vol. 267, p. 111925, 2026. [14] X. Jiang, H. Xing, B. Tu, L. Fu, W. Huang, and Z. Zhu, “Semi-supervised dynamic generalization network with dual feature enhancement strat-egy for machinery fault diagnosis under unseen working conditions,” 
+
+Mechanical Systems and Signal Processing , vol. 237, p. 113064, 2025. [15] Y. Liao, R. Huang, J. Li, Z. Chen, and W. Li, “Deep semisupervised domain generalization network for rotary machinery fault diagnosis under variable speed,” IEEE Transactions on Instrumentation and Measurement ,vol. 69, no. 10, pp. 8064–8075, 2020. [16] H. Ren, J. Wang, Z. Zhu, J. Shi, and W. Huang, “Domain fuzzy generalization networks for semi-supervised intelligent fault diagnosis under unseen working conditions,” Mechanical Systems and Signal Processing , vol. 200, p. 110579, 2023. [17] C. Zhao and W. Shen, “Mutual-assistance semisupervised domain generalization network for intelligent fault diagnosis under unseen working conditions,” Mechanical Systems and Signal Processing , vol. 189, p. 110074, 2023. [18] Q. Song, X. Jiang, J. Liu, J. Shi, and Z. Zhu, “Contrast-assisted domain-specificity-removal network for semi-supervised generalization fault diagnosis,” IEEE Transactions on Neural Networks and Learning Systems ,vol. 36, no. 3, pp. 5403–5416, 2024. [19] S. Ying, X. Song, and H. Wang, “Semi-supervised domain general-ization with clustering and contrastive learning combined mechanism,” 
+
+Knowledge-Based Systems , vol. 318, p. 113364, 2025. [20] J. Wei, Q. Wang, G. Zhang, H. Ma, and Y. Wang, “Domain knowledge guided pseudo-label generation framework for semi-supervised domain generalization fault diagnosis,” Advanced Engineering Informatics ,vol. 67, p. 103540, 2025. [21] Z. Chen, J. Liu, Z. Du, X. Fan, and H. Luo, “A noise-resilient fault diagnosis method based on optimized residual networks,” IEEE Transactions on Instrumentation and Measurement , vol. 74, pp. 1–10, 2025. [22] Y. Huang, W. Huang, X. Hu, Z. Liu, and J. Huo, “UDDGN: Domain-independent compact boundary learning method for universal diagnosis domain generation,” IEEE Transactions on Instrumentation and Mea-surement , vol. 74, pp. 1–20, 2025. [23] Y. Shi, A. Deng, M. Deng, M. Xu, Y. Liu, X. Ding, and W. Bian, “Domain augmentation generalization network for real-time fault diagnosis under unseen working conditions,” Reliability Engineering & System Safety ,vol. 235, p. 109188, 2023. [24] W. Guan, S. Wang, Z. Chen, G. Wang, Z. Liu, D. Cui, and Y. Mao, “Domain generalization network based on inter-domain multivariate linearization for intelligent fault diagnosis,” Reliability Engineering & System Safety , vol. 261, p. 111055, 2025. [25] L. Gao, Q. Gao, Z. Liu, H. Cheng, J. Yao, X. Zhao, and S. Jia, “Multiple classifiers inconsistency-based deep adversarial domain generalization method for cross-condition fault diagnosis in rotating systems,” Reliability Engineering & System Safety , vol. 260, p. 111017, 2025. [26] T. Gao, J. Yang, W. Wang, and X. Fan, “A domain feature decoupling network for rotating machinery fault diagnosis under unseen operating conditions,” Reliability Engineering & System Safety , vol. 252, p. 110449, 2024. [27] H. Ma, J. Wei, G. Zhang, X. Kong, and J. Du, “Causality-inspired multi-source domain generalization method for intelligent fault diagnosis under unknown operating conditions,” Reliability Engineering & System Safety ,vol. 252, p. 110439, 2024. [28] L. Ren, T. Mo, and X. Cheng, “Meta-learning based domain generaliza-tion framework for fault diagnosis with gradient aligning and semantic matching,” IEEE Transactions on Industrial Informatics , vol. 20, no. 1, pp. 754–764, 2023. [29] Y. Xiao, H. Shao, J. Wang, B. Cai, and B. Liu, “Domain-augmented meta ensemble learning for mechanical fault diagnosis from heteroge-neous source domains to unseen target domains,” Expert Systems with Applications , vol. 259, p. 125345, 2025. [30] J. Li, C. Shen, L. Kong, D. Wang, M. Xia, and Z. Zhu, “A new adversarial domain generalization network based on class boundary feature detection for bearing fault diagnosis,” IEEE Transactions on Instrumentation and Measurement , vol. 71, pp. 1–9, 2022. [31] H. Ren, J. Wang, W. Huang, X. Jiang, and Z. Zhu, “Domain-invariant feature fusion networks for semi-supervised generalization fault diag-nosis,” Engineering Applications of Artificial Intelligence , vol. 126, p. 107117, 2023. [32] Y. Ganin, E. Ustinova, H. Ajakan, P. Germain, H. Larochelle, F. Laviolette, M. March, and V. Lempitsky, “Domain-adversarial training of neural networks,” Journal of Machine Learning Research , vol. 17, no. 59, pp. 1–35, 2016. [33] A. v. d. Oord, Y. Li, and O. Vinyals, “Representation learning with contrastive predictive coding,” arXiv preprint arXiv:1807.03748 , 2018. [34] L. A. Zadeh, “Fuzzy sets,” Information and control , vol. 8, no. 3, pp. 338–353, 1965. 14 
+
+[35] W. A. Smith and R. B. Randall, “Rolling element bearing diagnostics using the case western reserve university data: A benchmark study,” 
+
+Mechanical Systems and Signal Processing , vol. 64, pp. 100–131, 2015. [36] C. Lessmeier, J. K. Kimotho, D. Zimmer, and W. Sextro, “Condition monitoring of bearing damage in electromechanical drive systems by using motor current signals of electric motors: A benchmark data set for data-driven classification,” in PHM Society European Conference , vol. 3, no. 1, 2016. [37] H. Zhou, X. Ren, L. Sun, G. Li, S. Wen, Z. Peng, and Y. Liu, “Study of JUST slewing bearing failure test data,” Acta Armamentarii , vol. 45, no. 10, p. 3744, 2024. [38] P. Zhou, S. Chen, Q. He, D. Wang, and Z. Peng, “Rotating machinery fault-induced vibration signal modulation effects: A review with mecha-nisms, extraction methods and applications for diagnosis,” Mechanical Systems and Signal Processing , vol. 200, p. 110489, 2023. [39] S. Woo, S. Debnath, R. Hu, X. Chen, Z. Liu, I. S. Kweon, and S. Xie, “ConvNeXt V2: Co-designing and scaling convnets with masked autoencoders,” in The IEEE/CVF Conference on Computer Vision and Pattern Recognition , 2023, pp. 16 133–16 142. [40] D. Powers, “Evaluation: From precision, recall and F-measure to ROC, informedness, markedness & correlation,” Journal of Machine Learning Technologies , vol. 2, no. 1, pp. 37–63, 2011.

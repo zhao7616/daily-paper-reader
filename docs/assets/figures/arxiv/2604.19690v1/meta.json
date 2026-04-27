@@ -1,0 +1,182 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.19690v1/fig-001.webp",
+      "caption": "Table 2. Pairwise two-sample KS test results for the five predicted parameters across the three morphology classes; detached (D), semidetached (SD) and contact (C). The null hypothesis (H0) is the two classes are drawn from the same parameter distribution. Entries indicate rejection of H0 at p < 0.05; the single non-significant result (SD vs C for q) is highlighted in italics.",
+      "page": 6,
+      "index": 1,
+      "width": 448,
+      "height": 437
+    },
+    {
+      "url": "assets/figures/arxiv/2604.19690v1/fig-002.webp",
+      "caption": "Figure 3. Pearson correlation matrix of the five predicted parameters for the 995 training systems.",
+      "page": 6,
+      "index": 2,
+      "width": 526,
+      "height": 493
+    },
+    {
+      "url": "assets/figures/arxiv/2604.19690v1/fig-003.webp",
+      "caption": "Figure 8. PCA dimensionality reduction experiment. Left: cumulativeexplained variance as a function of the number of principal components, with dashed lines marking the 90% (9 components), 95% (12 components), and 99% (20 components) thresholds. Right: mean 5-fold CV R2 on the 845-system CV set as a function of the number of principal components for each parameter.",
+      "page": 11,
+      "index": 3,
+      "width": 896,
+      "height": 345
+    },
+    {
+      "url": "assets/figures/arxiv/2604.19690v1/fig-004.webp",
+      "caption": "Figure 7. Learning curves for XGB regression across five stellar parameters. Validation R2 is shown as a function of training set size (10%–80% of the 845-system cross-validation pool. Each point represents the mean over five independent random subsamples; shaded bands indicate ±1 standard deviation. The held-out set was excluded throughout.",
+      "page": 11,
+      "index": 4,
+      "width": 892,
+      "height": 506
+    },
+    {
+      "url": "assets/figures/arxiv/2604.19690v1/fig-005.webp",
+      "caption": "Figure 11. Representative RF tree-prediction distributions for all five predicted parameters. For each cross-validation sample, predictions from all 500 individual decision trees are collected out-of-fold and a Gaussian Mixture Model (GMM with 1 or 2 components, selected by BIC) is fitted to the resulting histogram. Each panel shows a single representative system; the morphology label in brackets (D,SD,C) indicates the class of that particular star: detached, semidetached or contact. These individual examples are selected to illustrate the range of predictive certainty rather than to represent any particular morphology class. The left column shows the tightest unimodal case (1-component GMM) for each parameter, representing a well-constrained prediction. The right column demonstrates the sample with the largest GMM standard deviation (2-component GMM), representing the highest prediction uncertainty. The dashed black line marks the true parameter value while the solid red curve is the fitted GMM.",
+      "page": 15,
+      "index": 5,
+      "width": 554,
+      "height": 1152
+    },
+    {
+      "url": "assets/figures/arxiv/2604.19690v1/fig-006.webp",
+      "caption": "Figure 17. Same as Fig. 15, but for high-confidence predictions from the Kepler eclipsing binary dataset.",
+      "page": 21,
+      "index": 6,
+      "width": 910,
+      "height": 727
+    },
+    {
+      "url": "assets/figures/arxiv/2604.19690v1/fig-007.webp",
+      "caption": "Figure 6. Comparison of three XGB-based regression architectures evaluated on the set of 5-fold stratified CV, 845 systems). Blue bars correspond to five independent single-output XGBRegressor models (mean R2 = 0.867), a MultiOutputRegressor wrapper that fits one independent XGBRegressor per target represented by orange bars ( mean R2 = 0.867). RegressorChain of XGBRegressor models (green bars, mean R2 = 0.863), in which predictions of earlier outputs are appended as features for later ones with the chain order of i, Te2/Te1 , q, Ω1, Ω2).",
+      "page": 10,
+      "index": 7,
+      "width": 621,
+      "height": 434
+    },
+    {
+      "url": "assets/figures/arxiv/2604.19690v1/fig-008.webp",
+      "caption": "Figure 10. XGB residual distributions (predicted minus true) for the held-out test set. Histograms show residual density per parameter; red curves show fitted Gaussian distributions. Panel headers report mean (µ) and standard deviation (σ) of each distribution.",
+      "page": 14,
+      "index": 8,
+      "width": 894,
+      "height": 589
+    },
+    {
+      "url": "assets/figures/arxiv/2604.19690v1/fig-009.webp",
+      "caption": "Table 6. Predictions for 104697 OGLE Eclipsing Binaries. This table lists the classification and geometric parameters estimated by the XGB framework. Cm denotes the confidence of the morphological classification. The average parameter confidence (APC) is the mean of the geometric confidences (Ci, Cq, etc.), excluding Cm. DM refers to Mahalanobis distance. D, SD and C refers detached, semidetached and contact configurations. Systems with predicted inclinations i <70 deg are subject to higher geometric degeneracy inherent to the photometric method. We recommend treating the parameters for these candidates with caution. The metrics are described in Appendix A. (This table is available in its entirety in machine-readable form in the online journal.)",
+      "page": 18,
+      "index": 9,
+      "width": 988,
+      "height": 197
+    },
+    {
+      "url": "assets/figures/arxiv/2604.19690v1/fig-010.webp",
+      "caption": "Figure 18. Parameter-space coverage analysis in PCA space (PC1 + PC2 account for 64.3% of variance). The filled blue density shows the KDE of 10000 randomly sampled OGLE survey targets; the red dashed contours represent the KDE of the 995 training systems. The two-dimensional KDE overlap coefficient is OVL = 0.47.",
+      "page": 23,
+      "index": 10,
+      "width": 619,
+      "height": 496
+    },
+    {
+      "url": "assets/figures/arxiv/2604.19690v1/fig-011.webp",
+      "caption": "Figure 9. Predicted versus true values for XGB regression on the held-out test set. Diagonal black lines indicate perfect agreement while the purple dashed lines mark ±10% relative error bounds.",
+      "page": 13,
+      "index": 11,
+      "width": 897,
+      "height": 589
+    },
+    {
+      "url": "assets/figures/arxiv/2604.19690v1/fig-012.webp",
+      "caption": "Figure 4. Top panel: RF hyperparameter sensitivity analysis on the cross-validation set. The plot show CV R2 variation with the number of estimators (a), the maximum tree depth (b), and the maximum features per split (c). For panel (c), the numbers on the x-axis correspond to log2(51) ≈ 6, √ 51 ≈ 7, 0.3× 51 ≈ 15, and 0.5× 51 ≈ 26 features considered at each split out of the 51 total features. Bottom panel: XGB hyperparameter sensitivity analysis on the same set. In each panel, one hyperparameter is varied while the other two are held at their adopted values (dashed vertical line); the five curves show the per-parameter CV R2 for i, q, Te2/Te1 , Ω1, and Ω2. (d) Number of estimators, (e) maximum tree depth, (f) learning rate.",
+      "page": 8,
+      "index": 12,
+      "width": 983,
+      "height": 691
+    },
+    {
+      "url": "assets/figures/arxiv/2604.19690v1/fig-013.webp",
+      "caption": "Figure 1. Resolution sensitivity of the 51 extracted features. Each panel shows results for subsampling at 100, 250, 500, and 750 phase points (the baseline is 1000 points). Feature deviation is measured in units of the training-set standard deviation (σ) of each feature. The horizontal dashed line marks the 10% threshold (0.10σ) used throughout the analysis. (a) Solid line: overall mean deviation across all 51 features and all 995 light curves; shaded band corresponds to ±1σ spread across the 51 per-feature mean deviations. (b) Per-group mean deviation for nine feature groups: Eclipse shape (primary/secondary eclipse depth and width; 4 features), O’Connell effect (3 out-of-eclipse asymmetry features), four Fourier sub-groups (amplitudes, phases, ratios, and total power; 17 features), two phase-bin sub-groups (bin means and consecutive differences; 19 features), and Global stats (8 basic flux statistics; individual feature definitions are available at https://github.com/burakulas/ml-ebs/blob/main/Feature List.md). (c) Fraction of features with deviation below 0.05σ, 0.10σ, and 0.20σ. (d) Deviation of six representative features spanning different feature types.",
+      "page": 4,
+      "index": 13,
+      "width": 982,
+      "height": 786
+    },
+    {
+      "url": "assets/figures/arxiv/2604.19690v1/fig-014.webp",
+      "caption": "Figure 15. Representative OGLE light curves for detached (top), semidetached (middle), and and contact (bottom) systems selected by Mahalanobis distance filtering (DM ≤ median) and highest APC scores. Black points are processed light curves; grey dots are the raw catalog data. Vertical dashed lines mark primary and secondary eclipse phases. Panel legends show the OGLE-BLG-ELC identifier, APC score, Mahalanobis distance and reduced χ2 r. Red lines are synthetic light curves generated directly from the ML-predicted parameters without additional fitting.",
+      "page": 19,
+      "index": 14,
+      "width": 890,
+      "height": 707
+    },
+    {
+      "url": "assets/figures/arxiv/2604.19690v1/fig-015.webp",
+      "caption": "Figure 14. Parameter distributions for OGLE predictions. The histograms show the distribution of inclination (i), mass ratio (q), and effective temperature ratio (Te2/Te1) separated by morphological class (blue: detached, green: semidetached, red: contact).",
+      "page": 19,
+      "index": 15,
+      "width": 894,
+      "height": 268
+    },
+    {
+      "url": "assets/figures/arxiv/2604.19690v1/fig-016.webp",
+      "caption": "Figure 13. Feature distributions for correctly classified (green) and misclassified (red) semidetached systems. Left: O’Connell effect (flux difference between maxima). Right: primary eclipse width (phase units). The y-axis shows normalised probability density.",
+      "page": 17,
+      "index": 16,
+      "width": 893,
+      "height": 360
+    },
+    {
+      "url": "assets/figures/arxiv/2604.19690v1/fig-017.webp",
+      "caption": "Table 8. Comparison of our work with recent machine learning frameworks for eclipsing binary systems. Unlike studies focused solely on classification or specific binary subclasses, our framework integrates morphology classification and parameter estimation for detached (D), semidetached (SD), and contact (C) systems.",
+      "page": 24,
+      "index": 17,
+      "width": 1067,
+      "height": 257
+    },
+    {
+      "url": "assets/figures/arxiv/2604.19690v1/fig-018.webp",
+      "caption": "Figure 5. Importance of phase-binned statistics for RF (left) and XGB (right) models. Regions covered by vertical dashed lines mark secondary and primary eclipse phases.",
+      "page": 9,
+      "index": 18,
+      "width": 978,
+      "height": 333
+    },
+    {
+      "url": "assets/figures/arxiv/2604.19690v1/fig-019.webp",
+      "caption": "Table 7. Predictions for 2157 Kepler Eclipsing Binaries. Columns follow the same definitions as Table 6. (This table is available in its entirety in machine-readable form in the online journal.)",
+      "page": 20,
+      "index": 19,
+      "width": 888,
+      "height": 200
+    },
+    {
+      "url": "assets/figures/arxiv/2604.19690v1/fig-020.webp",
+      "caption": "Figure 16. Same as Fig. 14, but for 2157 Kepler eclipsing binary systems.",
+      "page": 20,
+      "index": 20,
+      "width": 896,
+      "height": 271
+    },
+    {
+      "url": "assets/figures/arxiv/2604.19690v1/fig-021.webp",
+      "caption": "Figure 2. Parameter space of the 995 training systems (NDetached = 421, NSemidetached = 234, NContact = 340) shown in three projection planes: inclination vs. mass ratio (i, q; left), mass ratio vs. temperature ratio (q, Te2/Te1 ; middle), and primary vs. secondary surface potential (Ω1, Ω2; right).",
+      "page": 5,
+      "index": 21,
+      "width": 893,
+      "height": 273
+    },
+    {
+      "url": "assets/figures/arxiv/2604.19690v1/fig-022.webp",
+      "caption": "Figure 12. Confusion matrices for XGB morphology classification. The left panel shows results on the 5-fold cross-validation set (N = 845, accuracy = 95.4%), while the right panel shows results on the held-out test set (accuracy = 90.7%). Each cell gives the number of systems and the row percentage. D, SD and C denote detached, semidetached and contact.",
+      "page": 16,
+      "index": 22,
+      "width": 889,
+      "height": 407
+    }
+  ]
+}

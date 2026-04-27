@@ -1,0 +1,14 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.22740v1/fig-001.webp",
+      "caption": "Fig. 3: Least-favorable densities and resulting decision rules under the NP-like formulation.",
+      "page": 10,
+      "index": 1,
+      "width": 368,
+      "height": 1346
+    }
+  ]
+}

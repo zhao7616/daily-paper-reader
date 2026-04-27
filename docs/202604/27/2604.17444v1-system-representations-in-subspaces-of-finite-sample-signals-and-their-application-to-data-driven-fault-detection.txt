@@ -1,0 +1,3297 @@
+Title: System representations in subspaces of finite-sample signals and their application to data-driven fault detection
+
+URL Source: https://arxiv.org/pdf/2604.17444v1
+
+Published Time: Tue, 21 Apr 2026 01:34:11 GMT
+
+Number of Pages: 18
+
+Markdown Content:
+# System representations in subspaces of finite-sample signals and their application to data-driven fault detection 
+
+# Linlin Li a, Steven X. Ding b, Jiahao Wang a, Maiying Zhong c, Wei Cheng b
+
+> a
+
+School of Automation and Electrical Engineering, University of Science and Technology Beijing, 100083 Beijing, China 
+
+> b
+
+Institute for Automatic Control and Complex Systems, University of Duisburg-Essen, 47057 Duisburg, Germany 
+
+> c
+
+College of Electrical Engineering and Automation, Shandong University of Science and Technology, Qingdao 266590, China 
+
+Abstract 
+
+This paper deals with system representations in finite-sample signal subspaces and their application to data-driven fault detection. The first part addresses concepts of finite-sample image and kernel system representations and, associated with them, image and residual subspaces of finite-sample signals. On this basis, the equivalence between the fundamental lemma and finite-sample image subspace is demonstrated. While the image representation models the nominal system dynamics, the residual representation describes uncertainties in the input-output data and is essential for fault detection. This result extends the fundamental lemma and builds the basis for exploring data-driven fault detection. In the second part, a data-driven projection-based fault detection approach is developed. By means of a singular value decomposition, orthogonal projections onto the image and residual subspaces are realized in the context of a low-rank matrix approximation, leading to projection-based residual generation and evaluation. Finally, analysis of detection performance in the framework of matrix perturbation theory and comparison with existing data-driven fault detection methods are explored. 
+
+Key words: Image and kernel representations; subspaces of finite-sample signals; data-driven fault detection; fundamental lemma; orthogonal projections 
+
+1 Introduction 
+
+Fault detection is a fundamental problem in the monitoring and supervision of dynamic control systems, with critical importance in applications. Undetected faults may lead to significant performance degradation, constraint violations, or even loss of closed-loop stability. Consequently, the development of reliable methods for the timely detection of faults remains a central topic in automatic control systems (Sheikhi et al., 2025). Conventional fault detection approaches are predomi-nantly model-based, relying on accurate mathematical descriptions of the underlying system input-output causality and dynamics (Patton et al., 2000; Ding, 
+
+⋆ This work has been supported by the National Natural Science Foundation of China under Grant 62322303 and 62233012. 
+
+Email addresses: linlin.li@ustb.edu.cn (Linlin Li), 
+
+steven.ding@uni-due.de (Steven X. Ding), 
+
+jiahaowang@xs.ustb.edu.cn (Jiahao Wang), 
+
+myzhong@sdust.edu.cn (Maiying Zhong), 
+
+cheng.wei@uni-due.de (Wei Cheng). 
+
+2008). Nevertheless, the dominat methodology in recent years is data-driven, particularly machine learning (ML) based methods (Wang et al., 2021; Zhao et al., 2026). Undoubtedly, in the era of information, digitalization and big-data, this trend is a logic consequence. Due to the distinguishing technological difference between these two classes of methods, first-principles models vs. process operation data, the methodological difference receives less attention. Existing data-driven fault de-tection methods for dynamic control systems mainly rely on a data-driven reconstruction of the system output (Ding, 2014; Huo et al., 2023; Chen et al., 2023). Methodologically differently, ML-based data-driven methods characterize the system behavior in terms of a lower-dimensional feature space or latent-variable representations learned from historical observa-tions. To capture the nominal system behavior implicitly from the measurement data, which span a higher-dimensional subspace due to system uncertainties, projection methods serve as a capable tool (Wang et al., 2021). Inspired by this methodological practice, a model-based fault detection scheme has been proposed in our recent work using an orthogonal projection 
+
+Preprint submitted to Automatica 21 April 2026 
+
+> arXiv:2604.17444v1 [eess.SY] 19 Apr 2026
+
+(Ding et al., 2026). In this framework, the input-output data space is decomposed into an image subspace representing the nominal system behavior and a residual subspace spanned by uncertainties. Projecting online input-output data onto the image subspace enables us to detect faults in the residual subspace. This approach is particularly capable of dealing with multiplicative uncertainties and faults that span the whole input-output data space. A direct transfer of this approach to a data-driven implementation is hindered due to the lack of a firm theoretic foundation. Specifically, in the model-based projection framework, coprime factorization theory serves as the mathematical tool to define system image, kernel and residual representations and subspaces in ℓ2 [0 , ∞) Hilbert space, and construct projection operators by means of image and kernel representations. Although in our previous work, data-driven image and kernel representations were addressed (Ding et al., 2014), their realization remains in the setting of input-output dynamics. Willems’ behavioral systems theory describes a system as the set of all admissible trajectories and focuses primarily on the nominal dynamics (Polderman &Willens, 1998). The fundamental lemma (Willems et al., 2005) provides a non-parametric characterization of all finite-length trajectories of an unknown linear time-invariant system through Hankel matrices constructed from persistently exciting data, thereby offering a model-free description of the system image (nominal) behavior. Although the fundamental lemma as a cornerstone is widely applied for the development of advanced data-driven control methods (van Waarde et al., 2020b; Markovsky & D¨ orfler, 2021; Doerfler et al., 2023), it can be observed that limited research leverages it to address fault detection issues. During preparing this work, we notice probably the first publication on the fundamental lemma-based fault detection (Markovsky et al., 2026), in which an orthogonal projection-based residual generation and evaluation are realized using the nominal data set representing the system image behavior. It is remarkable that while advanced fault detection methods are strongly focused on fault detec-tion in uncertain systems (Ding, 2020), the fundamental lemma-based control and detection methods either rely on nominal data set without explicitly imposing uncertainties induced subspace, or address noises as uncertainties that are then estimated in an input-output dynamic setting (Wang et al., 2025). Motivated by the aforementioned observations and analysis, the endeavors in this paper are devoted to two objectives. Firstly, analogous to the image and kernel representations in ℓ2 [0 , ∞) Hilbert space, finite-sample image and kernel representations are investigated and, on this basis, image and residual subspaces of finite-sample signals are introduced. Furthermore, relations of these concepts to the fundamental lemma are explored. In the second part, a data-driven projection-based fault detection approach is then developed on the assumption of availability of input-output data that are corrupted with uncertainties and span the space of finite-sample input-output data. The main contributions of this work are, (i) introduction of image, kernel representations and, corresponding to them, image and residual subspaces of finite-sample signals, a theoretic basis for subsequent research, (ii) presentation of an alternative proof and extension of the fundamental lemma by taking into account uncertainties in data, (iii) development of a data-driven fault detection approach by means of orthogonal projections, and (iv) analysis of detection performance of the proposed detection system and comparison with the existing data-driven detection methods. The rest of the paper is organized as follows. The necessary preliminaries and problem formulation are introduced in Section 2. Section 3 explores the theo-retical foundation of this work, including image and kernel representations, the corresponding subspaces of finite-sample signals, and discusses their relations to the fundamental lemma. It is followed by the development of a data-driven projection-based fault detection approach in Section 4. 
+
+Notation. Throughout this paper, standard notation known in control theory and linear algebra is adopted. In addition, Z (Z≥0) denotes the set of all integers (greater or equal to zero). Given i, k, q, s, N ∈ Z≥0, ϕ (i) ∈ Rq , i ∈
+
+[k + 1 , k + N ] ,ϕs(k) = 
+
+
+
+ϕ(k + 1) ...
+
+ϕ(k + s)
+
+ ∈ Rsq ,
+
+Hs(ϕ[k+1: k+N ])= 
+
+h
+
+ϕs(k) · · · ϕs(k+N −s)
+
+i
+
+∈Rsq ×(N −s+1) 
+
+denote the stacked vector and Hankel matrix of ϕ(k),
+
+respectively. For a sequence of blocks Gk, k ∈ Z, Tq,t (G)denotes a Toeplitz matrix defined by (Tq,t (G)) i,j = Gl+i−j , i = 1 , · · · , q, j = 1 , · · · , t, l ∈ Z≥0.
+
+A typical example from our subsequent work is (Ts,s (G)) i,j = Gi−j =
+
+
+
+CA i−j B, i > j D, i = j
+
+0, i < j, 
+
+(1) 
+
+Ts,s (G) = 
+
+
+
+D 0 · · · 0
+
+CB D . . . ...... . . . . . . 0
+
+CA s−2B · · · CB D
+
+
+
+. (2) 2Os and Cs denote matrices 
+
+Os =
+
+
+
+C
+
+...
+
+CA s−1
+
+ , Cs =
+
+h
+
+B · · · As−1B
+
+i
+
+. (3) 
+
+Remark 1 We adopt notation typically used in the fault detection framework, which may slightly differ from the standard one adopted in behavior systems theory and related study of data-driven system analysis and control .
+
+2 Preliminaries and problem formulation 
+
+In this section, system coprime factorizations and the associated alternative system representations, basic fault detection methods and the fundamental lemma are briefly introduced, followed by a problem formulation addressed in this work. 
+
+2.1 System factorizations, image, kernel representa-tions, and signal subspaces 
+
+Consider a linear time invariant (LTI) system G(z), whose minimal state space realization is described by 
+
+x(k + 1) = Ax (k) + Bu (k), (4) 
+
+y(k) = Cx (k) + Du (k), (5) where u ∈ Rp, x ∈ Rn, y ∈ Rm are the system input, state, and output vectors, respectively. The left and right coprime factorizations (LCF and RCF) of G(z),G(z) = ˆM −1(z) ˆN (z) = N (z)M −1(z),
+
+are alternative system representation forms. Associated with them, there exist right and left coprime pairs (RCP and LCP), 
+
+ ˆX(z), ˆY (z)
+
+
+
+and ( X(z), Y (z)) so that the double Bezout identity holds (Vinnicombe, 2000), 
+
+" X(z) Y (z)
+
+− ˆN (z) ˆM (z)
+
+# " M (z) − ˆY (z)
+
+N (z) ˆX(z)
+
+#
+
+= I. (6) The state space models of the LCPs and RCPs  ˆM , ˆN
+
+
+
+, (X, Y ) and ( M, N ) ,
+
+ ˆX, ˆY
+
+
+
+are as follows 
+
+h ˆM ˆN
+
+i
+
+=
+
+
+
+AL,
+
+h
+
+−L B L
+
+i
+
+, C, 
+
+h
+
+I D 
+
+i 
+
+, (7) 
+
+h
+
+X Y
+
+i
+
+=
+
+
+
+AL,
+
+h
+
+−BL −L
+
+i
+
+, F, 
+
+h
+
+I 0
+
+i 
+
+,
+
+" MN
+
+#
+
+= AF , B, 
+
+" FCF
+
+#
+
+,
+
+" ID
+
+#! 
+
+, (8) 
+
+" ˆY
+
+ˆX
+
+#
+
+= AF , −L, 
+
+" F
+
+−CF
+
+#
+
+,
+
+" 0
+
+I
+
+#! 
+
+, (9) where BL = B −LD, C F = C +DF , and matrices F and 
+
+L are designed such that AF = A+BF and AL = A−LC 
+
+are Schur matrices. 
+
+Remark 2 Hereafter, we may drop the domain variable 
+
+z or k when there is no risk of confusion .On account of the state space models of  ˆM , ˆN
+
+
+
+, (X, Y ) , (M, N ) and 
+
+ ˆX, ˆY
+
+
+
+as well as the Bezout identity (6), the system input-output data ( u, y )are expressed by 
+
+" uy
+
+#
+
+=
+
+" MN
+
+#
+
+v +
+
+" − ˆY
+
+ˆX
+
+#
+
+r, (10) which can be interpreted as a control loop with an observer-based state feedback controller, u = F ˆx + v. 
+
+The state estimate ˆ x is delivered by a state observer that serves as a residual generator as well (Ding, 2020), ˆx(k + 1) = AL ˆx(k) + BLu(k) + Ly (k), (11) 
+
+r(k) = y(k) − ˆy(k), ˆy(k) = C ˆx(k) + Du (k). (12) Signal r is called residual and comprises exclusively information about any uncertainties in the system, like unknown inputs, model mismatching and even faults. It is noteworthy that the Bezout identity (6) introduces a one-to-one mapping between ( u, y ) and ( v, r ) ,
+
+" vr
+
+#
+
+=
+
+" X Y
+
+− ˆN ˆM
+
+# " uy
+
+#
+
+, (13) which allows us to define the system image and residual subspaces with ( v, r ) as the latent (hidden) variables. The residual generator (11)-(12) is also called stable kernel representation of G and plays a core role in observer-based fault diagnosis (Ding, 2020). In control theory, systems ( IG, I C ) ,IG =
+
+" MN
+
+#
+
+, I C =
+
+" − ˆY
+
+ˆX
+
+#
+
+, (14) are called image representations of G and feedback controller C, respectively, where u = Cy = − ˆY ˆX−1y
+
+(Vinnicombe, 2000). Corresponding to them, the H2
+
+subspaces IG and RG,
+
+IG =
+
+(" uy
+
+#
+
+:
+
+" uy
+
+#
+
+=
+
+" MN
+
+#
+
+v, v ∈ H p
+
+> 2
+
+)
+
+, (15) 
+
+RG =
+
+(" uy
+
+#
+
+:
+
+" uy
+
+#
+
+=
+
+" − ˆY
+
+ˆX
+
+#
+
+r, r ∈ H m
+
+> 2
+
+)
+
+, (16) 3are defined and called image and residual subspaces, respectively. Attributed to the Bezout identity (6), RG
+
+is the complementary subspace of IG and Hp+m 
+
+> 2
+
+=
+
+IG ⊕ R G. Signals in IG represent the nominal system dynamics, while signals in RG describe the system uncertain dynamics that cause r̸ = 0 .
+
+2.2 Fault detection methods 
+
+It is known that all observer-based residual generators can be parameterized by 
+
+r = R
+
+ ˆM y − ˆN u 
+
+
+
+(17) with a stable post-filter R as the parameterisation system (Ding, 2008). A further classical fault detection technique is the parity space method (Willsky, 1976). A parity space-based residual generator is a finite impulse response (FIR) system of the form 
+
+Ps (ys(k) − T s,s (G) us(k)) (18) =
+
+h
+
+−PsTs,s (G) Ps
+
+i " us(k)
+
+ys(k)
+
+#
+
+∈ Rl, (19) where Ts,s (G) is given in (1), 1 ≤ l ≤ sm − n, and 
+
+Ps (̸= 0) ∈ Rl×sm is called parity matrix that solves the equation 
+
+PsOs = 0 . (20) The integer s is called the order of the parity matrix. It is worth mentioning that a data-driven variation of parity space method was developed and, based on it, the data-driven kernel representation-based fault detection was proposed in (Ding et al., 2014). Recently, an orthogonal projection-based fault detection has been proposed (Ding et al., 2026). The core of this method is an orthogonal projection of ( u, y ) onto the image subspace IG by an operator PIG and the generation of a residual vector rIG by means of 
+
+rIG =
+
+" uy
+
+#
+
+− P IG
+
+" uy
+
+#
+
+= ( I − P IG )
+
+" uy
+
+#
+
+.
+
+It is known from operator theory (Kato, 1995) that dist 
+
+" uy
+
+#
+
+, IG
+
+!
+
+= (I − P IG )
+
+" uy
+
+#
+
+> 2
+
+,
+
+namely ∥rIG ∥2 measures the (minimal) distance from (u, y ) to IG. Hence, ∥rIG ∥2 serves as a residual evalu-ation function. On this basis, gap metric (Kato, 1995) that measures the similarity between two subspaces is introduced for the threshold setting. 
+
+2.3 Fundamental lemma 
+
+In this subsection, we briefly review the fundamental lemma and some relevant results (Willems et al., 2005; Markovsky & D¨ orfler, 2021). 
+
+Definition 1 The system input us(k) ∈ Rsp is persis-tently exciting of order s if the associated Hankel matrix 
+
+Hs(u[k+1: k+N ]) is of full row rank, i.e. 
+
+rank  Hs(u[k+1: k+N ]) = sp. 
+
+Lemma 1 Let (us(k), y s(k)) denote s-samples long input-output trajectories of the LTI system (4)-(5) over the horizon [k0 + 1 , k 0 + N ] and assume u to be persistently exciting of order s + n. Then, any trajectory 
+
+(us(k), y s(k)) of the system can be expressed by 
+
+" us(k)
+
+ys(k)
+
+#
+
+= TG,s g, T G,s =
+
+" Hs(u[k0+1: k0+N ])
+
+Hs(y[k0+1: k0+N ])
+
+#
+
+, (21) 
+
+for some g ∈ RN −s+1 , and 
+
+∀g ∈ RN −s+1 ,
+
+" us(k)
+
+ys(k)
+
+#
+
+= TG,s g
+
+is a trajectory of the system. 
+
+Lemma 1 is known as fundamental lemma, which can be equivalently expressed by Im ( TG,s ) = BG,s ,
+
+BG,s =
+
+(" us(k)
+
+ys(k)
+
+#
+
+: ( u, y ) is a trajectory of G
+
+)
+
+. (22) In the data-driven framework, the concept of persistent excitation and the fundamental lemma are the corner-stone. 
+
+2.4 Problem formulation 
+
+In our work, it is assumed that data are collected during fault-free operations under persistent excitation, whose dynamics are governed by 
+
+x(k + 1) = Ax (k) + Bu (k) + ∆ p(k), (23) 
+
+y(k) = Cx (k) + Du (k) + ∆ s(k), (24) where ∆ p, ∆s represent uncertainties in the process and sensors, respectively. They are assumed to be unknown 4but ℓ2-bounded. We also consider a special case 
+
+" ∆p(k)∆s(k)
+
+#
+
+=
+
+" ω(k)
+
+v(k)
+
+#
+
+∼ N (0 , Σ) , (25) Σ = E
+
+" w(i)
+
+v(i)
+
+# " w(j)
+
+v(j)
+
+#T  =
+
+" Σω Sωv 
+
+STωv Σv
+
+#
+
+δij (26) with the process and measurement noises ( w, v ) that are uncorrelated with the system input. Here, δij = 1 for 
+
+i = j, δ ij = 0 for i̸ = j. Note that the system input-output dynamics can be equivalently written as 
+
+( ˆx(k + 1) = Aˆx(k) + Bu (k) + Lr (k)
+
+y(k) = ˆ y(k) + r(k), (27) which is called kernel-based model. Hereby, the dynam-ics of the residual r is described by 
+
+r = C (zI − AL)−1 (∆ p − L∆s) + ∆ s. (28) It is assumed that span {r(k), k ∈ Z≥0} = Rm.
+
+In the sequel, analogous to IG and IC and the input-output representation (10), we first address the image representations of finite-sample signals. Specifically, the input-output data ( us(k), y s(k)) are described by an algebraic system driven by ( v, r ) over a (finite) time interval. Whereby, the response of (us(k), y s(k)) to 
+
+v, called image representation, describes the nominal dynamics, while the response to r characterizes the dynamics induced by uncertainties. On this basis, image and residual subspaces of finite-sample signals, similar to ( IG, RG) , are defined. An interesting application of this work is to demonstrate the equivalence of the image subspace to Im( TG,s ), implying an alternative proof of the fundamental lemma. The response to r plays a core role in fault detection. Differing from (13) in the model-based framework, the kernel representation in this work is introduced as the null-space of the image representation. In the data-driven setting, this study extends the fundamental lemma to deal with data corrupted with uncertainties. These theoretical results enable the development of a data-driven projection-based fault detection approach. On the basis of a low-rank matrix approximation by means of a singular value decomposition (SVD) of the data matrix, projection-based residual generation and evaluation are realized. Finally, detection performance of the proposed approach is analyzed in the framework of matrix perturbation theory and compared with existing detection methods. 
+
+3 Image and kernel representations, signal sub-spaces, and fundamental lemma 
+
+In this section, we introduce finite-sample image and kernel representations and, associated with them, the image and residual subspaces as alternative system model forms. We make a concerted effort to explore relations between (i) the image subspace and fundamen-tal lemma and (ii) residual and parity subspaces. They highlight some unexplored theoretic aspects and lay the groundwork for our endeavours to develop data-driven fault detection methods. 
+
+3.1 Image representation and subspace, fundamental lemma 
+
+In (Ding et al., 2014), data-driven image and kernel representations have been introduced and applied for the purpose of fault detection and control. In this subsection, we firstly introduce a finite-sample image representation, an analogous form of the image representation (8) in finite samples-long signal subspace, that generalizes the data-driven representation in (Ding et al., 2014). On this basis, image subspace, a data-driven image representation and its equivalence to the fundamental lemma are explored. We begin with the following lemma given in (Ding et al., 2014). 
+
+Lemma 2 Given the system (4)-(5), there exist a matrix pair (Ms, N s) and a vector vs+n(k − n) ∈ R(s+n)p, s.t. 
+
+" us(k)
+
+ys(k)
+
+#
+
+=
+
+" Ms
+
+Ns
+
+#
+
+vs+n(k − n), (29) 
+
+" Ms
+
+Ns
+
+#
+
+=
+
+" Hu,x Hu,v 
+
+Hy,x Hy,v 
+
+#
+
+∈ Rs(p+m)×(s+n)p, (30) 
+
+where matrices Hu,x , H u,v , H y,x and Hy,v are 
+
+Hu,x =
+
+
+
+F
+
+...
+
+F A s−1
+
+> F
+
+h
+
+An−1 
+
+> F
+
+B · · · B
+
+i
+
+∈ Rsp ×np ,Hu,v =
+
+
+
+I 0 · · · 0
+
+F B I . . . ...... . . . . . . 0
+
+F A s−2 
+
+> F
+
+B · · · F B I
+
+
+
+∈ Rsp ×sp ,Hy,x =
+
+
+
+CF
+
+...
+
+CF As−1
+
+> F
+
+h
+
+An−1 
+
+> F
+
+B · · · B
+
+i
+
+∈ Rsm ×np ,
+
+5Hy,v =
+
+
+
+D 0 · · · 0
+
+CF B D . . . ...... . . . . . . 0
+
+CF As−2 
+
+> F
+
+B · · · CF B D
+
+
+
+∈ Rsm ×sp ,
+
+with F = Fd, and all eigenvalues of matrix AF = A+BF d
+
+equal zero. 
+
+The idea behind the proof of this lemma is to set u =
+
+Fdx + v in the image representation (8). The proof is straightforward on account of the deadbeat behavior, i.e. 
+
+AnFd = 0. The following lemma is essential to prove that the model (29) holds for any gain matrix F .
+
+Lemma 3 Given the system (4)-(5), and suppose that RCPs (M1, N 1) and (M2, N 2) are constructed for F = F1
+
+and F = F2̸ = F1, respectively. Then, it holds 
+
+" uy
+
+#
+
+=
+
+" M1
+
+N1
+
+#
+
+v =
+
+" M2
+
+N2
+
+#
+
+V v, (31) 
+
+V = ( AF1 , B, F 1 − F2, I ) . (32) 
+
+Correspondingly, 
+
+"M1,s 
+
+N1,s 
+
+#
+
+=
+
+" M2,s 
+
+N2,s 
+
+#
+
+Vs+n, V s+n = Ts+n,s +n (V ) , (33) (Ts+n,s +n (V )) i,j = Vi−j =
+
+
+
+(F1 − F2)Ai−jF1 B, i > j I, i = j
+
+0, i < j, 
+
+where (Mi,s , N i,s ) , i = 1 , 2, are (Ms, N s) given in Lemma 2 for F = Fi.
+
+Proof. The relation (31) is a known result, see, for instance, (Ding, 2020). Below, (33) is proven. For notational simplicity, Toeplitz matrices of ( Ms, N s) , for 
+
+F = Fi, C F = CFi , A F = AFi , i = 1 , 2,Ms,i = Ts,s +n
+
+ M i , M ik =
+
+
+
+FiAk−1 
+
+> Fi
+
+B, k > 0
+
+I, k = 0 0, k < 0,
+
+(34) 
+
+Ns,i = Ts,s +n
+
+ N i , N ik =
+
+
+
+CFi Ak−1 
+
+> Fi
+
+B, k > 0
+
+D, k = 0 0, k < 0,
+
+(35) 
+
+ Ts,s +n
+
+ M i  
+
+> l,j
+
+= M in+l−j ,  Ts,s +n
+
+ N i  
+
+> l,j
+
+= N in+l−j ,
+
+are used. Observe that 
+
+M2,s Vs+n = Ts,s +n
+
+ M 2 Ts+n,s +n (V ) =: Ts,s +n
+
+  ¯M  ,
+
+ Ts,s +n
+
+  ¯M   
+
+> l,j
+
+= ¯Mn+l−j ,
+
+¯Mk =
+
+
+
+> k−2
+
+X
+
+> l=0
+
+F2AlF2 B (F1 − F2) Ak−2−lF1 B
+
++ ( F1 − F2) Ak−1 
+
+> F1
+
+B + F2Ak−1 
+
+> F2
+
+B, k > 0
+
+I, k = 0 0, k < 0.
+
+Attributed to the equalities, 
+
+B (F1 − F2) = AF1 − AF2 =⇒
+
+Ak−1 
+
+> F1
+
+− Ak−1 
+
+> F2
+
+=
+
+> k−2
+
+X
+
+> i=0
+
+AiF2 B (F1 − F2) Ak−i−2 
+
+> F1
+
+, (36) it turns out, by routine computations, that ¯Mk = M 1 
+
+> k
+
+=⇒ M2,s Vs+n = M1,s .
+
+Similarly, we have 
+
+Ts,s +n
+
+  ¯N  := N2,s Vs+n,  Ts,s +n
+
+  ¯N   
+
+> l,j
+
+= ¯Nn+l−j ,
+
+¯Nk =
+
+
+
+> k−2
+
+X
+
+> l=0
+
+CF2 AlF2 B (F1 − F2) Ak−2−lF1 B
+
++D (F1 − F2) Ak−1 
+
+> F1
+
+B + CF2 Ak−1 
+
+> F2
+
+B, k > 0
+
+D, k = 0 0, k < 0,
+
+which, by means of (36), equals ¯Nk =
+
+
+
+CF1 Ak−1 
+
+> F1
+
+B, k > 0
+
+D, k = 0 0, k < 0,
+
+= N 1 
+
+> k
+
+.
+
+Thus, N2,s Vs+n = N1,s . The proof is completed. On the basis of Lemmas 2-3, we have the following theorem. 
+
+Theorem 1 Given the system (4)-(5), any input-output data (us(k), y s(k)) can be modelled by (29) for some 
+
+vs+n(k −n) ∈ R(s+n)pand AF = A+BF for an arbitrary gain matrix F . Furthermore, for s ≥ n, rank 
+
+" Ms
+
+Ns
+
+#
+
+= sp + n. (37) 6Proof. Consider the image representation of the system (4)-(5) given by (8), which, according to (31) in Lemma 3, is further written into 
+
+" MN
+
+#
+
+=
+
+" Md
+
+Nd
+
+#
+
+V =⇒
+
+" uy
+
+#
+
+=
+
+" Md
+
+Nd
+
+#
+
+¯v, ¯v = V v, 
+
+where ( Md, N d) denote the image representation for F =
+
+Fd. It follows from the state space model of ¯ v = V v, xV (k + 1) = AF xV (k) + Bv (k), x V (0) = 0 ,
+
+¯v(k) = ( F − Fd) xV (k) + v(k),
+
+that ¯ vs+n (k − n) = Vs+nvs+n (k − n) . Consequently, according to Lemmas 2-3, we have 
+
+" us(k)
+
+ys(k)
+
+#
+
+=
+
+" Md,s 
+
+Nd,s 
+
+#
+
+¯vs+n (k − n) = 
+
+" Ms
+
+Ns
+
+#
+
+vs+n (k − n) .
+
+Note that for F = 0 , (30) is subject to 
+
+" Hu,x Hu,v 
+
+Hy,x Hy,v 
+
+#
+
+=
+
+" 0 I
+
+OsCn Hy,v 
+
+#
+
+=⇒ (37). 
+
+Hence, according to Lemma 3, (37) holds for any F. The proof is completed. An immediate result of Theorem 1 is that any input-output data ( us(k), y s(k)) belongs to the subspace IG,s ,
+
+IG,s =
+
+(" us(k)
+
+ys(k)
+
+#
+
+,
+
+" us(k)
+
+ys(k)
+
+#
+
+=
+
+" Ms
+
+Ns
+
+#
+
+h
+
+)
+
+(38) for h ∈ R(s+n)p. IG,s is called image subspace. 
+
+Corollary 1 Given the system (4)-(5) with the input that is persistently exciting of order s + n, then 
+
+∃H s+n
+
+ v[kp+1: kp+N ]
+
+ ∈ R(s+n)p×(N −s+1) , k p = k0 − n
+
+such that 
+
+TG,s =
+
+" Ms
+
+Ns
+
+#
+
+Hs+n
+
+ v[kp+1: kp+N ]
+
+ , (39) Im ( TG,s ) = BG,s = IG,s . (40) 
+
+Proof. Equation (39) is attributed to Theorem 1, while (40) follows from Lemma 1, Theorem 1 and (39). As highlighted in (Markovsky & D¨ orfler, 2021), the original proof of the fundamental lemma in (Willems et al., 2005) ”is based on a kernel representation of the system and uses the notion of annihilators of the behavior ”. Also the proof with a state space representation in (van Waarde et al., 2020a) is based on the concept of annihilators of the behavior. Particularly, quoting from (Markovsky & D¨ orfler, 2021): ” Currently there is no constructive proof that gives an intuition why the additional persistency of excitation is needed nor how conservative the conditions are .” The results in Lemmas 2-3, Theorem 1 and Corollary 1 suggest a constructive proof of the fundamental lemma on the basis of system image representation and an alternative interpretation in the context of system factorization and the associated image subspace. Specifically, the matrix 
+
+Hs+n
+
+ v[kp+1: kp+N ]
+
+ of the latent vector implies the hidden (persistent) excitation that enables the system input-output data set TG,s to comprise full information of the system image representation ( Ms, N s) . Notice that (39)-(40) mean Im 
+
+" Ms
+
+Ns
+
+#
+
+Hs+n
+
+ v[kp+1: kp+N ]
+
+!
+
+=Im 
+
+" Ms
+
+Ns
+
+#!
+
+. (41) Equation (41) provides us with a necessary and suffi-cient condition for the required excitation. It can be interpreted as thoroughly exciting the system image subspace. It is noteworthy that, if Hs+n
+
+ v[kp+1: kp+N ]
+
+
+
+is persistently exciting of order s + n, i.e. 
+
+rank  Hs+n
+
+ v[kp+1: kp+N ]
+
+ = ( s + n) p, 
+
+the image representation ( Ms, N s) is identifiable on the basis of the system input-output data set, namely 
+
+" Ms
+
+Ns
+
+#
+
+= TG,s HTs+n
+
+ v[kp+1: kp+N ]
+
+
+
+×  Hs+n
+
+ v[kp+1: kp+N ]
+
+ HTs+n
+
+ v[kp+1: kp+N ]
+
+ −1 .
+
+In fact, in this case, there exists a matrix Π ∈
+
+R(N −s+1) ×(N −s+1) s.t. 
+
+Hs+n
+
+ u[k0+1: k0+N ]
+
+ = Hs+n
+
+   v[kp+1: kp+N ]
+
+ Π.
+
+The image representation (29) and the associated equiv-alence (39) provide alternative representation forms of system dynamics, which build the core of our subsequent work. 
+
+Definition 2 Given the LTI system (4)-(5), the input-output reprsentations (29) and (40) are called finite sample image representation and data-driven image representation, respectively. 3.2 Residual subspace and extension of fundamental lemma 
+
+The system image representation and also fundamental lemma model the system nominal dynamics exclusively. On the other hand, addressing system uncertainties including faults is a necessary step to perform fault detection. As illustrated in Section 2, in the model-based framework, residual generation is the first step for a re-liable fault detection. The system kernel representation (13) serves as the core of any observer-based residual generator, and associated with it, fault detection is achieved in the residual subspace. The objective of this 7subsection is twofold. Firstly, dynamics of LTI systems with uncertainties are modelled in the space of finite sample signals. In this regard, the fundamental lemma is extended. Secondly, existence conditions of kernel representation and residual subspace are examined. Consider the system model (23)-(24) and the associated kernel-based model (27). Particularly, for systems with the process and sensor noises as uncertainties modelled by (25)-(26), when L is set as the Kalman filter gain LK ,
+
+LK =  AP C T + Sωv 
+
+ Σ−1 
+
+> r
+
+, P = AP A T + Σ ω ,
+
+Σr = CP C T + Σ υ = E  r(k)rT (k) ,
+
+the residual r(k) ∼ N (0 , Σr ) is an innovation series and the system (27) is known as innovation model (Huang & Kadali, 2008). The following lemma is essential for our subsequent work. 
+
+Lemma 4 Given the kernel-based model (27), it holds, for some vs+n(k − n),
+
+" us(k)
+
+ys(k)
+
+#
+
+=
+
+" Ms
+
+Ns
+
+#
+
+vs+n(k−n)+ 
+
+" ˆYs
+
+ˆXs
+
+#
+
+rs+n(k−n) (42) 
+
+" ˆYs
+
+ˆXs
+
+#
+
+=
+
+" Hu, ˆx Hu,r,F d
+
+Hy, ˆx Hy,r,F d
+
+#
+
+, (43) 
+
+Hu, ˆx =
+
+
+
+Fd
+
+...
+
+FdAs−1
+
+> Fd
+
+h
+
+An−1 
+
+> Fd
+
+L · · · L
+
+i
+
+∈ Rsp ×nm ,Hu,r,F d =
+
+
+
+0 0 · · · 0
+
+FdL 0 . . . ...... . . . . . . 0
+
+FdAs−2 
+
+> Fd
+
+L · · · FdL 0
+
+
+
+∈ Rsp ×sm ,Hy, ˆx =
+
+
+
+CFd
+
+...
+
+CFd As−1
+
+> Fd
+
+h
+
+An−1 
+
+> Fd
+
+L · · · L
+
+i
+
+∈ Rsm ×nm ,Hy,r,F d =
+
+
+
+I 0 · · · 0
+
+CFd L I . . . ...... . . . . . . 0
+
+CFd As−2 
+
+> Fd
+
+L · · · CFd L I
+
+
+
+∈ Rsm ×sm ,
+
+where (Ms, N s) are defined by (31) for any F, and Fd is the deadbeat gain matrix, i.e. all eigenvalues of matrix 
+
+AFd = A + BF d are equal to zero. 
+
+Proof. It follows from (10) and the state space realizations (8) and (9) that for u = Fd ˆx + ¯ v
+
+ˆx(k + 1) = AFd ˆx(k) + B¯v(k) + Lr (k),
+
+" u(k)
+
+y(k)
+
+#
+
+=
+
+" Fd
+
+CFd
+
+#
+
+ˆx(k) + 
+
+" ID
+
+#
+
+v(k) + 
+
+" 0
+
+I
+
+#
+
+r(k).
+
+Hence, according to Theorem 1, the response of (us(k), y s(k)) to ¯ v can be described by, for any F, 
+
+" Md,s 
+
+Nd,s 
+
+#
+
+¯vs+n(k − n) = 
+
+" Ms
+
+Ns
+
+#
+
+vs+n(k − n),vs+n(k − n) = V −1 
+
+> s+n
+
+¯vs+n(k − n).
+
+Analogous it, we obtain 
+
+" ˆYs
+
+ˆXs
+
+#
+
+rs+n(k − n) as the response to the residual r, whose proof can be performed along the lines of the proof of Lemma 2 given in (Ding et al., 2014). This completes the proof. Recall that for two different observer gain matrices, L =
+
+L1, L = L2̸ = L1, the observer-based residual generator 
+
+r = ˆM y − ˆN u satisfies 
+
+r = ˆM2y − ˆN2u = R
+
+ ˆM1y − ˆN1u
+
+
+
+, (44) 
+
+R = ( AL2 , L 1 − L2, C, I ) , (45) where R is an invertible postfilter (Ding, 2008). It is of theoretic interest to examine the change of 
+
+ ˆXs, ˆYs
+
+
+
+caused by variations of L and F. The results are described in the following lemma. 
+
+Lemma 5 Given the kernel-based model (27), and suppose that ( ˆXs,i , ˆYs,i ) and (Ms,i , N s,i ) are constructed according to (42) and (30), respectively, for L = Li, F =
+
+Fi, i = 1 , 2, Then, it holds 
+
+" ˆYs, 1
+
+ˆXs, 1
+
+#
+
+=
+
+" Ms, 2 ˆYs, 2
+
+Ns, 2 ˆXs, 2
+
+# " ¯Rs+n
+
+Rs+n
+
+#
+
+, (46) 
+
+Rs+n = Ts+n,s +n (R) , R k =
+
+
+
+CA k−1 
+
+> L2
+
+(L1 − L2), k ≥ 1
+
+I, k = 0 0, k < 0,
+
+¯Rs+n = ¯R1 
+
+> s+n
+
++ ¯R2 
+
+> s+n
+
+= Ts+n,s +n
+
+  ¯R , ¯R = ¯R1 + ¯R2,
+
+¯R1 
+
+> k
+
+=
+
+( (F1 − F2)Ak−1 
+
+> F1
+
+L1, k ≥ 10, k ≤ 0, (47) ¯R2 
+
+> k
+
+=
+
+( F2Ak−1 
+
+> L2
+
+(L1 − L2), k ≥ 10, k ≤ 0, (48) 8(Ts+n,s +n (R)) i,j = Ri−j ,  Ts+n,s +n
+
+  ¯R  
+
+> i,j
+
+= ¯Ri−j .
+
+Proof. The proof is performed in two steps, (i) varying 
+
+L with a fixed F, (ii) fixing L, varying F. The identity 
+
+AkF − AkL =
+
+> k−1
+
+X
+
+> i=0
+
+Ak−1−iF (BF + LC ) AiL, (49) plays a key role in our proof, which can be easily proven by induction method and noticing BF +LC = AF −AL.
+
+We begin with the first step and introduce notation ˆYs,i = Ts,s +n
+
+ Y i , Y ik =
+
+( F A k−1 
+
+> F
+
+Li, k ≥ 10, k ≤ 0,
+
+ˆXs,i = Ts,s +n
+
+ Xi , X ik =
+
+
+
+CF Ak−1 
+
+> F
+
+Li, k ≥ 1
+
+I, k = 0 0, k < 0,
+
+ Ts,s +n
+
+ Y i  
+
+> l,j
+
+= Y in+l−j ,  Ts,s +n
+
+ Xi  
+
+> l,j
+
+= Xin+l−j .
+
+To be proven is ˆYs, 2Rs+n = ˆYs, 1 − Ms, 2 ¯R2
+
+> s+n
+
+, for L =
+
+Li, i = 1 , 2, and fixing F = F2. Consider the Toeplitz matrix of ˆYs, 2Rs+n, which, by routine computation according to Lemma 4 and definition of Rs+n, is given by ˆYs, 2Rs+n = Ts,s +n
+
+  ¯Y  ,  Ts,s +n
+
+  ¯Y   
+
+> l,j
+
+= ¯Yn+l−j ,
+
+¯Yk =
+
+
+
+F2
+
+
+
+> k−2
+
+X
+
+> l=0
+
+AlF2 L2CA k−2−lL2 (L1 − L2)+Ak−1 
+
+> F2
+
+L2
+
+ , k ≥ 10, k ≤ 0.
+
+Attributed to (49), 
+
+> k−2
+
+X
+
+> l=0
+
+AlF2 L2CA k−2−lL2 (L1 − L2) = 
+
+Ak−1 
+
+> F2
+
+− Ak−1 
+
+> L2
+
+−
+
+> k−2
+
+X
+
+> l=0
+
+AlF2 BF 2Ak−2−lL2
+
+!
+
+(L1 − L2)=⇒ F2 Ak−1 
+
+> F2
+
+L2 +
+
+> k−2
+
+X
+
+> l=0
+
+AlF2 L2CA k−2−lL2 (L1 − L2)
+
+!
+
+=
+
+F2
+
+
+
+− Ak−1 
+
+> L2
+
++
+
+> k−2
+
+X
+
+> l=0
+
+AlF2 BF 2Ak−2−lL2
+
+!
+
+(L1 − L2)+Ak−1 
+
+> F2
+
+L1
+
+ .
+
+(50) Note that, according to Ms, 2 and ¯R2 given in (34) and Lemma 5, respectively, 
+
+Ts,s +n (Ξ) = Ms, 2 ¯R2
+
+> s+n
+
+, (Ts,s +n (Ξ)) l,j = Ξ n+l−j ,
+
+Ξk =
+
+
+
+F2
+
+
+
+> k−2
+
+X
+
+> t=0
+
+AtF2 BF 2Ak−2−tL2
+
++Ak−1
+
+> L2
+
+ (L1 − L2), k ≥ 10, k ≤ 0.
+
+(51) Summarizing (50) and (51) results in 
+
+Ts,s +n
+
+  ¯Y  = Ts,s +n (Ξ) = ⇒ ˆYs, 1 = ˆYs, 2Rs+n+Ms, 2 ¯R2
+
+> s+n
+
+.
+
+Similarly, it turns out that ˆXs, 2Rs+n = Ts,s +n
+
+  ¯X ,  Ts,s +n
+
+  ¯X  
+
+> l,j
+
+= ¯Xn+l−j ,
+
+¯Xk =
+
+
+
+CF2
+
+> k−2
+
+X
+
+> t=0
+
+AtF2 L2CA k−2−tL2 (L1 − L2)+CF2 Ak−1 
+
+> F2
+
+L2 + CA k−1 
+
+> L2
+
+(L1 − L2), k > 0
+
+I, k = 0 0, k ≤ 0.
+
+which, according to (49), equals ¯Xk =
+
+
+
+−CF2 Ak−1 
+
+> L2
+
++
+
+> k−2
+
+X
+
+> t=0
+
+AtF2 BF 2Ak−2−tL2
+
+!
+
+(L1 − L2)+CF2 Ak−1 
+
+> F2
+
+L1 + CA k−1 
+
+> L2
+
+(L1 − L2), k > 0
+
+I, k = 0 0, k ≤ 0.
+
+Observe that 
+
+Ts,s +n
+
+ ¯Ξ = Ns, 2 ¯R2
+
+> s+n
+
+,  Ts,s +n
+
+ ¯Ξ  
+
+> l,j
+
+= ¯Ξn+l−j
+
+¯Ξk =
+
+
+
+CF2
+
+> k−2
+
+X
+
+> t=0
+
+AtF2 BF 2Ak−2−tL2
+
++DF 2Ak−1
+
+> L2
+
+ (L1 − L2), k > 00, k ≤ 0.
+
+Hence, it holds 
+
+Ts,s +n
+
+  ¯X + Ts,s +n
+
+ ¯Ξ = Ts,s +n
+
+ X1
+
+=⇒ ˆXs, 1 = ˆXs, 2Rs+n + Ns ¯R2
+
+> s+n
+
+.
+
+Next, in the second step, on the assumption of varying 
+
+F, F = Fi, i = 1 , 2, and fixing L = L1, we prove ˆYs, 1 − ˆYs, 2 = Ms, 2 ¯R1 
+
+> s+n
+
+⇐⇒ ˆYs, 2 + Ms, 2 ¯R1 
+
+> s+n
+
+= ˆYs, 1.
+
+9Note that 
+
+ Ts,s +n
+
+ Y 1  
+
+> l,j
+
+−  Ts,s +n
+
+ Y 2  
+
+> l,j
+
+=
+
+
+
+F1An−1+ l−jF1 − F2An−1+ l−jF2
+
+
+
+L1, n − 1 + l > j 
+
+0, n − 1 + l ≤ j, 
+
+which is equal to, attributed to the equality (36), 
+
+
+
+F1An−1+ l−jF1 − F2An−1+ l−jF2
+
+
+
+L1 =
+
+
+
+(F1 − F2) An−1+ l−jF1 + F2
+
+
+
+An−1+ l−jF1 − An−1+ l−jF2
+
+ 
+
+L1
+
+=
+
+
+
+(F1 − F2) An−1+ l−jF1
+
++F2
+
+> n−2+ l−j
+
+X
+
+> t=0
+
+AtF2 B (F1 − F2) An−2+ l−j−tF1
+
+ L1
+
+for n − 1 + l > j. The last equation is the ( l, j )-th entry of Toeplitz matrix Ts,s +n
+
+ Ms, 2 ¯R1
+
+> s+n
+
+ . Thus, it holds ˆYs, 1 − ˆYs, 2 = Ms, 2 ¯R1
+
+> s+n
+
+. Analogously, 
+
+ Ts,s +n
+
+ X1  
+
+> l,j
+
+−  Ts,s +n
+
+ X2  
+
+> l,j
+
+=
+
+
+
+CF1 An−1+ l−jF1 − CF2 An−1+ l−jF2
+
+
+
+L1, n − 1 + l > j I, n − 1 + l = j
+
+0, n − 1 + l < j, 
+
+leads to, attributed to the equality (36), 
+
+
+
+CF1 An−1+ l−jF1 − CF2 An−1+ l−jF2
+
+
+
+L1 =
+
+
+
+D (F1 − F2) An−1+ l−jF1 + CF2
+
+
+
+An−1+ l−jF1 − An−1+ l−jF2
+
+ 
+
+L1
+
+=
+
+
+
+D (F1 − F2) An−1+ l−jF1
+
++CF2
+
+> n−2+ l−j
+
+X
+
+> t=0
+
+AtF2 B (F1 − F2) An−2+ l−j−tF1
+
+ L1
+
+for n − 1 + l > j. The last equation is the ( l, j )-th entry of Toeplitz matrix Ts,s +n
+
+ Ns, 2 ¯R1
+
+> s+n
+
+ , which implies ˆXs, 1 − ˆXs, 2 = Ns, 2 ¯R1
+
+> s+n
+
+. With the successful proof in both steps, the proof of the lemma is completed. 
+
+Theorem 2 Given the kernel-based model (27) and 
+
+(Ms, N s) ,
+
+ ˆXs, ˆYs
+
+
+
+for arbitrary F and L, the following statements hold: (i) (Ms, N s) and 
+
+ ˆXs, ˆYs
+
+
+
+are param-eterized by Vs+n, R s+n, ¯Rs+n given in Lemma 3 and Lemma 5, for (F2, L 2) = (0 , 0) and (F1, L 1) = ( F, L ) ,
+
+respectively, as follows, 
+
+Ψs =
+
+" Ms ˆYs
+
+Ns ˆXs
+
+#
+
+= Ψ s, 0
+
+" Vs+n ¯Rs+n
+
+0 Rs+n
+
+#
+
+, (52) Ψs, 0 =
+
+" Ms, 0 ˆYs, 0
+
+Ns, 0 ˆXs, 0
+
+#
+
+=
+
+h
+
+IG0 IC0
+
+i
+
+, (53) 
+
+IG0 =
+
+" 0 I
+
+OsCn Ts,s (G)
+
+#
+
+, I C0 =
+
+" 0 00 I
+
+#
+
+, (54) 
+
+Rs+n = Ts+n,s +n (R) , ¯Rs+n = ¯R1
+
+> s+n
+
+, (55) 
+
+where Ts,s (G) is given in (1)-(2); (ii) any system input-ouput pair (us(k), y s(k)) can be expressed by 
+
+" us(k)
+
+ys(k)
+
+#
+
+=
+
+" Ms ˆYs
+
+Ns ˆXs
+
+# " vs+n(k − n)
+
+rs+n(k − n)
+
+#
+
+(56) 
+
+for some (vs+n(k − n), r s+n(k − n)) , which is equal to 
+
+" us(k)
+
+ys(k)
+
+#
+
+= Ψ s, 0
+
+" ¯vs+n(k − n)¯rs+n(k − n)
+
+#
+
+(57) = ¯Ψs, 0
+
+" ¯vs+n(k − n)¯rs(k)
+
+#
+
+, ¯Ψs, 0 =
+
+" Ms, 0 0
+
+Ns, 0 I
+
+#
+
+, (58) ¯vs+n(k − n) = Vs+nvs+n(k − n) + ¯Rs+nrs+n(k − n),
+
+¯rs+n(k − n) = Rs+nrs+n(k − n); (59) 
+
+(iii) the following rank conditions hold 
+
+rank (Ψ s) = rank (Ψ s, 0) = rank   ¯Ψs, 0
+
+ = s(p + m).
+
+(60) 
+
+Proof. It follows from Lemmas 3 and 5 that ( Ms, N s)given in Lemma 2 hold for any F, and for any ( F, L ), ˆXs, ˆYs
+
+
+
+can be expressed by (46). Now, let ( F1, L 1) = (F, L ) and ( F2, L 2) = (0 , 0) be the feedback gain and observer gain matrices of ( Ms,i , N s,i ) and 
+
+ ˆXs,i , ˆYs,i 
+
+
+
+in Lemmas 3 and 5, respectively. It is straightforward that (52) holds and 
+
+ ˆXs, 2, ˆYs, 2
+
+
+
+=
+
+ ˆXs, 0, ˆYs, 0
+
+
+
+and (Ms, 2, N s, 2) = ( Ms, 0, N s, 0) satisfy (53). Statement (ii) follows immediately from (52) and (53). Since 
+
+rank 
+
+" Vs+n ¯Rs+n
+
+0 Rs+n
+
+#
+
+= ( m + p) ( s + n) , (61) it is apparent that (60) is true. By virtue of (52), variations of ( Ms, N s) and 
+
+ ˆXs, ˆYs
+
+
+
+resulted from varying ( F, L ) are fully parameterized 10 by  Rs+n, ¯Rs+n, V s+n
+
+ . More importantly, Ψ s, 0 and equivalently ¯Ψs, 0 characterize the elemental system structure that is invariant with respect to ( F, L ). The rank condition (60) is the consequence of this property, which plays a core role in our subsequent work. An immediate result of Theorem 2 is an extension of the fundamental lemma. 
+
+Corollary 2 Consider the kernel-based model (27). For an input-output data matrix TG,s with N − s + 1 ≥
+
+(s + n) p + sm, (i) there exists a matrix of the latent variables (¯ vs+n(k − n), ¯rs(k)) so that for kp = k − n
+
+Im ( TG,s ) = Im ¯Ψs, 0
+
+" Hs+n
+
+ ¯v[kp+1: kp+N ]
+
+
+
+Hs
+
+ ¯r[k+1: k+N ]
+
+#! 
+
+(62) 
+
+and ∀g ∈ RN −s+1 ,
+
+" us(k)
+
+ys(k)
+
+#
+
+= TG,s g is an input-output trajectory of the system; (ii) 
+
+rank 
+
+" Hs+n
+
+ ¯v[kp+1: kp+N ]
+
+
+
+Hs
+
+ ¯r[k+1: k+N ]
+
+#
+
+= ( s + n) p + sm =⇒
+
+rank (TG,s ) = s(p + m) ⇐⇒ Im ( TG,s ) = Im   ¯Ψs, 0
+
+ .
+
+Proof. Equation (62) follows from Theorem 2 imme-diately, based on which and the rank condition (60), conclusion (ii) holds. Since TG,s ∈ Rs(p+m)×(N −s+1) , the statement (ii) implies that ( us(k), y s(k)) is an input-output trajectory of the system if and only if ∃g ∈ RN −s+1 so that " us(k)
+
+ys(k)
+
+#
+
+= TG,s g. We would like to remark that in (Wang et al., 2025) systems modelled by (27) with the innovation series r(k) are considered, in which the input vector is extended to 
+
+h
+
+uTs (k) rTs (k)
+
+iT
+
+. In this regard, it has been proven (Theorem 2 (a), (Wang et al., 2025)) that the data set consisting of ( us(k), y s(k), r s(k)) fully characterizes the system dynamics if the augmented input vector is persistently exciting of order s + n. It is straightforward to showcase that this result is equivalent to (ii) of Corollary 2. The rank condition (62) illustrates that under existence of r representing uncertainties in the system, (i) the dimension of the image subspace of the input-output data, Im ( TG,s ) , can be higher than sp + n, which implies the existence of the complementary subspace of the system image subspace, (ii) there exists mutual coupling between these two subspaces. Both issues are of importance in dealing with fault detection and thus motivate us to study the kernel representation and residual subspace. In the model-based framework, the residual subspace is the complementary subspace of the image subspace, which, according to (16), is the image subspace spanned by the RCP 
+
+ ˆX, ˆY
+
+
+
+as well. Consequently, the image and residual subspaces are characterized by the proper-ties that dim ( RG) = m, dim ( IG) = p, 
+
+h
+
+− ˆN ˆM
+
+i " M − ˆYN ˆX
+
+#
+
+=
+
+h
+
+0 I
+
+i
+
+. (63) This is the theoretic basis for a kernel representation serving as a residual generator. Analogous to it, to detect faults in the subspace of finite-sample input-output signals, it is necessary that Im 
+
+" − ˆYs
+
+ˆXs
+
+#! 
+
+⊈ Im 
+
+" Ms
+
+Ns
+
+#! 
+
+, (64) 
+
+rank 
+
+" Ms
+
+Ns
+
+#! 
+
+< s (p + m) . (65) Below, we examine the existence conditions for (64)-(65), which are equivalent to the existence conditions of the complementary subspace of IG,s . As delineated by the subsequent theorem, in the space of finite-sample signals, kernel representation and residual subspace exist only under certain conditions. 
+
+Remark 3 . For the sake of simplicity, notation 
+
+IG,s =
+
+" Ms
+
+Ns
+
+#
+
+, I C,s =
+
+" ˆYs
+
+ˆXs
+
+#
+
+is introduced in the sequel. 
+
+Theorem 3 Given the kernel-based model (27) and the corresponding input-output model (42), then (i) 
+
+rank (IG,s ) = β + sp, β = rank (Os) ; (66) 
+
+(ii) the rank condition 
+
+rank (IG,s ) < s (m + p) (67) 
+
+holds if and only if sm > β, and (iii) if s > μ obs , where 
+
+μobs (≤ n) is the system observability index, it holds that 
+
+rank (IG,s ) = sp + n < s (p + m) , (68) dim ( RG,s ) = s(p + m) − dim ( IG,s ) = sm − n, (69) dim ( RG,s ) < dim (Im ( IC,s )) = sm, (70) 
+
+where residual subspace RG,s is the complementary subspace of IG,s , and there exist (us(k), y s(k)) ( ̸= 0) so 
+
+11 that " us(k)
+
+ys(k)
+
+#
+
+∈ Im ( IG,s ) ∩ Im ( IC,s ) . (71) 
+
+Proof. To prove (66), setting F = 0 leads to 
+
+rank (IG,s ) = sp + rank (OsCn) . (72) Since the system (4)-(5) is controllable, we have 
+
+rank (OsCn) = β =⇒ rank (IG,s ) = sp + β. 
+
+The proof of (ii) follows immediately from (66). Concern-ing (iii), recall that rank  Oμobs 
+
+ = n. Thus, ∀s > μ obs ,
+
+(68) holds, and (69) is the immediate result of (68). Recalling the rank condition (refer to Theorem 2) 
+
+rank (IC,s ) = rank (IC0 ) = sm, 
+
+we further have (70), from which (71) follows. This completes the proof. 
+
+Remark 4 . The necessary condition s > μ obs and the conclusion (68) are known in behavioral systems theory, where they are expressed in terms of the concept lag of the system instead of the observability index, in order to deal with LTI systems in a general form (Willems et al., 2005; Markovsky & D¨ orfler, 2021). For an LTI with the minimal state space realization (4)-(5), the observability index equals the lag of the system .Theorem 3 reveals that the complementary subspace of IG,s exists, only if the data length s is sufficiently large. In our subsequent study, it is assumed that s > n (≥ μobs ) . The conditions (69)-(71) demonstrate the differences between the image and residual subspaces in H2 space and in the space of finite-sample signals. They reveal that, in the latter case, (i) increasing the evaluation window s is instrumental to enhance detection performance, (ii) Im ( IC,s ) is not the residual subspace, and thus (iii) the nominal and uncertain system dynamics are stronger corrupted. Aiming at fault detection, it is essential to determine a kernel representation as the dual expression of the image representation IG,s and the basis of residual generation in the residual subspace of finite sample signals. To this end, we now introduce the definition of finite-sample kernel representation. 
+
+Definition 3 Given the kernel-based model (27) and the associated finite sample input-output model (42), system 
+
+rK (k) = KG,s 
+
+" us(k)
+
+ys(k)
+
+#
+
+∈ Rθ , θ = sm − n (73) 
+
+is called finite-sample kernel representation, if 
+
+KG,s IG,s = 0 , rank (KG,s ) = sm − n. 
+
+Remark 5 . Hereafter, γ and θ are used to denote 
+
+γ = rank (IG,s ) = sp + n, (74) 
+
+θ = rank (KG,s ) = sm − n. (75) It is evident that the kernel representation (73) is a residual generator outputting the residual rK satisfying 
+
+rK (k) = KG,s IC,s rs+n(k − n)̸ = 0 as far as rs+n(k − n)̸ = 0 . Moreover, ∀R ∈ Rϕ×θ , ϕ ≤
+
+θ, rank (R) ≤ θ, 
+
+¯rK (k) = RK G,s IC,s rs+n(k − n)̸ = 0 , (76) which gives a parameterization of all finite-sample residual generators. As a result, in order to achieve a reliable fault detection, the kernel representation KG,s 
+
+(73) should satisfy the condition 
+
+KG,s IG,s = 0 , rank (KG,s IC,s ) = θ. (77) In terms of KG,s , the residual subspace is now defined. 
+
+Definition 4 Given the kernel-based model (27) and the associated finite sample kernel representation (73), the subspace RG,s ,
+
+RG,s =
+
+( " us(k)
+
+ys(k)
+
+#
+
+:
+
+" us(k)
+
+ys(k)
+
+#
+
+= KTG,s rK , r K ∈ Rθ
+
+)
+
+is called finite-sample residual subspace. 3.3 Kernel representation and parity matrix 
+
+On account of the parameterization of Ψ s described in Theorem 2, (77) holds if and only if for KG,s =
+
+h
+
+K1 K2
+
+i
+
+KG,s Ψs, 0 =
+
+h
+
+K2OsCn K1 + K2Ts,s (G) 0 K2
+
+i
+
+=
+
+h
+
+0 0 0 K2
+
+i
+
+=⇒ K1 = −K2Ts,s (G) ,K2Os = 0 , rank (K2) = sm − n. (78) 
+
+Theorem 4 Given the kernel-based model (27) and the finite-sample kernel representation 
+
+rK (k) = KG,s 
+
+" us(k)
+
+ys(k)
+
+#
+
+, (79) 
+
+the condition (77) is satisfied if and only if 
+
+KG,s = K2
+
+h
+
+−T s,s (G) I
+
+i
+
+(80) 12 with K2 satisfying (77). The dynamics of the kernel representation (79) is governd by 
+
+rK (k) = K2 ¯rs(k). (81) 
+
+Proof. It follows from (78) that KG,s subject to (80) is necessary and sufficient for the existence of (77). Since 
+
+rK (k) = KG,s Ψs, 0
+
+" ¯vs+n(k − n)¯rs+n(k − n)
+
+#
+
+,
+
+according to Theorem 2, for KG,s subject to (80) we have 
+
+KG,s Ψs, 0
+
+" ¯vs+n(k − n)¯rs+n(k − n)
+
+#
+
+= K2 ¯rs(k).
+
+The theorem is proven. We would like to call the reader’s attention to the condition (78) that is identical to the parity matrix condition (20). Furthermore, the kernel representation (79) is equivalent to the parity space residual generator (19). In fact, in (Ding et al., 2014) the data-driven kernel representation-based fault detection was introduced based on the parity space method. The above results give a proof of the kernel representation in a more general framework. 
+
+4 A data-driven fault detection scheme 
+
+4.1 Matrix perturbation theory-based problem set-up and theoretic basis 
+
+Suppose that system input-output data ( u(i), y (i)) , i ∈
+
+[k0 + 1 , k 0 + N ], k 0 ≥ n, s > n, are collected from the system (23)-(24) during fault-free operations and ordered into the input-output data matrix 
+
+TG,s =
+
+" Hs
+
+ u[k0+1: k0+N ]
+
+
+
+Hs
+
+ y[k0+1: k0+N ]
+
+#
+
+,
+
+where u is persistently exciting of order s + n, and N is sufficiently large, satisfying 
+
+N − s + 1 ≥ s (p + m) ⇐⇒ N ≥ s (p + m) + s − 1.
+
+According to Theorem 2, for kp = k0 − nTG,s =
+
+h
+
+IG,s IC,s 
+
+i " Hs+n
+
+ v[kp+1: kp+N ]
+
+
+
+Hs+n
+
+ r[kp+1: kp+N ]
+
+#
+
+. (82) On a practical assumption that 
+
+Hs+n
+
+ r[kp+1: kp+N ]
+
+ << Hs+n
+
+ v[kp+1: kp+N ]
+
+
+
+(83) the influence of r is addressed as a perturbation, which enables us to leverage matrix perturbation theory (Stewart & Sun, 1990) to explore data-driven fault detection issues. To this end, we introduce orthogonal projections onto a subspace in Rs(m+p)×(sp +n) and the Davis-Kahan theorem, which play a core role in our work. Let IG,s,n ,IG,s,n = IG,s 
+
+ ITG,s IG,s 
+
+−1/2 =⇒ ITG,s,n IG,s,n = I, 
+
+be the normalized image representation of IG,s . The op-erator PIG,s , PIG,s = IG,s,n ITG,s,n , defines an orthogonal projection that projects ( us(k), y s(k)) onto IG,s ,
+
+"ˆus(k)ˆys(k)
+
+#
+
+= PIG,s 
+
+"us(k)
+
+ys(k)
+
+#
+
+= IG,s,n ITG,s,n 
+
+"us(k)
+
+ys(k)
+
+#
+
+. (84) Next, do an SVD of the data matrix 1
+
+√N
+
+" Hs
+
+ u[k0+1: k0+N ]
+
+
+
+Hs
+
+ y[k0+1: k0+N ]
+
+#
+
+= U ΣV T , (85) and decompose U and Σ into 
+
+U =
+
+h
+
+U1 U2
+
+i
+
+, U 1 ∈ Rs(p+m)×(sp +n),
+
+Σ = diag (Σ 1, Σ2) , Σ1 = diag (σ1, · · · σsp +n) ,
+
+Σ2 = diag  σsp +n+1 , · · · , σ s(p+m)
+
+ , σ 1 ≥ · · · ≥ σs(p+m).
+
+On account of (82) and perturbation assumption (83), it is nature to consider U1 and U2 as approximations of the normalized image representation and its (orthogonal) complement, the normalized kernel representation, 
+
+U1 ≈ IG,s,n , U 2 = U ⊥ 
+
+> 1
+
+≈ I⊥ 
+
+> G,s,n
+
+=: KTG,s,n ,KG,s,n IG,s,n = 0 , K G,s,n KTG,s,n = I, KTG,s,n KG,s,n + IG,s,n ITG,s,n = I. (86) It is apparent that the approximation errors compromise fault detection performance. It is of essential importance to specify a tight bound of the approximation errors. In matrix perturbation theory, the Davis-Kahan theorem is widely applied to evaluating the influence of perturba-tions. We summarize the application of the Davis-Kahan theorem (Stewart & Sun, 1990) to our problem set-up in the following theorem. 
+
+Theorem 5 Consider perturbation problem (88). It holds 
+
+IG,s,n ITG,s,n − U1U T  
+
+> 12
+
+≤ ∥S2∥2
+
+λγ (S1) , (87) 
+
+where matrices S1, S 2 are defined by 
+
+1
+
+N TG,s T TG,s = S = S1 + S2, S 1 = IG,s Σv ITG,s , (88) 
+
+S2 = IG,s ˆΣvr ITC,s + IC,s ˆΣTvr ITG,s + IC,s ˆΣr ITC,s ,
+
+Σv = Hs+n
+
+ v[kp+1: kp+N ]
+
+ HTs+n
+
+ v[kp+1: kp+N ]
+
+
+
+N ,
+
+ˆΣr = Hs+n
+
+ r[kp+1: kp+N ]
+
+ HTs+n
+
+ r[kp+1: kp+N ]
+
+
+
+N ,
+
+13 ˆΣvr = Hs+n
+
+ v[kp+1: kp+N ]
+
+ HTs+n
+
+ r[kp+1: kp+N ]
+
+
+
+N ,
+
+and λi (S1) ≥ λi+1 (S1) , i = 1 , · · · , γ, λ i (S1) = 0 , i > γ, 
+
+are the eigenvalues of S1.
+
+Note that PIU1 = U1U T 
+
+> 1
+
+is an operator of orthogonal projection onto the subspace IU1 = Im ( U1) . Recall that 
+
+IG,s,n ITG,s,n − U1U T  
+
+> 12
+
+= PIU1 − P IG,s . (89) Here, PIU1 − P IG,s denotes the operator norm. Thus, inequality (87) gives a bound of the gap metric 
+
+δ (IU1 , IG,s ) = PIU1 − P IG,s that measures the variation of IG,s caused by the perturbation (Kato, 1995). Observe that 
+
+PIG,s − P IU1 = I − P IU1 − (I − I G,s ) = PIU2 − P I⊥
+
+> G,s
+
+,
+
+where PIU2 and PI⊥
+
+> G,s
+
+are operators of orthogonal projection onto IU2 = Im ( U2) and I⊥
+
+> G,s
+
+, respectively. Hence, 
+
+PIU2 − P I⊥
+
+> G,s
+
+= PIU1 − P IG,s ≤ ∥S2∥2
+
+λγ (S1) . (90) Now, we are in the position to formulate the data-driven fault detection to be addressed in the sequel. To begin with, we introduce the following definition. 
+
+Definition 5 Given the data matrix TG,s and the SVD (85), the orthogonal projections defined by the operators 
+
+PIU1 and PI⊥
+
+> U1
+
+, PI⊥
+
+> U1
+
+= U2U T 
+
+> 2
+
+= I − U1U T 
+
+> 1
+
+=: PIU2 , are called data-driven orthogonal projections onto the image subspace IG,s and residual subspace I⊥
+
+> G,s
+
+, respectively. 
+
+The data-driven fault detection problem will be solved in two steps: (i) residual generation by means of a data-driven orthogonal projection, (ii) residual evaluation and threshold setting. Below, we present a fault detection approach. 
+
+4.2 Orthogonal projection-based fault detection 
+
+As showcased by (88), the data subspace IU1 comprises the data collected during fault-free system operations. Let PIU1 be the operator of an orthogonal projection onto IU1 , the projection-based residual generator is given by 
+
+rIU1 (k) =  I − P IU1
+
+ "us(k)
+
+ys(k)
+
+#
+
+=
+
+"us(k)
+
+ys(k)
+
+#
+
+−
+
+"ˆus(k)ˆys(k)
+
+#
+
+.
+
+(91) Recall (86) and the system (42). It turns out 
+
+rIU1 (k) = U2U T
+
+> 2
+
+"us(k)
+
+ys(k)
+
+#
+
+≈ KTG,s,n KG,s,n 
+
+h
+
+IG,s IC,s 
+
+i "vs+n(k − n)
+
+rs+n(k − n)
+
+#
+
+= KTG,s,n KG,s,n IC,s rs+n(k − n).
+
+Noticing that rIU1 (k) = U T
+
+> 2
+
+"us(k)
+
+ys(k)
+
+#
+
+, for the detection purpose, it is equivalent to construct a kernel-based residual generator 
+
+rU2 (k) = U T
+
+> 2
+
+"us(k)
+
+ys(k)
+
+#
+
+(92) = KG,s,n IC,s rs+n(k − n) + ∆ rIU2
+
+∈ Rθ , (93) where ∆ rIU2
+
+addresses the possible error caused by 
+
+KG,s,n − U2. On this basis, the corresponding data-driven fault detection problem is formulated as: given the residual matrix RU2[k0+1: k0+N ] = U T 
+
+> 2
+
+TG,s and writing 
+
+rU2 (k) − ∆rIU2
+
+= dU2 (k) + fU2 (k), (94) 
+
+dU2 (k) = KG,s,n IC,s rs+n(k − n), (95) with fU2 (k) representing the influence of the system faults on the residual vector rU2 , find a residual evaluation function and a threshold setting that deliver an optimal fault detection. We first consider the case that r(k) represents an ℓ2-bounded unknown signal. Impose Σ rU2 = RU2[k0+1: k0+N ]RTU2[k0+1: k0+N ]. On the assumption that 
+
+rank  Hs+n
+
+ r[kp+1: kp+N ]
+
+ = ( s + n)m, 
+
+the residual evaluation function is defined by 
+
+J = ¯ rU2 (k)T Σ−1 
+
+> rU2
+
+¯rU2 (k), ¯rU2 (k) = rU2 (k) − ˆ∆rIU2
+
+with ˆ∆rIU2
+
+as an estimate of ∆ rIU2
+
+. The threshold setting problem is now formulated as finding ˆ∆rIU2
+
+and 
+
+Jth so that 
+
+( J ≤ Jth , fault-free operations 
+
+J > J th , faulty. (96) The above detection problem is in fact a data-driven realization of the so-called unified solution (Ding, 2008). To solve it, we propose to apply support vector data description (SVDD) method. SVDD is a well-established data-driven algorithm, originally developed 14 for solving one-class classification problems (Schoelkopf et al., 2001). In the SVDD framework, our problem is formulated as follows. Given the data set, rU2 (k) ∈
+
+Rθ , k = k0 + i, i = 1 , · · · , N − s + 1 , find ˆ∆rIU2
+
+∈
+
+Rθ , J th ∈ R and ξi ∈ R, i = 1 , · · · , N − s + 1 , that solve the minimization problem: min  
+
+> Jth ,ˆ∆rIU2
+> ,ξ i
+
+J2 
+
+> th
+
++ C 
+
+> N−s+1
+
+X
+
+> i=1
+
+ξi
+
+!
+
+(97) s.t. ∀ ∥ ¯rU2 (k0 + i)∥2Σ−1
+
+> rU2
+
+≤ J2 
+
+> th
+
++ ξi, ξ i ≥ 0,
+
+where C ≥ 0 is a design parameter, i = 1 , · · · , N − s + 1 ,
+
+and ξi are slack variables representing tolerable outliers (false alarms). There exist well-established algorithms to solve the optimization problem (97). The reader is referred to (Schoelkopf et al., 2001) for details. Next, assume that the uncertainties in the system (23)-(24) are process and measurement noises modelled by (25)-(26), the residual r(k) ∼ N (0 , Σr ) is white noise series subject to ( ?? ). Hence, for sufficiently large N, we have the approximations ˆΣr ≈ Σrs+n = Ers+n (k − n) rTs+n (k − n) ,
+
+ˆΣvr ≈ Σvs+nrs+n = Evs+n (k − n) rTs+n (k − n) = 0 ,
+
+=⇒ S1 = IG,s Σv ITG,s , S 2 = IC,s ˆΣr ITC,s . (98) Consequently, the dynamics of the residual generator (92) is described by 
+
+rU2 (k) = U T 
+
+> 2
+
+Ψs
+
+" vs+n (k − n)
+
+rs+n (k − n)
+
+#
+
+∼ N (∆ rIU2
+
+, ΣrU2 ).
+
+Taking into account of faults, we have 
+
+rU2 (k) = ∆ rIU2
+
++ εU2 (k) + fU2 (k) ∈ Rsm −n, (99) where εU2 (k) ∼ N (0 , ˆΣrU2 ). If ∆ rIU2
+
+is sufficiently small or a quasi-stationary signal, the detection problem (99) is well solved using the χ2-test statistic J,
+
+J = ¯ rU2 (k)T Σ−1 
+
+> rU2
+
+¯rU2 (k), (100) ˆ∆rIU2
+
+= 1
+
+N
+
+> N
+
+X
+
+> k=1
+
+rU2 (k), J th = χ2 
+
+> α
+
+(θ)) (101) for a false alarm rate α (Ding, 2008). Otherwise, an upper-bound of ∆rIU2
+
+is estimated and the corresponding detection problem is solved by means of the well-established generalized likelihood ratio (GLR) testing. For details, the reader is referred to (Basseville & Nikiforov, 1993). 
+
+Projection-based data-driven fault detection 
+
+(1) Collect input-output data and build the data matrix TG,s ;(2) Perform the SVD (85) with output U2;(3) Construct the residual generator (92); (4) Generate rU2 (k) and build the data matrices 
+
+RU2[k0+1: k0+N ], ΣrU2 ;(5) Run SVDD algorithm to determine 
+
+ ˆ∆rIU2
+
+, J th 
+
+
+
+or alternatively compute 
+
+ ˆ∆rIU2
+
+, J th 
+
+
+
+according to (101). 
+
+4.3 Detection performance analysis 
+
+Performance of a fault detection system is mainly characterized by false alarm rate (FAR) and miss detection rate (MDR). We now analyze the impact of the gaps between IG,s and IU1 as well as between RG,s and 
+
+IU2 on these two performance indices, which are resulted from the perturbation. As described in the previous subsection, the perturbation yields 
+
+δ (IU1 , IG,s ) = PIU1 − P IG,s ,δ (IU2 , RG,s ) = PIU2 − P I⊥
+
+> G,s
+
+.
+
+It is a well-known result that gap metric can be computed by solving a model-matching problem (MMP) (Kato, 1995). Applying it to our case gives 
+
+δ (IU1 , IG,s ) = min 
+
+> Q1
+
+∥IG,s,n − U1Q1∥2 ,δ (IU2 , RG,s ) = min 
+
+> Q2
+
+KTG,s,n − U2Q2 2 .
+
+It is straightforward that 
+
+∥IG,s,n − U1Q1∥2 =
+
+" U T
+
+> 1
+
+U T
+
+> 2
+
+#
+
+(IG,s,n − U1Q1)
+
+> 2
+
+=
+
+" U T 
+
+> 1
+
+IG,s,n − Q1
+
+U T 
+
+> 2
+
+IG,s,n 
+
+#
+
+> 2
+
+=⇒
+
+δ (IU1 , IG,s ) = U T 
+
+> 2
+
+IG,s,n 2 = U2U T 
+
+> 2
+
+IG,s,n 2 , (102) 
+
+KTG,s,n − U2Q2 2 =
+
+" U T
+
+> 1
+
+U T
+
+> 2
+
+#  KTG,s,n − U2Q2
+
+
+
+> 2
+
+=
+
+" U T 
+
+> 1
+
+KTG,s,n 
+
+U T 
+
+> 2
+
+KTG,s.n − Q2
+
+#
+
+> 2
+
+=⇒
+
+δ (IU2 , RG,s ) = U1U T 
+
+> 1
+
+KTG,s,n 2 . (103) Equations (102)-(103) mean that the gap between 
+
+IU1 and IG,s is induced by the projection of the system image subspace onto the data-driven residual subspace, while the gap between IU2 and RG,s is the result of 15 projecting the system residual subspace onto the data-driven image subspace. In the context of fault detection, this implies that (i) a larger gap metric between IU1 and 
+
+IG,s leads to a higher FAR, (ii) a larger gap metric between IU2 and RG,s results in a higher MDR. It follows from (87) in Theorem 5 that the ratio ∥S2∥2 /λ γ (S1)dictates the value of the gap metric. Consequently, it quantifies the fault detection performance. Noticing that both S1, S 2 cannot be computed without model knowledge, an empirical bound on the assumption of (83) is proposed in order to estimate the possible FAR and MDR. To this end, λγ (S1) is replaced by λγ (S) = 
+
+σ2
+
+> γ
+
+ TG,s 
+
+> √N
+
+
+
+. Moreover, observe that 
+
+S2 = S − S1 ⇐⇒ S2U = U Σ2 − S1U. 
+
+Substituting S1 by U1Σ21U T 
+
+> 1
+
+leads to 
+
+S2U ≈ U Σ2 − U1Σ21
+
+h
+
+I 0
+
+i
+
+=
+
+h
+
+0 U2Σ22
+
+i
+
+.
+
+Hence, ∥S2∥2 is replaced by λγ+1 (S) , attributed to the relation 
+
+∥S2∥2 ≤ ∥ S2U ∥2 ≈ λmax 
+
+ U2Σ22
+
+ ≤ λγ+1 (S) ,
+
+which finally gives an empirical bound of 
+
+∥S2∥2
+
+λγ (S1) ≈ λγ+1 (S)
+
+λγ (S) =
+
+σ2
+
+> γ+1
+
+ TG,s 
+
+> √N
+
+
+
+σ2
+
+> γ
+
+ TG,s 
+
+> √N
+
+ . (104) 
+
+4.4 A summary and comparison 
+
+At the end of this section, we briefly summarize the proposed data-driven projection-based detection approach from a substitute aspect and, based on it, compare it with the existing data-driven detection method (Ding, 2014). The core idea behind the proposed detection approach is to determine the system image representation IG,s for the given data matrix TG,s and, aided by it, to generate residual by projecting the data onto the image/residual subspace. Mathematically, this is a low-rank approximation problem. Specifically for our application, it is formulated as min 
+
+> IG,s
+
+TG,s 
+
+√N − IG,s Hs+n
+
+ v[kp+1: kp+N ]
+
+
+
+> 2
+
+(105) s.t. rank (IG,s ) = γ = sp + n. 
+
+According to Eckart-Young-Mirsky theorem (Eckart & Young, 1936), the SVD (85) is the analytical solution of (105), namely the leading left singular subspace of TG,s  
+
+> √N
+
+gives the optimal rank-γ approximation of Im( IG,s ). Denoted by (ˆ us(k), ˆys(k)) the optimal estimate in the data-driven image subspace, residual rU2 (k) is generated based on rU1 (k) (refer to (91)-(92)). On the other hand, the existing data-driven optimal residual generation (Ding, 2014) follows a different scheme, namely residual generation is based an optimal output estimation according to (12). In (Ding, 2014), by means of a RQ-decomposition of the input-output data matrix ,
+
+" TG,s +ρ
+
+Hs
+
+ y[k0+1: k0+N ]
+
+#
+
+=
+
+" R11 0
+
+R21 R12 
+
+# " Q1
+
+Q2
+
+#
+
+,TG,s +ρ =
+
+
+
+Hρ
+
+ u[kρ+1: kρ+N ]
+
+
+
+Hρ
+
+ y[kρ+1: kρ+N ]
+
+
+
+Hs
+
+ u[k0+1: k0+N ]
+
+ ,
+
+with kρ = k0 − ρ, ρ > n, an optimal output estimation is achieved in the least spares (LS) sense, min 
+
+> Φs
+
+Hs
+
+ y[k0+1: k0+N ]
+
+ − ΦsTG,s +ρ . (106) In the above equation, 
+
+Ry,s =
+
+h
+
+−Φs I
+
+i " TG,s +ρ
+
+Hs
+
+ y[k0+1: k0+N ]
+
+#
+
+builds the output residual matrix Ry,s , whose corre-sponding vectorized finite-sample model 
+
+ry,s (k) = 
+
+h
+
+−Φs I
+
+i
+
+uρ(k − ρ)
+
+yρ(k − ρ)
+
+us(k)
+
+
+
+ys(k)
+
+
+
+is indeed the finite-sample kernel representation 
+
+ry,s (k) = 
+
+h
+
+− ˆNs ˆMs
+
+i " us+ρ(k − ρ)
+
+ys+ρ(k − ρ)
+
+#
+
+, (107) a dual form of the image representation (29), which can be derived from the kernel-based model (13) with the state equation (11). It is worth mentioning that an optimal estimation of Ry,s in the sense of (106) was reported in (Wang et al., 2025). Comparing (105) and (106) reveals the crucial difference between these two residual generation schemes. It is the optimal estimation in two different subspace, one in the input-output data subspace ( us(k), y s(k)), while the other one exclusively in the output subspace ys(k). As illustrated in (Ding et al., 2026), a residual in the former case is capable of handling (multiplicative) uncertainties, including faults, and thus results in higher fault detectability. In contrast, the output residual works efficiently to deal with systems with (additive) unknown inputs. It is noteworthy that dim ( rU2 ) = ( s + ρ)m − n > sm = dim( ry,s ),
+
+a further aspect that illustrates the higher fault de-tectability of the projection-based method. 16 5 Conclusions 
+
+The objective of this paper is twofold: (i) to introduce the concepts of image and kernel representations of finite-sample signals of LTI systems and, associated to them, image and residual subspaces of finite-sample signals, on this basis, (ii) to develop a data-driven fault detection approach. Proceeding from the coprime factorizations of LTI systems, the finite-sample image representation has been derived, which leads to the defi-nition of image subspace IG,s . The image representation describes the nominal system behavior, whose data-driven version is verifiably equivalent to TG,s , implying 
+
+IG,s = Im ( TG,s ) . This study provides an alternative proof of the fundamental lemma, highlights the role of the latent variable, and showcases a meaningful aspect behind the excitation condition described in the fundamental lemma. On the basis of the kernel-based model (27) and the Bezout identity-induced input-output model (10), a complete finite-sample model (42) has been established. It describes the system behavior (us(k), y s(k)) under the existence of uncertainties. The system behavior (42) is fully characterized by the latent variable pair (vs+n, r s+n) , and its data-driven version extends the fundamental lemma. In this regard, finite-sample kernel representation and residual subspace have been introduced. It is remarkable that the finite-sample kernel representation and residual subspace differ from their counterpart induced by the coprime factorization. Particularly, the statement (71) in Theorem 3 underlines the difference between the kernel representation (11)-(12) satisfying (63) and the finite-sample kernel representation (79). It has been proven that the latter is equivalent to a parity-based residual generator. Relying on the achieved theoretical results, a data-driven projection-based fault detection approach has been proposed. This detection approach comprises three steps, (i) a low-rank matrix approximation of the normalized image representation IG,s,n by means of an SVD of the data matrix TG,s , (ii) an orthogonal projection onto the approximated image subspace and, based on it, generation of projection-based residual vector rU2 (k), and (iii) threshold setting either by the SVDD algorithm for the ℓ2-bounded residual or using χ2
+
+(T 2 or GLR) statistic testing for the residual in the form of an innovation series. Further effort has been dedicated to the analysis of the detection performance of the proposed data-driven detection system using the Davis-Kahan theorem in the framework of matrix perturbation theory. In this regard, gap metric-based estimation of FAR and MDR has been explored. As a summary of our work in comparison with the existing data-driven fault detection methods, the principal difference between the proposed and the existing methods has been underlined. The proposed one is an orthogonal projection-based optimal estimation of the nominal behavior in the input-output data space ( us(k), y s(k)) , and the existing one is based on an LS-estimation of the output ys(k).
+
+In our recent work, a unified framework of control and detection based on the Bezout identity and the mapping (13) between the input-output ( u, y ) and the latent variable pair ( v, r ) is established. Inspired by this work, analogous forms of the Bezout identity and the mapping (13) will be explored in the finite-sample subspaces and system representations. Their potential application to data-driven feedback control would be the objective of these research endeavours. 
+
+References 
+
+Basseville, M., & Nikiforov, I. (1993). Detection of Abrupt Changes - Theory and Application . New Jersey: Prentice-Hall. Chen, H., Liu, Z., & Huang, B. (2023). Data-driven fault detection for lipschitz nonlinear systems: From open to closed-loop systems. Automatica , 155 , 111161. Ding, S. X. (2008). Model-Based Fault Diagnosis Techniques - Design Schemes, Algorithms, and Tools .Springer-Verlag. Ding, S. X. (2014). Data-driven design of monitoring and diagnosis systems for dynamic processes: A review of subspace technique based schemes and some recent results. Journal of Process Control , 24 , 431–449. Ding, S. X. (2020). Advanced Methods for Fault Diagnosis and Fault-tolerant Control . Berlin: Springer-Verlag. Ding, S. X., Li, L., & Liu, T. (2026). An alternative paradigm of fault diagnosis in dynamic systems: orthogonal projection-based methods. Automatica ,
+
+183 , 112637. Ding, S. X., Yang, Y., Zhang, Y., & Li, L. (2014). Data-driven realization of kernel and image representations and their application to fault detection and control system design. Automatica , 50 , 2615–2623. Doerfler, F., Coulson, J., & Markovsky, I. (2023). Bridging direct and indirect data-driven control formulations via regularizations and relaxations. 
+
+IEEE Transactions on Automatic Control , 68 , 883– 897. Eckart, C., & Young, G. (1936). The approximation of one matrix by another of lower rank. Psychometrika ,
+
+1 , 211–218. Huang, B., & Kadali, R. (2008). Dynamic Modelling, Predictive Control and Performance Monitoring, a Data-Driven Subspace Approach . London: Springer-Verlag. Huo, M., Luo, H., Cheng, C., Li, K., Yin, S., Kaynak, O., Zhang, J., & Tang, D. (2023). Subspace-aided sensor fault diagnosis and compensation for industrial systems. IEEE Transactions on Industrial Electronics , 70 , 9474–9482. Kato, T. (1995). Perturbation Theory for Linear Operators . Berlin: Springer-Verlag. 17 Markovsky, I., & D¨ orfler, F. (2021). Behavioral systems theory in data-driven analysis, signal processing, and control. Annual Reviews in Control , 52 , 42–64. Markovsky, I., Muix´ ı, A., Zlotnik, S., & Diez, P. (2026). A behavioral approach to direct data-driven fault detection. Mechanical Systems and Signal Processing ,
+
+245 , 113802. Patton, R. J., Frank, P. M., & (Eds.), R. N. C. (2000). 
+
+Issues of Fault Diagnosis for Dynamic Systems .London: Springer. Polderman, J. W., & Willens, J. C. (1998). Intro-duction to mathematical systems theory: a behavioral approach . Springer. Schoelkopf, B., Platt, J., Shawe-Taylor, J., Smola, A., & Williamson, R. (2001). Estimating the support of a high-dimensional distribution. Neural Computation ,
+
+13 , 1443–1471. Sheikhi, M. A., Gleizer, G. d. A., Keviczky, T., & Esfahani, P. M. (2025). Fault diagnosis in dynamical systems: Geometric interpretation and tractable algorithms. Annual Review of Control, Robotics, and Autonomous Systems , . Stewart, G. W., & Sun, J.-G. (1990). Matrix Perturbation Theory . San Diego, CA: Academic Press. Vinnicombe, G. (2000). Uncertainty and Feedback: H∞
+
+Loop-Shaping and the ν Gap Metric . World Scientific. van Waarde, H. J., De Persis, C., Camlibel, M. K., & Tesi, P. (2020a). Willems’ fundamental lemma for state-space systems and its extension to multiple datasets. IEEE Control Systems Letters , 4 , 602–607. van Waarde, H. J., Eising, J., Trentelman, H. L., & Camlibel, M. K. (2020b). Data informativity: A new perspective on data-driven analysis and control. IEEE Transactions on Automatic Control , 65 , 4753–4768. Wang, J., Zhou, J., & Chen, X. (2021). Data-Driven Fault Detection and Reasoning for Industrial Monitoring . Springer. Wang, Y., You, K., Huang, D., & Shang, C. (2025). Data-driven output prediction and control of stochastic systems: An innovation-based approach. Automatica ,
+
+171 , 111897. Willems, J. C., Rapisarda, P., Markovsky, I., & De Moor, B. L. (2005). A note on persistency of excitation. 
+
+Systems & Control Letters , 54 , 325–329. Willsky, A. S. (1976). A survey of design methods for failure detection in dynamic systems. Automatica , 12 ,601–611. Zhao, S., Yang, H., Kareck, T. L., Khan, F., & Wang, Q. (2026). Data-driven fault detection and diagnosis in industrial process systems: A systematic review and perspective. Reliability Engineering & System Safety ,
+
+270 , 112159. 18

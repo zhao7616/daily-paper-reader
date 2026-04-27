@@ -1,0 +1,54 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.17277v1/fig-001.webp",
+      "caption": "Figure 4. R2NN-enabled analog tactile perception. (a) Conceptual application of the R2NN for tactile Braille reading. A robotic prosthesis equipped with the system assists users with concurrent visual and manual impairments, utilizing a customized frequency-modulated texture-encoding strategy for Braille characters. (b) Schematic of the end-to-end tactile signal acquisition and analog processing pipeline. (c) Photograph of the integrated R2NN hardware device. (d) Experimental setup for evaluating the R2NN-based tactile perception system. (e) Recorded real-time waveforms during the continuous processing of the Braille sequence “USTC”. The traces display the raw dynamic tactile input, the analog R2NN outputs, and the final logic-level classification signals. (f) Output tactile feedback, demonstrating the specific vibrational cues generated upon the successful recognition of the character “T”.",
+      "page": 21,
+      "index": 1,
+      "width": 1021,
+      "height": 904
+    },
+    {
+      "url": "assets/figures/arxiv/2604.17277v1/fig-002.webp",
+      "caption": "Figure 5. Real-time speech recognition and robotic control via the R2NN. (a) Schematic of the R2NN-driven speech recognition and actuation system. (b) Frequency alignment between the average spectra of the spoken commands (“Hou”/Backward, “Qian”/Forward, “Ting”/Stop; dashed lines) and the engineered transmission profiles of the R2NN (solid lines). (c) Confusion matrix demonstrating the experimental inference accuracy for speech classification. (d) Recorded dynamic waveforms of the raw input speech signals alongside the corresponding analog R2NN outputs and logic-level classification signals. (e) Successful execution of motion commands by the humanoid robot according to the R2NN’s recognition outputs.",
+      "page": 22,
+      "index": 2,
+      "width": 950,
+      "height": 800
+    },
+    {
+      "url": "assets/figures/arxiv/2604.17277v1/fig-003.webp",
+      "caption": "Figure 1. Concept of the metacircuit-based R2NN. (a) Equivalence between a mechanical local resonator and its electrical counterpart under the conventional admittance-based mechanical-electrical analogy (MEA). (b) Reformulated MEA implemented via a generalized impedance converter (GIC), yielding an experimentally achievable FDNR-based local resonator. (c) Mapping relations among a digital RNN, the proposed metacircuit, and a mechanical metamaterial. The schematic symbol Deff denotes the effective FDNR-based local resonator. (d) The metacircuit-based R2NN performing direct analog inference on diverse dynamic physical signals for downstream applications, including tactile perception, speech recognition, and condition monitoring.",
+      "page": 18,
+      "index": 3,
+      "width": 1021,
+      "height": 754
+    },
+    {
+      "url": "assets/figures/arxiv/2604.17277v1/fig-004.webp",
+      "caption": "Figure 6. Continuous condition monitoring of a quadrotor drone using the R2NN. (a) Schematic illustrating the three defined operational states of the quadrotor drone: normal operation, single-blade stall, and four-blade stall. (b) Spectral alignment between the average acquired vibration signals for each condition (dashed lines) and the engineered transmission profiles of the R2NN (solid lines). (c) Photograph of the experimental setup used to verify real-time, long-duration drone condition monitoring. (d) Continuous real-time waveforms tracking the input vibration signals, analog R2NN outputs, and resulting logic-level classifications during state transitions. (e) Visual status indicators on the integrated R2NN device, instantaneously reflecting the diagnosed operational condition of the drone.",
+      "page": 23,
+      "index": 4,
+      "width": 967,
+      "height": 906
+    },
+    {
+      "url": "assets/figures/arxiv/2604.17277v1/fig-005.webp",
+      "caption": "Figure 2. Operational principle and training dynamics of the R2NN. (a) Architecture of the implemented 5×5 locally resonant metacircuit, including the schematic symbol and circuit realization of a FDNR-based local resonator. (b) Measured amplitude-frequency responses for the effective parameters Deff and Zeff, and the amplification factor  of a single unit cell. (c) Spatial distribution of the local resonance frequencies across the unit cells after 3 and 30 training epochs. The current injection site is marked by a star, and output cells are indicated by circled numbers. (d) Evolution of the metacircuit’s impedance landscape under a 70 Hz excitation at epoch 3 versus epoch 30. Blue and green lines denote positive and negative resistances, respectively, with logarithmically scaled line widths representing absolute values. Grounded nodes are marked by inverted triangles, and output cell impedances are highlighted by dashed boxes. (e) Current routing within the metacircuit under a 70 Hz excitation at epoch 3 and epoch 30. Blue and green indicate positive and negative flow directions, with arrows showing directionality and logarithmically scaled line widths representing current magnitude. (f) Optimized current distributions under 30 Hz and 50 Hz excitations at epoch 30, demonstrating frequency-selective spatial routing.",
+      "page": 19,
+      "index": 5,
+      "width": 1021,
+      "height": 869
+    },
+    {
+      "url": "assets/figures/arxiv/2604.17277v1/fig-006.webp",
+      "caption": "Figure 3. System architecture and inference performance of the R2NN hardware. (a) Schematic of the complete end-to-end R2NN system architecture. (b) Comparison of simulated and experimentally measured transmission spectra of the metacircuit. (c) Real-time waveforms of the input signals from three classes, accompanied by their corresponding analog R2NN outputs, and logic-level outputs. (d) Time-integrated energy measured at each R2NN output probe, alongside the normalized energy profile representing the predicted probability distribution. (e) Confusion matrix detailing the experimental inference accuracy across all tested signal classes.",
+      "page": 20,
+      "index": 6,
+      "width": 1021,
+      "height": 913
+    }
+  ]
+}

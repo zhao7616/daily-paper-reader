@@ -1,0 +1,699 @@
+Title: Multi-stream Quickest Change Detection: Foundations and Recent Advances
+
+URL Source: https://arxiv.org/pdf/2604.18008v1
+
+Published Time: Tue, 21 Apr 2026 02:57:16 GMT
+
+Number of Pages: 25
+
+Markdown Content:
+# Multi-stream Quickest Change Detection: Foundations and Recent Advances 
+
+Topi Halme 1 and Visa Koivunen 11Aalto University, Finland 
+
+{topi.halme, visa.koivunen }@aalto.fi 
+
+April 2026 
+
+Abstract 
+
+This paper provides an overview of recent developments in quickest change detection (QCD) for high-dimensional multi-sensor systems, with an emphasis on settings involving structural constraints and limited sensing resources. Classical QCD methodologies, while well understood in low-dimensional and fully observed regimes, face significant challenges when extended to modern applications characterized by large-scale data, constrained sam-pling or communication, and heterogeneous signal structures. We review key approaches for handling high dimensionality, including methods that exploit sparsity, and other forms of signal heterogeneity. Additionally, we discuss sampling constraints, where observations must be selected or acquired sequentially under resource limitations. Multi-stream ap-plications can require making multiple detections, for example when detecting changes separately in different streams. The underlying assumptions on probability models, the types of changes taking place, commonly used decision-making criteria, performance in-dices, and error types are described. We also briefly discuss the application of machine learning in cases where the underlying probability models are not known or there is a need to select which sensors should monitor the phenomena because of the large scale of the system. 
+
+1
+
+> arXiv:2604.18008v1 [math.ST] 20 Apr 2026
+
+# 1 Introduction 
+
+In many modern applications, a fundamental problem is detecting and localizing rapid changes, anomalies or adversarial events in monitored processes or phenomena. Multiple data streams may be monitored simultaneously by using multiple devices or sensors in dis-tinct locations. Detecting a change in the statistical properties of a monitored process as quickly as possible is known as a quickest change detection (QCD) problem [1, 2]. The gen-eral objective in a QCD problem is to construct procedures that detect the change with as minimal delay as possible, while controlling the rate of false alarms. A false positive is con-sidered to occur when one prematurely makes a decision that a change has taken place before it actually happened. Importantly, the inference must be done in real time, as in a variety of important applications the data is streaming, dynamic and generated sequentially. Historically, the change detection problem was first studied in the context of industrial quality control during the 1920s and 1930s. The first algorithms are due to Shewhart [3, 4] and Page [5]. Shewhart proposed a scheme where an alarm is raised the first time an observation (or a function of it) falls outside prespecified limits. As such, the decision to stop or continue is only based on the most recent data point and does not utilize previous observations. The resulting detection rule is easy to implement, but the suboptimal use of all available data may make the detection of small changes very slow. Page [5] suggested using moving averages or cumulative sums of past statistics for more efficient detection. The algorithms of Shewhart and Page were not motivated by rigorous theoretical analysis, but by easy implementation and reasonable practical performance in quality control tasks. The first optimality considerations appeared in the 1950s and 60s after Wald’s pioneering work on sequential analysis [6]. In a Bayesian context, the first optimal algorithms and theory are due to Shiryaev in a series of works in the 1960s [7, 8]. Optimality in a non-Bayesian, or minimax, sense was first studied by Lorden in 1971 [9]. Since then, the general sequential change detection problem has been extended to many directions relevant to modern applications, including non-i.i.d. data models, uncertainty in the pre- and/or post-change distributions, high-dimensional problems, detection under sampling constraints, and decentralized systems, among others. Extensive general treatments of quickest change detection can be found in e.g. the books by Hadjiliadis and Poor [1] and Tartakovsky et al. [2]. In contemporary applications of QCD algorithms, a defining characteristic is a large number of data streams that must be monitored simultaneously in real time. A large number of devices equipped with sensors and communications capability may be observing streaming data continuously, for example smartphones, smart buildings, distributed radars and wireless base-stations, weather stations, seismic and environment monitoring, the Internet of Things, and sensors monitoring the state of our infrastructure (power grid, roads and bridges) to name a few. Depending on the application, the task may be to detect changes in individual streams separately. Alternatively, the goal may be to detect a single change that affects one or more of the streams simultaneously or with a small delay due to the physics of the phenomena, such as radio wave propagation. In both cases, the large number of streams poses additional, but different, difficulties and opportunities. In particular, this overview article highlights three central challenges that arise specifically in the multi-stream settings, and discusses solutions proposed in the literature. The challenges are: 1. Changes with high-dimensional unknown parameters: In practical applications 2of sequential change detection, the distribution of the data after the change is usually not exactly known. Instead, the post-change distribution of the data may belong to a family of distributions that depends on an unknown parameter vector θ. For example, each component of θ could represent the post-change mean parameter in different data streams, or θ could denote the indices of sensors that have been affected by the change. If the number of streams is large, estimating θ accurately becomes increasingly difficult, which in turn makes detecting a change more challengin. 2. Adaptive sampling under constraints: When the number of sensors is large, it is often not feasible to receive data from all sensors at all times due to e.g. power and bandwidth constraints. Naturally, a tradeoff exists between the proportion of data observed and the ensuing detection delay. However, if the observer, such as a common fusion center, can adaptively choose which sensors it wants to receive observations from at a given time instance, the impact of reduced communication detection efficiency can be mitigated. Designing sampling policies that most effectively sample the sensors specifically for change detection purposes is therefore an important topic with lots of recent and ongoing research. 3. Adjusting for multiple comparisons: In many applications changes can happen at different times at different sensors, leading to many individual detections. In these cases, conventional QCD performance metrics need to be adjusted to take into account the simultaneous tests. Multiple Hypothesis Testing (MHT) provides a framework for controlling the error rates in that setting. This paper presents a brief overview of underlying models and methods in multi-stream QCD. The underlying assumptions on probability models, the types of changes taking place, commonly used decision-making criteria, performance indices, and error types are described. We focus on large-scale settings where the number of streams and the dimension of the probability model parameter vectors may be large. We will also briefly discuss the application of machine learning in cases where the underlying probability models are not known or there is a need to select which sensors should monitor the phenomena because of the large scale of the system. We will describe some timely and emerging applications of multi-stream QCD. 
+
+Notation. Time is indexed by n ∈ N. In the single-stream setting, X1, X 2, . . . denotes the observed data sequence, while in the multi-stream setting Xn = [ X(1)  
+
+> n
+
+, . . . , X (K) 
+
+> n
+
+] denotes the 
+
+K-dimensional observation vector at time n, where K is the number of streams or sensors. The change-point is denoted by ν, and in settings with streamwise changes ν(k) denotes the change-point in stream k. Expectations and probabilities when change happens at time ν
+
+are denoted by Eν and Pν , respectively, while E∞ and P∞ correspond to the no-change set-ting. When the post-change model depends on an unknown parameter θ, the corresponding expectation is denoted by Eθ 
+
+> ν
+
+. Pre- and post-change distributions are denoted by f0 and f1
+
+in the simple setting, and more generally by f (· | θ) for a parametric family. 
+
+# 2 Quickest change detection: basic fundamentals 
+
+In this section, we briefly introduce the standard QCD problem in the single-stream i.i.d. set-ting. The objective is to detect an abrupt change, if one occurs, in the underlying probability 3model of a data sequence X1, X 2, . . . as quickly as possible. Initially, the data X1, . . . , X ν−1
+
+is assumed to be generated according to a probability density f0 which usually represents a normal operational state of the system. A common example is that the data observed by a sensor contains Gaussian noise only. At an unknown time ν, the data distribution changes to some other distribution f1, so that Xν , X ν+1 , . . . ∼ f1.A change detection procedure is defined by a stopping time random variable T which indicates the time the sampling is stopped and a change is declared. 
+
+Definition 1 (Stopping time) . Let Fn = σ(X1, . . . , X n) denote the sigma-algebra generated by the first n observations. A random variable T is a stopping time with respect to a sequence 
+
+X1, X 2, . . . if for each n, the event {T = n} ∈ F n. Equivalently, the event {T = n} is a function of only (X1, . . . , X n)A central modeling choice is whether the change-point ν is considered to be a random vari-able with a prior distribution, or an unknown deterministic quantity. The former yields the Bayesian approach, while the latter corresponds to a non-Bayesian, or minimax, framework. The two paradigms are introduced next. 
+
+2.1 Classical non-Bayesian objectives 
+
+When ν is unknown, the usual QCD objective is to minimize some notion of average detection delay (ADD) while maintaining the average run length (ARL) to false alarm above a tolerable level γ. The ARL to false alarm is defined as 
+
+ARL (T ) = E∞(T ), (1) meaning that when no change occurs, the constraint ARL (T ) ≥ γ implies that the test should take at least γ samples on average before (false positive) detection. In other words, it is the expected number of observations to an alarm assuming that there is no change. Average detection delay is usually measured in the worst-case over values of ν. Lorden [9] proposed a “worst-worst-case” average detection delay (WADD) criterion, defined as 
+
+WADD (T ) = sup 
+
+> ν≥1
+
+ess sup Eν [( T − ν + 1) +|F ν−1], (2) where a supremum is first taken over all possible realizations of pre-change data Fν−1, and then all possible values of the change point. This leads to the following optimization problem minimize WADD (T ) subject to ARL (T ) ≥ γ. (3) In an alternate approach, Pollak [10] suggested taking the average instead of the supremum over all possible pre-change observations. He proposed using conditional average detection delay (CADD), the expected number of samples needed to detect the change after it occurs as a criterion: 
+
+CADD (T ) = sup 
+
+> ν≥1
+
+Eν (T − ν|T ≥ ν). (4) It is easy to see that WADD (T ) ≥ CADD (T ) for all T .Finding exactly optimal solutions to formulations like (3) for all values of γ is usually difficult except in few simple cases. For this reason, a common consideration in the literature 4is asymptotic optimality, usually studied in the limit γ → ∞ . In the i.i.d. setting, a universal lower bound for CADD of any procedure as γ → ∞ was derived by Lai [11] as inf    
+
+> T:ARL (T)≥γ
+
+CADD (T ) ≥ log γI (1 + o(1)) , (5) where I is the Kullback-Leibler (KL) divergence (relative entropy) between distributions f1
+
+and f0
+
+I =
+
+Z
+
+f1(x) log f1(x)
+
+f0(x) dx. (6) Earlier, a similar lower bound for WADD was derived by Lorden [9]. A change detection procedure T is said to be asymptotically (first-order) optimal if 
+
+CADD (T )inf τ :ARL (τ )≥γ CADD (τ ) → 1 as γ → ∞ . (7) 
+
+2.2 Fundamental non-Bayesian QCD algorithms 
+
+Next, we describe briefly two foundational algorithms for QCD in the non-Bayesian paradigm, i.e., the CuSum procedure and the Shiryaev-Roberts procedure. 
+
+CuSum procedure. The Cumulative Sum (CuSum) procedure was first introduced by Page [5]. The CuSum test tracks the drift of the cumulative log-likelihood-ratio sum S1, S 2, . . . :
+
+Sn =
+
+> n
+
+X
+
+> j=1
+
+log f1(Xj )
+
+f0(Xj ) . (8) It stops when the sum exceeds its past minimum by a sufficient amount. The test is defined by 
+
+Wn = Sn − min  
+
+> k≤n
+
+Sk, (9) 
+
+T C 
+
+> b
+
+= inf {n : Wn > b }. (10) The CuSum statistic Wn can alternatively be written as 
+
+Wn = max 
+
+> k≤nn
+
+X
+
+> j=k
+
+log f1(Xj )
+
+f0(Xj ) (11) and updated recursively using the formula 
+
+Wn = max 
+
+
+
+0, W n−1 + log f1(Xn)
+
+f0(Xn)
+
+
+
+, W0 = 0 . (12) The recursive update makes the CuSum test efficient to implement in practice, and provides a low complexity method for detecting changes in streaming data. Lorden [9] proved that as γ → ∞ , the CuSum procedure is asymptotically first-order optimal in terms of WADD. Later Moustakides [12] showed that CuSum with the stopping threshold b chosen such that 
+
+ARL (T C 
+
+> b
+
+) = γ is exactly optimal for all γ in the sense of (3). Finding a b such that the 5ARL constraint is satisfied with equality is generally not possible in closed form, but can be found e.g. numerically via Monte Carlo simulations. A simple lower bound for ARL (T C 
+
+> b
+
+) as a function of b exists, and is given by (see e.g. [2, Lemma 8.2.1.]) 
+
+ARL (T C 
+
+> b
+
+) ≥ eb. (13) Choosing b = log γ therefore guarantees ARL (T C 
+
+> b
+
+) ≥ γ.
+
+Shiryaev-Roberts procedure. The Shiryaev-Roberts (SR) procedure is defined by the statistic 
+
+Rn =
+
+> n
+
+X
+
+> k=1
+> n
+
+Y
+
+> j=k
+
+f1(Xj )
+
+f0(Xj ) (14) and the stopping time 
+
+T SR  
+
+> b
+
+= inf {n : Rn > b } (15) where b is a threshold. The difference between the SR and CuSum statistics is that instead of taking the maximum over k ≤ n as in (11), the SR statistic takes the sum of likelihood ratios over k ≤ n. The SR statistic also has a recursive form, given by 
+
+Rn = (1 + Rn−1) f1(Xn)
+
+f0(Xn) , R0 = 0 . (16) The recursion stops and raises an alarm when Rn exceeds the threshold b. The procedure is also asymptotically optimal with respect to both WADD and CADD [13]. The same ARL lower bound (13) as for CuSum also applies to SR. 
+
+2.3 Bayesian objective 
+
+In some settings, it may be possible to consider the change-point ν as a random variable with a known distribution πn = P(ν = n). Optimal stopping times under this formulation were first studied by Shiryaev [7] under the loss function 
+
+B(T, λ ) = Pπ(T < ν ) + λEπ[( T − ν)+], (17) where the notation Pπ, Eπ is used to highlight that ν ∼ π. With an appropriate choice of λ,the objective (17) is equivalent to the following constrained optimization problem: minimize Eπ[( T − ν)+] subject to Pπ(T < ν ) ≤ α, (18) i.e. minimizing the average detection delay under a constraint that the probability of false alarm (PFA) Pπ(T < ν ) is smaller than some α. When ν ∼ Geom( ρ), Shiryaev [7] showed that the exactly optimal test for (17) is a threshold test on the posterior probability of change 
+
+pn = Pπ(ν ≤ n|F n). (19) The probability pn can be computed recursively as 
+
+pn = ˜pn−1L(Xn)˜pn−1L(Xn) + (1 − ˜pn−1) , (20) 6where ˜ pn = pn + (1 − pn)ρ and p0 = π0 = ρ. Shiryaev’s test T Sb is then performed by comparing the probability pn to a stopping threshold b > 0, i.e. 
+
+T Sb = inf {n : pn ≥ b}. (21) As ρ → 0, i.e. the prior distribution becomes increasingly uninformative, the limit of posterior odds pn/(1 − pn) converges to the Shiryaev-Roberts statistic (14). As for CuSum and SR, finding a threshold b such that the constraint in (18) is satisfied with equality is usually only possible numerically. However, by the law of iterated expectation 
+
+Pπ(T Sb < ν ) = Eπ(Pπ(T Sb < ν |F T Sb )) = Eπ(1 − pT Sb ) ≤ 1 − b, (22) where inequality follows from the definition of T Sb (21). The probability of false alarm con-straint in (18) is then satisfied by setting b = 1 − α.Shiryaev’s test is also asymptotically optimal as false alarm probability α → 0 in a large class of non-i.i.d. models and for general prior distributions π [14]. 
+
+Comparison of Shiryaev’s test and CuSum 
+
+While the non-Bayesian and Bayesian procedures have very different notions of optimality, their empirical performance can be compared under common criteria. To illustrate this by a concrete example, we simulate a simple change-detection setting of a mean-shift from 0 to μ = 0 .5 under Gaussian noise, so that f0 = N (0 , 1) , f 1 = N (μ, 1). Four algorithms are considered, the CuSum test (9)( T C 
+
+> b
+
+), SR procedure (15) ( T SR  
+
+> b
+
+), and two versions of Shiryaev’s test; one with parameter ρ = 1 /1000 ( T Sb, 1000 ) and the other with ρ = 1 /50 ( T Sb, 50 ). For each procedure T , the detection threshold b is set such that ARL (T ) = E∞(T ) = 1000 for purposes of comparison, where the values are found by 5000 Monte Carlo simulations. Note that the Shiryaev procedures are typically calibrated to have a prespecified PFA Pπ(T < ν ) rather than ARL. PFA depends on π, the assumed prior distribution of the change-point ν, which may not be available. The ARL guarantee holds regardless of ν, even for the Bayesian procedures. The average detection delay Eν (T − ν|T ≥ ν) is evaluated for different values of ν in Figure 1a) for all procedures. This delay metric is different than either CADD and WADD ,which include taking the maximum over ν. For all tests, the largest detection delay occurs when the change happens early at time ν = 1. This is intuitively explained by the fact that the test statistics that are typically updated using a recursive formula are guaranteed to be far away from the threshold if the change takes place in the very beginning of the monitoring process. The optimality of CuSum in terms of WADD is observed from the figure, since its maximum delay over ν is the smallest. On the other hand, for larger values of the change-point, the detection delay of Shiryaev-Roberts or the Bayesian procedures is smaller. The performance of the Shiryaev and SR procedures is similar, which is to be expected as in the limit ρ → 0 the Shiryaev procedure converges to SR. In Figure 1b), the WADD of CuSum and SR is plotted as function of log( ARL ). The relationship is linear, and the slope given by the reciprocal of KL-divergence ( μ2/2) −1 matches the asymptotic lower bound (5). 
+
+2.4 Alternative performance criteria 
+
+In single-stream QCD, minimizing some notion of average detection delay while controlling the ARL to false alarm (in non-Bayesian settings) or probability of false alarm (in Bayesian 728 30 32 34 1 10 50 100 200 500 1000 change-point ν       
+
+> average detection delay CuSum Shiryaev ( ρ=1 1000) Shiryaev ( ρ=1 50) Shiryaev-Roberts
+
+(a) 20 30 40 300 1000 3000 ARL WADD  (ν = 1)   
+
+> CuSum SR Slope = 1/KL-divergence
+
+(b) 
+
+Figure 1: Change-point detection algorithms trade off between controlling false alarm rates (such as average run length (ARL) to false alarm) and average detection delay. (a) Average detection delay as a function of different values of the change-point ν. CuSum procedure minimizes worst-case detection delay, but for many values of ν, the delay of Shiryaev-Roberts or Bayesian Shiryaev tests (calibrated to have the same ARL) is smaller. (b) Worst-case average detection delay for CuSum and SR (which happens when ν = 1 as observed in the left panel) as a function of log(ARL). For both algorithms, the detection delay grows linearly with respect to log(ARL), and the slope is given by the reciprocal of KL-divergence, in accordance with asymptotic lower bound eq. (5). 8settings) is the most common performance objective. However, in some applications, other performance criteria may also be of interest. For instance, if T represents the time when a machine part deemed to be faulty is replaced, it may make sense to penalize, for example, the average “size of miss” Eπ|T − ν|. More generally, the objective trades off between early and late detection 
+
+R(T, λ ) = Eπ(ν − T )+ + λEπ(T − ν)+, (23) where λ is a tunable parameter that controls the relative importance of the two criteria. Under such a penalty, replacing the part before it is actually faulty is penalized less if the replacement is done close to the eventual time of failure ν. It turns out, that under some conditions, the Shiryaev test T Sb is also optimal for the risk R(T, λ ) [15]. In non-Bayesian settings, exactly optimal algorithms are known in relatively few cases besides the optimality of CuSum for Lorden’s delay with i.i.d data. As an interesting example, Poor [16] considered an exponential delay penalty of the form 
+
+β(T −ν+1) +
+
+− 1
+
+β − 1 (24) for some constant β̸ = 1. If β > 1, each additional unit of delay is penalized in an exponen-tially increasing manner. It may be necessary to associate a higher cost on longer delays when the cost of undetected changes may be enormous. If β < 1, the cost of delay is saturating and sub-linear, with β → 1 converging to the traditional linear detection penalty. For instance, in financial applications, a delayed detection of a shift in the market may incur an exponentially increasing penalty due to the compounding nature of financial gains and losses. Similarly, in applications where the change-point triggers a cascade of events (e.g. healthcare, power grid, communication networks, etc.), the effects of delay may be multiplicative, motivating an exponential penalty. Poor showed that a modified version of the CuSum procedure with recursion 
+
+Wn = max(0 , W n−1) + ℓ(Xn) + log β, W0 = 0 (25) minimizes the worst-case average of the exponential delay in (24) under an ARL constraint. The modified CuSum statistic (25) is closely related to the standard CuSum (12), with the difference being a supplementary constant log β added at each step. Recently, drawing in part on the results of [16], Tartakovsky et al. [17] used a very similar statistic for detection of transient changes, i.e. settings where the change is observable only for a limited period. An optimal procedure that maximizes the probability of detection within the transient period was derived. 
+
+# 3 Recent advances in multi-stream change detection 
+
+In modern practical applications of sequential change detection, the observed data is usually high-dimensional, observed by a large number of sensors in distinct locations. For example, when a change in the environment or radio spectrum occurs, it may affect one or multiple sensors. The problem is significantly more demanding than single-stream QCD because both the subset of affected sensors and the post-change distribution in those sensors may not be fully known or are subject to uncertainty. Additionally, the change may occur at different times in different sensors depending on the physics of the monitored phenomenon or the topology of a networked system. 93.1 High-dimensional unknown parameters 
+
+A relatively general formulation of many multi-stream change detection problems can be given as follows. The observations Xn = [ X(1)  
+
+> n
+
+, ..., X (K) 
+
+> n
+
+] are K-dimensional random vectors independent over time. However, at the same time instance the observations acquired by different sensors may be dependent. If the observations are acquired by sensors in distinct locations, it is reasonable to assume that sensor noises are independent, but the signals may be correlated. Let f (·| θn) denote a family of joint probability densities for Xn parametrized by a vector θn ∈ Θ of length K. Then Xn ∼ f (·| θn), where 
+
+θn =
+
+(
+
+0, n < ν, 
+
+θ1, n ≥ ν, (26) meaning that the change manifests by altering a parameter from a known value 0 (assumed w.l.o.g.) to an unknown θ1.
+
+Binary θ
+
+We begin with the simpler setting in which the post-change model is determined solely by the subset of affected sensors. In this case, the unknown parameter θ is naturally represented as a binary vector, where each component indicates whether the corresponding stream is affected by the change. That is, θ1 ∈ Θ = {0, 1}K , and θ(k) = 1 indicates that the change affects sensor k. For example, if the components of Xn are independent also within the same time instance and have pre- and post-change distributions f (k)0 and f (k)1 , respectively, the joint density can be written 
+
+f (Xn|θn) = 
+
+> K
+
+Y
+
+> k=1
+
+[θ(k) 
+
+> n
+
+f (k)1 (X(k) 
+
+> n
+
+) + (1 − θ(k) 
+
+> n
+
+)f (k)0 (X(k) 
+
+> n
+
+)] . (27) If θ1 is known, the optimal procedure under Lorden’s formulation is still the CuSum procedure with the test statistic 
+
+W θ1 
+
+> n
+
+= max 
+
+> k≤nn
+
+X
+
+> j=k
+
+log f (Xj |θ1)
+
+f (Xj |0) (28) When θ is unknown, two of the most common ways of handling distributional uncertainty are to either maximize or average over θ in (28). The former leads to a generalized likelihood ratio (GLR) testing approach in which the unknown nuisance parameters are estimated, while the latter yields a mixture test. When the post-change parameter space is finite, the two approaches have a lot in common, as demonstrated in [18]. Indeed, the GLR-CuSum statistic is given by max  
+
+> k≤n
+
+max 
+
+> θ∈{ 0,1}K
+> n
+
+X
+
+> j=k
+
+log f (Xj |θ)
+
+f (Xj |0) (29) = max  
+
+> θ∈{ 0,1}K
+
+W θ 
+
+> n
+
+, (30) 10 where the second line follows from interchanging the maximizations, and W θ 
+
+> n
+
+is the CuSum statistic in which the set of affected sensors is θ. This procedure is equivalent to running a CuSum test for each θ ∈ Θ, and declaring a change when one of them reaches a threshold 
+
+b. More generally, one can specify a different threshold bθ for each W θ 
+
+> n
+
+, θ ∈ Θ, and consider the stopping time 
+
+T G = inf 
+
+
+
+n : max  
+
+> θ∈{ 0,1}K
+
+(W θ 
+
+> n
+
+− bθ) ≥ 0
+
+
+
+. (31) If bθ is further chosen to be of the form bθ = b − log pθ, where pθ > 0 and P 
+
+> θ∈Θ
+
+pθ = 1, the stopping time can be written as 
+
+T G = inf 
+
+
+
+n : max  
+
+> θ∈{ 0,1}K
+
+(W θ 
+
+> n
+
++ log pθ) ≥ b
+
+
+
+(32) = inf 
+
+
+
+n : max  
+
+> θ∈{ 0,1}K
+
+pθeW θ 
+
+> n
+
+≥ eb
+
+
+
+. (33) Changing the maximization to a sum over θ in (33), one immediately obtains a mixture-CuSum test 
+
+T M = inf 
+
+n : X
+
+> θ∈{ 0,1}K
+
+pθeW θ 
+
+> n
+
+≥ eb
+
+ , (34) where pθ can be interpreted as a prior distribution for θ. The GLR and mixture tests were analyzed in [18] and shown to be asymptotically optimal in a strong second-order sense, i.e. as γ → ∞ 
+
+WADD (T G) − inf    
+
+> T:ARL (T)≥γ
+
+WADD (T ) = O(1) , (35) for any set of affected sensors θ ∈ Θ, and similarly for T M .The main drawback of the above procedures is that their implementation in principle requires running |Θ| CuSum-recursions in parallel, and |Θ| can be as large as 2 K if the set of affected sensors can be completely arbitrary. Significant reduction in computational complexity can be achieved by adaptive windowing [18]. A computationally simpler algorithm is the SUM-CuSum [19] for independent streams, given by 
+
+T SUM = inf 
+
+(
+
+n :
+
+> K
+
+X
+
+> k=1
+
+W (k) 
+
+> n
+
+≥ b
+
+)
+
+, (36) where W (k) is the CuSum-statistic using observations only from stream k (or equivalently (28) with θ = ek, the k-th basis vector). The SUM-CuSum test declares a change when the sum of local sensor CuSums crosses a threshold, making it possible to do most of the computations locally. The procedure was shown to be first-order asymptotically optimum in [19]. It also works well when the change does not necessarily occur at the same time in all affected streams. However, unlike (32) and (34), it is not second-order asymptotically optimal. 11 Continuous θ
+
+In many applications, just knowing the indices of the affected sensors may not be enough to determine the full post-change distribution. For instance, the change may affect the sensors with different intensities based on e.g. the distance between the sensor and the (unknown) signal source location. For example, the sensors may be monitoring the energy of radio frequency signals in a spectrum band that attenuate inversely proportionally to squared distance. In such cases, we can still adopt the general model from (26), but represent 
+
+θ ∈ Θ ⊂ RK as a general K-dimensional real vector. In principle, the general GLR and mixture-CuSum ideas from above can of course be extended to a continuous θ without issue. However, the possibly high dimension K of the unknown parameter vector θ presents additional challenges in the continuous case. Indeed, it follows from [20] that when f (·| θ) is in the exponential family, and Θ satisfies certain regularity conditions, the asymptotic detection delay of any procedure T as ARL γ → ∞ 
+
+satisfies the following minimax lower bound: sup 
+
+> θ∈Θ
+
+I(θ)WADD (T ) ≥ log γ + K
+
+2 log log γ + O(1) , (37) It is important to point out that in (37) the second-order delay term grows linearly with K.For moderate γ and large K, the influence of the second-order term can be greater than the first-order term. Deriving procedures which are effective for high-dimensional θ has attracted the most attention in the literature in the special case when θ corresponds to the mean vector of a multivariate Gaussian distribution with diagonal covariance. The proposed ideas and the developed methods extend to more complicated models and different probability models. Xie and Siegmund [21] developed a mixture procedure where each stream is hypothesized to be affected by a change with probability p. The stopping time is then given by the threshold rule 
+
+T XS = inf 
+
+n : max 
+
+> 0≤m≤nK
+
+X
+
+> k=1
+
+log 
+
+1 − p + p exp 
+
+max 
+
+> θ
+> n
+
+X
+
+> j=m
+
+log f (X(k) 
+
+> j
+
+|θ)
+
+f (X(k) 
+
+> j
+
+|0)
+
+ ≥ b
+
+ . (38) The term inside the square brackets is the GLR statistic for stream k for observations between time instances m and n. Therefore, setting p = 1 recovers the standard GLR-CuSum. The test is shown to be effective if the post-change vector θ is sparse, i.e. only a small proportion of its components are non-zero. In the same vein, Chan [22] proposed detectability-score transformations of stream-wise GLR statistics. The central idea is to down-weight weak local evidence that would correspond to signals too weak to be reliably detected with the current sample size. This reduces the accumulation of noise from unaffected streams and yields asymptotically near-optimal detection delay across a range of sparsity regimes. Asymptotic lower bounds for the detection delay in the limit K → ∞ are also derived, which is different from the usual γ → ∞ asymptotics in QCD. Chen et al. [23] propose an algorithm that simultaneously tracks various likelihood ratios corresponding to individual or multiple sensors, and uses hard thresholding to suppress likelihood ratios likely corresponding to noise in the sparse case. Using different levels for hard threshold in parallel makes the test adaptable to different levels of sparsity in the post-change mean vector θ.12 The usefulness of thresholding in detecting a change to a sparse θ is related to the ef-fectiveness of thresholding in sparse estimation, see e.g. [24] and references therein. Indeed, a change detection problem with unknown parameters may be seen as a combination of an estimation and detection problem; the better θ is known (estimated) the easier a change is to detect. Another popular technique used in high-dimensional problems is shrinkage es-timation [25]. A natural way to incorporate a particular estimator to a change detection algorithm is to use a so-called adaptive change detection procedure [26, 27, 28, 29]. For example, in the CuSum recursion (12), one can replace the unknown f1 (here f (·| θ)) with a plug-in f (Xn| ˆθn), where ˆθn is some estimator of θ based on the data up to time instance n.Xie et al. [29] proposed estimating θ based on a sliding window of past w observations, i.e. ˆθn = ˆθ(Xn−1, . . . , Xn−w). This yields the window-limited CuSum statistic 
+
+W WL  
+
+> n
+
+= max {0, W n−1} + log f (Xn| ˆθn)
+
+f (Xn|0) , W0 = 0 . (39) An important feature of this statistic is that it can be calculated recursively, which is not in general the case for e.g. GLR type tests, as remarked in Section 3.1. Another advantage is that prior knowledge/structure (such as sparsity) about θ can be easily incorporated by selecting the estimator ˆθ accordingly. For example, shrinkage estimators reduce estimator variance by introducing some bias, often leading to reduced loss under an appropriate loss function. Wang and Mei [30] considered thresholding as well as linear shrinkage estima-tors of the form a ˆθML + b, where ˆθML is the maximum likelihood estimator. Later, it was demonstrated in [31] that using the James-Stein (JS) estimator [32] in place of the standard maximum likelihood estimator in the WL-CuSum test (39) can reduce detection delay for all values of θ in the Gaussian case. This stems from the fact that the James-Stein esti-mator dominates the ML estimator in terms of mean-square error when K ≥ 3 [32]. The JS-estimator is most effective when θ is dense rather than sparse, i.e. when the change event causes subtle disturbances to many sensors. A simple way to create a procedure that is ef-fective for both dense and sparse θ simultaneously would be to run two versions of (39) in parallel: one with an estimator ˆθn effective for dense changes (such as JS) and one for sparse changes (such as a hard-thresholding estimator [24, Ch. 5]). Forming and analyzing such combined procedures in a principled manner is an interesting topic for future research. 
+
+Numerical comparison of methods for high-dimensional Gaussian mean-shifts 
+
+As an illustration of the properties of the methods discussed above, we present a brief nu-merical comparison. We consider a model with K = 100 data streams, where before the change 
+
+f0 = N (0, I K ),
+
+and after the change 
+
+f1 = N (θ, I K ).
+
+Although simple, this setting is not unduly restrictive: more general Gaussian models with correlated components can often be reduced to this form by whitening, provided that the pre-change covariance matrix is known or can be estimated accurately. 13 20 40 60 80 1 10 25 50 75 100 Number of a ff ected streams (out of 100) Average detection delay Chan GLR OCD XS JS-WL-CuSum ML-WL-CuSum Figure 2: Average detection delays highlight a clear dependence on the sparsity of the change. For very sparse changes, XS [21], Chan [22], and OCD [23] procedures achieve the smallest delays, whereas their advantage diminishes as more streams are affected. In contrast, the James-Stein WL-CuSum [31] iis ncreasingly effective in denser regimes, while the ML-WL-CuSum and GLR procedures remain comparatively stable across sparsity levels. Overall, it is observed that substantial gains over standard methods are possible in high-dimensional problems when the detection procedure is matched to the structure of the post-change signal. We compare six procedures: T XS in (38) from [21], Chan’s detectability score procedure [22], the OCD procedure from [23], two versions of the WL-CuSum procedure (39) from [29] based on the ML and James–Stein estimators [31], and the classical GLR-CuSum procedure [11]. Since XS, Chan, and GLR do not admit recursive updates, we implement window-limited versions with window size 200. For the XS and Chan procedures, we set p = 1 /√K = 0 .1as recommended in [22]. Parallel versions of the WL-CuSum tests are run (see [29]) with window-sizes ranging from 30 to 80. The XS, Chan and OCD procedures are implemented using the R-package ocd [33]. The stopping thresholds of all procedures are set via 1000 Monte-Carlo simulations such that ARL (T ) ≈ 1000. We consider changes affecting L ∈ { 1, 25 , 50 , 100 } of the K = 100 streams. For a given value of L, the post-change vector θ is generated at every MC iteration as follows: for 1 ≤ k ≤ K we first sample ξ(k) ∼ N (0 .5, 1) 1{k ≤ L} and then set θ(k) = ξ(k)/pP (ξ(k))2.This normalization ensures that the KL-divergence satisfies I = ∥θ∥2/2 = 1 /2 at every iteration. The change-point is fixed at ν = 100. Figure 2 reports Monte Carlo estimates of the average detection delay Eν (T − ν | T ≥ ν). The results show a clear dependence on sparsity. For sparse changes, the XS, Chan, and OCD procedures perform best. As the change becomes denser, their advantage diminishes, whereas the James–Stein WL-CuSum becomes increasingly competitive. By contrast, the ML-WL-CuSum and GLR procedures are comparatively insensitive to the number of affected streams. Importantly, for both very 14 sparse and very dense θ, substantial performance gains over standard methods like GLR are available when the number of sensors is large. 
+
+3.2 QCD under sampling constraints 
+
+In the previous subsection, we assumed that all sensors acquire data continuously at each time instance. In practice, it is often necessary to reduce the communication and sampling overhead by sampling only some subset of streams at a given time. By designing intelligent sensing policies and methods for sensor selection, significant savings in computational com-plexity and communications overhead may be achieved. Let us denote by An ⊂ { 1, ..., K }
+
+the indices of streams monitored at time n, meaning that with some abuse of notation 
+
+X(k) 
+
+> n
+
+=
+
+(
+
+X(k) 
+
+> n
+
+if k ∈ A n
+
+∅ otherwise , (40) where ∅ denotes an empty symbol/missing observation. The sampling choice An can depend on previous data, i.e. An ∈ F n−1. The size An is usually constrained, for example |A n| ≤ L ∀n
+
+if at most L < K of the sensors can be deployed at a given time. Under such a constraint, the typical QCD objective is now expanded to designing both a sampling policy and a detection rule. Dragalin [34] considers the case L = 1 and proposes a scanning rule for stream selection in which a particular stream is sampled until its CuSum statistic hits either 0 or a stopping threshold b. If the statistic hits 0, the sampling moves to the next data stream. The procedure is shown to be asymptotically optimum under Pollak’s CADD. Lai et al. [35] consider a closely related problem with L = 1 in a sequential hypothesis testing context. In an infinite sequence of streams, a signal is present independently in each stream with equal probability. The objective is to find an affected stream as quickly as possible while sampling only a single stream at a time. It is shown that within a Bayesian formulation seeking minimal delay and false detection probability, successively running a CuSum test until either reset and switch to another stream, or detection in the current stream is exactly optimal. Recently, [36] considered a similar rule in a QCD context, and showed that such a cyclic procedure is asymptotically second-order optimal under Lorden’s WADD. Moreover, the data distributions in different streams are allowed to be different. The general idea in the above works may be extended to the case when 1 ≤ L ≤ K
+
+streams are observed at a time by e.g. computing and updating a detection statistic for each stream, and sampling those with the L currently highest values. However, as observed in [37], especially if K is much larger than L, it may be beneficial to “increase exploration” by incrementing the detection statistics of all unobserved streams at each step by a small constant ∆. This way, the procedure cannot get stuck sampling a single stream for a long time. Determining an “optimal” value for ∆ is not straightforward, and even the analysis of the procedure is challenging for ∆ > 0, but small values of ∆ > 0 are shown to perform better empirically than ∆ = 0 [38]. The above works assume that sampled data streams are independent, or at the very least that the change is observable from the marginal distributions of individual streams. If the data are acquired by distinct sensors, noise can be assumed to be independent while the signals may be correlated or otherwise dependent. More general observation models 15 were studied recently in [39], where the change is assumed to affect the joint distribution of an unknown subset of sensors; for example the correlation structure. Conditions under which the cyclic, rotating order sampling policy remains asymptotically optimal were derived. Previously in e.g. [36], asymptotic optimality when only a single sensor observes the change was established with respect to a procedure that has access to all samples. In [39] asymptotic optimality is studied only with respect to procedures that satisfy the sampling constraint. In this class, the simple sampling policy of [36] is first-order asymptotically optimal even when an arbitrary number of sensors observe the change under the assumption of homogeneity of the statistical models. The cyclic policies are computationally simple to implement and don’t require storing a lot of past data. From a broader perspective, designing the sampling policy can be seen to be closely related to the multi-armed bandit (MAB) [40] problem. The core challenge in the MAB problem is the exploration vs. exploitation tradeoff: choosing the arm (stream) with the highest expected reward (exploitation) vs. choosing an arm (stream) that may have a higher reward than the current best arm (exploration). As an example, Restless Multiarm Bandit (RMAB) [41, 42] and Bayesian Thompson sampling methods have been used for learning sensing policy and stream selection while balancing between exploitation and exploration in multisensor systems. In a change detection setting, however, the objective is not to minimize e.g. cumulative regret, but for instance average detection delay. In case of long-term rewards, associating a per-action reward to each action (sampling choice) is therefore not obvious, although a large observed likelihood ratio could represent a reasonable proxy. In fact, from this perspective, the cyclic sampling policies discussed above can be seen as greedy (or follow-the-leader) selection policies. In general, myopic learning policies that maximize immediate or near-term rewards are more appropriate for stream or sensor selection in the QCD context. A natural and fundamental algorithm for sampling that often works well in practice is Thompson sampling in a Bayesian framework. The idea is to define a distribution over possi-ble environments, and at each time make the optimal action with respect to an environment drawn at random from the current posterior distribution. In a QCD context, this would mean specifying a (joint) prior distribution for the change-points, computing the posterior probabilities of change having happened at each stream (i.e. the Shiryaev statistics (21)), and sampling according to these probabilities. Such a policy is studied in [43]. If specifying a prior distribution is infeasible, using the Shiryaev-Roberts statistics (14) is a logical sub-stitute. A Thompson sampling related sampling policy based on randomized SR statistics is proposed and analyzed in [44]. Finally, Veeravalli et al. [45] consider a generalized setup where possible sampling actions 
+
+An do not have to correspond to subsets of sensors, but represent general (finite) set of sampling actions. For example, different sampling actions could represent different ways of steering a sensor array. Depending on the true target parameters θ, some sampling actions 
+
+a are more effective than others for distinguishing the change. The effectiveness is measured by the post-change KL-divergence 
+
+Ia(θ) = 
+
+Z
+
+f a(x|θ) log f a(x|θ)
+
+f a(x|0) , (41) where f a(·| θ) is the sampling distribution of the data under action a when the true parameter is θ. For example, if θ is a binary vector as in (27), An is a subset of sensors, and the 16 components of Xn are independent, 
+
+f An (Xn|θ) = Y
+
+> k∈A n
+
+[θ(k) 
+
+> n
+
+f (k)1 (X(k) 
+
+> n
+
+) + (1 − θ(k) 
+
+> n
+
+)f (k)0 (X(k) 
+
+> n
+
+)] . (42) Naturally, the optimal action is a∗ = arg max aIa(θ), but this depends on the unknown θ.As a solution, it is proposed in [45] to 1) estimate θ with a maximum likelihood sliding window estimator ˆθn based on past observations, and 2) select the next action An as either 
+
+An = arg max aIa( ˆθn) or uniformly at random at deterministic exploration times. The form of the sampling policy goes all the way back to Chernoff and the sequential design of exper-iments in hypothesis testing [46]. Sampling policies based on Chernoff’s rule are first-order asymptotically optimum across a wide range of controlled sensing tasks. However, its (empir-ical and theoretical) performance can be suboptimal when the choice of an action can change the effect of future actions, as noted recently in [47]. 
+
+3.3 QCD with False Discovery Rate control 
+
+So far, we have considered settings where only a single change affecting the monitored system is detected. In many applications changes can happen at different times at different sensors, possibly caused by the same or different phenomena. For example, in a sensor network, each sensor may be monitoring a different physical process, and a change in one process may or may not affect the others. When a change takes place in one stream, it can require an action to be taken only in that stream. In these cases it may be necessary to detect a change-point separately in each stream. Moreover, it is of interest to consider performance criteria that measure the performance across the streams as a whole, instead of separately optimizing the performance in each individual stream. For example, in a cognitive radio network [48], secondary users opportunistically sense the channels for available transmission opportunities. Even if the individual channels are independent, it is important to limit the total amount of interference or collisions caused by the SUs as a whole. Let us denote the time of detection in the kth stream by T (k), and by ν(k) the actual change-point in stream k. If a QCD procedure that controls the ARL (1) individually is applied to each stream, one approximately obtains control over the average number of false-alarm events that can occur over all streams in a given time interval. In practice, it might be more useful to have control over the proportion of false detections among all detections. To this end, a natural criterion well-suited for large-scale applications is the false discovery rate (FDR) [49]. In a change-detection setting, the FDR at time n for a set of stopping times 
+
+T = {T (1) , . . . , T (K)} is defined as the expected ratio of false detections V (n) made by time 
+
+n to all detections R(n) by n:
+
+FDR ν (T , n ) = Eν
+
+ V (n)max {1, R (n)}
+
+
+
+(43) where 
+
+V (n) = 
+
+> K
+
+X
+
+> k=1
+
+1
+
+n
+
+T (k) < ν (k), T (k) ≤ n
+
+o
+
+(44) 
+
+R(n) = 
+
+> K
+
+X
+
+> k=1
+
+1
+
+n
+
+T (k) ≤ n
+
+o
+
+. (45) 17 The denominator in (43) includes the maximum only to prevent division by zero. In the FDR literature, the typical starting point is a set of p-values corresponding to fixed-sample size hypothesis tests and the ubiquitous Benjamini-Hochberg procedure [49]. The BH-procedure was extended to sequential hypothesis tests by Bartroff and Song [50]. Utilizing some ideas from [50], Chen et al. [51] were the first to study multi-stream QCD procedures with FDR control. Under the Bayesian change-point formulation (Sec. 2.3), a procedure that utilizes the posterior probabilities (19) as the test statistics in a sequential BH-type procedure is proposed. It is shown that the procedure controls the FDR averaged over the distribution of the change-points π(ν) asymptotically as K → ∞ , i.e. for all fixed n
+
+and a user-defined FDR-threshold 0 < α < 1
+
+FDR π(T , n ) = X
+
+> ν
+
+π(ν)FDR ν (T , n ) ≤ α + o(1) . (46) Later, it was observed in [43] that in the Bayesian setting it is in fact sufficient to use a single common stopping threshold for all streamwise tests, and such a procedure controls the FDR non-asymptotically. That is, (46) is achieved without the o(1) term. In a simple setting, even an exactly optimal procedure for FDR π(T , ∞) can be derived [52] as a concatenation of Shiryaev tests (21) with specifically chosen stopping thresholds. Under a non-Bayesian formulation, the natural objective in the spirit of Pollak’s CADD (4) would be to control the worst-case FDR over all values of the change-point, namely sup 
+
+> ν
+
+FDR ν (T , n ) ≤ α (47) This condition is clearly stronger than in the Bayesian setting, since controlling the FDR for all individual ν clearly implies that the FDR averaged over any distribution ν ∼ π is controlled as well. For example, (47) implies that FDR ∞(T , ∞) ≤ α, which in turn implies 
+
+P∞
+
+> K
+
+[
+
+> k=1
+
+{T (k) < ∞} 
+
+!
+
+≤ α. (48) That is, in the case where no change ever occurs, the probability of any procedure declaring a change should be smaller than α. Such a condition is more stringent than the typical ARL used in single-stream change detection. Indeed, P∞(T < ∞) < 1 implies ARL (T ) = ∞. It is expected that a procedure that controls (47) will suffer large detection delays, at least in the worst-case. Nonetheless, procedures that control (47) were developed in [53, 54]. The methods consist of running a CuSum test in each stream with certain stopping thresholds that are increasing over time. As a result, the average detection delay can be large if the change happens late, since by the time the change happens the stopping threshold has increased to a high level. Recently, [55] consider a slightly more general version of (47), where FDR is controlled not only at any fixed n, but also any stopping time τ . For example, τ could be the time m
+
+changes have been detected. Since constructing a detection procedure with small (or even finite) worst-case average detection delay is infeasible due to the reasons discussed above, a criterion called error over patience (EOP) is proposed: EOP( T ) = sup 
+
+> ν≥1
+
+sup 
+
+> τ
+
+E(FDR ν (T , τ )) 
+
+E(τ ) , (49) 18 where the inner supremum is taken over all stopping times (Definition 1). In essence, the criterion allows the FDR to be larger if the process is terminated late, i.e. when τ is large. This way, control over the FDR does not need to be maintained for an indefinitely long time. The definition of FDR we have adopted (43) measures the quality of detections made up to time n. In some applications, it could be of interest to consider the “quality” of the streams still active at time n. For example, the false non-discovery rate (FNR) at time n
+
+defined as FNR ν (T , n ) = Eν
+
+" P Kk=1 1ν(k) ≤ n, T (k) > n 
+
+max {1, K − R(n)}
+
+#
+
+(50) measures the proportion of post-change streams among all streams where a change has not yet been detected. Discussions of many related performance metrics such as FNR and algorithms controlling them can be found in [56] and [57]. 
+
+# 4 Future outlook 
+
+In this brief overview, the discussion was mostly limited to parametric models. In modern applications, it may not always be possible to formulate the data distributions using para-metric models. Many approaches that replace the likelihood ratio with some non-parametric data-driven statistic and empirical probability models have been proposed recently. For ex-ample, tests based on kernel minimum mean discrepancy (MMD) have been recently proposed [58, 59] as interesting ideas. Many other ways of finding statistics that discriminate between the pre-change and post-change distributions in place of the likelihood ratio naturally exist as well, see for example [60, Sec. IV-B]. Empirical likelihoods (EL) and likelihood ratios provide a data driven, non-parametric approach while being able to take advantage of some benefits of likelihood-based sequential inference. Moreover, conformal p-values computed using a training data from the pre-change probability model to indicate a change in distribu-tion, outliers or out of distribution data may be employed. They have found applications in sequential inference in single and multi-stream settings and multisensor systems performing spatio-temporal inference. One recently proposed general framework for how statistics other than the likelihood ratio can be used for (single-stream) QCD is proposed by Shin et al. [61]. It is shown that the general CuSum and Shiryaev-Roberts procedures can also be used when the likelihood ratio is replaced by a so-called e-process. E-processes may be seen as a nonparametric generalization of the likelihood ratio. Optimal detectors and estimators are derived based on a particular parametric signal model and strict assumptions on the underlying probability models. However, optimality is only achieved when the underlying assumptions hold. The performance of optimal procedures may deteriorate significantly, even for minor departures from the assumed model. Robust statistical methods are semi-parametric, namely take advantage of parametric models but trade off optimality to reliability. Statistically robust detectors are close-to optimal in nominal conditions and highly reliable for real-life data, even if the assumptions are only approximately valid. Robust procedures are an attractive approach in QCD problems where outliers may be present in the data, or the assumptions in probability models do not hold exactly, see e.g. [62, 63, 64] and references therein. Robust procedures can distinguish among data from different populations and outliers. The parameters of the distribution may then be estimated 19 from the population associated with the majority of the data, and the outliers and data from minority population will have a bounded influence. Machine learning approaches provide an attractive approach for change-point detection in the presence of modeling deficits. Probability models and their parameters can then be learned from data. In highly dynamic and high-dimensional scenarios, learning sensing policies allows for allocating sensing, computation, and inference resources to a subset of data streams where the change is likely to take place soon. Consequently, significant savings in computation and energy consumption may be achieved. Different variants and recent advances of reinforcement learning, including MAB and Partially Observable Markov Decision Processes (POMDP) provide a framework for learning optimized sensing policies. Statistical censoring methods can be used to reduce data transmissions and energy consumption in networked, multi-stream change-point detection since only informative decision statistics are transmitted. Only minor performance losses in inference are experienced even under rather strict communications rate constraints. No matter the exact approach that is used in a non-parametric setting, the general chal-lenges highlighted in this paper still persist. High dimensionality, sensing constraints, and multiplicity of decisions continue to complicate both algorithm design and performance anal-ysis. In a broader context, detecting rapid changes, disruptions and adversarial events is a key capability in resilient systems that are able to identify such undesirable events, recover and reconfigure to continue normal operation, and provide desired trustworthy sequential inference performance with rigorous performance guarantees. Detecting changes is also crucial in creating situational awareness exploited by any adaptive or cognitive system. 
+
+# 5 Conclusion 
+
+This overview surveyed some key models and methods for multi-stream quickest change de-tection, with emphasis on three recurring challenges: high-dimensional unknown post-change parameters, multiple-hypothesis testing inspired error rate control, and adaptive sensing un-der resource constraints. Across these settings, a common message is that effective procedures must balance statistical optimality with computational and operational feasibility. Several important challenges remain open. In high-dimensional settings, a central diffi-culty is to design procedures that retain strong optimality properties while remaining compu-tationally feasible when the number of streams is very large. Beyond the parametric models emphasized here, there is also a growing need for methods that operate reliably when the pre- and post-change distributions are only partially specified or must be learned from data. In controlled sensing problems, an important direction is to develop adaptive sampling rules with rigorous performance guarantees under dependence, heterogeneity, and resource con-straints. Finally, in settings with multiple streamwise detections, further work is needed to combine local detection efficiency with performance criteria that measure the global perfor-mance. A related challenge is to formulate performance criteria that are both achievable in practice and sufficiently stringent to control the error events and tradeoffs that matter most in applications. 20 Acknowledgement 
+
+The authors would like to thank Dr. H. Vincent Poor for insightful discussions on the topic of quickest change detection, and for the fruitful long-term collaboration on a variety of signal processing topics. 
+
+# References 
+
+[1] H. V. Poor and O. Hadjiliadis, Quickest Detection . Cambridge University Press, 2008. [2] A. Tartakovsky, I. Nikiforov, and M. Basseville, Sequential analysis: Hypothesis testing and changepoint detection . CRC Press, 2014. [3] W. A. Shewhart, “The application of statistics as an aid in maintaining quality of a manufactured product,” Journal of the American Statistical Association , vol. 20, no. 152, pp. 546–548, 1925. [4] W. A. Shewhart, “Economic quality control of manufactured product,” Bell System Technical Journal , vol. 9, no. 2, pp. 364–389, 1930. [5] E. S. Page, “Continuous inspection schemes,” Biometrika , vol. 41, no. 1/2, pp. 100–115, 1954. [6] A. Wald, Sequential Analysis . John Wiley & Sons, Inc., 1947. [7] A. N. Shiryaev, “On optimum methods in quickest detection problems,” Theory of Prob-ability & Its Applications , vol. 8, no. 1, pp. 22–46, 1963. [8] A. N. Shiryaev, “Some exact formulas in a “disorder” problem,” Theory of Probability & Its Applications , vol. 10, no. 2, pp. 348–354, 1965. [9] G. Lorden, “Procedures for reacting to a change in distribution,” The Annals of Math-ematical Statistics , vol. 42, no. 6, pp. 1897–1908, 1971. [10] M. Pollak, “Optimal detection of a change in distribution,” The Annals of Statistics ,vol. 13, no. 1, pp. 206–227, 1985. [11] T. L. Lai, “Information bounds and quick detection of parameter changes in stochastic systems,” IEEE Transactions on Information Theory , vol. 44, no. 7, pp. 2917–2929, 1998. [12] G. V. Moustakides, “Optimal stopping times for detecting changes in distributions,” 
+
+The Annals of Statistics , vol. 14, no. 4, pp. 1379–1387, 1986. [13] A. S. Polunchenko and A. G. Tartakovsky, “On optimality of the Shiryaev–Roberts procedure for detecting a change in distribution,” The Annals of Statistics , vol. 38, no. 6, pp. 3445–3457, 2010. [14] A. G. Tartakovsky and V. V. Veeravalli, “General asymptotic Bayesian theory of quickest change detection,” Theory of Probability & Its Applications , vol. 49, no. 3, pp. 458–497, 2005. 21 [15] A. N. Shiryaev, “A remark on the quickest detection problems,” Statistics & Decisions ,vol. 22, pp. 79–82, 2004. [16] H. V. Poor, “Quickest detection with exponential penalty for delay,” The Annals of Statistics , vol. 26, no. 6, pp. 2179–2205, 1998. [17] A. G. Tartakovsky, N. R. Berenkov, A. E. Kolessa, and I. V. Nikiforov, “Optimal sequen-tial detection of signals with unknown appearance and disappearance points in time,” 
+
+IEEE Transactions on Signal Processing , vol. 69, pp. 2653–2662, 2021. [18] G. Fellouris and G. Sokolov, “Second-order asymptotic optimality in multisensor se-quential change detection,” IEEE Transactions on Information Theory , vol. 62, no. 6, pp. 3662–3675, 2016. [19] Y. Mei, “Efficient scalable schemes for monitoring a large number of data streams,” 
+
+Biometrika , vol. 97, no. 2, pp. 419–433, 2010. [20] D. Siegmund and B. Yakir, “Minimax optimality of the shiryayev–roberts change-point detection rule,” Journal of Statistical Planning and Inference , vol. 138, no. 9, pp. 2815– 2825, 2008. [21] Y. Xie and D. Siegmund, “Sequential multi-sensor change-point detection,” The Annals of Statistics , vol. 41, no. 2, pp. 670–692, 2013. [22] H. P. Chan, “Optimal sequential detection in multi-stream data,” The Annals of Statis-tics , vol. 45, no. 6, pp. 2736–2763, 2017. [23] Y. Chen, T. Wang, and R. J. Samworth, “High-dimensional, multiscale online change-point detection,” Journal of the Royal Statistical Society. Series B: Statistical Method-ology , vol. 84, pp. 234–266, 2 2022. [24] E. J. Candes, “Modern statistical estimation via oracle inequalities,” Acta numerica ,vol. 15, pp. 257–325, 2006. [25] D. Fourdrinier, W. E. Strawderman, and M. T. Wells, Shrinkage estimation . Springer, 2018. [26] G. Lorden and M. Pollak, “Nonanticipating estimation applied to sequential analysis and changepoint detection,” The Annals of Statistics , vol. 33, no. 3, pp. 1422–1454, 2005. [27] G. Lorden and M. Pollak, “Sequential change-point detection procedures that are nearly optimal and computationally simple,” Sequential Analysis , vol. 27, no. 4, pp. 476–512, 2008. [28] Y. Cao, L. Xie, Y. Xie, and H. Xu, “Sequential change-point detection via online convex optimization,” Entropy , vol. 20, no. 2, 2018. [29] L. Xie, G. V. Moustakides, and Y. Xie, “Window-limited CUSUM for sequential change detection,” IEEE Transactions on Information Theory , vol. 69, no. 9, pp. 5990–6005, 2023. 22 [30] Y. Wang and Y. Mei, “Large-scale multi-stream quickest change detection via shrinkage post-change estimation,” IEEE Transactions on Information Theory , vol. 61, no. 12, pp. 6926–6938, 2015. [31] T. Halme, V. V. Veeravalli, and V. Koivunen, “Quickest Change Detection for Multiple Data Streams Using the James–Stein Estimator,” IEEE Transactions on Information Theory , vol. 71, no. 10, pp. 7802–7814, 2025. [32] W. James and C. Stein, “Estimation with Quadratic Loss,” in Proceedings of the Fourth Berkeley Symposium on Mathematical Statistics and Probability, Volume 1: Contribu-tions to the Theory of Statistics , pp. 361–379, University of California Press, 1961. [33] Y. Chen, T. Wang, and R. J. Samworth, ocd: High-Dimensional Multiscale Online Changepoint Detection , 2020. R package version 1.1. [34] V. Dragalin, “A simple and effective scanning rule for a multi-channel system,” Metrika ,vol. 43, no. 1, pp. 165–182, 1996. [35] L. Lai, H. V. Poor, Y. Xin, and G. Georgiadis, “Quickest search over multiple sequences,” 
+
+IEEE Transactions on Information Theory , vol. 57, no. 8, pp. 5375–5386, 2011. [36] Q. Xu, Y. Mei, and G. V. Moustakides, “Optimum multi-stream sequential change-point detection with sampling control,” IEEE Transactions on Information Theory , vol. 67, no. 11, pp. 7627–7636, 2021. [37] K. Liu, Y. Mei, and J. Shi, “An adaptive sampling strategy for online high-dimensional process monitoring,” Technometrics , vol. 57, no. 3, pp. 305–319, 2015. [38] Q. Xu, Y. Mei, and J. Shi, “Impact of compensation coefficients on active sequential change point detection,” Sequential Analysis , vol. 44, no. 2, pp. 153–177, 2025. [39] A. Chaudhuri, G. Fellouris, and A. Tajer, “Round Robin Active Sequential Change De-tection for Dependent Multi-Channel Data,” IEEE Transactions on Information Theory ,vol. 70, no. 12, pp. 9327–9351, 2024. [40] T. Lattimore and C. Szepesv´ ari, Bandit Algorithms . Cambridge University Press, 2020. [41] J. Oksanen and V. Koivunen, “An order optimal policy for exploiting idle spectrum in cognitive radio networks,” IEEE Transactions on Signal Processing , vol. 63, pp. 1214– 1227, 3 2015. [42] J. Lund´ en, V. Koivunen, and H. V. Poor, “Spectrum Exploration and Exploitation for Cognitive Radio: Recent Advances,” IEEE Signal Processing Magazine , vol. 32, pp. 123– 140, 5 2015. [43] E. Nitzan, T. Halme, and V. Koivunen, “Bayesian Methods for Multiple Change-Point Detection with Reduced Communication,” IEEE Transactions on Signal Processing ,vol. 68, pp. 4871–4886, 2020. 23 [44] W. Zhang and Y. Mei, “Bandit Change-Point Detection for Real-Time Monitoring High-Dimensional Data Under Sampling Control,” Technometrics , vol. 65, no. 1, pp. 33–43, 2023. [45] V. V. Veeravalli, G. Fellouris, and G. V. Moustakides, “Quickest change detection with controlled sensing,” IEEE Journal on Selected Areas in Information Theory , 2024. [46] H. Chernoff, “Sequential design of experiments,” The Annals of Mathematical Statistics ,vol. 30, no. 3, pp. 755–770, 1959. [47] A. Tajer, J. Heydari, and H. V. Poor, “Active Sampling for the Quickest Detection of Markov Networks,” IEEE Transactions on Information Theory , vol. 68, pp. 2479–2508, 4 2022. [48] L. Lai, Y. Fan, and H. V. Poor, “Quickest detection in cognitive radio: A sequential change detection framework,” in Proceedings of the IEEE Global Telecommunications Conference (GLOBECOM) , pp. 1–5, IEEE, 2008. [49] Y. Benjamini and Y. Hochberg, “Controlling the false discovery rate: a practical and powerful approach to multiple testing,” Journal of the Royal Statistical Society: Series B (Methodological) , vol. 57, no. 1, pp. 289–300, 1995. [50] J. Bartroff and J. Song, “Sequential tests of multiple hypotheses controlling false discov-ery and nondiscovery rates,” Sequential Analysis , vol. 39, pp. 65–91, 1 2020. [51] J. Chen, W. Zhang, and H. V. Poor, “A false discovery rate oriented approach to parallel sequential change detection problems,” IEEE Transactions on Signal Processing , vol. 68, pp. 1823–1836, 2020. [52] T. Halme and V. Koivunen, “Optimal multi-stream quickest detection with false discov-ery rate control,” in 2023 57th Asilomar Conference on Signals, Systems, and Comput-ers , pp. 877–881, 2023. [53] J. Chen, W. Zhang, and H. V. Poor, “Non-Bayesian multiple change-point detection controlling false discovery rate,” in Proceedings of the IEEE International Symposium on Information Theory (ISIT) , pp. 31–35, July 2016. [54] E. Nitzan, T. Halme, H. V. Poor, and V. Koivunen, “Deterministic multiple change-point detection with limited communication,” in Proceedings of the 54 th Annual Conference on Information Sciences and Systems (CISS) , pp. 1–6, Mar. 2020. [55] S. Dandapanthula and A. Ramdas, “Multiple testing in multi-stream sequential change detection,” arXiv preprint arXiv:2501.04130 , 2025. [56] Y. Chen and X. Li, “Compound sequential change-point detection in parallel data streams,” Statistica Sinica , vol. 33, no. 1, pp. 453–474, 2023. [57] Z. Lu, Y. Chen, and X. Li, “Optimal Parallel Sequential Change Detection Under Generalized Performance Measures,” IEEE Transactions on Signal Processing , vol. 70, pp. 5967–5981, 2022. 24 [58] H. D. Shuang Li, Yao Xie and L. Song, “Scan b-statistic for kernel change-point detec-tion,” Sequential Analysis , vol. 38, no. 4, pp. 503–544, 2019. [59] S. Wei and Y. Xie, “Online kernel CUSUM for change-point detection,” Journal of the Royal Statistical Society Series B: Statistical Methodology , 2 2026. [60] L. Xie, S. Zou, Y. Xie, and V. V. Veeravalli, “Sequential (quickest) change detection: Classical results and new directions,” IEEE Journal on Selected Areas in Information Theory , vol. 2, no. 2, pp. 494–514, 2021. [61] J. Shin, A. Ramdas, and A. Rinaldo, “E-detectors: A Nonparametric Framework for Sequential Change Detection,” The New England Journal of Statistics in Data Science ,vol. 2, pp. 229–260, 12 2023. [62] J. Unnikrishnan, V. V. Veeravalli, and S. P. Meyn, “Minimax robust quickest change detection,” IEEE Transactions on Information Theory , vol. 57, no. 3, pp. 1604–1614, 2011. [63] L. Xie, Y. Liang, and V. V. Veeravalli, “Distributionally robust quickest change de-tection using Wasserstein uncertainty sets,” in International Conference on Artificial Intelligence and Statistics , pp. 1063–1071, PMLR, 2024. [64] Y. Hou, H. Bidkhori, and T. Banerjee, “Robust Quickest Change Detection With Sam-pling Control,” IEEE Transactions on Signal Processing , vol. 73, pp. 3588–3597, 2025. 25

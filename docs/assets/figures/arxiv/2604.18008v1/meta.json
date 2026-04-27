@@ -1,0 +1,22 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.18008v1/fig-001.webp",
+      "caption": "Figure 1: Change-point detection algorithms trade off between controlling false alarm rates (such as average run length (ARL) to false alarm) and average detection delay. (a) Average detection delay as a function of different values of the change-point ν. CuSum procedure minimizes worst-case detection delay, but for many values of ν, the delay of Shiryaev-Roberts or Bayesian Shiryaev tests (calibrated to have the same ARL) is smaller. (b) Worst-case average detection delay for CuSum and SR (which happens when ν = 1 as observed in the left panel) as a function of log(ARL). For both algorithms, the detection delay grows linearly with respect to log(ARL), and the slope is given by the reciprocal of KL-divergence, in accordance with asymptotic lower bound eq. (5).",
+      "page": 8,
+      "index": 1,
+      "width": 909,
+      "height": 365
+    },
+    {
+      "url": "assets/figures/arxiv/2604.18008v1/fig-002.webp",
+      "caption": "Figure 2: Average detection delays highlight a clear dependence on the sparsity of the change. For very sparse changes, XS [21], Chan [22], and OCD [23] procedures achieve the smallest delays, whereas their advantage diminishes as more streams are affected. In contrast, the James-Stein WL-CuSum [31] iis ncreasingly effective in denser regimes, while the ML-WLCuSum and GLR procedures remain comparatively stable across sparsity levels. Overall, it is observed that substantial gains over standard methods are possible in high-dimensional problems when the detection procedure is matched to the structure of the post-change signal.",
+      "page": 14,
+      "index": 2,
+      "width": 792,
+      "height": 453
+    }
+  ]
+}
