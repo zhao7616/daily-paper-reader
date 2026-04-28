@@ -1,0 +1,304 @@
+Title: CrackForward: Context-Aware Severity Stage Crack Synthesis for Data Augmentation
+
+URL Source: https://arxiv.org/pdf/2604.19941v2
+
+Published Time: Fri, 24 Apr 2026 00:53:11 GMT
+
+Number of Pages: 7
+
+Markdown Content:
+# CRACKFORWARD: CONTEXT-AWARE SEVERITY-STAGE CRACK SYNTHESIS FOR DATA AUGMENTATION Nassim Sadallah and Mohand Saïd Allili LARIVIA Lab, Department of Computer Science and Engineering Gatineau, QC, Canada {sadn12, mohandsaid.allili}@uqo.ca 
+
+> © 2026 IEEE. Personal use of this material is permitted. For any other use, permission must be obtained from IEEE.
+
+ABSTRACT Reliable crack segmentation is vital for structural health monitoring, yet the scarcity of well-annotated data con-stitutes a major challenge. To address this limitation, we propose a novel context-aware generative framework designed to synthesize realistic crack growth patterns for data augmentation. Unlike existing methods that primarily manipulate textures or background content, CrackForward explicitly models crack morphology by combining directional crack elongation with learned thickening and branching. Our framework integrates two key innovations: (i) a contextually guided crack expansion module, which uses local directional cues and adaptive random walk to simulate realistic propaga-tion paths; and (ii) a two-stage U-Net-style generator that learns to reproduce spatially varying crack char-acteristics such as thickness, branching, and growth. Experimental results show that the generated samples preserve target-stage saturation and thickness charac-teristics and improve the performance of several crack segmentation architectures. These results indicate that structure-aware synthetic crack generation can provide more informative training data than conventional aug-mentation alone. Index Terms— Crack Expansion, Local Eigenvector Ori-entation, Unet-style generation, Crack Segmentation 1. INTRODUCTION Rapid advances in machine learning and robotics are re-shaping structural health monitoring (SHM) by enabling automated inspection, progress tracking, and proactive safety assessment of critical infrastructure [1–3]. Main-tenance alone represents 50–70 % of a project’s lifecycle cost [4], making early damage detection crucial for cost-effective asset management. Among deterioration mech-anisms, concrete crack propagation is the most prevalent and damaging [5]. Although cracks are visually observ-able, their early signs are often subtle and easily missed, delaying timely intervention. To quantify deterioration, crack segmentation, which classifies each pixel as crack or background, offers pre-cise geometric information for assessing severity, mod-eling growth, and planning repairs [6, 7]. However, the effectiveness of deep learning–based segmentation is con-strained by limited annotated datasets, a bottleneck that hampers model generalization across diverse materials, lighting conditions, and crack morphologies [8]. Address-ing this data scarcity is therefore critical for building ro-bust, scalable SHM solutions that can reliably detect and track structural damage under real-world conditions. To mitigate data scarcity, research has explored two main dataset-expansion strategies. The first uses tra-ditional augmentation, geometric transformations [9], mixup [10], and image-processing variations, to boost model robustness and generalization [11, 12]. While helpful, these methods merely reshape existing samples, offering limited novelty and diversity [13]. A second direction leverages generative models, which synthesize images from segmentation masks or learned feature rep-resentations [14, 15]. Although more advanced, current approaches face two main challenges: (1) limited in-formativeness, as generated data often lacks contextual richness and structural diversity, and (2) a synthetic– real domain gap that causes segmentation models trained only on synthetic images to underperform unless com-bined with real data. In addition, most methods treat cracks as purely visual artifacts, overlooking material-specific propagation. For example, crack growth in pavement differs significantly from that in walls, making contextual differentiation essential for generating data that reflects realistic crack evolution. In this work, we present a novel two-phase frame-work for context-aware crack expansion under structural and severity-stage constraints. Our main contributions are: (1) a local endpoint estimation and directional propagation strategy for structure-consistent crack elon-
+
+> arXiv:2604.19941v2 [cs.CV] 23 Apr 2026
+
+gation, and (2) a dual-stage generative architecture for stage-conditioned crack thickening and branching synthesis. Unlike standard augmentation or generic GAN-based methods, the proposed framework models stage-consistent crack development, generating masks that capture plausible morphological progression across severity levels. The first phase performs direction-guided crack elongation, while the second models dynamic thickening and branching. This yields high-fidelity, domain-aware synthetic crack masks that improve the generalization of downstream segmentation models. The rest of this paper is organized as follows: Section 2 presents our proposed methodology. Section 3 presents our experiments for validation. Section 4 concludes the paper. 2. METHODOLOGY 2.1. Local Endpoint Estimation (LEE) This stage seeks to simulate the progressive increase in crack length. This starts by reliably identifying struc-turally significant endpoints in a source crack mask 
+
+M .First, we compute the crack skeleton S ∈ { 0, 1}H×W ,then crack endpoints are detected using 3 × 3 kernel filtering, N = S ∗ K, where ∗ is discrete convolution and :
+
+K =
+
+
+
+1 1 11 0 11 1 1
+
+ ,
+
+where a point (i, j ) is an endpoint if it is on the crack and N (i, j ) = 1 . Let C be the set of all endpoints. To enforce a minimum euclidean separation dmin between crack propagation positions, we iteratively select end-points from C. Let E be the set of final retained end-points, which is initially empty. For each iteration, we select the next point e ∈ C such that: 
+
+∀e′ ∈ E : ∥e − e′∥2 > d min .
+
+To estimate a crack’s local orientation at endpoint candidate e = ( i, j ), we first extract a centered w × w
+
+window M around the endpoint. Let {P1, ..., P n} be the set containing the crack pixels coordinates in M , μ the coordinates average. First, we compute the empirical covariance to capture the crack pixel spatial distribution 
+
+C = 1
+
+n − 1
+
+> n
+
+∑
+
+> k=1
+
+(Pk − μ)( Pk − μ)T ,
+
+and let λ1 ≥ λ2 and v1, v2 be its eigenpairs. The princi-pal axis is vdom = v1. Finally, we normalize and set the direction of the crack propagation by correcting the sign of the dominant eigenvector, as follows: 
+
+vadj =
+
+{−vdom , if v⊤
+
+> dom
+
+(μ − e) < 0,
+
+vdom , otherwise , vadj ← vadj 
+
+∥vadj ∥ .
+
+The estimated orientation angle is thus: 
+
+θ = atan2 ((vadj )y , (vadj )x
+
+)
+
+Algorithm 1 gives the full procedure and Fig. 1 illustrates endpoints (red) and local directions (green). 2.2. Directional Crack Propagation We model crack growth from endpoints with a directional random walk balancing local orientation and controlled randomness. Let I ∈ { 0, 1}H×W be the skeleton image and E = {(yi, x i)} the filtered endpoints. For each end-point we estimate the dominant orientation θ0. Propa-gation is constrained to θ ∼ U [θ0 − δ, θ 0 + δ] with step length ℓ. Starting at p0, each step updates the position by: 
+
+pt+1 = pt + ℓ [cos θ, sin θ]⊤,
+
+and the segment [pt, p t+1 ] is rasterized to the image (dig-ital line). The walk runs for s steps until a target crack density m ∈ [0 , 1] is reached. This procedure preserves local directionality while introducing controlled stochas-tic deviations and global sparsity control. Algorithm 1 Directional random walk algorithm Require: Binary image I, endpoints E, step range 
+
+[smin , s max ], base length ℓ, max deviation δ, density 
+
+m 
+
+> 1:
+
+I0 ← Skeletonize (I) 
+
+> 2:
+
+for all endpoint (y, x ) ∈ E do  
+
+> 3:
+
+θ0, vdom ← LEE (I0, (y, x ))  
+
+> 4:
+
+s ← random integer in [smin , s max ] 
+
+> 5:
+
+while s > 0 and density (I0) < m do  
+
+> 6:
+
+∆θ ← random uniform in [−δ, δ ] 
+
+> 7:
+
+θsampled ← θ0 + ∆ θ 
+
+> 8:
+
+ℓstep ← ℓ 
+
+> 9:
+
+x′ ← x + ℓstep · cos( θsampled ) 
+
+> 10:
+
+y′ ← y + ℓstep · sin( θsampled ) 
+
+> 11:
+
+if (x′, y ′) /∈ [0 , W ) × [0 , H ) then  
+
+> 12:
+
+break  
+
+> 13:
+
+end if  
+
+> 14:
+
+Draw line from (x, y ) to (x′, y ′) and set pixels to 1.  
+
+> 15:
+
+x ← x′, y ← y′, s ← s − 1 
+
+> 16:
+
+end while  
+
+> 17:
+
+end for  
+
+> 18:
+
+return I0Fig. 1. Illustration of endpoint detection (left) and crack propagation using diretional random walks (right). 2.3. Dual-Stage Framework for Crack Growth Synthesis In low-reinforced concrete, crack growth is nonlinear: as cracks propagate, their width generally increases due to ongoing material degradation and stress redistribution. Capturing this coupled evolution of length and thickness is essential for generating training data that reflects real structural behavior. To address this, we propose a dual-stage U-Net–based generator for unpaired crack-mask translation that inte-grates gated and dilated convolutions to synthesize re-alistic crack geometry with spatially varying thickness. Fig. 2 presents the global architecture of this model. Stage 1 models the coarse propagation path and over-all length. It takes elongated skeleton st ∈ { 0, 1}1×H×W
+
+and source statistics ϕs1 and produces a coarse binary mask M tcoarse ∈ { 0, 1}1×256 ×256 . Through 3 decoding stages, FiLM layers ensure minimum thicknening, while attention gates Fig. 3 weight skip connections to sup-press irrelevant encoder informations. The decoder mod-ule uses dilated convolutions hallucinating pixels along 
+
+st, followed by spatial attention to capture global feature relations and refine outputs. Stage 2 refines local widening and branching, en-abling masks whose thickness naturally grows with crack extension. The generation is conditioned on the coarse mask ( M tcoarse ), the original mask ( M s), the half-thickness map T s 
+
+> half
+
+, and target statistics ϕS2 .The encoder comprises three convolutional blocks; an early FiLM layer [16] modulates feature-wise scale and bias (γ, β ) using statistics ϕS2 . In the decoder, feature maps are modulated by T s 
+
+> half
+
+to control per-pixel thick-ness adjustments. Attention gates weight skip connec-tions to keep only relevant encoder informations, and dilated convolutions enlarge the receptive field with pa-rameter efficiency. Decoding blocks include FiLM layers for multi-scale conditioning and a final spatial-attention module to capture global feature relations. The modula-tion block, spatial-attention block, encoder and decoder illustrated in Fig. 4 facilitate precise morphological con-trol, aligning synthetic patterns with crack evolution dy-
+
+Fig. 2. Dual-stage crack thickener architecture. namics. 2.4. Objective functions We adopt an unpaired adversarial learning strategy to model crack severity progression. The generator is trained using an adversarial loss to produce realis-tic crack masks, together with a reconstruction loss to preserve structural consistency during growth. In addition, we introduce three morphology-aware losses, namely thickness, saturation, continuity, in order to explicitly control the geometric properties of the gener-
+
+Fig. 3. Attention gate module Fig. 4. modules architecture ated cracks and enforce realistic morphological evolution across severity stages. We use the Least Squares GAN (LSGAN) formula-tion to stabilize adversarial training and improve gra-dient quality. Given real sample xi ∼ pi at stage i
+
+and translated sample ˜xj ∼ ˜pz at stage j with ( i, j ∈{1, . . . , N } and i < j ), the adversarial loss for the dis-criminator D and G are defined as: 
+
+LD 
+
+> adv
+
+= Exi∼Pi
+
+[(D(xi) − 1) 2] + E ˜xj ∼ ˜Pz
+
+[(D( ˜ xj )) 2]
+
+LG 
+
+> adv
+
+= Exi∼Pi
+
+[(D(G(xi, T half i , s ,i, Φj )) − 1)2]
+
+T half  
+
+> i
+
+denotes the half-thickness map of the input crack mask Mi, where each foreground pixel p is as-signed its Euclidean distance to the nearest boundary pixel, given by T half  
+
+> i
+
+(p) = min q∈∂M i ∥p − q∥2, with 
+
+∂M i the boundary of Mi. The target domain statistics 
+
+Φj = [ μ(j) 
+
+> s
+
+, μ (j) 
+
+> t
+
+] contains the mean saturation and mean half-thickness of target stage j, s,i is the extended skele-ton generated by LEE module. The full LSGAN loss, thus, is given by Llsgan = LD 
+
+> adv
+
++ LG
+
+> adv
+
+We use the reconstruction (cycle) loss to preserve the geometric identity as we do not have paired data. The cycle loss is defined as Lcyc = ∥ ˆxirec − xi∥1.While the adversarial loss enforces global realism, it does not explicitly constrain the morphological prop-erties of the generated crack masks. Thus, we intro-duce three morphology-aware losses that encode domain-specific structural priors: thickness, saturation, and con-tinuity. Thickness loss: Penalizes deviations from the dataset mean thickness μt:
+
+Lth = ∣∣¯t( ˆ xj ) − μj
+
+∣∣, ¯t( ˆ xj ) = 1
+
+| ˆxj |
+
+∑ 
+
+> p∈ˆxj
+
+d(p).
+
+Saturation loss: Enforces alignment with the target mean saturation μs:
+
+Lsat = ∣∣s(ˆ x)−μs
+
+∣∣, s( ˆ xj ) = 1
+
+HW 
+
+∑
+
+> p
+
+1{ ˆxj (p) > 0.5},
+
+Continuity loss: Computed as the mean absolute Laplacian response to encourage spatial coherence and penalize fragmented structures: 
+
+Lcont = 1
+
+HW 
+
+∑
+
+> p
+
+∣∣(K ∗ ˆxj )( p)∣∣, K =
+
+
+
+0 1 01 −4 10 1 0
+
+ .
+
+The complete generator loss combines the adversarial objective with the morphology-aware losses: 
+
+LG = Llsgan + λ1Lcyc + λ2Lth + λ3Lsat + λ4Lcont ,
+
+where λ1, λ2, λ3, and λ4 are weights for cycle and mor-phology losses. 3. EXPERIMENTAL RESULTS 3.1. Experiment Setup To validate our framework, we conducted experiments using the DeepCrack dataset [6], consisting of 537 im-ages. The dataset was partitioned into three balanced severity stages using the 33rd and 66th percentiles of a per-sample severity score ϕ, computed from crack satu-ration and mean half-thickness. Table 1 summarizes the statistics of each stage. Table 1. Per-stage crack statistics                                                                                               
+
+> Stage Split Ns(μ±σ)t(μ±σ)
+> 0FULL 179 0.0116 ±0.0047 1.550 ±0.359
+> Train 125 0.0117 ±0.0048 1.184 ±0.158
+> Val 27 0.0113 ±0.0052 1.141 ±0.117
+> Test 27 0.0113 ±0.0041 1.222 ±0.212
+> 1FULL 179 0.0282 ±0.0070 2.563 ±0.455
+> Train 125 0.0281 ±0.0070 1.701 ±0.253
+> Val 27 0.0294 ±0.0072 1.695 ±0.311
+> Test 27 0.0269 ±0.0068 1.809 ±0.342
+> 2FULL 179 0.0655 ±0.0359 5.605 ±2.883
+> Train 125 0.0663 ±0.0354 3.509 ±1.692
+> Val 27 0.0684 ±0.0452 3.427 ±1.843
+> Test 27 0.0549 ±0.0200 2.945 ±1.000
+
+All masks and images were resized to 256 ×256 . Both the generator and the segmentation models were trained with batch size 4 using the Adam optimizer with learning rate 2 × 10 −4. The generator was trained in an unpaired setting for 100 epochs on an NVIDIA RTX6000 GPU, with cycle loss weight λ1 = 10 .0 and morphology-aware loss weights λ2 = 2 .0, λ3 = 2 .0, and λ4 = 4 .0. In the directional propagation stage, the parameters were set Table 2. Per-stage real vs. generated statistics on the TEST                                            
+
+> Stage Case s(μ±σ)∆st(μ±σ)∆t
+> 1Real 0.0269 ±0.0068 1.809 ±0.342
+> 1Fake 0.0262 ±0.0034 0.0007 1.730 ±0.180 0.079
+> 2Real 0.0549 ±0.0200 2.945 ±1.000
+> 2Fake 0.0512 ±0.0119 0.0037 2.941 ±0.881 0.004
+
+Table 3. Quantitative assessment of synthesized cracks.          
+
+> domain target L1 Loss SSIM PSNR (dB) Medium cracks (stage 1) 0.1001 0.968 32.62 Advanced cracks (stage 2) 0.1073 0.9510 30.84
+
+to dmin = 4 , δ = 90 ◦, ℓ = 2 , and [smin , s max ] = [3 , 50] ,with stopping controlled by the target mean saturation 
+
+m. For downstream evaluation, all segmentation models were trained on the same split and input resolution for 30 epochs. 3.2. Performance Evaluation 3.2.1. Quantitative evaluation In this assessment, we compared the distribution of the generated translations with the empirical distribution of the actual stages, and we report the corresponding re-sults in Table 2. The proposed generator performs trans-lations with saturation and thickness errors of approxi-mately 2.6% and 4.4% for Stage 1, and 6.7% and 0.14% for Stage 2, respectively. These low relative deviations indicate that the growth accurately preserves the target-stage statistical properties, and remains tightly aligned with the real data distributions in terms of both crack density and structural thickness. Table 3 reports quantitative assessments via L1 loss, SSIM, and PSNR on the generated images, revealing low reconstruction errors and high structural fidelity. 3.2.2. Qualitative evaluation Figure 5 shows representative examples of crack propaga-tion synthesized by CrackForward, illustrating plausible elongation patterns and spatially varying thickness. In particular, the generated samples exhibit stronger thick-ening near existing branches and thinner newly elongated regions, in agreement with the intended stage-wise mor-phological progression. These qualitative results further support the usefulness of the proposed framework for crack data augmentation. 3.2.3. Segmentation application enhancement To evaluate CrackForward for crack segmentation, U-Net, FPN, PAN, and PSPNet were trained under three settings: real data only, real data with classi-cal augmentation, and real data with CrackForward augmentation. In all cases, the real training set in-cluded the three severity stages. CrackForward added synthetic samples by translating early-stage masks to medium and severe stages, and medium-stage masks to the severe stage. Classical augmentation used random flips, rotations, zooms, color jittering, brightness, and hue variations. As shown in Table 4, CrackForward consistently improves performance across all models. Relative to real-only training, Dice improves by 4.7%, 3.7%, 6.6%, and 3.4% for U-Net, FPN, PAN, and PSP-Net, respectively, while IoU improves by 6.3%, 5.4%, 7.9%, and 5.8%. Compared with classical augmentation, Dice further improves by 3.3%, 2.9%, 4.2%, and 2.6%, and IoU by 5.4%, 4.9%, 5.7%, and 4.6%, respectively. These results indicate that CrackForward provides com-plementary structural variability beyond conventional transformations. Table 4. Segmentation performance under different aug-mentation settings.                                
+
+> Model Training Data Dice IoU U-Net Real 0.771 0.663 Real + Classical Aug. 0.781 0.669 Real + CrackForward 0.807 0.705 FPN Real 0.725 0.589 Real + Classical Aug. 0.731 0.592 Real + CrackForward 0.752 0.621 PAN Real 0.701 0.567 Real + Classical Aug. 0.717 0.579 Real + CrackForward 0.747 0.612 PSPNet Real 0.715 0.582 Real + Classical Aug. 0.720 0.589 Real + CrackForward 0.739 0.616
+
+4. CONCLUSIONS This paper introduced CrackForward, a context-aware generative framework for alleviating data scarcity in crack segmentation. By combining context-guided crack expansion with a two-stage U-Net-style generator, the proposed method synthesizes stage-consistent crack pat-terns with controlled thickness, saturation, and struc-tural variability. Experimental results show that the generated samples preserve target-stage morphological characteristics and consistently improve segmentation performance across multiple architectures. Overall, the results suggest that structure-aware crack synthesis can provide more informative augmen-tation than conventional transformations alone. Future work will investigate broader experimental validation, joint modeling of crack masks and background appear-ance, and extension to other structural defects such as Fig. 5. Representative samples of crack propagation synthesized by the proposed CrackForward framework. spalling, delamination, and corrosion. 
+
+# Acknowledgments 
+
+This research was supported by the Fonds de recherche du Québec – Nature et technologies (FRQNT), award DOI: 10.69777/371547. 5. REFERENCES [1] Dariush Amirkhani, Mohand Saïd Allili, Loucif Hebbache, Nadir Hammouche, and Jean-François Lapointe, “Visual concrete bridge defect classifi-cation and detection using deep learning: A sys-tematic review,” IEEE Transactions on Intelligent Transportation Systems, vol. 25, no. 9, pp. 10483– 10505, 2024. [2] Srijeet Halder and Kereshmeh Afsari, “Robots in inspection and monitoring of buildings and infras-tructure: A systematic review,” Applied Sciences, vol. 13, no. 4, pp. 2304, 2023. [3] Michela Prunella, Roberto Maria Scardigno, Domenico Buongiorno, Antonio Brunetti, Nicola Longo, Raffaele Carli, Mariagrazia Dotoli, and Vi-toantonio Bevilacqua, “Deep learning for auto-matic vision-based recognition of industrial surface defects: A survey,” IEEE Access, vol. 11, pp. 43370– 43423, 2023. [4] Mohammed Sulaiman, Ali Abdullah S AlQahtani, Hexu Liu, and Mohamed Binalhaj, “Utilizing wi-fi access points for unmanned aerial vehicle localiza-tion for building indoor inspection,” in 2021 IEEE 12th Annual Ubiquitous Computing, Electronics & Mobile Communication Conference (UEMCON). IEEE, 2021, pp. 0775–0779. [5] Ming-Hui Zeng, Hong-Wei Wang, Yan-Jie Wang, Jian-Jun Zheng, and Zhi-Min Wu, “Meso-crack propagation process of concrete based on macro-fracture parameters: Numerical and experimental,” Theoretical and Applied Fracture Mechanics, vol. 129, pp. 104216, 2024. [6] Yahui Liu, Jian Yao, Xiaohu Lu, Renping Xie, and Li Li, “Deepcrack: A deep hierarchical feature learning architecture for crack segmentation,” Neu-rocomputing, vol. 338, pp. 139–153, 2019. [7] Fabio Panella, Aldo Lipani, and Jan Boehm, “Se-mantic segmentation of cracks: Data challenges and architecture,” Automation in Construction, vol. 135, pp. 104110, 2022. [8] Amir Rezaie, Radhakrishna Achanta, Michele Go-dio, and Katrin Beyer, “Comparison of crack seg-mentation using digital image correlation measure-ments and deep learning,” Construction and Build-ing Materials, vol. 261, pp. 120474, 2020. [9] Shanglian Zhou, Carlos Canchila, and Wei Song, “Deep learning-based crack segmentation for civil infrastructure: Data types, architectures, and benchmarked performance,” Automation in Con-struction, vol. 146, pp. 104678, 2023. [10] Lulu Tian, Zidong Wang, Weibo Liu, Yuhua Cheng, Fuad E Alsaadi, and Xiaohui Liu, “A new gan-based approach to data augmentation and image segmentation for crack detection in thermal imaging tests,” Cognitive Computation, vol. 13, pp. 1263– 1273, 2021. [11] Suorong Yang, Weikang Xiao, Mengchen Zhang, Suhan Guo, Jian Zhao, and Furao Shen, “Image data augmentation for deep learning: A survey,” arXiv preprint arXiv:2204.08610, 2022. [12] Linjun Zhang, Zhun Deng, Kenji Kawaguchi, Ami-rata Ghorbani, and James Zou, “How does mixup help with robustness and generalization?,” arXiv preprint arXiv:2010.04819, 2020. [13] Yifan Zhang, Daquan Zhou, Bryan Hooi, Kai Wang, and Jiashi Feng, “Expanding small-scale datasets with guided imagination,” Advances in neural in-formation processing systems, vol. 36, pp. 76558– 76618, 2023. [14] T Jin, Xiao-Wei Ye, and ZX Li, “Establishment and evaluation of conditional gan-based image dataset for semantic segmentation of structural cracks,” En-gineering Structures, vol. 285, pp. 116058, 2023. [15] Tomaso Fontanini, Claudio Ferrari, Giuseppe Lisanti, Massimo Bertozzi, and Andrea Prati, “Se-mantic image synthesis via class-adaptive cross-attention,” IEEE Access, 2025. [16] Ethan Perez, Florian Strub, Harm de Vries, Vin-cent Dumoulin, and Aaron Courville, “FiLM: Vi-sual reasoning with a general conditioning layer,” in AAAI Conference on Artificial Intelligence (AAAI-18), 2018, pp. 3942–3951.

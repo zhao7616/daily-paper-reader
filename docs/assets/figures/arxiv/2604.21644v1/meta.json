@@ -1,0 +1,30 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.21644v1/fig-001.webp",
+      "caption": "Fig. 2: Coloring filter pole locations. The three coloring filters (SF:1, SF:2, SF:3) are characterized by their poles in the complex z-plane. All filters have poles at radius 0.8 with varying angles (100, 130, and 145 degrees), representing different coloring characteristics of the process noise.",
+      "page": 4,
+      "index": 1,
+      "width": 456,
+      "height": 467
+    },
+    {
+      "url": "assets/figures/arxiv/2604.21644v1/fig-002.webp",
+      "caption": "Fig. 3: Performance ratio comparison. The figure compares the performance ratios PRAug. (perfectly augmented KF with known coloring dynamics) and PRIWAKF (Innovations-Whitening Adaptive KF) for three coloring filter examples (SF:1, SF:2, SF:3). Both methods achieve similar performance ratios, demonstrating that IWAKF can match the performance of the perfectly augmented filter without prior knowledge of the process-noise coloring dynamics.",
+      "page": 4,
+      "index": 2,
+      "width": 452,
+      "height": 327
+    },
+    {
+      "url": "assets/figures/arxiv/2604.21644v1/fig-003.webp",
+      "caption": "Fig. 4: Innovations autocorrelation comparison. The figure displays the autocorrelation of the innovations sequence for the standard KF, the augmented KF (Aug. KF), and IWAKF. The standard KF shows significant autocorrelation, indicating colored innovations due to unmodeled colored process noise. Both the augmented KF and IWAKF exhibit near-zero autocorrelation, demonstrating that they successfully whiten the innovation. Notably, IWAKF achieves this whitening without prior knowledge of the process-noise coloring dynamics.",
+      "page": 5,
+      "index": 3,
+      "width": 467,
+      "height": 918
+    }
+  ]
+}

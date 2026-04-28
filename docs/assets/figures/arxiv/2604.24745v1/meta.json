@@ -1,0 +1,78 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.24745v1/fig-001.webp",
+      "caption": "Fig. 10. HRGrad predicts the macroscopic velocity moments T of the 1D Riemann problem for ε = 0.1.",
+      "page": 21,
+      "index": 1,
+      "width": 759,
+      "height": 297
+    },
+    {
+      "url": "assets/figures/arxiv/2604.24745v1/fig-002.webp",
+      "caption": "Fig. 6. MAD-MTL predicts the macroscopic temperature moments T of the 1D Riemann problem. The comparison results are shown for (a) ε = 1.0, (b) ε = 0.1, and (c) ε = 0.01.",
+      "page": 10,
+      "index": 2,
+      "width": 773,
+      "height": 406
+    },
+    {
+      "url": "assets/figures/arxiv/2604.24745v1/fig-003.webp",
+      "caption": "Fig. 7. Geometric sketch comparison of gradient manipulation methods under conflicting tasks (g1, g2). (a) PCGrad relies on energy-clipping orthogonal projections. (b) IMTL-G rescales gradients to be equal-length. (c) ConFIG sums unit vectors of orthogonal components. (d) HRGrad isometrically rotates gradients into a Harmonized Cone H, resolving conflicts while fully preserving kinetic energy.",
+      "page": 10,
+      "index": 3,
+      "width": 754,
+      "height": 193
+    },
+    {
+      "url": "assets/figures/arxiv/2604.24745v1/fig-004.webp",
+      "caption": "Fig. 3. Comparison of gradient aggregation strategies under multiscale conflicts. (a) Euclidean projection severely clips the magnitude of the microscopic gradient P(gmicro). (b) Manifold isometric rotation avoids directional conflicts while preserving the gradient magnitude ∥grotmicro∥2 ≡ ∥gmicro∥2.",
+      "page": 8,
+      "index": 4,
+      "width": 713,
+      "height": 221
+    },
+    {
+      "url": "assets/figures/arxiv/2604.24745v1/fig-005.webp",
+      "caption": "Fig. 1. Schematic of the proposed HRGrad framework. Starting from task gradients sampled over macro, transitional, and micro regimes, HRGrad first constructs a harmonized cone together with a physical anchor. Then, it rotates conflicting gradients by isometric operators and selects MER-optimal rotation angles. Finally, it performs fair aggregation to produce the update direction.",
+      "page": 4,
+      "index": 5,
+      "width": 680,
+      "height": 415
+    },
+    {
+      "url": "assets/figures/arxiv/2604.24745v1/fig-006.webp",
+      "caption": "Fig. 4. MAD-MTL predicts the macroscopic density moments ρ of the 1D Riemann problem. The comparison results are shown for (a) ε = 1.0, (b) ε = 0.1, and (c) ε = 0.01.",
+      "page": 9,
+      "index": 6,
+      "width": 773,
+      "height": 410
+    },
+    {
+      "url": "assets/figures/arxiv/2604.24745v1/fig-007.webp",
+      "caption": "Fig. 5. MAD-MTL predicts the macroscopic velocity moments u of the 1D Riemann problem. The comparison results are shown for (a) ε = 1.0, (b) ε = 0.1, and (c) ε = 0.01.",
+      "page": 9,
+      "index": 7,
+      "width": 773,
+      "height": 415
+    },
+    {
+      "url": "assets/figures/arxiv/2604.24745v1/fig-008.webp",
+      "caption": "Table 1 Comparison of gradient conflict resolution methods. Sc: equal cosine similarity constant; m: number of tasks; ✓: property is provably guaranteed; ×: not guaranteed.",
+      "page": 37,
+      "index": 8,
+      "width": 837,
+      "height": 390
+    },
+    {
+      "url": "assets/figures/arxiv/2604.24745v1/fig-009.webp",
+      "caption": "Fig. 8. HRGrad predicts the macroscopic density moments ρ of the 1D Riemann problem for ε = 0.1.",
+      "page": 20,
+      "index": 9,
+      "width": 761,
+      "height": 190
+    }
+  ]
+}
