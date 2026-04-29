@@ -1,0 +1,440 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-04-29T20:51:55.903398+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 0,
+    "deep_cap": 6,
+    "deep_selected": 0,
+    "quick_candidates": 12,
+    "quick_skim_target": 11,
+    "quick_selected": 11
+  },
+  "deep_dive": [],
+  "quick_skim": [
+    {
+      "id": "2604.20127v1",
+      "source": "arxiv",
+      "title": "Trajectory-Aware Reliability Modeling of Democratic Systems",
+      "abstract": "Failures in complex systems often emerge through gradual degradation and the propagation of stress across interacting components rather than through isolated shocks. Democratic systems exhibit similar dynamics, where weakening institutions can trigger cascading deterioration in related institutional structures. Traditional reliability and survival models typically estimate failure risk based on the current system state but do not explicitly capture how degradation propagates through institutional networks over time. This paper introduces a trajectory-aware reliability modeling framework based on Dynamic Causal Neural Autoregression (DCNAR). The framework first estimates a causal interaction structure among institutional indicators and then models their joint temporal evolution to generate forward trajectories of system states. Failure risk is defined as the probability that predicted trajectories cross predefined degradation thresholds within a fixed horizon. Using longitudinal institutional indicators, we compare DCNAR-based trajectory risk models with discrete-time hazard and Cox proportional hazards models. Results show that trajectory-aware modeling consistently outperforms Cox models and improves risk prediction for several propagation-driven institutional failures. These findings highlight the importance of modeling dynamic system interactions for reliability analysis and early detection of systemic degradation.",
+      "authors": [
+        "Dmitry Zaytsev",
+        "Valentina Kuskova",
+        "Michael Coppedge"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.CY"
+      ],
+      "published": "2026-04-22T02:47:31+00:00",
+      "link": "https://arxiv.org/pdf/2604.20127v1",
+      "tags": [
+        "keyword:PHM",
+        "query:PHM"
+      ],
+      "llm_score": 7.5,
+      "llm_evidence_en": "reliability modeling of gradual degradation and failure risk over time",
+      "llm_evidence_cn": "随时间推移的渐进退化和失效风险的可靠性建模",
+      "llm_evidence": "随时间推移的渐进退化和失效风险的可靠性建模",
+      "canonical_evidence": "随时间推移的渐进退化和失效风险的可靠性建模",
+      "llm_tldr_en": "Models system reliability and failure risk by capturing how degradation propagates through networks over time.",
+      "llm_tldr_cn": "通过捕捉退化在网络中随时间的传播过程，对系统可靠性和失效风险进行建模。",
+      "llm_tldr": "通过捕捉退化在网络中随时间的传播过程，对系统可靠性和失效风险进行建模。",
+      "llm_tags": [
+        "query:rul:composite"
+      ],
+      "matched_query_tag": "query:rul:composite",
+      "matched_query_text": "Papers central to 剩余寿命预测和旋转机械设备剩余寿命预测, especially work that connects or combines: Remaining Useful Life (RUL) prediction methods; Health monitoring and RUL for rotating machinery; Remaining useful life prediction for rolling element bearings; Deep learning architectures for RUL estimation; State of the art methods for remaining useful life prediction of rotating machinery; Deep learning based RUL estimation for industrial bearings and motors; Data driven vs physics informed models for RUL prediction; Real time health assessment and RUL forecasting for rotating components.",
+      "matched_requirement_id": "req-composite-rul",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2604.21761v1",
+      "source": "arxiv",
+      "title": "Transferable Physics-Informed Representations via Closed-Form Head Adaptation",
+      "abstract": "Physics-informed neural networks (PINNs) have garnered significant interest for their potential in solving partial differential equations (PDEs) that govern a wide range of physical phenomena. By incorporating physical laws into the learning process, PINN models have demonstrated the ability to learn physical outcomes reasonably well. However, current PINN approaches struggle to predict or solve new PDEs effectively when there is a lack of training examples, indicating they do not generalize well to unseen problem instances. In this paper, we present a transferable learning approach for PINNs premised on a fast Pseudoinverse PINN framework (Pi-PINN). Pi-PINN learns a transferable physics-informed representation in a shared embedding space and enables rapid solving of both known and unknown PDE instances via closed-form head adaptation using a least-squares-optimal pseudoinverse under PDE constraints. We further investigate the synergies between data-driven multi-task learning loss and physics-informed loss, providing insights into the design of more performant PINNs. We demonstrate the effectiveness of Pi-PINN on various PDE problems, including Poisson's equation, Helmholtz equation, and Burgers' equation, achieving fast and accurate physics-informed solutions without requiring any data for unseen instances. Pi-PINN can produce predictions 100-1000 times faster than a typical PINN, while producing predictions with 10-100 times lower relative error than a typical data-driven model even with only two training samples. Overall, our findings highlight the potential of transferable representations with closed-form head adaptation to enhance the efficiency and generalization of PINNs across PDE families and scientific and engineering applications.",
+      "authors": [
+        "Jian Cheng Wong",
+        "Isaac Yin Chung Lai",
+        "Pao-Hsiung Chiu",
+        "Chin Chun Ooi",
+        "Abhishek Gupta",
+        "Yew-Soon Ong"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.CE",
+        "physics.comp-ph"
+      ],
+      "published": "2026-04-23T15:08:28+00:00",
+      "link": "https://arxiv.org/pdf/2604.21761v1",
+      "tags": [
+        "keyword:PHM"
+      ],
+      "llm_score": 6.5,
+      "llm_evidence_en": "physics-informed representations for physical phenomena",
+      "llm_evidence_cn": "物理信息表示用于物理现象",
+      "llm_evidence": "物理信息表示用于物理现象",
+      "canonical_evidence": "物理信息表示用于物理现象",
+      "llm_tldr_en": "Proposes a transferable physics-informed neural network framework for solving physical equations.",
+      "llm_tldr_cn": "提出了一种可迁移的物理信息神经网络框架，用于解决物理方程。",
+      "llm_tldr": "提出了一种可迁移的物理信息神经网络框架，用于解决物理方程。",
+      "llm_tags": [
+        "query:rul:composite"
+      ],
+      "matched_query_tag": "query:rul:composite",
+      "matched_query_text": "Papers central to 剩余寿命预测和旋转机械设备剩余寿命预测, especially work that connects or combines: Remaining Useful Life (RUL) prediction methods; Health monitoring and RUL for rotating machinery; Remaining useful life prediction for rolling element bearings; Deep learning architectures for RUL estimation; State of the art methods for remaining useful life prediction of rotating machinery; Deep learning based RUL estimation for industrial bearings and motors; Data driven vs physics informed models for RUL prediction; Real time health assessment and RUL forecasting for rotating components.",
+      "matched_requirement_id": "req-composite-rul",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.22869v1",
+      "source": "arxiv",
+      "title": "Avionic Main Fuel Pump Simulation and Fault-Diagnosis Benchmark",
+      "abstract": "In many cyber-physical systems, especially in critical applications such as aeroplanes, data to train anomaly detection and diagnosis algorithms is lacking due to data protection issues and partial observability. To combat this inherent lack of data, we introduce a high-fidelity, physics-informed co-simulation of a common aircraft main-fuel-pump system modelled in \\textsc{MATLAB/Simulink Simscape Fluids}. We also describe its generated time-series data with health and fault mode annotations. To show feasibility of our benchmark, we apply an unsupervised Recurrent Variational Autoencoder (RNN-VAE) for anomaly detection and a SOM-VAE for operating mode discretization, trained to separate healthy and faulty conditions.",
+      "authors": [
+        "Felix Leonhard Janzen",
+        "Lukas Moddemann",
+        "Alexander Diedrich",
+        "Oliver Niggemann"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI",
+        "eess.SY"
+      ],
+      "published": "2026-04-23T19:08:54+00:00",
+      "link": "https://arxiv.org/pdf/2604.22869v1",
+      "tags": [
+        "query:PHM"
+      ],
+      "llm_score": 7.5,
+      "llm_evidence_en": "Physics-informed simulation for fault diagnosis and health monitoring of avionic fuel pumps.",
+      "llm_evidence_cn": "航空燃油泵故障诊断与健康状态监测的物理信息仿真基准。",
+      "llm_evidence": "航空燃油泵故障诊断与健康状态监测的物理信息仿真基准。",
+      "canonical_evidence": "航空燃油泵故障诊断与健康状态监测的物理信息仿真基准。",
+      "llm_tldr_en": "Introduces a high-fidelity benchmark for avionic fuel pump fault diagnosis using physics-informed co-simulation.",
+      "llm_tldr_cn": "引入了一个基于物理信息协同仿真的航空燃油泵故障诊断高保真基准数据集。",
+      "llm_tldr": "引入了一个基于物理信息协同仿真的航空燃油泵故障诊断高保真基准数据集。",
+      "llm_tags": [
+        "query:phm:composite"
+      ],
+      "matched_query_tag": "query:phm:composite",
+      "matched_query_text": "Papers central to 同时涉及故障诊断与剩余寿命预测的研究论文, especially work that connects or combines: joint modeling of diagnosis and prognosis; multi-task learning for diagnosis and RUL; simultaneous fault diagnosis and remaining useful life prediction; integrated approach for machinery fault diagnosis and prognosis; multi task deep learning for PHM applications; joint diagnosis and RUL estimation research papers.",
+      "matched_requirement_id": "req-composite-phm",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2604.22740v1",
+      "source": "arxiv",
+      "title": "Minimax Optimal Procedures for Joint Detection and Estimation",
+      "abstract": "We investigate the problem of jointly testing a pair of composite hypotheses and, depending on the test result, estimating a random parameter under distributional uncertainties. Specifically, it is assumed that the distribution of the data given the parameter of interest, is subject to uncertainty. Both, a Bayesian formulation and a Neyman-Pearson-like formulation, are considered. It is shown that the optimal policy induces an $f$-similarity that must be maximized to identify the least favorable distributions. Besides the general results, the implementation is investigated using a band-type uncertainty model. For designing the minimax procedures, existing algorithms are modified to increase convergence speed while maintaining numerical stability. The proposed theory is supplemented by numerical results for both formulations.",
+      "authors": [
+        "Dominik Reinhard",
+        "Michael Fauß",
+        "Abdelhak M. Zoubir"
+      ],
+      "primary_category": "eess.SP",
+      "categories": [
+        "eess.SP",
+        "cs.IT"
+      ],
+      "published": "2026-04-24T17:38:05+00:00",
+      "link": "https://arxiv.org/pdf/2604.22740v1",
+      "tags": [
+        "keyword:PHM",
+        "query:PHM"
+      ],
+      "llm_score": 6.5,
+      "llm_evidence_en": "joint detection and estimation under uncertainty",
+      "llm_evidence_cn": "不确定性下的联合检测与估计",
+      "llm_evidence": "不确定性下的联合检测与估计",
+      "canonical_evidence": "不确定性下的联合检测与估计",
+      "llm_tldr_en": "Investigates minimax optimal procedures for joint hypothesis testing and parameter estimation.",
+      "llm_tldr_cn": "研究了在不确定性下进行联合假设检验和参数估计的极小极大优化程序。",
+      "llm_tldr": "研究了在不确定性下进行联合假设检验和参数估计的极小极大优化程序。",
+      "llm_tags": [
+        "query:phm:composite"
+      ],
+      "matched_query_tag": "query:phm:composite",
+      "matched_query_text": "Papers central to 同时涉及故障诊断与剩余寿命预测的研究论文, especially work that connects or combines: joint modeling of diagnosis and prognosis; multi-task learning for diagnosis and RUL; simultaneous fault diagnosis and remaining useful life prediction; integrated approach for machinery fault diagnosis and prognosis; multi task deep learning for PHM applications; joint diagnosis and RUL estimation research papers.",
+      "matched_requirement_id": "req-composite-phm",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.23068v1",
+      "source": "arxiv",
+      "title": "Probabilistic Hazard Analysis Framework with Stochastic Optimal Control for Deteriorating Civil Infrastructure Systems",
+      "abstract": "The safety and resilience of civil infrastructure systems are increasingly threatened by compounded risks from various hazard events and structural deterioration due to environmental stressors. This study presents a comprehensive risk-informed, life-cycle optimization framework that extends the Performance-Based Earthquake Engineering (PBEE) and probabilistic seismic loss estimation paradigms by combining hazard uncertainties, nonstationary deterioration, structural damage accumulation, and state-dependent fragility assessments, with optimal, adaptive maintenance strategies in time. The life-cycle cost optimization is formulated in this work as a Markov Decision Process (MDP) problem, utilizing derived, transition matrices reflecting time-variant deterioration effects and hazard risks. To mitigate the curse of dimensionality in system-level optimization, a novel tensor-based method exploiting Kronecker-factored transition dynamics is introduced, reducing complexity from exponential to linear in the number of components while still preserving exact, global dynamic programming solutions. Overall, the framework is general and versatile, able to accommodate various hazard types. A seismic hazard application is, however, demonstrated and explained in detail in this work. The developed methodology eventually provides decision-makers with a practical, data-driven tool toward cost effective risk mitigation of civil infrastructure systems.",
+      "authors": [
+        "Sudhir P. Jodha",
+        "Konstantinos G. Papakonstantinou"
+      ],
+      "primary_category": "eess.SY",
+      "categories": [
+        "eess.SY",
+        "cs.CE",
+        "math.NA"
+      ],
+      "published": "2026-04-24T23:38:38+00:00",
+      "link": "https://arxiv.org/pdf/2604.23068v1",
+      "tags": [
+        "query:PHM"
+      ],
+      "llm_score": 7.5,
+      "llm_evidence_en": "deterioration modeling and life-cycle optimization",
+      "llm_evidence_cn": "退化建模与全寿命周期优化",
+      "llm_evidence": "退化建模与全寿命周期优化",
+      "canonical_evidence": "退化建模与全寿命周期优化",
+      "llm_tldr_en": "Presents a life-cycle optimization framework combining deterioration, damage, and maintenance.",
+      "llm_tldr_cn": "提出了一个结合退化、损伤和维护的生命周期优化框架，用于基础设施安全。",
+      "llm_tldr": "提出了一个结合退化、损伤和维护的生命周期优化框架，用于基础设施安全。",
+      "llm_tags": [
+        "query:phm:composite"
+      ],
+      "matched_query_tag": "query:phm:composite",
+      "matched_query_text": "Papers central to 同时涉及故障诊断与剩余寿命预测的研究论文, especially work that connects or combines: joint modeling of diagnosis and prognosis; multi-task learning for diagnosis and RUL; simultaneous fault diagnosis and remaining useful life prediction; integrated approach for machinery fault diagnosis and prognosis; multi task deep learning for PHM applications; joint diagnosis and RUL estimation research papers.",
+      "matched_requirement_id": "req-composite-phm",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2604.23514v1",
+      "source": "arxiv",
+      "title": "Probabilistic Graphical Model using Graph Neural Networks for Bayesian Inversion of Discrete Structural Component States",
+      "abstract": "The health condition of components in civil infrastructures can be described by various discrete states according to their performance degradation. Inferring these states from measurable responses is typically an ill-posed inverse problem. Although Bayesian methods are well-suited to tackle such problems, computing the posterior probability density function (PDF) presents challenges. The likelihood function cannot be analytically formulated due to the unclear relationship between discrete states and structural responses, and the high-dimensional state parameters resulting from numerous components severely complicates the computation of the marginal likelihood function. To address these challenges, this study proposes a novel Bayesian inversion paradigm for discrete variables based on Probabilistic Graphical Models (PGMs). The Markov networks are employed as modeling tools, with model parameters learned from data and structural topology prior. It has been proved that inferring this PGM produces the same probabilistic estimation as the posterior PDF derived from Bayesian inference, which effectively solves the above challenges. The inference is accomplished by Graph Neural Networks (GNNs), and a graph property-based GNN training strategy is developed to enable accurate inference across varying graph scales, thereby significantly reducing the computational overhead in high-dimensional problems. Both synthetic and experimental data are used to validate the proposed framework",
+      "authors": [
+        "Teng Li",
+        "Stephen Wu",
+        "Yong Huang",
+        "James L. Beck",
+        "Hui Li"
+      ],
+      "primary_category": "stat.ML",
+      "categories": [
+        "stat.ML",
+        "cs.LG",
+        "stat.ME"
+      ],
+      "published": "2026-04-26T03:22:18+00:00",
+      "link": "https://arxiv.org/pdf/2604.23514v1",
+      "tags": [
+        "query:PHM"
+      ],
+      "llm_score": 6.5,
+      "llm_evidence_en": "health condition of components and performance degradation states",
+      "llm_evidence_cn": "组件健康状况和性能退化状态",
+      "llm_evidence": "组件健康状况和性能退化状态",
+      "canonical_evidence": "组件健康状况和性能退化状态",
+      "llm_tldr_en": "Uses GNNs and Bayesian inversion to infer discrete health states of structural components from responses.",
+      "llm_tldr_cn": "利用图神经网络和贝叶斯反演从响应中推断结构组件的离散健康状态。",
+      "llm_tldr": "利用图神经网络和贝叶斯反演从响应中推断结构组件的离散健康状态。",
+      "llm_tags": [
+        "query:rul:composite"
+      ],
+      "matched_query_tag": "query:rul:composite",
+      "matched_query_text": "Papers central to 剩余寿命预测和旋转机械设备剩余寿命预测, especially work that connects or combines: Remaining Useful Life (RUL) prediction methods; Health monitoring and RUL for rotating machinery; Remaining useful life prediction for rolling element bearings; Deep learning architectures for RUL estimation; State of the art methods for remaining useful life prediction of rotating machinery; Deep learning based RUL estimation for industrial bearings and motors; Data driven vs physics informed models for RUL prediction; Real time health assessment and RUL forecasting for rotating components.",
+      "matched_requirement_id": "req-composite-rul",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.20161v1",
+      "source": "arxiv",
+      "title": "SMART: A Spectral Transfer Approach to Multi-Task Learning",
+      "abstract": "Multi-task learning is effective for related applications, but its performance can deteriorate when the target sample size is small. Transfer learning can borrow strength from related studies; yet, many existing methods rely on restrictive bounded-difference assumptions between the source and target models. We propose SMART, a spectral transfer method for multi-task linear regression that instead assumes spectral similarity: the target left and right singular subspaces lie within the corresponding source subspaces and are sparsely aligned with the source singular bases. Such an assumption is natural when studies share latent structures and enables transfer beyond the bounded-difference settings. SMART estimates the target coefficient matrix through structured regularization that incorporates spectral information from a source study. Importantly, it requires only a fitted source model rather than the raw source data, making it useful when data sharing is limited. Although the optimization problem is nonconvex, we develop a practical ADMM-based algorithm. We establish general, non-asymptotic error bounds and a minimax lower bound in the noiseless-source regime. Under additional regularity conditions, these results yield near-minimax Frobenius error rates up to logarithmic factors. Simulations confirm improved estimation accuracy and robustness to negative transfer, and analysis of multi-modal single-cell data demonstrates better predictive performance. The Python implementation of SMART, along with the code to reproduce all experiments in this paper, is publicly available at https://github.com/boxinz17/smart.",
+      "authors": [
+        "Boxin Zhao",
+        "Mladen Kolar",
+        "Jinchi Lv"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "stat.ME",
+        "stat.ML"
+      ],
+      "published": "2026-04-22T04:00:31+00:00",
+      "link": "https://arxiv.org/pdf/2604.20161v1",
+      "tags": [
+        "keyword:PHM",
+        "query:PHM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "spectral transfer approach to multi-task learning",
+      "llm_evidence_cn": "多任务学习的光谱迁移方法",
+      "llm_evidence": "多任务学习的光谱迁移方法",
+      "canonical_evidence": "多任务学习的光谱迁移方法",
+      "llm_tldr_en": "Proposes a spectral transfer method for multi-task learning to improve performance with small samples.",
+      "llm_tldr_cn": "提出了一种用于多任务学习的光谱迁移方法，以提高小样本下的性能。",
+      "llm_tldr": "提出了一种用于多任务学习的光谱迁移方法，以提高小样本下的性能。",
+      "llm_tags": [
+        "query:phm"
+      ],
+      "matched_query_tag": "query:phm",
+      "matched_query_text": "multi task deep learning for PHM applications",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2604.18889v1",
+      "source": "arxiv",
+      "title": "AC-SINDy: Compositional Sparse Identification of Nonlinear Dynamics",
+      "abstract": "We present AC-SINDy, a compositional extension of the Sparse Identification of Nonlinear Dynamics (SINDy) framework that replaces explicit feature libraries with a structured representation based on arithmetic circuits. Rather than enumerating candidate basis functions, the proposed approach constructs nonlinear features through compositions of linear functions and multiplicative interactions, yielding a compact and scalable parameterization and enabling sparsity to be enforced directly over the computational graph. We also introduce a formulation that separates state estimation from dynamics identification by combining latent state inference with shared dynamics and multi-step supervision, improving robustness to noise while preserving interpretability. Experiments on nonlinear and chaotic systems demonstrate that the method recovers accurate and interpretable governing equations while scaling more favorably than standard SINDy.",
+      "authors": [
+        "Peter Racioppo"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-04-20T22:14:12+00:00",
+      "link": "https://arxiv.org/pdf/2604.18889v1",
+      "tags": [
+        "query:PHM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "latent state inference with shared dynamics for nonlinear systems",
+      "llm_evidence_cn": "非线性系统的潜状态推理与共享动力学",
+      "llm_evidence": "非线性系统的潜状态推理与共享动力学",
+      "canonical_evidence": "非线性系统的潜状态推理与共享动力学",
+      "llm_tldr_en": "A compositional framework for identifying nonlinear dynamics and state estimation.",
+      "llm_tldr_cn": "一种用于识别非线性动力学和状态估计的组合框架。",
+      "llm_tldr": "一种用于识别非线性动力学和状态估计的组合框架。",
+      "llm_tags": [
+        "query:rul:composite"
+      ],
+      "matched_query_tag": "query:rul:composite",
+      "matched_query_text": "Papers central to 剩余寿命预测和旋转机械设备剩余寿命预测, especially work that connects or combines: Remaining Useful Life (RUL) prediction methods; Health monitoring and RUL for rotating machinery; Remaining useful life prediction for rolling element bearings; Deep learning architectures for RUL estimation; State of the art methods for remaining useful life prediction of rotating machinery; Deep learning based RUL estimation for industrial bearings and motors; Data driven vs physics informed models for RUL prediction; Real time health assessment and RUL forecasting for rotating components.",
+      "matched_requirement_id": "req-composite-rul",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.21137v1",
+      "source": "arxiv",
+      "title": "Enhancing Science Classroom Discourse Analysis through Joint Multi-Task Learning for Reasoning-Component Classification",
+      "abstract": "Analyzing the reasoning patterns of students in science classrooms is critical for understanding knowledge construction mechanism and improving instructional practice to maximize cognitive engagement, yet manual coding of classroom discourse at scale remains prohibitively labor-intensive. We present an automated discourse analysis system (ADAS) that jointly classifies teacher and student utterances along two complementary dimensions: Utterance Type and Reasoning Component derived from our prior CDAT framework. To address severe label imbalance among minority classes, we (1) stratify-resplit the annotated corpus, (2) apply LLM-based synthetic data augmentation targeting minority classes, and (3) train a dual-probe head RoBERTa-base classifier. A zero-shot GPT-5.4 baseline achieves macro-F1 of 0.467 on UT and 0.476 on RC, establishing meaningful upper bounds for prompt-only approaches motivating fine-tuning. Beyond classification, we conduct discourse pattern analyses including UTxRC co-occurrence profiling, Cognitive Complexity Index (CCI) computation per session, lag-sequential analysis, and IRF chain analysis, revealing that teacher Feedback-with-Question (Fq) moves are the most consistent antecedents of student inferential reasoning (SR-I). Our results demonstrate that LLM-based augmentation meaningfully improves UT minority-class recognition, and that the structural simplicity of the RC task makes it tractable even for lexical baselines.",
+      "authors": [
+        "Jiho Noh",
+        "Mukhesh Raghava Katragadda",
+        "Raymond Carl",
+        "Soon Lee"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL",
+        "cs.AI"
+      ],
+      "published": "2026-04-22T22:56:53+00:00",
+      "link": "https://arxiv.org/pdf/2604.21137v1",
+      "tags": [
+        "keyword:PHM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "joint multi-task learning for classification dimensions",
+      "llm_evidence_cn": "用于分类维度的联合多任务学习",
+      "llm_evidence": "用于分类维度的联合多任务学习",
+      "canonical_evidence": "用于分类维度的联合多任务学习",
+      "llm_tldr_en": "Applies joint multi-task learning to classify discourse, demonstrating the utility of MTL in complex labeling.",
+      "llm_tldr_cn": "应用联合多任务学习对话语进行分类，展示了多任务学习在复杂标注中的效用。",
+      "llm_tldr": "应用联合多任务学习对话语进行分类，展示了多任务学习在复杂标注中的效用。",
+      "llm_tags": [
+        "query:phm"
+      ],
+      "matched_query_tag": "query:phm",
+      "matched_query_text": "multi task deep learning for PHM applications",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.21991v1",
+      "source": "arxiv",
+      "title": "Multi-Task Optimization over Networks of Tasks",
+      "abstract": "Multi-task optimization is a powerful approach for solving a large number of tasks in parallel. However, existing algorithms face distinct limitations: Population-based methods scale poorly and remain underexplored for large task sets. Approaches that do scale beyond a thousand tasks are mostly MAP-Elites variants and rely on a fixed, discretized archive that disregards the topology of the task space. We introduce MONET (Multi-Task Optimization over Networks of Tasks), a multi-task optimization algorithm that models the task space as a graph: tasks are nodes, and edges connect tasks in the task parameter space. This representation enables knowledge transfer between tasks and remains tractable for high-dimensional problems while exploiting the topology of the task space. MONET combines social learning, which generates candidates from neighboring nodes via crossover, with individual learning, which refines a node's own solution independently via mutation. We evaluate MONET on four domains (archery, arm, and cartpole with 5,000 tasks each; hexapod with 2,000 tasks) and show that it matches or exceeds the performance of existing MAP-Elites-based baselines across all four domains.",
+      "authors": [
+        "Julian Hatzky",
+        "Thomas Bartz-Beielstein",
+        "A. E. Eiben",
+        "Anil Yaman"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI",
+        "cs.NE"
+      ],
+      "published": "2026-04-23T18:18:20+00:00",
+      "link": "https://arxiv.org/pdf/2604.21991v1",
+      "tags": [
+        "keyword:PHM",
+        "query:PHM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "multi-task optimization over networks of tasks",
+      "llm_evidence_cn": "任务网络上的多任务优化",
+      "llm_evidence": "任务网络上的多任务优化",
+      "canonical_evidence": "任务网络上的多任务优化",
+      "llm_tldr_en": "Introduces MONET, a multi-task optimization algorithm that models task spaces as graphs for knowledge transfer.",
+      "llm_tldr_cn": "引入 MONET，一种将任务空间建模为图形以进行知识迁移的多任务优化算法。",
+      "llm_tldr": "引入 MONET，一种将任务空间建模为图形以进行知识迁移的多任务优化算法。",
+      "llm_tags": [
+        "query:phm"
+      ],
+      "matched_query_tag": "query:phm",
+      "matched_query_text": "multi task deep learning for PHM applications",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.22899v1",
+      "source": "arxiv",
+      "title": "Text-Guided Multimodal Unified Industrial Anomaly Detection",
+      "abstract": "Industrial anomaly detection based on RGB-3D multimodal data has emerged as a mainstream paradigm for intelligent quality inspection. However, existing unsupervised methods suffer from two critical limitations: ambiguous cross-modal alignment caused by the lack of high-level semantic guidance and insufficient geometric modeling for RGB-to-3D feature mapping. To address these issues, we propose a unified multimodal industrial anomaly detection framework guided by text semantics. The framework consists of two core modules: a Geometry-Aware Cross-Modal Mapper to preserve geometric structure during modality conversion, and an Object-Conditioned Textual Feature Adaptor to align multimodal features with semantic priors. Furthermore, we establish a unified learning paradigm for multimodal industrial anomaly detection, which breaks the one-model-one-class constraint and enables accurate anomaly detection across diverse classes using a single model. Extensive experiments on the MVTec 3D-AD and Eyecandies datasets demonstrate that our method achieves state-of-the-art performance in classification and localization under unsupervised settings.",
+      "authors": [
+        "Zewen Li",
+        "Shuo Ye",
+        "Zitong Yu",
+        "Weicheng Xie",
+        "Linlin Shen"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-04-24T13:21:22+00:00",
+      "link": "https://arxiv.org/pdf/2604.22899v1",
+      "tags": [
+        "keyword:PHM",
+        "query:PHM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "unified industrial anomaly detection framework",
+      "llm_evidence_cn": "统一的工业异常检测框架",
+      "llm_evidence": "统一的工业异常检测框架",
+      "canonical_evidence": "统一的工业异常检测框架",
+      "llm_tldr_en": "A text-guided multimodal framework for unified industrial anomaly detection and quality inspection.",
+      "llm_tldr_cn": "一种文本引导的多模态框架，用于统一的工业异常检测和质量检查。",
+      "llm_tldr": "一种文本引导的多模态框架，用于统一的工业异常检测和质量检查。",
+      "llm_tags": [
+        "query:phm:composite"
+      ],
+      "matched_query_tag": "query:phm:composite",
+      "matched_query_text": "Papers central to 同时涉及故障诊断与剩余寿命预测的研究论文, especially work that connects or combines: joint modeling of diagnosis and prognosis; multi-task learning for diagnosis and RUL; simultaneous fault diagnosis and remaining useful life prediction; integrated approach for machinery fault diagnosis and prognosis; multi task deep learning for PHM applications; joint diagnosis and RUL estimation research papers.",
+      "matched_requirement_id": "req-composite-phm",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}

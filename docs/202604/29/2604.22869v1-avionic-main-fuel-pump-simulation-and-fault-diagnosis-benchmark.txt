@@ -1,0 +1,285 @@
+Title: Avionic Main Fuel Pump Simulation and Fault-Diagnosis Benchmark
+
+URL Source: https://arxiv.org/pdf/2604.22869v1
+
+Published Time: Tue, 28 Apr 2026 00:06:01 GMT
+
+Number of Pages: 9
+
+Markdown Content:
+# AVIONIC MAIN FUEL PUMP SIMULATION AND 
+
+# FAULT -D IAGNOSIS BENCHMARK 
+
+Felix L. Janzen 
+
+Institute of Artificial Intelligence Helmut Schmidt University Hamburg, Germany 
+
+Felix.Janzen@hsu.hamburg 
+
+Lukas Moddemann 
+
+Institute of Artificial Intelligence Helmut Schmidt University Hamburg, Germany 
+
+Lukas.Moddemann@hsu.hamburg 
+
+Alexander Diedrich 
+
+Institute of Artificial Intelligence Helmut Schmidt University Hamburg, Germany 
+
+Alexander.Diedrich@hsu.hamburg 
+
+Oliver Niggemann 
+
+Institute of Artificial Intelligence Helmut Schmidt University Hamburg, Germany 
+
+Oliver.Niggemann@hsu.hamburg 
+
+## ABSTRACT 
+
+In many cyber-physical systems, especially in critical applications such as aeroplanes, data to train anomaly detection and diagnosis algorithms is lacking due to data protection issues and partial observability. To combat this inherent lack of data, we introduce a high-fidelity, physics-informed co-simulation of a common aircraft main-fuel-pump system modelled in MATLAB/S IMULINK 
+
+SIMSCAPE FLUIDS . We also describe its generated time-series data with health and fault mode annotations. To show feasibility of our benchmark, we apply an unsupervised Recurrent Variational Autoencoder (RNN-VAE) for anomaly detection and a SOM-VAE for operating mode discretization, trained to separate healthy and faulty conditions. 
+
+Keywords aircraft fuel system · anomaly detection · benchmark · cyber-physical systems · dataset · machine learning ·
+
+predictive maintenance · SIMSCAPE fluids · time-series 
+
+## 1 Introduction 
+
+Modern aircraft are filled with Cyber-Physical Systems (CPS) that process information and directly act on physical pro-cesses. In aerospace fuel systems, partial observability is common. Safety is guaranteed by certification, redundancies, scheduled maintenance and operational controls. However, many condition-monitoring sensors that are supplementary for operation are often not implemented as they impose additional cost on manufacturers [ 1]. Moreover, real fault data in the avionics domain is rare, restricting data-driven analysis [ 2]. This increases testing time, thus failing to take advantage of predictive maintenance with trustworthy Artificial Intelligence (AI) [3]. Because real operational datasets are effectively unavailable, researchers rely on high-fidelity benchmarks if they want to design, compare and validate anomaly detection or diagnosis models in the avionic domain. Therefore, we present a publicly available aircraft fuel system benchmark based on a high-fidelity, fault-injectable S IMSCAPE co-simulation. The simulator produces labelled multivariate time series, including noise, randomness and datasets with faults. In literature, even if simulations exist, they rarely have the type of labels that diagnosis algorithms require as input [ 4 ], or other issues like few fault variety or dull system complexity [ 5 ]. To evaluate the proposed benchmark, algorithms for anomaly detection and system discretization are applied. 
+
+© 2026 the authors. This work has been accepted to IFAC for publication under a Creative Commons Licence CC-BY-NC-ND 
+
+> arXiv:2604.22869v1 [cs.LG] 23 Apr 2026
+
+The contributions of the paper are: (i) the novel design of a detailed aircraft fuel system in MATLAB S IMULINK SIM - 
+
+> SCAPE
+
+FLUIDS with explicit fault injections for the main gear pump and related components. The model provides faults and allows to design controlled experiments; (ii) a labelled benchmark dataset containing time-series data with health and fault mode annotations is published that is explicitly designed for an avionic domain where real operational data is typically unavailable. The datasets are publicly accessible to support reproducible evaluations of anomaly detection and diagnosis models at https://github.com/Elix96J/Avionic_Main_Fuel_Pump_Simulation_and_Fault-Diagnosis_Benchmark 
+
+As an exemplary use case, we evaluate the benchmark with a state-of-the-art unsupervised Recurrent Variational Autoencoder (RNN-VAE) for anomaly detection and discretize the proposed data to alter time-series into interpretable system descriptions [6]. 
+
+## 2 Related Work 
+
+Existing benchmarks in the context of CPS are highlighted by their strengths and limitations in supporting Consistency Based Diagnosis (CBD). This analysis sets the stage for introducing our proposed benchmark, which addresses gaps by offering a scalable, interpretable environment with diverse fault scenarios and explicit system model. 
+
+2.1 Requirements for a Benchmark 
+
+[ 5] provide the BeRfiPl benchmark for AI methods in anomaly diagnosis, reconfiguration and planning of Cyber-Physical Production Systems (CPPS). The benchmark consists of 16 simulated modular process-plant setups for different processes modelled in OpenModelica. On this basis, the authors propose a minimal set of five requirements for AI benchmarks for comparison: • Benchmarks should include both continuous and discrete signals [7], • a variety of multiple types of faults [8], • high system complexity in multiple layers (e.g. interconnections, number of variables, fault scenarios) to test asymptotic performance of algorithms, • non-trivial dependencies between inputs, outputs, parameters and other elements [9], • repeating module types of a CPPS, ideally in loops, for the evaluation of planning paths algorithms to reuse functionalities [9]. Building on this foundation, [ 10 ] extend BeRfiPl with the HAI-CPPS benchmark, which reuses the simulation but alters it for neuro-symbolic use cases. While [ 5] defines their fifth requirement as recurring module involvement, [ 10 ]instead introduce a requirement for interpretable system topologies with explicit state information, providing symbolic representations. BeRfiPl offer limited fault cases, whereas HAI-CPPS extends the fault scenarios. Table 1 summarizes the benchmark requirements from the literature and how the surveyed benchmarks, including our work, satisfy them. A model indicates whether the benchmark provides an explicit representation or formalization of the CPS. This representation can be in the form of mathematical models, structural descriptions or formal models that describe system behavior. Hybrid signals indicate the presence of both continuous and discrete variables. Fault variety captures the diversity and complexity of the faults represented in the benchmark. A scalable benchmark allows for the systematic variation of system complexity along multiple dimensions, including the number of variables and components, interconnection complexity between modules and fault scenario complexity. This is essential for studying Table 1: Comparison of conducted benchmarks Benchmark Model Hybrid signals Fault variety Scalable System knowledge CBD-ready 
+
+BeRfiPl Yes Yes No Partially Modules No HAI-CPPS Yes Yes Yes Yes States & residual modes Yes TEP-Alarm Yes Yes Yes Partially Symbolic states Partially Water Networks Yes No (continuous) Yes Yes Structural equations & graph Yes NoBOOM No Yes Yes Partially Real data & anomaly labels No LiU-ICE Yes No (continuous) No Partially Structural model & DAE No This work Yes Yes Yes Yes Health annotations Yes 2the asymptotic performance limits of AI methods. System knowledge refers to interpretable system descriptions, including topology information, behavioral models and symbolic representations of system states. Lastly, a CBD-ready 
+
+benchmark provides data containing fault annotations of faulty components and labelled discretisation of operating modes. 
+
+2.2 Comparable Benchmarks 
+
+[11 ] published a dataset that uses the Simulink model of [ 12 ] to simulate process and alarm data based on the Tennessee-Eastman-Process (TEP) benchmark of [ 13 ]. [ 11 ] develops an alarm design in five successive revisions. The resulting TEP-Alarm dataset provides a large number of observations for alarm prediction. The TEP is considered partially scalable as it is tied to a single configuration and a fixed control structure, whereas disturbance scenarios and alarm thresholds vary between tests. This creates challenges for anomaly detection as additional preprocessing steps are required to discretize alarms or deciding whether to predict alarm sequences or the underlying injected disturbances. Additionally, faults are solely scripted as minor disturbances, like step changes or valve closures and not degradation faults such as gear wear. [ 14 ] propose a water network benchmark for model-based fault diagnosis based on structural analysis. They find structurally overdetermined equation subsets to build residuals. Extending this approach, [ 15 ] follow-up work selects a real-world network to simulate the water distribution of a city, with additional historical information. The structural model is extended with more detailed component-level representations including explicit fault modes for a more realistic diagnosis benchmark on fluids. Although structural models are published, immediately usable, logged and labelled time series are not delivered. Users must select sensors and leak locations before simulating separately if they want data, residuals and states. [16 ] introduce NoBOOM, a benchmark for anomaly detection in real-world chemical processes. Datasets of varying size and complexity are published, which are split into training and test sets, differing in number of features, time steps and anomaly types, labelled by experts. However, detailed metadata is under non-disclosure and sensor IDs are anonymized. While NoBOOM provides valuable data, it lacks an executable plant model, which limits the ability to trace anomalies back to their root causes. Furthermore, researchers cannot simulate new operating scenarios or systematically inject component-level faults. The benchmark also exhibits a comparatively high anomaly rate that deviates from the classical anomaly detection setting of rare events. [17 ] created the LiU-ICE benchmark using a turbocharged gasoline engine test setup that mimics real-world combustion engine conditions, using eight sensors to track signals. The researchers also developed a model of the engine’s air path using Differential Algebraic Equations (DAEs). LiU-ICE is applicable for residual-based diagnosis design for combustion engines but no explicit health annotations or residuals as the benchmark challenges participants to derive them. The benchmark covers only three sensor faults and a single leak fault and is not scalable as it relies on a fixed setup. 
+
+## 3 A Novel High-Fidelity Simulation on Aircraft Fuel Systems 
+
+3.1 Simulation Setup 
+
+Since Eaton is one of the major manufacturers of aircraft hydraulic pumps, we simulate Eaton main gear pumps. In practice, detailed geometric or measurement data is unavailable. To create a pump model under these constraints, the required pump parameters are reverse-engineered from the available catalogue data sheet and treated as a generic pump and parametrised by the properties provided [ 18 ]. Specifically, five model types (704300, 708300, 708400, 708600, 714900) are simulated by a single pump, since they share similar characteristics. We implement fluid properties in S IMSCAPE FLUIDS via a custom Isothermal Liquid (IL) definition. This procedure can be applied directly to other manufacturers for which only catalogue data is available. The simulation setup, see Figure 1, is based on the configuration of [19] and consists of the following components: • Tank/feeding system with 2 bar pre-pressurization, simulating the boost stage; • Kerosene (Jet Fuel) with a density of ρ = 784 kg /m3 and dynamic viscosity μ = 7 .67 × 10 −4 Pa · s,corresponding to a kinematic viscosity of ν = 9 .8 × 10 −7 m2/s and an isothermal bulk modulus of 1.5 GPa 
+
+at atmospheric pressure; • Main gear pump, modelled as a fixed-displacement, with discharge pressure pout = 69 bar (1 000 psig) with an inlet pressure pin = 2 bar (30 psig) so that the pump increases the system pressure by 
+
+∆p = pout − pin = 67 bar . (1) 3while the rotational speed remains its nominal state with n = 6 000 rev /min (628 .31 rad /s) and a fuel flow rate of Q = 58 gpm = 3 .67 × 10 −3 m3/s which translates into a pump displacement, given by: 
+
+D = Qηvol · n = 40 .7 cm 3/rev (2) with an assumed ηvol = 0 .9;• Bypass valve with a pressure differential of 67 bar , a pressure regulation range of 3.45 bar and a maximum opening area of ABypass ,max ≈ π · 10 mm · 5 mm ≈ 157 mm 2 [20]; • Fuel Metering Unit (FMU), modelled as a controllable orifice using the Orifice block, parameterised with a maximum geometric area of AFMU ,max = 100 mm 2. The metering area is controlled by a throttle, operated by the pilot to accelerate or decelerate the aircraft. The throttle signal θ(t) ∈ [0 , 1] represents a piecewise linear throttle variation: 
+
+θ(t) = 
+
+
+
+0.20 , 0 ≤ t ≤ 12 ,
+
+0.20 + 730 (t − 12) , 12 < t ≤ 15 ,
+
+0.90 , 15 < t ≤ 17 ,
+
+0.90 − 15 (t − 17) , 17 < t ≤ 20 ,
+
+0.30 , 20 < t ≤ Tsim ;
+
+(3) • PRV opens at 200 bar , connected from the pump discharge line to the tank and prevents the system from overpressurizing; • Injector nozzles in front of the combustion engine with a total area of 25 mm 2.67 bar = 6.7e6 Pa    
+
+> ramp-up time
+> 1,4s
+> Tank_Reservoir1
+> Main Gear Pump Flow
+> Engine1
+> Combustion engine
+> Flow_Pump
+> Flow_Engine1
+> Isothermal Liquid
+> Properties
+> f(x) = 0
+> Pressure Relief Valve
+> Flow
+> Relief
+> Flow_PRV
+> Injector nozzle
+> Pressure Shut-Off
+> p_Shut
+> Pressure Pump
+> p_Pump
+> Tank_Reservoir2
+> RPM_Motor
+> Bypass
+> Flow_Bypass
+> FMU
+> Flow
+> Bypass
+> Flow
+> Engine2
+> Flow_Engine2
+> Flow Pump
+> White Noise_100Hz
+> x
+> Shut-Off
+> Valve
+> Pressure Combustion
+> p_Combustion
+> Flow
+> Engine3
+> Flow_Engine3
+> Flow
+> Engine4
+> Flow_Engine4
+> Pressure FMU
+> p_FMU
+> Signal 1  Pilot Throttle
+> Signal_Throttle
+> White Noise_10Hz
+> x
+> +++
+
+Figure 1: S IMULINK /S IMSCAPE model of the main fuel pump system 
+
+3.2 Fuel Flow Partitioning Methodology 
+
+To dimension the fuel system, the flow has to be partitioned between the bypass branch and the path to the combustion engine. For estimating the distribution of fuel between the engine and bypass branches in the modelled fuel system, we scaled the flow based on the experimental configuration reported by [ 19 ]. In their setup, the main fuel pump delivers a total flow rate of QPump ,Sciatti = 15 L /min , with the bypass valve discharging QBypass ,Sciatti = 14 L /min at a piston position of xb = 1 .1 mm and QBypass ,Sciatti = 2 .8 L /min at xb = 0 .1 mm . Under these conditions the bypass carries between approximately 19 % and 93 % of the total pump flow, while the engine branch receives the remaining 7 % to 
+
+81 % .4Assuming similar geometric values, these were scaled proportionally to the nominal pump flow rate of the present study, which is QPump ≈ 2.4 × 10 −3 m3/s = 144 L /min . Applying a scaling factor of 
+
+kQ = QPump 
+
+QPump ,Sciatti 
+
+= 144 15 ≈ 9.6, (4) the corresponding bypass volume flow rate lies in the range QBypass ∈ [26 .3, 131 .6] L /min , where the lower bound corresponds to the nearly closed bypass position and the upper bound to the fully open bypass position. Using the continuity equation 
+
+QPump = QEngine + QBypass , (5) the engine volume flow rate lies in the range QEngine ∈ [12 .4, 117 .7] L /min .Consistent with this scaling, the metering and restriction areas in the present model are chosen as scaled counterparts of the orifice geometries. The total injector nozzle area increases from 2.5 mm 2 to Ainj = 25 mm 2 and both the shut-off valve and the FMU metering valve are assigned a maximum effective area of ASO ,max = AFMU ,max = 100 mm 2. The bypass valve is dimensioned according to its spool geometry with piston diameter D = 10 mm and maximum lift 
+
+xmax = 5 mm , leading to a maximum circumferential opening area 
+
+Amax ,geom ≈ π D x max (6) 
+
+⇒ Amax ,geom = π · 10 mm · 5 mm ≈ 157 mm 2,
+
+which is used as the maximum effective area of the bypass valve. With these properties, the model preserves the qualitative flow partitioning behaviour observed by [ 19 ] while generating the higher nominal pump flow rate and pressure of an Eaton main gear pump. 
+
+3.3 Simulating Faulty and Healthy Data 
+
+For data generation, the hydraulic system is simulated in healthy and single-fault modes, resulting in labelled multivariate time series, see Figure 2. Table 2 lists components h and injected faults f . h0 corresponds to the motor, h1 to sensor, 
+
+h2 to the pump, h3 to the PRV, h4 to the FMU, h5 to the bypass valve and h6 to the fuel reservoir. Components 
+
+hi ∈ {⊤ , ⊥} are boolean with ⊤ denoting nominal behaviour and ⊥ a faulty component [21]. The global S IMULINK solver is set to daessc , a variable-step stiff DAE solver. Simulations are run in normal mode with the final simulation time specified via the StopTime parameter. All relevant signals are recorded using S IMULINK   
+
+> (i) (ii) (iii)
+
+Figure 2: Time-series signals for the healthy (i) and two faulty runs (ii, iii). Top row displays flow rates with orange for 
+
+QPump , wine red for QEngine and blue for QBypass . Bottom row displays pressure signals with blue for pPump , orange for pFMU , green for pShut and red for pCombustion .5signal logging. Each run is saved as CSV file with a total number of 6 001 002 rows, a simulation time of 30 s , a sample rate 200 Hz and 1 000 simulation runs. 14 columns correspond to the number of recorded features plus an additional time column, while the healthy data file contains two additional columns for the Unique Identifiers (UD). In total, one file with only healthy data and nine files with faulty symptoms are generated. Table 2: Faulty components hi for injected faults fi
+
+f fault h0 h1 h2 h3 h4 h5 h6
+
+0 Healthy ⊤ ⊤ ⊤ ⊤ ⊤ ⊤ ⊤
+
+1 White noise ⊥ ⊤ ⊤ ⊤ ⊤ ⊤ ⊤
+
+2 Sensor drop pFMU ⊤ ⊥ ⊤ ⊤ ⊤ ⊤ ⊤
+
+3 Sensor drop QEngine1 ⊤ ⊥ ⊤ ⊤ ⊤ ⊤ ⊤
+
+4 Pump leakage ⊤ ⊤ ⊥ ⊤ ⊤ ⊤ ⊤
+
+5 Pump displacement change ⊤ ⊤ ⊥ ⊤ ⊤ ⊤ ⊤
+
+6 PRV leakage ⊤ ⊤ ⊤ ⊥ ⊤ ⊤ ⊤
+
+7 FMU orifice fault ⊤ ⊤ ⊤ ⊤ ⊥ ⊤ ⊤
+
+8 Bypass orifice fault ⊤ ⊤ ⊤ ⊤ ⊤ ⊥ ⊤
+
+9 High boost pressure ⊤ ⊤ ⊤ ⊤ ⊤ ⊤ ⊥
+
+## 4 Evaluation 
+
+The proposed datasets are designed to meet the unique requirements of main-gear-pump testing. They are evaluated using task-specific ML methods for (i) anomaly detection and (ii) discretization to generate an interpretable, symbolic representation of the time-series. Each method is designed for its respective objective. These are robust model-building procedures that leverage explicit identifiers of model states and available health labels. Both methods confirm the immediate usability of the dataset. 
+
+4.1 Anomaly Detection 
+
+Detecting anomalous behavior in aviation component testing is complex, as it involves identifying infrequent or unpredictable events within operational data. An unsupervised Variational Autoencoder (VAE) framework that uses the model likelihood of the observed data as a probabilistic residual for anomaly detection is applied. In particular, we adopt a Recurrent Variational Autoencoder (RNN-VAE) with a standard Gaussian prior distribution, N (0 , 1) , over the latent space, which facilitates more effective latent representation learning and consequently improves the model’s reconstruction capability for time-series. Composite F1 score [ 22 ] is the harmonic mean of time-wise precision P r t and event-wise recall Rec e, thereby rewarding detectors that both avoid false alarms and reliably identify complete anomalous events, unlike standard F1
+
+score. The model achieves high Composite F1 scores for most types of anomalies, with the exception of two cases, as listed in Table 3. Table 3: Assessment of anomaly detection with Composite F1 (✓ fulfilled, ✗ not fulfilled) 
+
+f fault Detected Comp. F1 Score 1 White noise ✗ 0.0
+
+2 Sensor drop pFMU ✓ 0.997 
+
+3 Sensor drop QEngine1 ✓ 0.994 
+
+4 Pump leakage ✓ 0.999 
+
+5 Pump displacement change ✓ 1.000 
+
+6 PRV leakage ✓ 0.976 
+
+7 FMU orifice misposition ✓ 0.994 
+
+8 Bypass orifice misposition ✗ 0.533 
+
+9 High boost pressure ✓ 0.872 
+
+6For the white-noise anomaly, the induced perturbation closely resembles the stochastic variability naturally present in nominal simulation data and is thereby difficult to detect. In the case of the bypass anomaly, the model has a high false-positive rate, which substantially reduces the corresponding anomaly detection performance. 
+
+4.2 Discretization 
+
+In the following, we demonstrate the utility of the newly developed dataset by deploying a SOM-VAE model [ 6] within a sequential input data setup for discretization and identify the thresholds in the latent space within which the algorithm reaches the trade-off between interpretability and its discretization performance. To quantify the performance with respect to the discretization task, we adopt the metric Purity π by [ 23 ], which serves as an appropriate measure for evaluating the alignment between predicted symbolic states and ground truth labels, formally defined as follows: 
+
+π(C, S ) = 1
+
+n
+
+> I
+
+X
+
+> i=1
+
+max  
+
+> j
+
+|si ∩ cj | (7) where cj ∈ C = {c1, . . . , c J } represent the true mode label, si ∈ S = {s1, . . . , s J } the set of symbolic modes generated by our model and n the total count of data samples. Ground-truth labels are derived by one-hot encoding the pump’s operational phase (UD1) and its corresponding speed profile (UD2). When combined, these two identifiers uniquely characterize the discrete states of the underlying automaton. The discretization model is trained with a predefined number of latent categories i.e. SOM map units. This number is systematically varied to assess its effect on the resulting evaluation metric, as summarized in Table 4. Table 4: Purity results for varying SOM map sizes and sequence lengths. Latent SOM Map Sequence Length Result 
+
+[3 , 3] 20 0.7988 
+
+[3 , 3] 50 0.7611 
+
+[3 , 3] 100 0.7352 
+
+[6 , 6] 20 0.8540 
+
+[12 , 12] 20 0.8846 The results demonstrate that the discretization mechanism maintains strong performance and benefits from increased representational capacity as the size of the SOM map grows. This is to be expected, as larger maps enable the model to encode a greater amount of information and partition the latent space with higher granularity. Conversely, performance decreases as the sequence length increases, indicating that longer temporal contexts introduce additional complexity that challenges the discretization. 
+
+## 5 Conclusion 
+
+Our datasets are constrained in realism and generalizability as they are synthetic, generated from a Simscape co-simulation. Only single-fault cases are covered and the throttle signal is a fixed, piecewise-linear signal. Further simplifications include the assumption of an isothermal fluid, disregarding temperature effects. Cavitation is not represented and no sensor latency is modelled as logged signals are interpreted to be ideal. Nonetheless, the model and data are public, allowing to add multi-fault cases and adjust inputs, properties as well as components. Applying the RNN-VAE for anomaly detection and the SOM-VAE for discretization results in strong performance, which confirms that the datasets support learning and are appropriate for evaluating a broader class of models. The RNN-VAE detects most faults well, but completely misses the white-noise anomaly as it mimics gear wear. High false positives are shown on the bypass-orifice misposition, indicating signatures similar to the healthy sequence. Further research involves the enhancement of the simulation model to include more details on the interaction between mechanical and electronic components in the hydraulic chain, implementing different pilot throttle signals, adding fault superpositions and implementing different ML prediction models for time-series to obtain better metrics and evaluate the benchmark. Additionally, validating the simulation against real pump measurements would further strengthen the credibility of the model. 7References 
+
+[1] Francesco Biondani, Nicola Dall’Ora, Francesco Tosoni, Enrico Fraccaroli, Domenico Fabio Migliore, Francesco Acerra, and Franco Fummi. Fault injection for synthetic data generation in aircraft: A simulation-based approach. In 2024 IEEE 22nd International Conference on Industrial Informatics (INDIN) . IEEE, 2024. [2] Tiejun Liu, Yaoping Zhang, Xiaojing Yin, and Weidong He. Aviation fuel pump fault diagnosis based on conditional variational self-encoder adaptive synthetic less data enhancement. Mathematics , 13(14):2218, 2025. [3] Alexander Windmann, Philipp Wittenberg, Marvin Schieseck, and Oliver Niggemann. Artificial Intelligence in Industry 4.0: A review of integration challenges for industrial systems. In 2024 IEEE 22nd International Conference on Industrial Informatics (INDIN) , page 1–8. IEEE, 2024. [4] Jiajin Li, Steve King, and Ian Jennions. Intelligent fault diagnosis of an aircraft fuel system using machine learning—a literature review. Machines , 11(4):481, 2023. [5] Jonas Ehrhardt, Malte Ramonat, Rene Heesch, Kaja Balzereit, Alexander Diedrich, and Oliver Niggemann. An AI benchmark for diagnosis, reconfiguration & planning. In 2022 IEEE 27th International Conference on Emerging Technologies and Factory Automation (ETFA) . IEEE, 2022. [6] Phillip Johann Overlöper, Lukas Moddemann, Nemanja Hranisavljevic, Alexander Windmann, and Oliver Niggemann. Discretization of CPS time series with neural networks. In 2024 IEEE 29th International Conference on Emerging Technologies and Factory Automation (ETFA) , pages 1–8. IEEE, 2024. [7] Paolo Mercorelli. Recent advances in intelligent algorithms for fault detection and diagnosis. Sensors , 24(8):2656, April 2024. ISSN 1424-8220. [8] Kaja Balzereit, Alexander Diedrich, Jonas Ginster, Stefan Windmann, and Oliver Niggemann. An ensemble of benchmarks for the evaluation of AI methods for fault handling in CPPS. In 19th IEEE International Conference on Industrial Informatics , 11 2021. [9] Aljosha Köcher, René Heesch, Niklas Widulle, Anna Nordhausen, Julian Putzke, Alexander Windmann, and Oliver Niggemann. A research agenda for AI planning in the field of flexible production systems. In 2022 IEEE 5th International Conference on Industrial Cyber-Physical Systems (ICPS) , pages 1–8, 2022. [10] Lukas Moddemann, Jonas Ehrhardt, Alexander Diedrich, and Oliver Niggemann. The HAI-CPPS benchmark: Evaluating AI capabilities across hybrid data spaces. In 2025 IEEE 30th International Conference on Emerging Technologies and Factory Automation (ETFA) , page 1–8. IEEE, 2025. [11] Gianluca Manca. Tennessee-Eastman-Process alarm management dataset. IEEE DataPort, 2020. [12] Andreas Bathelt, N. Lawrence Ricker, and Mohieddine Jelali. Revision of the Tennessee Eastman Process model. 
+
+IFAC-PapersOnLine , 48(8):309–314, 2015. ISSN 2405-8963. [13] James J Downs and Ernest F Vogel. A plant-wide industrial process control problem. Computers & chemical engineering , 17(3):245–255, 1993. [14] Anna Sztyber, Elodie Chanthery, Louise Travé-Massuyès, and Carlos Gustavo Pérez-Zuñiga. Water network benchmarks for structural analysis algorithms in fault diagnosis. In 33rd International Workshop on Principle of Diagnosis–DX 2022 , 2022. [15] Anna Sztyber, Elodie Chanthery, and Louise Travé-Massuyès. Benchmark for fault diagnosis of water distribution network. In The 34th International Workshop on Principles of Diagnosis (DX’23) , Loma Mar, United States, 2023. PARC and the Silicon Austria Labs (SAL). [16] Dennis Wagner, Fabian Hartung, Justus Arweiler, Aparna Muraleedharan, Indra Jungjohann, Arjun Nair, Steffen Reithermann, Ralf Schulz, Michael Bortz, Daniel Neider, et al. Noboom: Chemical process datasets for industrial anomaly detection. In The Thirty-ninth Annual Conference on Neural Information Processing Systems Datasets and Benchmarks Track , 2020. [17] Daniel Jung, Erik Frisk, Mattias Krysander, Anna Sztyber-Betley, Francesco Corrini, Andrea Arici, Nicolas Anselmi, Mirko Mazzoleni, Jiamin Xu, Siwen Mo, Zixuan Xu, Chongpan Yang, Zhile Du, Hossein Safaeipour, Mehdi Forouzanfar, Vahid Mirahi, Anna Pinnarelli, Vicenç Puig, Qiao Deng, Yufei Liu, Jiakun Liu, Haobin Ke, Wanting Zhu, Silke Merkelbach, Maryam Ahang, and Homayoun Najjaran. A fault diagnosis benchmark of technical systems with incomplete data — six solutions. Control Engineering Practice , 164:106427, 2025. ISSN 0967-0661. [18] Eaton Corporation. Main engine fuel pump, 2025. URL https://www.eaton.com/content/dam/eaton/ products/pumps/aerospace-fuel-pumps/documents/eaton-main-gear-fuel-pump-brochure-tf600-52_en-us.pdf . Accessed: 2025-08-10. 8[19] Francesco Sciatti, Paolo Tamburrano, Pietro De Palma, Elia Distaso, and Riccardo Amirante. Detailed simulations of an aircraft fuel system by means of Simulink. Journal of Physics: Conference Series , 2385, 2022. [20] Aircraft Maintenance & Training School (AM&TS) & Fly Fokker. Fokker 50/60 Technical Training: 73. Engine Fuel and Control — Engine Fuel System: Description and Operation . Aircraft Maintenance & Training School (AM&TS) & Fly Fokker, 2010. ATA 73. [21] Alexander Diedrich, Lukas Moddemann, and Oliver Niggemann. Learning system descriptions for cyber-physical systems. In Proceedings of 12th IFAC Symposium on Fault Detection, Supervision and Safety for Technical Processes , 2024. [22] Astha Garg, Wenyu Zhang, Jules Samaran, Ramasamy Savitha, and Chuan-Sheng Foo. An Evaluation of Anomaly Detection and Diagnosis in Multivariate Time Series. IEEE Transactions on Neural Networks and Learning Systems , 33(6):2508–2517, 2021. [23] Christopher D Manning. Introduction to Information Retrieval . Syngress Publishing, 2008. 9

@@ -1,0 +1,971 @@
+Title: Multi-Task Optimization over Networks of Tasks
+
+URL Source: https://arxiv.org/pdf/2604.21991v1
+
+Published Time: Mon, 27 Apr 2026 00:02:59 GMT
+
+Number of Pages: 28
+
+Markdown Content:
+# Multi-Task Optimization over Networks of Tasks 
+
+Julian Hatzky 1, Thomas Bartz-Beielstein 2, A. E. Eiben 1, and Anil Yaman 1 
+
+> 1
+
+Vrije Universiteit Amsterdam, Amsterdam, The Netherlands 
+
+{j.hatzky, a.e.eiben, a.yaman}@vu.nl  
+
+> 2
+
+TH Köln, Cologne, Germany 
+
+thomas.bartz-beielstein@th-koeln.de 
+
+Abstract. Multi-task optimization is a powerful approach for solving a large number of tasks in parallel. However, existing algorithms face distinct limitations: Population-based methods scale poorly and remain underexplored for large task sets. Approaches that do scale beyond a thousand tasks are mostly MAP-Elites variants and rely on a fixed, discretized archive that disregards the topology of the task space. We introduce MONET (Multi-Task Optimization over Networks of Tasks), a multi-task optimization algorithm that models the task space as a graph: tasks are nodes, and edges connect tasks in the task parame-ter space. This representation enables knowledge transfer between tasks and remains tractable for high-dimensional problems while exploiting the topology of the task space. MONET combines social learning , which gen-erates candidates from neighboring nodes via crossover, with individual learning , which refines a node’s own solution independently via mutation. We evaluate MONET on four domains (archery, arm, and cartpole with 5,000 tasks each; hexapod with 2,000 tasks) and show that it matches or exceeds the performance of existing MAP–Elites-based baselines across all four domains. 
+
+Keywords: Multi-task Optimization · Multi-Task MAP-Elites · Inno-vation Networks · Social Learning · Graphs 
+
+## 1 Introduction 
+
+To maintain reliable performance, real-world embodied agents must remain oper-ational even when their configurations change. For example, in scenarios where a legged robot loses a limb [11,14] or a modular robot reconfigures itself to navigate a narrow passage [18,44,52], they are required to maintain their performance. In such cases, the ability to adapt an existing control strategy instead of relearning a new strategy for the new configuration from scratch can prove to be more efficient. It is possible to achieve this by employing the multi-task optimization approach [23], where each configuration variant (e.g. morphology) is treated as a distinct task, and solutions (e.g. controller) are pre-computed for all of them, so that when the configurations change, an appropriate controller is already avail-able or is faster to adapt [12,38]. In other words, given a parameterized family of tasks, the multi-task optimization approach aims to find a high-quality solution for each task simultaneously and in parallel [23].          
+
+> arXiv:2604.21991v1 [cs.LG] 23 Apr 2026 2J. Hatzky et al. social learning
+> individual learning
+> (𝝉 i,𝒜 [𝝉 i] ) 0.6
+> 0.7
+> 0.8
+> 0.9
+> Fitness
+> b) MONET Task Network on Cartpole a) MONET Network with Evolutionary Operators
+
+Fig. 1: Illustration of the MONET task network structure. Each node Vi = τ i
+
+represents a task, labelled by its current best solution A[τ i] ∈ Θ. (a) Task network with the individual and social learning strategies that operate on it. (b) Task network and solution qualities at 500 ,000 evaluations ( 50% of the total). Existing multi-task optimization algorithms face a fundamental scalability– structure tradeoff. Population-based multi-task evolutionary methods [29, 49] maintain a separate population per task and quickly become impractical as the number of tasks grows into the thousands and beyond. Quality-diversity (QD) algorithms and MAP-Elites [14, 38] in particular, bypass this by replacing per-task populations with a single structured archive. MAP-Elites has been extended to multi-task settings by Multi-Task MAP-Elites (MT-ME) [39], which solves a fixed set of tasks via a globally shared archive, and Parametric-Task MAP-Elites (PT-ME) [4], which extends this to continuous task spaces. Both have demonstrated strong performance on problems with thousands of tasks. However, these archive-based methods exhibit two intertwined limitations. First, the archive is a fixed discretized grid over the task or feature space: with 
+
+c bins per dimension and a d-dimensional task space its size grows as O(cd),so the representation becomes infeasible already for moderate d. Second, the archive is largely topologically flat : in MT-ME any solution can serve as a parent for any task. PT-ME partially addresses this through a local linear regression operator that exploits Delaunay triangulation [17] between tasks to calculate an adjacency matrix. Even so, this locality is confined to one of two variation paths, and the global Simulated Binary Crossover (SBX) operator [16] still draws parents without regard for task similarity. Neither method makes the task-space topology a first-class structural element that governs all recombination. We introduce MONET (Multi-Task Optimization over Networks of Tasks), a multi-task optimization algorithm that resolves both limitations by replacing the flat archive with an explicit graph over tasks (Figure 1): each node in the vertex set V represents a task and stores its current best solution, while bidi-rectional edges in E connect tasks to enable knowledge transfer (e.g., through crossover or direct copy). Unlike a grid, this representation does not depend on a discretization of the task space and scales as O(|V| k), where k is the num-ber of neighbors per node, remaining tractable as the task space dimensionality Multi-Task Optimization over Networks of Tasks 3
+
+grows. Unlike a flat archive, the graph encodes topology directly: every node has a well-defined neighborhood that the search can exploit. The evolutionary pro-cess operates on this graph through two complementary mechanisms. Individual learning improves a solution in isolation through mutation, exploring the local fitness landscape of a single task. Social learning transfers information between neighboring nodes in variable ratios by selecting parent solutions from neighbor-ing tasks and generating offspring through crossover. This separation is inspired by cultural evolution, where individual innovation and the social spread of useful innovations through a population jointly drive adaptation [42, 51]. The balance between individual and social learning, the strategy to select a node (random or best fit), the size of the neighborhood, and the type of neigh-borhood (closest neighbors, distance-proportional sampling, or random selection) are key design choices that shape how information flows through the graph. A small neighborhood with strong social learning concentrates exploitation among very similar tasks, while a larger neighborhood or weaker social learning permits broader exploration. Understanding which of these choices matters and whether a single robust configuration exists in different problem domains is essential for the practical application of MONET. To this end, we conducted a hyperparameter study in four environments: archery, arm, and cartpole with 5,000 tasks each, and hexapod with 2,000 tasks. We show that MONET outperforms both MT-ME and PT-ME across all four environments, demonstrating that exploiting task-space structure through a net-work of task neighborhoods is an effective approach to multi-task optimization at scale. Our contributions are: 1. A unified formal taxonomy of MAP-Elites variants for multi-task optimiza-tion that exposes the structural modifications distinguishing each variant and motivates MONET (Section 2). 2. MONET, a graph-based multi-task optimizer that makes task-space neigh-borhoods an explicit element of recombination and combines localized social and individual learning (Section 3). 3. A systematic hyperparameter study across four task domains (archery, arm, cartpole, and hexapod) analyzing the effects of neighborhood type, neigh-borhood size, and the social/individual balance (Sections 4 and 5). 4. Empirical evidence that a single MONET configuration generalizes across all four domains and matches or outperforms MT-ME and PT-ME, showing task-space topology to be a valuable and underexploited source of informa-tion in multi-task optimization (Sections 5 and 6). 
+
+## 2 Related Works 
+
+Evolutionary multi-task optimization has become a highly active area of research within the computational intelligence community [23, 24, 40, 53]. To concretize the description, we specify the problem setting as follows. Consider a set of n
+
+tasks, each described by a parameter vector τ i ∈ T , for which we want to find the corresponding solutions θ1, . . . , θn ∈ Θ simultaneously. The goal of multi-task 4 J. Hatzky et al. 
+
+optimization is to find, for every task τ ∈ T , an optimal solution as: 
+
+θ∗ 
+
+> τ
+
+= arg max  
+
+> θ∈Θ
+
+f (θ, τ ), (1) where Θ is the solution space, T the task parameter space and f : Θ × T → R
+
+the fitness function. Existing methodologies generally fall into two categories: implicit transfer ,which utilizes a single, unified search space for all tasks, and explicit trans-fer , which operates across distinct solution spaces. Although implicit transfer is relatively straightforward to implement, its application is largely restricted to homogeneous environments. In contrast, explicit transfer accommodates hetero-geneous tasks, though determining the optimal knowledge to exchange between distinct spaces remains a complex challenge. To facilitate this transfer, con-temporary frameworks have leveraged probabilistic search distributions, search direction vectors, higher-order heuristics, and surrogate models. A representa-tive example is the Multi-Factorial Evolutionary Algorithm II (MFEA-II) [7], which learns an online inter-task transfer parameter to modulate the proba-bilistic crossover between tasks and thereby suppress negative transfer during multifactorial search. Historically, the application of these methods has been limited to optimiz-ing a small number of tasks concurrently (typically between two and ten). As catalogued in the evolutionary multi-tasking (EMT) survey of [40], examples in-clude optimizing three robot morphologies via neuroevolution [7], two symbolic regression datasets using genetic programming [54], ten numerical functions for software testing [43], multi-UAV path planning across three tasks [6], power dis-patch optimization for two bus systems [31], logistics planning for four package delivery problems [22], and the design of three diode models [30]. Similar multi-task formulations exist in other fields, such as Bayesian optimization [41], which is frequently used to tune machine learning models across multiple datasets. However, because Bayesian approaches rely on Gaussian processes that scale cu-bically 3, they are restricted to computationally expensive fitness functions and struggle to scale beyond a thousand evaluations [45]. To address these scalabil-ity limits, recent works in evolutionary many-task optimization have successfully tackled increasingly larger problem sets, scaling to 30, 50, 500, and up to 2,000 tasks simultaneously. Aligning with this trajectory toward large-scale optimiza-tion. In order to show the connection of the proposed method to the existing literature, we first introduce a unified notation framework for the whole MAP-Elites algorithm family, enabling each multi-task variant to be presented as a modification of its underlying formulation 4. The same base is then extended once more in Section 3 when MONET is defined. 
+
+Definition 1 (MAP-Elites). Let Θ denote a solution space, f : Θ → R afitness function to be maximized , B a behavior space, and b : Θ → B a behavioral        
+
+> 3In addition, the approaches such as Nyström approximation have limitations.
+> 4We adopt the maximization convention throughout; a minimization problem with cost cis handled by setting f=−c.
+
+Multi-Task Optimization over Networks of Tasks 5Θ ℝ                   
+
+> f:Θ→ℝ
+> ℬ
+> 𝒜 :ℬ⇀Θ𝐛 :Θ→ℬ
+> f∘𝒜 :ℬ→ℝ
+
+(a) MAP-Elites (Definition 1). Solid blue: behavioral descriptor b : Θ → B ; solid red: fitness f : Θ → R; dashed green: archive A : B ⇀ Θ and composed map 
+
+f ◦ A : B → R.Θ ℝ                      
+
+> f(·, τ):Θ×𝒯 →ℝ
+> 𝒯 𝒢 =(𝒱 ,ℰ)
+> 𝒜 :𝒯 →Θ
+> f∘𝒜 :𝒯 →ℝ
+> d, N-NN Nb( τ)
+
+(b) MONET (Definition 2). The behav-ioral descriptor b is absent; solid red: fit-ness f (·, τ ) : Θ × T → R; dashed green: archive A : T → Θ and f ◦ A : T → R;solid blue: graph construction via task distance d; dashed blue: neighborhood lookup Nb( τ ).
+
+Fig. 2: Commutative diagrams comparing MAP-Elites and MONET. 
+
+descriptor that maps a solution to its behavior. Fix a finite discretization of B
+
+into cells. MAP-Elites [14, 38] maintains an archive A5, treated as a partial function from cells to Θ, initialized empty and updated by the following elitist rule: given a candidate θ ∈ Θ, insert θ into the cell containing b(θ) iff that cell is empty or f (θ) > f (A[b(θ)]) . The run returns A, which trades objective value against behavioral coverage rather than optimizing f alone. 
+
+Figure 2a summarizes the mappings of Definition 1 as a commutative dia-gram. 6 Now we are ready to introduce relevant multi-task variants as extensions of this definition: each paragraph names exactly what is changed and leaves the rest of the definition in place. 
+
+Multi-Task MAP-Elites (MT-ME) [39]. MT-ME extends Definition 1 by 
+
+replacing the behavioral descriptor b : Θ → B with the task parameter itself. A finite set of tasks {τ 1, . . . , τ n} ⊂ T is fixed in advance, the archive becomes 
+
+A : T → Θ indexed directly by task, and the fitness lifts to f : Θ × T → R,matching the problem statement of Eq. (1). Recombination draws parents glob-ally from the entire task archive, so information is shared across all tasks re-gardless of their similarity. MT-ME uses the iso-line-dd variation operator [47], which exploits the observation that elites tend to cluster in a compact “elite hy- 
+
+> 5
+
+We use uppercase calligraphic A because the archive is primarily a data structure that is treated as a partial function; this convention is standard in the MAP-Elites literature and consistent with the use of uppercase for structured objects such as operators or transforms.  
+
+> 6
+
+Note that Definition 1 uses a single-task fitness f : Θ → R; the multi-task extensions below lift this to f : Θ × T → R by conditioning on a task parameter τ ∈ T ,recovering the problem statement of Eq. (1). 6 J. Hatzky et al. 
+
+pervolume” in genotype space: given two parent elites θi and θj , a candidate is generated by adding isotropic Gaussian noise and a directional component along the line connecting the parents, thereby biasing search toward the region of geno-type space where elites concentrate. Mouret and Maguire [39] evaluated MT-ME on arm and hexapod (Figure 3), comparing against CMA-ES run independently per task, MAP-Elites with random task assignment, and MAP-Elites evaluated on all tasks simultaneously. MT-ME outperformed all baselines on both domains. 
+
+Multi-Task Multi-Behavior MAP-Elites (MTMB-ME) [3]. MTMB-ME extends MT-ME by restoring the behavioral descriptor from Definition 1 on top of the task index, yielding a two-level archive A : T × B → Θ indexed jointly by task and behavior. Task-specific adaptation and behavioral diversity are there-fore maintained simultaneously within a single archive. Anne and Mouret [3] applied MTMB-ME to a humanoid robot fault-recovery scenario, identifying successful contact positions on a wall that help the robot regain balance after a leg fault, and outperformed random search, grid search, and standard MAP-Elites both in the number of tasks solved and in the number of solutions found. 
+
+Parametric-Task MAP-Elites (PT-ME) [4]. PT-ME extends MT-ME to 
+
+continuous task spaces. Instead of fixing a finite set of tasks in advance, PT-ME draws a fresh task τ ∼ T at every iteration and stores, for each drawn task, the best solution encountered so far, so the archive becomes a dense dataset covering the entire task space. PT-ME alternates between two variation operators at equal probability. The first is SBX [16] with a bandit-tuned tournament that biases task selection toward tasks close to the parents, replacing the iso-line-dd operator of MT-ME. The second, and more distinctive, operator is a local linear regression : PT-ME partitions the task space into cells via Centroidal Voronoi Tessellation (CVT) [19, 48], precomputes a k-dimensional tree ( k-d tree) [10] for fast cell lookup and a Delaunay triangulation [17] for adjacency, then fits a linear least-squares model M = ( T⊤T)−1T⊤X to the elites in adjacent cells, where T
+
+stacks the task vectors of the adjacent cells and X the corresponding solution vectors; a candidate is then generated as θ = M · τ + σreg · N (0 , var( X)) . This regression operator is notable because it explicitly exploits task-space locality: the Delaunay triangulation defines a geometric neighborhood over T , and the linear model builds a local approximation of the task-to-solution mapping from that neighborhood. On archery adn arm PT-ME yields improved performance over standard MAP-Elites and Proximal Policy Optimization (PPO) [2]. 
+
+MAP-Elites with Knowledge Transfer (MMKT) [32]. This variant ex-tends MT-ME by partitioning the task set into groups {T 1, . . . , Tm} obtained by applying k-means clustering to the task parameters, and then promoting knowl-edge transfer between tasks through linear combinations of solutions drawn from the same group. In this preliminary study, MMKT outperforms MT-ME on the arm task. 
+
+Adaptive Group-based Collaborative Optimization (AGCO) [27]. This framework extends the group-based view further with a two-stage transfer pro-tocol. An inter-group knowledge separation stage employs an adaptive selec-tion mechanism for crossover operators to control information exchange between Multi-Task Optimization over Networks of Tasks 7
+
+groups, and an intra-group knowledge reunion stage leverages Thompson sam-pling to weight within-group recombination so that target tasks assimilate in-sights from multiple in-group sources according to their evolutionary preferences. Most of the variants above treat the archive as fully connected: every elite can serve as a parent for any cell regardless of the relationship between the cor-responding tasks. PT-ME is a partial exception: its regression operator builds a local linear model from Delaunay-adjacent cells, thereby exploiting geometric locality in T for candidate generation. However, this locality is confined to one of two variation operators (applied with 50% probability), the adjacency structure is a by-product of the CVT tessellation rather than an explicit design element, and the SBX path still draws parents globally. An alternative that makes locality a first-class principle is familiar from cellular evolutionary algorithms (cEAs) [1], which organize the population into local neighborhoods and restrict recombina-tion accordingly, so that information propagates through the population only via those neighborhoods. MONET (Section 3) follows the same intuition but imposes the graph over tasks rather than over individuals: it extends MT-ME by replacing the implicit fully-connected archive A : T → Θ with an explicit graph structure over T , inducing neighborhoods from task-space proximity. 
+
+## 3 MONET 
+
+Building on the taxonomy introduced in Section 2, we now introduce MONET. Figure 1 illustrates the task-graph representation at the core of MONET: nodes are tasks, edges connect neighboring tasks in the task parameter space, and each node stores the best solution found so far. 
+
+Definition 2 (MONET). Let {τ 1, . . . , τ n} ⊂ T be a finite task set, f : Θ ×T → R a task-parameterized fitness function, and d : T × T → R≥0 a task distance. MONET represents the optimization state as a labeled graph G =(V, E, A) whose nodes V = {τ 1, . . . , τ n} are the tasks themselves, whose edges 
+
+E = {(τ i, τ j ) : τ j is among the N nearest neighbors of τ i under d} encode task-space proximity for a user-chosen neighborhood size N , and whose labeling A :
+
+V → Θ stores the best solution found so far for each task. Candidate solutions are admitted by the elitist rule: a candidate θ generated for task τ i replaces A[τ i]
+
+iff f (θ, τ i) ≥ f (A[τ i], τ i).
+
+Figure 2b summarizes the mappings of Definition 2. Compared with the base MAP-Elites diagram (Figure 2a), the behavioral descriptor b is absent and the archive is indexed directly by task; the fitness is conditioned on a task parameter; and the bottom row shows the graph construction from the task distance d and the neighborhood lookup Nb( τ ) that mediates social learning. Candidates are generated by one of two complementary mechanisms, selected at each step with probability pind . Individual learning mutates the current label 
+
+A[τ i] of a focal task, exploring the local fitness landscape of τ i in isolation. Social learning draws a neighbor τ j from the graph neighborhood of τ i and recombines 
+
+A[τ i] with A[τ j ], transferring information between similar tasks along the edges 8 J. Hatzky et al. 
+
+Algorithm 1 MONET 
+
+Require: Task set T = {τ 1, . . . , τ n}, fitness function f , task distance d
+
+Require: Budget E, init fraction Kinit , neighborhood size N , selection strategy Se-lect (·), probability pind 
+
+Ensure: Archive A mapping each task to its best solution 1: A[τ ] ← ∅ for all τ ∈ T ▷ empty network 2: for each τ i ∈ T do ▷ build k-NN task graph 3: Nb( τ i) ← N nearest tasks under d
+
+4: end for 
+
+5: for i ← 1 to Kinit do ▷ random initialization 6: τ ← RandomTask (T )
+
+7: θ ∼ U (pmin , p max )
+
+8: fx ← f (θ, τ )
+
+9: if A[τ ] = ∅ or fx ≥ A [τ ].fitness then ▷ elitist update 10: A[τ ] ← (θ, f x)
+
+11: end if 
+
+12: end for 
+
+13: e ← Kinit ▷ main loop 14: while e < E do 
+
+15: τ ← RandomTask (T ) ▷ sample focal task 16: if rand() < p ind then ▷ individual learning 17: Mutation (τ , A) ▷ IndividualLearning (τ , A)18: e ← e + 1 
+
+19: else ▷ social learning 20: τ j ← Select (Nb( τ )) ▷ pick one neighbor 21: if τ j̸ = nil then ▷ skip if no graph neighbor exists 22: SBX (τ , τ j , A) ▷ SocialLearning (τ , τ j , A)23: e ← e + 1 
+
+24: end if 
+
+25: end if 
+
+26: end while 
+
+27: return A
+
+of G. Empty nodes are initialized by individual learning with a uniform random solution, or by social learning by copying from a non-empty neighbor (with a uniform random fallback if no such neighbor exists); social learning is skipped at a step where the chosen neighbor is itself empty. In this work, we use the Euclidean distance in T as the task distance d, and set the neighborhood size N (the number of nearest neighbors retained per task, Def. 2) to a small fraction of |V| (see Section 4), so that G is a sparse, par-tially connected graph whose density is controlled by the chosen neighborhood size. Algorithm 1 provides the pseudocode of MONET and the code is publicly accessible [25]. Multi-Task Optimization over Networks of Tasks 9
+
+## 4 Experimental Setup 
+
+We compare MONET against PT-ME and MT-ME across four task environ-ments: archery, arm, cartpole, and hexapod (Figure 3). PT-ME samples tasks continuously from T rather than operating over a fixed task set: it partitions T into n cells via Centroidal Voronoi Tessellation (CVT) [19, 48] and, by the end of its run, each cell holds the highest-fitness task-solution pair it has sampled. To place the three algorithms on the same footing, we take these n cell elites ( n = 5000 for archery, arm, and cartpole, and 
+
+n = 2000 for hexapod) as the fixed task set on which MT-ME and MONET are then run. This removes task selection as a confound in the cross-algorithm comparison. One asymmetry remains: under this protocol each PT-ME task is evaluated essentially once (the sample whose solution became its cell’s elite), whereas MT-ME and MONET revisit each task many times to refine its solution, so the total evaluation budget is identical across algorithms but the per-task refinement opportunity is not. For PT-ME and MT-ME we use the default parameters from [4, 39]. For MONET, we first conduct a hyperparameter sensitivity analysis. We consider the following hyperparameters and ranges: pind ∈ { 0, 0.3, 0.5, 0.7, 1}, strategy ∈{random , best_fitness }, neighborhood ∈ { random , closest , distance_proportional },and neighbor_percentage ∈ { 1% , 5% , 10% }. Here pind is the per-step proba-bility of performing individual learning (mutation) rather than social learning (SBX); strategy is the rule used to pick the neighbor during social learning, either uniformly at random or deterministically the neighbor with the high-est current fitness; neighborhood determines how the neighbor set of each task is built, taking the N closest tasks in T , N uniformly random tasks, or N
+
+tasks drawn without replacement with probability proportional to task-space similarity; and neighbor_percentage sets this neighborhood size as a fraction 
+
+N = ⌈neighbor_percentage · |V|⌉ of the total task set. For each hyperparameter combination we perform up to 20 independent runs with different random seeds and report the mean fitness with standard devia-tion as well as the area under the learning curve (AUC), capturing both final performance and cumulative learning efficiency. The sensitivity sweep is concen-trated on archery and arm (20 seeds per configuration; cartpole and hexapod are evaluated on a smaller subset of configurations because of simulator cost. To quantify the importance of individual hyperparameters and their interac-tions, both per task and aggregated across all tasks, we fit a gradient-boosted tree surrogate model and compute SHapley Additive exPlanations (SHAP) val-ues [33, 34], following the surrogate-based hyperparameter importance method-ology of [28]. Guided by this analysis, we then assign reasonable values to each hyperparameter, yielding a single configuration of MONET that we refer to as the default configuration and compare it against PT-ME and MT-ME. Addition-ally, we employ the Sequential Parameter Optimization Toolbox (SPOT) [9], a surrogate-based optimizer, to automatically tune MONET’s hyperparameters per task and include these task-specific configurations in the comparison. 10 J. Hatzky et al. Target                  
+
+> Fitness is distance
+> covered along the
+> x-axis.
+> Fitness is time that pole
+> is staying upright.
+> b) Arm d) Hexapod c) Cartpole
+> Pole Length L
+> Pole Mass W
+> Gravity
+> Wind (W)
+> Distance (D)
+> Pitch
+> Yaw
+> Fitness is arrow
+> distance to bullseye.
+> (0 out of target)
+> Fitness is
+> Euclidean
+> distance to
+> target.
+> a) Archery
+> 𝒯∈ ℝ² , θ ∈ℝ²𝒯∈ ℝ² , θ ∈ℝ10 𝒯∈ ℝ² , θ ∈ℝ16 𝒯∈ ℝ12 , θ ∈ℝ36
+
+Fig. 3: Overview of benchmark environments. To assess statistical significance of the performance differences between al-gorithms, we apply the Mann-Whitney U test [35] to the final fitness values and AUC values across all seeds and report the resulting p-values with Holm-Bonferroni correction [20, 26] for multiple comparisons. Higher fitness is better in all four benchmarks, but the scale differs across them: archery and arm return values in [0 , 1] ; cartpole reports the mean balanced-step count across 10 rollouts and therefore lies in [0 , t max ] with tmax = 1000 ;hexapod reports the forward centre-of-mass displacement in metres over a 3 s episode with no formal upper bound (in practice below 1.5 m ). Closed-form fit-ness expressions are defined in the Supplementary Information (SI) [25]. All four benchmarks are run for 10 6 evaluations and 20 seeds per run. 
+
+Archery. A projectile-aiming task in which the archer compensates for target distance and wind (Figure 3a) [4]. Tasks (2D) vary the distance D ∈ [5 , 40] mand horizontal wind W ∈ [−10 , 10] m /s2; solutions (2D) are yaw and pitch in 
+
+[−π/ 12 , π/ 12] at fixed launch speed v0 = 70 m /s.
+
+Arm. A planar 10-degree-of-freedom (10-DoF) arm places its end-effector at a fixed target (Figure 3b) [4,39]. Tasks (2D) vary the link length L and maximum joint angle αmax , both in [0 , 1] ; solutions (10D) are the 10 joint angles. 
+
+Cartpole. Cart-pole balancing under varying physical parameters (Figure 3c) [8, 36]. Tasks (2D) vary pole mass mp ∈ [0 .05 , 0.5] kg and pole length L ∈ [0 .3, 1.2] m; solutions (16D) are a direct encoding of the weights of a small multi-layer per-ceptron controller (4 inputs, 2 hidden tanh units, 2 output logits, with bias units on the input and hidden layers). 
+
+Hexapod. A simulated hexapod walks forward across 2 000 random morphologies (Figure 3d) [14, 39], simulated in PyBullet [13]. Tasks (12D) are 12 leg-segment length changes; solutions (36D) parameterise a gait controller. 
+
+## 5 Results 
+
+Across the four domains, MONET matches or exceeds the strongest MAP-Elites baseline on final mean fitness, with the largest gap on the hexapod task where the Multi-Task Optimization over Networks of Tasks 11 
+
+per-domain tuned configuration nearly doubles the final fitness of MT-ME (Fig-ure 4, Table 1). We first walk through the per-domain comparison, then unpack the hyperparameter analysis that produced the shared default configuration. 
+
+5.1 Algorithm Comparison 
+
+We report two MONET variants: MONET default , a single configuration shared across domains (defined in Section 5.2), and MONET tuned , a per-domain tuning produced with SPOT [9]. Both are compared against PT-ME and MT-ME with their published defaults. Each box in Figure 4 aggregates 20 seeds per (algorithm, domain) pair; brackets indicate pairwise comparisons where one algorithm is significantly better (Mann-Whitney U, Holm-Bonferroni correction, p < 0.05 ). 
+
+Archery. MT-ME, PT-ME, and MONET tuned all saturate at 1.000 ; MONET default 
+
+stops short at 0.996 ± 0.000 (p < 0.001 vs. all three). Final fitness is thus tied at the top, and AUC is the discriminating signal. MONET default reaches an AUC of 976 .3 ± 0.6, significantly above MT-ME ( 957 .2 ± 3.3, p < 0.001 ) and PT-ME (924 .1 ± 1.1, p < 0.001 ). MONET tuned improves AUC further to 979 .2 ± 1.9
+
+(p < 0.001 vs. MONET default ). MONET therefore converges to near-optimal performance substantially earlier than the baselines. 
+
+Arm. MONET default reaches 0.770 ± 0.001 on final fitness, just below MT-ME (0.772 ± 0.002 , p < 0.001 ) and above PT-ME ( 0.747 ± 0.001 , p < 0.001 ). On AUC it is the strongest of the four algorithms: 762 .7 ± 1.2, ahead of MT-ME (760 .1 ± 3.4, p = 0 .003 ) and PT-ME ( 734 .0 ± 2.9, p < 0.001 ). This reflects faster convergence in the early phase (Figure 4b). MONET tuned achieves the highest final fitness at 0.773 ± 0.000 , significantly above MT-ME ( p < 0.001 ). 
+
+Cartpole. MONET default reaches 997 .2 ± 2.6, statistically indistinguishable from MT-ME ( 994 .5 ± 8.5) and PT-ME ( 992 .5 ± 8.9). MT-ME retains a significant AUC lead ( 978 .4 ± 11 .4 vs. 969 .0 ± 7.2, p < 0.001 ): it converges earlier while MONET terminates higher. Tuning nudges final fitness to 998 .5 ± 1.0 (not sig-nificant vs. baselines) but significantly lowers AUC to 941 .4 ± 17 .4 (p < 0.001 
+
+vs. MONET default ). 
+
+Hexapod. MONET default (0.690 ± 0.101 ) performs significantly better than MT-ME ( 0.530 ± 0.032 , p < 0.001 ) and statistically indistinguishable from PT-ME (0.727 ± 0.078 , p = 0 .15 ). Tuning improves performance further to 0.956 ± 0.082 ,significantly above both baselines ( p < 0.001 vs. MT-ME; p < 0.001 vs. PT-ME). Previous work reported that PT-ME outperformed MT-ME [4], whereas in our experiments, MT-ME achieved better performance than PT-ME. This dis-crepancy arises because PT-ME samples tasks continuously from the task space, which can result in selecting tasks that are easier to solve. To ensure a fair comparison, we fixed the task set to the final tasks discovered by PT-ME and evaluated both methods on this same set of tasks. 12 J. Hatzky et al. 0.0M 0.2M 0.4M 0.6M 0.8M 1.0M 
+
+> 0.0000
+> 0.5000
+> 1.0000
+> Mean Fitness
+
+Convergence 
+
+(a) Archery 
+
+MONET default 
+
+MONET tuned 
+
+PT-ME 
+
+MT-ME    
+
+> 0.9950
+> 0.9975
+> 1.0000
+> 1.0025 ns ns ns
+
+Final Mean Fitness 
+
+MONET default 
+
+MONET tuned 
+
+PT-ME 
+
+MT-ME 
+
+> 0.950
+> 1.000
+
+AUC      
+
+> 0.0M 0.2M 0.4M 0.6M 0.8M 1.0M
+> 0.600
+> 0.700
+> Mean Fitness
+
+(b) Arm 
+
+MONET default 
+
+MONET tuned 
+
+PT-ME 
+
+MT-ME 
+
+> 0.760
+> 0.780
+
+MONET default 
+
+MONET tuned 
+
+PT-ME 
+
+MT-ME      
+
+> 0.740
+> 0.760
+> 0.780
+> 0.0M 0.2M 0.4M 0.6M 0.8M 1.0M
+> 0
+> 500
+> 1000
+> Mean Fitness
+
+(c) Cartpole 
+
+MONET default 
+
+MONET tuned 
+
+PT-ME 
+
+MT-ME     
+
+> 980
+> 1000
+> 1020
+> ns ns ns ns ns ns
+
+MONET default 
+
+MONET tuned 
+
+PT-ME 
+
+MT-ME       
+
+> 800
+> 900
+> 1000
+> 1100 ns
+> 0.0M 0.2M 0.4M 0.6M 0.8M 1.0M
+
+Evaluations 
+
+> 0.000
+> 0.500
+> 1.000
+> Mean Fitness
+
+(d) Hexapod 
+
+MONET default 
+
+MONET tuned 
+
+PT-ME 
+
+MT-ME 
+
+> 0.500
+> 1.000
+> 1.500
+> ns
+
+MONET default 
+
+MONET tuned 
+
+PT-ME 
+
+MT-ME 
+
+> 0.500
+> 1.000
+
+Mann-Whitney U test with Holm-Bonferroni correction: p < 0.05 , p < 0.01 , p < 0.001 , ns = not significant 
+
+MONET default MONET tuned PT-ME MT-ME 
+
+Fig. 4: Algorithm comparison across the four benchmark domains. 
+
+5.2 Hyperparameter Sensitivity and Default Configuration 
+
+The most important finding from the SHAP-based sensitivity analysis is that the probability of individual learning pind accounts for most of the variation in performance, with a mean absolute SHAP value |SHAP | = 0 .49 , followed by neighbor_percentage ( 0.16 ), strategy ( 0.13 ), and neighborhood ( 0.09 ); see Figure 5. Low values of pind (favoring social learning over individual mutation) consistently improve both mean fitness and AUC across all domains, supporting the central design intuition behind MONET that information transfer between similar tasks is the dominant lever. The remaining hyperparameters show weaker and more domain-dependent effects (see SI for detailed SHAP analysis per do-main [25]). Multi-Task Optimization over Networks of Tasks 13 0.0 0.1 0.2 0.3 0.4 0.5   
+
+> Mean |SHAP value| (z-score units)
+> neighborhood: random
+> strategy: closest
+> strategy: best_fitness
+> neighborhood: closest
+> neighborhood: distance_proportional
+> strategy: random
+> neighbor_pct
+> p_ind
+> 0.010
+> 0.010
+> 0.014
+> 0.028
+> 0.095
+> 0.130
+> 0.163
+> 0.491
+> Mean Fitness (z-score)
+> Global SHAP z-score Normalised Across All Domains
+
+Fig. 5: Global hyperparameter importance for MONET: mean absolute SHAP value on a gradient-boosted tree surrogate. The default parameters of MONET were defined based on the SHAP anal-ysis as: strategy = best_fitness, neighborhood = closest, pind = 0 .3, and neigh-bor_percentage = 5% (obtained by ranking configurations on the z-scored mean fitness across all domains, see SI [25]). This configuration picks the fittest neigh-bor for crossover, draws neighbors from the k nearest tasks in task space, and mixes mostly social learning ( 70% ) with occasional individual refinement ( 30% ). The SPOT-tuned per-domain configurations differ markedly from the default and from each other: archery uses a large neighborhood ( 39% ) with moderate 
+
+pind = 0 .22 ; arm uses a very small neighborhood ( 0.1% ) with high pind = 0 .54 
+
+(favouring individual refinement on this well-conditioned task); cartpole uses a small neighborhood ( 1% ) with a balanced pind = 0 .5; and hexapod uses a small neighborhood ( 1% ) with pure social learning ( pind = 0 ). This spread confirms that the optimal individual vs. social learning balance is task-dependent. The default configuration is competitive with the baselines and achieves the best AUC on three of four domains (archery, arm, hexapod); it is outperformed only on archery final fitness, where PT-ME and MT-ME saturate at 1.000 , and on cartpole AUC, where MT-ME converges faster (Fig. 4, Table 1) 
+
+## 6 Conclusion 
+
+In this work, we propose MONET to find high-quality solutions for a large set of related tasks simultaneously and in parallel. We propose structuring the task space as a network to establish topological relations and neighborhoods, which aims to exploit task similarities for knowledge transfer. As shown by the results in four domains, this approach has an advantage over flat archive representa-tion, where these topological relations are ignored. We introduced two operators, namely individual and social learning, that aim to improve tasks in isolation or exploit knowledge transfer across neighboring related tasks. 14 J. Hatzky et al. 
+
+Table 1: Final mean fitness and AUC ( ×10 3 on the [0 , 1] domains) per domain. Mean ± std over 20 random seeds per (algorithm, domain) pair.                                                                                                        
+
+> Archery Arm Cartpole Hexapod
+> (a) Final mean fitness
+> PT-ME 1.000 ±0.000 0.747 ±0.001 992 .5±8.90.727 ±0.078
+> MT-ME 1.000 ±0.000 0.772 ±0.002 994 .5±8.50.530 ±0.032
+> MONET default 0.996 ±0.000 0.770 ±0.001 997 .2±2.60.690 ±0.101
+> MONET tuned 1.000 ±0.000 0.773 ±0.000 998 .5±1.00.957 ±0.083
+> (b) AUC ( ×10 3on [0 ,1] domains)
+> PT-ME 924 .1±1.1734 .0±2.9913 .5±70 .2349 .9±27 .7
+> MT-ME 957 .2±3.3760 .1±3.4978 .4±11 .4450 .2±29 .3
+> MONET default 976 .3±0.6762 .7±1.2969 .0±7.2557 .0±67 .3
+> MONET tuned 979 .2±1.9757 .3±0.2941 .4±17 .4716 .0±87 .8
+
+The extensive sensitivity analysis of the MONET algorithm and its parame-ters showed that the probability of individual learning pind influences the perfor-mance the most, with high values leading to lower performance. This shows that social learning is a significant contributor to performance by exploiting knowl-edge transfer across tasks. However, this analysis was on a pre-selected set of 
+
+pind parameters. Thus, using a more balanced ratio between individual and social learning parameters can improve performance, particularly in task spaces where similarities between tasks are relatively low. In fact, SPOT-based per-domain tuning selected low pind on hexapod (0) and archery (0 .54) . On arm (0 .5) and cartpole 0.5, a more balanced mix was preferred. We establish connectivity between tasks on the basis of the task parameter similarities. This relies on the idea that tasks sharing similar parameters are themselves similar, making them more likely to benefit from knowledge transfer and to converge toward similar solutions. However, this assumption may not hold in many domains. In the hexapod domain, for example, small changes to front-right and back-left leg lengths yield nearby task vectors but can demand qualitatively different solutions to perform the control tasks. Future work should therefore explore alternative connectivity definitions and assess their effect on knowledge transfer. Currently, the MONET algorithm has four hyperparameters. Another in-teresting direction is online self-adaptive parameter control (e.g., adapting the neighborhood size as in MT-ME’s task-competition and replacement rule [39], or dynamically switching between individual and social learning strategies [50]). Although this can introduce complexity, it may provide more generalized perfor-mance across different domains and task spaces. Another promising direction is to extend the types of individual and social learning strategies that can improve performance. Furthermore, some of these strategies can converge to more general solutions that can lead to satisfactory performance for a wide range of tasks in the task space [46]. Multi-Task Optimization over Networks of Tasks 15 
+
+## References 
+
+1. Alba, E., Dorronsoro, B.: Cellular Genetic Algorithms, Operations Re-search/Computer Science Interfaces Series, vol. 42. Springer US, Boston, MA (2008). https://doi.org/10.1007/978-0-387-77610-1 
+
+2. and Filip Wolski and Prafulla Dhariwal and Alec Radford and Oleg Klimov, J.S.: Proximal policy optimization algorithms. CoRR abs/1707.06347 (2017) 3. Anne, T., Mouret, J.B.: Multi-task multi-behavior MAP-elites. In: Proceedings of the Companion Conference on Genetic and Evolutionary Computation. pp. 111– 114. GECCO ’23 Companion, Association for Computing Machinery, New York, NY, USA (2023). https://doi.org/10.1145/3583133.3590730 
+
+4. Anne, T., Mouret, J.B.: Parametric-Task MAP-Elites. In: Proceedings of the Ge-netic and Evolutionary Computation Conference. pp. 68–77 (Jul 2024). https: //doi.org/10.1145/3638529.3653993 
+
+5. Anne, T., Mouret, J.B.: Parametric-Task MAP-Elites. https://github.com/ hucebot/Parametric-Task_MAP-Elites (2024) 6. Bali, K.K., Gupta, A., Ong, Y.S., Tan, P.S.: Cognizant multitasking in multiob-jective multifactorial evolution: MO-MFEA-II. IEEE Transactions on Cybernetics 
+
+51 (4), 1784–1796 (2021). https://doi.org/10.1109/TCYB.2020.2981733 
+
+7. Bali, K.K., Ong, Y.S., Gupta, A., Tan, P.S.: Multifactorial evolutionary algorithm with online transfer parameter estimation: MFEA-II. IEEE Transactions on Evolu-tionary Computation 24 (1), 69–83 (2020). https://doi.org/10.1109/TEVC.2019. 2906927 
+
+8. Barto, A.G., Sutton, R.S., Anderson, C.W.: Neuronlike adaptive elements that can solve difficult learning control problems. IEEE Transactions on Systems, Man, and Cybernetics SMC-13 (5), 834–846 (1983). https://doi.org/10.1109/TSMC. 1983.6313077 
+
+9. Bartz-Beielstein, T.: Optimization with spotoptim (2026), https://arxiv.org/ abs/2604.13672 
+
+10. Bentley, J.L.: Multidimensional binary search trees used for associative searching. Communications of the ACM 18 (9), 509–517 (1975). https://doi.org/10.1145/ 361002.361007 
+
+11. Bongard, J., Zykov, V., Lipson, H.: Resilient machines through continuous self-modeling. Science 314 (5802), 1118–1121 (2006). https://doi.org/10.1126/ science.1133687 
+
+12. Chatzilygeroudis, K., Cully, A., Vassiliades, V., Mouret, J.B.: Quality-diversity optimization: A novel branch of stochastic optimization. In: Black Box Optimiza-tion, Machine Learning, and No-Free Lunch Theorems, pp. 109–135. Springer Optimization and Its Applications, Springer (2021). https://doi.org/10.1007/ 978-3-030-66515-9_4 
+
+13. Coumans, E., Bai, Y.: PyBullet, a Python module for physics simulation for games, robotics and machine learning. http://pybullet.org (2021) 14. Cully, A., Clune, J., Tarapore, D., Mouret, J.B.: Robots that can adapt like animals. Nature 521 (7553), 503–507 (2015). https://doi.org/10.1038/ nature14422 , https://doi.org/10.1038/nature14422 
+
+15. Deb, K.: Multi-Objective Optimization Using Evolutionary Algorithms. Wiley, Chichester, UK (2001) 16. Deb, K., Agrawal, R.B.: Simulated binary crossover for continuous search space. Complex Systems 9(2), 115–148 (1995) 16 J. Hatzky et al. 17. Delaunay, B.: Sur la sphere vide. In: Proceedings of the Mathematics, Toronto. pp. 695–700. Toronto (1928) 18. van Diggelen, F., Cambier, N., Ferrante, E., Eiben, A.E.: A model-free method to learn multiple skills in parallel on modular robots. Nature Communications 15 ,6267 (2024). https://doi.org/10.1038/s41467-024-50131-4 
+
+19. Du, Q., Faber, V., Gunzburger, M.: Centroidal voronoi tessellations: Applications and algorithms. SIAM Review 41 (4), 637–676 (1999). https://doi.org/10.1137/ S0036144599352836 
+
+20. Dunn, O.J.: Multiple comparisons among means. Journal of the American Sta-tistical Association 56 (293), 52–64 (1961). https://doi.org/10.1080/01621459. 1961.10482090 
+
+21. Feller, W.: An Introduction to Probability Theory and Its Applications, vol. 1. Wiley, 3 edn. (1968) 22. Feng, L., Huang, Y., Zhou, L., Zhong, J., Gupta, A., Tang, K., Tan, K.C.: Explicit evolutionary multitasking for combinatorial optimization: A case study on capaci-tated vehicle routing problem. IEEE Transactions on Cybernetics 51 (6), 3143–3156 (2021). https://doi.org/10.1109/TCYB.2019.2962865 
+
+23. Gupta, A., Ong, Y.S., Feng, L.: Multifactorial evolution: Toward evolutionary mul-titasking. IEEE Transactions on Evolutionary Computation 20 (3), 343–357 (2016). 
+
+https://doi.org/10.1109/TEVC.2015.2458037 
+
+24. Gupta, A., Zhou, L., Ong, Y.S., Chen, Z., Hou, Y.: Half a dozen real-world appli-cations of evolutionary multitasking, and more. IEEE Computational Intelligence Magazine 17 , 49–66 (May 2022). https://doi.org/10.1109/MCI.2022.3155332 
+
+25. Hatzky, J., Bartz-Beielstein, T., Eiben, A.E., Yaman, A.: Repository for MONET: Multi-Task Optimization over Networks of Tasks. https://github.com/ju2ez/ MONET/tree/PPSN-MONET-introduction (2026) 26. Holm, S.: A simple sequentially rejective multiple test procedure. Scandinavian Journal of Statistics 6(2), 65–70 (1979) 27. Hou, Y., Yu, Z., Guo, Z., Pei, W., Wu, Y., Ge, H., Xue, B., Zhang, M.: A Group-Based Many-Task Collaborative Optimization Framework for Evolutionary Robots Design. IEEE Transactions on Systems, Man, and Cybernetics: Systems 55 (5), 3492–3505 (May 2025). https://doi.org/10.1109/TSMC.2025.3541002 
+
+28. Hutter, F., Hoos, H., Leyton-Brown, K.: An efficient approach for assessing hy-perparameter importance. In: Proceedings of the 31st International Conference on Machine Learning. Proceedings of Machine Learning Research, vol. 32, pp. 754– 762. PMLR (2014) 29. Huynh Thi Thanh, B., Van Cuong, L., Thang, T.B., Long, N.H.: Ensemble Mul-tifactorial Evolution With Biased Skill-Factor Inheritance for Many-Task Opti-mization. IEEE Transactions on Evolutionary Computation 27 (6), 1735–1749 (Dec 2023). https://doi.org/10.1109/TEVC.2022.3227120 
+
+30. Liang, J., Qiao, K., Yuan, M., Yu, K., Qu, B., Ge, S., Li, Y., Chen, G.: Evolu-tionary multi-task optimization for parameters extraction of photovoltaic models. Energy Conversion and Management 207 , 112509 (Mar 2020). https://doi.org/ 10.1016/j.enconman.2020.112509 
+
+31. Liu, J., Li, P., Wang, G., Zha, Y., Peng, J., Xu, G.: A multitasking electric power dispatch approach with multi-objective multifactorial optimization algo-rithm. IEEE access : practical innovations, open solutions 8, 155902–155911 (2020). 
+
+https://doi.org/10.1109/ACCESS.2020.3018484 
+
+32. Liu, P., Guo, Z., Yu, H., Linghu, H., Li, Y., Hou, Y., Ge, H., Zhang, Q.: A pre-liminary study of multi-task map-elites with knowledge transfer for robotic arm Multi-Task Optimization over Networks of Tasks 17 design. In: 2022 IEEE Congress on Evolutionary Computation (CEC). pp. 1–8 (2022). https://doi.org/10.1109/CEC55065.2022.9870374 
+
+33. Lundberg, S.M., Erion, G., Chen, H., DeGrave, A., Prutkin, J.M., Nair, B., Katz, R., Himmelfarb, J., Bansal, N., Lee, S.I.: From local explanations to global under-standing with explainable AI for trees. Nature Machine Intelligence 2(1), 56–67 (2020). https://doi.org/10.1038/s42256-019-0138-9 
+
+34. Lundberg, S.M., Lee, S.I.: A unified approach to interpreting model predictions. In: Advances in Neural Information Processing Systems. vol. 30 (2017) 35. Mann, H.B., Whitney, D.R.: On a test of whether one of two random variables is stochastically larger than the other. The Annals of Mathematical Statistics 18 (1), 50–60 (1947). https://doi.org/10.1214/aoms/1177730491 
+
+36. Michie, D., Chambers, R.A.: BOXES: An experiment in adaptive control. In: Dale, E., Michie, D. (eds.) Machine Intelligence 2, pp. 137–152. Oliver and Boyd, Edin-burgh (1968) 37. Mouret, J.B.: pymap_elites: Python reference implementation of MAP-Elites and Multi-Task MAP-Elites. https://github.com/resibots/pymap_elites 
+
+38. Mouret, J., Clune, J.: Illuminating search spaces by mapping elites. CoRR 
+
+abs/1504.04909 (2015), http://arxiv.org/abs/1504.04909 
+
+39. Mouret, J.B., Maguire, G.: Quality diversity for multi-task optimization. In: Pro-ceedings of the 2020 Genetic and Evolutionary Computation Conference. pp. 121–129. ACM, Cancún Mexico (Jun 2020). https://doi.org/10.1145/3377930. 3390203 
+
+40. Osaba, E., Martinez, A.D., Ser, J.D.: Evolutionary multitask optimization: a methodological overview, challenges and future research directions (2021), https: //arxiv.org/abs/2102.02558 
+
+41. Pearce, M., Branke, J.: Continuous multi-task bayesian optimisation with cor-relation. European Journal of Operational Research 270 (3), 1074–1085 (2018). 
+
+https://doi.org/10.1016/j.ejor.2018.03.017 
+
+42. Rendell, L., Boyd, R., Cownden, D., Enquist, M., Eriksson, K., Feldman, M.W., Fogarty, L., Ghirlanda, S., Lillicrap, T., Laland, K.N.: Why copy others? Insights from the social learning strategies tournament. Science 328 (5975), 208–213 (2010). 
+
+https://doi.org/10.1126/science.1184719 
+
+43. Sagarna, R., Ong, Y.S.: Concurrently searching branches in software tests genera-tion through multitask evolution. In: 2016 IEEE Symposium Series on Computa-tional Intelligence (SSCI). pp. 1–8 (2016). https://doi.org/10.1109/SSCI.2016. 7850040 
+
+44. Samarakoon, S.M.B.P., Muthugala, M.A.V.J., Elara, M.R.: Metaheuristic based navigation of a reconfigurable robot through narrow spaces with shape changing ability. Expert Systems with Applications 201 , 117060 (2022). https://doi.org/ 10.1016/j.eswa.2022.117060 
+
+45. Shahriari, B., Swersky, K., Wang, Z., Adams, R.P., de Freitas, N.: Taking the human out of the loop: A review of bayesian optimization. Proceedings of the IEEE 104 (1), 148–175 (2016). https://doi.org/10.1109/JPROC.2015.2494218 
+
+46. Triebold, C., Yaman, A.: Evolving generalist controllers to handle a wide range of morphological variations. In: Proceedings of the Genetic and Evolutionary Com-putation Conference. pp. 1137–1145 (2024) 47. Vassiliades, V., Mouret, J.B.: Discovering the elite hypervolume by leveraging inter-species correlation. In: Proceedings of the Genetic and Evolutionary Computation Conference. pp. 149–156. Gecco ’18, Association for Computing Machinery, New York, NY, USA (2018). https://doi.org/10.1145/3205455.3205602 18 J. Hatzky et al. 48. Vassiliades, V., Chatzilygeroudis, K., Mouret, J.B.: Using centroidal voronoi tes-sellations to scale up the multi-dimensional archive of phenotypic elites algo-rithm. IEEE Transactions on Evolutionary Computation PP , 1–1 (Aug 2017). 
+
+https://doi.org/10.1109/TEVC.2017.2735550 
+
+49. Wang, C., Liu, J., Wu, K., Wu, Z.: Solving Multitask Optimization Problems With Adaptive Knowledge Transfer via Anomaly Detection. IEEE Transactions on Evo-lutionary Computation 26 (2), 304–318 (Apr 2022). https://doi.org/10.1109/ TEVC.2021.3068157 
+
+50. Yaman, A., Bredeche, N., Çaylak, O., Leibo, J.Z., Lee, S.W.: Meta-control of social learning strategies. PLoS computational biology 18 (2), e1009882 (2022) 51. Yaman, A., Iacca, G.: Distributed embodied evolution over networks. Applied Soft Computing 101 , 106993 (2021) 52. Yim, M., Shen, W.M., Salemi, B., Rus, D., Moll, M., Lipson, H., Klavins, E., Chirikjian, G.S.: Modular self-reconfigurable robot systems. IEEE Robotics & Au-tomation Magazine 14 (1), 43–52 (2007). https://doi.org/10.1109/MRA.2007. 339623 
+
+53. Zhao, H., Ning, X., Liu, X., Wang, C., Liu, J.: What makes evolutionary multi-task optimization better: A comprehensive survey. Applied Soft Computing 145 ,110545 (2023). https://doi.org/10.1016/j.asoc.2023.110545 
+
+54. Zhong, J., Feng, L., Cai, W., Ong, Y.S.: Multifactorial genetic programming for symbolic regression problems. IEEE Transactions on Systems, Man, and Cyber-netics: Systems 50 (11), 4492–4505 (2020). https://doi.org/10.1109/TSMC.2018. 2853719 
+
+## A Node Coverage Guarantees Under Random Sampling 
+
+If we draw at each evaluation step a random node and perform an action, we may ask how many evaluations are required so that we visit each of the ν nodes at least once with high certainty. This problem can be framed as a coupon collector’s problem [21]. Writing 
+
+M for the number of draws, the expected number of steps needed to visit all ν
+
+nodes at least once is 
+
+E[M ] = νH ν = ν
+
+
+
+ln ν + γ + O
+
+ 1
+
+ν
+
+ 
+
+,
+
+where Hν is the ν-th harmonic number and γ ≈ 0.57721 is the Euler-Mascheroni constant. Beyond the expectation, one may also ask for a high-probability guarantee. Using the asymptotic limit for the coupon collector’s completion time, the prob-ability that all nodes have been visited by draw 
+
+M = ν(ln ν + c)
+
+converges to 
+
+P M ≤ ν(ln ν + c) ≈ e−e−c
+
+.Multi-Task Optimization over Networks of Tasks 19 
+
+To achieve at least 99% probability of having visited all nodes, we solve for ce−e−c
+
+= p
+
+ln 
+
+
+
+e−e−c 
+
+= ln( p)
+
+−e−c = ln( p)
+
+For p = 0 .99 : c = − ln  − ln(0 .99)  ≈ 4.60015 ≈ ln(100) .
+
+Since each node is selected independently with probability 1 
+
+> ν
+
+at every draw, the visit count of any particular node over M draws follows a Binomial distri-bution, 
+
+Xi ∼ Binomial  M, 1
+
+> ν
+
+ ,
+
+from which the expected number of visits per node is 
+
+E[Xi] = Mν .
+
+We evaluate four environments with differing numbers of distinct tasks and a fixed amount of draws (number of evaluations) M = 1 ,000 ,000 :Table 2: Coupon collector bounds for the four benchmark environments with 
+
+M = 1 ,000 ,000 total evaluations.         
+
+> Environment νE[M]M0.99 E[Xi]
+> Archery / Arm / Cartpole 5 000 45 472 65 612 200 Hexapod 2 000 16 356 24 412 500
+
+## B MONET Algorithm 
+
+Algorithm 2 and Algorithm 3 detail the two learning subroutines invoked in Algorithm 1. 
+
+Individual Learning. When individual learning is selected, the current elite at node τ i is mutated independently of any neighbor. If no solution exists at the node, a random solution is drawn from U(pmin , p max ) and evaluated. Otherwise, Gaussian mutation with standard deviation σm scaled by the parameter range is applied. The offspring replaces the current elite only if its fitness is at least as high. 20 J. Hatzky et al. 
+
+Algorithm 2 Individual Learning 
+
+Require: Task τ , archive A, bounds pmin , p max , mutation std σm
+
+Ensure: Updated A[τ ]
+
+1: if A[τ ] = ∅ then ▷ initialize empty node 2: θ ∼ U (pmin , p max ) ▷ random solution 3: A[τ ] ← (θ, f (θ, τ )) 
+
+4: return 
+
+5: end if 
+
+6: θ ← A [τ ].solution ▷ current elite 7: ϵ ∼ N (0, σ m(pmax − pmin )) ▷ Gaussian perturbation 8: y ← clip (θ + ϵ, p min , p max ) ▷ mutant offspring 9: fy ← f (y, τ )
+
+10: if fy ≥ A [τ ].fitness then ▷ elitist replacement 11: A[τ ] ← (y, f y )
+
+12: end if 
+
+Social Learning. When social learning is selected, the current elite is recombined with a solution drawn from a neighboring node. If the current node is empty, the neighbor’s solution is copied as an initial seed (or a random solution is used when no neighbor has a solution). Recombination is performed via Simulated Binary Crossover (SBX) [16] with distribution index ηc = 10 [15]. As with individual learning, the offspring replaces the elite only upon improvement. 
+
+Algorithm 3 Social Learning 
+
+Require: Task τ , neighbor task τ j , archive A, bounds pmin , p max 
+
+Ensure: Updated A[τ ]
+
+1: if A[τ ] = ∅ then ▷ initialize empty node 2: if A[τ j ]̸ = ∅ then 
+
+3: θ ← A [τ j ].solution ▷ copy from neighbor 4: else 
+
+5: θ ∼ U (pmin , p max ) ▷ random fallback 6: end if 
+
+7: A[τ ] ← (θ, f (θ, τ )) 
+
+8: return 
+
+9: end if 
+
+10: if A[τ j ] = ∅ then 
+
+11: return ▷ no valid neighbor solution 12: end if 
+
+13: y ← SBX  A[τ ].solution , A[τ j ].solution , η c = 10  ▷ crossover 14: y ← clip (y, p min , p max )
+
+15: fy ← f (y, τ )
+
+16: if fy ≥ A [τ ].fitness then ▷ elitist replacement 17: A[τ ] ← (y, f y )
+
+18: end if Multi-Task Optimization over Networks of Tasks 21 
+
+## C Closed-Form Task Fitness Definitions 
+
+This appendix gives the explicit fitness expressions for the four benchmarks. 
+
+C.1 Archery 
+
+With initial velocity vector 
+
+v = v0
+
+
+
+− sin( yaw )cos( yaw ) cos( pitch )cos( yaw ) sin( pitch )
+
+ , v0 = 70 m /s,
+
+the target-plane hit time is thit = D/v y whenever vy > 0; if vy ≤ 0 the shot misses and f = 0 . Taking g = 9 .8 m /s2 and wind W ∈ [−10 , 10] m /s2 along x,the miss coordinates on the target plane ( y = D) are 
+
+mx = 12 W t 2 
+
+> hit
+
++ vx thit , mz = − 12 g t 2 
+
+> hit
+
++ vz thit , r = pm2 
+
+> x
+
++ m2 
+
+> z
+
+.
+
+Fitness is computed on a 10-ring target of ring width 0.061 m :
+
+f = max  0, 10 − ⌊ r/ 0.061 ⌋
+
+10 ∈ { 0, 0.1, . . . , 1.0}.
+
+C.2 Arm 
+
+With end-effector position pee ∈ R2 and a fixed target ptar = (0 .5, 0.5) ,
+
+f = exp( −∥ pee − ptar ∥2) ∈ (0 , 1] .
+
+The joint commands are q = ( θ − 12 ) · 2π α max /10 where θ ∈ [0 , 1] 10 is the solution vector and αmax is the task-dependent maximum joint-angle fraction; each of the 10 links has length L/ 10 with L the task-dependent total arm length. 
+
+pee is the end-effector position returned by forward kinematics. 
+
+C.3 Cartpole 
+
+The task uses the CartPole-v1 dynamics from OpenAI Gym with the pole mass 
+
+mp and pole length L replaced by the per-task values; the default cart mass mc
+
+is retained. With pole angle ϕ, cart position xc, control force F ∈ {− 10 , +10 } N,and gravity g = 9 .8 m /s2,
+
+¨ϕ =
+
+g sin ϕ + cos ϕ
+
+
+
+−F − mpL ˙ϕ2 sin ϕ
+
+
+
+/(mc + mp)
+
+L
+
+ 43 − mp cos 2 ϕmc+mp
+
+ , ¨xc =
+
+F + mpL
+
+ ˙ϕ2 sin ϕ − ¨ϕ cos ϕ
+
+
+
+mc + mp
+
+.
+
+A solution is evaluated over nrollouts = 10 rollouts with distinct Gym seeds. Each rollout runs until the pole leaves the balanced region ( |ϕ| ≥ 12 ◦ or |xc| ≥ 2.4 m )or until the step cap tmax = 1000 is reached. Writing t(k) 
+
+> balanced
+
+for the number of surviving steps on rollout k, the reported fitness is the arithmetic mean 
+
+f = 1
+
+nrollouts 
+
+> nrollouts
+
+X
+
+> k=1
+
+min  tmax , t (k)
+
+> balanced
+
+ ∈ [0 , t max ].22 J. Hatzky et al. 
+
+C.4 Hexapod 
+
+With gait parameters θ ∈ [0 , 1] 36 and morphology τ ∈ T instantiated through a per-task URDF, a PyBullet simulation is run for up to 3 s of wall-clock simulator time. The episode terminates early if any body-axis angle (roll, pitch, yaw) exceeds π/ 8 or if the lateral deviation satisfies |y| > 0.5 m . Writing px(t) for the forward position of the center of mass and T ≤ 3 s for the time of termination or episode end, 
+
+f (θ, τ ) = px(T ),
+
+reported in metres. The controller returns f = 0 if any entry of θ lies outside 
+
+[0 , 1] .
+
+## D Detailed Sensitivity Analysis 
+
+This appendix provides per-domain SHAP beeswarm plots and the SPOT-tuned hyperparameter configurations that complement the global sensitivity analysis. 
+
+D.1 Per-Domain SHAP Analysis 
+
+Figures 6 and 7 show the SHAP beeswarm plots for the archery and arm domains, respectively. Each point represents one MONET run; its horizontal position in-dicates the SHAP value (contribution to the predicted metric), and its color encodes the feature value (red = high, blue = low). In both domains, pind exhibits the strongest effect: high values of pind (more individual learning) consistently decrease predicted fitness, corroborating the global finding that social learning is the primary driver of performance. The remaining parameters show smaller, more task-specific effects. Multi-Task Optimization over Networks of Tasks 23 0.6 0.4 0.2 0.0 0.2 
+
+SHAP value (impact on model output) 
+
+neighborhood: random 
+
+strategy: best_fitness 
+
+neighborhood: closest 
+
+strategy: closest 
+
+strategy: random 
+
+neighborhood: distance_proportional 
+
+neighbor_pct 
+
+p_ind 
+
+Mean Fitness 
+
+> Low
+> High
+> Feature value
+
+SHAP Beeswarm Archery 
+
+Fig. 6: SHAP beeswarm plot for the archery domain. Each row is a hyperparam-eter; each dot is a MONET run. Color indicates the feature value (red = high, blue = low); horizontal position indicates the SHAP value. 24 J. Hatzky et al. 0.010 0.005 0.000 0.005 
+
+SHAP value (impact on model output) 
+
+neighborhood: random 
+
+neighborhood: closest 
+
+neighborhood: distance_proportional 
+
+strategy: best_fitness 
+
+strategy: random 
+
+neighbor_pct 
+
+p_ind 
+
+Mean Fitness 
+
+> Low
+> High
+> Feature value
+
+SHAP Beeswarm 10-DoF Arm Kinematics 
+
+Fig. 7: SHAP beeswarm plot for the arm domain. Panels as in Figure 6. Multi-Task Optimization over Networks of Tasks 25 400 200 0
+
+SHAP value (impact on model output) 
+
+neighborhood: random 
+
+neighborhood: distance_proportional 
+
+strategy: random 
+
+strategy: best_fitness 
+
+neighborhood: closest 
+
+neighbor_pct 
+
+p_ind 
+
+Mean Fitness 
+
+> Low
+> High
+> Feature value
+
+SHAP Beeswarm Cartpole Balancing 
+
+Fig. 8: SHAP beeswarm plot for the cartpole domain. Panels as in Figure 6. 26 J. Hatzky et al. 0.2 0.0 
+
+SHAP value (impact on model output) 
+
+neighborhood: distance_proportional 
+
+neighborhood: closest 
+
+neighborhood: random 
+
+neighbor_pct 
+
+strategy: random 
+
+strategy: best_fitness 
+
+p_ind 
+
+Mean Fitness 
+
+> Low
+> High
+> Feature value
+
+SHAP Beeswarm Hexapod Locomotion 
+
+Fig. 9: SHAP beeswarm plot for the hexapod domain. Panels as in Figure 6. 
+
+D.2 SPOT-Tuned Configurations 
+
+Table 3 lists the per-domain configurations found by the SPOT hyperparameter tuner. Table 3: SPOT-tuned MONET configurations per domain. 
+
+Domain strategy neighborhood pind neighbor_pct. 
+
+Archery best_fitness closest 0.0 2% Arm random closest 0.3 1% Cartpole best_fitness random 0.5 1% Hexapod best_fitness random 0.0 1% 
+
+## E MONET Hyperparameter Descriptions 
+
+Table 4 summarizes the four hyperparameters varied in the sensitivity analysis. All other algorithmic parameters (mutation operator, crossover operator, initial-ization strategy) are held fixed throughout. See Algorithm 1 for the points at which each parameter enters the loop. Multi-Task Optimization over Networks of Tasks 27 
+
+Table 4: MONET hyperparameters and their roles. 
+
+Parameter Values Description 
+
+pind 0, 0.3, 0.5, 0.7, 1Probability that a given evaluation step performs in-dividual learning (mutation of the focal task’s own elite) rather than social learning (crossover with a neighbor’s elite). At pind = 0 only social learning oc-curs; at pind = 1 only individual learning occurs. strategy random, best_fitness Neighbor selection strategy during social learning. 
+
+random : uniform random selection among all neigh-bors. best_fitness : deterministically select the neighbor with the highest current fitness. neighborhood random, closest, dis-tance_prop. Method for constructing the neighbor set of each task. closest : the N nearest tasks by Euclidean dis-tance in task space. random : N tasks sampled uni-formly at random (sorted by similarity after sam-pling). distance_proportional : N tasks sampled 
+
+without replacement with probability proportional to task-space similarity s(τ i, τ j ) = 1 /(1 + ∥τ i − τ j ∥);this softly biases the neighborhood toward nearby tasks while retaining a chance of including distant ones. neighbor_pct. 1%, 5%, 10% Fraction of the total task set used as the neighbor-hood size N = ⌈neighbor_percentage · |V|⌉ . For in-stance, with 5 000 tasks and 5%, each task has N =250 neighbors. Controls graph sparsity: lower values yield sparser graphs with more localized knowledge transfer. 
+
+## F Hyperparameter Configuration Ranking 
+
+Table 5 lists the ten highest-ranked MONET hyperparameter configurations (across the 2–4 domains on which they were run) by combined z-score, com-puted as the mean of the within-domain z-scores of final mean fitness and AUC. Table 6 shows the five worst-ranked configurations for comparison. Only con-figurations evaluated on at least two domains are included in the ranking. The counts nArm , n Archery , n Cartpole , n Hexapod report the number of deduplicated seed runs per domain. Two patterns are clear from Table 5: (i) the closest neighborhood domi-nates the top of the ranking, and (ii) small neighborhood sizes ( ≤ 2% of the task set) are preferred. Poorly-performing configurations (Table 6) combine the 
+
+distance_proportional neighborhood with either very high pind (near pure individual learning) or very large neighborhoods, both of which disrupt local knowledge transfer. 28 J. Hatzky et al. 
+
+Table 5: Top 10 MONET configurations by combined z-score ( ndomains ≥ 2). 
+
+strategy neighborhood nbr.% pind nArm nArc nCart nHex zFF zAUC combined best_fitness closest 1.5 0.30 20 20 0 0 +0 .58 +1 .01 +0.80 
+
+best_fitness closest 1.0 0.30 22 22 0 5 +0 .60 +0 .96 +0 .78 
+
+best_fitness closest 2.0 0.30 20 20 0 0 +0 .55 +0 .99 +0 .77 
+
+best_fitness closest 2.0 0.50 20 39 5 0 +0 .62 +0 .90 +0 .76 
+
+best_fitness closest 1.5 0.70 5 20 0 0 +0 .62 +0 .81 +0 .72 
+
+best_fitness closest 2.0 0.70 5 20 0 0 +0 .62 +0 .82 +0 .72 
+
+random closest 2.0 0.00 20 19 4 0 +0 .66 +0 .75 +0 .71 
+
+random closest 1.5 0.00 20 19 5 0 +0 .66 +0 .75 +0 .70 
+
+best_fitness closest 1.0 0.50 40 41 5 5 +0 .56 +0 .82 +0 .69 
+
+random closest 1.0 0.00 40 40 5 3 +0 .64 +0 .73 +0 .68 
+
+Table 6: Bottom 5 MONET configurations by combined z-score ( ndomains ≥ 2). 
+
+strategy neighborhood nbr.% pind nArm nArc nCart nHex zFF zAUC combined best_fitness distance_prop. 5.0 1.00 20 20 0 2 −1.22 −1.86 −1.54 
+
+best_fitness distance_prop. 10.0 0.00 20 20 0 16 −2.51 −0.65 −1.58 
+
+random closest 34.3 0.98 2 1 1 0 −1.19 −1.97 −1.58 
+
+best_fitness distance_prop. 5.0 0.00 20 20 0 3 −3.00 −0.93 −1.96 
+
+best_fitness distance_prop. 41.5 0.99 2 2 2 0 −1.97 −2.23 −2.10 
+
+## G Code Availability 
+
+Table 7 lists the reference papers and public code repositories for MONET and the three baselines. Table 7: Reference papers and public code repositories for MONET and the baseline algorithms. 
+
+Algorithm Paper Code 
+
+MONET (ours) This paper [25] MAP-Elites [14, 38] [37] MT-ME [39] [37] PT-ME [4] [5]

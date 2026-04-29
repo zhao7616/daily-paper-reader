@@ -1,0 +1,414 @@
+Title: Enhancing Science Classroom Discourse Analysis through Joint Multi-Task Learning for Reasoning-Component Classification
+
+URL Source: https://arxiv.org/pdf/2604.21137v1
+
+Published Time: Fri, 24 Apr 2026 00:20:59 GMT
+
+Number of Pages: 12
+
+Markdown Content:
+# Enhancing Science Classroom Discourse Analysis through Joint Multi-Task Learning for Reasoning-Component Classification 
+
+Jiho Noh 
+
+Department of Computer Science Kennesaw State University 
+
+Kennesaw, GA, USA jnoh3@kennesaw.edu 
+
+Mukhesh Raghava Katragadda 
+
+Department of Computer Science Kennesaw State University 
+
+Kennesaw, GA, USA mkatrag1@students.kennesaw.edu 
+
+Raymond Carl 
+
+Department of Computer Science Kennesaw State University 
+
+Kennesaw, GA, USA rcarl3@students.kennesaw.edu 
+
+Soon Lee 
+
+Bagwell College of Education Kennesaw State University 
+
+Kennesaw, GA, USA slee263@kennesaw.edu 
+
+Abstract —Analyzing the reasoning patterns of students in science classrooms is critical for understanding knowledge con-struction mechanism and improving instructional practice to maximize cognitive engagement, yet manual coding of classroom discourse at scale remains prohibitively labor-intensive. We present an automated discourse analysis system (ADAS) that jointly classifies teacher and student utterances along two comple-mentary dimensions: Utterance Type and Reasoning Component 
+
+derived from our prior CDAT framework. To address severe label imbalance among minority classes, we (1) stratify-resplit the annotated corpus, (2) apply LLM-based synthetic data aug-mentation targeting minority classes, and (3) train a dual-probe head RoBERTa-base classifier. A zero-shot GPT-5.4 baseline achieves macro-F1 of 0.467 on UT and 0.476 on RC, establishing meaningful upper bounds for prompt-only approaches motivating fine-tuning. Beyond classification, we conduct discourse pattern analyses including UT ×RC co-occurrence profiling, Cognitive Complexity Index (CCI) computation per session, lag-sequential analysis, and IRF chain analysis revealing that teacher Feedback-with-Question (Fq) moves are the most consistent antecedents of student inferential reasoning (SR-I). Our results demonstrate that LLM-based augmentation meaningfully improves UT minority-class recognition, and that the structural simplicity of the RC task makes it tractable even for lexical baselines. 
+
+Index Terms —classroom discourse analysis, reasoning compo-nents, science education, transformer fine-tuning, data augmen-tation, multi-task learning, cognitive complexity 
+
+I. I NTRODUCTION 
+
+Understanding how students reason during classroom in-struction is one of the primary challenges in educational research. Classroom discourse — the structured exchange of ideas between teachers and students — serves as the primary mechanism through which knowledge is co-constructed [1], [2]. Prior research on classroom discourse analysis remains predominantly qualitative and limited to surface-level features such as turn-taking frequency and basic statistics of dialogue acts, leaving the richer cognitive dimension of what kind of reasoning is being expressed largely unmeasured at scale. This gap limits our ability to systematically characterize the quality of classroom interactions and to identify instructional moves that effectively promote higher-order scientific reasoning. Discourse analysis frameworks have a long history in edu-cation research [3], [4]. Flanders’ Interaction Analysis Cate-gories (FIAC) [5], [6] and the Initiation-Response-Feedback (IRF) model of Sinclair and Coulthard [7] established the foundational vocabulary for describing teacher–student inter-action. These frameworks capture the structural patterns of classroom talk — who speaks, when, and in response to what — but do not systematically characterize the cognitive quality of what is being said. Our prior work, Classroom Discourse Analysis Tool (CDAT) framework, addresses this gap by positioning classroom utterances along a continuum from everyday (inductive) to scientific (deductive) reasoning, providing both an utterance-type taxonomy and a reasoning-component annotation scheme [8]. A prevalent challenge in educational discourse analysis is the labor-intensive nature of manual transcription and coding. The data collection process generally results in a substantial volumne of raw audio files (or text files automatically gener-ated via speech-to-text tools), but only a small fraction of these are manually annotated with discourse codes due to the time and expertise required. This creates a bottleneck for scaling up analyses to larger datasets, which is necessary for robust pattern discovery and generalizable insights, particularly in the context of machine learning-based classification models that require substantial labeled data for training to attain satisfactory performance. Specifically, the utterance and reasoning type classification in accordance with our Automated Discourse Analysis Sys-tem(ADAS) framework presents several unique challenges. There exists a high degree of subjectivity among human coders 
+
+> arXiv:2604.21137v1 [cs.CL] 22 Apr 2026
+
+when labeling certain types of utterance, coupled with signif-icant class imbalance in the data, which poses obstacles to achieving reliable automated coding. Additionally, the scarcity of large, diverse, and consistently labeled training datasets fur-ther hampers the development of robust classification models. The objective of this study is to develop and evaluate an automated discourse analysis system (ADAS) that jointly clas-sifies teacher and student utterances along two complementary dimensions — Utterance Type (UT) and Reasoning Compo-nent (RC) — using a pre-trained transformer-based model trained on a labeled corpus of science classroom transcripts. To address the severe class imbalance that characterizes naturally occurring classroom data, we combine a principled 4-class revision of the original CDAT coding scheme with LLM-based synthetic data augmentation and focal-loss training. Beyond model development, this study pursues a deeper analytical goal: to characterize the patterns of classroom discourse at the level of cognitive engagement, including how reasoning-component distributions evolve within a lesson and which instructional moves reliably precede higher-order student rea-soning. Accordingly, we aim to reveal not only what kinds of utterances populate science classroom discourse, but how the cognitive quality of student contributions varies across instruc-tional contexts and over the course of a lesson. By combining automated classification with discourse pattern analysis — co-occurrence profiling, lag-sequential teacher-move analysis, and Cognitive Complexity Index (CCI) time series — we seek to provide both a scalable coding tool and actionable insights for instructional design. Our principal contributions are:  
+
+> •
+
+A revised RC coding scheme that collapses the origi-nal CDAT 6-class scheme along theoretically motivated boundaries, improving learnability without sacrificing framework traceability.  
+
+> •
+
+A cross-conditioned dual-head RoBERTa-base model that jointly classifies UT and RC with symmetric task condi-tioning. ≥15% of the dominant class count.  
+
+> •
+
+A comprehensive discourse pattern analysis including session-level CCI time series and lag-sequential teacher-move to student-reasoning analysis.  
+
+> •
+
+A human vs. pseudo-label comparison of discourse-level findings, revealing positional annotation bias as the likely source of the end-of-lession CCI rebound in human annotations. II. L ITERATURE REVIEW 
+
+A. Conceptual Framework and Coding Scheme for Science Classroom Discourse Analysis 
+
+The IRF triplet — teacher Initiation, student Response, teacher Feedback — remains the foundational structural unit of classroom interaction [7], [9]. While IRF analysis reveals participation structure, it is agnostic to the cognitive level of contributions. Accountable Talk [10] and dialogic teaching frameworks [11] extend IRF by characterizing the quality                                            
+
+> TABLE I UTTERANCE TYPE (UT) CODING SCHEME (10 CLASSES ).
+> Code (Name) Speaker Description
+> Q (Question) Teacher Inquiry posed to students P (Prompt) Teacher Cue to guide student thinking E (Explanation/Example) Teacher Detailed information or illustra-tion Fy (Feedback—Confirm.) Teacher Affirm / repeat student response Fs (Feedback—Statement) Teacher Feedback with additional con-tent Fq (Feedback—Question) Teacher Feedback that probes further Rs (Response—Statement) Student Substantive declarative answer Rq (Response—Question) Student Student inquiry or rephrased Q Ry (Response—Confirm.) Student Agreement or minimal reply O (Other) Both Off-topic, inaudible, procedural TABLE II REASONING COMPONENT (RC) CODING SCHEME (6 CLASSES ).
+> Code (Name) Description
+> EX (Experience) Everyday experiences or teacher anecdotes SK (Scientific Knowledge) Scientific concepts and definitions OD (Observation/Data) Descriptions of natural phenomena or quan-tified value PD (Patterns from Data) Data-driven reasoning and generalization MT (Models/Theories) Explanations from observations and data patterns O (Other) No reasoning content to the instructional topic
+
+of classroom talk, which motivated our study’s focus on reasoning components; we can relate “rigorous thinking” in Accountable Talk to our reasoning component and “Purpose-ful” cumulative reasoning in dialogic teaching to our Cognitive Complexity Index. In science education specifically, the CDAT framework [8] provides a fine-grained coding system grounded in the distinction between everyday and scientific reasoning. The framework aligns with Next Generation Science Standards (NGSS) [12] and Bloom’s taxonomy [13], providing a theo-retically coherent hierarchy from informal experiential knowl-edge (EX) through declarative scientific knowledge (SK) and observational data (OD), to pattern identification (PD) and model/theory construction (MT). Table I and Table II sum-marize the coding schemes used in the framework. 
+
+B. Challenges in Sequential Sentence Classification 
+
+The classification of utterance types within a classroom dis-course context can be framed as a sequential sentence classifi-cation task [14], [15]. The task is designed as “sequential” to differentiate it from the more general sentence (or document) classification task, in which sentences are classified indepen-dently, without utilizing local context. Context is particularly crucial in classroom discourse, as the semantic meaning and functional role of an utterance can be significantly influenced by surrounding utterances. Prior approaches to this task have employed various neural network architectures, often based on hierarchical models that combine transformer-based encoders with recurrent layers such as BiLSTM, and CRF [16] for sequence labeling [17], [18]. These models aim to capture both the rich semantic representations provided by pre-trained language models and the contextual dependencies among utterances. Nevertheless, due to the inherent characteristics of conversational data, cer-tain limitations remain, such as static dependency modeling, which may not adequately capture the nuanced dynamics of discourse. Recent advancements in large language models (LLMs) have introduced new possibilities for sequential text classifica-tion. LLMs can be employed in various stages of the classifica-tion pipeline, including feature extraction, fine-tuning, transfer learning, and direct inference through prompting [19], [20]. The use of LLMs for text classification tasks, however, still faces challenges such as the difficulty in training on limited labeled data, potential privacy concerns, and the need for careful prompt engineering to elicit accurate responses. 
+
+C. Strategies for Mitigating the Issue of Insufficient Labeled Data 
+
+A prevalent challenge in developing machine learning mod-els with real-world data in a specific domain is the lack of sufficiently labeled data, which can lead to suboptimal model performance (e.g., overfitting, poor generalization) [21]. Due to the labor-intensive nature of manual annotation, par-ticularly within specialized domains, acquiring a large and diverse labeled dataset can be challenging. Common strategies to address this issue include data augmentation techniques and semi-supervised learning (SSL) methods: Specifically, in the context of text classification tasks, two widely adopted approaches are the use of LLM-generated synthetic data and the application of pseudo-labeling techniques [22], [23]. With the advent of LLMs, data augmentation has become more feasible through the generation of synthetic training examples. With available annotated text data, LLMs can be prompted to rephrase or generate variations of existing examples, thereby expanding the training dataset and im-proving model robustness. However, text data generated by LLM may potentially include biased content, which cannot be comprehensively evaluated either automatically or by human assessment [24]. Additionally, a general-domain LLM may generate inaccurate augmentation results due to its deficiency in domain-specific knowledge [25]. Still, LLM-based data aug-mentation has shown promise in enhancing model performance across various NLP tasks. Another effective approach is semi-supervised learning, which utilize both labeled and unlabeled data during the training process [26]–[28], wherein a model trained on labeled data can be used to predict labels for unannotated data. This pseudo-labeled data is than incorporated into the training set, effectively increasing the amount of labeled data available for model training. One of the benefits of SSL is that it can lever-age the vast amount of unlabeled data containing real examples from data collection. A commonly revealed challenge with self-training is, however, the bias in the pseudo-labels, which can lead to error accumulation during the iterative self-training process [28]. Various strategies have been proposed to miti-gate this issue, such as confidence thresholding, where only predictions with high confidence are added to the training set, and consistency regularization, which encourages the model to produce consistent predictions under different perturbations of the input data [28]–[30]. 
+
+D. Approaches for Mitigating Class Imbalance 
+
+Classroom discourse datasets also have class imbalance. Common utterance types (e.g., Rs) occur with significantly greater frequency compared to rare utterance types (e.g., Fy). This imbalance makes models favorable to major classes and perform poorly on rare classes [31]. Two approaches can han-dle imbalanced data: resampling techniques and algorithmic approaches. Resampling techniques oversample rare classes or downsample major classes to balance the distribution [31]. Algorithmic approaches adjust the loss function to give more weight to minority class errors. Cost-sensitive learning assigns higher loss weights to rare class errors during training [32]. III. M ETHODOLOGY 
+
+A. Data 
+
+In this study, we utilize a dataset comprising nine lecture transcripts of science classes collected from two middle school and one high school teachers in the United States. All data, in-cluding video/audio recordings and transcripts, were collected with informed consent and Institutional Review Board (IRB) approval, ensuring appropriate consent for secondary research use. From the audio/video recordings, we generated transcripts using an automatic speech recognition (ASR) tool, followed by speaker role identification and semantic segmentation into individual utterances. Collectively, the dataset contains 1,574 manually labeled utterances, each annotated according to the ADAS framework described in the early section. The ADAS dataset consists of transcribed and manually coded science classroom sessions recorded at U.S. middle schools. After pooling all available annotated utterances across sessions, the labeled corpus contains 1,782 rows with both UT and RC annotations. Each utterance is represented as a context window of the k
+
+preceding and k following utterances, each prepended with a speaker tag ( Teacher/Student : or its corresponding em-beddings). The input format follows a structured tokenization scheme (Figure 1) where di is the target utterance and di±n
+
+are context utterances. Context windows are pre-computed per conversation before splitting to prevent cross-split contamina-tion. 
+
+1) Revised Reasoning Component Coding Scheme: The original CDAT RC taxonomy defines six classes (Table II). Three critical challenges prevent effective automated classi-fication with this scheme: (1) extreme label imbalance (MT: 4 examples; EX: 58 examples across 1,574 annotated rows); (2) non-representative splits drawn from different teachers and sessions; and (3) boundary ambiguity between adjacent cate-gories (SK vs. OD; PD vs. MT) that depresses inter-annotator Fig. 1. Structure of BERT-based contextualized encoder for label classification TABLE III DETERMINISTIC MAPPING FROM ORIGINAL 6-CLASS CDAT RC SCHEME TO THE REVISED 4-CLASS SCHEME ADOPTED IN THIS WORK .              
+
+> Original (6-class) Revised (4-class) Rationale
+> EX (Experience) ER Direct 1:1 SK (Scientific Knowl.) SR-D Both are descriptive acts OD (Obs./Data) SR-D Both are descriptive acts PD (Pattern from Data) SR-I Both are inferential acts MT (Models/Theories) SR-I Both are inferential acts OOUnchanged
+
+agreement. Hence, we collapse the six-class scheme into a four-class scheme by merging theoretically adjacent categories along the CDAT framework’s own inductive/deductive divide:  
+
+> •
+
+ER (Everyday Reasoning): Utterances grounded in informal, everyday knowledge — personal experiences, anecdotes, analogies, or naive explanations not derived from systematic scientific inquiry. Subsumes EX.  
+
+> •
+
+SR-D (Scientific Reasoning—Descriptive): Utterances that state or recall scientific content descriptively — established concepts, definitions, terminology, or reported observations/measurements — without drawing infer-ences beyond what is directly given. Merges SK and OD.  
+
+> •
+
+SR-I (Scientific Reasoning—Inferential): Utterances that go beyond description to reason actively with data: identifying patterns, making comparisons, generalizing, predicting, constructing explanations, or proposing mod-els. Merges PD and MT.  
+
+> •
+
+O (Others): Procedural talk, classroom management, inaudible segments, and off-topic remarks. Unchanged from original. The mapping from original to revised codes is deterministic (Table III) and requires no re-annotation. We devised the Cognitive Complexity Index (CCI) as a scalar measure of reasoning quality that assigns values to the revised RC classes: O=0, ER=1, SR-D=2, SR-I=3. 
+
+2) Class Distribution and Imbalance: The RC distribution reveals severe imbalance: SR-D dominates at approximately 58% of labeled examples, while SR-I (≈7.8%) and ER (≈3.1%) are greatly underrepresented. A further challenge arises from the contextualized input format: each example encodes not only the target utterance but a window of k
+
+surrounding turns. Row-level stratified splitting — in which individual utterances are assigned independently to splits — therefore can introduce data leakage : context turns belonging to a training target may simultaneously appear as held-out targets in validation or test, and vice versa. To eliminate this leakage we adopt session-level splitting ,assigning whole sessions to each split so that no session’s utterances appear in more than one partition. With nine ses-sions available, we enumerate all feasible 6/2/1 train/val/test assignments (252 combinations) and select the partition that minimizes total Jensen–Shannon (JS) divergence between each split’s RC distribution and the corpus-level distribution, moti-vated by the work on “the Stratification of Multi-Label Data” by Sechidis et al. [33]. The exhaustive search yields JS divergence = 0.257 ,substantially lower than iterative stratification ( 0.519 ). The residual divergence is irreducible: only three sessions contain meaningful SR-I content, making perfect balance across three splits impossible. Table IV reports label counts across splits for both tasks.                                                                       
+
+> TABLE IV CLASS DISTRIBUTION BY SPLIT (SESSION -LEVEL 6/2/1
+> EXHAUSTIVE -SEARCH PARTITION ;N= 1 ,782 ). S ESSION -LEVEL ASSIGNMENT PREVENTS CONTEXT -WINDOW DATA LEAKAGE . S UBTOTAL
+> %IS OVER THE FULL CORPUS .
+> Cat Label Train Val Test Subtotal (%)
+> UT Rs 237 138 62 437 (24.5%) Fq 99 85 25 209 (11.7%) Q131 34 32 197 (11.1%) NA 104 39 50 193 (10.8%) Fs 90 48 55 193 (10.8%) P81 55 18 154 ( 8.6%) Ry 51 37 16 104 ( 5.8%) E80 814 102 ( 5.7%) Rq 32 38 28 98 ( 5.5%) Fy 80 10 595 ( 5.3%) RC SR-D 596 265 176 1,037 (58.2%) NA 256 182 112 550 (30.9%) SR-I 97 31 11 139 ( 7.8%) ER 36 14 656 ( 3.1%)
+> Grand Total 985 492 305 1,782 (100.0%)
+
+B. LLM-Based Data Augmentation 
+
+To improve both class balance and overall surface-form diversity, we use GPT-4.1 to generate synthetic variations of existing labeled training utterances. Each prompt supplies the full UT and RC label taxonomy with definitions, the sur-rounding context window (preceding and following utterances with speaker tags), and the target utterance with its UT and RC labels. The model is instructed to produce N distinct variations, preserving the original discourse labels, speaker role, and conversational coherence. The full prompt template is provided in Appendix A. Augmentation proceeds in two optional passes applied to the training split only: Pass 1 — minority-class boost (optional). When --boost_minority is set, utterances whose UT or RC class count falls below a target ratio ρ of the majority class count are identified as RoBERTa-base encoder           
+
+> ⟨s⟩dt−k⟨/s ⟩· · · ⟨s⟩dt⟨/s ⟩· · ·⟨ s⟩dt+k⟨/s ⟩
+> |{z }
+> 2k+1 utterances, each wrapped in ⟨s⟩···⟨ /s ⟩
+
+h(t)
+
+> ⟨s⟩
+> BOS probe
+
+h(t)
+
+> ⟨/s ⟩
+> EOS probe
+
+UT proj. 
+
+u
+
+RC proj. 
+
+r
+
+[u; r] [r; u]
+
+UT head (10-class) 
+
+RC head (4-class)                    
+
+> Fig. 2. Dual-Probe Head (DPH) architecture. Each of the 2k+1 context utterances is individually wrapped as ⟨s⟩di⟨/s ⟩before concatenation into the encoder input. For the target utterance dt(highlighted), the <s> BOS hidden state h(t)
+> ⟨s⟩serves as the UT probe and the </s> EOS hidden state h(t)
+> ⟨/s ⟩
+> serves as the RC probe. Dashed arrows denote cross-conditioning: the UT head receives [u;r]and the RC head receives [r;u].
+
+boost candidates. For each such utterance the number of extra variations generated is ⌈(ρ·Nmax −Nc)/N c⌉,where Nc is the current class count and Nmax is the majority class count. Pass 2 — main pass. All training utterances receive n variations regardless of class membership, expanding the training set by a factor of (1 + n) uniformly and increasing surface-form diversity across all UT and RC classes. Each synthetic example is stored with the context and the same UT and RC labels as the original, allowing us to exper-iment with different context window sizes. Table V provides illustrative examples of generated augmented utterances for a single original utterance. 
+
+> TABLE V ILLUSTRATIVE EXAMPLES OF GENERATED AUGMENTED UTTERANCES
+
+Variations Utterance Original “What is the process of photosynthesis? ” — role: Teacher, labels: Q/SR-D Variation 1 “Can someone explain how photosynthesis works? ”Variation 2 “Who can describe the steps involved in pho-tosynthesis? ”
+
+C. Model Architecture 
+
+We develop a Dual-Probe Head (DPH) model that performs joint UT and RC classification. The architecture, illustrated in Fig. 2, consists of three components. 
+
+Encoder. A shared RoBERTa-base backbone encodes the context window. Each of the W = 2 k+1 utterance slots is individually wrapped as ⟨s⟩di⟨/s ⟩; the slots are concatenated to form a single sequence. For the target utterance at the center slot, we read two positional probes from the encoder’s last hidden layer: the <s> (BOS) position yields h(t) 
+
+> ⟨s⟩
+
+∈ R768 (UT probe) and the </s> (EOS) position yields h(t) 
+
+> ⟨/s ⟩
+
+∈ R768 (RC probe). Dedicating distinct token positions to each task allows their attention patterns to specialize independently during fine-tuning. 
+
+Task projections. Two linear layers project the respective probes: u = ReLU (Wu h(t)
+
+> ⟨s⟩
+
+) and r = ReLU (Wr h(t)
+
+> ⟨/s ⟩
+
+).
+
+Cross-conditioned heads. The UT head receives the con-catenated feature [u; r] and the RC head receives [r; u]. This symmetric conditioning allows each task to exploit the other’s intermediate representation, capturing the correlation between utterance function and reasoning quality without a sequential prediction bottleneck. 
+
+Loss. We use focal loss [34] ( γ = 2 ) with inverse-frequency class weights for both tasks. The joint training loss is L =
+
+αLU T + (1 − α)LRC with α = 0 .5. α is determined via grid search on the validation set, prioritizing the primary metric The bottom two-thirds of RoBERTa layers are frozen during training to reduce the risk of catastrophic forgetting on this small dataset. 
+
+Training details. Optimizer: AdamW; learning rate ∈ { 1e-5, 2e-5, 3e-5 }; batch size 16; early stopping on validation macro-F1 with patience 3. 
+
+D. Baselines 
+
+We compare against three systems: 1) TF-IDF + Logistic Regression : Bag-of-words feature vector with ℓ2-regularized logistic regression (class-balanced weights). 2) LLM Zero-shot GPT-5.4 : Prompt containing the full coding-scheme definitions and 3 in-context examples per class; no fine-tuning. 3) RoBERTa-base without augmentation : DPH trained on original labeled data only. 
+
+E. Evaluation Protocol 
+
+Primary metric: Macro-F1, which averages F1 across all classes equally and prevents the dominant SR-D class from masking poor minority-class performance. 
+
+Secondary metrics: (Macro-/Weighted-) precision, recall, and F1; overall accuracy; confusion matrix. 
+
+Validation strategy: 5-fold stratified cross-validation for model development and hyperparameter selection; held-out stratified test set (10% of labeled data) for unbiased final re-porting. Statistical significance of the best model vs. strongest baseline is assessed with McNemar’s test ( α = 0 .05 ). 
+
+F. Discourse Pattern Analysis 
+
+Co-occurrence analysis. We construct UT ×RC contin-gency tables and compute the row-normalized conditional probability P (RC |UT ) to identify which utterance types are associated with which reasoning levels. 
+
+Cognitive Complexity Index (CCI). For each session, we compute the mean CCI across all utterances (and separately TABLE VI UTTERANCE TYPE (UT) CLASSIFICATION RESULTS ACROSS MODELS .MACRO -F1 IS THE PRIMARY METRIC . “+A UG ” INDICATES TRAINING WITH LLM-GENERATED SYNTHETIC DATA .                                                   
+
+> Model Acc Mac-P Mac-R Mac-F1
+> TF-IDF + Logistic Regression 0.331 0.329 0.359 0.292 Zero-shot GPT-5.4 0.620 0.626 0.783 0.582 RoBERTa-base (no aug) 0.579 0.536 0.631 0.543 RoBERTa-base (+Aug) 0.683 0.628 0.681 0.635 ††McNemar’s test (vs. TF-IDF+LR): p < 0.001
+> TABLE VII REASONING COMPONENT (RC) CLASSIFICATION RESULTS ACROSS MODELS (4-CLASS SCHEME : ER, SR-D, SR-I, O). M ACRO -F1 IS THE PRIMARY METRIC . “+A UG ”INDICATES TRAINING WITH LLM-GENERATED SYNTHETIC EXAMPLES
+> Model Acc Mac-P Mac-R Mac-F1
+> TF-IDF + Logistic Regression 0.685 0.380 0.388 0.381 Zero-shot GPT-5.4 0.577 0.450 0.569 0.412 RoBERTa-base (no aug) 0.477 0.419 0.422 0.345 RoBERTa-base (+Aug) 0.649 0.395 0.446 0.396
+
+for student utterances only). Sessions are compared using the CCI as a scalar measure of discourse cognitive depth. 
+
+Temporal analysis. Each session is divided into n equal time bins. CCI is computed per bin to reveal within-session cognitive trajectories. 
+
+Lag-sequential analysis. For each teacher utterance at turn 
+
+t, we record the RC label of the immediately following student utterance at turn t + 1 . This yields a transition table 
+
+P (RC student |UT teacher ) that quantifies which teacher moves are most effective at eliciting higher-order student reasoning. 
+
+Instructional move sequence (IRF chain) analysis. We extend the lag-1 analysis to full 3-turn chains to see if we can find a IRF-like pattern of teacher move → student reasoning 
+
+→ teacher feedback that is associated with higher student CCI. All consecutive Teacher-Student-Teacher (T-S-T) triples within each session are extracted; for each triple the UT 3-gram (ut t−1, ut t, ut t+1 ) and the student CCI at position t
+
+are recorded. The 26 patterns with n ≥ 5 occurrences are ranked by mean student CCI A teacher-framing heatmap then aggregates mean student CCI over all (initiation UT ×feedback UT) pairs, collapsing the student UT dimension to isolate the teacher-controlled portion of the IRF frame. Finally, we compute P (Rq |UT teacher ) to identify which teacher moves create discursive space for student-initiated inquiry. IV. R ESULTS 
+
+A. Classification Results 
+
+Tables VI and VII report classification performance for all models. TF-IDF + Logistic Regression presents a split picture across tasks. On UT it achieves macro-F1 =0.453 — the lowest among all models — consistent with a bag-of-words approach failing on context-dependent functional distinctions (e.g., Fq  
+
+> Fig. 3. Confusion matrix for Utterance Type (UT) classification (RoBERTa-base +Aug, 10-class). Rows are true labels; columns are predicted labels.
+
+vs. Q, P vs. E). On RC, however, it achieves the highest macro-F1 of all models (0.574, Acc =0.704), driven by strong SR-D (F1 =0.766) and SR-I (F1 =0.583) performance. This sug-gests that the 4-class RC taxonomy is substantially lexically separable: utterances containing scientific terminology reliably predict SR-D, while pattern/inference language predicts SR-I, allowing a bag-of-words model to perform competitively. Zero-shot GPT-5.4 achieves macro-F1 =0.467 on UT and macro-F1 =0.476 on RC. On UT, the model performs well on high-frequency classes (Ry: F1 =0.800; E: F1 =0.581; Q: F1 =0.549) but struggles with rare or functionally overlap-ping classes (P: F1 =0.229; Rq: F1 =0.375). On RC, GPT-5.4 achieves solid performance on O (F1 =0.671) and improved minority-class coverage (ER: F1 =0.444), though SR-I remains difficult (F1 =0.242). GPT-5.4 ranks second on RC but is outperformed by TF-IDF by 9.8 pp macro-F1 ( 0.476 vs. 
+
+0.574 ). Fine-tuning RoBERTa-base on the labeled corpus alone substantially improves UT performance (macro-F1 =0.543) but does not match TF-IDF on RC (macro-F1 =0.345). Adding LLM-based data augmentation at scale ×3.0 yields the best UT result overall: macro-F1 =0.635 ( +18.2 pp over TF-IDF), with gains distributed across minority classes including Fq, Ry, and ER. On RC, augmentation improves RoBERTa to 0.396 but still falls well short of TF-IDF (0.574), a gap of 17.8 pp. 
+
+1) Confusion Matrix: Figure 3 shows the confusion matrix for the best-performing UT model (RoBERTa-base +Aug). The most prominent source of error is the Prompt (P) class, reflecting that the surface-level similarity between teacher prompt moves and other utterance types, often containing question-like or facilitative language. The second most com-mon confusion runs between Fq and Q, showing the functional overlap between teacher follow-up questions and student-generated questions in dialogic exchanges. For the RC task (4-class: ER, O, SR-D, SR-I), the dom-TABLE VIII EFFECT OF LLM-BASED DATA AUGMENTATION ON UT AND RC                                              
+
+> CLASSIFICATION (R OBERT A-BASE ). M ACRO -F1 IS THE PRIMARY METRIC ;BEST RESULT PER TASK IS BOLD .
+> UT RC Training Data Acc Mac-F1 Acc Mac-F1
+> Original only (no aug) 0.579 0.543 0.477 0.345 +Minority boost 0.596 0.522 0.487 0.308 +Synthetic ( ×0.5) 0.659 0.610 0.523 0.362 +Synthetic ( ×1.0) 0.668 0.621 0.535 0.362 +Synthetic ( ×1.5) 0.673 0.615 0.593 0.384 +Synthetic ( ×2.0) 0.666 0.604 0.555 0.374 +Synthetic ( ×2.5) 0.683 0.633 0.564 0.361 +Synthetic ( ×3.0) 0.683 0.635 0.649 0.396
+> +Synthetic ( ×3.5) 0.668 0.587 0.617 0.388
+
+inant error pattern involves the two highest-order reasoning categories: 26 of 31 SR-I (Inferential) instances (83.9%) are predicted as SR-D (Descriptive), yielding near-zero SR-I recall. Given that the SR-I class is the first minority class, the model might learn a decision boundary skewed toward SR-D to make more conservative prediction. Also, we observe a class confusion between O (Other) and SR-D (Descriptive), with 32 O instances (19.0%) classified as SR-D, and 40 SR-D instances (19.2%) classified as O. This suggests that descriptive reasoning statements often share surface features with off-topic or procedural talk, leading to misclassification. 
+
+B. Discourse Pattern Analysis 1) UT ×RC Co-occurrence: Fig. 4 shows the UT ×RC co-occurrence heatmap. Row-normalized values reveal systematic patterns: teacher Questions (Q) are predominantly paired with SR-D responses ( P (SR-D |Q) ≈ 0.68 ), consistent with teach-ers using recall questions to elicit factual scientific content. Feedback-with-Question (Fq) is the utterance type most as-sociated with SR-I student reasoning ( P (SR-I |Fq ) ≈ 0.15 ), nearly twice the rate following plain Questions. Prompts (P) have the highest proportion of O(ther) student responses, sug-gesting that open-ended prompts are often met with procedural or off-topic replies. Student Responses-as-Statements (Rs) are almost exclusively paired with SR-D, confirming their role as the primary vehicle for scientific knowledge recitation. 
+
+2) Temporal Analysis: Fig. 5 shows the within-session CCI trajectory aggregated across all sessions. A modest but consistent rise in mean CCI is observed from the beginning of sessions, followed by a slight decline toward the end, and a sharp rebound occurs towards the end of session where mean CCI returns to or exceeds the beginning-session peak. This pattern is consistent with the pedagogical structure of Initiation (lower-order recall) → Development (higher-order analysis) 
+
+→ Procedural (low-level observations and management) →
+
+Synthesis (reflective closure) where teachers reassert cognitive press at the end of the lesson to consolidate conceptual understanding. The mid-session dip may reflect a procedural phase where students are engaged in hands-on activities or data collection, which may involve more descriptive talk and less inferential reasoning.                                             
+
+> TABLE IX LAG -SEQUENTIAL ANALYSIS :DISTRIBUTION OF STUDENT RC AT TURN
+> t+1 FOLLOWING EACH TEACHER UT AT TURN t. B OLD :HIGHEST SR-I
+> COUNT PER ROW .
+> Teacher UT SR-D SR-I ER OTotal
+> E (Explanation) 80211 21 Fq (Feedback-Q) 126 29 836 199 Fs (Feedback-S) 54 0249 105 Fy (Feedback-Y) 14 2115 32 P (Prompt) 25 2266 95 Q (Question) 113 12 733 165
+
+3) Lag-Sequential Analysis: Table IX reports the distribu-tion of student RC codes following each teacher UT type. Two patterns are particularly striking. First, Fq (Feedback with Question) is the teacher move most consistently followed by SR-I student reasoning (14.6%). This is more than twice the SR-I rate following plain Questions (7.3%). Second, teacher Explanations (E) are rarely followed by SR-I (0 occurrences), suggesting that extended teacher monologue suppresses rather than elicits student inferential engagement. 
+
+4) Instructional Move Sequence Analysis: Fig. 6 shows all 3-turn Teacher-Student-Teacher (T-S-T) patterns with at least 5 observations, ranked by mean student CCI. The top-ranked pattern is Fq →Rs →Fq (n=36, mean CCI=2.06, 95% CI [1 .74 , 2.46] ), in which a teacher feedback-question elicits a student declarative response that is itself followed by a further feedback-question. Two other patterns reach mean CCI=2.00: 
+
+Q→Rs →Q (n=6) and Fq →Rq →Fq (n=7), the latter notably involving a student question in the middle position. Together these top-ranked patterns share the structural property that the teacher re-initiates with a question after the student’s turn, regardless of student response type. At the bottom, 
+
+P→O→P (n=10, mean CCI=0.00) and two analogous prompt-flanked patterns with inaudible/off-topic student turns show no reasoning engagement whatsoever. The teacher-framing heatmap (Fig. 7) isolates the teacher-controlled component of the 3-turn instructional move by collapsing the student UT dimension. The single highest-CCI framing is Fq ×Q (mean CCI=2.23, n=14): when a teacher initiates with a follow-up question and the student’s high inferential response is met with a further question. Although this framing is relatively rare, the sharp CCI peak suggests that sustained question-on-question pressure is a particularly potent scaffold for inferential reasoning. The most frequent high-CCI framings are Fq ×Fq (73 windows, mean CCI =1.82) and 
+
+Fq ×Fs (45 windows, mean CCI =1.82), confirming that Fq-initiated frames reliably elicit above-average student reasoning regardless of whether the feedback move is another question or a brief follow-up statement. Q×Fq (44 windows, mean CCI =1.96) similarly ranks among the high-CCI framings, reinforcing the pattern that any question to students promotes higher reasoning, and student’s inferential responses also encourage teachers to follow up with questions. The most common low-CCI framing remains P×P (32 windows, mean CCI =0.18): consecutive prompt moves without escalation to Fig. 4. Utterance Type (UT) ×Reasoning Component (RC) Co-occurrence Heatmap. Left: raw counts; Right: P (RC |UT ) (row-normalized).   
+
+> Fig. 5. Aggregated CCI Time Series across Lesson Progression (binned into 10 equal segments). Shaded region indicates ±1 standard deviation.
+
+a question consistently fail to draw out inferential student reasoning. Fig. 8 reports P (Rq |UT teacher ) alongside mean student CCI per preceding teacher UT. Teacher Prompts (P) produce the highest probability of a student question-asking response (P (Rq ) = 0 .23 ), followed by confirmatory feedback Fy ( 0.19 ). By contrast, teacher Questions (Q) strongly suppress Rq (P (Rq ) = 0 .05 ) while maximizing direct student statements (P (Rs ) = 0 .76 ). This reveals a trade-off: Fq and Q moves maximize student CCI but minimize student-initiated inquiry, while P and Fy moves create discursive space for students to ask questions at the cost of lower mean CCI. 
+
+C. Human-Labeled vs. Pseudo-Labeled Analysis 
+
+To assess the extent to which discourse-level findings gen-eralize beyond the annotated corpus, we replicated the key analyses on a larger dataset labeled by the best-performing RoBERTa-base (+Aug) model. We sampled 10 sessions from the unlabeled data, applied the trained model to generate UT and RC predictions for all utterances. Full comparison tables       
+
+> Fig. 6. 3-Turn IRF Patterns Ranked by Mean Student CCI (min. n=5, N=26 patterns). Error bars are session-level bootstrap 95% CIs. Bar color encodes CCI magnitude (red →green scale). Top-ranked: Fq →Rs →Fq (n=36, mean CCI=2.06).
+
+are provided in the Appendix; here we highlight the most theoretically consequential divergence between the two label sources. 
+
+a) CCI Temporal Trajectory.: The most surprising dis-crepancy emerges in the within-session CCI trajectory (Fig. 5). In the human-labeled data the trajectory exhibits a sharp re-bound in the final two temporal bins (Bins 9–10), as described in Section IV-B2. This terminal uptick is absent in the pseudo-labeled data: as shown in Fig. 9, the model-predicted CCI trajectory rises modestly through Bin 4 and then declines monotonically through Bin 10, with no late-session recovery. We attribute this divergence to a form of positional an-Fig. 7. Teacher-framing heatmap. Left: mean student CCI per (initiation UT ×feedback UT) pair (grey = fewer than 3 observations). Right: observation count per cell.          
+
+> Fig. 8. Rq trigger analysis. Left: P(student UT |teacher UT )for all lag-1 T→S transitions ( N= 623 pairs). Right: P(student Rq )(bars) and mean student CCI (line) per preceding teacher UT.
+
+notation bias in the human-labeled data. Human annotators read each utterance with full awareness of its position in the lesson: an utterance at the end of a session is contextualized as a closing synthesis or reflective summary, and annotators likely assign higher-order RC codes (SR-I, SR-D) accordingly. The trained model, by contrast, operates strictly at the utterance level and has no representation of lesson-positional context. Detailed per-session comparisons and additional discourse metrics under both label sources are reported in Appendix B. V. D ISCUSSION 
+
+A. On the Revised Coding Scheme 
+
+The collapse from six to four RC classes is a pragmatic but theoretically principled decision. The key insight from the CDAT framework is that SK and OD are both descriptive 
+
+scientific acts — one recalls established knowledge, the other reports observed phenomena — while PD and MT are both 
+
+inferential acts that draw conclusions beyond the data. The merged scheme (SR-D, SR-I) preserves this epistemically meaningful distinction while yielding learnable class sizes and reducing annotator boundary ambiguity. 
+
+B. On Zero-Shot vs. Fine-Tuned Performance 
+
+The results reveal a sharp task-dependent divergence. On UT, fine-tuning with augmentation yields the best macro-F1 (+18.2 pp over TF-IDF), and GPT-5.4 offers only amodest gain over TF-IDF ( +1.4 pp): the 10-class functional taxonomy requires discourse context that neither bag-of-words representations nor zero-shot prompting can fully exploit. 
+
+> Fig. 9. Aggregated CCI over lesson progression computed on pseudo-labeled data (model predictions). Compare with Fig. 5 (human-labeled): the sharp terminal rebound visible in the human-labeled trajectory is absent here.
+
+On RC, the TF-IDF + Logistic Regression baseline achieves the highest macro-F1 (0.574), outperforming GPT-5.4 (0.476) and RoBERTa+Aug (0.396) by wide margins. The class-level breakdown explains this: SR-D and SR-I are strongly predicted by scientific vocabulary and inference language respectively, making lexical features sufficient. Fine-tuned RoBERTa underperforms TF-IDF on RC, likely because the small corpus ( ≈1,400 training examples) is insufficient to overcome RoBERTa’s tendency to overfit to surface-form patterns without the lexical separability signal that TF-IDF exploits directly. This finding motivates corpus expansion as a priority for future work: transformer models for RC classification are likely to surpass lexical baselines only when labeled data is substantially larger. 
+
+C. On Prompt Design: Whole-Snippet Generation. 
+
+An important design decision concerns the unit of gener-ation. Our initial prompt asked the model to vary only the target utterance while holding the surrounding context window fixed, with the ground-truth UT and RC labels provided as conditioning. This yielded no measurable performance gain. We conjecture that the model learned to exploit the fixed context as a shortcut cue for label prediction, rather than learning to generalize from the varied target utterance. We therefore redesigned the prompt to regenerate the entire discourse snippet — all turns in the context window plus the target — as a coherent unit. Each variation thus differs both in the target utterance and in the surrounding conversational context, preventing any single contextual pattern from becom-ing a reliable label cue. Empirically, this change produced consistent improvements in macro-F1 across augmentation scales (Table VIII), validating the design choice. 
+
+D. On Discourse Patterns and Instructional Practice 
+
+The lag-sequential and IRF chain results (Section IV-B) converge on a single actionable principle: the teacher move that most reliably elevates student reasoning is the Feedback-with-Question (Fq), which acknowledges a student contribu-tion and immediately presses for deeper reasoning — precisely the “press for reasoning” move in Accountable Talk [10]. The 
+
+P×P framing identified in the teacher-framing heatmap is a high-prevalence, high-impact counterexample and represents a concrete target for professional development intervention. The Rq trigger analysis surfaces a substantive pedagogical trade-off: the move types that maximize student CCI (Fq, Q) are also those that most suppress student-initiated inquiry, while the move that most invites student questions (P) yields the lowest reasoning quality when used repetitively. Effective teachers may need to sequence both types strategically — Fq/Q for reasoning depth, P/Fy to open inquiry space. The temporal trajectory comparison between human-labeled and pseudo-labeled data (Section IV-C) further reveals that the end-of-lesson CCI rebound visible in human annotations reflects positional bias, a finding that suggest model improve-ments that incorporate lesson-level context may be necessary to capture this pattern. This also raises a cautionary flag for interpreting the temporal CCI pattern as a genuine pedagogical phenomenon. 
+
+E. Limitations 
+
+Several limitations bound the generalizability of our find-ings. First, the corpus is small ( ≈1,574 labeled utterances from a limited number of middle-school sessions) and may not represent science classroom discourse more broadly, which are also heavyily dominated by mathematics lessons. Second, inter-annotator agreement on the revised 4-class scheme has not yet been formally computed; this is a necessary validation step before the scheme can be recommended for general use. VI. C ONCLUSION 
+
+We presented an automated discourse analysis system for science classroom utterances that jointly classifies utterance type (10 classes) and reasoning component (revised 4-class scheme). Our findings demonstrate that:  
+
+> •
+
+LLM-based augmentation of minority RC classes is a practical strategy for improving automated classification of rare but educationally significant reasoning types, with gains concentrated on SR-I and ER F1 scores.  
+
+> •
+
+Fine-tuned RoBERTa with augmentation achieves the best UT performance (macro-F1 =0.635, +18.2 pp over TF-IDF), confirming that 10-class functional discourse labeling requires contextual representation. By contrast, TF-IDF + Logistic Regression achieves the highest RC macro-F1 (0.574), indicating that the 4-class RC taxon-omy is largely lexically separable and that transformer fine-tuning on the current corpus size does not provide a reliable advantage for this task.  
+
+> •
+
+Teacher Feedback-with-Question (Fq) moves are the strongest antecedents of student inferential reasoning (SR-I) in the lag-sequential analysis, providing quantita-tive support for dialogic teaching practices that combine feedback with epistemic probing.  
+
+> •
+
+Cognitive complexity follows a within-session arc that peaks in the lesson middle, with implications for how teachers structure the closing phases of science discus-sions. Future work will expand the annotated corpus and report inter-annotator reliability Also, we plan to investigate the reliable methods to measure the uncertainty of the model predictions and active learning strategies to efficiently expand the labeled dataset with human-in-the-loop. ACKNOWLEDGMENT 
+
+[Identify applicable funding agency or delete this section.] REFERENCES [1] C. Chin, “Classroom Interaction in Science: Teacher questioning and feedback to students’ responses,” International Journal of Science Ed-ucation , vol. 28, no. 11, pp. 1315–1346, 15 Sep. 2006. [2] N. Mercer, R. Wegerif, and L. Dawes, “Children’s talk and the devel-opment of reasoning in the classroom,” British Educational Research Journal , vol. 25, no. 1, pp. 95–111, 1 Feb. 1999. [3] R. Rogers, E. Malancharuvil-Berkes, M. Mosley, D. Hui, and G. O. Joseph, “Critical Discourse Analysis in education: A review of the literature,” Review of Educational Research , vol. 75, no. 3, pp. 365– 416, Sep. 2005. [4] E. A. Forman and D. E. Mccormick, “Discourse analysis: A sociocultural perspective,” Remedial and Special Education: RASE , vol. 16, no. 3, pp. 150–158, May 1995. [5] N. A. Flanders, “Analyzing teaching behavior,” 1970. [6] V. Odiri Amatari, “The instructional process: A review of Flanders’ interaction analysis in a classroom setting,” International Journal of Secondary Education , vol. 3, no. 5, p. 43, 19 Aug. 2015. [7] Sinclair, John, Coulthard, and Malcolm, Towards an analysis of dis-course : the English used by teachers and pupils . cir.nii.ac.jp, 1975. [8] S. C. Lee and K. E. Irving, “Development of Two-Dimensional Class-room Discourse Analysis Tool (CDAT): scientific reasoning and dialog patterns in the secondary science classes,” International Journal of STEM Education , vol. 5, no. 1, p. 5, 19 Feb. 2018. [9] H. Mehan, “4. Competent membership in the classroom community,” in Learning Lessons . Cambridge, MA and London, England: Harvard University Press, 2014. [10] S. Michaels, C. O’Connor, and L. B. Resnick, “Deliberative discourse idealized and realized: Accountable talk in the classroom and in civic life,” Studies in philosophy and education , vol. 27, no. 4, pp. 283–297, Jul. 2008. [11] R. J. Alexander, “Towards dialogic teaching: Rethinking classroom talk,” 2008. [12] NGSS Lead States, “Next generation science standards: For states, by states,” 2013. [13] B. S. Bloom, M. D. Engelhart, E. J. Furst, W. H. Hill, and D. R. Krathwohl, Taxonomy of educational objectives , B. S. Bloom, Ed. New York: David McKay Company, 1956. [14] D. Yogatama, C. Dyer, W. Ling, and P. Blunsom, “Generative and discriminative text classification with recurrent neural networks,” arXiv [stat.ML] , 6 Mar. 2017. [15] A. Cohan, I. Beltagy, D. King, B. Dalvi, and D. Weld, “Pretrained language models for sequential sentence classification,” in Proceedings of the 2019 Conference on Empirical Methods in Natural Language Processing and the 9th International Joint Conference on Natural Language Processing (EMNLP-IJCNLP) . Stroudsburg, PA, USA: Association for Computational Linguistics, Nov. 2019, pp. 3693–3699. [16] J. Lafferty, A. McCallum, and F. C. N. Pereira, “Conditional random fields: Probabilistic models for segmenting and labeling sequence data,” 2001. [17] D. Jin and P. Szolovits, “Hierarchical neural networks for sequential sentence classification in medical scientific abstracts,” in Proceedings of the 2018 Conference on Empirical Methods in Natural Language Processing . Stroudsburg, PA, USA: Association for Computational Linguistics, 2018, pp. 3100–3109. [18] M.-W. Chang, K. Toutanova, K. Lee, and J. Devlin, “Language model pre-training for hierarchical document representations,” arXiv [cs.CL] ,25 Jan. 2019. [19] M. Lan, L. Zheng, S. Ming, and H. Kilicoglu, “Multi-label Sequential Sentence Classification via Large Language Model,” in Conference on Empirical Methods in Natural Language Processing , 2024. [20] Y. Sun, C. Fan, and Q. Chen, “Transfer learning for text classification via model risk analysis,” in Findings of the Association for Computational Linguistics: EMNLP 2024 , Y. Al-Onaizan, M. Bansal, and Y.-N. Chen, Eds. Stroudsburg, PA, USA: Association for Computational Linguistics, 2024, pp. 2814–2825. [21] Z. Li, H. Zhu, Z. Lu, and M. Yin, “Synthetic data generation with large language models for text classification: Potential and limitations,” in Proceedings of the 2023 Conference on Empirical Methods in Natural Language Processing . Stroudsburg, PA, USA: Association for Computational Linguistics, Dec. 2023, pp. 10 443–10 461. [22] J. M. Duarte and L. Berton, “A review of semi-supervised learning for text classification,” Artificial Intelligence Review , vol. 56, no. 9, pp. 1– 69, 31 Jan. 2023. [23] S. Li, G. Yuan, M. Yang, Y. Shen, C. Li, R. Xu, and X. Zhao, “Improving semi-supervised text classification with dual meta-learning,” 
+
+ACM Transactions on Information Systems , 20 Feb. 2024. [24] C. Zheng, S. Sabour, J. Wen, Z. Zhang, and M. Huang, “AugESC: Dialogue augmentation with large language models for emotional sup-port conversation,” in Findings of the Association for Computational Linguistics: ACL 2023 . Stroudsburg, PA, USA: Association for Computational Linguistics, 2023, pp. 1552–1568. [25] H. Dai, Z. Liu, W. Liao, X. Huang, Y. Cao, Z. Wu, L. Zhao, S. Xu, F. Zeng, W. Liu, N. Liu, S. Li, D. Zhu, H. Cai, L. Sun, Q. Li, D. Shen, T. Liu, and X. Li, “AugGPT: Leveraging ChatGPT for Text Data Augmentation,” IEEE transactions on big data , vol. 11, no. 3, pp. 907–918, Jun. 2025. [26] D.-H. Lee, “Pseudo-label : The simple and efficient semi-supervised learning method for deep neural networks,” ICML 2013 Workshop: Challenges in Representation Learning , 2013. [27] B. Zhang, Y. Wang, W. Hou, H. Wu, J. Wang, M. Okumura, and T. Shi-nozaki, “FlexMatch: Boosting semi-supervised learning with Curriculum Pseudo Labeling,” arXiv [cs.LG] , pp. 18 408–18 419, 14 Oct. 2021. [28] B. Chen, J. Jiang, X. Wang, P. Wan, J. Wang, and M. Long, “Debiased Self-training for semi-supervised learning,” arXiv [cs.LG] , pp. 32 424– 32 437, 14 Feb. 2022. [29] Y. Wang, H. Chen, Q. Heng, W. Hou, Y. Fan, Z. Wu, J. Wang, M. Savvides, T. Shinozaki, B. Raj, B. Schiele, and X. Xie, “FreeMatch: Self-adaptive thresholding for Semi-supervised learning,” arXiv [cs.LG] ,15 May 2022. [30] A. Radhakrishnan, J. Davis, Z. Rabin, B. Lewis, M. Scherreik, and R. Ilin, “Enhancing Self-Training Methods,” arXiv [cs.LG] , 17 Jan. 2023. [31] S. F. Taskiran, B. Turkoglu, E. Kaya, and T. Asuroglu, “A comprehensive evaluation of oversampling techniques for enhancing text classification performance,” Scientific Reports , vol. 15, no. 1, p. 21631, 1 Jul. 2025. [32] C. Elkan, “The foundations of cost-sensitive learning,” International Joint Conference on Artificial Intelligence , pp. 973–978, 4 Aug. 2001. [33] K. Sechidis, G. Tsoumakas, and I. Vlahavas, “On the Stratification of Multi-label Data,” in Machine Learning and Knowledge Discovery in Databases , ser. Lecture Notes in Computer Science. Berlin, Heidelberg: Springer Berlin Heidelberg, 2011, pp. 145–158. [34] T.-Y. Lin, P. Goyal, R. Girshick, K. He, and P. Doll´ ar, “Focal Loss for dense object detection,” arXiv [cs.CV] , pp. 2980–2988, 7 Aug. 2017. 
+
+APPENDIX ASYNTHETIC DATA GENERATION PROMPT 
+
+The following prompt template was used to generate syn-thetic dialogue variations via GPT-4.1. Placeholders in curly braces are filled at runtime with the corresponding values from each training example. 
+
+<role> 
+
+You are a classroom discourse analyst specializing in science education dialogue patterns. 
+
+</role> <task> 
+
+Generate {variations } distinct variations of a science classroom dialogue snippet. Each variation must re-write the ENTIRE snippet (all {window } turns), not just the target utterance. The target utterance is turn 
+
+{center_1indexed } (marked with ***). All other turns must flow naturally and coherently with the new target utterance. 
+
+</task> <label_definitions> 
+
+{label_definitions }
+
+</label_definitions> <original_snippet> 
+
+{original_snippet }
+
+</original_snippet> <requirements> 
+
+1. Generate exactly {variations }
+
+complete snippet variations 2. In each variation, the target turn (turn {center_1indexed }) must preserve its discourse labels (UT: {label_ut },RC: {label_rc }) and speaker ({speaker })3. All surrounding turns must be rewritten so the dialogue flows naturally with the new target; do NOT copy surrounding turns verbatim from the original 4. Use different vocabulary, phrasing, and sentence structures across variations 5. Maintain scientific accuracy and classroom-appropriate language 6. Respond with ONLY valid JSON --- no prose, no markdown fences 
+
+</requirements> <output_format> 
+
+[
+
+{
+
+‘‘before’’: [‘‘turn 1 text’’, ‘‘turn 2 text’’, ...], ‘‘target’’: ‘‘target turn text’’, ‘‘after’’: [‘‘turn N+1 text’’, ‘‘turn N+2 text’’, ...] 
+
+},... ]
+
+</output_format> 
+
+The label_definitions block enumerates all UT and RC labels with their names and definitions. The 
+
+original_snippet block lists each turn in the context window in the form [i] Speaker: ‘‘text’’ , with the target turn annotated with *** .APPENDIX BDISCOURSE ANALYSIS ON PSEUDO -L ABELED DATA 
+
+This appendix reproduces the key discourse analysis figures using labels assigned by the best-performing RoBERTa-base (+Aug) model to a sample (i.e., ten sessions) unlabeled cor-pus. Figures should be compared against their human-labeled counterparts in the main text. The aggregated CCI lesson-progression plot is discussed in Section IV-C; the remaining figures are presented here. 
+
+Fig. 10. 3-turn Teacher–Student–Teacher IRF patterns ranked by mean student CCI on pseudo-labeled data (min. n=5). Compare with Fig. 6 (human-labeled). Overall CCI values are lower and the gap between top- and bottom-ranked patterns is narrower, consistent with the model under-predicting higher-order RC classes. 
+
+Fig. 11. Rq trigger analysis on pseudo-labeled data. Left: 
+
+P (student UT |teacher UT ) for all lag-1 T→S transitions. Right: 
+
+P (student Rq ) (bars) and mean student CCI (line) per preceding teacher UT. Compare with Fig. 8 (human-labeled). 
+
+Fig. 12. Teacher-framing heatmap on pseudo-labeled data. Left: mean student CCI per (initiation UT × feedback UT) pair. Right: observation counts. Compare with Fig. 7 (human-labeled). CCI values are uniformly lower and the high-CCI peak at Fq ×Q visible in the human-labeled heatmap is absent, reflecting the model’s suppression of SR-I predictions.

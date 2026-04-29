@@ -1,0 +1,46 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.21761v1/fig-001.webp",
+      "caption": "Fig. 2. Comparison of baseline MLP and different Pi-PINN approaches for predicting or solving different PDE problems.",
+      "page": 5,
+      "index": 1,
+      "width": 974,
+      "height": 565
+    },
+    {
+      "url": "assets/figures/arxiv/2604.21761v1/fig-002.webp",
+      "caption": "Fig. 5. The predicted results and corresponding errors for the nonlinear Burger’s equation (sine IC), for MLP and PiL-PINN with different PDE instances K.",
+      "page": 7,
+      "index": 2,
+      "width": 1068,
+      "height": 308
+    },
+    {
+      "url": "assets/figures/arxiv/2604.21761v1/fig-003.webp",
+      "caption": "Fig. 6. The predicted results and corresponding errors for the Burgers’ equation (family of IC) on new PDE instances, for MLP, MLP+[Pi]2, and Pil-PINN trained with K = 240 PDE instances.",
+      "page": 7,
+      "index": 3,
+      "width": 1072,
+      "height": 427
+    },
+    {
+      "url": "assets/figures/arxiv/2604.21761v1/fig-004.webp",
+      "caption": "Fig. 1. The Schematic diagram of the fast Pseudoinverse PINN framework, with the example PDE instances (Burgers’ equation).",
+      "page": 3,
+      "index": 4,
+      "width": 1014,
+      "height": 570
+    },
+    {
+      "url": "assets/figures/arxiv/2604.21761v1/fig-005.webp",
+      "caption": "Fig. 4. The predicted results and corresponding errors for the Helmholtz equation on new PDE instance (α1 = 1.2, α2 = 6.0), for MLP, MLP+[Pi]2, and HYDRA+[Pi]2 trained with K = 32 PDE instances.",
+      "page": 6,
+      "index": 5,
+      "width": 418,
+      "height": 597
+    }
+  ]
+}

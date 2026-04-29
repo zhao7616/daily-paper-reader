@@ -1,0 +1,46 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.20161v1/fig-001.webp",
+      "caption": "Figure 1: Simulation results for Model I.",
+      "page": 15,
+      "index": 1,
+      "width": 704,
+      "height": 518
+    },
+    {
+      "url": "assets/figures/arxiv/2604.20161v1/fig-002.webp",
+      "caption": "Table 1: Summary statistics of the normalized test prediction error pntestqq ´1{2 }Xtest pC ´ Ytest}F over 100 random 70%/30% splits of the ILC1 cells. For SMART, “Source: METHOD” indicates the source estimator used to construct the source regression matrix.",
+      "page": 18,
+      "index": 2,
+      "width": 722,
+      "height": 700
+    },
+    {
+      "url": "assets/figures/arxiv/2604.20161v1/fig-003.webp",
+      "caption": "Figure 3: Simulation results for Model III.",
+      "page": 17,
+      "index": 3,
+      "width": 704,
+      "height": 518
+    },
+    {
+      "url": "assets/figures/arxiv/2604.20161v1/fig-004.webp",
+      "caption": "Figure 4: Cell counts for each annotated cell type in the multi-modal single-cell data.",
+      "page": 27,
+      "index": 4,
+      "width": 964,
+      "height": 483
+    },
+    {
+      "url": "assets/figures/arxiv/2604.20161v1/fig-005.webp",
+      "caption": "Figure 2: Simulation results for Model II.",
+      "page": 16,
+      "index": 5,
+      "width": 704,
+      "height": 518
+    }
+  ]
+}

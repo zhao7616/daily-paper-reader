@@ -1,0 +1,9314 @@
+Title: SMART: A Spectral Transfer Approach to Multi-Task Learning
+
+URL Source: https://arxiv.org/pdf/2604.20161v1
+
+Published Time: Thu, 23 Apr 2026 00:27:57 GMT
+
+Number of Pages: 53
+
+Markdown Content:
+# SMART: A Spectral Transfer Approach to Multi-Task Learning 
+
+## Boxin Zhao 1, Mladen Kolar 2, and Jinchi Lv 31University of Chicago 
+
+> 2
+
+## University of Southern California 
+
+> 3
+
+## University of Southern California 
+
+Abstract 
+
+Multi-task learning is effective for related applications, but its performance can deteriorate when the target sample size is small. Transfer learning can borrow strength from related studies; yet, many existing methods rely on restrictive bounded-difference assumptions between the source and target models. We propose SMART, a spectral transfer method for multi-task linear regression that instead assumes spectral similarity: the target left and right singular subspaces lie within the corresponding source subspaces and are sparsely aligned with the source singular bases. Such an assumption is natural when studies share latent structures and enables transfer beyond the bounded-difference settings. SMART estimates the target coefficient matrix through structured regularization that incorporates spectral information from a source study. Importantly, it requires only a fitted source model rather than the raw source data, making it useful when data sharing is limited. Although the optimization problem is nonconvex, we develop a practical ADMM-based algorithm. We establish general, non-asymptotic error bounds and a minimax lower bound in the noiseless-source regime. Under additional regularity conditions, these results yield near-minimax Frobenius error rates up to logarithmic factors. Simulations confirm improved estimation accuracy and robustness to negative transfer, and analysis of multi-modal single-cell data demonstrates better predictive performance. The Python implementation of SMART, along with the code to reproduce all experiments in this paper, is publicly available at https://github.com/boxinz17/smart .
+
+Keywords: Data integration, Reduced-rank regression, Nonconvex optimization, Source-free transfer learning, Multi-modal single-cell data 
+
+# 1 Introduction 
+
+Many modern scientific studies require estimating multiple related regression models simultaneously. A particularly important example arises in genomics, where one seeks to characterize the gene–protein association networks across tissues or cell types (Tang et al., 2023). Recent single-cell multi-modal technologies now measure gene expression (mRNA) and protein abundance (surface markers) in the same cell (Luecken et al., 2021), producing paired high-dimensional observations across modalities. A natural target is therefore a gene–protein association matrix that summarizes the dominant cross-modal relationships. Since cellular systems are often driven by a relatively small number of coordinated functional programs, these cross-modal associations are well-modeled by a low-rank coefficient matrix, with each latent factor corresponding to a gene–protein module. Such settings also motivate learning across related studies. Multi-task learning can improve estimation by borrowing strength across tasks, but its gains are often limited precisely when transfer is most needed: some studies have only modest sample sizes. Such imbalances are routine in biomedical data, where rare cell types, disease-specific states, or difficult experimental conditions are sparsely observed, whereas other populations are much better sampled. In gene–protein association studies across cell types, for example, a 1
+
+> arXiv:2604.20161v1 [cs.LG] 22 Apr 2026
+
+data-poor target population may still share core biological programs with a data-rich source population. Transfer learning is thus a natural strategy for improving estimation in the target study by leveraging information learned from related sources (Pan and Yang, 2009). Two obstacles make this problem challenging. First, many high-dimensional transfer-learning methods assume a bounded-difference assumption , namely that the source and target coefficients are close under some metric (Li et al., 2023; Park et al., 2025). In the multivariate low-rank setting, Park et al. (2025) required the contrast between the target coefficient matrix and each informative source to have small nuclear norm, which ties together similarity in singular directions and similarity in effect magnitude. This can become restrictive in complex biological systems: large shifts in individual coefficients or singular values may occur even when the underlying low-dimensional modules are largely preserved. For instance, gene–protein associations may vary substantially across cell types or treatment conditions, whereas pathways of co-regulated genes and protein complexes remain aligned, leading to a large nuclear-norm contrast despite strong subspace similarity. Second, many transfer-learning procedures need direct access to the source data (Li et al., 2022), whereas in practice, privacy, consent, or platform restrictions may leave only a fitted source model or other summary representation available. Motivated by these challenges, we propose a spectral notion of transfer specifically designed for low-rank multi-task regression. Instead of insisting that source and target coefficients be numerically close, we require a spectral containment condition , which states that the left and right singular subspaces of the target coefficient matrix lie within those of a clean source matrix, along with a sparse alignment condition ,which stipulates that the target singular vectors admit sparse representations in the source singular bases. These assumptions formalize a biologically relevant setting in which the target repurposes a subset of latent modules already present in the source. They also constitute the central conceptual innovation of our framework: in contrast to bounded-difference approaches, they permit arbitrarily large shifts in singular values and individual coefficients while preserving the shared low-dimensional structure that enables effective transfer. Building on this new perspective, we propose SMART , a spectral transfer method for low-rank multi-task regression that uses only a fitted source regression matrix and injects its spectral information through structured regularization. This source-free design is practically important when the raw source data cannot be shared. The resulting optimization problem is nonconvex, so we develop an efficient ADMM-based algorithm that addresses the orthogonality constraints through manifold optimization. On the theoretical side, we establish general, non-asymptotic error upper bounds, and a minimax lower bound in the noiseless-source regime; under additional conditions, these results yield near-minimax Frobenius error rates up to logarithmic factors. Empirically, SMART delivers clear gains in small-sample regimes in both simulations and a multi-modal single-cell application, demonstrating that subspace-level transfer can remain powerful even when the source and target effect magnitudes differ substantially. 
+
+## 1.1 Related works 
+
+Multi-task learning. Multi-task learning has a long history in computer science (Caruana, 1997), especially in neural networks and representation learning (Zhang and Yang, 2021). More recently, the statistical literature has developed a rich theory under the multivariate linear regression framework. At its core is the reduced-rank regression (RRR), which models the coefficient matrix as low-rank to capture response dependence and improve efficiency (Anderson, 1951; Izenman, 1975). Modern extensions incorporate sparsity, adaptivity, and scalability: Yuan et al. (2007) and Chen et al. (2013) studied nuclear-norm penalization for adaptive dimension reduction; the dirty model of Jalali et al. (2010) captured both shared and task-specific components; and Bunea et al. (2011, 2012) developed methods for joint variable and rank selection. Sparse formulations further enable simultaneous predictor and factor selection (Chen and Huang, 2012; Ma et al., 2020), while SOFAR extends structured singular value decomposition (SVD) to large-scale association learning (Uematsu et al., 2019). Together, these works provide a flexible toolkit for modeling multi-task relationships through low-rank structure and sparsity. Our work builds on such literature but studies a distinct problem: improving a target low-rank multivariate regression by transferring only structured spectral information from an external source model. 2Transfer learning. Transfer learning has long been studied in computer science (Pan and Yang, 2009) and has recently received growing attention in statistics, with applications in high-dimensional linear regression (Li et al., 2022), generalized linear models (Li et al., 2023), Gaussian graphical models (Zhao et al., 2025), and functional data (Cai et al., 2024). Many statistical approaches rely on a bounded-difference assumption , requiring the source and target parameters to be close under a suitable metric. There is also a growing interest in source-free transfer learning, where the raw source data are unavailable, and transfer must rely on a pretrained source model; see, for example, Gu et al. (2025). More recently, structurally motivated transfer methods have also been developed in other problems, including a rank-based approach for high-dimensional survival analysis (Qiao et al., 2025) and a spectral transfer method for matrix completion (He et al., 2024). Although these works also exploit structural similarity across domains, our focus on multivariate low-rank regression leads to a different notion of transferable structure, a different nonconvex estimator, and a different theoretical analysis. The most closely related work is the concurrent study of Park et al. (2025), which examines transfer learning for multivariate low-rank regression under a bounded nuclear-norm contrast condition between the target and each informative source coefficient matrix. This assumption essentially enforces similarity in both singular directions and effect magnitudes, and thus can rule out scenarios where the signal undergoes large but directionally aligned shifts. By contrast, in the single-source setting considered here, we posit exact spectral containment of the target singular subspaces within those of a clean source matrix, along with sparse alignment of the target singular vectors in the source singular bases. This sharper structural assumption disentangles subspace reuse from effect-size similarity, allows for arbitrarily large changes in singular values, and directly informs the regularization design and theoretical analysis of SMART . An illustrative example and additional discussion of the differences from Park et al. (2025) are provided in Appendix A. 
+
+## 1.2 Organization and notation 
+
+Organization. The rest of the paper is organized as follows. Section 2 introduces the model setup and the spectral transfer framework. Section 3 presents SMART , including its ADMM-based optimization and hyperparameter selection. Section 4 establishes theoretical guarantees, including finite-sample error bounds and a minimax lower bound. Section 5 reports simulation examples, Section 6 presents the multi-modal single-cell application, and Section 7 concludes with some discussions. All the proofs and additional details on the experiments and optimization are provided in the Appendix. The Python implementation of our method, along with the code to reproduce all experiments in this paper, is publicly available at 
+
+https://github.com/boxinz17/smart 
+
+Notation. For a vector v P Rd, define the ℓp-norm as }v}p “ p řdi“1 |vi|pq1{p for 1 ď p ă 8 , and 
+
+}v}8 “ max i |vi|. For a matrix A P Rmˆn, we use | ¨ | to denote entrywise norms and } ¨ } the matrix norms: |A|1 “ ř 
+
+> i,j
+
+|Aij |, |A|0 “ ř 
+
+> i,j
+
+1tAij ‰ 0u, |A|8 “ max i,j |Aij |, }A}2 is the largest singular value, and }A}F “ p ř 
+
+> i,j
+
+|Aij |2q1{2. Denote by }A}1,2 :“ `ř nj“1 }A:j }21
+
+˘ 12 . The inner product is xA, By “ 
+
+tr pAJBq “ ř 
+
+> i,j
+
+Aij Bij , and vec pAq denotes column-stacking. For a symmetric A, λmin pAq and λmax pAq
+
+represent its smallest and largest eigenvalues. For A P Rn1ˆn2 and B P Rm1ˆm2 , their Kronecker product is 
+
+A b B P Rn1m1ˆn2m2 with entries rAij Bℓm si,j,ℓ,m . Given S Ď r ms ˆ r ns and A P Rmˆn, AS denotes the matrix with entries Aij if pi, j q P S and 0 otherwise. We adopt standard asymptotic notation: for sequences tf pnqu and tgpnqu , f pnq “ Opgpnqq or f pnq À gpnq
+
+means that f pnq ď Cg pnq for some C ą 0 and large n; f pnq “ Ωpgpnqq or f pnq Á gpnq means that 
+
+f pnq ě cg pnq for some c ą 0; f pnq “ Θpgpnqq or f pnq — gpnq means that c1gpnq ď f pnq ď c2gpnq for constants c1, c 2 ą 0; and f pnq “ opgpnqq means that f pnq{ gpnq Ñ 0. The universal constants may vary across lines. We also write a ^ b “ min pa, b q, a _ b “ max pa, b q, and txu for the greatest integer ď x. Denote by Sdˆd the set of symmetric d ˆ d matrices. 32 Model setting and problem setup 
+
+Let tp xi, yiqu ni“1 be independent and identically distributed (i.i.d.) observations with covariates xi P Rp
+
+and responses yi P Rq . We study the multi-task linear regression model 
+
+Y “ XC ˚ ` E, (1) where Y “ r y1, . . . , ynsJ P Rnˆq is the response matrix, X “ r x1, . . . , xnsJ P Rnˆp is the design matrix, and E “ r e1, . . . , ensJ P Rnˆq is the error matrix, which is assumed to be independent of X. Each column of Y corresponds to one task across all observations, whereas each row records the responses for a single observation. The coefficient matrix C˚ P Rpˆq encodes the linear relationships between the covariates and tasks. To model the structure common to all tasks, we posit that C˚ is low-rank and admits the singular value decomposition (SVD) 
+
+C˚ “ U˚D˚V˚J “
+
+> r
+
+ÿ
+
+> j“1
+
+d˚ 
+
+> j
+
+u˚ 
+
+> j
+
+v˚J  
+
+> j
+
+,
+
+where r “ rank pC˚q ď min pp, q q, D˚ “ diag pd˚ 
+
+> 1
+
+, . . . , d ˚ 
+
+> r
+
+q collects the singular values d˚ 
+
+> 1
+
+ě ¨ ¨ ¨ ě d˚ 
+
+> r
+
+ą 0,and U˚ P Rpˆr and V˚ P Rqˆr are orthonormal matrices containing the left and right singular vectors, respectively. The columns of U˚ define a low-dimensional subspace of covariates that is pertinent to the tasks, whereas the columns of V˚ encode structure shared among tasks. Unless noted otherwise, we treat r
+
+as known. In applications, r may be chosen following the selection rule of Bunea et al. (2011). For example, in the gene–protein networks, the low-rank structure of C˚ reflects the idea that a small number of latent regulatory programs drive coordinated gene and protein expression. Each latent component defines a gene–protein module representing a shared pathway through which subsets of genes influence subsets of proteins. Modeling C˚ as low-rank therefore yields a parsimonious, interpretable description of cross-modal interactions while improving statistical efficiency and robustness in high-dimensional single-cell data. In addition to the target dataset, we assume access to a source regression matrix Cp0q P Rpˆq obtained from a related biological context, such as a different cell type or experimental condition within the same gene–protein framework. For instance, in single-cell multi-omics, one may leverage previously estimated gene–protein associations from a reference cell type to improve estimation in a new but related cell type. Let the singular vector matrices corresponding to Cp0q be orthonormal and ordered by singular values, and write 
+
+Cp0q “ Up0qDp0qVp0qJ “
+
+> r0
+
+ÿ
+
+> j“1
+
+dp0q 
+
+> j
+
+up0q 
+
+> j
+
+vp0qJ  
+
+> j
+
+,
+
+where 1 ď r0 ď min pp, q q is the rank, Up0q “ r up0q 
+
+> 1
+
+, . . . , up0q 
+
+> r0
+
+s P Rpˆr0 and Vp0q “ r vp0q 
+
+> 1
+
+, . . . , vp0q 
+
+> r0
+
+s P Rqˆr0
+
+are orthonormal singular vector matrices, and Dp0q “ diag pdp0q 
+
+> 1
+
+, . . . , d p0q 
+
+> r0
+
+q contains non-increasing positive singular values dp0q 
+
+> 1
+
+ě ¨ ¨ ¨ ě dp0q 
+
+> r0
+
+ą 0. The alignment measures defined below are specified with respect to this fixed selection of singular vectors. If the singular values of the source are all distinct, this basis is unique except for an overall sign ambiguity. To improve the estimation of the target coefficient matrix C˚ using auxiliary information from the source matrix Cp0q, we impose some structural assumptions that capture their spectral similarity. Our framework targets settings where the main latent factors of the target are inherited from or aligned with those of the source. Formally, we assume the singular subspaces of the target matrix are contained in those of the source. 
+
+Assumption 2.1 (Spectral containment) . Assume that r0 ě r, and 
+
+col pU˚q Ď col pUp0qq and col pV˚q Ď col pVp0qq.
+
+4The condition above is biologically plausible in many settings. In our real-data analysis (Section 6), for example, the target cell type (ILC1) exhibits a more specialized and functionally constrained regulatory program than the source cell type (NK), which circulates systemically and participates in a broader range of immune pathways. Consequently, the latent gene–protein modules active in ILC1 are naturally spanned by those present in NK, consistent with the containment condition (Vivier et al., 2018). Assumption 2.1 above ensures that the dominant directions underlying the low-rank structure of C˚ are fully captured by the spectral span of Cp0q. However, when r0 is large, this containment condition alone can still be weak, since col pUp0qq and col pVp0qq may include many directions that are irrelevant to the target. Under Assumption 2.1, denote by 
+
+Pu :“ Up0qJ U˚ P Rr0ˆr , Pv :“ Vp0qJ V˚ P Rr0ˆr .
+
+Then we have that U˚ “ Up0qPu and V˚ “ Vp0qPv . We measure the complexity of these source-basis representations by 
+
+s˚ 
+
+> u
+
+:“ | Pu|0 “
+
+ˇˇˇU˚J Up0q
+
+ˇˇˇ0
+
+“
+
+> r
+
+ÿ
+
+> i“1
+
+#
+
+!
+
+1 ď j ď r0 : xu˚ 
+
+> i
+
+, up0q 
+
+> j
+
+y ‰ 0
+
+)
+
+,s˚ 
+
+> v
+
+:“ | Pv |0 “
+
+ˇˇˇV˚J Vp0q
+
+ˇˇˇ0
+
+“
+
+> r
+
+ÿ
+
+> i“1
+
+#
+
+!
+
+1 ď j ď r0 : xv˚ 
+
+> i
+
+, vp0q 
+
+> j
+
+y ‰ 0
+
+)
+
+.
+
+(2) We further impose the following condition. 
+
+Assumption 2.2 (Sparse alignment) . Assume that s˚ 
+
+> u
+
+and s˚ 
+
+> v
+
+are small relative to rp and rq , respectively. 
+
+Together, Assumptions 2.1 and 2.2 above define our structural similarity framework. The spectral containment condition ensures that the target subspaces lie within the source subspaces, while the sparse alignment condition requires this representation to be parsimonious. By construction, we have that 
+
+s˚
+
+> u
+
+, s ˚ 
+
+> v
+
+ď rr 0; hence, when r0 is much smaller than min pp, q q, this relative sparsity holds automatically. When r0 is large, the condition requires that each target singular vector involves only a small number of source directions on average. Indeed, Assumption 2.2 is well-motivated in many structured biological systems. Even when two related conditions share broad regulatory programs, the target condition often activates only a subset of those pathways. In such cases, each latent component of the target can be represented using only a small number of directions from the source spectral basis, reflecting the selective reuse of functional modules. The sparse alignment condition formalizes such phenomenon, enabling efficient information transfer while preserving interpretability. A concrete illustration is given in Section 6, where the target cell type reuses only a few regulatory axes from its broader source counterpart. In practice, the clean source matrix Cp0q is typically unobserved, and we only have access to a noisy approximation rCp0q “ Cp0q ` Ep0q,
+
+where Ep0q P Rpˆq is an additive noise matrix. We therefore work with the singular value decomposition of the observed noisy matrix 
+
+rCp0q “ rUp0q rDp0q rVp0qJ “
+
+> rr0
+
+ÿ
+
+> j“1
+
+rdp0q 
+
+> j
+
+rup0q 
+
+> j
+
+rvp0qJ  
+
+> j
+
+,
+
+where rr0 “ rank p rCp0qq and rdp0q 
+
+> 1
+
+ą ¨ ¨ ¨ ą rdp0q 
+
+> rr0
+
+ą 0. We do not assume that rCp0q is low-rank. The strict inequalities ensure that the nonzero singular vectors are uniquely ordered up to the sign, a mild generic condition under perturbation by noise or numerical error. 53 SMART algorithm 
+
+In this section, we introduce SMART ( Spectral Multi-task Adaptive Regression Transfer), our source-guided estimator for multi-task reduced-rank regression. The method combines low-rank regression with structured regularization induced by spectral information from a related source study. To this end, we extend the singular vectors rUp0q and rVp0q of the noisy source matrix rCp0q to full orthonormal bases of Rp and Rq by appending arbitrary but fixed orthonormal complements rup0q
+
+> rr0`1
+
+, . . . , rup0q
+
+> p
+
+and rvp0q
+
+> rr0`1
+
+, . . . , rvp0q 
+
+> q
+
+. The estimator below is defined relative to this fixed completion. For any pru, r v q with 
+
+0 ď ru ď p and 0 ď rv ď q, let us define 
+
+rUspruq :“
+
+”rup0q 
+
+> 1
+
+, . . . , rup0q
+
+> ru
+
+ı
+
+, rUs
+
+> K
+
+pruq :“
+
+”rup0q
+
+> ru`1
+
+, . . . , rup0q
+
+> p
+
+ı
+
+,
+
+and similarly for the right singular vectors 
+
+rVsprv q :“
+
+”rvp0q 
+
+> 1
+
+, . . . , rvp0q
+
+> rv
+
+ı
+
+, rVs
+
+> K
+
+prv q :“
+
+”rvp0q 
+
+> rv`1
+
+, . . . , rvp0q
+
+> q
+
+ı
+
+.
+
+We interpret rUsp0q, rVsp0q, rUs
+
+> K
+
+ppq, and rVs
+
+> K
+
+pqq as empty matrices of compatible dimensions. Given structural parameters pru, r v q, we estimate the low-rank components p pU, pD, pVq by solving 
+
+pU, pD, pV P arg min 
+
+> U,D,V
+
+#
+
+12n
+
+››Y ´ XUDV J››2F ` λu
+
+ˇˇˇ rUsJK pruqUD 
+
+ˇˇˇ1
+
+` λv
+
+ˇˇˇ rVsJK prv qVD 
+
+ˇˇˇ1
+
++
+
+subject to UJU “ Ir , VJV “ Ir , D ě 0,
+
+(3) where U P Rpˆr , V P Rqˆr , and D “ diag pd1, . . . , d r q with dj ě 0. The resulting estimator is given by 
+
+pC :“ pU pD pVJ.
+
+The optimization criterion in (3) above combines a least-squares loss with two source-guided penalties. The term | rUsJK pruqUD |1 penalizes the entries of the left factor UD along source directions outside the leading ru-dimensional left subspace, and | rVsJK prv qVD |1 plays a similar role for the right factor VD . Thus, coordinates along the first ru left source directions and the first rv right source directions remain unpenalized, whereas coordinates in the complementary directions are shrunk toward zero. Such formulation favors solutions that use only a sparse set of penalized source directions, in line with Assumption 2.2. As shown later in Section 4, the structural ranks pru, r v q control a trade-off between the approximation error induced by source noise and the statistical estimation error. Smaller values of pru, r v q impose stronger source-guided shrinkage and are most beneficial when the source singular vectors are accurate. As the source noise increases, larger values of pru, r v q enlarge the unpenalized subspaces and reduce sensitivity to noisy source directions. 
+
+## 3.1 Optimization algorithm 
+
+In this section, we describe an ADMM-type algorithm for numerically solving (3) . The factorized objective is nonconvex because of the orthogonality constraints and the coupling among U, D, and V. The algorithm alternates updates of U, D, and V, enforcing orthogonality through projections onto the Stiefel manifold. In practice, we initialize SMART with the truncated SVD of a warm-start estimator, such as the ridge or Lasso, to improve the numerical stability. 6To simplify notation, let us write rUs
+
+> K
+
+pruq as rUs 
+
+> K
+
+and rVs
+
+> K
+
+prv q as rVs 
+
+> K
+
+throughout this section. We can then rewrite (3) as the equivalent constrained problem 
+
+p pΘ, pΩq P arg min 
+
+> Θ,Ω
+
+" 12n
+
+››Y ´ XUDV J››2F ` λu |Ωu|1 ` λv |Ωv |1
+
+*
+
+,
+
+subject to UJU “ Ir , VJV “ Ir , D ě 0,
+
+rUsJK UD “ Ωu, rVsJK VD “ Ωv ,
+
+(4) where Θ “ p U, D, Vq, Ω “ p Ωu, Ωv q, and D is diagonal with nonnegative entries. The corresponding augmented Lagrangian is given by 
+
+LρpΘ, Ω, Γq “ 12n
+
+››Y ´ XUDV J››2F ` λu |Ωu|1 ` λv |Ωv |1
+
+`
+
+A
+
+Γu, rUsJK UD ´ Ωu
+
+E
+
+`
+
+A
+
+Γv , rVsJK VD ´ Ωv
+
+E
+
+` ρ
+
+2
+
+››› rUsJK UD ´ Ωu
+
+›››2F
+
+` ρ
+
+2
+
+››› rVsJK VD ´ Ωv
+
+›››2F
+
+,
+
+where Γ “ p Γu, Γv q are dual variables and ρ ą 0 is a penalty parameter. Starting from an initial point, the SMART algorithm alternates 
+
+Upt`1q Ð arg min 
+
+> U:UJU“Ir
+
+Lρ
+
+´`U, Dptq, Vptq˘, Ωptq, Γptq
+
+¯
+
+,
+
+Vpt`1q Ð arg min 
+
+> V:VJV“Ir
+
+Lρ
+
+´`Upt`1q, Dptq, V˘, Ωptq, Γptq
+
+¯
+
+,
+
+Dpt`1q Ð arg min  
+
+> D:Dě0
+
+Lρ
+
+´`Upt`1q, D, Vpt`1q˘, Ωptq, Γptq
+
+¯
+
+,
+
+followed by 
+
+Ωpt`1q Ð arg min  
+
+> Ω
+
+LρpΘpt`1q, Ω, Γptqq,
+
+and the dual updates 
+
+Γpt`1q 
+
+> u
+
+Ð Γptq 
+
+> u
+
+` ρ
+
+´ rUsJK Upt`1qDpt`1q ´ Ωpt`1q
+
+> u
+
+¯
+
+,
+
+Γpt`1q 
+
+> v
+
+Ð Γptq 
+
+> v
+
+` ρ
+
+´ rVsJK Vpt`1qDpt`1q ´ Ωpt`1q
+
+> v
+
+¯
+
+.
+
+The U- and V-subproblems are addressed on the Stiefel manifold, whereas the updates for D, Ωu, and 
+
+Ωv have straightforward closed-form expressions. Further algorithmic details can be found in Appendix B. 
+
+## 3.2 Hyperparameter selection 
+
+We select the SMART hyperparameters pλu, λ v , r, r u, r v q as follows. 
+
+Regularization parameters. For fixed pr, r u, r v q, we choose pλu, λ v q by minimizing the BIC criterion 
+
+BIC pλu, λ v q “ nq log 
+
+#
+
+}Y ´ X pCpλu, λ v q} 2F
+
+nq 
+
++
+
+`
+
+´
+
+| pΩu|0 ` | pΩv |0
+
+¯
+
+log pnq q,
+
+where pC “ pU pD pVJ, pΩu “ rUsJK pruq pU pD, pΩv “ rVsJK prv q pV pD.
+
+Because pr, r u, r v q are fixed in this setting, the unpenalized dimension rpru ` rv ` 1q remains the same for all pλu, λ v q. Consequently, the criterion only needs to adjust for the changes in the penalized support sizes. 
+
+Rank parameters. We determine the target rank r using the criterion of Bunea et al. (2011) applied to pY, Xq. The source truncation levels pru, r v q are then selected via a grid search combined with K-fold cross-validation, choosing the pair that yields the lowest average prediction error. 7Practical workflow. In applications, we first obtain an estimate of r, then carry out cross-validation over a reasonably sized grid of pru, r v q values, and subsequently select pλu, λ v q using the BIC for each candidate pair. This procedure strikes a practical compromise between computational burden and statistical precision. 
+
+# 4 Theoretical properties 
+
+In this section, we derive theoretical upper bounds on the error of the SMART estimator and, in the noiseless-source setting, a nearly matching minimax lower bound, differing only by logarithmic factors. Let us first introduce some notation that will be used throughout the technical analysis. We extend the source singular vectors Up0q and Vp0q to full orthonormal bases of Rp and Rq by appending arbitrary orthonormal complements 
+
+Up0qK :“ r up0q
+
+> r0`1
+
+, . . . , up0q 
+
+> p
+
+s, Vp0qK :“ r vp0q
+
+> r0`1
+
+, . . . , vp0q 
+
+> q
+
+s,
+
+so that 
+
+col pUp0qK q “ col pUp0qqK, col pVp0qK q “ col pVp0qqK.
+
+Define the full bases 
+
+Up0q 
+
+> full
+
+:“ r Up0q Up0qK s, Vp0q 
+
+> full
+
+:“ r Vp0q Vp0qK s.
+
+For 0 ď ru ď p and 0 ď rv ď q, denote by 
+
+Uspruq :“ r up0q 
+
+> 1
+
+, . . . , up0q 
+
+> ru
+
+s, Us
+
+> K
+
+pruq :“ r up0q
+
+> ru`1
+
+, . . . , up0q 
+
+> p
+
+s,
+
+Vsprv q :“ r vp0q 
+
+> 1
+
+, . . . , vp0q 
+
+> rv
+
+s, Vs
+
+> K
+
+prv q :“ r vp0q 
+
+> rv`1
+
+, . . . , vp0q 
+
+> q
+
+s,
+
+where tup0q 
+
+> j
+
+ur0 
+
+> j“1
+
+and tvp0q 
+
+> j
+
+ur0 
+
+> j“1
+
+are the fixed ordered source singular vectors introduced in Section 2, and the remaining vectors come from the chosen orthonormal completions. We interpret Usp0q, Vsp0q, Us
+
+> K
+
+ppq,and Vs
+
+> K
+
+pqq as empty matrices of compatible dimensions. We define the minimal leading truncation levels r˚ 
+
+> u
+
+and r˚ 
+
+> v
+
+such that the singular subspaces of the target matrix C˚ are contained in the truncated source subspaces 
+
+r˚ 
+
+> u
+
+:“ min tru : col pU˚q Ď col pUspruqqu , r˚ 
+
+> v
+
+:“ min trv : col pV˚q Ď col pVsprv qqu . (5) In view of Assumption 2.1, we have that r˚ 
+
+> u
+
+, r ˚ 
+
+> v
+
+ď r0.To quantify how well the target singular vectors align with the retained source directions, let us define for truncation levels ru and rv ,
+
+supruq :“ ˇˇU˚J Us
+
+> K
+
+pruqˇˇ0 , sv prv q :“ ˇˇV˚J Vs
+
+> K
+
+prv qˇˇ0 , (6) where | ¨ | 0 counts the number of nonzero entries. Consequently, supruq and sv prv q count the nonzero components of the target singular vectors along the penalized complement directions of the fixed augmented source basis. By construction, it holds that sup0q “ s˚ 
+
+> u
+
+and sv p0q “ s˚ 
+
+> v
+
+, as introduced in (2) . Moreover, supruq and 
+
+sv prv q are nonincreasing in ru and rv , and satisfy that 
+
+supruq “ 0 for ru ě r˚ 
+
+> u
+
+, sv prv q “ 0 for rv ě r˚ 
+
+> v
+
+.
+
+The quantities r˚ 
+
+> u
+
+, r˚ 
+
+> v
+
+, supruq, and sv prv q do not depend on the particular orthonormal completion of the source basis. This follows from Assumption 2.1, which guarantees that U˚J up0q 
+
+> j
+
+“ 0 and V˚J vp0q 
+
+> j
+
+“ 0
+
+for all j ą r0.84.1 Technical conditions 
+
+We now introduce the technical assumptions required for our theoretical analysis. Throughout this section, we treat the design matrix X as fixed and impose deterministic conditions that typically hold with high probability when the rows of X are sampled i.i.d. from sub-Gaussian distributions. We begin with a restricted eigenvalue condition, which ensures stable recovery in high-dimensional regimes. 
+
+Assumption 4.1 (Restricted eigenvalue) . There exist universal constants ρ1, ρ 2 ą 0 such that 
+
+12n }Xβ}22 ě ρ2
+
+2 }β}22 ´ ρ1
+
+log pn }β}21 for all β P Rp.
+
+The above condition holds with high probability when the rows x1, . . . , xn are i.i.d. Gaussian with a non-degenerate covariance matrix; see, e.g., Wainwright (2019, Theorem 7.16). We next impose the boundedness and non-degeneracy conditions on the design matrix, the true coefficient matrix, and the source coefficient matrix. 
+
+Assumption 4.2 (Constrained singular values) . The following conditions hold for some universal constants 
+
+ν, d min , d p0q 
+
+> min
+
+ą 0:(i) The design matrix X P Rnˆp satisfies that sup uPRp:}u}2ď1 }Xu }22 ď νn .(ii) The smallest nonzero singular values of the target and source coefficient matrices satisfy that d˚ 
+
+> r
+
+ě dmin 
+
+and dp0q 
+
+> r0
+
+ě dp0q
+
+> min
+
+, respectively. 
+
+To ensure identifiability and perturbation stability of the singular subspaces, we impose a spectral gap condition on both the target matrix C˚ and the source matrix Cp0q.
+
+Assumption 4.3 (Spectral gap) . There exists a universal constant 0 ă τ ă 1 such that the squared singular values satisfy a relative spectral gap condition 
+
+d˚2 
+
+> j´1
+
+´ d˚2 
+
+> j
+
+ě τ d ˚2
+
+> j´1
+
+, 2 ď j ď r, (7) 
+
+´
+
+dp0q
+
+> j´1
+
+¯2
+
+´
+
+´
+
+dp0q
+
+> j
+
+¯2
+
+ě τ
+
+´
+
+dp0q
+
+> j´1
+
+¯2
+
+, 2 ď j ď r0. (8) The condition above is standard in the low-rank estimation literature; see, for example, Uematsu et al. (2019, Condition 5). Finally, we impose a distributional assumption on the noise matrix. 
+
+Assumption 4.4 (Gaussian noise) . Let E “ r e1, . . . , ensJ P Rnˆq be the noise matrix. Assume that the rows e1, . . . , en are i.i.d. Gaussian with mean zero and covariance Σ, where }Σ}2 ď αmax for some 
+
+αmax ą 0.
+
+The Gaussian assumption above simplifies the concentration analysis. Our results can be extended to sub-Gaussian noise with appropriate modifications to the constants; see, e.g., Shen and Lv (2026). 
+
+## 4.2 Upper bound analysis of SMART 
+
+In this section, we establish theoretical guarantees for the SMART estimator. Since the objective in (3) is nonconvex, direct statistical analysis is challenging. To address such issue, we exploit a two-stage approach based on the convexity-assisted nonconvex optimization (CANO) framework of Uematsu et al. (2019), which yields non-asymptotic error bounds for nonconvex estimators. The CANO strategy proceeds in two steps. First, an initial estimator, typically convex, provides a coarse but consistent initializer. Second, this initializer is refined by solving the original nonconvex SMART problem within a neighborhood of the initial solution, where the objective exhibits favorable local geometry. Such localization mitigates the effects of nonconvexity and facilitates the technical analysis. Our theoretical results focus on a global optimizer of the localized SMART problem. The resulting bound separates the statistical estimation error from the approximation error induced by the source noise. 9Finally, we emphasize that CANO serves primarily as a theoretical device; practical optimization algorithms for SMART are discussed in Section 3.1. 
+
+Stage 1: Initialization. We start with constructing an initial estimator pCinit of the true coefficient matrix C˚. For the theoretical analysis, we treat pCinit as a black-box initializer satisfying the non-asymptotic error bounds ››› pCinit ´ C˚
+
+›››F
+
+ď R2,n ,
+
+››› pCinit ´ C˚
+
+›››1,2
+
+ď R1,n . (9) When C˚ is additionally entrywise sparse, one concrete choice is the Lasso estimator 
+
+pClasso P arg min 
+
+> CPRpˆq
+
+" 12n }Y ´ XC }2F ` λ0 |C|1
+
+*
+
+,
+
+where λ0 ě 0. The proposition below provides its non-asymptotic guarantees. 
+
+Proposition 4.5 (Error bounds for Lasso estimator) . For each 1 ď j ď q, let sj :“ ››C˚
+
+> :j
+
+››0 be the sparsity of the jth column of C˚, and define 
+
+s0 :“
+
+> q
+
+ÿ
+
+> j“1
+
+sj “ | C˚|0 , smax :“ max  
+
+> 1ďjďq
+
+sj , s˚,1,2 :“
+
+˜ qÿ
+
+> j“1
+
+s2
+
+> j
+
+¸1{2
+
+.
+
+Assume that Assumptions 4.1, 4.2(i), and 4.4 hold, and further that n is sufficiently large, i.e., 
+
+n ą
+
+smax 
+
+”
+
+32 να max 
+
+!
+
+log p `
+
+´ c20´24
+
+¯
+
+log p `
+
+´ c20
+
+> 4
+
+¯
+
+log q
+
+)
+
+` log p
+
+ı
+
+p4ρ22{9q ^ p ρ2{p 64 ρ1qq (10) 
+
+for some universal constant c0 ą ?2. Then with 
+
+λ0 —
+
+c αmax log ppq q
+
+n ,
+
+the Lasso estimator satisfies that with probability at least 1 ´ 2ppq q1´c20{2,
+
+››› pClasso ´ C˚
+
+›››F
+
+À
+
+c αmax s0 log ppq q
+
+n ,
+
+››› pClasso ´ C˚
+
+›››1,2
+
+À s˚,1,2
+
+c αmax log ppq q
+
+n .
+
+The proof of the above proposition is given in Appendix D. Other possible initializers include the ordinary least squares, ridge regression, and reduced-rank regression, provided that they satisfy the error bounds in (9). 
+
+Stage 2: Refined estimation. In the second stage, for fixed truncation levels pru, r v q, we solve the SMART optimization problem (3) over pU, D, Vq subject to the additional constraints 
+
+›››UDV J ´ pCinit 
+
+›››F
+
+ď 2R2,n ,
+
+›››UDV J ´ pCinit 
+
+›››1,2
+
+ď 2R1,n . (11) Let pC “ pU pD pVJ be a global optimum of this localized problem, and define the estimation error p∆ “ pC ´ C˚.We also introduce the spectral conditioning factor 
+
+ηr :“ 1 ` 1
+
+τ
+
+¨˝ rÿ
+
+> j“1
+
+˜
+
+d˚
+
+> 1
+
+d˚
+
+> j
+
+¸2˛‚
+
+> 1{2
+
+,
+
+where τ ą 0 is the spectral gap constant from Assumption 4.3. 10 Finally, let us define the spectral approximation error of the source matrix as 
+
+εp0q :“
+
+››› rCp0q ´ Cp0q
+
+›››2
+
+,
+
+which measures the fidelity of the noisy source matrix rCp0q to the true source matrix Cp0q; smaller values correspond to a more accurate source. We are now ready to state the error upper bound for the SMART estimator. 
+
+Theorem 4.6 (Error upper bound for SMART) . Assume that Assumptions 2.1–4.4 and the initialization condition (9) hold. Fix truncation levels ru and rv , and an error tolerance 0 ă δ ă 1. Assume further that sample size n is sufficiently large so that 
+
+R2,n ď τ
+
+18 ?5 ¨ d˚
+
+> r
+
+?r ¨
+
+ˆ d˚
+
+> r
+
+d˚
+
+> 1
+
+˙3{2
+
+, (12) 
+
+R21,n À αmax η2
+
+> r
+
+␣rpru ` rv ` 1q ` supruq ` sv prv q( ¨ log p12 r max pp, q q{ δq
+
+log p , (13) 
+
+and 
+
+9c2η2 
+
+> r
+
+R22,n 
+
+2αmax d2min 
+
+«
+
+tr pΣq ` c1 max 
+
+#b tr pΣ2q log p6p{δq 
+
+> c2
+
+, αmax log p6p{δq
+
+> c2
+
++ff 
+
+ď log ` 12 pr δ
+
+˘ (14) 
+
+for universal constants c, c 1, c 2 ą 0. Set the regularization parameters as 
+
+λu “ 8?2 ¨
+
+c να max log p12 pr {δq
+
+n , λv “ 2?2 ¨
+
+c να max log p6qr {δq
+
+n . (15) 
+
+Then the estimation error of SMART satisfies that with probability at least 1 ´ δ,
+
+››› p∆
+
+›››F
+
+À ?αmax ηr ¨
+
+d `rpru ` rv ` 1q ` supruq ` sv prv q˘ ¨ log p12 r max pp, q q{ δq
+
+n
+
+` α1{4max pd˚ 
+
+> 1
+
+q1{2 εsource ¨
+
+ˆ log p12 r max pp, q q{ δq
+
+n
+
+˙1{4
+
+, (16) 
+
+where the source error εsource is given by 
+
+εsource “
+
+«
+
+r␣pr˚ 
+
+> u
+
+´ ruq` ` p r˚ 
+
+> v
+
+´ rv q`
+
+( ´ `supruq ` sv prv q˘ff 1{2
+
+¨
+
+´
+
+εp0q
+
+¯1{2 ´
+
+2dp0q 
+
+> 1
+
+` εp0q
+
+¯1{2
+
+` ?r ¨
+
+«
+
+pr˚ 
+
+> u
+
+q1{4ap ´ max pr˚ 
+
+> u
+
+, r uq ` p r˚ 
+
+> v
+
+q1{4aq ´ max pr˚ 
+
+> v
+
+, r v q
+
+ff 1{2
+
+ˆ
+
+´
+
+εp0q
+
+¯1{4 ´
+
+2dp0q 
+
+> 1
+
+` εp0q
+
+¯1{4
+
+,
+
+(17) 
+
+and ptq` “ max tt, 0u denotes the positive part. 
+
+The proof of Theorem 4.6 is provided in Section E.2. The upper bound in (16) above has two components. The first term, which attains a parametric rate, reflects the estimation error in the ideal setting when the source matrix is perfectly clean (i.e., εp0q “ 0). The factor rpru ` rv ` 1q ` supruq ` sv prv q corresponds to the effective degrees of freedom of the model. To see this, let us consider the decomposition 
+
+U˚ “ Uspruq
+
+”
+
+pUspruqq J U˚
+
+ılooooooooomooooooooon 
+
+> Pu
+> 1
+
+`Us
+
+> K
+
+pruq
+
+”
+
+pUs
+
+> K
+
+pruqq J U˚
+
+ılooooooooomooooooooon 
+
+> Pu
+> 2
+
+.
+
+11 Here, Pu 
+
+> 1
+
+P Rruˆr contributes rr u parameters. For Pu 
+
+> 2
+
+, the ℓ1-penalty in (3) encourages sparsity, so only supruq nonzero entries need to be estimated. Thus, recovering U˚ requires rr u ` supruq parameters. Applying the same argument to V˚ yields rr v ` sv prv q parameters, and estimating D˚ contributes an additional r degrees of freedom. Altogether, the model involves rpru ` rv ` 1q ` supruq ` sv prv q parameters. The second term in (16) accounts for the approximation error caused by noise in the source matrix 
+
+rCp0q, scaled by α1{4max . If the source is noise-free (i.e., εp0q “ 0), then the approximation error εsource is zero and this term vanishes. Conversely, when εp0q is large, εsource increases, indicating stronger misalignment between the noisy source directions and the true target signal. Furthermore, when ru ě r˚ 
+
+> u
+
+and rv ě r˚ 
+
+> v
+
+—the minimal truncation levels specified in (5) —the first component of εsource in (17) becomes zero. Because the second component grows more slowly with εp0q, enlarging ru and rv beyond these thresholds can significantly mitigate the approximation error. The structural parameters pru, r v q govern the trade-off between estimation and approximation errors. Since rr u ` supruq and rr v ` sv prv q are non-decreasing in ru and rv , larger values expand the unpenalized subspace, thereby increasing estimation error through higher model complexity while reducing approximation error by allowing the estimator to avoid noisy source directions. When the source is clean and its singular vectors are reliable, the optimal choice is often ru “ rv “ 0, allowing the estimator to exploit the source spectral structure most aggressively. With moderate source noise, intermediate values of pru, r v q balance these two effects by retaining informative directions while discarding noisy ones. In the extreme case of a heavily contaminated source, setting ru “ p and rv “ q removes the regularization terms entirely, reducing the procedure to a target-only model and avoiding negative transfer from unreliable source information. 
+
+## 4.3 Minimax lower bound 
+
+In this section, we derive a minimax lower bound on the expected squared Frobenius risk for multi-task learning with spectral transfer, focusing on an idealized setting where the source matrix Cp0q is observed noiselessly, i.e., εp0q “ 0.We begin by specifying the parameter space of interest. Guided by the spectral containment condition (Assumption 2.1) and the projection sparsity notion in (2) , we define the admissible sets for U˚ and V˚ as 
+
+U :“
+
+!
+
+U P Rpˆr : UJU “ Ir , col pUq Ď col pUp0qq, ˇˇUJUp0qˇˇ0 ď s˚
+
+> u
+
+)
+
+,
+
+V :“
+
+!
+
+V P Rqˆr : VJV “ Ir , col pVq Ď col pVp0qq, ˇˇVJVp0qˇˇ0 ď s˚
+
+> v
+
+)
+
+,
+
+respectively. Further, assume that the singular values of C˚ are uniformly bounded away from zero and satisfy the spectral gap condition (Assumption 4.3). The parameter space for D˚ is defined as 
+
+D :“
+
+!
+
+D “ diag pd1, . . . , d r q :0 ă c ď dr ă ¨ ¨ ¨ ă d1 ď γc ă 8 ,d2 
+
+> j´1
+
+´ d2 
+
+> j
+
+ě τ d 2 
+
+> j´1
+
+for all 2 ď j ď r
+
+)
+
+,
+
+(18) where γ ą 1 is a uniform upper bound on the condition number and 0 ă τ ă 1 is a universal constant. Finally, we define the parameter space for the target coefficient matrix as 
+
+C :“
+
+!
+
+C P Rpˆq : C “ UDV J, U P U, D P D, V P V
+
+)
+
+. (19) In the subsequent technical analysis, we treat the design matrix X as fixed and assume that it satisfies Assumption 4.2. For simplicity, we also assume that the entries of the noise matrix E are i.i.d. Gaussian with mean zero and variance σ2.We are now ready to present the second main result, which establishes a minimax lower bound for estimating C˚ under the squared Frobenius loss. 
+
+Theorem 4.7 (Minimax lower bound) . Consider the multi-task linear regression model in (1) , with the parameter space C defined in (19) . Assume that min ps˚
+
+> u
+
+, s ˚ 
+
+> v
+
+q ě rpr ` 1q and r0 ě 4r ` 1. In addition, assume 
+
+12 that ´
+
+ps˚ 
+
+> u
+
+^ tr0{2uq ´ r
+
+¯
+
+log 
+
+ˆ r0 ´ r
+
+ps˚ 
+
+> u
+
+^ tr0{2uq ´ r
+
+˙
+
+ě 4 log 2 
+
+c ,
+
+´
+
+ps˚ 
+
+> v
+
+^ tr0{2uq ´ r
+
+¯
+
+log 
+
+ˆ r0 ´ r
+
+ps˚ 
+
+> v
+
+^ tr0{2uq ´ r
+
+˙
+
+ě 4 log 2 
+
+c ,
+
+(20) 
+
+where c ą 0 is a universal constant. If sample size n is sufficiently large such that 
+
+n ě
+
+ˆ σ2ps˚ 
+
+> u
+
+_ s˚ 
+
+> v
+
+q
+
+γ2c2ν
+
+˙
+
+_
+
+ˆ cσ 2
+
+8c2ν
+
+´
+
+ps˚ 
+
+> u
+
+^ tr0{2uq ´ r
+
+¯
+
+log 
+
+ˆ r0 ´ r
+
+ps˚ 
+
+> u
+
+^ tr0{2uq ´ r
+
+˙˙ 
+
+_
+
+ˆ cσ 2
+
+8c2ν
+
+´
+
+ps˚ 
+
+> v
+
+^ tr0{2uq ´ r
+
+¯
+
+log 
+
+ˆ r0 ´ r
+
+ps˚ 
+
+> v
+
+^ tr0{2uq ´ r
+
+˙˙ 
+
+, (21) 
+
+the minimax expected squared Frobenius risk satisfies that 
+
+inf 
+
+> pC
+
+sup 
+
+> CPC
+
+EC
+
+››› pC ´ C
+
+›››2F
+
+Á σ2ps˚ 
+
+> u
+
+` s˚ 
+
+> v
+
+q
+
+γ2n ` σ2
+
+ˆ s˚ 
+
+> u
+
+^ tr0{2u
+
+n log 
+
+ˆ 0.75 r0
+
+s˚ 
+
+> u
+
+^ tr0{2u
+
+˙
+
+` s˚ 
+
+> v
+
+^ tr0{2u
+
+n log 
+
+ˆ 0.75 r0
+
+s˚ 
+
+> v
+
+^ tr0{2u
+
+˙˙ 
+
+, (22) 
+
+where EC denotes expectation under model (1) with coefficient matrix C.
+
+The proof of Theorem 4.7 is included in Appendix F. Theorem 4.7 above is established using a combination of local metric entropy arguments, adapted from Cai et al. (2013) (see Lemma F.5 in the Appendix), and the classical Fano method. A key ingredient is a new result establishing both upper and lower bounds for the δ-covering number of the Stiefel manifold under the Frobenius norm, extending earlier results for the Grassmann manifold (Szarek, 1982) (see Lemma F.3). We conclude with the following remark on Theorem 4.7. 
+
+Remark 4.8 . Comparing the lower bound in (22) to the high-probability upper bound in (16) , we see that the two results match up to logarithmic factors in the noiseless-source regime when γ is treated as a universal constant. To compare the two bounds directly, let us specialize the upper bound to the isotropic noise setting of Σ “ σ2Iq assumed in this subsection. Indeed, if γ “ Op1q, the spectral gap condition in (18) entails that r “ Op1q, since 
+
+c2τ r ď τ
+
+> r
+
+ÿ
+
+> j“1
+
+d2 
+
+> j
+
+ď
+
+> r
+
+ÿ
+
+> j“2
+
+pd2 
+
+> j´1
+
+´ d2 
+
+> j
+
+q ` d2 
+
+> r
+
+“ d21 ď c2γ2,
+
+which implies that r ď γ2{τ “ Op1q. Consequently, with ru “ rv “ 0 (so s˚ 
+
+> u
+
+“ sup0q and s˚ 
+
+> v
+
+“ sv p0q), the upper bound (16) entails that the SMART estimator pC satisfies that with probability at least 1 ´ δ,
+
+››› pC ´ C˚
+
+›››2F
+
+À σ2ps˚ 
+
+> u
+
+` s˚ 
+
+> v
+
+q log `c max pp, q q{ δ˘
+
+n
+
+for some universal constant c, whereas the lower bound (22) yields that 
+
+inf 
+
+> pC
+
+sup 
+
+> CPC
+
+EC
+
+››› pC ´ C
+
+›››2F
+
+Á σ2ps˚ 
+
+> u
+
+` s˚ 
+
+> v
+
+q
+
+n .
+
+Hence, in the noiseless-source regime, the upper and lower bounds agree up to logarithmic factors in their dependence on n, s˚
+
+> u
+
+, and s˚ 
+
+> v
+
+.13 5 Simulation examples 
+
+In this section, we evaluate the empirical performance of the suggested SMART algorithm through a series of simulation examples. We compare its estimation accuracy to several baseline methods under varying conditions, including different sample sizes, fitted ranks, source truncation levels, and source quality. Recall that n denotes the number of observations, p the number of input features, and q the number of output responses. Let r be the rank of the true target coefficient matrix C˚, and r0 the rank of the source coefficient matrix Cp0q, with r ď r0. The rank of an estimator pC is denoted as pr. To measure the estimation accuracy, we report the normalized Frobenius error of the estimated coefficient matrix pC “ pU pD pVJ, defined as 1?pq 
+
+››› pC ´ C˚
+
+›››F
+
+.
+
+## 5.1 Data generating process 
+
+We simulate data according to the following procedure: 1) Source regression coefficient matrix: We generate two random matrices U1 P Rpˆr0 and 
+
+V1 P Rqˆr0 with i.i.d. standard normal entries, and orthonormalize their columns via the QR decomposition to obtain Up0q and Vp0q. We then construct a diagonal matrix Dp0q P Rr0ˆr0 with singular values linearly spaced between 1.0 and 10.0 in decreasing order. The clean source regression coefficient matrix is defined as 
+
+Cp0q “ Up0qDp0qVp0qJ .
+
+To model imperfect source knowledge, we add Gaussian noise 
+
+rCp0q “ Cp0q ` Ep0q, Ep0q 
+
+> ij
+
+„ N p0, σ 20 q i.i.d. The noise level σ0 controls the fidelity of the source: smaller values correspond to a higher-quality source, and σ0 “ 0 corresponds to the noiseless case. 2) Feature matrix: The input feature matrix X P Rnˆp has i.i.d. rows drawn from a multivariate normal distribution Npp0, Σxq, where the covariance matrix Σx P Rpˆp has entries pΣxqij “ 0.5|i´j|.3) Target regression coefficient matrix: To construct the target coefficient matrix C˚, we randomly select r columns from both Up0q and Vp0q without replacement, forming U˚ P Rpˆr and V˚ P Rqˆr .We then generate a diagonal matrix D˚ P Rrˆr with values linearly spaced between 3.0 and 5.0 in decreasing order. The target regression coefficient matrix is C˚ “ U˚D˚V˚J . This construction ensures that in the noiseless-source setting, the spectral containment condition holds exactly and that the target singular vectors are sparse in the source singular bases. 4) Response matrix: Finally, the response matrix Y P Rnˆq is generated according to the multivariate linear model 
+
+Y “ XC ˚ ` E with Eij „ N p0, σ 2q i.i.d. The noise standard deviation is fixed at σ “ 0.5 for all experiments. 
+
+## 5.2 Experimental design 
+
+We evaluate the performance of SMART across multiple simulation settings with varying problem dimensions. Specifically, we consider the following three configurations: 
+
+• Model I: p “ 100 , q “ 50 ;
+
+• Model II: p “ 150 , q “ 100 ;
+
+• Model III: p “ 300 , q “ 200 .To assess SMART under different conditions, we conduct four experiments. In each experiment, we vary one key parameter while holding the others fixed at their default values. The default settings are: sample 14 200 400 600 800 1000   
+
+> n
+> 0.00
+> 0.50
+> 1.00
+> 1.50
+> 2.00
+> 2.50
+> 3.00
+> 3.50
+> 4.00
+> Average Frobenius Norm Error  ×10 2
+
+Experiment 1             
+
+> 12345678910 11
+> r
+> 0.00
+> 2.00
+> 4.00
+> 6.00
+> 8.00
+> 10.00
+> 12.00
+> Average Frobenius Norm Error  ×10 2
+
+Experiment 2             
+
+> 0246810 12 14 16 18 20
+> rs
+> 0.50
+> 1.00
+> 1.50
+> 2.00
+> 2.50
+> 3.00
+> 3.50
+> 4.00
+> Average Frobenius Norm Error  ×10 2
+
+Experiment 3        
+
+> 0.0 0.1 0.2 0.3 0.4 0.5
+> 0
+> 0.00
+> 0.50
+> 1.00
+> 1.50
+> 2.00
+> 2.50
+> 3.00
+> 3.50
+> 4.00
+> Average Frobenius Norm Error  ×10 2
+
+Experiment 4 
+
+Model-I (p=100 q=50)      
+
+> RRR SRRR SOFAR RSSVD SMART (fixed ranks) SMART
+
+Figure 1: Simulation results for Model I. 
+
+size n “ 200 , estimated rank pr “ 5, source subspace ranks ru “ rv “ 10 , and source noise level σ0 “ 0.01 .For all models, we fix r0 “ 10 and r “ 5. Each configuration is repeated 100 times to compute the averages and standard errors. 1) Experiment 1: Vary the sample size n, while keeping pr, ru, rv , and σ0 fixed. 2) Experiment 2: Vary the estimated rank pr, with n, ru, rv , and σ0 held constant. 3) Experiment 3: Let ru “ rv “ rs and vary rs, keeping n, pr, and σ0 fixed. 4) Experiment 4: Vary the source noise level σ0, with pr, ru, and rv fixed. In these experiments, the hyperparameters ppr, r u, r v q for SMART are either fixed or selected automatically. For the fixed-rank variant, we set ppr, r u, r v q manually and tune pλu, λ v q using the BIC criterion in Section 3.2; we denote this method as SMART (fixed ranks) . The fully automated version of SMART jointly selects 
+
+ppr, r u, r v , λ u, λ v q using the strategy in Section 3.2, and we denote it simply as SMART . In Experiments 2 and 3, the horizontal axis varies only the externally imposed fixed-rank specification. We therefore depict the performance of fully automatic SMART as a horizontal reference line evaluated under the corresponding default configuration for each model. 
+
+## 5.3 Baseline methods 
+
+We compare the suggested SMART algorithm to the following state-of-the-art low-rank regression methods: 
+
+• RRR. An adaptive low-rank regression method that extends traditional reduced-rank regression by employing adaptive nuclear-norm penalization (Chen et al., 2013). 
+
+• SRRR. Incorporates group Lasso penalties into reduced-rank regression, enabling simultaneous dimension reduction and variable selection (Chen and Huang, 2012). 15 300 500 700 1000 1200   
+
+> n
+> 0.25
+> 0.50
+> 0.75
+> 1.00
+> 1.25
+> 1.50
+> 1.75
+> 2.00
+> 2.25
+> Average Frobenius Norm Error  ×10 2
+
+Experiment 1             
+
+> 12345678910 11
+> r
+> 0.00
+> 1.00
+> 2.00
+> 3.00
+> 4.00
+> 5.00
+> 6.00
+> 7.00
+> Average Frobenius Norm Error  ×10 2
+
+Experiment 2             
+
+> 0246810 12 14 16 18 20
+> rs
+> 0.25
+> 0.50
+> 0.75
+> 1.00
+> 1.25
+> 1.50
+> 1.75
+> 2.00
+> 2.25
+> Average Frobenius Norm Error  ×10 2
+
+Experiment 3        
+
+> 0.0 0.1 0.2 0.3 0.4 0.5
+> 0
+> 0.00
+> 0.25
+> 0.50
+> 0.75
+> 1.00
+> 1.25
+> 1.50
+> 1.75
+> 2.00
+> 2.25
+> Average Frobenius Norm Error  ×10 2
+
+Experiment 4 
+
+Model-II (p=150 q=100)      
+
+> RRR SRRR SOFAR RSSVD SMART (fixed ranks) SMART
+
+Figure 2: Simulation results for Model II. 
+
+• SOFAR. Enforces two-way sparsity on singular vectors by solving a regularized optimization problem with orthogonality constraints (Uematsu et al., 2019). 
+
+• RSSVD. A layer-wise estimation method that applies adaptive penalties to individual rank-one components (Mukherjee and Zhu, 2011; Mukherjee et al., 2015). All baseline methods use only the target data and ignore the source information. Comparing SMART against them highlights the benefit of transfer learning. Their performance is unaffected by the source truncation level rs and the source noise level σ0. Accordingly, in Experiments 3 and 4 we present their results as horizontal reference lines evaluated under the corresponding default configuration. 
+
+## 5.4 Simulation results 
+
+Figures 1–3 present the simulation results for Models I–III. Across all experiments, SMART consistently outperforms the baseline methods. In Experiments 2 and 3, the fixed-rank version shows strong robustness to the choice of hyperparameters ppr, r u, r v q. Experiment 4 further demonstrates that the fully data-driven SMART, which selects ppr, r u, r v q via the strategy in Section 3.2, never underperforms relative to target-only methods. When the source matrix is accurate (low noise), SMART yields substantial gains over the baseline methods; when the source is highly contaminated, SMART automatically downweights or discards unreliable source information and matches the target-only performance. Overall, SMART is robust to the source quality and effectively avoids negative transfer. 
+
+# 6 Application to multi-modal single-cell dataset 
+
+Data preprocessing. We constructed GEX and ADT matrices from the raw data, which contain 13 ,953 
+
+genes and 134 proteins across 90 ,261 cells. After normalization, filtering, and feature selection, we restricted the analysis to NK and ILC1 cells, yielding 5,434 source cells and 552 target cells. The final predictor 16 500 700 1000 1200 1500   
+
+> n
+> 0.20
+> 0.40
+> 0.60
+> 0.80
+> 1.00
+> 1.20
+> 1.40
+> Average Frobenius Norm Error  ×10 2
+
+Experiment 1             
+
+> 12345678910 11
+> r
+> 0.00
+> 0.50
+> 1.00
+> 1.50
+> 2.00
+> 2.50
+> 3.00
+> 3.50
+> 4.00
+> Average Frobenius Norm Error  ×10 2
+
+Experiment 2             
+
+> 0246810 12 14 16 18 20
+> rs
+> 0.20
+> 0.40
+> 0.60
+> 0.80
+> 1.00
+> 1.20
+> 1.40
+> Average Frobenius Norm Error  ×10 2
+
+Experiment 3        
+
+> 0.0 0.1 0.2 0.3 0.4 0.5
+> 0
+> 0.00
+> 0.20
+> 0.40
+> 0.60
+> 0.80
+> 1.00
+> 1.20
+> 1.40
+> Average Frobenius Norm Error  ×10 2
+
+Experiment 4 
+
+Model-III (p=300 q=200)      
+
+> RRR SRRR SOFAR RSSVD SMART (fixed ranks) SMART
+
+Figure 3: Simulation results for Model III. 
+
+set contains 248 shared gene features, and all 134 ADT markers are retained as responses. Additional preprocessing details are provided in Appendix C. We evaluate SMART on a Multimodal Single-Cell dataset of bone marrow mononuclear cells from 12 healthy donors 1. Each cell contains paired measurements of gene expression (GEX) and protein abundance (ADT). We treat each row of Y as a protein-expression vector and the corresponding row of X as the associated gene-expression profile, and estimate a linear map from GEX to ADT. The above dataset includes cell-type annotations, with substantial imbalance in cell counts across types. Some populations are well sampled, whereas others are rare, making target-only estimation challenging for the latter. Figure 4 in Appendix C depicts the distribution of cell counts across cell types. We focus on transfer from NK cells to ILC1 cells. Specifically, we treat ILC1 (tissue-resident innate lymphoid cells) as the target and NK (circulating natural killer) as the source . Such choice is motivated by both sample size and biological relatedness: ILC1 has n “ 552 cells, whereas NK has n “ 5434 cells, and both belong to the group 1 innate lymphoid cells that share key transcription factors (e.g., T-bet) and cytokines (e.g., IFN-γ). At the same time, NK cells exhibit broader systemic activity, whereas ILC1s are locally specialized and functionally constrained (Vivier et al., 2018). Consequently, the regulatory programs of ILC1s are plausibly contained within those of NK cells, which aligns naturally with the spectral containment assumption and motivates the use of NK as the source for transfer learning to ILC1. 
+
+Implementation. For each source estimator (Lasso, Ridge, OLS, RRR, SRRR, RSSVD, SOFAR), we first fit a source matrix rCp0q on the NK data and then use rCp0q as the source input to SMART to obtain a target estimator pC. Table 1 names each SMART variant by its source estimator. We assess performance over 100 random splits of the ILC1 cells (70% training, 30% testing) and, for each split, report  
+
+> 1The dataset was released for the Multimodal Single-Cell Data Integration Challenge at NeurIPS 2021 and is publicly available at https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE194122 .
+
+17 Method Mean SE Median Q1 Q3 
+
+Target-Only Methods 
+
+Target-Only (RRR) 0.410 2.4 ˆ 10 ´2 0.307 0.259 0.478 Target-Only (SRRR) 0.449 3.4 ˆ 10 ´2 0.292 0.227 0.533 Target-Only (RSSVD) 0.464 3.4 ˆ 10 ´2 0.309 0.239 0.489 Target-Only (SOFAR) 0.360 1.8 ˆ 10 ´2 0.297 0.267 0.355 Target-Only (Lasso) 0.331 3.0 ˆ 10 ´4 0.331 0.330 0.333 Target-Only (OLS) 0.432 2.0 ˆ 10 ´3 0.428 0.416 0.442 Target-Only (Ridge) 0.336 4.0 ˆ 10 ´4 0.336 0.332 0.338 
+
+Source-Only Methods 
+
+Source-Only (RRR) 0.331 4.0 ˆ 10 ´4 0.331 0.328 0.334 Source-Only (SRRR) 0.332 4.0 ˆ 10 ´4 0.332 0.329 0.334 Source-Only (RSSVD) 0.358 6.0 ˆ 10 ´4 0.358 0.355 0.362 Source-Only (SOFAR) 0.382 4.0 ˆ 10 ´4 0.383 0.380 0.385 Source-Only (Lasso) 0.365 3.0 ˆ 10 ´4 0.365 0.363 0.367 Source-Only (OLS) 0.358 2.0 ˆ 10 ´4 0.358 0.357 0.360 Source-Only (Ridge) 0.361 3.0 ˆ 10 ´4 0.361 0.360 0.363 
+
+SMART Methods 
+
+SMART (Source: RRR) 0.200 3.0 ˆ 10 ´4 0.200 0.198 0.202 SMART (Source: SRRR) 0.200 3.0 ˆ 10 ´4 0.200 0.198 0.202 SMART (Source: RSSVD) 0.203 5.0 ˆ 10 ´4 0.202 0.200 0.204 SMART (Source: SOFAR) 0.211 2.1 ˆ 10 ´3 0.204 0.201 0.215 SMART (Source: Ridge) 0.203 4.0 ˆ 10 ´4 0.203 0.201 0.205 SMART (Source: Lasso) 0.201 5.0 ˆ 10 ´4 0.201 0.199 0.203 SMART (Source: OLS) 0.200 4.0 ˆ 10 ´4 0.200 0.198 0.202       
+
+> Table 1: Summary statistics of the normalized test prediction error pntest qq´1{2}Xtest pC´Ytest }Fover 100 random 70%/30% splits of the ILC1 cells. For SMART, “Source: METHOD” indicates the source estimator used to construct the source regression matrix.
+
+the normalized test prediction error 
+
+1
+
+?ntest q
+
+›››Xtest pC ´ Ytest 
+
+›››F
+
+.
+
+Baseline methods. We compare SMART to source-only and target-only versions of the same seven estimators. Source-only methods fit a regression matrix on NK and apply it directly to ILC1 without target adaptation. Target-only methods are trained only on the ILC1 training sample. All methods are evaluated on the same random splits using the same prediction metric. 
+
+Results. Table 1 reports prediction errors for all methods. SMART consistently attains the lowest errors, with little variability across source initializations. Target-only methods perform worse, reflecting the difficulty of modeling with limited ILC1 data. Source-only methods are stable but suboptimal, underscoring the need for study-specific adaptation. Overall, SMART not only outperforms both baselines in accuracy but also yields the narrowest interquartile ranges, demonstrating strong robustness and generalization. 18 7 Discussions 
+
+We have introduced in this paper SMART , a spectral transfer framework for low-rank multi-task linear regression that leverages the spectral structure of a related source matrix to improve estimation when target sample sizes are limited. By incorporating source spectral information through structured regularization, 
+
+SMART enables effective transfer using only a fitted source regression matrix. We have suggested an ADMM-based algorithm for practical optimization of the resulting nonconvex objective and established non-asymptotic error upper bounds together with a minimax lower bound in the noiseless-source regime. Under some mild regularity conditions, these results imply near-minimax Frobenius rates up to logarithmic factors in that regime. In the simulation examples and the multi-modal single-cell application, SMART 
+
+outperforms the baseline methods and shows robustness to negative transfer. Future works include extensions to the generalized and nonlinear models, inference procedures, and theoretically grounded data-adaptive selection of structural and regularization parameters. 19 References 
+
+Theodore Wilbur Anderson. Estimating linear restrictions on regression coefficients for multivariate normal distributions. The Annals of Mathematical Statistics , pages 327–351, 1951. Florentina Bunea, Yiyuan She, and Marten H Wegkamp. Optimal selection of reduced rank estimators of high-dimensional matrices. The Annals of Statistics , pages 1282–1309, 2011. Florentina Bunea, Yiyuan She, and Marten H. Wegkamp. Joint variable and rank selection for parsimonious estimation of high-dimensional matrices. The Annals of Statistics , 40(5):2359–2388, 2012. T Tony Cai, Zongming Ma, and Yihong Wu. Sparse PCA: optimal rates and adaptive estimation. The Annals of Statistics , 41(237):3074–3110, 2013. T Tony Cai, Dongwoo Kim, and Hongming Pu. Transfer learning for functional mean estimation: phase transition and adaptive algorithms. The Annals of Statistics , 52(2):654–678, 2024. Rich Caruana. Multitask learning. Machine Learning , 28:41–75, 1997. Kun Chen, Hongbo Dong, and Kung-Sik Chan. Reduced rank regression via adaptive nuclear norm penalization. Biometrika , 100(4):901–920, 2013. Lisha Chen and Jianhua Z Huang. Sparse reduced-rank regression for simultaneous dimension reduction and variable selection. Journal of the American Statistical Association , 107(500):1533–1545, 2012. Tian Gu, Yi Han, and Rui Duan. Robust angle-based transfer learning in high dimensions. Journal of the Royal Statistical Society Series B: Statistical Methodology , 87(3):723–745, 2025. Yong He, Zeyu Li, Dong Liu, Kangxiang Qin, and Jiahui Xie. Representational transfer learning for matrix completion. arXiv preprint arXiv:2412.06233 , 2024. Alan Julian Izenman. Reduced-rank regression for the multivariate linear model. Journal of Multivariate Analysis , 5(2):248–264, 1975. Ali Jalali, Sujay Sanghavi, Chao Ruan, and Pradeep Ravikumar. A dirty model for multi-task learning. 
+
+Advances in Neural Information Processing Systems , 23, 2010. Sai Li, T Tony Cai, and Hongzhe Li. Transfer learning for high-dimensional linear regression: prediction, estimation and minimax optimality. Journal of the Royal Statistical Society Series B , 84(1):149–173, 2022. Sai Li, Linjun Zhang, T Tony Cai, and Hongzhe Li. Estimation and inference for high-dimensional generalized linear models with knowledge transfer. Journal of the American Statistical Association , 0(0):1–12, 2023. Malte Luecken, Daniel Burkhardt, Robrecht Cannoodt, Christopher Lance, Aditi Agrawal, Hananeh Aliee, Ann Chen, Louise Deconinck, Angela Detweiler, Alejandro Granados, Shelly Huynh, Laura Isacco, Yang Kim, Dominik Klein, BONY DE KUMAR, Sunil Kuppasani, Heiko Lickert, Aaron McGeever, Joaquin Melgarejo, Honey Mekonen, Maurizio Morri, Michaela Müller, Norma Neff, Sheryl Paul, Bastian Rieck, Kaylie Schneider, Scott Steelman, Michael Sterr, Daniel Treacy, Alexander Tong, Alexandra-Chloe Villani, Guilin Wang, Jia Yan, Ce Zhang, Angela Pisco, Smita Krishnaswamy, Fabian Theis, and Jonathan M Bloom. A sandbox for prediction and integration of DNA, RNA, and proteins in single cells. In Neural Information Processing Systems Track on Datasets and Benchmarks , 2021. Zhuang Ma, Zongming Ma, and Tingni Sun. Adaptive estimation in two-way sparse reduced-rank regression. 
+
+Statistica Sinica , 30(4):2179–2201, 2020. Ashin Mukherjee and Ji Zhu. Reduced rank ridge regression and its kernel extensions. Statistical Analysis and Data Mining , 4(6):612–622, 2011. 20 Ashin Mukherjee, Kun Chen, Naisyin Wang, and Ji Zhu. On the degrees of freedom of reduced-rank estimators in multivariate regression. Biometrika , 102(2):457–477, 2015. Sinno Jialin Pan and Qiang Yang. A survey on transfer learning. IEEE Transactions on Knowledge and Data Engineering , 22(10):1345–1359, 2009. Seyoung Park, Eun Ryung Lee, Hyunjin Kim, and Hongyu Zhao. Transfer learning under large-scale low-rank regression models. Journal of the American Statistical Association , pages 1–13, 2025. Nan Qiao, Haowei Jiang, and Cunjie Lin. Rank-based transfer learning for high-dimensional survival data with application to sepsis data. arXiv preprint arXiv:2504.11270 , 2025. Y. Shen and J. Lv. Sharp concentration inequalities: phase transition and mixing of Orlicz tails with variance. arXiv preprint arXiv:2603.25934 , 2026. Stanislaw J Szarek. Nets of Grassmann manifold and orthogonal group. In Proceedings of Research Workshop on Banach Space Theory , volume 169, page 185, 1982. Xin Tang, Jiawei Zhang, Yichun He, Xinhe Zhang, Zuwan Lin, Sebastian Partarrieu, Emma Bou Hanna, Zhaolin Ren, Hao Shen, Yuhong Yang, et al. Explainable multi-task learning for multi-modality biological data analysis. Nature Communications , 14(1):2546, 2023. Yoshimasa Uematsu, Yingying Fan, Kun Chen, Jinchi Lv, and Wei Lin. SOFAR: large-scale association network learning. IEEE Transactions on Information Theory , 65(8):4924–4939, 2019. Eric Vivier, David Artis, Marco Colonna, Andreas Diefenbach, James P Di Santo, Gérard Eberl, Shigeo Koyasu, Richard M Locksley, Andrew NJ McKenzie, Reina E Mebius, et al. Innate lymphoid cells: 10 years on. Cell , 174(5):1054–1066, 2018. Martin J Wainwright. High-Dimensional Statistics: A Non-Asymptotic Viewpoint , volume 48. Cambridge University Press, 2019. Ming Yuan, Ali Ekici, Zhaosong Lu, and Renato Monteiro. Dimension reduction and coefficient estimation in multivariate linear regression. Journal of the Royal Statistical Society Series B , 69(3):329–346, 2007. Yu Zhang and Qiang Yang. A survey on multi-task learning. IEEE Transactions on Knowledge and Data Engineering , 34(12):5586–5609, 2021. Boxin Zhao, Cong Ma, and Mladen Kolar. Trans-glasso: A transfer learning approach to precision matrix estimation. Journal of the American Statistical Association , pages 1–21, 2025. 21 A Comparison with Park et al. (2025) 
+
+In this section, we present a simple example to highlight the difference between our spectral similarity assumptions and the nuclear-norm-based assumption of Park et al. (2025). For clarity of exposition, we restrict attention here to the setting with a single source. Denote by C˚ P Rpˆq the target coefficient matrix, and Cp0q P Rpˆq a source coefficient matrix. We begin by defining the contrast 
+
+∆p0q :“ Cp0q ´ C˚.
+
+In Park et al. (2025), the key similarity requirement for an informative source is a bounded nuclear-norm contrast condition of the form 
+
+}∆p0q}˚ ď hn, (23) where hn is sufficiently small relative to the sample size and the problem dimensions. In effect, Condition (23) above requires the total singular-value mass of the difference between Cp0q and C˚ to remain uniformly bounded, thereby enforcing global similarity in both singular directions and effect magnitude across domains. In contrast, our framework (see Assumptions 2.1–2.2 in Section 2) postulates a structured spectral linkage between the target and source. Specifically, we assume that the dominant singular subspaces of the target coefficient matrix are nested within those of the source, and that the associated singular vectors align sparsely when represented in the source’s singular basis. Collectively, these requirements imply that the target signal is concentrated within a low-dimensional set of modules already extracted from the source, while still permitting the singular values—and thus the effect sizes—to vary freely along these shared directions. 
+
+A simple separating example. To make the distinction concrete, let us consider the case of p “ q “ 2
+
+with 
+
+Cp0q “
+
+ˆ2 00 1
+
+˙
+
+, C˚ “
+
+ˆM 00 0
+
+˙
+
+“ M e1eJ 
+
+> 1
+
+,
+
+where M ą 0 may depend on n, and te1, e2u denotes the standard basis of R2.
+
+(i) Our spectral assumptions hold. First, note that the target matrix C˚ has rank one with singular vectors 
+
+pU˚, V˚q “ p e1, e1q, whereas the source matrix Cp0q has singular vectors pUp0q, Vp0qq “ pr e1, e2s, re1, e2sq .Then it follows that 
+
+col pU˚q “ span te1u Ď span te1, e2u “ col pUp0qq,
+
+col pV˚q “ span te1u Ď span te1, e2u “ col pVp0qq,
+
+so Assumption 2.1 holds exactly. Moreover, the alignment is maximally sparse: the target singular directions coincide with individual source directions, which is precisely the sparse alignment pattern encoded by Assumption 2.2. 
+
+(ii) The nuclear-norm contrast condition fails. In contrast, the nuclear-norm condition breaks down in this same example. Indeed, the source-target contrast is given by 
+
+∆p0q “ Cp0q ´ C˚ “
+
+ˆ2 ´ M 00 1
+
+˙
+
+,
+
+whose singular values are ˇˇ2 ´ M ˇˇ and 1. Hence, we have that 
+
+}∆p0q}˚ “ ˇˇ2 ´ M ˇˇ ` 1.
+
+If we take M to be large—for instance, M — nα for some α ą 0—then }∆p0q}˚ can grow without bound. As a result, Condition (23) cannot be satisfied with a “small” hn. Hence, this choice violates the bounded nuclear-norm contrast condition in Park et al. (2025), despite the fact that the target signal lies entirely within, and is perfectly aligned with, the singular subspace of the source. 
+
+Practical interpretation. More broadly, this example reflects a common pattern in biomedical applications. One may view Cp0q as encoding two functional modules, such as pathways or protein complexes, under a 22 baseline condition, with both modules exhibiting moderate effect sizes. The target matrix C˚ then represents a new condition, such as a particular tissue type or treatment, in which one module (corresponding to 
+
+e1) is strongly up-regulated through a large value of M , while the other is suppressed. The underlying module structure—namely, the singular subspace spanned by e1—is perfectly shared between the source and target, so our spectral containment assumption is natural in this setting. At the same time, the large change in effect magnitude along that shared direction inflates the nuclear-norm contrast and causes the bounded-difference condition (23) to fail. In this sense, our assumptions are better suited to settings with conserved low-dimensional structure but substantial, interpretable shifts in effect sizes, a regime in which nuclear-norm-based similarity can be unnecessarily restrictive. 
+
+# B Optimization algorithm details 
+
+In this section, we will provide additional details for solving the SMART objective (3) . Throughout the section, we abbreviate rUs
+
+> K
+
+pruq and rVs
+
+> K
+
+prv q as rUs 
+
+> K
+
+and rVs
+
+> K
+
+, respectively. With such notation in place, the resulting ADMM-type procedure is summarized in Algorithm 1. In particular, the U- and V-blocks are updated numerically on the Stiefel manifold , while the D-, Ωu-, and Ωv -blocks admit closed-form updates. When ru “ p or rv “ q, the corresponding complementary basis has zero rows, so the associated Ω- and 
+
+Γ-blocks are omitted. With that convention fixed, we now describe each block update in turn. We begin with the U-update, which is equivalent to 
+
+Upt`1q Ð arg min 
+
+> U
+
+" 12n
+
+›››XUD ptq
+
+›››2F ` ρptq
+
+2
+
+››› rUsJK UD ptq
+
+›››2F ` tr 
+
+´
+
+UJBptq
+
+> u
+
+¯*
+
+s.t. UJU “ Ir ,
+
+where 
+
+Bptq 
+
+> u
+
+“ rUs
+
+> K
+
+Γptq 
+
+> u
+
+Dptq ´ 1
+
+n XJYV ptqDptq ´ ρptq rUs
+
+> K
+
+Ωptq 
+
+> u
+
+Dptq.
+
+This is a smooth quadratic program on the Stiefel manifold, and we solve it approximately using the Riemannian conjugate gradient method implemented in Pymanopt (Townsend et al., 2016). Next, let us consider the V-update. After expanding the loss and using VJV “ Ir , term }XU pt`1qDptqVJ}2F
+
+is constant with respect to V. Accordingly, the subproblem reduces to 
+
+Vpt`1q Ð arg min 
+
+> V
+
+" ρptq
+
+2
+
+››› rVsJK VD ptq
+
+›››2F ` tr 
+
+´
+
+VJBptq
+
+> v
+
+¯*
+
+s.t. VJV “ Ir ,
+
+where 
+
+Bptq 
+
+> v
+
+“ rVs
+
+> K
+
+Γptq 
+
+> v
+
+Dptq ´ 1
+
+n YJXU pt`1qDptq ´ ρptq rVs
+
+> K
+
+Ωptq 
+
+> v
+
+Dptq.
+
+As in the previous step, this problem can be solved numerically with Pymanopt .We now turn to the D-update. Denote by 
+
+rΩu :“ Ωptq 
+
+> u
+
+´ ρptq´1
+
+Γptq 
+
+> u
+
+, rΩv :“ Ωptq 
+
+> v
+
+´ ρptq´1
+
+Γptq 
+
+> v
+
+.
+
+Then the subproblem becomes 
+
+Dpt`1q Ð arg min   
+
+> D“diag pd1,...,d rq, d kě0
+
+! 12n
+
+›››Y ´ XU pt`1qDV pt`1qJ 
+
+›››2F
+
+` ρptq
+
+2
+
+››› rUsJK Upt`1qD ´ rΩu
+
+›››2F
+
+` ρptq
+
+2
+
+››› rVsJK Vpt`1qD ´ rΩv
+
+›››2F
+
+)
+
+.
+
+23 Algorithm 1 SMART algorithm 
+
+1: Input: target rank r; structural ranks ru, rv ; regularization parameters λu, λv ; complementary source bases 
+
+rUs
+
+> K
+
+, rVs
+
+> K
+
+; penalty scaling factor γ ą 1; maximum number of iterations tmax .
+
+2: Initialize: primal variables Up0q, Dp0q, Vp0q; auxiliary variables Ωp0q 
+
+> u
+
+, Ωp0q 
+
+> v
+
+; dual variables Γp0q 
+
+> u
+
+, Γp0q 
+
+> v
+
+; penalty parameter ρp0q; iteration counter t Ð 0.
+
+3: while stopping criteria not met and t ă tmax do 
+
+4: Update U:
+
+Upt`1q Ð arg min 
+
+> U:UJU“Ir
+
+#
+
+12n
+
+›››Y ´ XUD ptqVptqJ 
+
+›››2F
+
+`
+
+A
+
+Γptq 
+
+> u
+
+, rUsJK UD ptq ´ Ωptq
+
+> u
+
+E
+
+` ρptq
+
+2
+
+››› rUsJK UD ptq ´ Ωptq
+
+> u
+
+›››2F
+
++
+
+.
+
+5: Update V:
+
+Vpt`1q Ð arg min 
+
+> V:VJV“Ir
+
+#
+
+12n
+
+›››Y ´ XU pt`1qDptqVJ
+
+›››2F
+
+`
+
+A
+
+Γptq 
+
+> v
+
+, rVsJK VD ptq ´ Ωptq
+
+> v
+
+E
+
+` ρptq
+
+2
+
+››› rVsJK VD ptq ´ Ωptq
+
+> v
+
+›››2F
+
++
+
+.
+
+6: Update D:
+
+Dpt`1q Ð arg min   
+
+> D“diag pd1,...,d rq, d kě0
+
+#
+
+12n
+
+›››Y ´ XU pt`1qDV pt`1qJ 
+
+›››2F
+
+`
+
+A
+
+Γptq 
+
+> u
+
+, rUsJK Upt`1qD ´ Ωptq
+
+> u
+
+E
+
+`
+
+A
+
+Γptq 
+
+> v
+
+, rVsJK Vpt`1qD ´ Ωptq
+
+> v
+
+E
+
+` ρptq
+
+2
+
+››› rUsJK Upt`1qD ´ Ωptq
+
+> u
+
+›››2F
+
+` ρptq
+
+2
+
+››› rVsJK Vpt`1qD ´ Ωptq
+
+> v
+
+›››2F
+
++
+
+.
+
+7: Update Ωu:
+
+Ωpt`1q 
+
+> u
+
+Ð arg min 
+
+> Ωu
+
+" ρptq
+
+2
+
+›››Ωu ´ rUsJK Upt`1qDpt`1q
+
+›››2F
+
+´
+
+A
+
+Γptq 
+
+> u
+
+, Ωu
+
+E
+
+` λu |Ωu|1
+
+*
+
+.
+
+8: Update Ωv :
+
+Ωpt`1q 
+
+> v
+
+Ð arg min 
+
+> Ωv
+
+" ρptq
+
+2
+
+›››Ωv ´ rVsJK Vpt`1qDpt`1q
+
+›››2F
+
+´
+
+A
+
+Γptq 
+
+> v
+
+, Ωv
+
+E
+
+` λv |Ωv |1
+
+*
+
+.
+
+9: Update dual variables: 
+
+Γpt`1q 
+
+> u
+
+Ð Γptq 
+
+> u
+
+` ρptq ´ rUsJK Upt`1qDpt`1q ´ Ωpt`1q
+
+> u
+
+¯
+
+,
+
+Γpt`1q 
+
+> v
+
+Ð Γptq 
+
+> v
+
+` ρptq ´ rVsJK Vpt`1qDpt`1q ´ Ωpt`1q
+
+> v
+
+¯
+
+.
+
+10: Update penalty parameter: ρpt`1q Ð γρ ptq.
+
+11: Increment iteration counter: t Ð t ` 1.
+
+12: end while 
+
+13: Output: 
+
+pU Ð Uptq, pV Ð Vptq, pD Ð Dptq, pΩu Ð Ωptq 
+
+> u
+
+, pΩv Ð Ωptq 
+
+> v
+
+, pΓu Ð Γptq 
+
+> u
+
+, pΓv Ð Γptq 
+
+> v
+
+.
+
+24 To obtain a closed-form solution, let us write 
+
+P :“ XU pt`1q “ r p1, . . . , pr s, Q :“ Vpt`1q “ r q1, . . . , qr s,
+
+Au :“ rUsJK Upt`1q “ r au, 1, . . . , au,r s, Av :“ rVsJK Vpt`1q “ r av, 1, . . . , av,r s,
+
+and denote by ˜ωu,k and ˜ωv,k the kth columns of rΩu and rΩv , respectively. Since D is diagonal and Q has orthonormal columns, the objective decouples across d1, . . . , d r . We define 
+
+αk :“ 1
+
+n }pk}22, βk :“ 1
+
+n pJ 
+
+> k
+
+Yq k,γu,k :“ } au,k }22, δu,k :“ aJ 
+
+> u,k
+
+˜ωu,k ,γv,k :“ } av,k }22, δv,k :“ aJ 
+
+> v,k
+
+˜ωv,k .
+
+Then the kth coordinate has objective p1{2qckd2 
+
+> k
+
+´ bkdk, where 
+
+ck :“ αk ` ρptqpγu,k ` γv,k q, bk :“ βk ` ρptqpδu,k ` δv,k q.
+
+Hence, we have that 
+
+dpt`1q 
+
+> k
+
+“
+
+#
+
+max t0, b k{cku, ck ą 0,
+
+0, ck “ 0,
+
+for k “ 1, . . . , r .The Ωu- and Ωv -updates are proximal steps. More precisely, we have that 
+
+Ωpt`1q 
+
+> u
+
+Ð arg min 
+
+> Ωu
+
+" ρptq
+
+2
+
+›››Ωu ´ rUsJK Upt`1qDpt`1q ´ ρptq´1
+
+Γptq
+
+> u
+
+›››2F
+
+` λu|Ωu|1
+
+*
+
+,
+
+whose solution is obtained entrywise by soft-thresholding 
+
+Ωpt`1q 
+
+> u,ij
+
+“ ST λu{ρptq
+
+ˆ” rUsJK Upt`1qDpt`1q ` ρptq´1
+
+Γptq
+
+> u
+
+ı
+
+> ij
+
+˙
+
+.
+
+Similarly, we have that 
+
+Ωpt`1q 
+
+> v,ij
+
+“ ST λv {ρptq
+
+ˆ” rVsJK Vpt`1qDpt`1q ` ρptq´1
+
+Γptq
+
+> v
+
+ı
+
+> ij
+
+˙
+
+.
+
+Here, the soft-thresholding operator is defined as 
+
+ST κpaq “ 
+
+$’&’%
+
+a ´ κ, a ą κ, 
+
+0, |a| ď κ, a ` κ, a ă ´ κ. 
+
+Stopping criterion. Finally, we adopt a practical convergence criterion based on the primal feasibility and blockwise stationarity. The residuals are evaluated before updating the penalty parameter for the next iteration. To begin, let us define the primal residuals 
+
+Rpt`1q 
+
+> p,u
+
+:“ rUsJK Upt`1qDpt`1q ´ Ωpt`1q 
+
+> u
+
+, Rpt`1q 
+
+> p,v
+
+:“ rVsJK Vpt`1qDpt`1q ´ Ωpt`1q 
+
+> v
+
+.
+
+25 Denote by 
+
+ηpt`1q 
+
+> u
+
+:“
+
+$’&’%
+
+}Rpt`1q 
+
+> p,u
+
+}F
+
+app ´ ruqr , ru ă p, 
+
+0, ru “ p, ηpt`1q 
+
+> v
+
+:“
+
+$’&’%
+
+}Rpt`1q 
+
+> p,v
+
+}F
+
+apq ´ rv qr , rv ă q, 
+
+0, rv “ q. 
+
+We then aggregate these two quantities through 
+
+rpt`1q 
+
+> primal
+
+“ 12 ηpt`1q 
+
+> u
+
+` 12 ηpt`1q 
+
+> v
+
+.
+
+Since D, Ωu, and Ωv are updated in closed form, we monitor first-order stationarity only for the manifold-constrained U- and V-blocks. To this end, we define the current block objectives 
+
+f pt`1qpUq “ 12n
+
+›››Y ´ XUD pt`1qVpt`1qJ 
+
+›››2F
+
+`
+
+A
+
+Γpt`1q 
+
+> u
+
+, rUsJK UD pt`1q ´ Ωpt`1q
+
+> u
+
+E
+
+` ρptq
+
+2
+
+››› rUsJK UD pt`1q ´ Ωpt`1q
+
+> u
+
+›››2F
+
+,gpt`1qpVq “ 12n
+
+›››Y ´ XU pt`1qDpt`1qVJ
+
+›››2F
+
+`
+
+A
+
+Γpt`1q 
+
+> v
+
+, rVsJK VD pt`1q ´ Ωpt`1q
+
+> v
+
+E
+
+` ρptq
+
+2
+
+››› rVsJK VD pt`1q ´ Ωpt`1q
+
+> v
+
+›››2F
+
+.
+
+Let Mp,r “ t U P Rpˆr : UJU “ Ir u and Mq,r “ t V P Rqˆr : VJV “ Ir u. We define the stationarity residual as 
+
+rpt`1q 
+
+> stat
+
+“ 12
+
+››∇Mp,r f pt`1qpUpt`1qq››F
+
+?pr ` 12
+
+››∇Mq,r gpt`1qpVpt`1qq››F
+
+?qr ,
+
+where ∇Mp,r f pUq denotes the Riemannian gradient of f at U.In summary, for a user-specified tolerance ε ą 0, we will terminate the algorithm once 
+
+rpt`1q 
+
+> primal
+
+ď ε and rpt`1q 
+
+> stat
+
+ď ε. 
+
+# C Details of the multi-modal single-cell experiment 
+
+This section provides additional details for the multi-modal single-cell analysis reported in Section 6. Figure 4 displays the cell counts across annotated cell types. We next summarize the preprocessing pipeline, the implementation details, and the baseline comparisons used in this experiment. 
+
+Data preprocessing. We extracted the gene expression (GEX) and protein expression (ADT) matrices from the raw dataset, which contains 13 ,953 genes and 134 proteins measured across 90 ,261 cells. For GEX, we applied the library-size normalization, log transformation, selection of the top 3,000 highly variable genes, and standardization. For ADT, we applied the centered log-ratio normalization. We then restricted attention to NK and ILC1 cells, which yielded 5,434 source cells and 552 target cells. After removing genes with zero variance in either group, 2,998 GEX features and all 134 ADT markers remained. Finally, we used marginal screening to define a common set of 248 gene predictors, and this predictor set was used throughout the regression analysis. 
+
+Implementation. To evaluate SMART, we first constructed the noisy source matrix rCp0q by applying several baseline estimators to the NK (source) data. Specifically, we considered seven methods: the Lasso, Ridge, OLS, RRR, SRRR, RSSVD, and SOFAR. For each method, the resulting estimate rCp0q was passed to SMART to produce a target regression estimate pC. The model was trained on a random 70% subset of the ILC1 (target) cells and evaluated on the remaining 30% held-out observations. We measured prediction accuracy using the Frobenius norm of the test error 
+
+1
+
+?ntest q
+
+›››Xtest pC ´ Ytest 
+
+›››F
+
+,
+
+26 Figure 4: Cell counts for each annotated cell type in the multi-modal single-cell data. 
+
+where ntest denotes the number of test observations and q denotes the number of output variables. To improve robustness, we repeated this procedure 100 times using different train/test splits generated from a fixed list of random seeds. For each method, we report the mean, standard deviation, median, and interquartile range (Q1 and Q3) of the prediction errors across repetitions. 
+
+Baseline methods. To place the performance of SMART in context, we compared it to a collection of baseline methods divided into two groups: source-only and target-only . The source-only methods applied the regression matrix estimated from the NK data directly to the ILC1 test set, without any retraining. In contrast, the target-only methods applied the same family of estimators—the Lasso, Ridge, OLS, RRR, SRRR, RSSVD, and SOFAR—only to the ILC1 data, without using the source information. For comparability, each method was evaluated on the same 70%/30% train/test splits and with the same error metric used for SMART. The source-only methods were evaluated directly on the test set, whereas the target-only methods were fit on the target training split before evaluation. As a final step, each experiment was repeated over 100 random splits, and the reported summaries were computed across those repetitions. 
+
+# D Proof of Proposition 4.5 
+
+For any matrix A, let A: j be its jth column. We consider the matrix Lasso estimator 
+
+pClasso P arg min 
+
+> CPRpˆq
+
+" 12n }Y ´ XC }2F ` λ0 |C|1
+
+*
+
+.
+
+Since the objective is separable across columns, the jth column of pClasso can be computed as 
+
+pClasso : j P arg min 
+
+> βPRp
+
+" 12n }Y: j ´ Xβ}22 ` λ0 }β}1
+
+*
+
+, 1 ď j ď q. 
+
+For each 1 ď j ď q, recall that 
+
+sj :“ ˇˇC˚ 
+
+> :j
+
+ˇˇ0, smax :“ max  
+
+> 1ďjďq
+
+sj , s˚,1,2 :“
+
+˜ qÿ
+
+> j“1
+
+s2
+
+> j
+
+¸1{2
+
+.
+
+27 Let us also define 
+
+δ2 
+
+> n
+
+:“ c20 ´ 24 ¨ log pn ` c20
+
+4 ¨ log qn , λ0 :“ 4?να max 
+
+˜c log pn ` δn
+
+¸
+
+,
+
+where ν is the constant introduced in Assumption 4.2(i). Since the rows of E are independent and identically distributed (i.i.d.) Gaussian with covariance matrix 
+
+Σ, the noise vector in the jth column model satisfies that 
+
+E: j „ N p0, Σjj Inq, Σjj ď } Σ}2 ď αmax .
+
+Accordingly, the common choice λ0 dominates the column-specific penalty level required by Wainwright (2019, Corollary 9.26). Moreover, it follows from the elementary bound pa ` bq2 ď 2a2 ` 2b2 that 
+
+λ20 “ 16 να max 
+
+˜c log pn ` δn
+
+¸2
+
+ď 32 να max 
+
+ˆ log pn ` δ2
+
+> n
+
+˙
+
+.
+
+Then it holds that 
+
+λ20 ď 32 να max 
+
+" log pn `
+
+ˆ c20 ´ 24
+
+˙ log pn `
+
+ˆ c20
+
+4
+
+˙ log qn
+
+*
+
+.
+
+Using condition (10) and the bound sj ď smax for all 1 ď j ď q, it follows that 
+
+sj
+
+ˆ
+
+λ20 ` log pn
+
+˙
+
+ă 4ρ22
+
+9 ^ ρ2
+
+64 ρ1
+
+for all 1 ď j ď q. 
+
+Hence, an application of Wainwright (2019, Corollary 9.26) yields that for each j P r qs,
+
+››› pClasso : j ´ C˚ 
+
+> :j
+
+›››22 ď 9sj λ20
+
+4ρ22
+
+,
+
+››› pClasso : j ´ C˚ 
+
+> :j
+
+›››1
+
+ď 6sj λ0
+
+ρ2
+
+, (24) with probability at least 1 ´ 2e´2nδ 2 
+
+> n
+
+.A union bound now shows that (24) holds simultaneously for all j P r qs with probability at least 
+
+1 ´ 2qe ´2nδ 2 
+
+> n
+
+“ 1 ´ 2ppq q1´c20{2.
+
+On this event, summing the squared ℓ2-errors across columns leads to 
+
+››› pClasso ´ C˚
+
+›››2F
+
+“
+
+> q
+
+ÿ
+
+> j“1
+
+››› pClasso : j ´ C˚ 
+
+> :j
+
+›››22
+
+ď 9λ20
+
+4ρ22
+
+> q
+
+ÿ
+
+> j“1
+
+sj “ 9λ20s0
+
+4ρ22
+
+À αmax s0 log ppq q
+
+n .
+
+Taking square roots, we can deduce that 
+
+››› pClasso ´ C˚
+
+›››F
+
+À
+
+c αmax s0 log ppq q
+
+n .
+
+For the mixed norm } ¨ } 1,2, we can instead aggregate the columnwise ℓ1-bounds in ℓ2
+
+››› pClasso ´ C˚
+
+›››1,2
+
+“
+
+˜ qÿ
+
+> j“1
+
+››› pClasso : j ´ C˚ 
+
+> :j
+
+›››21
+
+¸1{2
+
+ď 6λ0
+
+ρ2
+
+˜ qÿ
+
+> j“1
+
+s2
+
+> j
+
+¸1{2
+
+“ 6λ0s˚,1,2
+
+ρ2
+
+.
+
+28 Therefore, in view of λ0 — aαmax log ppq q{ n, we can obtain that 
+
+››› pClasso ´ C˚
+
+›››1,2
+
+À s˚,1,2
+
+c αmax log ppq q
+
+n .
+
+This completes the proof of Proposition 4.5. 
+
+# E Proof of Theorem 4.6 
+
+This section contains the complete proof of Theorem 4.6. To streamline the arguments, let us first introduce some notation that will be used throughout. We denote the structured factor matrices and their estimators as 
+
+A˚ “ U˚D˚, B˚ “ V˚D˚, pA “ pU pD, and pB “ pV pD,
+
+respectively. Define the estimation error of the regression matrix and its structured components as 
+
+p∆ “ pC ´ C˚, p∆a “ pA ´ A˚, p∆b “ pB ´ B˚, p∆d “ pD ´ D˚, (25) and write p∆init “ pCinit ´ C˚ for the error of the initial estimator. We further define the generalized inverse diagonal matrix pD´ “ diag p pd´ 
+
+> 1
+
+, . . . , pd´ 
+
+> r
+
+q with pd´ 
+
+> j
+
+“ pd´1 
+
+> j
+
+¨ 1t pdj ą 0u
+
+for all 1 ď j ď r.
+
+## E.1 Some technical lemmas 
+
+In this subsection, we will collect several technical lemmas that are used repeatedly in the main arguments. We start with a perturbation result that guarantees the sign consistency between the estimated and true singular vectors. 
+
+Lemma E.1 (Sign consistency) . Let 
+
+C “ UDV J “
+
+> r
+
+ÿ
+
+> k“1
+
+dkukvJ 
+
+> k
+
+, C˚ “ U˚D˚V˚J “
+
+> r
+
+ÿ
+
+> k“1
+
+d˚ 
+
+> k
+
+u˚ 
+
+> k
+
+v˚J 
+
+> k
+
+be rank-r matrices, with singular values ordered as d1 ě ¨ ¨ ¨ ě dr ą 0 and d˚ 
+
+> 1
+
+ě ¨ ¨ ¨ ě d˚ 
+
+> r
+
+ą 0. Assume that the squared singular values of C˚ satisfy the separation condition 
+
+d˚2 
+
+> j´1
+
+´ d˚2 
+
+> j
+
+ě τ d ˚2 
+
+> j´1
+
+for all 2 ď j ď r, 
+
+for some universal constant 0 ă τ ă 1. Fix any index 1 ď j ď r. If the perturbation satisfies that 
+
+}C ´ C˚}2 ď τ
+
+6?5 ¨
+
+ˆ d˚
+
+> j
+
+?r
+
+˙
+
+¨
+
+ˆ d˚
+
+> j
+
+d˚
+
+> 1
+
+˙3{2
+
+, (26) 
+
+the jth pair of singular vectors has aligned sign 
+
+`uJ 
+
+> j
+
+u˚
+
+> j
+
+˘ ¨ `vJ 
+
+> j
+
+v˚
+
+> j
+
+˘ ą 0. (27) 
+
+Consequently, if condition (26) holds for j “ r, the sign alignment in (27) holds uniformly for all 
+
+j “ 1, . . . , r .Proof . Let us set ε “ } C ´ C˚}2. We argue by contradiction. Assume that 
+
+`uJ 
+
+> j
+
+u˚
+
+> j
+
+˘ ¨ `vJ 
+
+> j
+
+v˚
+
+> j
+
+˘ ď 0.
+
+29 Then it holds that 
+
+u˚J  
+
+> j
+
+pC˚ ´ Cq v˚ 
+
+> j
+
+“ d˚ 
+
+> j
+
+´ dj
+
+`uJ 
+
+> j
+
+u˚
+
+> j
+
+˘ ` vJ 
+
+> j
+
+v˚
+
+> j
+
+˘ ´ ÿ
+
+> k‰j
+
+dk
+
+`uJ 
+
+> k
+
+u˚
+
+> j
+
+˘ ` vJ 
+
+> k
+
+v˚
+
+> j
+
+˘
+
+ě d˚ 
+
+> j
+
+´ ÿ
+
+> k‰j
+
+dk
+
+ˇˇuJ 
+
+> k
+
+u˚
+
+> j
+
+ˇˇ ˇˇvJ 
+
+> k
+
+v˚
+
+> j
+
+ˇˇ . (28) We will apply Theorem 3 of Yu et al. (2015) to CC J and C˚C˚J . In light of 
+
+}CC J ´ C˚C˚J }2 ď p} C}2 ` } C˚}2q ε ď p 2d˚ 
+
+> 1
+
+` εq ε, 
+
+there exists a sign suj P t´ 1, `1u such that 
+
+››suj uj ´ u˚
+
+> j
+
+››2 ď 23{2p2d˚ 
+
+> 1
+
+` εqε
+
+min `d˚2 
+
+> j´1
+
+´ d˚2 
+
+> j
+
+, d ˚2 
+
+> j
+
+´ d˚2
+
+> j`1
+
+˘ ,
+
+where d˚20 “ 8 and d˚2 
+
+> r`1
+
+“ 0. Since (26) entails that ε ď 16?5 d˚ 
+
+> j
+
+ď d˚ 
+
+> 1
+
+, the spectral-gap assumption yields that ››suj uj ´ u˚
+
+> j
+
+››2 ď 3 ¨ 23{2d˚ 
+
+> 1
+
+ετ d ˚2
+
+> j
+
+. (29) Similarly, an application of Theorem 3 of Yu et al. (2015) to CJC and C˚J C˚ gives a sign svj P t´ 1, `1u
+
+such that ››svj vj ´ v˚
+
+> j
+
+››2 ď 3 ¨ 23{2d˚ 
+
+> 1
+
+ετ d ˚2
+
+> j
+
+. (30) Let us fix k ‰ j. It follows from the orthogonality that 
+
+uJ 
+
+> k
+
+uj “ 0, vJ 
+
+> k
+
+vj “ 0,
+
+and thus, ˇˇuJ 
+
+> k
+
+u˚
+
+> j
+
+ˇˇ “ ˇˇuJ 
+
+> k
+
+pu˚ 
+
+> j
+
+´ suj uj qˇˇ , ˇˇvJ 
+
+> k
+
+v˚
+
+> j
+
+ˇˇ “ ˇˇvJ 
+
+> k
+
+pv˚ 
+
+> j
+
+´ svj vj qˇˇ .
+
+Consequently, we have that 
+
+ÿ
+
+> k‰j
+
+dk
+
+ˇˇuJ 
+
+> k
+
+u˚
+
+> j
+
+ˇˇ ˇˇvJ 
+
+> k
+
+v˚
+
+> j
+
+ˇˇ ď ››u˚ 
+
+> j
+
+´ suj uj
+
+››2 ¨ ››v˚ 
+
+> j
+
+´ svj vj
+
+››2 ¨
+
+> r
+
+ÿ
+
+> k“1
+
+dk. (31) Combining (29), (30), and (31), we can deduce that 
+
+ÿ
+
+> k‰j
+
+dk
+
+ˇˇuJ 
+
+> k
+
+u˚
+
+> j
+
+ˇˇ ˇˇvJ 
+
+> k
+
+v˚
+
+> j
+
+ˇˇ ď 72 d˚21 ε2
+
+τ 2d˚4
+
+> j
+
+¨
+
+> r
+
+ÿ
+
+> k“1
+
+dk ď 72 r d ˚21 d1ε2
+
+τ 2d˚4
+
+> j
+
+. (32) Moreover, it follows from (26) that 
+
+ε ď τ
+
+6?5 ¨
+
+ˆ d˚
+
+> j
+
+?r
+
+˙
+
+¨
+
+ˆ d˚
+
+> j
+
+d˚
+
+> 1
+
+˙3{2
+
+ď 16?5 d˚ 
+
+> j
+
+ď 14 d˚ 
+
+> j
+
+. (33) Hence, an application of Weyl’s inequality leads to 
+
+d1 “ } C}2 ď } C˚}2 ` } C ´ C˚}2 ď d˚ 
+
+> 1
+
+` 14 d˚ 
+
+> j
+
+ď 54 d˚ 
+
+> 1
+
+. (34) 30 Then substituting (33) and (34) into (32) yields that 
+
+ÿ
+
+> k‰j
+
+dk
+
+ˇˇuJ 
+
+> k
+
+u˚
+
+> j
+
+ˇˇ ˇˇvJ 
+
+> k
+
+v˚
+
+> j
+
+ˇˇ ď 90 r d ˚31 ε2
+
+τ 2d˚4
+
+> j
+
+. (35) Further, in view of (26), it holds that 
+
+ε2 ď τ 2d˚5
+
+> j
+
+180 r d ˚31
+
+.
+
+Substituting this bound into (35), we can obtain that 
+
+ÿ
+
+> k‰j
+
+dk
+
+ˇˇuJ 
+
+> k
+
+u˚
+
+> j
+
+ˇˇ ˇˇvJ 
+
+> k
+
+v˚
+
+> j
+
+ˇˇ ď 12 d˚ 
+
+> j
+
+.
+
+Returning to (28), this implies that 
+
+u˚J  
+
+> j
+
+pC˚ ´ Cq v˚ 
+
+> j
+
+ě 12 d˚ 
+
+> j
+
+.
+
+Then it follows that 
+
+}C ´ C˚}2 ě u˚J  
+
+> j
+
+pC˚ ´ Cq v˚ 
+
+> j
+
+ě 12 d˚ 
+
+> j
+
+, (36) which contradicts (33). Therefore, we have that 
+
+`uJ 
+
+> j
+
+u˚
+
+> j
+
+˘ ¨ `vJ 
+
+> j
+
+v˚
+
+> j
+
+˘ ą 0.
+
+The final claim follows since the right-hand side of (26) is minimized at j “ r, as d˚ 
+
+> j
+
+ě d˚ 
+
+> r
+
+for each 
+
+1 ď j ď r. This concludes the proof of Lemma E.1. The lemma below complements the previous result by providing Frobenius-norm bounds for the perturbations of singular values and singular vectors under an eigen-gap condition and columnwise sign alignment. 
+
+Lemma E.2 (Perturbation bound under singular value separation) . Let 
+
+C “ UDV J “
+
+> r
+
+ÿ
+
+> k“1
+
+dkukvJ 
+
+> k
+
+, C˚ “ U˚D˚V˚J “
+
+> r
+
+ÿ
+
+> k“1
+
+d˚ 
+
+> k
+
+u˚ 
+
+> k
+
+v˚J 
+
+> k
+
+be rank-r matrices, with singular values ordered as d1 ě ¨ ¨ ¨ ě dr ą 0 and d˚ 
+
+> 1
+
+ě ¨ ¨ ¨ ě d˚ 
+
+> r
+
+ą 0. Assume that 
+
+}C ´ C˚}2 ď d˚ 
+
+> 1
+
+, `uJ 
+
+> j
+
+u˚
+
+> j
+
+˘ ¨ `vJ 
+
+> j
+
+v˚
+
+> j
+
+˘ ě 0 for all 1 ď j ď r, (37) 
+
+and the squared singular values of C˚ satisfy that 
+
+d˚2 
+
+> j´1
+
+´ d˚2 
+
+> j
+
+ě τ d ˚2 
+
+> j´1
+
+for all 2 ď j ď r, 
+
+for some universal constant 0 ă τ ă 1. Then after possibly replacing each pair pu˚ 
+
+> j
+
+, v˚ 
+
+> j
+
+q with p´ u˚ 
+
+> j
+
+, ´v˚ 
+
+> j
+
+q
+
+and relabeling the resulting singular vectors again by pu˚ 
+
+> j
+
+, v˚ 
+
+> j
+
+q, it holds that 
+
+}D ´ D˚}F ď } C ´ C˚}F , (38) 
+
+}UD ´ U˚D˚}F ď cη r }C ´ C˚}F , (39) 
+
+}VD ´ V˚D˚}F ď cη r }C ´ C˚}F , (40) 
+
+where 
+
+ηr “ 1 ` 1
+
+τ
+
+¨˝ rÿ
+
+> j“1
+
+˜
+
+d˚
+
+> 1
+
+d˚
+
+> j
+
+¸2˛‚
+
+> 1{2
+
+31 and c ą 0 is a universal constant. Proof . We begin by making explicit the sign convention that is implicit in the proof of Lemma 3 in the Supplementary Material of Uematsu et al. (2019). For each 1 ď j ď r, condition (37) entails that uJ 
+
+> j
+
+u˚
+
+> j
+
+and vJ 
+
+> j
+
+v˚ 
+
+> j
+
+have the same sign, unless one of them is zero. Then there exists some sj P t´ 1, 1u such that 
+
+uJ 
+
+> j
+
+psj u˚ 
+
+> j
+
+q ě 0 and vJ 
+
+> j
+
+psj v˚ 
+
+> j
+
+q ě 0.
+
+If we replace pu˚ 
+
+> j
+
+, v˚ 
+
+> j
+
+q with psj u˚ 
+
+> j
+
+, s j v˚ 
+
+> j
+
+q, it holds that 
+
+d˚ 
+
+> j
+
+psj u˚ 
+
+> j
+
+qp sj v˚ 
+
+> j
+
+qJ “ d˚ 
+
+> j
+
+u˚ 
+
+> j
+
+v˚J  
+
+> j
+
+,
+
+so matrix C˚ remains unchanged. After such replacement and relabeling the resulting singular vectors again by pu˚ 
+
+> j
+
+, v˚ 
+
+> j
+
+q, we can assume that 
+
+uJ 
+
+> j
+
+u˚ 
+
+> j
+
+ě 0 and vJ 
+
+> j
+
+v˚ 
+
+> j
+
+ě 0 for all 1 ď j ď r. 
+
+With the sign convention fixed, bound (38) can be established directly from the Wielandt–Hoffman inequality. Under such sign alignment, the proof of Lemma 3 in the Supplementary Material of Uematsu et al. (2019) applies and yields that 
+
+}UD ´ U˚D˚}F ` } VD ´ V˚D˚}F ď cη r }C ´ C˚}F .
+
+Each term on the left-hand side of the expression above is therefore bounded by the same right-hand side, which establishes (39) and (40). This completes the proof of Lemma E.2. The following lemma quantifies the source approximation error induced by additive perturbation in the source matrix. Recall that we observe a noisy version of the source matrix 
+
+rCp0q “ Cp0q ` Ep0q,
+
+where Ep0q denotes the perturbation matrix. Let the singular value decomposition (SVD) of rCp0q be 
+
+rCp0q “ rUp0q rDp0q rVp0qJ “
+
+> rr0
+
+ÿ
+
+> j“1
+
+rdp0q 
+
+> j
+
+rup0q 
+
+> j
+
+rvp0qJ  
+
+> j
+
+.
+
+We then extend rUp0q and rVp0q to full orthonormal bases of Rp and Rq , respectively, by appending the vectors rup0q
+
+> rr0`1
+
+, . . . , rup0q 
+
+> p
+
+and rvp0q
+
+> rr0`1
+
+, . . . , rvp0q 
+
+> q
+
+.For any integers 0 ď ru ď p and 0 ď rv ď q, let us define the truncated singular subspaces and their orthogonal complements for the left and right singular vectors of rCp0q as 
+
+rUspruq :“ r rup0q 
+
+> 1
+
+, . . . , rup0q 
+
+> ru
+
+s, rUs
+
+> K
+
+pruq :“ r rup0q
+
+> ru`1
+
+, . . . , rup0q 
+
+> p
+
+s,
+
+respectively, and similarly, 
+
+rVsprv q :“ r rvp0q 
+
+> 1
+
+, . . . , rvp0q 
+
+> rv
+
+s, rVs
+
+> K
+
+prv q :“ r rvp0q 
+
+> rv`1
+
+, . . . , rvp0q 
+
+> q
+
+s.
+
+For later use, we also introduce the full source-augmented orthogonal basis matrices 
+
+rUfull :“
+
+” rUs rUs
+
+> K
+
+ı
+
+P Rpˆp, rVfull :“
+
+” rVs rVs
+
+> K
+
+ı
+
+P Rqˆq .
+
+Let Su, Scu, Sv , and Scv be as defined in (50) and (51) , and recall quantities supruq and sv prv q introduced in (6). In addition, denote by 
+
+εp0q :“
+
+›››Ep0q
+
+›››2
+
+32 the spectral error of the source matrix. Throughout, we will also use the standard shorthand notation 
+
+x` :“ max px, 0q for any x P R.We are now ready to state the lemma below, which quantifies the approximation error incurred when the noisy singular vectors of the source matrix are used in place of their population counterparts. 
+
+Lemma E.3 (Approximation error from noisy source singular vectors) . Assume that Assumption 2.1 and Condition (8) in Assumption 4.3 are satisfied. Then for all 0 ď ru ď p, we have that 
+
+ˇˇˇˇ” rUsJK pruq U˚
+
+ı
+
+> Scu
+
+ˇˇˇˇ1
+
+ď 23{2 rr pr˚ 
+
+> u
+
+´ ruq` ´ supruqs 
+
+τ
+
+´
+
+dp0q
+
+> r˚
+> u
+
+¯2
+
+´
+
+2dp0q 
+
+> 1
+
+` εp0q
+
+¯
+
+εp0q
+
+` 25{4 r pr˚ 
+
+> u
+
+q1{4ap ´ max pr˚ 
+
+> u
+
+, r uq?τ d p0q
+
+> r˚
+> u
+
+´
+
+εp0q
+
+¯1{2 ´
+
+εp0q ` 2dp0q
+
+> 1
+
+¯1{2
+
+.
+
+Similarly, for all 0 ď rv ď q, we have that 
+
+ˇˇˇˇ” rVsJK prv q V˚
+
+ı
+
+> Scv
+
+ˇˇˇˇ1
+
+ď 23{2 rr pr˚ 
+
+> v
+
+´ rv q` ´ sv prv qs 
+
+τ
+
+´
+
+dp0q
+
+> r˚
+> v
+
+¯2
+
+´
+
+2dp0q 
+
+> 1
+
+` εp0q
+
+¯
+
+εp0q
+
+` 25{4 r pr˚ 
+
+> v
+
+q1{4aq ´ max pr˚ 
+
+> v
+
+, r v q?τ d p0q
+
+> r˚
+> v
+
+´
+
+εp0q
+
+¯1{2 ´
+
+εp0q ` 2dp0q
+
+> 1
+
+¯1{2
+
+.
+
+Proof . We will prove the bound for the left singular vectors; the arguments for the right singular vectors are analogous. Let us write ε0 “ εp0q and su “ supruq, abbreviate Uspruq and Us
+
+> K
+
+pruq as Us and Us
+
+> K
+
+, and define rUs and rUs 
+
+> K
+
+similarly. We also adopt the conventions of dp0q 
+
+> 0
+
+“ 8 and dp0q 
+
+> r0`1
+
+“ 0.We first consider the case of ru ď r˚ 
+
+> u
+
+. Let us define 
+
+Ugap “ r up0q
+
+> ru`1
+
+, . . . , up0q
+
+> r˚
+> u
+
+s, Utail “ r up0q 
+
+> r˚
+> u`1
+
+, . . . , up0q 
+
+> p
+
+s,
+
+and rUgap “ r rup0q
+
+> ru`1
+
+, . . . , rup0q
+
+> r˚
+> u
+
+s, rUtail “ r rup0q 
+
+> r˚
+> u`1
+
+, . . . , rup0q 
+
+> p
+
+s.
+
+When ru “ r˚ 
+
+> u
+
+, the gap matrices are understood to be empty. Then it holds that 
+
+Us 
+
+> K
+
+“ r Ugap Utail s, rUs 
+
+> K
+
+“ r rUgap rUtail s.
+
+We further define 
+
+Mu :“
+
+!
+
+pj, i q P r r˚ 
+
+> u
+
+´ rus ˆ r rs : “UJ
+
+> gap
+
+U˚‰ 
+
+> ji
+
+‰ 0
+
+)
+
+,
+
+Mcu :“
+
+!
+
+pj, i q P r r˚ 
+
+> u
+
+´ rus ˆ r rs : “UJ
+
+> gap
+
+U˚‰ 
+
+> ji
+
+“ 0
+
+)
+
+.
+
+Since Assumption 2.1 implies that UJ
+
+> tail
+
+U˚ “ 0, the support of UsJK U˚ coincides with Mu in the first 
+
+r˚ 
+
+> u
+
+´ ru rows and is empty in the remaining rows. Hence, it follows that 
+
+ˇˇˇˇ” rUsJK U˚
+
+ı
+
+> Scu
+
+ˇˇˇˇ1
+
+“
+
+ˇˇˇˇ” rUJ
+
+> gap
+
+U˚
+
+ı
+
+> Mcu
+
+ˇˇˇˇ1
+
+`
+
+ˇˇˇ rUJ
+
+> tail
+
+U˚
+
+ˇˇˇ1
+
+.
+
+Let us first control the gap term. For any pj, i q P Mcu, it holds that 
+
+xup0q 
+
+> ru`j
+
+, u˚ 
+
+> i
+
+y “ 0.
+
+33 Then for any sign suru`j P t´ 1, `1u, we have that 
+
+ˇˇˇˇ” rUJ
+
+> gap
+
+U˚
+
+ı
+
+> ji
+
+ˇˇˇˇ “
+
+ˇˇˇArup0q 
+
+> ru`j
+
+, u˚
+
+> i
+
+Eˇ ˇˇ
+
+“
+
+ˇˇˇA
+
+suru`j rup0q 
+
+> ru`j
+
+´ up0q 
+
+> ru`j
+
+, u˚
+
+> i
+
+Eˇ ˇˇ
+
+ď
+
+›››suru`j rup0q 
+
+> ru`j
+
+´ up0q
+
+> ru`j
+
+›››2
+
+.
+
+We next observe that 
+
+››› rCp0q rCp0qJ ´ Cp0qCp0qJ 
+
+›››2
+
+ď
+
+›››Cp0qEp0qJ 
+
+›››2
+
+`
+
+›››Ep0qCp0qJ 
+
+›››2
+
+`
+
+›››Ep0qEp0qJ 
+
+›››2
+
+ď
+
+´
+
+2dp0q 
+
+> 1
+
+` ε0
+
+¯
+
+ε0.
+
+Applying Theorem 3 of Yu et al. (2015) to the Gram matrices rCp0q rCp0qJ and Cp0qCp0qJ , we see that for each k P r ru ` 1, r ˚ 
+
+> u
+
+s, there exists a sign ˜suk P t´ 1, `1u such that 
+
+›››˜suk rup0q 
+
+> k
+
+´ up0q
+
+> k
+
+›››2
+
+ď
+
+23{2
+
+´
+
+2dp0q 
+
+> 1
+
+` ε0
+
+¯
+
+ε0
+
+min 
+
+!
+
+pdp0q
+
+> k´1
+
+q2 ´ p dp0q 
+
+> k
+
+q2, pdp0q 
+
+> k
+
+q2 ´ p dp0q
+
+> k`1
+
+q2
+
+) .
+
+With the aid of Condition (8), we have that 
+
+min 
+
+!
+
+pdp0q
+
+> k´1
+
+q2 ´ p dp0q 
+
+> k
+
+q2, pdp0q 
+
+> k
+
+q2 ´ p dp0q
+
+> k`1
+
+q2
+
+)
+
+ě τ pdp0q 
+
+> k
+
+q2 ě τ
+
+´
+
+dp0q
+
+> r˚
+> u
+
+¯2
+
+.
+
+Consequently, we can deduce that 
+
+max 
+
+> pj,i qP Mcu
+
+ˇˇˇˇ” rUJ
+
+> gap
+
+U˚
+
+ı
+
+> ji
+
+ˇˇˇˇ ď 23{2
+
+τ
+
+´
+
+dp0q
+
+> r˚
+> u
+
+¯2
+
+´
+
+2dp0q 
+
+> 1
+
+` ε0
+
+¯
+
+ε0.
+
+Since |Mcu| “ rpr˚ 
+
+> u
+
+´ ruq ´ su, it follows that 
+
+ˇˇˇˇ” rUJ
+
+> gap
+
+U˚
+
+ı
+
+> Mcu
+
+ˇˇˇˇ1
+
+ď 23{2 prpr˚ 
+
+> u
+
+´ ruq ´ suq
+
+τ
+
+´
+
+dp0q
+
+> r˚
+> u
+
+¯2
+
+´
+
+2dp0q 
+
+> 1
+
+` ε0
+
+¯
+
+ε0.
+
+We now bound the tail term. Denote by 
+
+rUoracle “ r rup0q 
+
+> 1
+
+, . . . , rup0q
+
+> r˚
+> u
+
+s, Uoracle “ r up0q 
+
+> 1
+
+, . . . , up0q
+
+> r˚
+> u
+
+s.
+
+Since 
+
+ˇˇˇ rUJ
+
+> tail
+
+U˚
+
+ˇˇˇ1
+
+“
+
+ˇˇˇU˚J rUtail 
+
+ˇˇˇ1
+
+, it follows from the orthogonality that 
+
+›››U˚J rUtail 
+
+›››2F
+
+`
+
+›››U˚J rUoracle 
+
+›››2F
+
+“ } U˚}2F “ r. 
+
+Hence, we can deduce that 
+
+ˇˇˇU˚J rUtail 
+
+ˇˇˇ21 ď rpp ´ r˚ 
+
+> u
+
+q
+
+›››U˚J rUtail 
+
+›››2F
+
+“ rpp ´ r˚ 
+
+> u
+
+q
+
+ˆ
+
+r ´
+
+›››U˚J rUoracle 
+
+›››2F
+
+˙
+
+ď 2r3{2pp ´ r˚ 
+
+> u
+
+q
+
+´?r ´
+
+›››U˚J rUoracle 
+
+›››F
+
+¯
+
+.
+
+34 For any orthonormal matrix Ooracle P Rr˚  
+
+> uˆr˚
+> u
+
+, it holds that 
+
+›››U˚J rUoracle 
+
+›››F
+
+“
+
+›››U˚J rUoracle Ooracle 
+
+›››F
+
+ě ››U˚J Uoracle 
+
+››F ´
+
+›››U˚J 
+
+´ rUoracle Ooracle ´ Uoracle 
+
+¯› ››F
+
+.
+
+Since Assumption 2.1 entails that U˚J Utail “ 0, we have that ››U˚J Uoracle 
+
+››F “ ?r. Consequently, it follows that ?r ´
+
+›››U˚J rUoracle 
+
+›››F
+
+ď ?r
+
+››› rUoracle Ooracle ´ Uoracle 
+
+›››F
+
+.
+
+Substituting this into the previous expression, we can obtain that 
+
+ˇˇˇU˚J rUtail 
+
+ˇˇˇ21
+
+ď 2r2pp ´ r˚ 
+
+> u
+
+q
+
+››› rUoracle Ooracle ´ Uoracle 
+
+›››F
+
+.
+
+Let us define 
+
+∆˚ 
+
+> u
+
+:“
+
+´
+
+dp0q
+
+> r˚
+> u
+
+¯2
+
+´
+
+´
+
+dp0q 
+
+> r˚
+> u`1
+
+¯2
+
+.
+
+Applying Theorem 3 of Yu et al. (2015) once more to the leading r˚ 
+
+> u
+
+-dimensional eigenspaces of rCp0q rCp0qJ 
+
+and Cp0qCp0qJ , there exists an orthonormal matrix rOoracle such that 
+
+››› rUoracle rOoracle ´ Uoracle 
+
+›››F
+
+ď 2?2r˚
+
+> u
+
+∆˚
+
+> u
+
+´
+
+2dp0q 
+
+> 1
+
+` ε0
+
+¯
+
+ε0.
+
+It follows from Condition (8) that ∆˚ 
+
+> u
+
+ě τ
+
+´
+
+dp0q
+
+> r˚
+> u
+
+¯2
+
+. Then it holds that 
+
+ˇˇˇ rUJ
+
+> tail
+
+U˚
+
+ˇˇˇ1
+
+“
+
+ˇˇˇU˚J rUtail 
+
+ˇˇˇ1
+
+ď 25{4rpr˚ 
+
+> u
+
+q1{4?p ´ r˚
+
+> u
+
+?τ d p0q
+
+> r˚
+> u
+
+ε1{20
+
+´
+
+2dp0q 
+
+> 1
+
+` ε0
+
+¯1{2
+
+.
+
+Thus, combining the bounds for the gap and tail terms yields that 
+
+ˇˇˇˇ” rUsJK U˚
+
+ı
+
+> Scu
+
+ˇˇˇˇ1
+
+ď 23{2 prpr˚ 
+
+> u
+
+´ ruq ´ suq
+
+τ
+
+´
+
+dp0q
+
+> r˚
+> u
+
+¯2
+
+´
+
+2dp0q 
+
+> 1
+
+` ε0
+
+¯
+
+ε0
+
+` 25{4rpr˚ 
+
+> u
+
+q1{4?p ´ r˚
+
+> u
+
+?τ d p0q
+
+> r˚
+> u
+
+ε1{20
+
+´
+
+2dp0q 
+
+> 1
+
+` ε0
+
+¯1{2
+
+.
+
+It remains to consider the case of ru ą r˚ 
+
+> u
+
+. Then we have that Su “ ∅ and supruq “ 0. Denote by 
+
+rUtail “ r rup0q
+
+> ru`1
+
+, . . . , rup0q 
+
+> p
+
+s.
+
+Since rUs 
+
+> K
+
+“ rUtail , we can deduce that 
+
+ˇˇˇˇ” rUsJK U˚
+
+ı
+
+> Scu
+
+ˇˇˇˇ1
+
+“
+
+ˇˇˇ rUJ
+
+> tail
+
+U˚
+
+ˇˇˇ1
+
+“
+
+ˇˇˇU˚J rUtail 
+
+ˇˇˇ1
+
+ď arpp ´ ruq
+
+›››U˚J rUtail 
+
+›››F
+
+.
+
+Moreover, it holds that ›››U˚J rUtail 
+
+›››2F
+
+ď r ´
+
+›››U˚J rUoracle 
+
+›››2F
+
+.
+
+35 Using the same argument as above for ?r ´
+
+›››U˚J rUoracle 
+
+›››F
+
+, we can show that 
+
+ˇˇˇˇ” rUsJK U˚
+
+ı
+
+> Scu
+
+ˇˇˇˇ1
+
+ď 25{4rpr˚ 
+
+> u
+
+q1{4?p ´ ru
+
+?τ d p0q
+
+> r˚
+> u
+
+ε1{20
+
+´
+
+2dp0q 
+
+> 1
+
+` ε0
+
+¯1{2
+
+.
+
+Since supruq “ 0 whenever ru ě r˚ 
+
+> u
+
+, combining the above two cases gives that 
+
+ˇˇˇˇ” rUsJK U˚
+
+ı
+
+> Scu
+
+ˇˇˇˇ1
+
+ď 23{2 rrpr˚ 
+
+> u
+
+´ ruq` ´ supruqs 
+
+τ
+
+´
+
+dp0q
+
+> r˚
+> u
+
+¯2
+
+´
+
+2dp0q 
+
+> 1
+
+` ε0
+
+¯
+
+ε0
+
+` 25{4rpr˚ 
+
+> u
+
+q1{4ap ´ max pru, r ˚ 
+
+> u
+
+q?τ d p0q
+
+> r˚
+> u
+
+ε1{20
+
+´
+
+2dp0q 
+
+> 1
+
+` ε0
+
+¯1{2
+
+,
+
+which is exactly the desired bound for the left singular vectors. The right singular vector bound can be established using the same argument after replacing pp, r u, r ˚ 
+
+> u
+
+, s u, Uq with pq, r v , r ˚ 
+
+> v
+
+, s v , Vq. This concludes the proof of Lemma E.3. The following lemma specifies a set of desirable events that occur with high probability. For the rest of the analysis, we work under the assumption that these events hold in order to establish the central deterministic bounds. 
+
+Lemma E.4 (High-probability events) . Assume that Assumptions 4.1–4.4 are satisfied. Let pC “ pU pD pVJ
+
+be the localized Stage 2 estimator satisfying (11) , and assume that (9) , (12) , and (14) are satisfied. Fix any 
+
+0 ă δ ă 1 and define the regularization parameters λu and λv as in (15) . Then with probability at least 
+
+1 ´ δ, it holds simultaneously that 
+
+ˇˇˇˇ
+
+1
+
+n rUJ
+
+> full
+
+XJE pB pD´
+
+ˇˇˇˇ8
+
+ď λu{2, (41) 
+
+ˇˇˇˇ
+
+1
+
+n pXU ˚qJ E pB pD´
+
+ˇˇˇˇ8
+
+ď λu{2, (42) 
+
+ˇˇˇˇ
+
+1
+
+n pXU ˚qJ E rVfull 
+
+ˇˇˇˇ8
+
+ď λv {2. (43) 
+
+Proof . Denote by 
+
+rX “ X rUfull , rE “ E rVfull , X˚ “ XU ˚, E˚ “ EV ˚.
+
+Let rxpjq and repjq be the jth columns of rX and rE, respectively, and xpjq˚ and epjq˚ the corresponding columns of X˚ and E˚. Since pC satisfies (11), it follows from Condition (9) that 
+
+››› p∆
+
+›››F
+
+ď 3R2,n . (44) Observe that the Stage 2 objective and constraints are invariant under simultaneous permutations of the columns of p pU, pVq and of the diagonal entries of pD. We can thus choose a representative of the optimizer for which pd1 ě ¨ ¨ ¨ ě pdr ě 0.
+
+In view of (12), it holds that 
+
+››› p∆
+
+›››2
+
+ď
+
+››› p∆
+
+›››F
+
+ď 3R2,n ď τ
+
+6?5 ¨ d˚
+
+> r
+
+?r ¨
+
+ˆ d˚
+
+> r
+
+d˚
+
+> 1
+
+˙3{2
+
+. (45) 36 In particular, the right-hand side of the expression above is at most d˚ 
+
+> r
+
+{4. An application of Weyl’s inequality gives that for each 1 ď j ď r, ˇˇˇ pdj ´ d˚
+
+> j
+
+ˇˇˇ ď
+
+››› p∆
+
+›››2
+
+ď d˚
+
+> r
+
+4 ď d˚
+
+> j
+
+4 .
+
+Consequently, we have that pdj ě 3d˚ 
+
+> j
+
+{4 ą 0, and thus 
+
+ˇˇˇ pD´
+
+ˇˇˇ8
+
+ď 2
+
+dmin 
+
+,
+
+ˇˇˇD˚ pD´
+
+ˇˇˇ8
+
+ď 2. (46) At this point, the assumptions of Lemma E.1 (with j “ r) and Lemma E.2 are satisfied. Then it follows that ››› p∆a
+
+›››F
+
+ď cη r
+
+››› p∆
+
+›››F
+
+,
+
+››› p∆b
+
+›››F
+
+ď cη r
+
+››› p∆
+
+›››F
+
+,
+
+››› p∆d
+
+›››F
+
+ď
+
+››› p∆
+
+›››F
+
+, (47) where c is the universal constant from Lemma E.2, and hence the same constant as in (14) . By a union bound, it suffices to show that each of (41) – (43) holds with probability at least 1 ´ δ{3. We will verify these bounds one by one. We first prove (41). Let us write 
+
+ˇˇˇˇ
+
+1
+
+n rUJ
+
+> full
+
+XJE pB pD´
+
+ˇˇˇˇ8
+
+ď Tu, 1 ` Tu, 2,
+
+where 
+
+Tu, 1 “
+
+ˇˇˇˇ
+
+1
+
+n rXJEB ˚ pD´
+
+ˇˇˇˇ8
+
+, Tu, 2 “
+
+ˇˇˇˇ
+
+1
+
+n rXJE p∆b pD´
+
+ˇˇˇˇ8
+
+.
+
+We begin with Tu, 1. In light of (46), it holds that 
+
+Tu, 1 “
+
+ˇˇˇˇ
+
+1
+
+n rXJE˚D˚ pD´
+
+ˇˇˇˇ8
+
+ď 2
+
+n
+
+ˇˇˇ rXJE˚
+
+ˇˇˇ8
+
+.
+
+For each 1 ď i ď p and 1 ď j ď r, scalar rxpiqJ epjq˚ is Gaussian with mean zero and variance 
+
+E
+
+„´rxpiqJ epjq˚
+
+¯2ȷ
+
+“ `v˚J  
+
+> j
+
+Σv ˚
+
+> j
+
+˘ ›››r xpiq
+
+›››22
+
+ď αmax 
+
+›››Xrup0q
+
+> i
+
+›››22
+
+ď να max n. 
+
+As a result, we have that 
+
+P
+
+ˆ
+
+Tu, 1 ą λu
+
+4
+
+˙
+
+ď 2pr exp 
+
+ˆ
+
+´ nλ 2
+
+> u
+
+128 να max 
+
+˙
+
+ď δ
+
+6 .
+
+We next analyze term Tu, 2. By resorting to Lemma E.5, (46), and (47), we can deduce that 
+
+Tu, 2 ď
+
+ˆ
+
+max 
+
+> 1ďjďp
+
+››››
+
+1
+
+n EJ rxpjq
+
+››››2
+
+˙ ˆ 
+
+max 
+
+> 1ďkďr
+
+›››´ p∆b pD´
+
+¯
+
+> :k
+
+›››2
+
+˙
+
+ď 2
+
+dmin 
+
+ˆ
+
+max 
+
+> 1ďjďp
+
+››››
+
+1
+
+n EJ rxpjq
+
+››››2
+
+˙ ˆ 
+
+max 
+
+> 1ďkďr
+
+››› p∆b
+
+> :k
+
+›››2
+
+˙
+
+ď 6cη r R2,n 
+
+dmin 
+
+Mu,
+
+where 
+
+Mu “ max 
+
+> 1ďjďp
+
+››››
+
+1
+
+n EJ rxpjq
+
+››››2
+
+.
+
+For each j, if βj “ ››r xpjq››22 {n, we have that 
+
+1
+
+n EJ rxpjq „ N
+
+ˆ
+
+0, βj
+
+n Σ
+
+˙
+
+,
+
+37 and Assumption 4.2(i) entails that βj ď ν. Hence, it follows from Lemma E.6 and a union bound that with probability at least 1 ´ δ{6,
+
+M 2 
+
+> u
+
+ď νn
+
+«
+
+tr pΣq ` c1 max 
+
+#d 
+
+tr pΣ2q log p6p{δq
+
+c2
+
+, αmax log p6p{δq
+
+c2
+
++ff 
+
+.
+
+Consequently, on the same event, it holds that 
+
+T 2 
+
+> u, 2
+
+ď 36 c2η2 
+
+> r
+
+R22,n νd2min n
+
+«
+
+tr pΣq ` c1 max 
+
+#d 
+
+tr pΣ2q log p6p{δq
+
+c2
+
+, αmax log p6p{δq
+
+c2
+
++ff 
+
+.
+
+Note that Condition (14) bounds the right-hand side of the expression above by 
+
+8να max log p12 pr {δq
+
+n “ λ2
+
+> u
+
+16 .
+
+Thus, we have that Tu, 2 ď λu{4 with probability at least 1 ´ δ{6, which establishes (41) with probability at least 1 ´ δ{3.We next aim to show (42). Observe that 
+
+ˇˇˇˇ
+
+1
+
+n pXU ˚qJ E pB pD´
+
+ˇˇˇˇ8
+
+ď Td, 1 ` Td, 2,
+
+where 
+
+Td, 1 “
+
+ˇˇˇˇ
+
+1
+
+n XJ˚ EB ˚ pD´
+
+ˇˇˇˇ8
+
+, Td, 2 “
+
+ˇˇˇˇ
+
+1
+
+n XJ˚ E p∆b pD´
+
+ˇˇˇˇ8
+
+.
+
+Similar as before, we can show that 
+
+Td, 1 ď 2
+
+n
+
+ˇˇXJ˚ E˚
+
+ˇˇ8 ,
+
+and each entry of XJ˚ E˚ is Gaussian with variance at most να max n. Consequently, it holds that 
+
+P
+
+ˆ
+
+Td, 1 ą λu
+
+4
+
+˙
+
+ď 2r2 exp 
+
+ˆ
+
+´ nλ 2
+
+> u
+
+128 να max 
+
+˙
+
+ď δ
+
+6 ,
+
+since r ď p.For the second term above, it holds that 
+
+Td, 2 ď 2
+
+dmin 
+
+ˆ
+
+max 
+
+> 1ďjďr
+
+››››
+
+1
+
+n EJxpjq˚
+
+››››2
+
+˙ ˆ 
+
+max 
+
+> 1ďkďr
+
+››› p∆b
+
+> :k
+
+›››2
+
+˙
+
+ď 6cη r R2,n 
+
+dmin 
+
+Mu, ˚,
+
+where 
+
+Mu, ˚ “ max 
+
+> 1ďjďr
+
+››››
+
+1
+
+n EJxpjq˚
+
+››››2
+
+.
+
+Using the same argument as above, with r in place of p, we have that with probability at least 1 ´ δ{6,
+
+M 2 
+
+> u, ˚
+
+ď νn
+
+«
+
+tr pΣq ` c1 max 
+
+#d 
+
+tr pΣ2q log p6r{δq
+
+c2
+
+, αmax log p6r{δq
+
+c2
+
++ff 
+
+.
+
+Since r ď p, this bound is no larger than the corresponding bound for Mu, and Condition (14) again yields that Td, 2 ď λu{4 with probability at least 1 ´ δ{6. Hence, (42) holds with probability at least 1 ´ δ{3.38 Finally, we establish (43) . Let rvj be the jth column of rVfull . For each 1 ď i ď r and 1 ď j ď q, scalar 
+
+xpiqJ ˚ repjq is Gaussian with mean zero and variance 
+
+E
+
+„´
+
+xpiqJ ˚ repjq
+
+¯2ȷ
+
+“ `rvJ 
+
+> j
+
+Σrvj
+
+˘ ›››xpiq˚
+
+›››22
+
+ď αmax }Xu ˚ 
+
+> i
+
+}22 ď να max n. 
+
+Therefore, we can obtain that 
+
+P
+
+ˆˇ ˇˇˇ
+
+1
+
+n pXU ˚qJ E rVfull 
+
+ˇˇˇˇ8
+
+ą λv
+
+2
+
+˙
+
+ď 2qr exp 
+
+ˆ
+
+´ nλ 2
+
+> v
+
+8να max 
+
+˙
+
+ď δ
+
+3 .
+
+Combining the three bounds above completes the proof of Lemma E.4. The following two auxiliary lemmas are self-contained and will simplify several steps in the theoretical analysis that follows. 
+
+Lemma E.5. Let A P Rmˆn and B P Rnˆq be arbitrary matrices. Denote the ith row of A as Ai: and the 
+
+jth column of B as B:j . Then it holds that 
+
+|AB |8 ď
+
+ˆ
+
+max  
+
+> 1ďiďm
+
+}Ai:}2
+
+˙ ˆ 
+
+max  
+
+> 1ďjďq
+
+}B:j }2
+
+˙
+
+.
+
+Proof . For any 1 ď i ď m and 1 ď j ď q, the pi, j qth entry of AB satisfies that 
+
+ˇˇˇrAB sij 
+
+ˇˇˇ “
+
+ˇˇˇˇˇ
+
+> n
+
+ÿ
+
+> k“1
+
+Aik Bkj 
+
+ˇˇˇˇˇ “ |x Ai:, B:j y| ď } Ai:}2 }B:j }2 ,
+
+where the inequality is an immediate consequence of the Cauchy–Schwarz inequality. Taking the maximum over all i and j establishes the desired claim. This concludes the proof of Lemma E.5. 
+
+Lemma E.6 (Gaussian vector norm concentration) . Let g „ N p0, Σq be a d-dimensional Gaussian random vector. Then we have that for each t ě 0,
+
+P
+
+!
+
+}g}22 ´ tr pΣq ě t
+
+)
+
+ď exp 
+
+"
+
+´c2 min 
+
+ˆ t2
+
+c21 tr pΣ2q , tc1 λmax pΣq
+
+˙* 
+
+,
+
+where c1, c 2 ą 0 are universal constants. Proof . Let Σ “ UΛU J be the eigen-decomposition of Σ, where U P Rdˆd is orthonormal and 
+
+Λ “ diag pλ1, . . . , λ dq with λj ě 0. Let z “ p Z1, . . . , Z dqJ „ N p0, Idq. Then it holds that 
+
+g d
+
+“ UΛ 1{2z.
+
+Consequently, we have that 
+
+}g}22
+
+> d
+
+“
+
+›››Λ1{2z
+
+›››22
+
+“
+
+> d
+
+ÿ
+
+> j“1
+
+λj Z2 
+
+> j
+
+,
+
+and thus 
+
+}g}22 ´ tr pΣq d
+
+“
+
+> d
+
+ÿ
+
+> j“1
+
+λj pZ2 
+
+> j
+
+´ 1q. (48) By invoking Lemma 2.7.4 of Vershynin (2018), random variables Z2 
+
+> j
+
+´ 1 are independent, mean-zero, and sub-exponential, with }Z2 
+
+> j
+
+´ 1}ψ1 ď K for some universal constant K ą 0. Then an application of Theorem 2.8.3 from the same reference to the weighted sum in (48) gives that for all t ě 0,
+
+P
+
+# dÿ
+
+> j“1
+
+λj pZ2 
+
+> j
+
+´ 1q ě t
+
++
+
+ď exp 
+
+#
+
+´c2 min 
+
+˜
+
+t2
+
+K2 řdj“1 λ2
+
+> j
+
+, tK max j λj
+
+¸+ 
+
+, (49) 39 where c2 ą 0 is a universal constant. Therefore, since tr pΣ2q “ řdj“1 λ2 
+
+> j
+
+and λmax pΣq “ max j λj , the claimed bound follows from (48) and (49) after absorbing K into the universal constant c1. This completes the proof of Lemma E.6. 
+
+## E.2 Proof of Theorem 4.6 
+
+To simplify the notation, let us write Uspruq and Us
+
+> K
+
+pruq as Us and Us
+
+> K
+
+, respectively. Similarly, we write 
+
+Vsprv q and Vs
+
+> K
+
+prv q as Vs and Vs
+
+> K
+
+. We also define rUs, rUs
+
+> K
+
+, rVs, and rVs 
+
+> K
+
+analogously. Throughout the remainder of the proof, we will abbreviate supruq and sv prv q as su and sv , respectively. We start with defining the supports associated with the source-truncated orthogonal complements 
+
+Su :“
+
+!
+
+pi, j q : “UsJK U˚‰ 
+
+> ij
+
+‰ 0
+
+)
+
+Ď r p ´ rus ˆ r rs,
+
+Scu :“
+
+!
+
+pi, j q : “UsJK U˚‰ 
+
+> ij
+
+“ 0
+
+)
+
+Ď r p ´ rus ˆ r rs.
+
+(50) From the definition of su, we see that |Su| “ su and |Scu| “ rpp ´ ruq ´ su. Similarly, in the v-direction denote by 
+
+Sv :“
+
+!
+
+pi, j q : “VsJK V˚‰ 
+
+> ij
+
+‰ 0
+
+)
+
+Ď r q ´ rv s ˆ r rs,
+
+Scv :“
+
+!
+
+pi, j q : “VsJK V˚‰ 
+
+> ij
+
+“ 0
+
+)
+
+Ď r q ´ rv s ˆ r rs,
+
+(51) so that |Sv | “ sv and |Scv | “ rpq ´ rv q ´ sv . For convenience, we also introduce the full source-augmented orthogonal basis matrices 
+
+rUfull :“
+
+” rUs rUs
+
+> K
+
+ı
+
+P Rpˆp, rVfull :“
+
+” rVs rVs
+
+> K
+
+ı
+
+P Rqˆq .
+
+Under Condition (9) and constraint (11), it follows from the triangle inequality that 
+
+››› p∆
+
+›››F
+
+ď 3R2,n and 
+
+››› p∆
+
+›››1,2
+
+ď 3R1,n . (52) Further, (12) implies that 3R2,n ă d˚ 
+
+> r
+
+{4. Hence, with the aid of Weyl’s inequality, we can deduce that 
+
+pdj ě d˚ 
+
+> j
+
+´
+
+››› p∆
+
+›››2
+
+ě d˚ 
+
+> j
+
+´
+
+››› p∆
+
+›››F
+
+ě 34 d˚ 
+
+> j
+
+ą 0, 1 ď j ď r. 
+
+In particular, it holds that pD´ “ pD´1 and pB pD´ “ pV.Given the regularization parameters 
+
+λu “ 8?2 ¨
+
+c να max log p12 pr {δq
+
+n , λv “ 2?2 ¨
+
+c να max log p6qr {δq
+
+n ,
+
+it follows from Lemma E.4, Conditions (9) – (12) , and Condition (14) that the following concentration inequalities hold with probability at least 1 ´ δ,
+
+ˇˇˇˇ
+
+1
+
+n rUJ
+
+> full
+
+XJE pB pD´
+
+ˇˇˇˇ8
+
+ď λu
+
+2 , (53) 
+
+ˇˇˇˇ
+
+1
+
+n pXU ˚qJ E pB pD´
+
+ˇˇˇˇ8
+
+ď λu
+
+2 , (54) 
+
+ˇˇˇˇ
+
+1
+
+n pXU ˚qJ E rVfull 
+
+ˇˇˇˇ8
+
+ď λv
+
+2 . (55) Accordingly, it remains only to establish the desired error bound deterministically on the event when (53)–(55) hold. 40 From Conditions (9)–(11) and the optimality of p pU, pD, pVq, we can deduce that 
+
+12n
+
+›››Y ´ X pU pD pVJ
+
+›››2F
+
+` λu| rUsJK pU pD|1 ` λv | rVsJK pV pD|1
+
+ď 12n
+
+››Y ´ XU ˚D˚V˚J ››2F ` λu| rUsJK U˚D˚|1 ` λv | rVsJK V˚D˚|1.
+
+Combining this inequality with (1) and the definitions in (25), we can show that 
+
+12n }X p∆}2F ď
+
+B 1
+
+n XJE, p∆
+
+F
+
+` λu
+
+!ˇ ˇˇ rUsJK A˚
+
+ˇˇˇ1
+
+´
+
+ˇˇˇ rUsJK pA
+
+ˇˇˇ1
+
+)
+
+` λv
+
+!ˇ ˇˇ rVsJK B˚
+
+ˇˇˇ1
+
+´
+
+ˇˇˇ rVsJK pB
+
+ˇˇˇ1
+
+)
+
+. (56) To deal with the stochastic inner product, note that 
+
+p∆ “ pU pD pVJ ´ U˚D˚V˚J “ pA pD´ pBJ ´ U˚B˚J 
+
+“ p∆a
+
+´ pB pD´
+
+¯J
+
+` A˚ pD´ pBJ ´ U˚B˚J 
+
+“ p∆a
+
+´ pB pD´
+
+¯J
+
+´ U˚ p∆d
+
+´ pB pD´
+
+¯J
+
+` U˚
+
+´ p∆b
+
+¯J
+
+.
+
+Then it holds that 
+
+B 1
+
+n XJE, p∆
+
+F
+
+“
+
+B 1
+
+n XJE pB pD´, p∆a
+
+F
+
+´
+
+B 1
+
+n U˚J XJE pB pD´, p∆d
+
+F
+
+`
+
+B 1
+
+n EJXU ˚, p∆b
+
+F
+
+. (57) We next decompose p∆a “ rUs rUsJ p∆a ` rUs 
+
+> K
+
+rUsJK p∆a.
+
+It follows that 
+
+B 1
+
+n XJE pB pD´, p∆a
+
+F
+
+“
+
+B 1
+
+n rUsJXJE pB pD´, rUsJ p∆a
+
+F
+
+`
+
+B 1
+
+n rUsJK XJE pB pD´, rUsJK p∆a
+
+F
+
+ď
+
+ˇˇˇˇ
+
+1
+
+n rUsJXJE pB pD´
+
+ˇˇˇˇ8
+
+ˇˇˇ rUsJ p∆a
+
+ˇˇˇ1
+
+`
+
+ˇˇˇˇ
+
+1
+
+n rUsJK XJE pB pD´
+
+ˇˇˇˇ8
+
+ˇˇˇ rUsJK p∆a
+
+ˇˇˇ1
+
+.
+
+In light of 
+
+max 
+
+"ˇ ˇˇˇ
+
+1
+
+n rUsJXJE pB pD´
+
+ˇˇˇˇ8
+
+,
+
+ˇˇˇˇ
+
+1
+
+n rUsJK XJE pB pD´
+
+ˇˇˇˇ8
+
+*
+
+“
+
+ˇˇˇˇ
+
+1
+
+n rUJ
+
+> full
+
+XJE pB pD´
+
+ˇˇˇˇ8
+
+,
+
+from (53) we have that 
+
+B 1
+
+n XJE pB pD´, p∆a
+
+F
+
+ď λu
+
+2
+
+ˇˇˇ rUsJ p∆a
+
+ˇˇˇ1
+
+` λu
+
+2
+
+ˇˇˇ rUsJK p∆a
+
+ˇˇˇ1
+
+ď λu
+
+2
+
+ˇˇˇ rUsJ p∆a
+
+ˇˇˇ1
+
+` λu
+
+2
+
+ˇˇˇˇ” rUsJK p∆a
+
+ı
+
+> Su
+
+ˇˇˇˇ1
+
+` λu
+
+2
+
+ˇˇˇˇ” rUsJK p∆a
+
+ı
+
+> Scu
+
+ˇˇˇˇ1
+
+.
+
+With the aid of ˇˇˇˇ” rUsJK p∆a
+
+ı
+
+> Scu
+
+ˇˇˇˇ1
+
+ď
+
+ˇˇˇˇ” rUsJK pA
+
+ı
+
+> Scu
+
+ˇˇˇˇ1
+
+`
+
+ˇˇˇˇ” rUsJK A˚
+
+ı
+
+> Scu
+
+ˇˇˇˇ1
+
+,
+
+we can obtain that 
+
+B 1
+
+n XJE pB pD´, p∆a
+
+F
+
+ď λu
+
+2
+
+ˇˇˇ rUsJ p∆a
+
+ˇˇˇ1 ` λu
+
+2
+
+ˇˇˇˇ” rUsJK p∆a
+
+ı
+
+> Su
+
+ˇˇˇˇ1
+
+` λu
+
+2
+
+ˇˇˇˇ” rUsJK pA
+
+ı
+
+> Scu
+
+ˇˇˇˇ1
+
+` λu
+
+2
+
+ˇˇˇˇ” rUsJK A˚
+
+ı
+
+> Scu
+
+ˇˇˇˇ1
+
+. (58) 41 On the other hand, it holds that 
+
+ˇˇˇ rUsJK A˚
+
+ˇˇˇ1
+
+´
+
+ˇˇˇ rUsJK pA
+
+ˇˇˇ1
+
+“
+
+ˇˇˇˇ” rUsJK A˚
+
+ı
+
+> Su
+
+ˇˇˇˇ1
+
+´
+
+ˇˇˇˇ” rUsJK pA
+
+ı
+
+> Su
+
+ˇˇˇˇ1
+
+`
+
+ˇˇˇˇ” rUsJK A˚
+
+ı
+
+> Scu
+
+ˇˇˇˇ1
+
+´
+
+ˇˇˇˇ” rUsJK pA
+
+ı
+
+> Scu
+
+ˇˇˇˇ1
+
+ď
+
+ˇˇˇˇ” rUsJK A˚
+
+ı
+
+> Su
+
+´
+
+” rUsJK pA
+
+ı
+
+> Su
+
+ˇˇˇˇ1
+
+`
+
+ˇˇˇˇ” rUsJK A˚
+
+ı
+
+> Scu
+
+ˇˇˇˇ1
+
+´
+
+ˇˇˇˇ” rUsJK pA
+
+ı
+
+> Scu
+
+ˇˇˇˇ1
+
+“
+
+ˇˇˇˇ” rUsJK p∆a
+
+ı
+
+> Su
+
+ˇˇˇˇ1
+
+`
+
+ˇˇˇˇ” rUsJK A˚
+
+ı
+
+> Scu
+
+ˇˇˇˇ1
+
+´
+
+ˇˇˇˇ” rUsJK pA
+
+ı
+
+> Scu
+
+ˇˇˇˇ1
+
+. (59) Hence, combining (58) and (59) leads to 
+
+B 1
+
+n XJE pB pD´, p∆a
+
+F
+
+` λu
+
+!ˇ ˇˇ rUsJK A˚
+
+ˇˇˇ1
+
+´
+
+ˇˇˇ rUsJK pA
+
+ˇˇˇ1
+
+)
+
+ď λu
+
+2
+
+ˇˇˇ rUsJ p∆a
+
+ˇˇˇ1
+
+` 3λu
+
+2
+
+ˇˇˇˇ” rUsJK p∆a
+
+ı
+
+> Su
+
+ˇˇˇˇ1
+
+` 3λu
+
+2
+
+ˇˇˇˇ” rUsJK A˚
+
+ı
+
+> Scu
+
+ˇˇˇˇ1
+
+´ λu
+
+2
+
+ˇˇˇˇ” rUsJK pA
+
+ı
+
+> Scu
+
+ˇˇˇˇ1
+
+ď 3λu
+
+2
+
+ˇˇˇ rUsJ p∆a
+
+ˇˇˇ1
+
+` 3λu
+
+2
+
+ˇˇˇˇ” rUsJK p∆a
+
+ı
+
+> Su
+
+ˇˇˇˇ1
+
+` 3λu
+
+2
+
+ˇˇˇˇ” rUsJK A˚
+
+ı
+
+> Scu
+
+ˇˇˇˇ1
+
+. (60) Observe that 
+
+››› p∆a
+
+›››2F “
+
+››› rUsJ p∆a
+
+›››2F `
+
+››› rUsJK p∆a
+
+›››2F
+
+. Then it follows that 
+
+ˇˇˇ rUsJ p∆a
+
+ˇˇˇ1
+
+ď ?rur
+
+››› rUsJ p∆a
+
+›››F
+
+ď ?rur
+
+››› p∆a
+
+›››F
+
+and ˇˇˇˇ” rUsJK p∆a
+
+ı
+
+> Su
+
+ˇˇˇˇ1
+
+ď ?su
+
+››››” rUsJK p∆a
+
+ı
+
+> Su
+
+››››F
+
+ď ?su
+
+››› rUsJK p∆a
+
+›››F
+
+ď ?su
+
+››› p∆a
+
+›››F
+
+.
+
+Consequently, we can deduce that 
+
+ˇˇˇ rUsJ p∆a
+
+ˇˇˇ1
+
+`
+
+ˇˇˇˇ” rUsJK p∆a
+
+ı
+
+> Su
+
+ˇˇˇˇ1
+
+ď p ?rur ` ?suq
+
+››› p∆a
+
+›››F
+
+ď a2 prr u ` suq
+
+››› p∆a
+
+›››F
+
+,
+
+where the final inequality above has used ?a ` ?b ď a2pa ` bq for a, b ě 0. Combining this bound with (60) gives that B 1
+
+n XJE pB pD´, p∆a
+
+F
+
+` λu
+
+!ˇ ˇˇ rUsJK A˚
+
+ˇˇˇ1
+
+´
+
+ˇˇˇ rUsJK pA
+
+ˇˇˇ1
+
+)
+
+ď 3λu
+
+2
+
+a2 prr u ` suq
+
+››› p∆a
+
+›››F
+
+` 3λu
+
+2
+
+ˇˇˇˇ” rUsJK A˚
+
+ı
+
+> Scu
+
+ˇˇˇˇ1
+
+.
+
+(61) By the same argument and using (55), we can show that 
+
+B 1
+
+n EJXU ˚, p∆b
+
+F
+
+` λv
+
+!ˇ ˇˇ rVsJK B˚
+
+ˇˇˇ1
+
+´
+
+ˇˇˇ rVsJK pB
+
+ˇˇˇ1
+
+)
+
+ď 3λv
+
+2
+
+a2 prr v ` sv q
+
+››› p∆b
+
+›››F
+
+` 3λv
+
+2
+
+ˇˇˇˇ” rVsJK B˚
+
+ı
+
+> Scv
+
+ˇˇˇˇ1
+
+.
+
+(62) In addition, (54) entails that 
+
+´
+
+B 1
+
+n U˚J XJE pB pD´, p∆d
+
+F
+
+ď λu
+
+2
+
+ˇˇˇ p∆d
+
+ˇˇˇ1
+
+ď λu
+
+2
+
+?r
+
+››› p∆d
+
+›››F
+
+. (63) Let us define 
+
+λmax :“ max tλu, λ v u .
+
+42 In view of the definitions of λu and λv , this quantity satisfies the upper bound 
+
+λmax ď cλ ¨
+
+c log p12 max pp, q q ¨ r{δq
+
+n ,
+
+where cλ “ 8?2να max is a universal constant. Thus, combining (56) , (57) , and (61) – (63) , we can obtain the deterministic inequality 
+
+12n
+
+›››X p∆
+
+›››2F
+
+ď λmax 
+
+" 32
+
+a2 prr u ` suq
+
+››› p∆a
+
+›››F
+
+` 32
+
+a2 prr v ` sv q
+
+››› p∆b
+
+›››F
+
+` 12
+
+?r
+
+››› p∆d
+
+›››F
+
+*
+
+` 3λmax 
+
+2
+
+ˇˇˇˇ” rUsJK A˚
+
+ı
+
+> Scu
+
+ˇˇˇˇ1
+
+` 3λmax 
+
+2
+
+ˇˇˇˇ” rVsJK B˚
+
+ı
+
+> Scv
+
+ˇˇˇˇ1
+
+.
+
+(64) Further, it follows from (52) and Condition (12) that 
+
+››› p∆
+
+›››2
+
+ď
+
+››› p∆
+
+›››F
+
+ď τ
+
+6?5 ¨
+
+ˆ d˚
+
+> r
+
+?r
+
+˙
+
+¨
+
+ˆ d˚
+
+> r
+
+d˚
+
+> 1
+
+˙3{2
+
+.
+
+By resorting to Lemma E.1, Lemma E.2, and Assumption 4.3, we have that 
+
+››› p∆a
+
+›››F
+
+ď cη r
+
+››› p∆
+
+›››F
+
+,
+
+››› p∆b
+
+›››F
+
+ď cη r
+
+››› p∆
+
+›››F
+
+, and 
+
+››› p∆d
+
+›››F
+
+ď
+
+››› p∆
+
+›››F
+
+,
+
+where ηr “ 1 ` p 1{τ q ¨ 
+
+´řrj“1
+
+`d˚ 
+
+> 1
+
+{d˚
+
+> j
+
+˘2¯1{2
+
+, 0 ă τ ă 1, and c ą 0 are universal constants. Substituting these bounds into (64) yields that 
+
+12n
+
+›››X p∆
+
+›››2F
+
+ď λmax 
+
+" 3?22 cη r
+
+?rr u ` su ` 3?22 cη r
+
+?rr v ` sv ` 12
+
+?r
+
+*
+
+¨
+
+››› p∆
+
+›››F
+
+` 3λmax 
+
+2
+
+ˇˇˇˇ” rUsJK A˚
+
+ı
+
+> Scu
+
+ˇˇˇˇ1
+
+` 3λmax 
+
+2
+
+ˇˇˇˇ” rVsJK B˚
+
+ı
+
+> Scv
+
+ˇˇˇˇ1
+
+ď c1λmax ηr
+
+ar pru ` rv ` 1q ` su ` sv ¨
+
+››› p∆
+
+›››F
+
+` 3λmax 
+
+2
+
+ˇˇˇˇ” rUsJK A˚
+
+ı
+
+> Scu
+
+ˇˇˇˇ1
+
+` 3λmax 
+
+2
+
+ˇˇˇˇ” rVsJK B˚
+
+ı
+
+> Scv
+
+ˇˇˇˇ1
+
+(65) for a universal constant c1 ą 0.We now invoke the restricted strong convexity. Applying Assumption 4.1 columnwise leads to 
+
+12n
+
+›››X p∆
+
+›››2F
+
+“
+
+> q
+
+ÿ
+
+> j“1
+
+12n
+
+›››X p∆:j
+
+›››22
+
+ě ρ2
+
+2
+
+> q
+
+ÿ
+
+> j“1
+
+››› p∆:j
+
+›››22
+
+´ ρ1
+
+log pn
+
+> q
+
+ÿ
+
+> j“1
+
+››› p∆:j
+
+›››21
+
+“ ρ2
+
+2
+
+››› p∆
+
+›››2F
+
+´ ρ1
+
+log pn
+
+››› p∆
+
+›››21,2
+
+ě ρ2
+
+2
+
+››› p∆
+
+›››2F
+
+´ 9ρ1
+
+log pn R21,n ,
+
+43 where the last step above has utilized (52). Combining this lower bound with (65), we can deduce that 
+
+››› p∆
+
+›››2F
+
+ď 2c1
+
+ρ2
+
+λmax ηr
+
+arpru ` rv ` 1q ` su ` sv ¨
+
+››› p∆
+
+›››F
+
+` 3λmax 
+
+ρ2
+
+ˇˇˇˇ” rUsJK A˚
+
+ı
+
+> Scu
+
+ˇˇˇˇ1
+
+` 3λmax 
+
+ρ2
+
+ˇˇˇˇ” rVsJK B˚
+
+ı
+
+> Scv
+
+ˇˇˇˇ1
+
+` 18 ρ1
+
+ρ2
+
+¨ log pn R21,n 
+
+“ 2c1cλ
+
+ρ2
+
+ηr
+
+c rrpru ` rv ` 1q ` su ` sv s ¨ log p12 r max pp, q q{ δq
+
+n ¨
+
+››› p∆
+
+›››F
+
+` 3cλ
+
+ρ2
+
+"ˇ ˇˇˇ” rUsJK A˚
+
+ı
+
+> Scu
+
+ˇˇˇˇ1
+
+`
+
+ˇˇˇˇ” rVsJK B˚
+
+ı
+
+> Scv
+
+ˇˇˇˇ1
+
+*
+
+¨
+
+c log p12 r max pp, q q{ δq
+
+n
+
+` 18 ρ1
+
+ρ2
+
+¨ log pn R21,n .
+
+(66) For any t P R satisfying t2 ´ bt ´ c ď 0 with b, c ą 0, we have that 
+
+t ď b ` ?c. 
+
+Applying this elementary fact to (66), we can obtain that 
+
+››› p∆
+
+›››F
+
+ď 2c1cλ
+
+ρ2
+
+ηr
+
+c rrpru ` rv ` 1q ` su ` sv s ¨ log p12 r max pp, q q{ δq
+
+n
+
+`
+
+c 3cλ
+
+ρ2
+
+"ˇ ˇˇˇ” rUsJK A˚
+
+ı
+
+> Scu
+
+ˇˇˇˇ1
+
+`
+
+ˇˇˇˇ” rVsJK B˚
+
+ı
+
+> Scv
+
+ˇˇˇˇ1
+
+*1{2 ˆ log p12 r max pp, q q{ δq
+
+n
+
+˙1{4
+
+`
+
+c 18 ρ1
+
+ρ2
+
+c log pn R1,n .
+
+(67) We now bound the approximation terms. It follows from Lemma E.3 and the inequality |MD ˚|1 ď d˚ 
+
+> 1
+
+|M|1
+
+for any matrix M with r columns that 
+
+ˇˇˇˇ” rUsJK A˚
+
+ı
+
+> Scu
+
+ˇˇˇˇ1
+
+`
+
+ˇˇˇˇ” rVsJK B˚
+
+ı
+
+> Scv
+
+ˇˇˇˇ1
+
+ď d˚
+
+> 1
+
+«
+
+23{2 rr tp r˚ 
+
+> u
+
+´ ruq` ` p r˚ 
+
+> v
+
+´ rv q`u ´ p supruq ` sv prv qqs 
+
+´
+
+2dp0q 
+
+> 1
+
+` εp0q
+
+¯
+
+εp0q
+
+τ
+
+´
+
+min 
+
+´
+
+dp0q
+
+> r˚
+> u
+
+, d p0q
+
+> r˚
+> v
+
+¯¯ 2
+
+` 25{4r
+
+”
+
+pr˚ 
+
+> u
+
+q1{4 ap ´ max pr˚ 
+
+> u
+
+, r uq ` p r˚ 
+
+> v
+
+q1{4 aq ´ max pr˚ 
+
+> v
+
+, r v q
+
+ı `εp0q˘1{2 ´
+
+εp0q ` 2dp0q
+
+> 1
+
+¯1{2
+
+min 
+
+´
+
+dp0q
+
+> r˚
+> u
+
+, d p0q
+
+> r˚
+> v
+
+¯ff 
+
+.
+
+Substituting this bound into (67) gives that 
+
+››› p∆
+
+›››F
+
+ď 2c1cλ
+
+ρ2
+
+ηr
+
+c pr pru ` rv ` 1q ` su ` sv q log p12 r max pp, q q{ δq
+
+n
+
+` 2ad˚
+
+> 1
+
+τ
+
+c 6cλ
+
+ρ2
+
+rεsource 
+
+ˆ log p12 r max pp, q q{ δq
+
+n
+
+˙1{4
+
+`
+
+c 18 ρ1
+
+ρ2
+
+c log pn R1,n ,
+
+(68) 44 where 
+
+rεsource “ “r ␣pr˚ 
+
+> u
+
+´ ruq` ` p r˚ 
+
+> v
+
+´ rv q`
+
+( ´ p supruq ` sv prv qq ‰1{2
+
+ˆ
+
+`εp0q˘1{2 ´
+
+2dp0q 
+
+> 1
+
+` εp0q
+
+¯1{2
+
+min 
+
+´
+
+dp0q
+
+> r˚
+> u
+
+, d p0q
+
+> r˚
+> v
+
+¯
+
+` ?r ¨
+
+”
+
+pr˚ 
+
+> u
+
+q1{4 ¨ ap ´ max pr˚ 
+
+> u
+
+, r uq ` p r˚ 
+
+> v
+
+q1{4 ¨ aq ´ max pr˚ 
+
+> v
+
+, r v q
+
+ı1{2
+
+ˆ
+
+`εp0q˘1{4 ´
+
+2dp0q 
+
+> 1
+
+` εp0q
+
+¯1{4
+
+c
+
+min 
+
+´
+
+dp0q
+
+> r˚
+> u
+
+, d p0q
+
+> r˚
+> v
+
+¯ .
+
+In view of Assumption 4.2, we have that 
+
+min 
+
+´
+
+dp0q
+
+> r˚
+> u
+
+, d p0q
+
+> r˚
+> v
+
+¯
+
+ě dp0q 
+
+> min
+
+“ Ωp1q.
+
+Since τ is universal, it holds that 
+
+rεsource À εsource ,
+
+where εsource is defined in (17). Recalling that cλ “ 8?2να max , we can deduce that 
+
+››› p∆
+
+›››F
+
+À ?αmax ηr
+
+c pr pru ` rv ` 1q ` su ` sv q log p12 r max pp, q q{ δq
+
+n
+
+` α1{4max pd˚ 
+
+> 1
+
+q1{2 εsource 
+
+ˆ log p12 r max pp, q q{ δq
+
+n
+
+˙1{4
+
+` R1,n 
+
+c log pn .
+
+Therefore, combining this result with Condition (13) yields that 
+
+››› p∆
+
+›››F
+
+À ?αmax ηr
+
+c pr pru ` rv ` 1q ` su ` sv q log p12 r max pp, q q{ δq
+
+n
+
+` α1{4max pd˚ 
+
+> 1
+
+q1{2 εsource 
+
+ˆ log p12 r max pp, q q{ δq
+
+n
+
+˙1{4
+
+.
+
+This concludes the proof of Theorem 4.6. 
+
+# F Proof of Theorem 4.7 
+
+In this section, we present the complete proof of Theorem 4.7. We first establish several technical lemmas in Section F.1, and then turn to the main arguments in Section F.2. 
+
+## F.1 Technical lemmas 
+
+Let us begin with the definitions of covering and packing numbers that will be used repeatedly in the lower-bound argument. 
+
+Definition F.1 (Covering number) . Let pΘ, ρ q be a metric space. A set tθ1, . . . , θ N u Ď Θ is called a δ-cover of Θ if for each θ P Θ, there exists some i P r N s such that ρpθ, θ iq ď δ. The δ-covering number N pδ; Θ , ρ q is the smallest cardinality of such a cover. 
+
+Definition F.2 (Packing number) . Let pΘ, ρ q be a metric space. A set tθ1, . . . , θ M u Ď Θ is called a 
+
+δ-packing of Θ if ρpθi, θ j q ą δ for all distinct i, j P t 1, . . . , M u. The δ-packing number Mpδ; Θ , ρ q is the largest cardinality of such a packing. Let 
+
+St pp, r q :“ ␣Φ P Rpˆr : ΦJΦ “ Ir
+
+(
+
+45 be the Stiefel manifold. The lemma below provides matching upper and lower bounds for the covering number of the Stiefel manifold under the Frobenius norm. 
+
+Lemma F.3. For integers 1 ď r ď p with pp, r q ‰ p 1, 1q, there exist some universal constants C ą c ą 0
+
+such that for any 0 ă δ ă 1,
+
+´ cδ
+
+¯pr ´ rpr`1q 
+
+> 2
+
+r rpr´1q 
+
+> 4
+
+ď N pδ; St pp, r q, } ¨ } Fq ď 
+
+ˆ Cδ
+
+˙pr ´ rpr`1q
+
+> 2
+
+r rpr´1q 
+
+> 4
+
+. (69) 
+
+Proof . When p “ r, the desired claim reduces to the case of orthogonal group Oprq “ St pr, r q and follows directly from Proposition 7 of Szarek (1982). Accordingly, we will assume that p ą r. Let Gr pp, r q be the Grassmann manifold of r-dimensional subspaces of Rp. For any U, V P St pp, r q, denote by 
+
+ρ1pU, Vq :“ } U ´ V}F .
+
+For any E, F P Gr pp, r q, we identify them with their orthogonal projection matrices PE and PF , and define 
+
+ρ2pE, F q :“ 1
+
+?2 }PE ´ PF }F .
+
+By invoking Lemma 1 of Cai et al. (2013), after absorbing factor ?2 into the constants, there exist some absolute constants c1 ą c0 ą 0 such that for any 0 ă ε ă ar ^ p p ´ rq,
+
+´ c0
+
+ε
+
+¯rpp´rq
+
+ď N pε; Gr pp, r q, ρ 2q ď 
+
+´ c1
+
+ε
+
+¯rpp´rq
+
+. (70) We first establish the upper bound in (69). We set 
+
+ε1 “ δ
+
+2?2 , ε2 “ δ
+
+2 .
+
+Let tE1, . . . , E Nbase u be an ε1-cover of Gr pp, r q with respect to ρ2, and choose Vj P St pp, r q such that 
+
+span pVj q “ Ej for each j. Let tO1, . . . , ONfib u be an ε2-cover of St pr, r q with respect to the Frobenius norm. We claim that ␣Vj Ok : 1 ď j ď Nbase , 1 ď k ď Nfib 
+
+(
+
+is a δ-cover of St pp, r q under ρ1. To verify this, let us fix any U P St pp, r q and choose j such that 
+
+ρ2pspan pUq, E j q ď ε1.
+
+We next define 
+
+O˚ P arg min 
+
+> OPSt pr,r q
+
+››U ´ Vj O››F ,
+
+and then choose k so that }O˚ ´ Ok}F ď ε2. It follows from the standard principal-angle relations that 
+
+ρ2pspan pUq, span pVqq ď min  
+
+> OPSt pr,r q
+
+}U ´ VO }F ď ?2 ρ2pspan pUq, span pVqq 
+
+for all U, V P St pp, r q. Then it holds that 
+
+››U ´ Vj Ok››F ď ››U ´ Vj O˚››F ` ››Vj `O˚ ´ Ok˘› ›F
+
+ď ?2 ρ2pspan pUq, E j q ` ››O˚ ´ Ok››F
+
+ď ?2 ε1 ` ε2
+
+“ δ. 
+
+46 Consequently, we can obtain that 
+
+N pδ; St pp, r q, } ¨ } Fq ď N
+
+ˆ δ
+
+2?2 ; Gr pp, r q, ρ 2
+
+˙
+
+N
+
+ˆ δ
+
+2 ; St pr, r q, } ¨ } F
+
+˙
+
+. (71) With the aid of Proposition 7 of Szarek (1982), there exists a universal constant c3 ą 0 such that 
+
+N
+
+ˆ δ
+
+2 ; St pr, r q, } ¨ } F
+
+˙
+
+ď
+
+ˆ 2c3
+
+?rδ
+
+˙ rpr´1q
+
+> 2
+
+. (72) Hence, combining (70), (71), and (72), and setting C “ max t2?2c1, 2c3u yield that 
+
+N pδ; St pp, r q, } ¨ } Fq ď 
+
+ˆ Cδ
+
+˙pr ´ rpr`1q
+
+> 2
+
+r rpr´1q 
+
+> 4
+
+.
+
+We now turn to the lower bound. Let tE1, . . . , E Mbase u Ď Gr pp, r q be a δ-packing of Gr pp, r q with respect to ρ2, and tQ1, . . . , QMfib u Ď St pr, r q a δ-packing of St pr, r q with respect to the Frobenius norm. We choose Uj P St pp, r q so that span pUj q “ Ej for each j. We claim that 
+
+␣Uj Qk : 1 ď j ď Mbase , 1 ď k ď Mfib 
+
+(
+
+forms a δ-packing of St pp, r q under ρ1. Let us fix j and consider k ‰ ℓ. Then it holds that 
+
+››Uj Qk ´ Uj Qℓ››F “ ››Qk ´ Qℓ››F ą δ. 
+
+Now assume that j ‰ j1. For any k, ℓ , we have that 
+
+›››Uj Qk ´ Uj1
+
+Qℓ
+
+›››F
+
+“
+
+›››Uj ´ Uj1 rQ
+
+›››F
+
+, rQ :“ Qℓ `Qk˘´1 P St pr, r q.
+
+Then it follows that 
+
+›››Uj Qk ´ Uj1
+
+Qℓ
+
+›››F
+
+ě min 
+
+> QPSt pr,r q
+
+›››Uj ´ Uj1
+
+Q
+
+›››F
+
+ě ρ2pEj , E j1
+
+q ą δ. 
+
+Consequently, we can deduce that 
+
+M pδ; St pp, r q, } ¨ } Fq ě M pδ; Gr pp, r q, ρ 2q M pδ; St pr, r q, } ¨ } Fq . (73) It follows from Lemma 5.5 of Wainwright (2019), (70) , and Proposition 7 of Szarek (1982) that there exists some universal constant c2 ą 0 such that 
+
+M pδ; Gr pp, r q, ρ 2q ě N pδ; Gr pp, r q, ρ 2q ě 
+
+´ c0
+
+δ
+
+¯rpp´rq
+
+and 
+
+M pδ; St pr, r q, } ¨ } Fq ě N pδ; St pr, r q, } ¨ } Fq ě 
+
+ˆ c2
+
+?rδ
+
+˙ rpr´1q
+
+> 2
+
+for all 0 ă δ ă 1. Combining these inequalities with (73) and setting c1 “ min pc0, c 2q give that 
+
+M pδ; St pp, r q, } ¨ } Fq ě 
+
+ˆ c1
+
+δ
+
+˙pr ´ rpr`1q
+
+> 2
+
+r rpr´1q 
+
+> 4
+
+.
+
+47 Therefore, an application of Lemma 5.5 of Wainwright (2019) yields that 
+
+N pδ; St pp, r q, } ¨ } Fq ě M p2δ; St pp, r q, } ¨ } Fq ě 
+
+´ cδ
+
+¯pr ´ rpr`1q 
+
+> 2
+
+r rpr´1q
+
+> 4
+
+for c “ c1{2. This completes the proof of Lemma F.3. Denote by 
+
+Sp´1psq :“ t v P Rp : }v}2 “ 1, }v}0 ď su
+
+the set of s-sparse unit vectors in Rp. The next lemma is a direct specialization of Lemma 3.1.2 in Vu and Lei (2012). 
+
+Lemma F.4 (Lemma 3.1.2 of Vu and Lei (2012)) . Assume that s ě 2 and p ě 5. Then there exists a universal constant c ą 0 such that for each 0 ă δ ď 1, there exists a finite subset tv1, . . . , vM u Ď Sp´1psq
+
+satisfying that for each j ‰ ℓ, δ
+
+2 ă ››vj ´ vℓ››2 ď 2δ
+
+and 
+
+log M ě cps ´ 1q log 
+
+ˆ p ´ 1
+
+s ´ 1
+
+˙
+
+.
+
+Proof . Let us fix 0 ă δ ď 1. The conclusion follows directly from Lemma 3.1.2 of Vu and Lei (2012) with q “ 0 and R0 “ s. The distance bounds stated here are weaker than those in the original lemma and therefore continue to hold. This concludes the proof of Lemma F.4. The following lemma provides the local metric-entropy lower bound that we will use in the minimax arguments below. 
+
+Lemma F.5 (Proposition 3 of Cai et al. (2013)) . Let pΘ, ρ q be a totally bounded metric space, and 
+
+tPθ : θ P Θu a collection of probability measures. Assume that 
+
+sup 
+
+> θ‰θ1
+
+DKL pPθ }Pθ1 q
+
+ρ2pθ, θ 1q ď A
+
+and further that there exist constants 0 ă c ă C ă 8 and d, d 1 ě 1 such that 
+
+d1
+
+´ cδ
+
+¯d
+
+ď N pδ; Θ , ρ q ď d1
+
+ˆ Cδ
+
+˙d
+
+for all 0 ă δ ă δ0. Then we have that 
+
+inf 
+
+> pθ
+
+sup 
+
+> θPΘ
+
+E
+
+”
+
+ρ2
+
+´pθ, θ 
+
+¯ı 
+
+ě c2
+
+840 C2 min 
+
+" dA , δ 20
+
+*
+
+.
+
+Proof . Let us set rc “ d11{dc and rC “ d11{dC. Then it holds that 
+
+ˆ rcδ
+
+˙d
+
+ď N pδ; Θ , ρ q ď 
+
+˜ rCδ
+
+¸d
+
+for all 0 ă δ ă δ0. Therefore, an application of Proposition 3 of Cai et al. (2013) with rc and rC yields that 
+
+inf 
+
+> pθ
+
+sup 
+
+> θPΘ
+
+E
+
+”
+
+ρ2
+
+´pθ, θ 
+
+¯ı 
+
+ě rc2
+
+840 rC2 min 
+
+" dA , δ 20
+
+*
+
+“ c2
+
+840 C2 min 
+
+" dA , δ 20
+
+*
+
+.
+
+This completes the proof of Lemma F.5. 48 F.2 Proof of Theorem 4.7 
+
+Throughout this proof, we will use EC to denote expectation under the model Y “ XC ` E. Let us choose any U˚ P U, V˚ P V, and D˚ P D such that d˚ 
+
+> r
+
+“ c; such a choice is possible by rescaling an arbitrary element of D. Denote by 
+
+Cu :“
+
+!
+
+C P Rpˆq : C “ UD ˚V˚J , U P U
+
+)
+
+,
+
+Cv :“
+
+!
+
+C P Rpˆq : C “ U˚D˚VJ, V P V
+
+)
+
+.
+
+Since Cu, Cv Ď C, it holds that 
+
+inf 
+
+> pC
+
+sup 
+
+> CPC
+
+EC
+
+››› pC ´ C
+
+›››2F
+
+ě max 
+
+#
+
+inf 
+
+> pC
+
+sup 
+
+> CPCu
+
+EC
+
+››› pC ´ C
+
+›››2F
+
+, inf 
+
+> pC
+
+sup 
+
+> CPCv
+
+EC
+
+››› pC ´ C
+
+›››2F
+
++
+
+ě 12
+
+˜
+
+inf 
+
+> pC
+
+sup 
+
+> CPCu
+
+EC
+
+››› pC ´ C
+
+›››2F
+
+` inf 
+
+> pC
+
+sup 
+
+> CPCv
+
+EC
+
+››› pC ´ C
+
+›››2F
+
+¸
+
+.
+
+(74) Consequently, it suffices to derive the lower bounds for each term on the right-hand side of (74) above. Let us define 
+
+Pu :“
+
+!
+
+P P Rr0ˆr : PJP “ Ir , |P|0 ď s˚
+
+> u
+
+)
+
+.
+
+Then we have that 
+
+U “
+
+!
+
+Up0qP : P P Pu
+
+)
+
+,
+
+Cu “
+
+!
+
+C P Rpˆq : C “ Up0qPD ˚V˚J , P P Pu
+
+)
+
+.
+
+Hence, we can deduce that 
+
+inf 
+
+> pC
+
+sup 
+
+> CPCu
+
+EC
+
+››› pC ´ C
+
+›››2F ě inf 
+
+> pP
+
+sup 
+
+> PPPu
+
+EP
+
+›››Up0qp pP ´ PqD˚V˚J 
+
+›››2F
+
+“ inf 
+
+> pP
+
+sup 
+
+> PPPu
+
+EP
+
+›››p pP ´ PqD˚
+
+›››2F
+
+ě c2 inf 
+
+> pP
+
+sup 
+
+> PPPu
+
+EP
+
+››› pP ´ P
+
+›››2F
+
+,
+
+(75) where EP denotes expectation under C “ Up0qPD ˚V˚J . The first inequality above holds since for any estimator pC, the induced estimator pP “ Up0qJ pCV˚D˚´ 1 is the orthogonal projection of pC onto the subspace tUp0qAV ˚J : A P Rr0ˆr u and therefore cannot increase the Frobenius risk on Cu.For any P ‰ P1 P Pu, we define 
+
+C “ Up0qPD ˚V˚J ,
+
+C1 “ Up0qP1D˚V˚J .
+
+Let P be the distribution of Y under model 
+
+Y “ XC ` E.
+
+Under our model assumptions, the rows satisfy that 
+
+yi i.i.d.
+
+„ N `CJxi, σ 2Iq
+
+˘ for 1 ď i ď n. 
+
+49 Similarly, let P1 be the distribution of Y under model 
+
+Y “ XC 1 ` E.
+
+Let ¯c “ γc . Then we can deduce that 
+
+DKL 
+
+`P}P1˘ “
+
+> n
+
+ÿ
+
+> i“1
+
+DKL 
+
+`N `CJxi, σ 2Iq
+
+˘ }N `pC1qJxi, σ 2Iq
+
+˘˘ 
+
+“ 12σ2
+
+> n
+
+ÿ
+
+> i“1
+
+››pC ´ C1qJxi
+
+››22
+
+“ 12σ2
+
+››XpC ´ C1q››2F
+
+> piq
+
+ď νn 
+
+2σ2
+
+››C ´ C1››2F
+
+“ νn 
+
+2σ2
+
+›››Up0qpP ´ P1qD˚V˚J 
+
+›››2F
+
+“ νn 
+
+2σ2
+
+››pP ´ P1qD˚››2F (76) 
+
+> pii q
+
+ď ¯c2νn 
+
+2σ2
+
+››P ´ P1››2F ,
+
+where step (i) above has used Assumption 4.2, and step (ii) above has utilized the fact that d˚ 
+
+> j
+
+ď d˚ 
+
+> 1
+
+ď ¯c for all 1 ď j ď r. Hence, we have that 
+
+sup 
+
+> P‰P1
+
+DKL pP}P1q}P ´ P1}2F
+
+ď ¯c2νn 
+
+2σ2 . (77) We set k :“ ts˚
+
+> u
+
+{ru and consider the subclass of Pu defined as 
+
+Pu, 1 :“
+
+"
+
+P “
+
+„P1
+
+0
+
+ȷ
+
+P Rr0ˆr : P1 P St pk, r q
+
+*
+
+.
+
+This construction is valid since r0 ě s˚
+
+> u
+
+{r ě k, and Pu, 1 Ď Pu because each P P Pu, 1 satisfies that 
+
+|P|0 ď kr ď s˚
+
+> u
+
+.By resorting to Lemma F.3, there exist universal constants C1 ą c1 ą 0 such that for any 0 ă δ ă 1,
+
+r rpr´1q
+
+> 4
+
+´ c1
+
+δ
+
+¯kr ´ rpr`1q
+
+> 2
+
+ď N pδ; St pk, r q, } ¨ } Fq ď r rpr´1q
+
+> 4
+
+ˆ C1
+
+δ
+
+˙kr ´ rpr`1q
+
+> 2
+
+.
+
+Applying Lemma F.5 together with (77), we can show that 
+
+inf 
+
+> pP
+
+sup 
+
+> PPPu, 1
+
+EP
+
+››› pP ´ P
+
+›››2F
+
+ě c21
+
+840 C21
+
+ˆ 2σ2pkr ´ rpr ` 1q{ 2q
+
+¯c2νn ^ 1
+
+˙
+
+.
+
+It follows from s˚ 
+
+> u
+
+ě rpr ` 1q and the sample size condition (21) that 
+
+inf 
+
+> pP
+
+sup 
+
+> PPPu, 1
+
+EP
+
+››› pP ´ P
+
+›››2F
+
+ě c21
+
+840 C21
+
+ˆ σ2kr 
+
+¯c2νn ^ 1
+
+˙
+
+Á σ2s˚
+
+> u
+
+¯c2n .
+
+Consequently, from (75) we can obtain that 
+
+inf 
+
+> pC
+
+sup 
+
+> CPCu
+
+EC
+
+››› pC ´ C
+
+›››2F ě c2 inf 
+
+> pP
+
+sup 
+
+> PPPu
+
+EP
+
+››› pP ´ P
+
+›››2F ě c2 inf 
+
+> pP
+
+sup 
+
+> PPPu, 1
+
+EP
+
+››› pP ´ P
+
+›››2F Á σ2s˚
+
+> u
+
+γ2n . (78) 50 We next consider a second subclass of Pu, namely 
+
+Pu, 2 :“
+
+"
+
+P “
+
+„Ir´1 00 v
+
+ȷ
+
+P Rr0ˆr : }v}2 “ 1, |v|0 ď s
+
+*
+
+,
+
+where s :“ p s˚ 
+
+> u
+
+^ tr0{2uq ´ r ` 1. This subclass is well-defined since s ` r ´ 1 ď tr0{2u ď r0, and it is contained in Pu because pr ´ 1q ` s “ s˚ 
+
+> u
+
+^ tr0{2u ď s˚
+
+> u
+
+. In view of Lemma F.4 and the assumption of 
+
+r0 ě 4r ` 1, there exist a finite subset 
+
+tv1, . . . , vM u Ď Sr0´r`1psq
+
+and a universal constant c ą 0 such that for each j ‰ ℓ,
+
+δ
+
+2 ă } vj ´ vℓ}2 ď 2δ (79) and 
+
+log M ě c`ps˚ 
+
+> u
+
+^ tr0{2uq ´ r˘ log 
+
+ˆ r0 ´ r
+
+ps˚ 
+
+> u
+
+^ tr0{2uq ´ r
+
+˙
+
+for all 0 ă δ ď 1. (80) Let us define 
+
+Pj :“
+
+„Ir´1 00 vj
+
+ȷ
+
+P Pu, 2, j P r M s.
+
+Then it holds that for any j, ℓ ,
+
+››pPj ´ PℓqD˚››F “ d˚ 
+
+> r
+
+}vj ´ vℓ}2 “ c}vj ´ vℓ}2,
+
+where the last equality above has used our choice of D˚ with d˚ 
+
+> r
+
+“ c. Thus, in light of (79) , we have that for each j ‰ ℓ, cδ 
+
+2 ă ››pPj ´ PℓqD˚››F ď 2cδ. 
+
+Denote by Pj the distribution of Y under model 
+
+Y “ XC j ` E, Cj “ Up0qPj D˚V˚J .
+
+It follows from (76) that 
+
+max  
+
+> j‰ℓ
+
+DKL 
+
+`Pj }Pℓ˘ ď 2c2νnδ 2
+
+σ2 .
+
+Let us set 
+
+δ2 
+
+> n
+
+:“ cσ 2
+
+8c2ν ¨ ps˚ 
+
+> u
+
+^ tr0{2uq ´ rn log 
+
+ˆ r0 ´ r
+
+ps˚ 
+
+> u
+
+^ tr0{2uq ´ r
+
+˙
+
+.
+
+Then under (21), we have that 
+
+δn ď 1.
+
+Further, with the aid of (80) and the first inequality in (20), we can deduce that 
+
+log M ě 4 log 2 .
+
+Moreover, it holds that 
+
+max  
+
+> j‰ℓ
+
+DKL 
+
+`Pj }Pℓ˘ ď c
+
+4
+
+`ps˚ 
+
+> u
+
+^ tr0{2uq ´ r˘ log 
+
+ˆ r0 ´ r
+
+ps˚ 
+
+> u
+
+^ tr0{2uq ´ r
+
+˙
+
+ď 14 log M. 
+
+Then we have that max j‰ℓ DKL 
+
+`Pj }Pℓ˘ ` log 2 log M ď 12 .
+
+51 Consequently, an application of Proposition 15.12 of Wainwright (2019) gives that 
+
+inf 
+
+> pP
+
+sup 
+
+> PPPu, 2
+
+EP
+
+›››p pP ´ PqD˚
+
+›››2F
+
+ě c2
+
+32 δ2
+
+> n
+
+“ cσ 2
+
+256 ν ¨ ps˚ 
+
+> u
+
+^ tr0{2uq ´ rn log 
+
+ˆ r0 ´ r
+
+ps˚ 
+
+> u
+
+^ tr0{2uq ´ r
+
+˙
+
+Á σ2pp s˚ 
+
+> u
+
+^ tr0{2uq ´ rq
+
+n log 
+
+ˆ r0 ´ r
+
+ps˚ 
+
+> u
+
+^ tr0{2uq ´ r
+
+˙
+
+.
+
+It follows from the assumptions of min ps˚
+
+> u
+
+, s ˚ 
+
+> v
+
+q ě rpr ` 1q and r0 ě 4r ` 1 that 
+
+ps˚ 
+
+> u
+
+^ tr0{2uq ´ r ě 12 ps˚ 
+
+> u
+
+^ tr0{2uq, r0 ´ r ě 34 r0.
+
+Then we can show that 
+
+inf 
+
+> pP
+
+sup 
+
+> PPPu, 2
+
+EP
+
+›››p pP ´ PqD˚
+
+›››2F
+
+Á σ2ps˚ 
+
+> u
+
+^ tr0{2uq
+
+n log 
+
+ˆ 0.75 r0
+
+s˚ 
+
+> u
+
+^ tr0{2u
+
+˙
+
+.
+
+Combining this bound with (75), we can obtain that 
+
+inf 
+
+> pC
+
+sup 
+
+> CPCu
+
+EC
+
+››› pC ´ C
+
+›››2F
+
+ě inf 
+
+> pP
+
+sup 
+
+> PPPu
+
+EP
+
+›››p pP ´ PqD˚
+
+›››2F
+
+ě inf 
+
+> pP
+
+sup 
+
+> PPPu, 2
+
+EP
+
+›››p pP ´ PqD˚
+
+›››2F
+
+Á σ2ps˚ 
+
+> u
+
+^ tr0{2uq
+
+n log 
+
+ˆ 0.75 r0
+
+s˚ 
+
+> u
+
+^ tr0{2u
+
+˙
+
+.
+
+(81) Further, combining (78) and (81) leads to 
+
+inf 
+
+> pC
+
+sup 
+
+> CPCu
+
+EC
+
+››› pC ´ C
+
+›››2F
+
+Á σ2s˚
+
+> u
+
+γ2n ` σ2ps˚ 
+
+> u
+
+^ tr0{2uq
+
+n log 
+
+ˆ 0.75 r0
+
+s˚ 
+
+> u
+
+^ tr0{2u
+
+˙
+
+. (82) By the same token, we can deduce that 
+
+inf 
+
+> pC
+
+sup 
+
+> CPCv
+
+EC
+
+››› pC ´ C
+
+›››2F
+
+Á σ2s˚
+
+> v
+
+γ2n ` σ2ps˚ 
+
+> v
+
+^ tr0{2uq
+
+n log 
+
+ˆ 0.75 r0
+
+s˚ 
+
+> v
+
+^ tr0{2u
+
+˙
+
+. (83) Therefore, combining (82) and (83) with (74) yields that 
+
+inf 
+
+> pC
+
+sup 
+
+> CPC
+
+EC
+
+››› pC ´ C
+
+›››2F
+
+Á σ2ps˚ 
+
+> u
+
+` s˚ 
+
+> v
+
+q
+
+γ2n ` σ2
+
+ˆ s˚ 
+
+> u
+
+^ tr0{2u
+
+n log 
+
+ˆ 0.75 r0
+
+s˚ 
+
+> u
+
+^ tr0{2u
+
+˙
+
+` s˚ 
+
+> v
+
+^ tr0{2u
+
+n log 
+
+ˆ 0.75 r0
+
+s˚ 
+
+> v
+
+^ tr0{2u
+
+˙˙ 
+
+.
+
+This concludes the proof of Theorem 4.7. 52 References 
+
+T Tony Cai, Zongming Ma, and Yihong Wu. Sparse PCA: optimal rates and adaptive estimation. The Annals of Statistics , 41(237):3074–3110, 2013. Seyoung Park, Eun Ryung Lee, Hyunjin Kim, and Hongyu Zhao. Transfer learning under large-scale low-rank regression models. Journal of the American Statistical Association , pages 1–13, 2025. Stanislaw J Szarek. Nets of Grassmann manifold and orthogonal group. In Proceedings of Research Workshop on Banach Space Theory , volume 169, page 185, 1982. James Townsend, Niklas Koep, and Sebastian Weichwald. Pymanopt: a Python toolbox for optimization on manifolds using automatic differentiation. Journal of Machine Learning Research , 17(137):1–5, 2016. Yoshimasa Uematsu, Yingying Fan, Kun Chen, Jinchi Lv, and Wei Lin. SOFAR: large-scale association network learning. IEEE Transactions on Information Theory , 65(8):4924–4939, 2019. Roman Vershynin. High-Dimensional Probability: An Introduction with Applications in Data Science ,volume 47. Cambridge University Press, 2018. Vincent Vu and Jing Lei. Minimax rates of estimation for sparse PCA in high dimensions. In Artificial Intelligence and Statistics , 2012. Martin J Wainwright. High-Dimensional Statistics: A Non-Asymptotic Viewpoint , volume 48. Cambridge University Press, 2019. Yi Yu, Tengyao Wang, and Richard J Samworth. A useful variant of the Davis–Kahan theorem for statisticians. Biometrika , 102(2):315–323, 2015. 53
