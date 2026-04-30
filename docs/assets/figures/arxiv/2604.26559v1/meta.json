@@ -1,0 +1,46 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.26559v1/fig-001.webp",
+      "caption": "Figure 1: Prediction curves corresponding to melanoma and other causes of death for a future observation ∆n+1, as a function of the time Tn+1 = t at which the event occurs.",
+      "page": 6,
+      "index": 1,
+      "width": 566,
+      "height": 421
+    },
+    {
+      "url": "assets/figures/arxiv/2604.26559v1/fig-002.webp",
+      "caption": "Figure 2: Survival function for a synthetic dataset with n = 300 data points: posterior estimates obtained via the marginal algorithm (blue), true curve (orange), and KaplanMeier estimate (green); the pointwise 0.95 posterior credible band is also displayed.",
+      "page": 26,
+      "index": 2,
+      "width": 564,
+      "height": 416
+    },
+    {
+      "url": "assets/figures/arxiv/2604.26559v1/fig-003.webp",
+      "caption": "Table 1: Comparison of rescaled total variation distances between estimated and true incidence functions, and rescaled Kolmogorov distances between estimated and true subdistribution functions, for the hierarchical and the independent model, using marginal and conditional estimation approaches. Distances are averaged over 100 simulated datasets.",
+      "page": 28,
+      "index": 3,
+      "width": 902,
+      "height": 322
+    },
+    {
+      "url": "assets/figures/arxiv/2604.26559v1/fig-004.webp",
+      "caption": "Figure 3: Cause–specific incidence functions (left), subdistributions (middle) and prediction curves (right); true curves (dashed) and posterior estimates (solid), with corresponding pointwise 0.95 credible bands; estimates of subdistributions are also compared with the Aalen-Johansen estimate (dash-dotted).",
+      "page": 27,
+      "index": 4,
+      "width": 968,
+      "height": 712
+    },
+    {
+      "url": "assets/figures/arxiv/2604.26559v1/fig-005.webp",
+      "caption": "Figure 4: EBMT dataset: posterior estimates of the survival function (left), the subdistributions for the primary (GvHD) and competing (death/relapse) event types (middle), and prediction curves (right); the first two estimates are compared with the frequentist counterparts. Curves are related to patients who experienced graft from bone marrow cells.",
+      "page": 31,
+      "index": 5,
+      "width": 968,
+      "height": 718
+    }
+  ]
+}

@@ -1,0 +1,70 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.24818v1/fig-001.webp",
+      "caption": "Figure 1: Comparison of degradation curves: mc1 NUTS (left, Fig. 1a) vs. mc2 ADVI (right, Fig. 1b). Both methods yield nearly identical results, validating ADVI accuracy with 15× speedup.",
+      "page": 11,
+      "index": 1,
+      "width": 986,
+      "height": 455
+    },
+    {
+      "url": "assets/figures/arxiv/2604.24818v1/fig-002.webp",
+      "caption": "Table 3: Random Effect Model: ADVI vs. NUTS Comparison",
+      "page": 10,
+      "index": 2,
+      "width": 961,
+      "height": 431
+    },
+    {
+      "url": "assets/figures/arxiv/2604.24818v1/fig-003.webp",
+      "caption": "Table 6: Mixture Model (C = 2): ADVI vs. NUTS Comparison",
+      "page": 14,
+      "index": 3,
+      "width": 475,
+      "height": 741
+    },
+    {
+      "url": "assets/figures/arxiv/2604.24818v1/fig-004.webp",
+      "caption": "Table 4: Model Selection Grid Search (mix1 ADVI, fullrank advi, 20k iter)",
+      "page": 13,
+      "index": 4,
+      "width": 977,
+      "height": 452
+    },
+    {
+      "url": "assets/figures/arxiv/2604.24818v1/fig-005.webp",
+      "caption": "Figure 2: Comparison of random effect distributions: mc1 NUTS (left) vs. mc2 ADVI (right). Both methods yield nearly identical bimodal distributions, confirming ADVI captures the same latent subgroup structure.",
+      "page": 12,
+      "index": 5,
+      "width": 986,
+      "height": 428
+    },
+    {
+      "url": "assets/figures/arxiv/2604.24818v1/fig-006.webp",
+      "caption": "Figure 3: Comparison of pump degradation speed rankings: mc1 NUTS (left) vs. mc2 ADVI (right). Both methods yield nearly identical rankings (RMSE = 0.038), validating ADVI’s reliability for risk stratification.",
+      "page": 12,
+      "index": 6,
+      "width": 986,
+      "height": 600
+    },
+    {
+      "url": "assets/figures/arxiv/2604.24818v1/fig-007.webp",
+      "caption": "Table 1: ADVI vs. NUTS: Random Effect Model",
+      "page": 9,
+      "index": 7,
+      "width": 540,
+      "height": 225
+    },
+    {
+      "url": "assets/figures/arxiv/2604.24818v1/fig-008.webp",
+      "caption": "Table 2: ADVI vs. NUTS: Mixture Model (K = 2)",
+      "page": 9,
+      "index": 8,
+      "width": 473,
+      "height": 450
+    }
+  ]
+}

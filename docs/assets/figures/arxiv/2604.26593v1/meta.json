@@ -1,0 +1,166 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.26593v1/fig-001.webp",
+      "caption": "Figure 12: Normalised mean squared error (NMSE) per node of offline GNODE predictions over 2D bridge truss training set.",
+      "page": 15,
+      "index": 1,
+      "width": 627,
+      "height": 477
+    },
+    {
+      "url": "assets/figures/arxiv/2604.26593v1/fig-002.webp",
+      "caption": "Figure 11: Offline GNODE predictions for the bridge truss system over the training dataset, illustrating the agreement between predicted and reference responses at selected measured and unmeasured nodes.",
+      "page": 15,
+      "index": 2,
+      "width": 956,
+      "height": 482
+    },
+    {
+      "url": "assets/figures/arxiv/2604.26593v1/fig-003.webp",
+      "caption": "Figure 1: State-space transition model for virtual sensing on graphs.",
+      "page": 2,
+      "index": 3,
+      "width": 882,
+      "height": 317
+    },
+    {
+      "url": "assets/figures/arxiv/2604.26593v1/fig-004.webp",
+      "caption": "Figure 4: Block diagram of the PiGGO, showing the estimation of the state evolution function Fev (Equation (15)) via the combination of physics-based (Cphy) and data-driven (Cbb) graph convolutional operators.",
+      "page": 7,
+      "index": 4,
+      "width": 968,
+      "height": 493
+    },
+    {
+      "url": "assets/figures/arxiv/2604.26593v1/fig-005.webp",
+      "caption": "Figure 5: Block diagram of the graph extended Kalman filter.",
+      "page": 10,
+      "index": 5,
+      "width": 968,
+      "height": 418
+    },
+    {
+      "url": "assets/figures/arxiv/2604.26593v1/fig-006.webp",
+      "caption": "Figure 8",
+      "page": 14,
+      "index": 6,
+      "width": 964,
+      "height": 482
+    },
+    {
+      "url": "assets/figures/arxiv/2604.26593v1/fig-007.webp",
+      "caption": "Figure 9",
+      "page": 14,
+      "index": 7,
+      "width": 951,
+      "height": 231
+    },
+    {
+      "url": "assets/figures/arxiv/2604.26593v1/fig-008.webp",
+      "caption": "Figure 2: The two phases of message-passing in GNNs. Left: Initial message computation phase, where messages are computed on each edge. Right: Aggregation and update phase, where messages from neighbours are combined and the node’s features are updated. The design choices for these two operations define different GNN variants.",
+      "page": 3,
+      "index": 8,
+      "width": 736,
+      "height": 329
+    },
+    {
+      "url": "assets/figures/arxiv/2604.26593v1/fig-009.webp",
+      "caption": "Figure 18: Normalised mean squared error (NMSE) per node of online GNODE predictions over 2D bridge trust testing set.",
+      "page": 18,
+      "index": 9,
+      "width": 934,
+      "height": 477
+    },
+    {
+      "url": "assets/figures/arxiv/2604.26593v1/fig-010.webp",
+      "caption": "Figure 17: Bridge truss online GNODE predictions over testing set",
+      "page": 18,
+      "index": 10,
+      "width": 956,
+      "height": 482
+    },
+    {
+      "url": "assets/figures/arxiv/2604.26593v1/fig-011.webp",
+      "caption": "Table 2: Problem testing assortment.",
+      "page": 13,
+      "index": 11,
+      "width": 980,
+      "height": 286
+    },
+    {
+      "url": "assets/figures/arxiv/2604.26593v1/fig-012.webp",
+      "caption": "Figure 19: Bridge truss online GEKF predictions over testing set",
+      "page": 19,
+      "index": 12,
+      "width": 964,
+      "height": 482
+    },
+    {
+      "url": "assets/figures/arxiv/2604.26593v1/fig-013.webp",
+      "caption": "Figure 20: Normalised mean squared error (NMSE) per node of online GEKF predictions over 2D bridge truss testing set.",
+      "page": 19,
+      "index": 13,
+      "width": 934,
+      "height": 476
+    },
+    {
+      "url": "assets/figures/arxiv/2604.26593v1/fig-014.webp",
+      "caption": "Figure 15: Sobol array online GEKF predictions over testing set",
+      "page": 17,
+      "index": 14,
+      "width": 964,
+      "height": 482
+    },
+    {
+      "url": "assets/figures/arxiv/2604.26593v1/fig-015.webp",
+      "caption": "Figure 14: Normalised mean squared error (NMSE) per node of online GNODE predictions over 2D sobol array testing set.",
+      "page": 17,
+      "index": 15,
+      "width": 946,
+      "height": 228
+    },
+    {
+      "url": "assets/figures/arxiv/2604.26593v1/fig-016.webp",
+      "caption": "Figure 16: Normalised mean squared error (NMSE) per node of online GEKF predictions over 2D random array testing set.",
+      "page": 17,
+      "index": 16,
+      "width": 948,
+      "height": 229
+    },
+    {
+      "url": "assets/figures/arxiv/2604.26593v1/fig-017.webp",
+      "caption": "Figure 6: Example of the random truss array with (Left) the spring mass model, where the boundary connections are shown in red and (Right) the equivalent graph model, where the boundary conditions are shown with red self-loops. The orange nodes represent those which are unmeasured.",
+      "page": 12,
+      "index": 17,
+      "width": 832,
+      "height": 375
+    },
+    {
+      "url": "assets/figures/arxiv/2604.26593v1/fig-018.webp",
+      "caption": "Figure 21: Comparison of averaged NMSE values for different combinations of training sparsity, testing sparsity and prediction model for the Sobol array and bridge truss systems.",
+      "page": 20,
+      "index": 18,
+      "width": 923,
+      "height": 606
+    },
+    {
+      "url": "assets/figures/arxiv/2604.26593v1/fig-019.webp",
+      "caption": "Figure 3: Block diagram of the Graph Neural ODE (GNODE) model, showing the input encoding Fin, continuous-time state evolution governed by Fev on the graph, and the observation mapping Fo used to recover measurable quantities.",
+      "page": 5,
+      "index": 19,
+      "width": 968,
+      "height": 379
+    },
+    {
+      "url": "assets/figures/arxiv/2604.26593v1/fig-020.webp",
+      "caption": "Figure 13: Sobol array online GNODE predictions over testing set",
+      "page": 16,
+      "index": 20,
+      "width": 964,
+      "height": 480
+    }
+  ]
+}

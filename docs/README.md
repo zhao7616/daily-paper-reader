@@ -6,56 +6,64 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-04-29
-- 运行时间：2026-04-29 20:54:10 UTC
+- 最新运行日期：2026-04-30
+- 运行时间：2026-04-30 20:06:58 UTC
 - 运行状态：成功
-- 本次总论文数：11
-- 精读区：0
+- 本次总论文数：14
+- 精读区：3
 - 速读区：11
 
 ### 今日简报（AI）
-- 今日共生成 11 篇推荐（精读 0 篇，速读 11 篇）
-- 速读：《Trajectory-Aware Reliability Modeling of Democratic Systems》（7.5/10）, 《Avionic Main Fuel Pump Simulation and Fault-Diagnosis Benchmark》（7.5/10）, 《Probabilistic Hazard Analysis Framework with Stochastic Optimal Control for Deteriorating Civil Infrastructure Systems》（7.5/10）
-- 这些结果覆盖了当下较热的方向，建议先看精读区论文的关键问题与方法。
-- 详情：[/202604/29/README](/202604/29/README)
+今日精选14篇前沿论文，深度聚焦物理引导的AI模型在复杂系统感知与安全预测中的突破。
+重点推荐结合图卡尔曼滤波的非线性结构虚拟传感，以及物理增强深度学习在锂电池热失控预警中的应用。
+建议关注物理规律与神经网络融合的跨界趋势，特别是其在数字孪生与跨模态故障诊断中的落地潜力。
+- 详情：[/202604/30/README](/202604/30/README)
 
 ### 精读区论文标签
-- 本次无精读推荐。
+1. [PiGGO: Physics-Guided Learnable Graph Kalman Filters for Virtual Sensing of Nonlinear Dynamic Structures under Uncertainty](/202604/30/2604.26593v1-piggo-physics-guided-learnable-graph-kalman-filters-for-virtual-sensing-of-nonlinear-dynamic-structures-under-uncertainty)  
+   标签：评分：9.0/10、query:phm
+   evidence：工程系统诊断和预测任务的数字孪生
+2. [Physics-Enhanced Deep Learning for Proactive Thermal Runaway Forecasting in Li-Ion Batteries](/202604/30/2604.20175v1-physics-enhanced-deep-learning-for-proactive-thermal-runaway-forecasting-in-li-ion-batteries)  
+   标签：评分：8.5/10、query:rul
+   evidence：电池热失控的主动预测
+3. [Avionic Main Fuel Pump Simulation and Fault-Diagnosis Benchmark](/202604/30/2604.22869v1-avionic-main-fuel-pump-simulation-and-fault-diagnosis-benchmark)  
+   标签：评分：8.0/10、query:phm
+   evidence：燃油泵故障诊断基准与健康标注
 
 ### 速读区论文标签
-1. [Trajectory-Aware Reliability Modeling of Democratic Systems](/202604/29/2604.20127v1-trajectory-aware-reliability-modeling-of-democratic-systems)  
+1. [Principled Estimation and Prediction with Competing Risks: a Bayesian Nonparametric Approach](/202604/30/2604.26559v1-principled-estimation-and-prediction-with-competing-risks-a-bayesian-nonparametric-approach)  
    标签：评分：7.5/10、query:rul
-   evidence：随时间推移的渐进退化和失效风险的可靠性建模
-2. [Avionic Main Fuel Pump Simulation and Fault-Diagnosis Benchmark](/202604/29/2604.22869v1-avionic-main-fuel-pump-simulation-and-fault-diagnosis-benchmark)  
-   标签：评分：7.5/10、query:phm
-   evidence：航空燃油泵故障诊断与健康状态监测的物理信息仿真基准。
-3. [Probabilistic Hazard Analysis Framework with Stochastic Optimal Control for Deteriorating Civil Infrastructure Systems](/202604/29/2604.23068v1-probabilistic-hazard-analysis-framework-with-stochastic-optimal-control-for-deteriorating-civil-infrastructure-systems)  
-   标签：评分：7.5/10、query:phm
-   evidence：退化建模与全寿命周期优化
-4. [SMART: A Spectral Transfer Approach to Multi-Task Learning](/202604/29/2604.20161v1-smart-a-spectral-transfer-approach-to-multi-task-learning)  
+   evidence：用于可靠性理论和具有竞争风险的生存分析的贝叶斯非参数方法
+2. [Optimal sequential decision-making for error propagation mitigation in digital twins](/202604/30/2604.22168v1-optimal-sequential-decision-making-for-error-propagation-mitigation-in-digital-twins)  
    标签：评分：7.0/10、query:phm
-   evidence：多任务学习的光谱迁移方法
-5. [Transferable Physics-Informed Representations via Closed-Form Head Adaptation](/202604/29/2604.21761v1-transferable-physics-informed-representations-via-closed-form-head-adaptation)  
+   evidence：用于推断数字孪生中潜在错误状态和维护决策的HMM和MDP
+3. [CUJBench: Benchmarking LLM-Agent on Cross-Modal Failure Diagnosis from Browser to Backend](/202604/30/2604.23455v1-cujbench-benchmarking-llm-agent-on-cross-modal-failure-diagnosis-from-browser-to-backend)  
+   标签：评分：7.0/10、query:phm
+   evidence：从症状到后端信号的跨模态故障诊断基准测试
+4. [Task-guided Spatiotemporal Network with Diffusion Augmentation for EEG-based Dementia Diagnosis and MMSE Prediction](/202604/30/2604.23964v1-task-guided-spatiotemporal-network-with-diffusion-augmentation-for-eeg-based-dementia-diagnosis-and-mmse-prediction)  
+   标签：评分：7.0/10、query:phm
+   evidence：利用多任务学习进行诊断和MMSE预测的联合建模
+5. [Heterogeneous Variational Inference for Markov Degradation Hazard Models: Discretized Mixture with Interpretable Clusters](/202604/30/2604.24818v1-heterogeneous-variational-inference-for-markov-degradation-hazard-models-discretized-mixture-with-interpretable-clusters)  
+   标签：评分：7.0/10、query:rul
+   evidence：用于识别设备风险集群的马尔可夫退化风险模型
+6. [A Hidden Markov Framework for Physically Interpretable Arc Stability Dynamics in Welding Systems](/202604/30/2604.21839v1-a-hidden-markov-framework-for-physically-interpretable-arc-stability-dynamics-in-welding-systems)  
    标签：评分：6.5/10、query:rul
-   evidence：物理信息表示用于物理现象
-6. [Minimax Optimal Procedures for Joint Detection and Estimation](/202604/29/2604.22740v1-minimax-optimal-procedures-for-joint-detection-and-estimation)  
+   evidence：用于估计运行状态演变和稳定性动态的隐马尔可夫模型框架
+7. [Minimax Optimal Procedures for Joint Detection and Estimation](/202604/30/2604.22740v1-minimax-optimal-procedures-for-joint-detection-and-estimation)  
    标签：评分：6.5/10、query:phm
    evidence：不确定性下的联合检测与估计
-7. [Probabilistic Graphical Model using Graph Neural Networks for Bayesian Inversion of Discrete Structural Component States](/202604/29/2604.23514v1-probabilistic-graphical-model-using-graph-neural-networks-for-bayesian-inversion-of-discrete-structural-component-states)  
+8. [Probabilistic Hazard Analysis Framework with Stochastic Optimal Control for Deteriorating Civil Infrastructure Systems](/202604/30/2604.23068v1-probabilistic-hazard-analysis-framework-with-stochastic-optimal-control-for-deteriorating-civil-infrastructure-systems)  
    标签：评分：6.5/10、query:rul
-   evidence：组件健康状况和性能退化状态
-8. [AC-SINDy: Compositional Sparse Identification of Nonlinear Dynamics](/202604/29/2604.18889v1-ac-sindy-compositional-sparse-identification-of-nonlinear-dynamics)  
+   evidence：退化与结构损伤累积建模
+9. [Trajectory-Aware Reliability Modeling of Democratic Systems](/202604/30/2604.20127v1-trajectory-aware-reliability-modeling-of-democratic-systems)  
    标签：评分：6.0/10、query:rul
-   evidence：非线性系统的潜状态推理与共享动力学
-9. [Enhancing Science Classroom Discourse Analysis through Joint Multi-Task Learning for Reasoning-Component Classification](/202604/29/2604.21137v1-enhancing-science-classroom-discourse-analysis-through-joint-multi-task-learning-for-reasoning-component-classification)  
+   evidence：基于复杂系统中逐渐退化和应力传播的可靠性建模
+10. [Text-Guided Multimodal Unified Industrial Anomaly Detection](/202604/30/2604.22899v1-text-guided-multimodal-unified-industrial-anomaly-detection)  
    标签：评分：6.0/10、query:phm
-   evidence：用于分类维度的联合多任务学习
-10. [Multi-Task Optimization over Networks of Tasks](/202604/29/2604.21991v1-multi-task-optimization-over-networks-of-tasks)  
-   标签：评分：6.0/10、query:phm
-   evidence：任务网络上的多任务优化
-11. [Text-Guided Multimodal Unified Industrial Anomaly Detection](/202604/29/2604.22899v1-text-guided-multimodal-unified-industrial-anomaly-detection)  
-   标签：评分：6.0/10、query:phm
-   evidence：统一的工业异常检测框架
+   evidence：统一的多模态工业异常检测框架
+11. [TEMPO: Transformers for Temporal Disease Progression from Cross-Sectional Data](/202604/30/2604.23368v1-tempo-transformers-for-temporal-disease-progression-from-cross-sectional-data)  
+   标签：评分：6.0/10、query:rul
+   evidence：时间疾病进展与分期
 
 
 <div class="dpr-home-promo-card">
