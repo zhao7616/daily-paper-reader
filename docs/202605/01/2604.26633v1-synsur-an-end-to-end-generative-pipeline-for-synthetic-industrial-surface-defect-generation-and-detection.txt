@@ -1,0 +1,279 @@
+Title: SynSur: An end-to-end generative pipeline for synthetic industrial surface defect generation and detection
+
+URL Source: https://arxiv.org/pdf/2604.26633v1
+
+Published Time: Thu, 30 Apr 2026 00:59:25 GMT
+
+Number of Pages: 13
+
+Markdown Content:
+# SYN SUR : A N END -TO -END GENERATIVE PIPELINE FOR SYNTHETIC INDUSTRIAL SURFACE DEFECT GENERATION AND DETECTION 
+
+Paul Julius Kühn 
+
+Fraunhofer IGD, 64283 Darmstadt, Germany 
+
+Mika Pommeranz 
+
+Fraunhofer IGD, 64283 Darmstadt, Germany 
+
+Arjan Kuijper 
+
+Fraunhofer IGD, 64283 Darmstadt, Germany 
+
+Saptarshi Neil Sinha 
+
+Fraunhofer IGD, 64283 Darmstadt, Germany 
+
+# ABSTRACT 
+
+The bottleneck in learning-based industrial defect detection is often limited not by model capacity, but by the scarcity of labeled defect data: defects are rare, annotations are expensive, and collecting balanced training sets is slow. We present an end-to-end pipeline for synthetic defect generation and annotation, combining Vision-Language-Model–based prompts, LoRA-adapted diffusion, mask-guided inpainting, and sample filtering with automatic label derivation, and demonstrates the potential of real data with realistic synthetic samples to overcome data scarcity. The evaluation is conducted on, a challenging dataset of pitting defects on ball screw drives, and then on a subset of the Mobile phone screen surface defect segmentation dataset (MSD) dataset to test cross-domain transfer. Be-yond downstream detector performance, we analyze key stages of the pipeline, including prompt construction, LoRA selection, and sample filtering with DreamSim and CLIPScore, to understand which synthetic samples are both realistic and useful. Experiments with YOLOv26, YOLOX, and LW-DETR show that synthetic-only training does not replace real data. When combined with real data, synthetic defects can preserve performance and yield modest gains in selected BSData training regimes. The MSD transfer study shows that the overall pipeline structure carries over to a second in-dustrial inspection domain, while also highlighting the importance of domain-specific adaptation and annotation-quality control. Overall, the paper provides an end-to-end assessment of diffusion-based industrial defect synthesis and shows that its strongest value lies in strengthening scarce real datasets rather than substituting for them. 
+
+Keywords Generative AI · Synthetic defect generation · Next generation automation · Automatic visual inspection 
+
+# 1 Introduction 
+
+Deep learning has significantly advanced visual defect detection in industrial quality assurance [ 13 ]. However, these methods require large amounts of labeled data, which is difficult to obtain in practice: defects occur rarely, and annotation demands expert knowledge. The resulting small, imbalanced datasets limit model robustness and generalization [ 20 , 13 ]. Synthetic data generation offers a promising solution. Traditional approaches rely on 3D rendering pipelines [ 11 , 46 ,47 , 40 ] that provide explicit control over defect geometry and automatic labeling, but require detailed scene models and substantial manual effort [ 3]. Moreover, the sim-to-real gap–caused by differences in texture, lighting, and sensor characteristics–often degrades detection performance on real data [13]. Diffusion models present a data-driven alternative that can learn defect appearance directly from images and support controllable editing. Despite this potential, diffusion-based defect synthesis remains underexplored in industrial inspection [ 3, 13 ], particularly pipelines that combine automated prompt generation, mask-guided synthesis, and 
+
+> arXiv:2604.26633v1 [cs.CV] 29 Apr 2026
+
+A PREPRINT - A PRIL 30, 2026 automatic annotation for object detection. The main challenge in this approach is to support a pipeline that generates the desired defect conditionally and consistently . Hence in this work, we propose an end-to-end pipeline that derives an initial defect prompt from a Vision-Language Model (VLM), adapts a diffusion backbone with LoRA [ 18 ], inserts defects by mask-guided inpainting, filters the generated patches, and derives detection labels automatically. Furthermore, this enables us to evaluate how far diffusion-based models can be used as a practical source of training data when real annotations are scarce. We evaluate the pipeline on BSData [ 38 ], an industrial dataset of pitting defects on ball screw drives, analyze both the visual quality of the generated defects and their utility for downstream detection, and extend the study with a cross-dataset evaluation on the scratch subset of Mobile Phone Screen Surface Defect Dataset (MSD) [ 52 ]to assess which stages transfer to a second defect domain. Our main contributions are: • An end-to-end pipeline for industrial defect synthesis and annotation that combines VLM-based prompt generation, LoRA-adapted diffusion, mask-guided inpainting, sample filtering, and automatic label derivation for detector training. To enable reproducibility, we will release the synthetic defect generation code and all data used in our evaluations upon acceptance of the paper. • A systematic analysis of prompt construction, LoRA selection, and synthetic sample filtering on BSData [ 38 ], linking synthetic defect quality to downstream detection utility. • We evaluated our approach against baseline detectors that employ both CNN- and transformer-based architec-tures across combinations of real-only, synthetic-only, mixed, and union training regimes. Our results show that synthetic data is most effective as augmentation when real data is scarce. Additionally, we conducted an A-transfer study on MSD [ 52 ] to assess pipeline portability to a second defect domain and to underscore the importance of domain-specific annotation quality. 
+
+# 2 Related Work 
+
+Deep Learning for Defect Detection. Deep learning methods dominate industrial defect detection. One-stage detectors such as YOLO [ 31 ] and its variants [ 32 , 6, 37 ] remain attractive for real-time inspection, while transformer-based models derived from DETR [ 8, 54 , 28 , 9, 33 ] offer an alternative set of inductive biases. Unsupervised anomaly detection methods such as PatchCore [ 35 ] and reconstruction-based approaches [ 4] address settings with few or no defect samples, but supervised detection performance still depends strongly on data quantity and class balance [ 3 , 13 ]. This motivates synthetic data generation as a practical complement when annotated industrial defects are scarce. 
+
+Simulation-Based Synthesis. 3D rendering pipelines generate synthetic data by modeling geometry, materials, and illumination, while providing ground truth labels automatically [ 49 ]. Domain randomization [ 45 ] mitigates sim-to-real mismatch by varying textures, lighting, and camera parameters and has been effective for tasks such as detection [ 46 ]and pose estimation [ 47 ]. Modern frameworks such as BlenderProc [ 11 ] make these pipelines more accessible. In industrial inspection, however, simulation still requires detailed scene models and material calibration, and the remaining domain gap can limit transfer to real sensor data. 
+
+Image-Based Synthesis. Image-based synthesis creates defects through copy-paste, patch insertion, or procedu-ral perturbation [ 19 , 22 ]. CutPaste [ 23 ] and DRAEM [ 51 ] showed that synthetic anomalies can support anomaly detection even without real defect samples. GAN-based approaches, including pix2pix [ 42 ], CycleGAN [ 55 ], and DefectGAN [ 27 ], extend this idea to learned defect generation. Their main limitation is that defect insertion and defect-background interaction are often not realistic enough for reliable supervised detection gains without additional filtering or blending [29]. 
+
+Generative Synthesis. Diffusion models [ 17 , 34 ] have become strong generative backbones and often surpass GANs in visual fidelity [ 12 ]. Control mechanisms such as ControlNet [ 53 ] and personalization methods such as DreamBooth [ 36 ]and LoRA [ 18 ] make them suitable for domain-specific synthesis from limited data. In industrial inspection, recent work uses inpainting and few-shot diffusion for realistic defect insertion [ 41 , 43 , 44 , 1 ]. However, the downstream value of diffusion-generated defects still depends strongly on prompt quality, spatial control, and sample selection [ 2, 29 , 39 ]. Existing work typically emphasizes individual aspects such as realism, few-shot generation, or augmentation effects. Our focus is to study these components jointly by combining VLM-based prompt construction, mask-guided inpainting, LoRA-based adaptation, filtering, and automatic annotation inside a single end-to-end pipeline for object detection training. 
+
+Vision-Language Models for Prompt Generation. Vision-Language Models (VLMs) enable automatic extraction of textual image descriptions. Following aligned vision-language representations such as CLIP [ 30 ], models including BLIP-2 [ 24 ], LLaVA [ 26 ], InstructBLIP [ 10 ], and Qwen2-VL [ 48 ] provide increasingly detailed multimodal under-standing. In diffusion-based generation, VLMs can replace manual prompt engineering by extracting domain-specific attributes directly from images. This is particularly relevant for industrial inspection, where defect appearance is visually subtle and difficult to describe consistently by hand. Although VLMs have been used for image captioning and retrieval, their application to prompt construction for industrial defect synthesis remains underexplored. 2A PREPRINT - A PRIL 30, 2026 
+
+# 3 Methodology 
+
+Fig. 1 summarizes the end-to-end synthetic defect generation pipeline. We first extract defect patches for prompt construction and LoRA [ 18 ] training. Synthetic masks derived from real annotations then define the inpainting regions for Flux.1-dev [ 5, 21 ] with the adapted LoRA [ 18 ]. Candidate patches are then filtered with DreamSim [ 14 ] and CLIPScore [16] before SAM 3 [7] segments the generated defects for blending and automatic annotation. Small set of  
+
+> representative
+> real defect data
+> Prompt generation
+> utilizing real defect
+> data and vision
+> language models
+> Finetune
+> diffusion -based
+> models utilizing
+> LoRA
+> Defect inpainting
+> based on random
+> mask generated
+> Data filtering
+> and automatic
+> labeling utilizing
+> SAM3
+> High contrast scratch
+> defect on dark glass
+> display ….
+
+Figure 1: Overview of the proposed end-to-end pipeline for synthetic defect data generation. From left to right: data preparation, prompt construction, LoRA fine-tuning, inpainting-based defect generation, defect segmentation, image blending, and automated annotation. 
+
+3.1 Pipeline for synthetic defect generation 
+
+The individual steps of our synthetic defect generation pipeline (Fig. 1) is presented below in detail: 
+
+Prompt Generation. Text prompts guide the diffusion-based synthesis. We derive an initial prompt semi-automatically with Qwen2-VL [ 48 ], which processes batches of defect patches and returns structured tags describing material properties, defect appearance, and imaging conditions. The prompt is assembled from the most frequent tags after light pruning of overly generic descriptors and used for both LoRA [18] training and inpainting. 
+
+Low Rank-Adaptation (LoRA). Prompts alone are insufficient for realistic defect synthesis because general-purpose diffusion models do not reliably capture industrial surface structure. We therefore adapt Flux.1-dev [ 5 ] using LoRA [ 18 ]. We compare two training strategies: (1) random sampling , which uses 100 randomly selected defect patches, and (2) size-binned sampling , which trains three separate LoRAs on small, medium, and large defects with 100 samples each. All variants use identical hyperparameters and train for 2,000 steps. Model selection is based on DreamSim [ 14 ]and CLIPScore [16], as detailed in Section 4.2. 
+
+Mask Generation and Inpainting. Inpainting masks define the synthesis region. We derive them from real training annotations to preserve realistic defect shapes. For additional variation, masks are randomly scaled ( ×0.8–1.2) and shifted ( ±50 px). This yields 1,000 single-defect binary masks, with 500 masks for each image resolution (Fig. 2a). Synthetic defects are generated with Flux.1-dev [ 5, 21 ] and the selected LoRA [ 18 ]. For each sample, a defect-free image 2b is cropped around the mask region and resized to 1024 ×1024 px with contextual padding of approximately twice the defect area. The model receives the background patch, mask, and prompt and generates a synthetic defect in 30 sampling steps (Fig. 2c). We generate 1,000 candidate patches from varied defect-free images, masks, and random seeds. From this pool, we retain 420 patches, corresponding to approximately twice the number of real defect patches in the training split, based on DreamSim [14] and CLIPScore [16].   
+
+> (a) (b) (c)
+
+Figure 2: Synthetic mask (a) corresponding defect-free crop (b) , and defect patch (c) generated from inputs (a) and (b) .
+
+Label derivation. Since inpainting may introduce background artifacts, SAM 3 [ 7] refines the generated defect masks 3A PREPRINT - A PRIL 30, 2026 for BSData [ 38 ] using the mask bounding box and a text cue. The resulting masks are smoothed with Gaussian blur for seamless blending into defect-free images. Annotations are generated in COCO [25] format. 
+
+3.2 Training Setup 
+
+We evaluate three detectors—YOLOX [ 15 ], YOLOv26 [ 37 ], and LW-DeTr [ 9]— under identical configurations to assess synthetic data utility. 
+
+Detection Models. We evaluate YOLOX-S(9.0M) [ 15 ] and YOLOv26-S(9.5M) [ 37 ] as one-stage CNN baselines, and LW-DeTr-t(12M) [ 9] as a lightweight transformer alternative. All models use pretrained initialization from the COCO dataset [ 25 ]. Evaluating both architecture families allows assessing whether synthetic data benefits generalize across detector families with different inductive biases. 
+
+Training Configurations. We compare real-only (100/0), synthetic-only (0/100), mixed (75/25, 50/50, 25/75), and union (100/100, 100/200) training configurations. Here, R/S denotes the amount of real and synthetic training data relative to the full real training split, in %. Results are averaged over three runs with different random seeds (mean ±
+
+std). 
+
+# 4 Evaluation 
+
+We evaluate the proposed pipeline along these dimensions: dataset characteristics, synthetic defect quality by optimizing LoRA variant selection and prompt construction, downstream detection performance, and cross-domain transferability. In order to evaluate these dimensions we perform both qualitative and quantitative analysis and provide a final qualitative analysis to summarize our results. We first characterize BSData [ 38 ] scratch subset, then select the appropriate LoRA [ 18 ] variant, analyze synthetic sample quality, detector performance under varying real/synthetic data mixtures, and transfer to a second industrial inspection domain utilizing the MSD dataset [52]. 
+
+4.1 Dataset analysis BSData. [ 38 ] is an industrial surface defect dataset containing close-up images of ball screw drive spindles with pitting defects. The dataset comprises 1,104 images with 394 pixel-level segmentation masks captured under realistic laboratory conditions. Detection is challenging due to the small size and low contrast of defects. Fig. 3 shows an example image ( a) with corresponding annotations ( b).  
+
+> (a) Multiple pitting defects. (b) Corresponding segmentation mask.
+
+Figure 3: Examples of pitting defects on a ball screw drive spindle (a) and corresponding defect segmentation masks 
+
+(b) [38]. We filter the dataset to the two most frequent resolutions ( 1130 ×460 and 1540 ×645 pixels) for consistent processing, resulting in 1,035 images: 710 defect-free and 325 defective, containing 357 annotated defect instances leading to a training data distribution of 65/15/20%. Most defective images contain a single defect (299), while 20 contain two and 6 contain three instances. We analyze the spatial distribution of defects in the retained images in Fig. 4a and 4b, which shows a strong bias toward the upper left quadrant, likely due to the recording setup. This non-uniform distribution motivates our mask generation strategy in Sec. 4.2 to ensure realistic defect placement. We extract defect patches from training images using segmentation masks for prompt generation, LoRA [ 18 ] fine-tuning, and quality evaluation. Each instance is cropped with surrounding context and resized to 1024 ×1024 px; when multiple defects overlap, only the largest is retained. This yields 221 patches (Fig. 4c). We provide a more detailed analysis of defect size and shape characteristics in the supplementary material (Sec. ?? ). 4A PREPRINT - A PRIL 30, 2026   
+
+> (a) (b) (c)
+
+Figure 4: Heatmaps of defect locations for the two retained image resolutions ( 1130 × 460 (a) and 1540 × 645 (b) 
+
+respectively). (c) shows an example of a cropped defect patch. Defects are predominantly located in the upper left quadrant. 
+
+Figure 5: Data samples with multiple scratches (left) and a single scratch (right) .
+
+MSD. [ 52 ] contains 1,200 images with three defect types: oil, scratch, and stain (400 images each). For cross-dataset evaluation, we use only the scratch subset to assess pipeline transferability to a different defect type and domain (Fig. 5). We split MSD [ 52 ] using the same ratios as BSData [ 38 ], yielding 260 training, 60 validation, and 80 test images, with 890 scratch instances in the training set. Randomly selected 20 defect-free images are used for inpainting. Scratches are elongated and spread across the display area. For LoRA [ 18 ] training we use 100 randomly sampled patches and preprocess them as described for BSData [38]. 
+
+4.2 Selection of LoRA variant based on defect quality 
+
+This section presents how we selected the optimal LoRA [ 18 ] variant that is employed by our synthetic defect generation pipeline which finally used in downstream detection training. We evaluate multiple LoRA training strategies for adapting Flux.1-dev [ 5 , 21 ] to faithfully reproduce pitting defect characteristics found in BSData [ 38 ], aiming to balance domain-consistent defect morphology with prompt adherence. All variants follow the training procedure described in Sec. 3.1. 
+
+Qualitative comparison. During training, we generate intermediate samples every 400 steps with the final prompt to monitor convergence and detect failure modes early. Fig. 6 shows representative outputs of the four LoRA [ 18 ] variants after 2,000 training steps, including the random strategy and the three size-binned variants. Visual inspection provides an initial indication of domain alignment, but final model selection is based on quantitative evaluation.    
+
+> (a) Random. (b) Small. (c) Medium. (d) Large.
+
+Figure 6: Representative outputs of the four LoRA [ 18 ] variants after 2,000 training steps using a fixed prompt. The random (a) and large-defect (d) variants produce the most plausible BSData-like morphology. 
+
+Quantitative comparison. We generate synthetic patches with each LoRA variant and evaluate them using Dream-5A PREPRINT - A PRIL 30, 2026 Sim [ 14 ] (perceptual similarity to real patches) and CLIPScore [ 16 ] (prompt alignment). For DreamSim we report the minimum distance to the nearest real patch ( min_dist ) and the mean distance to the k=3 nearest neighbours (mean_k_dist ). The size-binned strategy produces 20 samples per bucket (60 total); the random strategy is evaluated on an equal number under identical settings. Tab. 1 summarizes the results. The LoRA trained on large defects achieves the best overall performance, yielding the highest mean and median CLIPScore as well as the lowest DreamSim distances for both metrics. The medium bucket is competitive only in median mean_k_dist . These results indicate that training on larger patches produces a LoRA that better captures both prompt semantics and real defect appearance. Best value per metric column is orange .                                     
+
+> Bucket nCLIPScore mean ±std ↑CLIPScore median ↑min_dist mean ↓mean_k_dist mean ↓mean_k_dist med. ↓
+> small 20 26.0971 ±1.0242 26.2082 0.2193 0.2275 0.2242 medium 20 26.8142 ±1.6936 27.1947 0.2204 0.2293 0.2128
+> large 20 27.9290 ±1.4032 27.7938 0.2079 0.2158 0.2167
+
+Table 1: BSData [ 38 ] LoRA [ 18 ] comparison for the size-binned strategy (mean ± std; n = 20 per bucket). Best value per metric column is bold. 
+
+Discussion and LoRA Selection. Tab. 2 compares the random LoRA[ 18 ] with the aggregated size-binned strategy over n = 60 samples each. The random variant achieves higher mean and median CLIPScore [ 16 ], indicating stronger prompt alignment, while the size-binned strategy yields only marginally lower mean DreamSim [ 14 ] distances. Based on these results, we select the random LoRA for downstream synthesis: it offers the strongest prompt consistency, remains competitive in perceptual similarity, and is operationally simpler as it does not require size-specific model selection at generation time. Fig. 7 shows a representative synthetic sample produced with the selected LoRA alongside its nearest real training patches according to DreamSim distance. We use the random LoRA in all subsequent experiments.                              
+
+> Strategy nCLIPScore mean ±std ↑CLIPScore median ↑min_dist mean ↓mean_k_dist mean ↓mean_k_dist med. ↓
+> random 60 27.6974 ±1.3535 27.9839 0.2186 0.2248 0.2169
+> size 60 26.9468 ±1.5727 26.8120 0.2159 0.2242 0.2176
+
+Table 2: BSData [ 38 ] LoRA [ 18 ] comparison between the random and aggregated size-binned strategies ( n = 60 
+
+samples per strategy). Best value per metric column is bold. Synthetic sample  Real samples 
+
+Figure 7: A synthetic defect sample generated by the top-performing LoRA [ 18 ] model, selected based on CLIPScore 
+
+(left) , alongside its three nearest neighbors from the training set, retrieved using DreamSim [ 14 ] perceptual distance 
+
+(right) . This comparison validates that the generated sample exhibits visual diversity and is not merely replicating training data. 
+
+4.3 Prompt construction and filtering based on defect quality 
+
+We next analyze prompt construction and sample filtering for BSData [ 38 ], with particular emphasis on Qwen2-VL [ 48 ]-based tag extraction and ranking by DreamSim [14] and CLIPScore [16]. 
+
+Prompt Construction. Prompts are derived through automatic tag extraction using Qwen2-VL [ 48 , 50 ]. The model processes batches of four defect patches and returns up to 15 tags describing material properties, defect morphology, texture, and recording conditions. Tags are aggregated across all batches, ranked by frequency, and lightly pruned to suppress overly generic terms. The final conditioning string (Fig. 8) is assembled from the most informative descriptors, ordered by scene, defect type, texture, and recording conditions. 6A PREPRINT - A PRIL 30, 2026 
+
+Resulting prompt: 
+
+pitting defect on galvanized steel, irregular pitted surface, rough grainy texture, dark pits, subtle metallic sheen, close-up industrial inspection photo, shallow depth of field, low contrast, dim diffuse lighting, shadowed edges, horizontal striations 
+
+Figure 8: BSData [ 38 ] prompt derived from frequent Qwen [ 48 ] tags and light manual pruning. The prompt emphasizes material, morphology, texture, and recording conditions relevant to pitting defects. 
+
+Data Generation. For BSData [ 38 ], we generate 1,000 candidate defect patches via mask-guided inpainting with Flux.1-dev [ 5 , 21 ] and the selected LoRA [ 18 ]. We then filter this pool using DreamSim [ 14 ] and CLIPScore [ 16 ] to balance perceptual similarity and prompt fidelity. 
+
+4.4 Detection Performance 
+
+We evaluate the effect of synthetic data on downstream defect detection by training each detector under the configurations described in Sec. 3.2 and testing on the fixed BSData [ 38 ] test split. All results are reported as mean ± standard deviation over three runs. Best value per metric column is orange , 2nd best yellow . 
+
+YOLOv26. Tab. 3 summarizes the YOLOv26 [ 37 ] results. The real-only baseline reaches AP =0 .652 ±0.006 . Among mixed regimes, the 75/25 real-to-synthetic split performs best ( AP =0 .655 ±0.026 ), closely matching the baseline. The strongest overall AP is obtained by the union setting (100 % R + 100 % S) with the shorter training budget (AP =0 .667 ±0.006 at 150 epochs), indicating that synthetic data can yield modest gains when all real data is retained. Because the training budgets differ across some settings, we interpret this as supportive rather than strictly like-for-like evidence. Synthetic-only training drops substantially ( AP =0 .393 ±0.005 ).                                                                                                                               
+
+> Exp.(R/S) Epochs AP ↑AP50 ↑Precision ↑Recall ↑
+> 100/0 300 0.652 ±0.006 0.926 ±0.021 0.931 ±0.010 0.854 ±0.035
+> 75/25 300 0.655 ±0.026 0.926 ±0.013 0.913 ±0.011 0.864 ±0.042
+> 50/50 300 0.641 ±0.035 0.906 ±0.014 0.954 ±0.034 0.803 ±0.037
+> 25/75 300 0.602 ±0.023 0.871 ±0.022 0.930 ±0.054 0.763 ±0.039
+> 0/100 300 0.393 ±0.005 0.729 ±0.002 0.819 ±0.046 0.610 ±0.043
+> 100/100 150 0.667 ±0.006 0.915 ±0.010 0.941 ±0.027 0.843 ±0.020
+> 100/100 300 0.659 ±0.018 0.933 ±0.015 0.945 ±0.007 0.878 ±0.045
+> 100/200 100 0.620 ±0.009 0.923 ±0.019 0.917 ±0.049 0.832 ±0.051
+> 100/200 300 0.646 ±0.052 0.913 ±0.031 0.930 ±0.062 0.827 ±0.014
+
+Table 3: YOLOv26 [ 37 ] results on the BSData [ 38 ] test set (mean ± std over 3 runs). R and S denote the amount of real and synthetic training data relative to the full BSData training split, in %. 
+
+LW-DETR. Tab. 4 shows the LW-DETR [ 9] results. In contrast to the YOLO-based detectors, LW-DETR achieves its highest AP under the real-only baseline ( AP =0 .666 ±0.011 ) and does not benefit consistently from synthetic mixtures; mixed and union settings remain close to the baseline, with only a slight AR 100 improvement for the 100 % R + 200 % S configuration. Overall, the benefit of synthetic data is detector-dependent: YOLO-style architectures gain from mixed or union training, whereas LW-DETR is more robust to synthetic additions but profits less from them.                                                                                                                               
+
+> Exp.(R/S) Epochs AP ↑AP50 ↑AP75 ↑AR100 ↑
+> 100/0 90 0.666 ±0.011 0.924 ±0.015 0.795 ±0.019 0.709 ±0.010
+> 75/25 90 0.656 ±0.006 0.909 ±0.024 0.792 ±0.013 0.697 ±0.004
+> 50/50 90 0.642 ±0.005 0.912 ±0.004 0.776 ±0.030 0.689 ±0.007
+> 25/75 90 0.611 ±0.015 0.880 ±0.019 0.715 ±0.016 0.651 ±0.018
+> 0/100 90 0.456 ±0.003 0.775 ±0.021 0.538 ±0.022 0.568 ±0.006
+> 100/100 45 0.654 ±0.005 0.933 ±0.011 0.797 ±0.015 0.707 ±0.013
+> 100/100 90 0.661 ±0.005 0.951 ±0.014 0.773 ±0.007 0.705 ±0.008
+> 100/200 30 0.634 ±0.006 0.923 ±0.020 0.766 ±0.007 0.687 ±0.009
+> 100/200 90 0.663 ±0.005 0.949 ±0.011 0.785 ±0.015 0.715 ±0.007
+
+Table 4: LW-DETR [ 9 ] results on the BSData [ 38 ] test set (mean ± std over 3 runs). R and S denote the amount of real and synthetic training data relative to the full BSData training split, in %. 
+
+4.5 Cross-Dataset Transfer and Qualitative Ablations 
+
+We next assess how much of the end-to-end pipeline transfers to the MSD [ 52 ] scratch subset and qualitatively analyze the impact of LoRA [ 18 ] on defect appearance. Prompt construction, mask generation, inpainting, filtering, and detector 7A PREPRINT - A PRIL 30, 2026 training follow the BSData [ 38 ] setup, while label derivation is simplified because scratch annotations remain unstable under SAM 3 [7]. 
+
+Prompt Construction. Prompt construction follows the BSData [ 38 ] protocol: Qwen2-VL [ 48 , 50 ] processes scratch patches in batches of four and predicts up to 15 tags per batch. Tags are aggregated by frequency and lightly pruned before final prompt assembly , and the final prompt combines display-surface attributes with scratch-specific morphology and imaging cues (Fig. 9). From the training segmentations we generate 1,000 synthetic masks using the same random scaling and translation scheme as for BSData, but with placement priors spanning the full display area. 
+
+Resulting prompt: 
+
+high contrast scratch defect on dark glass display, thin linear scratch, occasional diagonal orientation, sharp edges, isolated single defect, reflective glossy surface with subtle metallic sheen, fine texture on smooth surface, close-up industrial inspection photo, uniform lighting with faint glow, minimal dark background, minimal noise shallow depth of field 
+
+Figure 9: Final MSD [ 52 ] prompt derived from frequent Qwen2-VL [ 48 ] tags and light manual pruning. The prompt emphasizes scratch geometry, reflective display appearance, and controlled acquisition conditions. 
+
+Synthetic data generation. For MSD [ 52 ], we train a single LoRA [ 18 ] to keep the cross-dataset study compact. The model is trained for 2,000 steps on 100 randomly sampled scratch patches. This produces 1,000 candidate images, which are filtered to 520 samples using DreamSim [14] and CLIPScore [16]. 
+
+Label derivation. Preliminary experiments indicate that SAM 3 [ 7 ] does not reliably delineate scratch regions in MSD [ 52 ] patches. We therefore omit SAM 3 [ 7] from the MSD [ 52 ] pipeline and use the synthetic inpainting mask directly as the segmentation annotation. This simplification improves robustness, but it can introduce label noise when the inpainted scratch occupies only part of the masked region. 
+
+Detection results. Tab. 5 summarizes the cross-dataset results for YOLOv26 [ 37 ]. Mixed and union settings remain close to this baseline, whereas synthetic-only training performs substantially worse ( AP = 0 .500 ). Overall, these results suggest that MSD [ 52 ] is an easier benchmark than BSData [ 38 ] and that, in this setting, the transferred pipeline remains usable after a dataset-specific annotation change but does not improve over the strong real-data baseline.                                                       
+
+> Exp.(R/S) Epochs AP ↑AP50 ↑Precision ↑Recall ↑
+> 100/0 300 0.953 0.995 0.990 0.982
+> 75/25 300 0.936 0.990 0.978 0.975
+> 50/50 300 0.913 0.984 0.972 0.939
+> 25/75 300 0.872 0.970 0.966 0.907
+> 0/100 300 0.500 0.770 0.827 0.652
+> 100/100 150 0.910 0.990 0.976 0.946
+> 100/100 300 0.908 0.982 0.971 0.949
+> 100/200 100 0.912 0.980 0.974 0.945
+> 100/200 300 0.934 0.990 0.984 0.957
+
+Table 5: YOLOv26 [ 37 ] results on the MSD [ 52 ] test set. R and S denote real and synthetic training images, relative to the full MSD training split, in %. 
+
+Image synthesis without LoRA. Fig. 10 (a-b) show unconditional generations from pretrained Flux.1-dev [ 21 , 5]without LoRA [ 18 ] finetuning. We compare a short prompt ( “pitting defect on steel surface” ) with the prompt derived with the VLM (Fig. 8). Although both outputs exhibit strong visual detail, neither resembles realistic industrial surface defects. In particular, the longer prompt tends to produce more imaginative and visually rich structures that do not match the texture and defect morphology observed in BSData [ 38 ]. This suggests that prompt optimization alone is insufficient to align the model with the target industrial domain. 
+
+Inpainting without LoRA. To isolate the effect of LoRA, we also evaluate Flux.1-dev [ 5, 21 ] in an inpainting setting without LoRA [ 18 ] adaptation. Fig. 10 (c) shows a defect-free image patch, the corresponding synthetic mask patch (d) ,and the inpainting outputs for both prompts (e-f) . In this setting, the generated region often lacks a plausible defect structure or appears visually inconsistent with the surrounding surface. These examples show that, without domain adaptation, the inpainting model does not reproduce the appearance of the industrial dataset reliably, which motivates LoRA [18] fine-tuning as a necessary component for defect synthesis. 
+
+Metric-based filtering analysis. To assess the effect of metric-based selection, we compare the highest- and lowest-ranked generated patches under CLIPScore [ 16 ] and DreamSim [ 14 ]. As shown in Fig. 11 (a–d) , high CLIPScore samples exhibit clearer defect structure and more coherent local texture, while low-scoring samples tend to be blurred or lack a distinct defect pattern — consistent with CLIPScore acting as a proxy for prompt–image alignment. Fig. 11 (e–h) 
+
+presents the corresponding DreamSim extremes, measured as the mean k-NN distance to real defect patches. Samples with low DreamSim distance closely resemble real training examples and frequently overlap with the top CLIPScore 8A PREPRINT - A PRIL 30, 2026      
+
+> (a) Simple (b) VLM 8 (c) Image (d) Mask (e) Simple (f) VLM 8
+
+Figure 10: Limitations of Flux.1-dev [ 5, 21 ] without finetuning. (a–b) Unconditional generations: prompt optimization alone fails to produce domain-consistent defect appearances for BSData. (c–f) Inpainting without LoRA [ 18 ] adaptation: given the same image patch and mask (c–d) , Flux.1-dev yields domain-inconsistent defect structures regardless of the prompt used (e–f) .selections; some remain visually subtle, which is plausible given the prevalence of small, low-contrast defects in the training data. Conversely, high-distance DreamSim samples are dominated by smooth or homogeneous textures, closely matching the weakest CLIPScore examples. This strong correlation between both metrics confirms that they jointly serve as reliable indicators of synthetic data quality, consistently favoring samples with clear, domain-consistent defect structure and suppressing those with weak or implausible defect appearance.       
+
+> (a) CLIPScore: 31.59 (b) CLIPScore: 31.04 (c) CLIPScore: 17.17 (d) CLIPScore: 17.40
+> (e) DreamSim: 0.129 (f) DreamSim: 0.128 (g) DreamSim: 0.459 (h) DreamSim: 0.447
+
+Figure 11: Ranking extremes for synthetic patches on BSData [ 38 ]. (a) , (b) highest and (c) , (d) lowest CLIPScore [ 16 ] ↑;
+
+(e) , (f) closest and (g) , (h) farthest DreamSim [ 14 ] ↓neighbors to real patches. Both metrics correlate, jointly identifying visually convincing samples with clear defect structure while suppressing blurred or weakly structured ones. 
+
+4.6 Qualitative analysis 
+
+We conclude the qualitative analysis with representative successful and unsuccessful synthetic samples, highlighting both realistic defect characteristics and recurring failure modes that can degrade dataset quality and annotation reliability. For BSData [ 38 ], Fig. 12 (a-b) successful pitting samples exhibit plausible placement within the spindle groove and morphology consistent with real defects—typically near-circular, locally concentrated structures that may become slightly elongated at larger scales. Failures occur when the synthetic mask overlaps component boundaries or strong geometric edges, causing the inpainting process to violate local surface geometry or produce structures no longer resembling pitting defects Fig. 12 (c-d) . For MSD [ 52 ], successful samples display long, thin scratches with subtle intensity variations consistent with the underlying screen texture Fig. 12 (e-f) , placed entirely within the display region. 9A PREPRINT - A PRIL 30, 2026 Failures typically arise when the mask extends beyond the screen area—e.g. due to varying screen dimensions across background images—causing the generated scratch to partially fall outside the valid inspection area Fig. 12 (g-h) .(a)  (b)  (c)  (d) 
+
+(e)  (f)  (g)  (h) 
+
+Figure 12: Representative synthetic samples. Top row: BSData [ 38 ]; bottom row: MSD [ 52 ]. Left (a,b,e,f) show successful generations exhibiting plausible defect placement and realistic morphology. Right (c,d,g,h) show typical failure cases, including boundary overlap, geometric distortion, and mask spillover artifacts. 
+
+# 5 Conclusion 
+
+We presented an end-to-end pipeline for generating annotated synthetic defect images, combining VLM-assisted prompt construction, LoRA-adapted diffusion, mask-guided inpainting, sample filtering, and automatic label derivation via SAM 3 [ 7 ] for BSData [ 38 ]. On BSData, the generated samples are sufficiently realistic to support object detector training as augmentation: synthetic-only training remains clearly inferior to real-only training, but mixed and union settings can preserve performance and yield modest gains in selected detector configurations. The MSD [ 52 ] transfer study shows that most stages of the pipeline carry over to a second defect domain, while also highlighting that annotation quality and stage-specific adaptation remain critical for reliable gains. LoRA adaptation proved essential for matching domain-specific defect appearance in both settings. 
+
+Limitations and Future Work. Our experiments also reveal clear limits. Synthetic-only training remains inferior to real-only training, and augmentation benefits are sensitive to mask quality, domain-specific tuning, and detector architecture. Further limitations include the single-defect-type focus, global prompting without controlled variation, and domain-dependent annotation quality. Future work will address these factors through multi-class synthesis, learned placement priors, prompt diversification, adaptive mask generation, automated LoRA selection, and closed-loop refinement driven by detector feedback. 
+
+# References 
+
+[1] Musawar Ali, Nicola Fioraio, Samuele Salti, and Luigi Di Stefano. AnomalyControl: Few-shot anomaly generation by ControlNet inpainting. 12:192903–192914. [2] Shekoofeh Azizi, Simon Kornblith, Chitwan Saharia, Mohammad Norouzi, and David J. Fleet. Synthetic data from diffusion models improves imagenet classification. [3] Jun Bai, Di Wu, Tristan Shelley, Peter Schubel, David Twine, John Russell, Xuesen Zeng, and Ji Zhang. A comprehensive survey on machine learning driven material defect detection, 2025. Accessed: 2026-01-26. [4] Paul Bergmann, Michael Fauser, David Sattlegger, and Carsten Steger. Mvtec ad — a comprehensive real-world dataset for unsupervised anomaly detection. In 2019 IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR) , pages 9584–9592, 2019. [5] Black Forest Labs. FLUX. [6] Alexey Bochkovskiy, Chien-Yao Wang, and Hong-Yuan Mark Liao. Yolov4: Optimal speed and accuracy of object detection. ArXiv , abs/2004.10934, 2020. 10 A PREPRINT - A PRIL 30, 2026 [7] Nicolas Carion, Laura Gustafson, Yuan-Ting Hu, Shoubhik Debnath, Ronghang Hu, Didac Suris, Chaitanya Ryali, Kalyan Vasudev Alwala, Haitham Khedr, Andrew Huang, Jie Lei, Tengyu Ma, Baishan Guo, Arpit Kalla, Markus Marks, Joseph Greer, Meng Wang, Peize Sun, Roman Rädle, Triantafyllos Afouras, Effrosyni Mavroudi, Katherine Xu, Tsung-Han Wu, Yu Zhou, Liliane Momeni, Rishi Hazra, Shuangrui Ding, Sagar Vaze, Francois Porcher, Feng Li, Siyuan Li, Aishwarya Kamath, Ho Kei Cheng, Piotr Dollár, Nikhila Ravi, Kate Saenko, Pengchuan Zhang, and Christoph Feichtenhofer. Sam 3: Segment anything with concepts, 2025. [8] Nicolas Carion, Francisco Massa, Gabriel Synnaeve, Nicolas Usunier, Alexander Kirillov, and Sergey Zagoruyko. End-to-end object detection with transformers. ArXiv , abs/2005.12872, 2020. [9] Qiang Chen, Xiangbo Su, Xinyu Zhang, Jian Wang, Jiahui Chen, Yunpeng Shen, Chuchu Han, Ziliang Chen, Weixiang Xu, Fanrong Li, Shan Zhang, Kun Yao, Errui Ding, Gang Zhang, and Jingdong Wang. LW-DETR: A transformer replacement to YOLO for real-time detection. [10] Wenliang Dai, Junnan Li, Dongxu Li, Anthony Meng Huat Tiong, Junqi Zhao, Weisheng Wang, Boyang Li, Pascale Fung, and Steven Hoi. Instructblip: towards general-purpose vision-language models with instruction tuning. In Proceedings of the 37th International Conference on Neural Information Processing Systems , NIPS ’23, Red Hook, NY, USA, 2023. Curran Associates Inc. [11] Maximilian Denninger, Martin Sundermeyer, Dominik Winkelbauer, Dmitry Olefir, Tomas Hodan, Youssef Zidan, Mohamad Elbadrawy, Markus Knauer, Harinandan Katam, and Ahsan Lodhi. Blenderproc: Reducing the reality gap with photorealistic rendering. In 16th Robotics: Science and Systems, RSS 2020, Workshops , Juli 2020. Video presentation: https://www.youtube.com/watch?v=tQ59iGVnJWM. [12] Prafulla Dhariwal and Alex Nichol. Diffusion models beat gans on image synthesis. In Proceedings of the 35th International Conference on Neural Information Processing Systems , NIPS ’21, Red Hook, NY, USA, 2021. Curran Associates Inc. [13] Wei Fang, Mengnan Wang, Jiadong Sun, Deji Chen, and Pei Shi. Review of surface-defect detection methods for industrial products based on machine vision. IEEE Access , 13:90668–90697, May 2025. [14] Stephanie Fu, Netanel Tamir, Shobhita Sundaram, Lucy Chai, Richard Zhang, Tali Dekel, and Phillip Isola. Dreamsim: Learning new dimensions of human visual similarity using synthetic data, 2023. [15] Zheng Ge, Songtao Liu, Feng Wang, Zeming Li, and Jian Sun. YOLOX: Exceeding YOLO series in 2021. [16] Jack Hessel, Ari Holtzman, Maxwell Forbes, Ronan Le Bras, and Yejin Choi. CLIPScore: A reference-free evaluation metric for image captioning. [17] Jonathan Ho, Ajay Jain, and Pieter Abbeel. Denoising diffusion probabilistic models. In Proceedings of the 34th International Conference on Neural Information Processing Systems , NIPS ’20, Red Hook, NY, USA, 2020. Curran Associates Inc. [18] Edward J. Hu, Yelong Shen, Phillip Wallis, Zeyuan Allen-Zhu, Yuanzhi Li, Shean Wang, Wang Lu, and Weizhu Chen. LoRA: Low-rank adaptation of large language models. [19] Saksham Jain, Gautam Seth, Arpit Paruthi, Umang Soni, and G. Kumar. Synthetic data augmentation for surface defect detection and classification using deep learning. 33. [20] Qifan Jin and Li Chen. A survey of surface defect detection of industrial products based on a small number of labeled data. [21] Black Forest Labs, Stephen Batifol, Andreas Blattmann, Frederic Boesel, Saksham Consul, Cyril Diagne, Tim Dockhorn, Jack English, Zion English, Patrick Esser, Sumith Kulal, Kyle Lacey, Yam Levi, Cheng Li, Dominik Lorenz, Jonas Müller, Dustin Podell, Robin Rombach, Harry Saini, Axel Sauer, and Luke Smith. Flux.1 kontext: Flow matching for in-context image generation and editing in latent space, 2025. [22] Déborah Lebert, Jérémy Plouzeau, Jean-Philippe Farrugia, Florence Danglade, and Frédéric Merienne. Synthetic data generation for surface defect detection. In Extended Reality , pages 198–208. Springer Nature Switzerland. [23] Chun-Liang Li, Kihyuk Sohn, Jinsung Yoon, and Tomas Pfister. Cutpaste: Self-supervised learning for anomaly detection and localization, 2021. [24] Junnan Li, Dongxu Li, Silvio Savarese, and Steven Hoi. Blip-2: bootstrapping language-image pre-training with frozen image encoders and large language models. In Proceedings of the 40th International Conference on Machine Learning , ICML’23. JMLR.org, 2023. [25] Tsung-Yi Lin, Michael Maire, Serge J. Belongie, Lubomir D. Bourdev, Ross B. Girshick, James Hays, Pietro Perona, Deva Ramanan, Piotr Dollár, and C. Lawrence Zitnick. Microsoft COCO: common objects in context. 
+
+CoRR , abs/1405.0312, 2014. [26] Haotian Liu, Chunyuan Li, Qingyang Wu, and Yong Jae Lee. Visual instruction tuning, 2023. 11 A PREPRINT - A PRIL 30, 2026 [27] Scarlett Liu, Hai Ni, Chao Li, Yukang Zou, and Yiping Luo. Defectgan: Synthetic data generation for emu defects detection with limited data. 24(11):17638–17652. [28] Wenyu Lv, Yian Zhao, Qinyao Chang, Kui Huang, Guanzhong Wang, and Yi Liu. Rt-detrv2: Improved baseline with bag-of-freebies for real-time detection transformer, 2024. [29] Dang Nguyen, Jiping Li, Jinghao Zheng, and Baharan Mirzasoleiman. Do we need all the synthetic data? targeted synthetic image augmentation via diffusion models. [30] Alec Radford, Jong Wook Kim, Chris Hallacy, Aditya Ramesh, Gabriel Goh, Sandhini Agarwal, Girish Sastry, Amanda Askell, Pamela Mishkin, Jack Clark, Gretchen Krueger, and Ilya Sutskever. Learning transferable visual models from natural language supervision, 2021. [31] Joseph Redmon, Santosh Divvala, Ross Girshick, and Ali Farhadi. You only look once: Unified, real-time object detection. In 2016 IEEE Conference on Computer Vision and Pattern Recognition (CVPR) , pages 779–788, 2016. [32] Joseph Redmon and Ali Farhadi. Yolov3: An incremental improvement, 2018. [33] Isaac Robinson, Peter Robicheaux, Matvei Popov, Deva Ramanan, and Neehar Peri. Rf-detr: Neural architecture search for real-time detection transformers, 2025. [34] Robin Rombach, Andreas Blattmann, Dominik Lorenz, Patrick Esser, and Björn Ommer. High-resolution image synthesis with latent diffusion models, 2022. [35] Karsten Roth, Latha Pemula, Joaquin Zepeda, Bernhard Scholkopf, Thomas Brox, and Peter Gehler. Towards total recall in industrial anomaly detection. 2022 IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR) , pages 14298–14308, 2021. [36] Nataniel Ruiz, Yuanzhen Li, Varun Jampani, Yael Pritch, Michael Rubinstein, and Kfir Aberman. Dreambooth: Fine tuning text-to-image diffusion models for subject-driven generation. In 2023 IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR) , pages 22500–22510, 2023. [37] Ranjan Sapkota, Rahul Harsha Cheppally, Ajay Sharda, and Manoj Karkee. YOLO26: Key architectural enhancements and performance benchmarking for real-time object detection. [38] Tobias Schlagenhauf and Magnus Landwehr. Industrial machine tool component surface defect dataset. 39. [39] Jordan Shipard, Arnold Wiliem, Kien Nguyen Thanh, Wei Xiang, and Clinton Fookes. Diversity is definitely needed: Improving model-agnostic zero-shot classification via stable diffusion, 2023. [40] Saptarshi Neil Sinha, Julius Kühn, Mika Silvan Goschke, and Michael Weinmann. 6d strawberry pose estimation: Real-time and edge ai solutions using purely synthetic training data, 2025. [41] Jaewoo Song, Daemin Park, Kanghyun Baek, Sangyub Lee, Jooyoung Choi, Eunji Kim, and Sungroh Yoon. DefectFill: Realistic defect generation with inpainting diffusion model for visual inspection. [42] Marjana Tahmid, Md. Samiul Alam, Namratha Rao, and Kazi Muhammad Asif Ashrafi. Image-to-image translation with conditional adversarial networks. In 2023 IEEE 9th International Women in Engineering (WIE) Conference on Electrical and Computer Engineering (WIECON-ECE) , pages 1–5, 2023. [43] Adnan Md Tayeb, Hope Leticia Nakayiza, Heejae Shin, Seungmin Lee, Chaesoo Lee, YeongHun Lee, Dong-Seong Kim, and Jae-Min Lee. DefectGen: Few-shot defect image generation using stable diffusion for steel surface analysis. In 2024 15th International Conference on Information and Communication Technology Convergence (ICTC) , pages 2087–2092. [44] Adnan Md Tayeb, Hope Leticia Nakayiza, Heejae Shin, Seungmin Lee, Jae-Min Lee, and Dong-Seong Kim. Defectdiffusion: A generative diffusion model for robust data augmentation in industrial defect detection. In 2025 International Conference on Artificial Intelligence in Information and Communication (ICAIIC) , pages 66–71. [45] Josh Tobin, Rachel Fong, Alex Ray, Jonas Schneider, Wojciech Zaremba, and Pieter Abbeel. Domain randomiza-tion for transferring deep neural networks from simulation to the real world. In 2017 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS) , pages 23–30, 2017. [46] Jonathan Tremblay, Aayush Prakash, David Acuna, Mark Brophy, Varun Jampani, Cem Anil, Thang To, Eric Cameracci, Shaad Boochoon, and Stan Birchfield. Training deep networks with synthetic data: Bridging the reality gap by domain randomization. In 2018 IEEE/CVF Conference on Computer Vision and Pattern Recognition Workshops (CVPRW) , pages 1082–10828, 2018. [47] Jonathan Tremblay, Thang To, and Stan Birchfield. Falling things: A synthetic dataset for 3d object detection and pose estimation, 2018. 12 A PREPRINT - A PRIL 30, 2026 [48] Peng Wang, Shuai Bai, Sinan Tan, Shijie Wang, Zhihao Fan, Jinze Bai, Keqin Chen, Xuejing Liu, Jialin Wang, Wenbin Ge, Yang Fan, Kai Dang, Mengfei Du, Xuancheng Ren, Rui Men, Dayiheng Liu, Chang Zhou, Jingren Zhou, and Junyang Lin. Qwen2-vl: Enhancing vision-language model’s perception of the world at any resolution, 2024. [49] Liqun Xu, Hexu Liu, Bo Xiao, Xiaowei Luo, Dharmaraj Veeramani, and Zhenhua Zhu. A systematic review and evaluation of synthetic simulated data generation strategies for deep learning applications in construction. 62. [50] An Yang, Anfeng Li, Baosong Yang, Beichen Zhang, Binyuan Hui, Bo Zheng, Bowen Yu, Chang Gao, Chengen Huang, Chenxu Lv, Chujie Zheng, Dayiheng Liu, Fan Zhou, Fei Huang, Feng Hu, Hao Ge, Haoran Wei, Huan Lin, Jialong Tang, Jian Yang, Jianhong Tu, Jianwei Zhang, Jianxin Yang, Jiaxi Yang, Jing Zhou, Jingren Zhou, Junyang Lin, Kai Dang, Keqin Bao, Kexin Yang, Le Yu, Lianghao Deng, Mei Li, Mingfeng Xue, Mingze Li, Pei Zhang, Peng Wang, Qin Zhu, Rui Men, Ruize Gao, Shixuan Liu, Shuang Luo, Tianhao Li, Tianyi Tang, Wenbiao Yin, Xingzhang Ren, Xinyu Wang, Xinyu Zhang, Xuancheng Ren, Yang Fan, Yang Su, Yichang Zhang, Yinger Zhang, Yu Wan, Yuqiong Liu, Zekun Wang, Zeyu Cui, Zhenru Zhang, Zhipeng Zhou, and Zihan Qiu. Qwen3 technical report. [51] Vitjan Zavrtanik, Matej Kristan, and Danijel Skoˇ caj. DrÆm – a discriminatively trained reconstruction embedding for surface anomaly detection. In 2021 IEEE/CVF International Conference on Computer Vision (ICCV) , pages 8310–8319, 2021. [52] Jian Zhang, Runwei Ding, Miaoju Ban, and Tianyu Guo. FDSNeT: An accurate real-time surface defect segmentation network. In ICASSP 2022 – 2022 IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP) , pages 3803–3807. [53] Lvmin Zhang, Anyi Rao, and Maneesh Agrawala. Adding conditional control to text-to-image diffusion models, 2023. [54] Yian Zhao, Wenyu Lv, Shangliang Xu, Jinman Wei, Guanzhong Wang, Qingqing Dang, Yi Liu, and Jie Chen. Detrs beat yolos on real-time object detection, 2023. [55] Jun-Yan Zhu, Taesung Park, Phillip Isola, and Alexei A. Efros. Unpaired image-to-image translation using cycle-consistent adversarial networks. In 2017 IEEE International Conference on Computer Vision (ICCV) , pages 2242–2251, 2017. 13

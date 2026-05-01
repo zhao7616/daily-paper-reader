@@ -1,0 +1,970 @@
+Title: Operational Feature Fingerprints of Graph Datasets via a White-Box Signal-Subspace Probe
+
+URL Source: https://arxiv.org/pdf/2604.22676v1
+
+Published Time: Mon, 27 Apr 2026 01:11:44 GMT
+
+Number of Pages: 21
+
+Markdown Content:
+# Operational Feature Fingerprints of Graph Datasets via a White-Box Signal-Subspace Probe 
+
+## Xiong Yuchen 
+
+## China-ASEAN College of Marine Sciences Xiamen University Malaysia Sepang 43900, Selangor, Malaysia 
+
+## yuchenak05@gmail.com 
+
+## Yeap Swee Keong *
+
+## China-ASEAN College of Marine Sciences Xiamen University Malaysia Sepang 43900, Selangor, Malaysia 
+
+## skyeap@xmu.edu.my 
+
+## Ban Zhen Hong *
+
+## School of Energy and Chemical Engineering Xiamen University Malaysia Sepang 43900, Selangor, Malaysia 
+
+## bzhong@xmu.edu.my 
+
+> *
+
+Corresponding authors. 
+
+Abstract 
+
+Graph neural networks achieve strong node-classification accuracy, but their learned message passing entangles ego attributes, neighborhood smoothing, high-pass graph differences, class geometry, and classifier-boundary effects in one opaque representation. This obscures both why a node is classified and what feature-level graph-learning mechanisms a dataset requires. We propose WG-SRC , a white-box signal-subspace probe for prediction and graph dataset diagnosis. 
+
+WG-SRC replaces learned message passing with a fixed, named graph-signal dictionary of raw features, row-normalized and symmetric-normalized low-pass propagation, and high-pass graph differences. It then combines Fisher coordinate selection, class-wise PCA subspaces, closed-form multi-alpha ridge classification, and validation-based score fusion, so prediction and analysis use explicit class subspaces, energy-controlled dimensions, and closed-form linear decisions. As a white-box graph-learning instrument rather than an accuracy maximizer, WG-SRC uses predictive performance to validate its diagnostics: across six node-classification datasets, the full scaffold remains competitive with reproduced graph baselines and achieves a positive average gain under aligned splits. Its atlas, produced by a functioning predictor, decomposes behavior into raw-feature, low-pass, high-pass, class-geometric, and ridge-boundary components. The resulting operational feature fingerprints distinguish low-pass-dominated Amazon graphs, mixed high-pass and class-geometrically complex Chameleon behavior, and raw- or boundary-sensitive WebKB graphs. As intrinsic classifier outputs rather than post-hoc explanations, these fingerprints provide post-evaluation diagnostic guidance for later model analysis and dataset-specific modification. Aligned mechanistic interventions support this guidance by indicating when high-pass blocks act as removable noise, when raw features should be preserved, and when ridge-type boundary correction matters. 
+
+# 1 Introduction 
+
+Graph neural networks learn by repeatedly aggregating features over edges and applying trained transfor-mations. This recipe is powerful, but it hides several mechanisms behind parameters: whether a prediction is driven by ego attributes, one-hop smoothing, two-hop return structure, high-pass differences between a node and its neighborhood, or a final discriminative boundary is often unclear. This opacity is especially 1
+
+> arXiv:2604.22676v1 [cs.LG] 24 Apr 2026
+
+problematic on heterophilic or mixed-homophily graphs, where naive smoothing can hurt because neighbors need not share labels (Pei et al., 2020; Zhu et al., 2020; Lim et al., 2021). This paper starts from a different premise. Instead of learning a hidden message-passing representation, we explicitly build the graph signals that a shallow graph model might exploit, and classify them using linear-algebraic modules whose behavior is inspectable. The resulting method, WG-SRC , constructs a named graph signal dictionary, selects discriminative coordinates, fits class-wise PCA subspaces, fits a closed-form ridge boundary, and fuses the two scores by validation. In this sense, the method is deliberately built around subspace geometry and controlled low-rank structure: the same explicit dimension-reduced objects are used both to make decisions and to analyze which graph mechanisms a dataset is using. The central point is that the same white-box components serve two inseparable roles. First, they form a competent node classifier under an explicit, auditable graph-signal scaffold. Second, because every signal block and decision module is named and measurable, the classifier produces a mechanism atlas that characterizes how the fitted scaffold uses the dataset. Throughout the paper, we use white-box scaffold to refer to the fitted predictive model itself, and diagnostic probe to refer to the same fitted scaffold when it is used as a measurement instrument for dataset analysis. The main object of interest is therefore not only the predicted label, but also the operational feature fingerprint revealed during prediction: raw-feature reliance, low-pass propagation reliance, high-pass sensitivity, class-subspace complexity, and ridge-boundary dependence. Thus, the atlas is not a post-hoc explanation attached to a black-box model. It is an intrinsic diagnostic output of the model. In this sense, WG-SRC is not merely an interpretable classifier; it is also a measurement instrument for graph datasets. The supported claim is not that the atlas automatically discovers the optimal redesign of a dataset or replaces a full redesign search. Rather, after a standard train/validation/test evaluation of the fitted white-box scaffold, the atlas yields operational feature fingerprints and mechanism hypotheses that can be checked against aligned interventions and used as post-evaluation diagnostic guidance. In this sense, prediction becomes reproducible diagnostic evidence about dataset behavior, and that evidence can guide later model analysis and dataset-specific modification without functioning as an automatic redesign oracle. 
+
+Contributions. We make five contributions. 1. We introduce WG-SRC , a white-box graph classifier that replaces learned message passing with an explicit multi-hop graph-signal dictionary and replaces hidden representation layers with class-wise PCA subspaces and closed-form ridge regression. 2. We show that WG-SRC is not only a predictor but also an intrinsic audit system: the same variables used for classification expose raw-feature, low-pass, high-pass, class-geometric, and boundary-based mechanisms at the node level. 3. We define a dense node-level mechanism atlas and show how aggregating these records yields operational feature fingerprints of graph datasets. These fingerprints characterize signal composition, class-subspace complexity, PCA–Ridge decision structure, and correct-versus-wrong signal shifts. 4. We connect operational feature fingerprints to post-evaluation diagnostic guidance for dataset-specific algorithm modification. The atlas does not act as an automatic architecture-search oracle; instead, it produces mechanism hypotheses about whether a dataset is likely to benefit from suppressing noisy high-pass blocks, preserving high-pass differences, preserving raw features, strengthening boundary decisions, or improving class-specific subspace modeling under the fixed white-box scaffold. 5. We empirically verify two forms of validity for this white-box scaffold: predictive validity, because 
+
+WG-SRC remains competitive under aligned reproduced benchmarks; and diagnostic-guidance validity, because atlas signatures are directionally consistent with aligned mechanistic interventions, error shifts, and PCA–Ridge decision phase structure rather than functioning as purely descriptive visualizations. 
+
+# 2 Related Work 
+
+Graph neural networks and heterophily. GCN (Kipf and Welling, 2017), GraphSAGE (Hamilton et al., 2017), and GAT (Veliˇ ckovi´ c et al., 2018) learn node representations by aggregating local neighborhoods. 2Heterophilic graphs expose the limitations of pure smoothing. Geom-GCN (Pei et al., 2020), H2GCN-style designs (Zhu et al., 2020), adaptive PageRank filters (Chien et al., 2021), and LINKX (Lim et al., 2021) address non-homophily by changing propagation, decoupling ego and neighborhood features, or using strong simple baselines. WG-SRC follows the decoupling intuition but removes learned hidden layers: it constructs low-pass and high-pass signals explicitly and audits which ones are used. 
+
+White-box and subspace learning. PCA and ridge regression are classical tools with transparent objectives (Pearson, 1901; Hoerl and Kennard, 1970). MCR 2 and ReduNet provide a modern white-box perspective on representation learning: classes should occupy structured, discriminative subspaces, and networks can be derived from optimization principles rather than treated as opaque stacks (Yu et al., 2020; Chan et al., 2022; Wang et al., 2024). WG-SRC borrows the subspace viewpoint, but adapts it to graphs by first decomposing node features into named graph signal blocks and then fitting class subspaces in that signal space. Its white-box character therefore comes not only from using explicit graph filters, but also from using subspace geometry, low-rank energy control, and closed-form decision modules as analyzable mathematical objects. 
+
+# 3 Method 
+
+Let G = ( V, E ) be a graph with feature matrix X ∈ Rn×d, adjacency matrix A, and labels on a training-node index set T ⊆ { 1, . . . , n }. Write ntr = |T | . WG-SRC has five stages: graph signal construction, Fisher coordinate selection, class subspace fitting, multi-alpha ridge fitting, and score fusion. 
+
+## 3.1 Explicit multi-hop graph signal dictionary 
+
+We use the row-normalized transition matrix Prow = D−1A and the symmetric-normalized matrix Psym =
+
+D−1/2AD −1/2, following standard normalized graph-operator conventions (von Luxburg, 2007). The block-normalized graph signal dictionary is 
+
+F (0) = X, P row X, P 2row X, P 3row X, X − Prow X, P row X − P 2row X, P sym X, P 2sym X, X − Psym X. (1) Each block is row-ℓ2 normalized before concatenation, so F (0) ∈ Rn×p with p = 9 d. After Fisher selection we obtain a coordinate set S ⊆ { 1, . . . , p } with |S| = K, and we write 
+
+F = F (0) [: ,S] ∈ Rn×K , Ftr = FT ,: ∈ Rntr ×K . (2) The downstream PCA, ridge, and atlas computations all use these selected coordinates unless stated otherwise. 
+
+## 3.2 Fisher coordinate selection 
+
+For coordinate j of the full dictionary F (0) , the Fisher score is 
+
+qj =
+
+PCc=1 nc(μc,j − μj )2
+
+PCc=1 
+
+P  
+
+> i∈T :yi=c
+
+(F (0)  
+
+> ij
+
+− μc,j )2 + ϵ . (3) The numerator measures between-class separation and the denominator measures within-class scatter. The top K coordinates define the selected set S in Eq. (2). The value of K is selected by validation. 
+
+## 3.3 Class subspace residuals 
+
+For each class c, PCA is fit on the selected training matrix Ftr restricted to class c. Let μc ∈ RK be the class center, let Bc ∈ RK×rc be the orthonormal basis selected by an energy threshold, and let fi = F ⊤ 
+
+> i, :
+
+∈ RK
+
+denote the selected feature vector of node i. The class-subspace residual score is 
+
+Rpca  
+
+> ic
+
+= (I − BcB⊤ 
+
+> c
+
+)( fi − μc) 22 . (4) A low residual means that the node lies near the class geometry; a high residual means that the node is poorly explained by that class subspace. Unlike a black-box embedding, rc, μc, Bc, and Rpca  
+
+> ic
+
+can all be inspected directly. 3Graph                  
+
+> A, X
+> Nine-block signal dictionary
+> Fisher selection
+> Class PCA subspaces
+> Multi-α
+> Ridge
+> Score fusion
+> [X, P row X, P 2row X, P 3row X, X−Prow X, P row X−P2row X, P sym X, P 2sym X, X −Psym X
+> ]
+> The same named components in-duce the node-level signal atlas.
+
+Figure 1: WG-SRC pipeline. The graph is converted into named signal blocks, discriminative coordinates are selected, and prediction is produced by fusing class-subspace residuals with a closed-form ridge boundary. 
+
+## 3.4 Closed-form multi-alpha ridge boundary 
+
+PCA residuals capture class geometry, but class boundaries may still be better described by a discriminative linear separator. We therefore fit a ridge classifier in closed form. Let Y ∈ Rntr ×C be the one-hot label matrix on the training nodes and let A denote the candidate regularization set. For α ∈ A ,
+
+βα = ( Ftr F ⊤ 
+
+> tr
+
++ αI ntr )−1Y, Zα = F F ⊤ 
+
+> tr
+
+βα, (5) where βα ∈ Rntr ×C and Zα ∈ Rn×C . In the implementation, each score matrix is first normalized by a single training-split standard deviation, 
+
+σα = std  {(Zα)ic : i ∈ T , c = 1 , . . . , C }, (6) and the residual-like ridge score is then defined by 
+
+Rridge  
+
+> ic
+
+= − 1
+
+|A| 
+
+X
+
+> α∈A
+
+(Zα)ic 
+
+σα + ϵ . (7) Smaller values are therefore better, matching the PCA-residual convention. 
+
+## 3.5 Score fusion and prediction 
+
+Before fusion, each branch is rescaled by a training-split standard deviation: 
+
+σpca = std  {Rpca  
+
+> ic
+
+: i ∈ T , c = 1 , . . . , C }, σridge = std  {Rridge  
+
+> ic
+
+: i ∈ T , c = 1 , . . . , C }. (8) We then define 
+
+eRpca  
+
+> ic
+
+= Rpca 
+
+> ic
+
+σpca + ϵ , eRridge  
+
+> ic
+
+= Rridge 
+
+> ic
+
+σridge + ϵ . (9) The final fused score is 
+
+Sic = w eRpca  
+
+> ic
+
++ (1 − w) eRridge  
+
+> ic
+
+, ˆyi = arg min  
+
+> c
+
+Sic . (10) All hyperparameters, including K, the PCA dimension cap, the energy threshold, the ridge-alpha set, and w,are selected by validation accuracy. The algorithm therefore remains a validation-selected white-box classifier rather than a trained neural network. 43.6 Node-level signal atlas 
+
+The same white-box scaffold used for prediction also produces explanations: the Fisher-selected coordinates and their block structure induce a reproducible node-level evidence decomposition over the explicit graph-signal dictionary. Let B be the set of named dictionary blocks in Eq. (1) , and let Ib ⊆ { 1, . . . , p } denote the coordinate indices belonging to block b ∈ B in the full dictionary F (0) . For each block, define the selected block coordinates 
+
+Sb = S ∩ I b.
+
+The atlas uses a Fisher-weighted block evidence, matching the implementation. For node i and block b, define 
+
+Eb(i) = 
+
+
+
+1
+
+|S b|
+
+X
+
+> j∈S b
+
+F (0)  
+
+> ij
+
+qj , |S b| > 0,
+
+0, |S b| = 0 ,
+
+(11) and normalize across the named blocks by 
+
+πb(i) = Eb(i)
+
+P 
+
+> b′∈B
+
+Eb′ (i) + ϵ . (12) Thus, πb(i) is not a learned attention weight; it is a reproducible, Fisher-weighted block share derived from the fixed graph-signal dictionary. We retain πb(i) for block-level inspection. However, because the three signal families contain unequal numbers of constituent blocks (one raw block, five low-pass blocks, and three high-pass blocks), family-level signal composition is computed by first averaging block evidence within each family and then normalizing across the three families. Define 
+
+Efam raw (i) = EX (i), (13) 
+
+Efam low (i) = 15
+
+
+
+EProw X (i) + EP 2row X (i) + EP 3row X (i) + EPsym X (i) + EP 2sym X (i)
+
+
+
+, (14) 
+
+Efam high (i) = 13
+
+
+
+EX−Prow X (i) + EProw X−P 2row X (i) + EX−Psym X (i)
+
+
+
+. (15) We then define the family-size-adjusted signal shares by 
+
+Rraw (i) = Efam raw (i)
+
+Efam raw (i) + Efam low (i) + Efam high (i) + ϵ , (16) 
+
+Rlow (i) = Efam low (i)
+
+Efam raw (i) + Efam low (i) + Efam high (i) + ϵ , (17) 
+
+Rhigh (i) = Efam high (i)
+
+Efam raw (i) + Efam low (i) + Efam high (i) + ϵ . (18) We define the branch-wise predictions by ˆypca  
+
+> i
+
+= arg min 
+
+> c
+
+eRpca  
+
+> ic
+
+, ˆyridge  
+
+> i
+
+= arg min 
+
+> c
+
+eRridge  
+
+> ic
+
+. (19) We also define the true-versus-nearest-wrong branch margins by 
+
+M pca  
+
+> i
+
+= min 
+
+> c̸=yi
+
+eRpca  
+
+> ic
+
+− eRpca  
+
+> i,y i
+
+, M ridge  
+
+> i
+
+= min 
+
+> c̸=yi
+
+eRridge  
+
+> ic
+
+− eRridge  
+
+> i,y i
+
+. (20) If the true label yi is absent from the training-class set CT for a particular split, these branch margins are treated as undefined and are recorded as missing values in the implementation. We also record the final prediction ˆyi, final correctness, degree, and the decision quadrant: both modules correct, PCA only, ridge only, or both wrong. These records form a dense atlas of how the model works on individual nodes. Aggregating these node-level records gives a dataset-level fingerprint: raw/low-pass/high-pass signal composition, PCA–Ridge decision structure, class-subspace complexity, and correct-versus-wrong signal shifts.This is the mechanism by which WG-SRC becomes dual-purpose: it predicts labels and simultaneously measures the graph-learning mechanisms used by the fitted white-box scaffold on the dataset. 54 Experimental Setup 
+
+Datasets. We evaluate on six node-classification datasets loaded from PyTorch Geometric (Fey and Lenssen, 2019). We use Amazon-Computers and Amazon-Photo through the PyG Amazon dataset class, with name=‘‘Computers’’ and name=‘‘Photo’’ , respectively. These two datasets are Amazon co-purchase graphs from the benchmark studied by Shchur et al. (2018). We use Chameleon through the PyG WikipediaNetwork dataset class, with name=‘‘chameleon’’ and geom gcn preprocess=True . We use 
+
+Cornell , Texas , and Wisconsin through the PyG WebKB dataset class. The Chameleon and WebKB datasets are standard heterophily node-classification benchmarks associated with the Geom-GCN setting (Pei et al., 2020); Chameleon is originally from the Wikipedia networks introduced by Rozemberczki et al. (2021). These datasets cover larger co-purchase graphs, a heterophilic Wikipedia graph, and small WebKB hyperlink graphs. 
+
+Baselines. For the aligned main comparison, we rerun the strongest reproduced baseline method assigned to each final-table dataset under the same dataset-repeat protocol as WG-SRC . The baseline method is GraphSAGE (Hamilton et al., 2017) for Amazon-Computers , Amazon-Photo , Cornell , Texas , and 
+
+Wisconsin , and LINKX (Lim et al., 2021) for Chameleon . Each baseline run uses validation accuracy only for epoch/model-state selection, and any optional hyperparameter grid is selected by validation accuracy only. The test mask is never used for training, early stopping, or hyperparameter selection. This comparison should therefore be read as an aligned strongest-baseline rerun rather than an exhaustive benchmark against every recent graph learner. 
+
+Evaluation. We report mean accuracy and sample standard deviation across ten repeated class-balanced random splits. All main-text tables and figures use only the six evaluated datasets. Auxiliary efficiency and atlas analyses use the same six-dataset filter unless explicitly stated. 
+
+Diagnostic protocol. Throughout the paper, the full WG-SRC scaffold is selected as a predictor by validation accuracy. The atlas is then interpreted as a diagnostic summary of this fitted white-box scaffold. Accordingly, Table 6 and Table 4 should be read as aligned diagnostic-guidance consistency tests: the atlas motivates mechanism hypotheses, and the reported variants are fixed structural interventions evaluated under the same split protocol rather than test-set-selected redesigns. The purpose of these analyses is to establish post-evaluation diagnostic guidance under the fitted white-box scaffold, not to claim that WG-SRC itself performs an automatic redesign search, blind pre-test model selection, or dataset-independent guidance. 
+
+# 5 Predictive Validity of the White-Box Scaffold 
+
+The purpose of the accuracy experiment is not to claim that WG-SRC is a universal accuracy-maximizing graph learner. Instead, accuracy is used as a validity check for the diagnostic scaffold. A dataset fingerprint is useful only if it is produced by a classifier that captures meaningful predictive structure. We therefore ask whether a fully auditable model can remain competitive while exposing its internal signal and decision mechanisms. Table 1 shows that WG-SRC improves over the strongest aligned baseline on all six evaluated datasets. The average improvement is +1 .52 pp , with the largest mean gain on Cornell . Figure 2 visualizes the same comparison. The gains are modest on the two Amazon datasets, where GraphSAGE is already strong, but are more pronounced on the smaller WebKB graphs where an explicit ridge boundary complements the class-subspace geometry. 6Table 1: Main comparison on the six evaluated datasets. Baseline numbers come from the aligned CPU rerun of the strongest reproduced baseline; WG-SRC numbers come from the final WG-SRC repeat table. We report mean test accuracy and sample standard deviation over ten aligned repeats. 
+
+Dataset Strongest baseline Baseline ( n = 10) WG-SRC (n = 10) Gain Amazon-Computers GraphSAGE 76.84 ± 2.28 78.71 ± 1.15 +1.87 Amazon-Photo GraphSAGE 88.37 ± 1.86 88.76 ± 1.35 +0.39 Chameleon LINKX 71.56 ± 1.49 72.48 ± 1.85 +0.92 Cornell GraphSAGE 72.43 ± 6.47 75.41 ± 7.26 +2.97 Texas GraphSAGE 84.32 ± 4.73 86.32 ± 4.08 +1.99 Wisconsin GraphSAGE 83.33 ± 5.25 84.31 ± 4.24 +0.98 
+
+Average – 79.48 81.00 +1.52 72.5 75.0 77.5 80.0 82.5 85.0 87.5 
+
+> Test accuracy (%)
+> Amazon-Computers
+> Amazon-Photo
+> Chameleon
+> Cornell
+> Texas
+> Wisconsin
+> +1.87
+> +0.39
+> +0.92
+> +2.97
+> +1.99
+
+Main comparison with aligned strongest baseline rerun 
+
+> baseline
+> WG-SRC +0.98
+
+Figure 2: Dataset-wise gain of WG-SRC over the strongest aligned baseline in Table 1. Positive values indicate improvement in percentage points. 
+
+# 6 Paired Random-Split Stability 
+
+Random splits can change graph benchmark conclusions (Shchur et al., 2018). We therefore compare 
+
+WG-SRC and the strongest baseline at matched dataset–repeat indices. Let ∆s = Acc (src)  
+
+> s
+
+− Acc (base)  
+
+> s
+
+. (21) for split s. The paired comparison is stricter than comparing only two independent means because every repeat difference is computed against the corresponding baseline run. Table 2 and Figure 3 show that the main-table gains are not driven by a single repeated mean. WG-SRC 
+
+wins most paired splits on five of six datasets and ties the win count on Wisconsin . The wide ranges on the small WebKB graphs also show why we report split-level behavior rather than only aggregate means. 
+
+## 6.1 Paired Significance Testing 
+
+Because WG-SRC and the strongest baseline are evaluated on matched dataset–repeat pairs, the appropriate comparison is paired. For dataset D and repeat s, we define the paired gain as 7Table 2: Paired random-split stability. For split s, ∆ s = Acc SRC ,s − Acc base ,s in percentage points, paired by dataset and repeat index. Baseline values are taken from the aligned CPU baseline rerun. 
+
+Dataset WG-SRC wins Mean ∆ Median ∆ Range ∆ Amazon-Computers 7/10 +1.87 +1.28 [-1.01, +7.55] Amazon-Photo 6/10 +0.39 +0.61 [-3.89, +3.64] Chameleon 7/10 +0.92 +0.55 [-0.66, +3.51] Cornell 7/10 +2.97 +4.05 [-10.81, +18.92] Texas 7/10 +1.99 +1.67 [-10.24, +8.53] Wisconsin 5/10 +0.98 +1.96 [-9.80, +9.80] −10 −5 0 5 10 15 20  
+
+> Paired split gain Δ s(percentage points)
+> Amazon-Computers
+> Amazon-Photo
+> Chameleon
+> Cornell
+> Texas
+> Wisconsin
+
+Paired split differences using aligned repeats 
+
+Figure 3: Paired split-level accuracy differences. Each point is one repeat. The dashed line marks zero improvement. 
+
+dD,s = 100 
+
+
+
+Acc (src)  
+
+> D,s
+
+− Acc (base) 
+
+> D,s
+
+
+
+. (22) where gains are measured in percentage points. Table 3 summarizes the paired effect size on each dataset without cluttering the main text with six separate per-dataset hypothesis tests. All six dataset-level mean gains are positive. To avoid treating the 60 split-level differences as fully independent observations, our primary significance statement uses the six dataset-level mean gains as the paired units. A two-sided one-sample t-test over the six dataset-level gains gives p = 0 .0105, a two-sided Wilcoxon signed-rank test gives p = 0 .0313, and a two-sided sign test for all six gains being positive gives 
+
+p = 0 .0313. Thus, the aggregate paired evidence supports a statistically significant improvement over the strongest aligned baseline. 8Table 3: Paired effect summary against the strongest aligned baseline. Gains are reported in percentage points. The effect size dz is paired Cohen’s d, computed as the mean paired gain divided by the standard deviation of the split-level paired gains. The final row treats the six dataset-level mean gains as the paired units.                                
+
+> Dataset Mean gain 95% CI dz
+> Amazon-Computers +1 .87 [−0.07 ,+3 .81] 0.69 Amazon-Photo +0 .39 [−1.20 ,+1 .98] 0.18 Chameleon +0 .92 [−0.14 ,+1 .98] 0.62 Cornell +2 .97 [−4.05 ,+10 .00] 0.30 Texas +1 .99 [−2.35 ,+6 .33] 0.33 Wisconsin +0 .98 [−3.84 ,+5 .81] 0.15 Dataset-level aggregate +1 .52 [+0 .54 ,+2 .50] 1.62
+
+# 7 Mechanistic Interventions and White-box Mechanism Checks 
+
+A common weakness of ablation studies is that they are run under a different split or seed protocol from the main experiment. To avoid this issue, we rerun all ablations using the same split and seed protocol as the final full WG-SRC scaffold main experiment. Each ablation is evaluated over ten matched repeats, uses the same train/validation/test policy as the corresponding full-model run, selects its internal hyperparameters by validation only, and evaluates the test set only after validation selection. Thus, the ablation study is aligned with the main experimental protocol rather than being a separate two-run diagnostic. Because WG-SRC is designed as a diagnostic scaffold, the full model should not be interpreted as the single best specialist for every dataset. Instead, the full scaffold exposes which signal families and decision mechanisms are active. The simplified variants in Table 4 are therefore not merely ablations; they are controlled mechanistic interventions that test whether simple structural changes agree with the dataset mechanisms measured by the atlas. The aligned interventions show that the full WG-SRC scaffold should be interpreted as a general white-box scaffold rather than as a single dataset-specific specialist. Some simplified variants can outperform or closely match the full scaffold on individual datasets: removing high-pass blocks improves the two Amazon graphs, ridge-oriented variants are strong on Cornell and Texas, and raw-only is strongest on Wisconsin. However, these specialized gains do not transfer uniformly across datasets. Raw-only collapses on Chameleon, PCA-only is weak across the board, and no single specialized variant remains reliable on all six datasets. The bottom rows of Table 4 summarize this generalist-versus-specialist distinction. The full WG-SRC scaffold has the best average rank among the listed variants, the highest worst-case accuracy, and is the only variant that appears in the top three on every dataset. These cross-dataset statistics are the key reason we keep the full scaffold as the main method. In addition, the choice is not based on accuracy alone. Although the Ridge-only variant attains a slightly higher mean accuracy, it is not an adequate primary model for the present paper’s purpose because it removes the class-subspace branch that is necessary for the downstream atlas analyses, especially class-subspace complexity, PCA–Ridge complementarity, and the geometry-versus-boundary interpretation developed in the later sections. Dataset-specific variants are useful diagnostics, and sometimes useful specialists, but the full model is the most stable and analytically complete white-box base model across the benchmark suite. This is the intended role of the intervention study. Since the model is white-box, removing or isolating a component is not merely a damage test; it is a mechanism check. Amazon graphs are low-pass dominated, so high-pass blocks can be removed for a specialized improvement. Chameleon requires the combined multi-hop, high-pass, PCA, and ridge structure, so the full model is strongest there. WebKB graphs are more boundary-or raw-feature dominated, so simplified specialists can improve particular datasets. These results preview the atlas analysis below: once the dataset structure is measured, the same measurements can explain which algorithmic simplifications or emphases are worth trying. 9Table 4: Aligned mechanistic intervention summary. All variants are run with the same ten split/seed protocol as the final full WG-SRC scaffold experiment. Entries are mean test accuracy in percent. The bottom rows summarize cross-dataset generalization. Rank is computed within each dataset among the listed variants; lower is better. The full model is not always the best dataset-specific specialist, but it has the best average rank, the best worst-case accuracy, and is the only variant that remains in the top three on all six datasets. The simplified variants are used as diagnostic interventions, not as a redefinition of the main benchmark model.                                                                                            
+
+> Dataset Full Raw No high-pass No P3XNo sym PCA only Ridge only Best diagnostic variant Amazon-Computers 78.71 63.46 79.73 76.32 73.54 76.83 78.58 No high-pass (79.73) Amazon-Photo 88.76 76.88 90.27 87.16 84.78 87.15 89.12 No high-pass (90.27) Chameleon 72.48 44.71 72.02 71.67 72.35 70.61 71.62 Full / near-full (72.48) Cornell 75.41 77.30 71.08 75.14 74.32 66.76 77.57 Ridge only (77.57) Texas 86.32 82.89 83.42 85.26 85.79 77.11 86.58 Ridge only (86.58) Wisconsin 84.31 88.63 79.22 85.69 83.73 78.24 83.92 Raw only (88.63) Mean accuracy 81.00 72.31 79.29 80.21 79.09 76.12 81.23 —Worst-case accuracy 72.48 44.71 71.08 71.67 72.35 66.76 71.62 —Average rank ↓2.33 5.00 3.67 3.83 4.50 6.00 2.67 —Top-3 count 6/6 2/6 3/6 1/6 2/6 0/6 4/6 —
+
+# 8 From Node-Level Atlases to Dataset Fingerprints 
+
+We call the aggregated atlas of a dataset an operational dataset fingerprint . It is operational because it is computed by a fixed, named graph-signal dictionary and by fixed white-box decision modules; it is a dataset fingerprint because applying the same measurement procedure to every dataset yields comparable signal compositions, decision geometries, class complexities, and error shifts. The fingerprint is not a causal claim about the true data-generating process. It is a reproducible measurement of how a white-box graph classifier uses the dataset. For dataset D, let UD denote the evaluation node set used for atlas reporting; in the retrospective analysis below, this is the test-node set. Let CT denote the set of classes present in the training split, and write 
+
+CT = |C T |. We define the dataset-level signal means by 
+
+RD = 1
+
+|U D |
+
+X
+
+> i∈U D
+
+Rraw (i), LD = 1
+
+|U D |
+
+X
+
+> i∈U D
+
+Rlow (i), HD = 1
+
+|U D |
+
+X
+
+> i∈U D
+
+Rhigh (i), (23) the mean class-subspace complexity by 
+
+CD = 1
+
+CT
+
+X
+
+> c∈C T
+
+rc, (24) and the PCA–Ridge decision fractions by 
+
+Qridge  
+
+> D
+
+= 1
+
+|U D |
+
+X
+
+> i∈U D
+
+1
+
+n
+
+ˆyridge  
+
+> i
+
+= yi, ˆypca 
+
+> i
+
+̸ = yi
+
+o
+
+, (25) 
+
+Qhard  
+
+> D
+
+= 1
+
+|U D |
+
+X
+
+> i∈U D
+
+1
+
+n
+
+ˆyridge 
+
+> i
+
+̸ = yi, ˆypca 
+
+> i
+
+̸ = yi
+
+o
+
+. (26) Define the correct and wrong subsets of the evaluation nodes by 
+
+Ucorrect  
+
+> D
+
+= { i ∈ U D : ˆ yi = yi }, Uwrong  
+
+> D
+
+= { i ∈ U D : ˆ yi̸ = yi }. (27) For the correctness-dependent high-pass shift, let 
+
+Hcorrect  
+
+> D
+
+= 1
+
+|U correct  
+
+> D
+
+|
+
+X
+
+> i∈U correct
+> D
+
+Rhigh (i), Hwrong  
+
+> D
+
+= 1
+
+|U wrong  
+
+> D
+
+|
+
+X
+
+> i∈U wrong
+> D
+
+Rhigh (i), (28) and define ∆HD = Hwrong  
+
+> D
+
+− Hcorrect  
+
+> D
+
+. (29) 10 Table 5: Family-size-adjusted node-level graph signal mixture. Values are average test-node signal-family shares in percent. Family composition is computed by first averaging Fisher-weighted block evidence within each signal family and then normalizing across the three families, thereby removing the trivial family-cardinality prior of the raw/low-pass/high-pass partition.                             
+
+> Dataset ntest Raw Low-pass High-pass Amazon-Computers 13252 15.32 69.76 14.92 Amazon-Photo 7250 13.35 71.97 14.68 Chameleon 456 0.31 61.32 38.37 Cornell 37 28.12 34.99 36.89 Texas 38 29.47 30.59 39.94 Wisconsin 51 34.59 32.70 32.71
+
+We then summarize the operational atlas of dataset D by 
+
+m(D) = 
+
+h
+
+RD , L D , H D , C D , Q ridge  
+
+> D
+
+, Q hard  
+
+> D
+
+, ∆HD
+
+i
+
+. (30) In the present paper, these quantities are reported on test nodes in order to characterize how the fixed white-box probe behaves on the dataset after standard supervised evaluation. This post-evaluation setting is intentional: the goal here is to measure and diagnose dataset behavior under a fixed probe, not to claim blind pre-test model selection, prospective model selection, or dataset-independent design rules. Accordingly, the resulting fingerprint is meant to provide post-evaluation diagnostic guidance only for later model analysis and dataset-specific modification on the same measured dataset. If related diagnostic procedures are later used prospectively, then any correctness-dependent quantities should be computed only on training or validation nodes, never on test nodes. 11 8.1 Graph-signal fingerprints Raw 
+
+features 
+
+Low-pass 
+
+propagation 
+
+High-pass 
+
+difference 
+
+> 10% H
+> 20% H
+> 30% H
+> 40% H
+
+Graph-signal simplex: dataset-level signal fingerprints 
+
+> Amazon-C
+> H=14.9%, L=69.8%
+> Amazon-P
+> H=14.7%, L=72.0%
+> Chameleon
+> H=38.4%, L=61.3% Cornell
+> H=36.9%, L=35.0%
+> Texas
+> H=39.9%, L=30.6%
+> Wisconsin
+> H=32.7%, L=32.7%
+> 10
+> 15
+> 20
+> 25
+> 30
+> 35
+> 40
+> High-pass share
+
+Figure 4: Graph-signal simplex. Each dataset is positioned in a ternary coordinate system using its family-size-adjusted node-level raw, low-pass, and high-pass signal shares. Marker color encodes high-pass reliance, while callouts report the high-pass and low-pass percentages. Amazon graphs remain low-pass dominated after adjustment, whereas Chameleon and the WebKB datasets move toward a more mixed raw/high-pass regime, showing that the datasets differ not only in accuracy but also in the graph-signal mechanisms used by WG-SRC .Table 5 and Figure 4 report family-size-adjusted signal-family shares, so the reported composition is not mechanically driven by the unequal 1:5:3 block counts of the raw/low-pass/high-pass partition. Amazon-Computers and Amazon-Photo remain low-pass dominated, but at a corrected level of roughly 70–72% rather than the unadjusted 84–85%. Chameleon shifts toward a mixed low-pass/high-pass profile, while 
+
+Cornell , Texas , and Wisconsin move into a substantially more raw- and high-pass-balanced regime. Thus, the classical homophily/heterophily dichotomy can be refined into a measurable signal composition: a graph may still be low-pass dominated, yet retain a nontrivial raw or high-pass component after correcting for family cardinality. 12 8.2 Dense node-level signal phase portraits 0.5 0.6 0.7 0.8 
+
+> 0.10
+> 0.12
+> 0.14
+> 0.16
+> 0.18
+> 0.20
+> 0.22
+> 0.24
+> high-pass share
+> n=13252
+
+Amazon-C       
+
+> 0.60 0.65 0.70 0.75 0.80 0.85
+> 0.10
+> 0.12
+> 0.14
+> 0.16
+> 0.18
+> 0.20
+> 0.22 n=7250
+
+Amazon-P      
+
+> 0.2 0.4 0.6 0.8 1.0
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8 n=456
+
+Chameleon     
+
+> 0.25 0.30 0.35 0.40 0.45
+> low-pass share
+> 0.30
+> 0.35
+> 0.40
+> 0.45
+> 0.50
+> high-pass share
+> n=37
+
+Cornell      
+
+> 0.20 0.25 0.30 0.35 0.40
+> low-pass share
+> 0.30
+> 0.35
+> 0.40
+> 0.45
+> 0.50
+> 0.55 n=38
+
+Texas    
+
+> 0.25 0.30 0.35 0.40
+> low-pass share
+> 0.25
+> 0.30
+> 0.35
+> 0.40
+> n=51
+
+Wisconsin 
+
+Node-level signal phase portraits  
+
+> all test nodes errors
+
+Figure 5: Dense node-level signal phase portraits. Each test node is positioned by family-size-adjusted low-pass share (x-axis) and family-size-adjusted high-pass share (y-axis). Blue semi-transparent points show all test nodes and orange semi-transparent points show errors. The plots show where mistakes occur inside the signal space rather than only how many errors occur. Figure 5 uses all test nodes rather than dataset averages. The portrait is deliberately not a feature-attribution bar plot: it is a phase portrait of the family-size-adjusted graph-signal state induced by the explicit dictionary in Eq. (1) . Amazon errors are concentrated away from the dominant low-pass core. Chameleon occupies a visibly broader mixed low-pass/high-pass region, consistent with the need to preserve node-neighborhood differences. This is the key advantage of a named signal dictionary: the space in which a model succeeds or fails is directly plottable. 13 8.3 PCA geometry versus ridge boundary −2 0 2                 
+
+> −4
+> −2
+> 0
+> 2
+> 4
+> Ridge margin
+> easy
+> hard
+> Amazon-C
+> −2 02
+> −2
+> 0
+> 2
+> 4easy
+> hard
+> Amazon-P
+> −2 02
+> −4
+> −2
+> 0
+> 2
+> 4easy
+> hard
+> Chameleon
+> −1.0 −0.5 0.0 0.5 1.0
+> PCA margin
+> −1
+> 0
+> 1
+> 2
+> Ridge margin
+> easy
+> hard
+> Cornell
+> −1 01
+> PCA margin
+> −2
+> −1
+> 0
+> 1
+> 2
+> 3easy
+> hard
+> Texas
+> −1 012
+> PCA margin
+> −1
+> 0
+> 1
+> 2
+> 3easy
+> hard
+> Wisconsin
+
+PCA--Ridge decision phase map 
+
+Figure 6: PCA–Ridge decision phase map. Each node is plotted by PCA margin and ridge margin. Blue points are correct predictions and orange points are errors. The axes separate geometry-driven, boundary-driven, easy, and hard cases. The PCA residual and ridge boundary are not redundant. Their node-level margins form a two-dimensional decision phase space (Figure 6). Nodes in the positive-positive region are easy for both modules; negative-negative nodes are hard for both; off-axis regions reveal geometry-only and boundary-only cases. On Texas 
+
+and Wisconsin , ridge margins correct a nontrivial fraction of nodes that the PCA residual alone misses, explaining why the final classifier often behaves boundary-dominantly on WebKB graphs. 14 8.4 Class-subspace geometry complexity Amazon-C 
+
+> Amazon-P
+> Chameleon
+> Cornell
+> Texas
+> Wisconsin
+> 0
+> 20
+> 40
+> 60
+> 80
+> 100
+> selected PCA dimension  Cc
+> Class-subspace geometry complexity
+> 0.60
+> 0.65
+> 0.70
+> 0.75
+> 0.80
+> 0.85
+> 0.90
+> 0.95
+> 1.00
+> retained variance
+
+Figure 7: Class-subspace geometry complexity. Each point is one class, positioned by its selected PCA dimension rc and colored by retained variance. Chameleon requires much larger class subspaces than Amazon and WebKB, indicating that its classes occupy more complex regions of the selected graph-signal space. Figure 7 gives a class-level view of the PCA component. Amazon and WebKB classes require relatively small selected dimensions, while Chameleon approaches the dimension cap for several classes. This supports the interpretation that Chameleon is not merely a graph-filtering problem: its class geometry in the selected signal space is intrinsically more complex, making the ridge boundary an important complement to PCA residuals. 15 8.5 Correct-vs-wrong signal shifts −14 −12 −10 −8 −6 −4 −2 0 2
+
+> wrong minus correct high-pass share (percentage points)
+> Wisconsin
+> Texas
+> Cornell
+> Chameleon
+> Amazon-P
+> Amazon-C
+> +0.1
+> -1.6
+> -3.4
+> -13.6
+> +2.5
+> +1.4
+
+Error signal shift: where high-pass rises or disappears in mistakes 
+
+Figure 8: Error signal shift. The lollipop value is the family-size-adjusted high-pass share of wrong nodes minus the family-size-adjusted high-pass share of correct nodes. Positive values mean errors have more high-pass mass; negative values mean errors lose high-pass mass relative to correct nodes. Figure 8 shows that errors are not uniformly distributed in signal space. On Amazon graphs, errors carry more high-pass mass than correct nodes, consistent with errors being atypical relative to the dominant low-pass mechanism. On Chameleon, the shift goes in the opposite direction: correct nodes rely more on high-pass differences, while errors are relatively more low-pass. This directly supports the design choice of including X − Prow X and Prow X − P 2row X in the dictionary. 
+
+# 9 From Operational Feature Fingerprints to Post-Evaluation Di-agnostic Guidance 
+
+The mechanistic atlas converts a dataset from a single accuracy number into a white-box diagnostic object with an operational feature fingerprint. Instead of asking only which model wins on a dataset, WG-SRC 
+
+asks which graph-signal families and decision mechanisms are associated with success or failure under a fixed white-box probe. This changes the role of evaluation: the dataset is no longer treated only as a black-box benchmark, but also as an object whose raw-feature reliance, propagation reliance, high-pass sensitivity, class geometry, and boundary dependence can be measured. The claim supported in this section is deliberately narrower than automatic algorithm design but stronger than mechanism interpretation alone. We do not claim that the atlas, by itself, discovers the globally best new model on a dataset or replaces a full redesign search. Rather, WG-SRC is a dual-purpose white-box model: it performs prediction and simultaneously produces the fingerprint m(D) in Eq. (30) . That fingerprint yields mechanism hypotheses—for example, that high-pass blocks are acting as noise, that raw features must be preserved, or that a ridge-style boundary is correcting PCA failures. The role of the aligned interventions is to test whether these hypotheses are supported in the expected direction. In this sense, the atlas is not a blind redesign oracle, not a prospective model selector, and not a dataset-independent design rule. Rather, after a standard evaluation of the fitted white-box scaffold, it provides post-evaluation diagnostic guidance for later model analysis and dataset-specific modification on that same measured dataset. This is the main inferential role of the aligned interventions. They are deliberately simple and are not presented as the final space of improved graph algorithms. Their purpose is to test whether atlas signatures have directional validity as post-evaluation diagnostic guidance. When the fingerprint suggests that a 16 Graph dataset (A, X, Y )
+
+Run full 
+
+WG-SRC scaffold 
+
+Compute operational fingerprint m(D)
+
+Dataset diagnosis from m(D)
+
+Mechanism hypotheses and diagnostic guidance 
+
+Follow-up model analysis or targeted modification 
+
+Diagnostic evidence for model behavior  
+
+> generalist probe mechanism measurement
+
+Figure 9: Mechanism atlas as a dataset diagnostic probe. WG-SRC first performs prediction with the full scaffold and then exposes an operational fingerprint m(D). The atlas is not claimed to automate model design; rather, it produces mechanism hypotheses and post-evaluation diagnostic guidance whose support is evaluated through aligned interventions, error shifts, and PCA–Ridge decision phase portraits on the same measured dataset. Table 6: From dataset fingerprint to post-evaluation same-dataset diagnostic guidance. The atlas signatures generate mechanism hypotheses and diagnostic guidance for later model analysis and dataset-specific modifi-cation on the measured dataset. The table is a diagnostic-consistency summary, not a test-set-tuned model search: it records whether the suggested mechanism direction agrees with aligned interventions.                         
+
+> Atlas signature Dataset diagnosis Diagnostic guidance High LD, low HD, and positive ∆HD
+> High-pass components may act as noise Remove, downweight, gate, or regularize high-pass blocks Near-zero RDand high CDRaw features are insufficient; class geometry is complex Preserve graph-derived signals and improve class-specific subspace modeling High HDand negative ∆ HDCorrect nodes rely on high-pass structure Preserve or adaptively gate high-pass differences rather than removing them globally High Qridge
+> DBoundary decisions correct PCA failures Strengthen the discriminative head or improve PCA– Ridge boundary fusion High Qhard
+> DBoth geometry and boundary fail on many nodes Investigate new signal blocks, hard-node treatment, uncertainty handling, or graph rewiring High RDand low-to-moderate
+> CD
+> Raw features carry strong class in-formation Use raw-preserving skip design, weak propagation, or propagation gating
+
+mechanism is harmful or necessary, the corresponding intervention often changes performance in the predicted direction. For the two Amazon graphs, the atlas shows high low-pass mass, low high-pass mass, and errors with increased high-pass signal; the no-high-pass intervention moves in the expected direction. For Chameleon, the atlas shows almost no raw signal, substantial high-pass structure, and high class-subspace complexity; the raw-only variant collapses, consistent with the diagnosis that graph-derived signals are necessary. For Texas, the large ridge-corrected decision quadrant matches strong boundary-oriented behavior. For Wisconsin, the high raw share matches strong raw-only behavior. Accordingly, the claim is not that WG-SRC automatically designs new algorithms or solves architecture search. The supported claim is that WG-SRC is a dual-purpose white-box model: it performs prediction and produces an operational dataset fingerprint whose mechanism hypotheses are supported by aligned interventions and whose post-evaluation diagnostic guidance can inform later model analysis and dataset-specific modification. In this sense, the atlas is not merely a descriptive visualization layer; it is a diagnostic interface between prediction, mechanism measurement, and mechanism-guided follow-up model analysis. 17 10 Limitations 
+
+First, WG-SRC is not a universal speed improvement. The explicit audit trail costs computation because the method constructs named graph-signal blocks, performs Fisher selection, fits class-wise PCA subspaces, solves ridge systems, and searches validation configurations. We therefore report the runtime table only as an appendix computational profile rather than as a main-text speed claim; see Appendix A. Second, the method is a modular scaffold rather than a single irreducible architecture: specialized variants can outperform the full scaffold on some datasets, but the atlas should be interpreted as a diagnostic probe rather than an automatic model-design system. Third, the baseline comparison is limited to the disclosed reproduced suite; broader benchmarking against every recent graph learner is future work. Fourth, the current atlas evidence is diagnostic rather than fully causal or fully search-optimal: it is validated through aligned intervention consistency, not through an exhaustive search over all possible redesigns. 
+
+# 11 Conclusion 
+
+We presented WG-SRC , a white-box graph classifier that replaces hidden message passing with explicit graph signal blocks and replaces learned representation layers with class PCA subspaces and closed-form ridge regression. The method is competitive with strong graph baselines in a disclosed reproduced suite, improving by +1 .52 pp on average across six datasets under the aligned baseline rerun. The broader contribution is that WG-SRC is dual-purpose. It is not only a classifier, but also a measurement instrument for graph datasets. Its mechanism atlas connects dataset-level signal fingerprints, node-level error shifts, class-subspace geometry, and PCA–Ridge decision phases to the behavior observed in aligned mechanistic interventions. This allows the model to reveal whether a dataset is low-pass dominated, high-pass sensitive, boundary driven, raw-feature sensitive, or geometrically complex. This diagnostic role is distinct from automatic algorithm design. We do not claim that the atlas, by itself, guarantees the globally best redesign for a dataset or replaces a full redesign search. Instead, the supported claim is more operational: after standard evaluation on a given dataset, the atlas provides a white-box, accuracy-preserving fingerprint whose mechanism hypotheses and diagnostic guidance are supported by aligned interventions on that same dataset. In this sense, WG-SRC offers a white-box path from prediction to dataset diagnosis, and from dataset diagnosis to mechanism-guided follow-up model analysis and dataset-specific modification. 
+
+Future directions. A natural future direction is to use the measured dataset fingerprints as a reference frame for probing black-box graph models. By evaluating black-box architectures and their ablated components across datasets with different fingerprints, it may become possible to identify the empirically effective role of specific architectural components under different measured dataset conditions. This could support a more systematic basis for dataset-specific model analysis and targeted optimization in future work. 
+
+# Reproducibility Statement 
+
+The package includes the LaTeX source, filtered summary tables, figures, and CSV files used to generate the tables and atlas figures. All main-text figures and tables use only the six evaluated datasets. Model and baseline selections are validation-only, and paired split stability is computed by matching dataset and repeat index. The full research repository, including algorithm implementations, experiment scripts, and iterative development records, is available at GitHub repository. 
+
+# Broader Impact Statement 
+
+This work aims to make graph learning more transparent. Potential positive impacts include easier auditing of graph models and better diagnosis of when graph propagation is harmful. Potential negative impacts are similar to those of node-classification systems generally: if applied to sensitive social, financial, or biological 18 networks without care, predictions and explanations could still be misused. The proposed atlas should be treated as a diagnostic aid, not as a guarantee of fairness or causality. 
+
+# References 
+
+Kipf, T. N. and Welling, M. Semi-supervised classification with graph convolutional networks. International Conference on Learning Representations , 2017. Hamilton, W. L., Ying, Z., and Leskovec, J. Inductive representation learning on large graphs. In Advances in Neural Information Processing Systems 30 (NeurIPS 2017) , pp. 1024–1034, 2017. Veliˇ ckovi´ c, P., Cucurull, G., Casanova, A., Romero, A., Li` o, P., and Bengio, Y. Graph attention networks. 
+
+International Conference on Learning Representations , 2018. Gasteiger, J., Bojchevski, A., and G¨ unnemann, S. Predict then propagate: Graph neural networks meet personalized PageRank. International Conference on Learning Representations , 2019. Huang, Q., He, H., Singh, A., Lim, S.-N., and Benson, A. R. Combining label propagation and simple models out-performs graph neural networks. International Conference on Learning Representations , 2021. Chen, M., Wei, Z., Huang, Z., Ding, B., and Li, Y. Simple and deep graph convolutional networks. In 
+
+Proceedings of the 37th International Conference on Machine Learning , PMLR 119:1725–1735, 2020. Frasca, F., Rossi, E., Eynard, D., Chamberlain, B., Bronstein, M. M., and Monti, F. SIGN: Scalable inception graph neural networks. arXiv preprint arXiv:2004.11198 , 2020. Pei, H., Wei, B., Chang, K. C.-C., Lei, Y., and Yang, B. Geom-GCN: Geometric graph convolutional networks. 
+
+International Conference on Learning Representations , 2020. Zhu, J., Yan, Y., Zhao, L., Heimann, M., Akoglu, L., and Koutra, D. Beyond homophily in graph neural networks: Current limitations and effective designs. Advances in Neural Information Processing Systems ,2020. Lim, D., Hohne, F., Li, X., Huang, S. L., Gupta, V., Bhalerao, O., and Lim, S.-N. Large scale learning on non-homophilous graphs: New benchmarks and strong simple methods. Advances in Neural Information Processing Systems , 2021. Chien, E., Peng, J., Li, P., and Milenkovic, O. Adaptive universal generalized PageRank graph neural network. 
+
+International Conference on Learning Representations , 2021. Fey, M. and Lenssen, J. E. Fast graph representation learning with PyTorch Geometric. ICLR Workshop on Representation Learning on Graphs and Manifolds , 2019. Rozemberczki, B., Allen, C., and Sarkar, R. Multi-scale attributed node embedding. Journal of Complex Networks , 9(2):cnab014, 2021. Yu, Y., Chan, K. H. R., You, C., Song, C., and Ma, Y. Learning diverse and discriminative representations via the principle of maximal coding rate reduction. Advances in Neural Information Processing Systems ,2020. Chan, K. H. R., Yu, Y., You, C., Qi, H., Wright, J., and Ma, Y. ReduNet: A white-box deep network from the principle of maximizing rate reduction. Journal of Machine Learning Research , 23(114):1–103, 2022. Wang, P., Liu, H., Pai, D., Yu, Y., Zhu, Z., Qu, Q., and Ma, Y. A global geometric analysis of maximal coding rate reduction. International Conference on Machine Learning , 2024. Pearson, K. On lines and planes of closest fit to systems of points in space. Philosophical Magazine , 2(11):559– 572, 1901. 19 Hoerl, A. E. and Kennard, R. W. Ridge regression: Biased estimation for nonorthogonal problems. Techno-metrics , 12(1):55–67, 1970. von Luxburg, U. A tutorial on spectral clustering. Statistics and Computing , 17(4):395–416, 2007. Shchur, O., Mumme, M., Bojchevski, A., and G¨ unnemann, S. Pitfalls of graph neural network evaluation. 
+
+Relational Representation Learning Workshop, NeurIPS , 2018. 
+
+# A Computational Profile 
+
+Table 7 reports a computational profile for completeness. It is not used as a main-text speed claim. Baseline runtime and accuracy are taken from the aligned CPU baseline rerun; WG-SRC accuracy is standardized to the ten-repeat main-table value. The purpose of this table is to document the cost of the white-box audit trail: explicit graph-signal construction, Fisher selection, class-wise PCA fitting, ridge solves, and validation search. Table 7: Appendix computational profile. Baseline runtime and accuracy are taken from the aligned CPU baseline rerun; WG-SRC accuracy is standardized to the ten-repeat main-table value. This table documents runtime cost and is not intended as a speedup claim.                                      
+
+> Dataset Best baseline Baseline time(s) WG-SRC time(s) Ratio WG-SRC acc. Amazon-Computers GraphSAGE 208.5 292.9 1.4 ×78.71 Amazon-Photo GraphSAGE 81.3 136.4 1.7 ×88.76 Chameleon LINKX 3.6 62.1 17.5 ×72.48 Cornell GraphSAGE 0.8 4.5 5.7 ×75.41 Texas GraphSAGE 0.8 4.1 5.2 ×86.32 Wisconsin GraphSAGE 0.9 6.0 6.8 ×84.31
+
+# B Implementation Details 
+
+The Fisher feature count was selected from K ∈ { 4000 , 5000 , 6000 , 8000 }. The PCA maximum dimension was selected from rmax ∈ { 32 , 48 , 64 , 96 }, with energy threshold η ∈ { 0.90 , 0.95 , 0.99 }. Ridge regularizer sets were selected from {0.01 , 0.1, 1.0}, {0.05 , 0.5, 5.0}, and {0.1, 1.0, 10 .0}. The fusion weight was selected from 
+
+w ∈ { 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8}. All selections were made using validation accuracy. The corresponding implementation and experiment scripts are released in the public repository listed in the Reproducibility Statement. 20 C Class-Pair Geometry and Confusion 0 1 2 3 4
+
+class 
+
+0
+
+1
+
+2
+
+3
+
+4               
+
+> class
+> 0.36 0.30 0.23 0.21
+> 0.36 0.34 0.26 0.26
+> 0.30 0.34 0.30 0.31
+> 0.23 0.26 0.30 0.31
+> 0.21 0.26 0.31 0.31
+
+Subspace overlap Oab 
+
+0 1 2 3 4
+
+class 
+
+0
+
+1
+
+2
+
+3
+
+4               
+
+> class
+> 0.20 0.14 0.11 0.02
+> 0.20 0.11 0.09 0.10
+> 0.14 0.11 0.23 0.18
+> 0.11 0.09 0.23 0.12
+> 0.02 0.10 0.18 0.12
+
+Bidirectional confusion 
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+0.00 
+
+0.05 
+
+0.10 
+
+0.15 
+
+0.20 
+
+Chameleon class-pair geometry and confusion constellation 
+
+Figure 10: Chameleon class-pair geometry and confusion constellation. The left panel shows pairwise PCA subspace overlap; the right panel shows bidirectional confusion. This appendix figure illustrates how the same subspace objects used for prediction can also diagnose class-pair errors. 21

@@ -1,0 +1,2602 @@
+Title: Estimation of Time-Varying Treatment Effects in a Joint Model for Longitudinal and Recurrent Event Outcomes in Mobile Health Data
+
+URL Source: https://arxiv.org/pdf/2604.23006v1
+
+Published Time: Tue, 28 Apr 2026 00:17:17 GMT
+
+Number of Pages: 56
+
+Markdown Content:
+ESTIMATION OF TIME-VARYING TREATMENT EFFECTS IN A JOINT MODEL FOR LONGITUDINAL AND RECURRENT EVENT OUTCOMES IN MOBILE HEALTH DATA 
+
+BY MADELINE R A BBOTT 1,a , J EREMY M G T AYLOR 1,b INBAL NAHUM -S HANI 2,d 
+
+LINDSEY N P OTTER 3,e DAVID W W ETTER 3,f CHO Y L AM 3,g AND WALTER DEMPSEY 1,c       
+
+> 1Department of Biostatistics, University of Michigan, amrabbott@umich.edu; bjmgt@umich.edu; cwdem@umich.edu
+> 2Institute for Social Research, University of Michigan, dinbal@umich.edu
+> 3Department of Population Health Sciences and Huntsman Cancer Institute, University of Utah, elindsey.potter@hci.utah.edu;
+> fdavid.wetter@hci.utah.edu; gcho.lam@hci.utah.edu
+
+Not only does mobile health technology enable researchers to track changes in multiple longitudinal outcomes of interest and to record the oc-currence of health-related events over time, but it also allows for the deliv-ery of repeated low-cost treatments directly to individuals in real time. We present a model-based approach for estimating the effect of repeatedly de-livered treatments in a micro-randomized trial (MRT) via an extension of a joint longitudinal-survival model. We discuss different ways that these re-peated treatment effects can be incorporated into the joint model; these differ-ent model specifications correspond to different mechanisms by which treat-ment is assumed to impact the longitudinal and event processes. Taking a Bayesian approach to inference, we model the association between repeated treatments, multiple longitudinally measured outcomes, and recurrent events. We also demonstrate how to calculate information criteria for model selection and present goodness-of-fit plots for assessing survival submodel calibration. We then illustrate the performance of our method via simulations and analy-sis of data collected in an MRT of substance use. 
+
+1. Introduction. Mobile health (mHealth) technology enables frequent measurement of multiple outcomes over time. The resulting intensive longitudinal data (ILD) can provide in-sight into underlying behavioral, psychological, or other states that are indirectly measured through these many observed outcomes. Beyond data collection, mHealth tools also support the delivery of repeated, low-cost treatments directly to individuals, often via just-in-time adaptive interventions (JITAIs) (Nahum-Shani et al., 2018). JITAIs are typically delivered multiple times per day and are tailored—in timing, type, and intensity—to individual’s con-text and state. They can be developed in micro-randomized trials (MRTs) in which individuals are randomized—possibly multiple times per day—to be sent or not sent a treatment. Since their proposal (Klasnja et al., 2015; Liao et al., 2016), MRTs have been used to in-form development of effective JITAIs in settings ranging from promoting physical activity among sedentary adults (Klasnja et al., 2019) to increasing engagement with mHealth tools 
+
+Keywords and phrases: joint model, recurrent events, micro-randomized trial. 
+
+1
+
+> arXiv:2604.23006v1 [stat.ME] 24 Apr 2026 2
+
+for substance use (Rabbi et al., 2018). In MRTs, researchers are often interested in under-standing the effect of treatment on an outcome measured shortly after randomization; e.g., the effect of smartphone notifications on substance use within the next 12 hours. The treatment effects of interest—i.e., of repeatedly delivered treatments on repeatedly measured outcomes—may account for the time-varying nature of treatments, covariates, and repeatedly measured outcomes. Boruvka et al. (2018) propose an estimator of a causal excur-sion effect that incorporates the time-varying nature of the treatment, outcome, and potential moderators. This estimator, which can be conditional on all past treatments or on a selected set of moderators (e.g., past engagement with notifications), captures the effect of treatment on a future outcome under different treatment scenarios and is marginal over all variables ex-cept the potential moderators on which the effect is conditioned. These MRT treatment effects are commonly estimated using generalized estimating equation methods, such as weighted and centered least squares (Boruvka et al., 2018), with extensions in Qian et al. (2021) and Shi, Wu and Dempsey (2023). Although these estimating equation approaches reduce para-metric assumptions, they cannot directly model possible treatment effects on multiple out-come types—e.g., a longitudinal and a time-to-event outcome—simultaneously. Here, we propose a method for obtaining model-based estimates of treatment effects. Such estimators are common in the joint longitudinal–survival model setting where understand-ing the hazard of an event as a function of time-varying predictors is of interest. Modeling longitudinal and survival outcomes jointly, rather than separately, can reduce bias and in-crease efficiency by accounting for dependencies between the longitudinal and survival pro-cesses (Ibrahim, Chu and Chen, 2010). Joint models typically treat longitudinal outcomes as intermediate variables through which treatment affects event risk. Much of this work is motivated by observational data (e.g., Yu et al. (2004); Taylor et al. (2014); Rizopoulos et al. (2024)), where a longitudinal outcome determines treatment, thus making it a “time-dependent confounder” that requires additional consideration (Taylor et al. (2014); Rizopou-los et al. (2024)). In MRTs, however, the timing of treatment delivery is random, so the longitudinal outcome is not a time-dependent confounder. Instead, the key challenge is that treatment can be delivered multiple times per day, rather than at a single decision point. In the MRT context, a primary advantage of our model-based approach is that it can dis-entangle treatment effects on a latent longitudinal process measured via multiple longitu-TIME-VARYING TREATMENT EFFECTS IN A JOINT MODEL 3
+
+dinal outcomes and on the hazard of recurrent events. Our work is motivated by an MRT aiming to use behavioral strategies to promote smoking cessation among current smokers attempting to quit. Throughout the study, prompts (i.e., treatments) to engage in behavioral strategies are delivered multiple times per day via app-based notifications, while informa-tion on emotions (i.e., ILD) and repeated instances of substance use (i.e., recurrent events) is also reported multiple times per day. We incorporate these repeated treatments into a joint longitudinal–recurrent event model that links latent psychological states with the hazard of recurrent substance-use events. While this approach has similarities to mediation analysis, we view our contribution as developing a framework that is useful for exploratory analyses of associations of interest. Modeling the time-varying effects of interventions on both the recurrent-event risk and the underlying latent process has the potential to provide insights into how JITAIs influence events of interest and thus inform the design of improved JITAIs. The main contribution of this work is a model-based approach for estimating treatment effects—on both the risk of recurrent events and the trajectory of the latent factors—in an MRT. We consider two different mechanisms by which the treatments can impact the lon-gitudinal latent process, which we model using a continuous-time multivariate stochastic process. Specifically, we allow treatment to impact the latent process via an additive shift to its mean, or we allow treatment to impact the underlying dynamics of the latent process by altering the rate at which it reverts towards the mean (i.e., as time-varying drift). Useful consequences of this model-based approach are threefold: we can (1) disentangle the im-pact of treatment directly on the event outcome and via the latent factors; (2) use the fitted model to predict the risk of an event within a fixed interval of time, given the trajectory of the latent factors and past treatment; and (3) use the fitted model to inform the development of improved JITAIs or other treatments through increased understanding of the pathways by which treatment may impact the recurrent event outcome. When analyzing the motivating MRT data, we also demonstrate how information criteria and posterior predictive checks can be used to examine the fit of models making different assumptions about the relationship between the recurrent events, longitudinal latent process, and repeated treatment effects. The rest of the paper is organized as follows: we describe the motivating MRT in Section 2, we present the joint longitudinal-recurrent event models with time-varying treatment effects 4day 0 day 1 day 2 day 3 day 10       
+
+> RRRRRR
+> start day end day
+
+i     
+
+> Send EMA to
+> assess emotions
+> and substance use Prompt (p = ½)
+> No prompt (p = ½)
+> R1 hour
+> day 1 day 2
+
+Fig 1: Simplified diagram of the MRT. Each day, a participant is randomized up to six times to potentially receive an app-based prompt. About one hour after randomization, an EMA is sent to the participant’s smartphone to assess the current intensity of multiple emotions and substance use since the prior EMA. Figure is adapted from Nahum-Shani et al. (2021). in Section 3, we demonstrate the statistical properties of our method via simulation in Section 4, we analyze the MRT data in Section 5, and we provide a discussion in Section 6. 
+
+2. Motivating Data. This work is motivated by data from the Affective Science MRT. At the time of drafting this manuscript, the study was still ongoing and thus we only include data available from enrolled participants at that time (N = 72). The design of this study is identical to that described in Nahum-Shani et al. (2021) and uses ecological momentary assessments (EMAs) to collect the self-reported intensity of 15 emotions, along with recent substance use (smoking cigarettes, vaping, or using marijuana). Up to six times per day over a ten day period, study participants are randomized with equal probability to be sent or not sent a prompt to engage with interventions delivered via smartphones. These prompts are aimed at improving their engagement in behavioral and self-regulatory activities associated with decreased vulnerability to substance use (Nahum-Shani et al., 2021). Approximately one hour after randomization, the participants are sent an EMA on their smartphone. A simplified diagram of the MRT design is provided in Figure 1. Our longitudinal outcome is a set of 15 emotions—5 positive and 10 negative—measured via self-report on a 5-point Likert scale at each EMA. Emotions are: happy, proud, relaxed, grateful, enthusiastic, angry, ashamed, irritable, guilty, lonely, anxious, sad, restless, bored, and hopeless. On average, emotions are measured 28 times per person (min. = 3, max. = 53). Our recurrent event is poly-substance use, which is also self-reported in the EMAs. To de-fine an instance of poly-substance use (i.e., using marijuana, vaping, or smoking cigarettes), TIME-VARYING TREATMENT EFFECTS IN A JOINT MODEL 5
+
+we use a set of deterministic rules that consolidate information across EMA questions assess-ing the timing and type of substance use (see Web Appendix A.1 for details). The within-individual average EMA completion rate is 47%, but this rate varies widely across individuals (range: 5% - 88%) according to a combination of non-response to delivered EMAs and failure to deliver EMAs. While many individuals respond frequently to the EMAs, some individuals go for multiple days without responding to an EMA. The event submodel assumes that individuals are at risk of experiencing an event (up until censoring), so to help reduce the impact of non-response on our event submodel, we censor individuals at the time of their most recent longitudinal measurement if they fail to respond to an EMA for a period of more than 48 hours. Otherwise, we censor individuals at the time of their final completed EMA. We also exclude any individuals who fail to respond to an EMA within the first 48 hours of the study, resulting in an analytic sample size of N = 64 individuals. The observed data, which consist of the longitudinal outcomes, recurrent events, and treat-ment timings, are plotted in Appendix Web Figure 4 for a subset of individuals in the mo-tivating MRT. Across all individuals, we observe 1,162 events of poly-substance use, which corresponds to an average of 19 events per person spread over a maximum of 10 days. Addi-tional plots detailing the timing of events are given in Web Appendix A.1. 
+
+3. Methods. To model the relationship between repeated treatments, a multivariate lon-gitudinal latent process, and the risk of recurrent events, we use a joint longitudinal-recurrent event model. The model extends the joint longitudinal-survival model previously presented in Abbott et al. (2025a) to allow for recurrent events and to include a model for the effect of treatment on the latent process and the hazard of events. The longitudinal submodel—without treatment—was originally presented in Abbott et al. (2025b). Here, we first introduce our joint longitudinal-recurrent event model in a setting without treatment effect models. Let i = 1 , ..., N index the independent individuals in our dataset, and let j = 1 , ..., n i index the longitudinal measurement occasions for individual i. This joint model consists of the following three submodels: 
+
+Measurement submodel: The measured k longitudinal outcomes, represented by k-length vector Yi(tij ), are assumed to be noisy observations of a p-dimensional latent process 
+
+ηi(tij ), where p < k . We model the measured longitudinal outcomes using a dynamic 6
+
+factor model, 
+
+Yi(tij ) = Ληi(tij ) + ui + ϵi(tij ).(1) 
+
+Λ is a k × p time-invariant loadings matrix that captures the association between the mea-sured longitudinal outcomes and the time-varying latent process. ui is a k-length vector of outcome-specific random intercepts that account for baseline differences in the measured longitudinal outcomes across individuals; we assume ui ∼ Nk(0, Σu) where Σu is a diag-onal matrix. ϵi(tij ) captures measurement error; we assume ϵi(tij ) ∼ Nk(0 , Σϵ) and that 
+
+Σϵ is diagonal. In the motivating data, Yi(tij ) is the set of 15 emotions measured at time 
+
+tij for individual i.
+
+Structural submodel: The p-dimensional latent process ηi(t) is assumed to be a multi-variate Ornstein-Uhlenbeck (OU) stochastic process. This process can be thought of as a continuous-time version of a vector autoregressive process and captures correlated change within and between multiple latent factors over time. The stochastic differential equation definition of the OU process is 
+
+dηi(t) = [ μ − θη i(t)] dt + σdW i(t).(2) 
+
+θ is a p × p parameter matrix that captures the speed at which the latent process reverts towards a constant mean μ, and σ is a p × p parameter matrix that captures the volatility of the process. Wi(t) is a Wiener process. Often, the constant mean is assumed to be 0 (μ = 0 ). Later, when we introduce interventions, we allow μ to depend on time. For more discussion of the OU process, see Brigo and Mercurio (2007). In the motivating data, we summarize the 15 measured emotions as a two time-varying latent factors using a bivariate (p = 2 ) OU process. These latent factors can be interpreted as capturing different aspects of psychological state, namely positive affect and negative affect. 
+
+Event-time submodel: The hazard of the rth event for individual i can depend on the history of the latent process Hi(t) = {ηi(s), 0 ≤ s ≤ t}, the history of recurrent events 
+
+Ri(t) = {Tir < t, r = 1 , 2, ... }, and possibly baseline covariates Xi. Very generally, we define the hazard for recurrent event r as 
+
+hir {t|H i(t), Ri(t), X i} = h0(t) exp f (Hi(t); βH ) + g(Ri(t); βR) + X⊤ 
+
+> i
+
+γ .(3) 
+
+h0(t) is the baseline hazard, which may be time-varying. We take a clock-reset approach in which we use the hazard to model the time between each recurrent event and thus reset TIME-VARYING TREATMENT EFFECTS IN A JOINT MODEL 7
+
+the clock for the baseline hazard (but not the time-dependent predictors) to 0 after the occurrence of an event. We then account for associations between repeated events through 
+
+g(Ri(t); βR); for example, g(Ri(t); βR) could be some transformation of the time since the most recent prior event, Ti,r −1. Xi, which is a vector containing baseline covariates, could adjust for pre-quit substance use or other time-independent risk factors. We discuss more concrete forms of f and g later in the simulation study. Due to the complexity of our model and the MRT data, we could potentially adapt our joint model to capture the effect of these randomized treatments in up to three different ways. Each treatment could be associated with changes in the measured longitudinal outcome, changes in the latent process, or modifications directly to the risk of a recurrent event. We summarize these possible pathways for treatment effect in Appendix Web Figure 11. In the remainder of this paper, we focus on the scenarios in which treatment directly impacts (a) the latent process and (b) the risk of a recurrent event. We could potentially also allow the treatment to directly impact the measured longitudinal outcome, but this modeling decision would imply that the treatment changes the observed longitudinal outcome without modifying the latent process that the longitudinal outcome is assumed to measure. This mechanism for treatment effect is less scientifically relevant than (a) or (b) because we view the observed longitudinal outcomes simply as noisy measurements of the latent factors of interest. Our measurement error perspective implies that any effect of treatment on the measured outcomes should result from changes to the latent factors themselves. Thus, our main contribution is the development of treatment effect models for (a) and (b). 3.1. Modeling the Impact of Treatment on the Latent Process. We now build on the mod-els defined in the previous section to model treatment effects. Let ai(tij ) denote the decision to treat individual i at time tij and Ai(t) := {ai(s), 0 ≤ s ≤ t} be their treatment history. We can model the impact of treatment directly on the latent process by incorporating a model for the treatment effect into our structural submodel. The prompts in the Affective Science MRT target engagement in behavioral activities posited to decrease vulnerability to smoking and so, via this model formulation, we assume that these vulnerability-related psychological states are represented by the low-dimensional latent process. This assumption 8
+
+about the treatment effect implies that treatment could also impact the risk of a recurrent event and the measured longitudinal outcomes via changes in the trajectory of the latent process. We consider two different approaches to modeling the impact of treatment on the latent process trajectory, which make different assumptions about how treatment might affect the latent process. In this first approach, we assume that the impact of treatment is additive and directly shifts the OU process away from the constant mean for a short window of time after the treatment. In the motivating MRT, this approach would assume that sending a prompt to an individual results in a shift in the level of their psychological state (e.g., positive and negative affect) on the scale of the state itself. Let η∗(t) denote the OU process without treatment effect (i.e., Eq.2 with μ = 0 ). Then, the impact of treatment is modeled as 
+
+ηi(t) = η∗ 
+
+> i
+
+(t) + μi(t)(4) where μi(t) is a simple function that describes the short-term impact of treatment. Here, we assume that, for each individual i, μi(t) is a simple deterministic function: 
+
+μi(t) = X
+
+> tia ∈A i(t)
+
+τ
+
+
+
+1 − t − tia 
+
+δa
+
+
+
+> +
+
+(5) where Ai(t) contains the time tia of all treatments sent to individual i prior to time t, τ is a length-p vector that captures the maximum impact of the treatment at the time at which it is delivered, and δa defines the window over which each treatment is active. We assume that δa
+
+is known, but that τ is estimated. Note that the deterministic function μi(t) implicitly condi-tions on the treatment history Ai(t). This form for μi(t) assumes that the effect of treatment on the latent process is largest at the time of treatment; then, this effect decays linearly until no effect remains δa units of time after the treatment was delivered. If multiple treatments are delivered in rapid succession, the cumulative impact of the treatments is additive, as il-lustrated in Figure 2a. Due to the complexity of our joint model, we assume a fairly simple form for μi(t) here, but one could specify a different form for μi(t) in a different setting. Assuming this additive treatment effect in Eq. 4, we can write the conditional distribu-tion for our structural submodel as follows: if ηi(0) ∼ Np(0, V ) where V = vec −1(θ ⊕
+
+θ)−1vec (σσ ⊤) , then for times t and s, t > s ,
+
+ηi(t)|ηi(s) ∼ Np
+
+
+
+μi(t) + e−θ(t−s) (ηi(s) − μi(s)) , V − e−θ(t−s)V e−θ⊤(t−s)
+
+(6) where e is the matrix exponential. TIME-VARYING TREATMENT EFFECTS IN A JOINT MODEL 9
+
+As an alternative to modeling the treatment effect as an additive shift to the mean of the OU process, we can instead model treatment as impacting the dynamics of the latent pro-cess through a time-varying drift term on the derivative scale. In the motivating MRT, this approach assumes that sending a prompt to an individual alters the rate at which their psy-chological states (e.g., positive and negative affect) change over time. For example, sending a prompt could increase the rate at which levels of negative affect revert towards their average level. The standard OU process assumes a constant value for μ, but the Hull-White process, which is often used in financial math applications, extends the OU process to allow for time-varying drift. For more discussion of the OU process and Hull-White model, see Brigo and Mercurio (2007). The stochastic differential equation (SDE) for the Hull-White model is 
+
+dηi(t) = [ μi(t) − θη i(t)] dt + σdW i(t)(7) where μi(t) is still a simple function that describes the short-term treatment effect. From this SDE, it follows that the conditional distribution of ηi(t) with time-dependent drift is 
+
+ηi(t)|ηi(s) ∼ Np
+
+
+
+e−θ(t−s)ηi(s) + 
+
+Z ts
+
+e−θ(t−u)μi(u)du, V − e−θ(t−s)V e−θ⊤(t−s)
+
+
+
+(8) The mean of this distribution requires integrating across e−θ(t−u)μi(u) as a function of u.Depending on the specific formulation of μi(t), an analytic solution to this integral may or may not exist. If we assume that the treatment effect model takes the linear form given in Eq.5, we can derive the analytic solution to the integral in the conditional mean in Eq.8. In a setting in which only a single treatment impacts the drift of this latent process, integration would be straight forward; in our setting, however, we must carefully account for overlapping active treatments. We use Ai(s − δa, t ) to denote the set of times at which treatments were sent to individual i between time s − δa and time t; this set of treatment times corresponds to all treatments that are active between times s and t. If we solve the integral in Eq.8, then we can re-write the distribution in an analytic form:              
+
+> (9)
+> ηi(t)|ηi(s)∼
+> Npe−θ(t−s)ηi(s) + X
+> tia ∈A i(s−δa,t )
+> 
+> 1−u−tia
+> δa
+> 
+> e−θ(t−u)θ−1+1
+> δae−θ(t−u)
+> 
+> τ
+> u=min (t,t ia +δa)
+> u=max (tia ,s )
+> ,
+> V−e−θ(t−s)Ve−θ⊤(t−s)
+> !
+
+More details on this derivation are given in the Appendix C. 10 −1 0123   
+
+> 0246
+> Time t
+> Difference in conditional mean at t
+> η1
+> η2
+> Tx
+
+(a) The difference in means at time t between a latent process with treatment effect modeled as an additive shift to the mean and a latent process without a treatment effect is μi(t) −
+
+e−θ(t−s)μi(s), where s = 0 .−1 0123   
+
+> 0246
+> Time t
+> Difference in conditional mean at t
+> η1
+> η2
+> Tx
+
+(b) The difference in means at time t between a latent process with treatment effect modeled on the derivative scale as time-varying drift and a latent process without a treatment effect is R ts e−θ(t−u)μi(u)du , where s = 0 .
+
+Fig 2: Treatment models for the longitudinal process. The plots show the difference between the latent process with a treatment effect model—either additive or drift—and a latent process with a constant mean of 0. We plot this difference across time t, with s fixed at 0, if treatments were to be sent as indicated by the red dots. The shaded grey bars highlight the (potentially overlapping) regions over which treatments may have some non-zero effect. Comparing the conditional distribution of ηi(t)|ηi(s) when the treatment effect is modeled as an additive term (Eq. 6) to the conditional distribution when treatment effect is modeled as impacting the dynamics of the latent process through drift (Eq. 9), we see the variance terms are the same but the treatment function μi(t) appears differently in the conditional means: 
+
+Additive treatment effect: 
+
+E [ηi(t)|ηi(s)] = e−θ(t−s)ηi(s) + μi(t) − e−θ(t−s)μi(s)
+
+Drift treatment effect: 
+
+E [ηi(t)|ηi(s)] = e−θ(t−s)ηi(s)+ X
+
+> tia ∈A i(s−δa,t )
+
+ 
+
+1 − u − tia 
+
+δa
+
+
+
+e−θ(t−u)θ−1 + 1
+
+δa e−θ(t−u)
+
+
+
+τ
+
+> u=min (t,t ia +δa)
+> u=max (tia ,s )
+
+In the additive version, the mean reversion parameter θ and treatment effect function μi(t)
+
+show up clearly in the terms in the sum. Using the definition of the latent process un-der additive treatment effect as given in Eq.4, we can re-write the conditional mean as 
+
+E [ηi(t)|ηi(s)] = e−θ(t−s)η∗ 
+
+> i
+
+(s) + μ(t). Writing the conditional mean in this format makes the additive impact of treatment quite clear. When treatment is incorporated into the drift of the latent process, the impact of treatment on the conditional expectation is still additive; however, the impacts of θ and μi(t) on the trajectory of the latent process are linked together in a much more complicated way (see Figure 2b). TIME-VARYING TREATMENT EFFECTS IN A JOINT MODEL 11 
+
+3.2. Modeling the Impact of Treatment on the Hazard of Recurrent Events. In the previ-ous section, we described how treatment can modify the trajectory of the latent process. Now, we discuss modeling the direct impact of treatment on the hazard of an event. Modeling the impact of treatment through a term included in the hazard model implies that the treatment alters the risk of a recurrent event through some mechanism that is not captured by the latent process. If the app-based notifications in the motivating study target engagement in certain behaviors, then, by using this model formulation, we assume that these states are different from those states captured by the latent factors. To model this treatment effect, we include a treatment-related term ˜μi(t) in the event-time submodel for individual i’s rth recurrent event: 
+
+hir {t|H i(t), Ri(t), X i} = h0(t) exp f (Hi(t); βH ) + g(Ri(t); βR) + ˜ μi(t) + X⊤ 
+
+> i
+
+γ(10) 
+
+For simplicity, we assume that ˜μi(t) has a form similar to the treatment model for the latent process (Eq.5). In a different setting, one may want to specify an alternative form for 
+
+˜μi(t), but here we use: 
+
+˜μi(t) = X
+
+> tia ∈A i(t)
+
+˜τ
+
+
+
+1 − t − tia 
+
+δb
+
+
+
+> +
+
+(11) where the impact of treatment on the hazard is captured through the unknown (scalar) param-eter ˜τ . As before, we assume that the duration of the treatment effect δb is known. 3.3. Inference. We take a Bayesian approach to fit our joint longitudinal-recurrent event model. Combining the measurement submodel (Eq. 1), hazard submodel (Eq. 10), and struc-tural submodel with the treatment effect modeled either as an additive shift (Eq. 6) or as drift (Eq. 8), our likelihood is                   
+
+> (12)
+> p(T,δ,Y;ΘR,ΘM,ΘS) =
+> NY
+> i=1
+> RiY
+> r=1
+> Z "
+> p(Tir , δ ir |H i(Tir ),Ri(Ti,r −1),Ai(Tir ); ΘR)
+> ×
+> niY
+> j=1
+> p(Yi(tij )|H (Tir )i,A(Tir )i;ΘM)p(ηi;ΘS)dηi
+> #
+
+where Ri is the number of events for individual i, ΘR = ( βH , βR, ˜τ ), ΘM = ( Λ, Σu, Σϵ),and ΘS = ( θ, σ, τ ). Recall that Hi(t) is the history of the latent process until time t, Ri(t)
+
+is the history of recurrent events until time t, and Ai(t) is the treatment history until time 
+
+t. The likelihood does depend on the treatment history, but we can factor out this term after conditioning on the observed treatment history and so we omit it from our likelihood defi-nition above. We do not include baseline covariates in this definition of the likelihood, but incorporating them is straightforward. 12 
+
+The likelihood contribution of the recurrent events is given by       
+
+> p(Tir , δ ir |H i(Tir ),Ri(Ti,r −1),Ai(Tir ); ΘR) = hir (Tir |H i(Tir )) δir exp
+> (
+> −
+> ZTir
+> Ti,r −1
+> hir (s)ds
+> )
+> .
+
+Note in this definition of the joint likelihood, we opt to write the distribution of the observed longitudinal outcome conditional only on the latent factors and integrate out the random intercepts in order to decrease the number of unknown parameters that must be sampled within the Bayesian algorithm. This distribution for the measured longitudinal outcome is 
+
+Yi(tij )|H i(Tir ), Ai(Tir ); ΘM ∼ N (Ληi(tij ), Σu + Σϵ).
+
+The distribution of latent process p(ηi; ΘS ) is the product of p-dimensional conditional Gaussian distributions of either the form in Eq.6 or 8, depending on how treatment is as-sumed to impact the latent process. When fitting this joint model, we must consider (i) how to ensure both the latent pro-cess parameters and the loadings matrix are identifiable and (ii) how to calculate the cu-mulative hazard, which requires integrating over the multivariate OU process. To address (i), we model the latent factors on the correlation scale (see Tran et al. (2021)). By forcing the latent factors to have a stationary variance of 1, we fix the amount of variability in the process. The loadings matrix Λ then rescales the latent factors to capture their association with the measured longitudinal outcomes Y . To implement this identifiability constraint, we follow the approach described in Tran et al. (2021) and reparameterize the OU process: in-stead of estimating parameters θ and σ, we estimate θ and the off-diagonal elements ρ of the stationary correlation matrix of the OU process V (previously defined in Section 3.1 as 
+
+V = vec −1(θ ⊕ θ)−1vec (σσ ⊤) ). For a bivariate OU process, we estimate V =
+
+1 ρρ 1
+
+.We also require that θ has eigenvalues with positive real parts (see Tran et al. (2021) for de-tails), and that Λ contains structural zeros with known locations. This constraint on Λ means that we know which of the observed longitudinal outcomes are measurements of which of the latent factors. In practice, domain knowledge can help inform the placement of these structural zeros. All non-zero elements of Λ must be positive. To address (ii) and avoid the complex integration required to evaluate the cumulative haz-ard in Eq.12, we take a discrete approximation based on a midpoint rule. Within the Bayesian algorithm, we generate values of the latent process on a fine grid and then sum the hazard across this fine grid using a midpoint rule that allows us to closely approximate the integral TIME-VARYING TREATMENT EFFECTS IN A JOINT MODEL 13 
+
+with a sum. We previously used this strategy in the context of a joint longitudinal-survival model (for single time-to-event outcomes) and found that, in the ILD setting, parameters’ posterior distributions were not sensitive to the choice of grid width. This sensitivity analy-sis, along with a more detailed description of this midpoint approximation to the cumulative hazard, can be found in Abbott et al. (2025a). We use Stan, a software that carries out a Hamiltonian Monte Carlo sampling algorithm, to fit our model (Carpenter et al., 2017). Priors are given in Appendix D. After fitting the joint model, it may be of interest to compare models that specify, for example, different mechanisms for the effect of treatment or different structures for the load-ings matrix and latent factors. To do so, deviance information criterion (DIC) and widely applicable information criterion (WAIC) (Watanabe, 2010) can be used. Gelman, Carlin and Stern (2014) define these information criteria as consisting of two terms: one term for the log-likelihood and another term that captures the effective number of parameters. Letting 
+
+Θ = ( ΘR, ΘM , ΘS ), DIC is defined as: 
+
+DIC = −2logp (Y, T, δ | ˆΘ) + 2 pDIC 
+
+where ˆΘ is the posterior mean; pDIC is the effective number of parameters, with pDIC =2
+
+
+
+logp (Y, T, δ | ˆΘ)− 1
+
+> S
+
+PSs=1 logp (Y, T, δ | ˆΘs)
+
+
+
+; and s indexes posterior samples. Similarly, 
+
+W AIC = −2 dlppd + 2 pWAIC 
+
+where dlppd = PNi=1 log 
+
+ 1
+
+> S
+
+PSs=1 p(Yi, T i, δ i|ΘsR, ΘsM , ΘsS )
+
+
+
+and the effective number of parameters is pWAIC = PNi=1 V Ss=1 (logp (Yi, T i, δ i|ΘsR, ΘsM , ΘsS )) , with V Ss=1 (as) = 
+
+> 1
+> S−1
+
+PSs=1 (as − ¯a)2. Both of these information criteria rely on evaluating the log-likelihood, either at the posterior mean ˆΘ or each of the posterior samples Θs, s = 1 , ..., S . To fit the model in Stan, we use the conditional likelihood, logp (Yi, T i, δ i|H i; Θ), rather than a version of the likelihood that is marginalized over the latent process. The marginal version, however, is generally recommended when comparing fits of latent variable models (Rizopoulos, 2023; Merkle, Furr and Rabe-Hesketh, 2019). To compute DIC and WAIC, we must integrate the conditional likelihood in Eq. 12 over the continuous-time multivariate OU process in the lon-gitudinal and event submodels. Specifically, we use a Monte Carlo-based approach to sample values of the latent process and approximate the integral (see Appendix F). This approach 14 
+
+allows us to estimate the value of the marginal log-likelihood at both the posterior mean ˆΘ
+
+and each of the posterior samples Θs, which we then use to calculate DIC and WAIC. We can also examine model fit using a posterior predictive check; specifically, we assess the form of the hazard model, which is a function of the time-varying treatment effect and latent variables that capture affective states. Generally, our approach involves comparing the observed number of events to the posterior expected number of events over different windows of time, conditional on event history prior to the start of the window. Treatment history and the posterior draws of the latent process are assumed known when generating these posterior predictions. We use mean cumulative functions (MCFs) to compare the posterior predictions to the observed events. Details on this approach are given in Appendix G. 
+
+4. Simulation Study. The goal of the simulation study is to assess the statistical proper-ties of correctly specified models fit to simulated datasets informed by other mHealth studies of smoking cessation. When generating data, we use two sets of true parameter values— called setting 1 and setting 2—which are informed by parameter estimates from observa-tional mHealth studies similar to the motivating mHealth MRT. Our simulated data, however, are slightly simpler than the data from these mHealth studies to modulate the computational cost of conducting the simulation study. 4.1. Data Generation. A single simulated dataset consists of N = 100 individuals who are followed for 14 days. At four random times each day, we observe longitudinal outcomes 
+
+Y , which consists of k = 4 observed outcomes that measure p = 2 latent factors. Treat-ments are sent randomly once per day and the effect of each treatment lasts for half a day (δa = 0 .5, δ b = 0 .5). Depending on the exact time at which each treatment is delivered, two treatments may be active at the same time. As discussed earlier, we do not consider the setting in which treatment directly impacts the longitudinal outcome, so the measurement submodel always takes the form described in Eq.1. For the structural submodel, we assume that the treatment impacts the latent process as either an additive shift to the mean (Eq. 4) or through a drift term (Eq. 7). The treatment function μi(t) is defined as in Eq.5. For each version of the structural submodel, we consider two different event-time submodels: 1. Treatment impacts the hazard of event r through the latent process and treatment modifies the hazard directly: hir (t) = h0 exp β1η1i(t) + β2η2i(t) + ˜ μi(t) .TIME-VARYING TREATMENT EFFECTS IN A JOINT MODEL 15 
+
+2. Treatment impacts the hazard of event r through the latent process and treatment modi-fies the hazard directly. The hazard also depends on the time since the most recent prior 
+
+(r − 1) th event, where experiencing an event (i.e., engaging in substance use) temporarily increases the risk of a subsequent event, but this temporary increase decays to 0 after a certain amount of time: hir (t) = h0 exp β1η1i(t) + β2η2i(t) + β3g(t − ti,r −1) + ˜ μi(t) .
+
+For setting 1, g(x) = 11+exp {4( x−2) } and for setting 2, g(x) = 11+exp {1.5( x−2) } . We assume that these functions are known when fitting the model. ˜μi(t) is given in Eq.11 with δb = 0 .5.In both hazard models, we assume that the baseline hazard is constant, h0 = exp( β0).When simulating the data, we assume that treatment has a positive impact on one of the latent factors and a negative impact on the other. In the motivating MRT, we might expect that receiving a prompt would temporarily increase positive affect (via τ1 = 2 ) while decreasing negative affect (via τ2 = −1). These effects are interpreted as either occurring on the scale of the mean (if the treatment effect is modeled additively) or on the scale of the derivative (if the treatment effect is modeled as drift). We also assume that receiving a prompt decreases the hazard of an event (via ˜τ = −0.8), which is what prompts in the MRT aim to do by encour-aging engagement in certain behavioral strategies. True values for other model parameters, which are informed by previous mHealth smoking cessation studies, are in Appendix E. In Appendix E, we provide some plots of the simulated data. The number of observed events ranges from an average of 1.9 events per person in setting 2 when the treatment effect modeled through the drift term and the hazard takes the form of model 2, to an average of 4.7 events per person in setting 2 when the treatment effect modeled as an additive shift to the latent process and the hazard takes the form of model 1. 4.2. Results. For each parameterization of the treatment effect on the latent process (ad-ditive or drift) and for each hazard model (1 or 2), we simulate 100 datasets and fit the model. We repeat this process for the true parameter values corresponding to both setting 1 and set-ting 2. When fitting the joint model, we initialize parameters at values with approximately the correct order of magnitude and with the correct sign. In practice, a two-stage approach could be used to determine reasonable starting values when true values are not known. For each dataset, we run 1 chain for 2000 iterations and discard the first 1000 as burn-in. 16 
+
+To assess bias and variance, we compare posterior medians to true values (Figure 3) and evaluate the coverage of 95% credible intervals (Figure 4). We find that the posterior medians are close to the true values and that the posterior distributions have close-to-nominal cover-age. In hazard model 2, point estimates for β3—the parameter that captures the association between the hazard and a known function of time since the most recent event—show some bias and, as a result of this bias, lower-than-nominal coverage. We further investigate the bias in this parameter with some additional simulations, which we present in more detail in Ap-pendix E.1. These supplemental simulations suggest that this bias is likely related to fitting a rather complicated model to a fairly small dataset; they also suggest that the higher temporal correlation in the latent process in setting 1, compared to setting 2, makes recovering unbi-ased estimates of β3 more difficult. Overall, however, the magnitude of the bias in our point estimates for β3 is still small and reasonable given the complexity of this joint model. 
+
+5. Analysis of the MRT Data. We use our joint longitudinal recurrent event model to analyze data from the motivating MRT. We use the longitudinal submodel to summarize the observed 15 emotions as two latent factors that represent positive affect and negative affect. We consider two models for the repeated treatments (i.e., the app-based prompts): one in which treatment has an additive impact directly on the mean of the latent factors and another in which treatment impacts the dynamics of the latent factors on the derivative scale through the time-varying drift term. In the recurrent event submodel, we model the hazard of recurrent poly-substance use events using the time-varying predictors of positive affect, negative affect, and repeated treatment effects: hir (t) = h0(t) exp [ β1η1i(t) + β2η2i(t) + ˜ μi(t)] .We assume that the treatment effect duration is 8 hours for both submodels ( δa = δb =8 hours). Alternative durations could be compared in a sensitivity analysis. We specify a log-normal baseline hazard and use a clock-reset approach. In the MRT, participants are asked to quit smoking on day 4; we account for potential changes in substance use before and after day 4 by specifying a separate baseline hazard for the pre- and post-quit periods. When modeling the impact of treatment directly on the hazard (i.e., when specifying ˜μi(t)), we consider one version that assumes the treatment parameter ˜τ is constant across the entire study and another other version that allows this treatment parameter to differ between the pre- and post-quit periods (i.e., we have ˜τpre and ˜τpost ). Further details are in Appendix A.3. TIME-VARYING TREATMENT EFFECTS IN A JOINT MODEL 17 Setting 1 Setting 2 
+
+> Haz. 1 with additive treat. effect  Haz. 2 with additive treat. effect  Haz. 1 with drift treat. effect  Haz. 2 with drift treat. effect
+
+β0 β1 β2 β3 τ~ λ1 λ2 λ3 λ4 σu1 2 σu2 2 σu3 2 σu4 2 σe1 2 σe2 2 σe3 2 σe4 2 θ11 θ12 θ21 θ22 ρ τ1 τ2 β0 β1 β2 β3 τ~ λ1 λ2 λ3 λ4 σu1 2 σu2 2 σu3 2 σu4 2 σe1 2 σe2 2 σe3 2 σe4 2 θ11 θ12 θ21 θ22 ρ τ1 τ2
+
+β0 β1 β2 τ~ λ1 λ2 λ3 λ4 σu1 2 σu2 2 σu3 2 σu4 2 σe1 2 σe2 2 σe3 2 σe4 2 θ11 θ12 θ21 θ22 ρ τ1 τ2 β0 β1 β2 τ~ λ1 λ2 λ3 λ4 σu1 2 σu2 2 σu3 2 σu4 2 σe1 2 σe2 2 σe3 2 σe4 2 θ11 θ12 θ21 θ22 ρ τ1 τ2
+
+β0 β1 β2 β3 τ~ λ1 λ2 λ3 λ4 σu1 2 σu2 2 σu3 2 σu4 2 σe1 2 σe2 2 σe3 2 σe4 2 θ11 θ12 θ21 θ22 ρ τ1 τ2 β0 β1 β2 β3 τ~ λ1 λ2 λ3 λ4 σu1 2 σu2 2 σu3 2 σu4 2 σe1 2 σe2 2 σe3 2 σe4 2 θ11 θ12 θ21 θ22 ρ τ1 τ2
+
+β0 β1 β2 τ~ λ1 λ2 λ3 λ4 σu1 2 σu2 2 σu3 2 σu4 2 σe1 2 σe2 2 σe3 2 σe4 2 θ11 θ12 θ21 θ22 ρ τ1 τ2 β0 β1 β2 τ~ λ1 λ2 λ3 λ4 σu1 2 σu2 2 σu3 2 σu4 2 σe1 2 σe2 2 σe3 2 σe4 2 θ11 θ12 θ21 θ22 ρ τ1 τ2
+
+0510 
+
+0510 
+
+0.0 2.5 5.0 7.5 10.0 12.5 
+
+04812 
+
+−2 024
+
+−2 024
+
+−2 024
+
+−2 024
+
+Parameters 
+
+> Posterior median
+
+submodel measurement recurrent event structural 
+
+Fig 3: Box plots summarize the distribution of the posterior medians for parameters 
+
+across the 100 datasets generated under each simulation scenario. When fitting the model, we assume that the grid used in the midpoint approximation of the cumulative hazard func-tion has a width of 0.5 days. True parameter values are indicated with colored dots. One additional advantage of using a log-normal baseline hazard is that it is potentially flexible enough to allow the underlying risk of an event to change as a function of the time since the prior event. In an attempt to avoid specifying an overly complex model given our limited sample size, we opt to account for potential changes in the hazard of an event as a function of time since the previous event through this log-normal baseline hazard with the 18 Setting 1 Setting 2                                                                                                                                                                                 
+
+> Haz. 1 with additive treat. effect
+> Haz. 2 with additive treat. effect
+> Haz. 1 with drift treat. effect
+> Haz. 2 with drift treat. effect
+> β0β1β2β3λ1λ2λ3λ4ρ σe1 2σe2 2σe3 2σe4 2σu1 2σu2 2σu3 2σu4 2τ~τ1τ2θ11 θ12 θ21 θ22 β0β1β2β3λ1λ2λ3λ4ρ σe1 2σe2 2σe3 2σe4 2σu1 2σu2 2σu3 2σu4 2τ~τ1τ2θ11 θ12 θ21 θ22
+> β0β1β2λ1λ2λ3λ4ρ σe1 2σe2 2σe3 2σe4 2σu1 2σu2 2σu3 2σu4 2τ~τ1τ2θ11 θ12 θ21 θ22 β0β1β2λ1λ2λ3λ4ρ σe1 2σe2 2σe3 2σe4 2σu1 2σu2 2σu3 2σu4 2τ~τ1τ2θ11 θ12 θ21 θ22
+> β0β1β2β3λ1λ2λ3λ4ρ σe1 2σe2 2σe3 2σe4 2σu1 2σu2 2σu3 2σu4 2τ~τ1τ2θ11 θ12 θ21 θ22 β0β1β2β3λ1λ2λ3λ4ρ σe1 2σe2 2σe3 2σe4 2σu1 2σu2 2σu3 2σu4 2τ~τ1τ2θ11 θ12 θ21 θ22
+> β0β1β2λ1λ2λ3λ4ρ σe1 2σe2 2σe3 2σe4 2σu1 2σu2 2σu3 2σu4 2τ~τ1τ2θ11 θ12 θ21 θ22 β0β1β2λ1λ2λ3λ4ρ σe1 2σe2 2σe3 2σe4 2σu1 2σu2 2σu3 2σu4 2τ~τ1τ2θ11 θ12 θ21 θ22
+> 80 90 100
+> 80 90 100
+> 80 90 100
+> 80 90 100
+
+Parameters 
+
+> Posterior median
+
+submodel measurement recurrent event structural 
+
+Fig 4: For data generated under settings 1 and 2 with different hazards and treatment ef-fect models, we summarize the coverage rate of 95% credible intervals across the 100 simulated datasets with the colored dots. The black horizontal dashed lines indicate target coverage and the dotted grey lines corresponds to the upper and lower bounds of a 95% binomial proportion confidence interval for a probability of 0.95. clock reset, rather than by modeling the hazard as a separate function of time since the most recent event (i.e., by including a β3g(·) term in our hazard model). When fitting the model, we rescale time so that the 10-day interval has time units in the range of 0 to 1 (this approach is suggested in Tran et al. (2021) to help deal with potentially oscillating OU processes). Rescaling of the time interval impacts the interpretation of the θ
+
+parameter in the structural submodel and the log-normal parameters in the baseline hazard. To initialize parameters, we use a two-stage approach and first fit the longitudinal sub-model, then a simple version of the hazard submodel. To fit the joint model, we use 4 chains with 3,000 samples, discarding the first 1,000 as burn-in. We find that fitting a joint model with treatment impacting the latent process in an additive way, rather on the derivative scale, is easier for a dataset of this size. When modeling treatment on the derivative scale and al-lowing separate pre- and post-quite treatment parameters in the hazard model, we increase TIME-VARYING TREATMENT EFFECTS IN A JOINT MODEL 19 
+
+the burn-in to 1,500 iterations but find that fitting this model is still somewhat challenging given a dataset of this size. More details on model convergence are in Section A.3. We compare model fit using DIC and WAIC. WAIC is given in Table 1. As WAIC is generally preferred over DIC (Gelman, Hwang and Vehtari, 2014), DIC is provided in the Appendix (Web Table 3). WAIC indicates that a time-varying drift treatment effect model for the latent process and two treatment-related parameters in the hazard model fit our data the best; DIC agrees. The WAIC for this model, however, is only very slighly better than WAIC for the other models. Due to the sampling-based approach used to calculate the marginal log-likelihood, some uncertainty exists in the exact value of WAIC and so we emphasize that our main motivation for presenting two different approaches for modeling the impact of treatment on the latent process is that these approaches correspond to different scientific beliefs about the mechanisms by which treatment impacts the latent process. Given the smaller sample size of this MRT data ( N = 64 individuals), it may be difficult to assess which model is preferred. In addition to comparing models using information criteria, we examine model fit using a posterior predictive check. We consider posterior predictions of events across day 0–10, day 2–10, day 5–10, and day 7–10, conditioning on the event history prior to the start of the win-dow and assuming the treatment history and posterior draws of the latent process are known. Comparisons of MCFs based on posterior predictions and observed data are shown in Figure 5 for the model with a time-varying additive treatment effect model for the latent process and one treatment-related parameter in the hazard model (i.e., the best model according to WAIC and DIC). The figure shows that the MCF for posterior predictions and for observed data are in close agreement shortly after the start of the prediction window, but error accumulates over the course of the window and so the difference between the predicted and observed MCFs increases. Plots for posterior predictions from the other three models show similar patterns (see Appendix Web Figure 22). Posterior medians and 95% credible intervals for all four models are in Figure 6. The estimated correlation ( ρ) between the latent factors for positive and negative affect is negative, as expected. Across all models, the posterior mean of ρ ranges from -0.53 to -0.50. Three of the negative emotions (angry, ashamed, and irritable) have smaller variance estimates for their item-specific random intercepts than the other negative emotions and the positive emotions. When examining the data directly, we see that the empirical variability in the individual-20 0510 15                                             
+
+> 012345678910
+> Time
+> MCF
+> tstart = 0
+> 0510 15
+> 012345678910
+> Time
+> MCF
+> tstart = 2
+> 0510 15
+> 012345678910
+> Time
+> MCF
+> tstart = 5
+> 0510 15
+> 012345678910
+> Time
+> MCF
+> tstart = 7
+
+Fig 5: Median and (5, 95) th percentiles of the mean cumulative function (MCF) for pos-terior predicted events (red line with shaded ribbon) based on conditional posterior pre-dictions from the joint model when the model for treatment effect on the latent process assumed the drift form and the hazard had two treatment-related coefficients. The black lines show the MCF for observed events.        
+
+> WAIC Impact of treatment on latent process Hazard model Additive Drift Single treatment parameter 193,664.3 195,059.2 Separate pre- and post-quit treatment parameters 194,316.9 193,297.4
+
+TABLE 1
+
+WAIC for the joint models fit to the motivating MRT data. When calculating the marginal log-likelihood, we subsampled every 5th iteration of the final 1,000 posterior samples. The lowest WAIC is bolded. 
+
+specific averages for these three negative emotions tends to be slightly smaller than for the other emotions, supporting this result (see Appendix A.3.3). Across all joint models, we find that the estimated effect of treatment ( τ ) in the treatment model for the latent process is near zero. This result is the same whether we model the impact of treatment on the latent process as an additive shift to the mean or on the derivative scale. When examining posterior parameter estimates for the treatment terms in the latent process, we see similar protective effects of sending a prompt to an individual after they have attempted to quit ( ˜τpost ), compared to before quit ( ˜τpre ). 
+
+6. Discussion. We proposed a method for jointly modeling multivariate ILD, a recurrent event outcome, and the effect of repeatedly delivered treatments, as often found in data from MRTs. In the longitudinal submodel, we only consider modeling the impact of treatments on the latent process. In addition to allowing treatments to alter the trajectory of the latent process, it might be reasonable to assume that the occurrence of an event modifies the la-tent process. In this case, one could use the same approach that we describe for modeling treatment’s impact on the latent process, but substitute treatment times with event times. The impact of treatments and events on the latent process could also be modeled simultaneously. TIME-VARYING TREATMENT EFFECTS IN A JOINT MODEL 21 Random intercept variance Hazard Treatment terms                                                                     
+
+> Loadings matrix OU process Measurement error variance
+> σu1 2σu2 2σu3 2σu4 2σu5 2σu6 2σu7 2σu8 2σu9 2σu10 2σu11 2σu12 2σu13 2σu14 2σu15 2μ0,pre σ0,pre μ0,post σ0,post β1β2τ1τ2τ~τ~pre τ~post
+> λ1λ2λ3λ4λ5λ6λ7λ8λ9λ10 λ11 λ12 λ13 λ14 λ15 θ11 θ21 θ12 θ22 ρσe1 2σe2 2σe3 2σe4 2σe5 2σe6 2σe7 2σe8 2σe9 2σe10 2σe11 2σe12 2σe13 2σe14 2σe15 2
+> 0.0 0.2 0.4 0.6
+> −0.4 −0.2 0.0 0.2
+> −10 010 20
+> −4 −2 0
+> 0.0 0.3 0.6 0.9
+> 0.0 0.4 0.8 1.2
+> Parameters
+> Posterior mean and 95% CI
+> Additive tx model with haz. A Additive tx model with haz. B Drift tx model with haz. A Drift tx model with haz. B
+
+Fig 6: Posterior means and 95% credible intervals for parameters in the joint models fit to the motivating MRT data. Hazard model A has a single treatment (tx)-related parameter; hazard model B has separate pre- and post-quit treatment parameters. Emotions: 1 = grate-ful, 2 = happy, 3 = proud, 4 = relaxed, 5 = enthusiastic, 6 = angry, 7 = ashamed, 8 = guilty, 9 = irritable, 10 = lonely, 11 = anxious, 12 = sad, 13 = restless, 14 = bored, 15 = hopeless. We do not consider this variation of the longitudinal submodel in our simulations or case study, but mention it now as it may be of interest in other settings. A limitation of our joint model is its computational cost. For the case study, fitting the models required between 38 hours (when the model for treatment effect on the latent process was additive and the hazard had two treatment-related coefficients) and 146 hours (when the model for treatment effect on the latent process assumed the drift form and the hazard had two treatment-related coefficients). Computing the marginal log-likelihood for DIC/WAIC requires a similar amount of time, although parallelization can reduce DIC/WAIC calcula-tions to under an hour from the analyst’s perspective. While this total computation time is small relative to the time needed to design and conduct an MRT, improving the speed of inference is important future work, as it would facilitate sensitivity analyses. In the case study, we use DIC and WAIC to compare models that make different assump-tions about how the longitudinal, recurrent event, and treatment-related components of the joint model are associated with each other. We use WAIC and DIC to compare joint models as a whole; Zhang et al. (2017) propose a version of DIC for joint longitudinal-survival models where DIC is decomposed into contributions from the longitudinal and survival submodels. Adapting this version of DIC to our setting could be an potentially interesting extension. 22 
+
+When modeling treatment in the longitudinal and recurrent event submodels via the func-tions μi(t) and ˜μi(t), we make assumptions about both the specific shape of the treatment effect over time and the duration of active treatment, δa and δb. In both our simulation study and the case study, we assume that the effect of treatment is at its maximum at the time of treatment and that the treatment “dosage" decreases with the time since delivery. We focus on estimating the maximum effect of treatment ( τ and ˜τ ) at the time of delivery but assume the form of its decay is known. We do so largely because the MRT motivating this work does not have a particularly large sample size ( N = 64 ). Here, DIC and WAIC can be used to compare joint models with different pre-specified treatment decay functions, but in other settings where more data are available, we could try to estimate additional parameters that characterize the treatment function (e.g., δa or δb). So far, we have assumed that treatment is binary; that is, either a prompt is sent or not sent. In reality, treatment in the motivating MRT can take three different levels: no prompt, a prompt encouraging engagement in a behavioral strategy requiring low effort, or a prompt to engage in a behavioral strategy requiring more effort. Extending the models presented in this paper to account for multiple levels of treatment would be straightforward, but would require more parameters. Additionally, our current definition of treatment depends only on the out-come of randomization. This definition corresponds to an intent-to-treat analysis. Information on subjects’ engagement with the intervention (i.e., whether they carried out the suggested behavioral strategy) is self-reported in the EMA delivered one hour after randomization. En-gagement with the intervention, called treatment compliance in other settings, could also be incorporated into the definition of treatment to enable an as-treated analysis. Finally, in practice, many EMA questionnaires are designed such that event outcomes are measured in an interval censored way; that is, questions are often phrased as, “Since the last EMA, have you [experienced some sort of event or engaged in some sort of behavior]”. Sometimes, as in our case study, this question is followed up with questions that prompt an individual to provide approximate times of the events or behaviors. Quite often, however, this subsequent set of questions is not asked and so the data only contain information on whether an event occurred within the time interval between consecutive EMAs. Thus, extending our method to handle this type of interval censored data could be practically useful. TIME-VARYING TREATMENT EFFECTS IN A JOINT MODEL 23 
+
+Funding. MRA was supported in part by NIH grant numbers F31DA057048 and T32CA083654. JMGT was supported in part by NIH grant number R01CA129102. INS and WHD were supported in part by NIH grant number P50DA054039. INS was supported in part by NIH grant number R01DA039901. WHD was supported in part by NIH grant num-ber R01GM152549. LNP was supported in part by R00CA252604. LNP, DWW, and CYL were supported in part by R01CA224537, P30CA042014, U01CA229437, UL1TR002538, U54CA280812, and the Huntsman Cancer Foundation. The content is solely the responsi-bility of the authors and does not necessarily represent the official views of the National Institutes of Health. SUPPLEMENTARY MATERIAL Data from the smoking cessation trial are not available due to privacy concerns. Simulated example data and code are available on Github ( www.github.com/madelineabbott/ OUF_JM_TX ). Additional supporting materials are available online. REFERENCES 
+
+ABBOTT , M. R., D EMPSEY , W. H., N AHUM -S HANI , I., P OTTER , L. N., W ETTER , D. W., L AM , C. Y. and TAYLOR , J. M. G. (2025a). A Bayesian joint longitudinal-survival model with a latent stochastic process for intensive longitudinal data. Biometrics 81 .ABBOTT , M. R., D EMPSEY , W. H., N AHUM -S HANI , I., L AM , C. Y., W ETTER , D. W. and T AYLOR , J. M. G. (2025b). A Continuous-Time Dynamic Factor Model for Intensive Longitudinal Data Arising from Mobile Health Studies. Psychometrika 90 1-22. BORUVKA , A., A LMIRALL , D., W ITKIEWITZ , K. and M URPHY , S. A. (2018). Assessing Time-Varying Causal Effect Moderation in Mobile Health. Journal of the American Statistical Association 113 1112-1121. BRIGO , D. and M ERCURIO , F. (2007). Interest Rate Models-Theory and Practice with Smile, Inflation and Credit ,second ed. 3. Springer Finance. CARPENTER , B., GELMAN , A., HOFFMAN , M. D., LEE , D., GOODRICH , B., BETANCOURT , M., BRUBAKER , M., G UO , J., L I, P. and R IDDELL , A. (2017). Stan: A Probabilistic Programming Language. 
+
+Journal of Statistical Software 76 1–32. GELMAN , A., C ARLIN , J. B. and S TERN , H. S. (2014). Bayesian Data Analysis , third ed. 7. Chapman & Hall/CRC texts in statistical science. GELMAN , A., H WANG , J. and V EHTARI , A. (2014). Understanding predictive information criteria for Bayesian models. Statistics and Computing 24 997–1016. 24 
+
+IBRAHIM , J. G., C HU , H. and C HEN , L. M. (2010). Basic concepts and methods for joint models of longitudinal and survival data. Journal of Clinical Oncology 26 2796–2801. KLASNJA , P., H EKLER , E. B., S HIFFMAN , S., B ORUVKA , A., A LMIRALL , D., T EWARI , A. and M URPHY , S. A. (2015). Microrandomized trials: An experimental design for developing just-in-time adaptive interventions. 
+
+Health Psychology 0 1220-8. https://doi.org/10.1037/hea0000305 KLASNJA , P., S MITH , S., S EEWALD , N. J., L EE , A., H ALL , K., L UERS , B., H EKLER , E. B. and M URPHY , S. A. (2019). Efficacy of Contextually Tailored Suggestions for Physical Activity: A Micro-randomized Optimiza-tion Trial of HeartSteps. Annals of Behavioral Medicine 53 573-582. LIAO , P., K LASNJA , P., T EWARI , A. and M URPHY , S. A. (2016). Sample size calculations for micro-randomized trials in mHealth. Statistics in Medicine 35 1944-1971. MERKLE , E. C., F URR , D. and R ABE -H ESKETH , S. (2019). Bayesian Comparison of Latent Variable Models: Conditional Versus Marginal Likelihoods. Psychometrika 84 802–829. NAHUM -S HANI , I., S MITH , S. N., S PRING , B. J., C OLLINS , L. M., W ITKIEWITZ , K., T EWARI , A. and M UR -
+
+> PHY
+
+, S. A. (2018). Just-in-Time Adaptive Interventions (JITAIs) in Mobile Health: Key Components and Design Principles for Ongoing Health Behavior Support. Annals of Behavioral Medicine 52 446–462. NAHUM -S HANI , I., P OTTER , L. N., L AM , C. Y., Y AP , J., M ORENO , A., S TOFFEL , R., W U, Z., W AN , N., DEMPSEY , W., K UMAR , S., E RTIN , E., M URPHY , S. A., R EHG , J. M. and W ETTER , D. W. (2021). The mobile assistance for regulating smoking (MARS) micro-randomized trial design protocol. Contemporary Clinical Trials . https://doi.org/10.1016/j.cct.2021.106513 QIAN , T., Y OO , H., K LASNJA , P., A LMIRALL , D. and M URPHY , S. A. (2021). Estimating time-varying causal excursion effect in mobile health with binary outcomes. Biometrika 108 507-527. RABBI , M., P HILYAW KOTOV , M., C UNNINGHAM , R., B ONAR , E. E., N AHUM -S HANI , I., K LASNJA , P., W AL -
+
+> TON
+
+, M. and M URPHY , S. (2018). Toward Increasing Engagement in Substance Use Data Collection: Devel-opment of the Substance Abuse Research Assistant App and Protocol for a Microrandomized Trial Using Adolescents and Emerging Adults. JMIR Research Protocols 7.RIZOPOULOS , D. (2023). Joint Modeling of Longitudinal and Time-to-Event Data with Applications in R. 
+
+https://www.drizopoulos.com/courses/EMC/ESP72.pdf . Accessed: 2024-06-17. RIZOPOULOS , D., T AYLOR , J. M. G., P APAGEORGIOU , G. and M ORGAN , T. M. (2024). Using joint models for longitudinal and time-to-event data to investigate the causal effect of salvage therapy after prostatectomy. 
+
+Statistical Methods in Medical Research 33 894-908. SHI , J., W U, Z. and D EMPSEY , W. (2023). Assessing time-varying causal effect moderation in the presence of cluster-level treatment effect heterogeneity and interference. Biometrika 110 645–662. TAYLOR , J. M. G., S HEN , J., K ENNEDY , E. H., W ANG , L. and S CHAUBEL , D. E. (2014). Comparison of methods for estimating the effect of salvage therapy in prostate cancer when treatment is given by indication. 
+
+Statistics in Medicine 2 257–74. TIME-VARYING TREATMENT EFFECTS IN A JOINT MODEL 25 
+
+TRAN , T. D., L ESAFFRE , E., V ERBEKE , G. and D UYCK , J. (2021). Latent Ornstein-Uhlenbeck mod-els for Bayesian analysis of multivariate longitudinal categorical responses. Biometrics 77 689–701. https://doi.org/10.1111/biom.13292 WATANABE , S. (2010). Asymptotic equivalence of Bayes cross validation and widely applicable information criterion in singular learning theory. Journal of Machine Learning Research 11 3571–3594. YU, M., L AW , N. J., T AYLOR , J. M. G. and S ANDLER , H. M. (2004). Joint longitudinal-survival-cure models and their application to prostate cancer. Statistica Sinica 14 835-862. ZHANG , D., C HEN , M. H., I BRAHIM , J. G., B OYE , M. E. and S HEN , W. (2017). Bayesian Model Assessment in Joint Modeling of Longitudinal and Survival Data with Applications to Cancer Clinical Trials. Journal of Computational and Graphical Statistics 26 121–133. SUPPLEMENTARY MATERIAL FOR: ESTIMATION OF TIME-VARYING TREATMENT EFFECTS IN A JOINT MODEL FOR LONGITUDINAL AND RECURRENT EVENT OUTCOMES IN MOBILE HEALTH DATA 
+
+BY MADELINE R A BBOTT 1,a , J EREMY M G T AYLOR 1,b INBAL NAHUM -S HANI 2,d 
+
+LINDSEY N P OTTER 3,e DAVID W W ETTER 3,f CHO Y L AM 3,g AND WALTER DEMPSEY 1,c       
+
+> 1Department of Biostatistics, University of Michigan, amrabbott@umich.edu; bjmgt@umich.edu; cwdem@umich.edu
+> 2Institute for Social Research, University of Michigan, dinbal@umich.edu
+> 3Department of Population Health Sciences and Huntsman Cancer Institute, University of Utah, elindsey.potter@hci.utah.edu;
+> fdavid.wetter@hci.utah.edu; gcho.lam@hci.utah.edu
+
+Web Appendix A. Case Study. 
+
+Web Appendix A.1. Defining the Recurrent Event Outcomes. Poly-substance use is de-fined as engaging in any of the following activities: using marijuana, vaping, or smoking cigarettes. At each ecological momentary assessment (EMA), participants are asked to re-spond to a set of questions in which they report if they used any of these substances since the last EMA, and if so, the approximate time of use. More details on the questions used to assess each type of substance use, and our approach to converting these responses into event times suitable for modeling, are given below. Note that these rules are defined specifically for the purpose of curating an event-time outcome appropriate for modeling, and are not in-tended to be used to draw general conclusions about comparable instances of substance use (for example, cigarette vs. vaping equivalence). 
+
+Marijuana Use. If participants report any marijuana use since the prior EMA, they are also asked to provide a single time corresponding to time of use. Each reported time of marijuana use is considered a recurrent event. 
+
+Cigarette Smoking. If participants report smoking any cigarettes since the prior EMA, then they are prompted to respond to additional questions about how many cigarettes they smoked and approximately when they smoked the cigarettes. 
+
+12
+
+If a participant reports smoking a partial or a single cigarette since the last EMA, then they are also asked to provide a single time corresponding to when they smoked. We consider this time as a recurrent event time. If a participant reports smoking more than one cigarette since the last EMA, then they are asked to respond to two additional questions. These questions ask (i) when they smoked the first cigarette after the last EMA and (ii) when they smoked their most recent cigarette. These questions result in an interval of time over which a participant has smoked a known number of cigarettes. To convert this interval into a recurrent event time appropriate for modeling, we evenly distribute the reported number of cigarettes across the interval and then consider each time at which a cigarette is assumed to be smoked as a recurrent event time. For example, if two cigarettes were smoked over an interval from A to B, then we would place one event at time A and one event at time B. If three cigarettes were smoked over an interval from A to B, then we would place one event at time A, one event at time B, and one event halfway between times A and B. If more than 10 cigarettes were reported smoked, then participants do not report the exact number but instead select the option of “more than 10 cigarettes” when filling out the EMA. For cases when “more than 10 cigarettes” was selected, we assume that the cigarettes were smoked (and recurrent events occurred) at a rate of approximately 1 event per hour across the reported interval of time. In some cases, an individual might smoke multiple cigarettes in a row, which could be viewed as a single episode of smoking, rather than multiple separate episodes. To account for cases like these, we define an additional rule: if multiple cigarettes were reported smoked over an interval of less than an hour, then we consolidate these events into a single event and use the midpoint of the interval of time as the corresponding recurrent event time. 
+
+Vaping. Vaping is assessed in a similar way to cigarette smoking; however, vaping is re-ported in units of “puffs”. Before converting the responses to the vaping-related questions into recurrent event times, we first consider how many puffs constitute a single event. One puff delivers much less nicotine than a single cigarette, and so a single puff is not equivalent to a single cigarette. The nicotine contained in one e-cigarette pod is approximately equivalent to the nicotine contained in a pack of cigarettes (20 cigarettes); it also takes approximately 200 puffs to use up a pod (Prochaska, Vogel and Benowitz, 2022). Using these two facts, TIME-VARYING TREATMENT EFFECTS IN A JOINT MODEL 3VAPING CIGARETTES                              
+
+> # puffs count # events count
+> 118
+> 26
+> 35
+> 41
+> 58
+> 64
+> 72
+> 91
+> 10 1
+> 11 1
+> 20 4
+> 21 1
+> 27 232
+> 40 1
+> 41 1
+> 43 1
+> 52 151
+> 100+ 112 1
+> 1
+> 2
+> 4
+> 47
+> 5
+> 3
+> WEB TABLE 1
+> Number of times that each number of puffs was observed and conversion of puffs to events.
+
+we assume that on average 10 puffs are equivalent to smoking one cigarette, and we define a single event of vaping as 0-15 puffs. It follows that 16-25 puffs are 2 events, 26-35 puffs are 3 events, and so on. The conversion of puffs to events is summarized in Table 1. After converting puffs to events, we next apply some rules to convert the information reported in the EMAs into recurrent event times. Vaping is assessed using questions that have the same structure as those used to assess cigarette smoking since the last EMA. Participants are asked to report the total number of puffs since the prior EMA, the approximate time of the puff if only a single puff was taken, and the approximate time of the first and most recent puff if multiple puffs were reported. Af-ter converting puffs to events, we apply rules similar to those used when converting cigarettes to event times. When more than 1 but fewer than 16 puffs are reported, we convert these puffs into a single event; the approximate time of the event corresponds to the midpoint of the re-ported interval over which the puffs were taken. In the illustrative analysis in the main paper, we combine all instances of marijuana use, vaping, and cigarette smoking into a single recurrent event outcome called poly-substance use. We do not distinguish between use of specific substances in our analysis. In Web Figure 1, we plot the timing of the recurrent poly-substance use events for each individual in the study. 40 1 2 3 4 5 6 7 8 9 10 
+
+> Day in study
+> Participant
+
+Web Figure 1: Timing of recurrent poly-substance use events. Grey bars indicate time periods when individuals are at risk of a recurrent event. The vertical grey line at day 4 indicates the end of the quit day, which we use as the transition from the pre-quit to the post-quit period. 010 20           
+
+> 012345678910
+> Day in study
+> MCF Estimate (95% CI)
+
+Web Figure 2: Mean cumulative function for recurrent poly-substance use. In Web Figure 2, we plot the mean cumulative function (MCF) estimate across days in the study. This plot tells use the expected cumulative number of events per person by each day in the study. We can also look at the expected cumulative number of events per person for the pre- and post-quit periods separately, as shown in Web Figure 3. Web Appendix A.2. Observed Data from Case Study. In Web Figure 4, we plot data observed for eight different participants in the motivating micro-randomized trial (MRT). TIME-VARYING TREATMENT EFFECTS IN A JOINT MODEL 50510    
+
+> 0246
+
+Time in days 
+
+> MCF Estimate (95% CI)
+
+colour 
+
+> Post−quit
+> Pre−quit
+
+Web Figure 3: Mean cumulative function for recurrent poly-substance use by pre- and post-quit periods. For the pre-quit period, time 0 corresponds to time since the start of the study. For the post-quit period, time 0 corresponds to time since the end of the designated quit day (day 4). 7 8                            
+
+> 56
+> 34
+> 12
+> 012345678910 012345678910
+> −2
+> 0
+> 2
+> 4
+> −2
+> 0
+> 2
+> 4
+> −2
+> 0
+> 2
+> 4
+> −2
+> 0
+> 2
+> 4
+> Day in study
+> Emotion intensity (centered)
+> Emotions
+> 0
+> 1
+> negative
+> positive
+> tx
+> Emotions
+> 0
+> 1
+> negative
+> positive
+> Positive emotions Negative emotions Treatment Event Censoring
+
+Web Figure 4: Responses to emotion-related questions, timing of recurrent poly-substance use events, and timing of treatments for eight different participants in the motivating MRT. These data consist of responses to the emotion-related questions (i.e., the measured longi-tudinal outcome), the timing of recurrent instances of poly-substance use (i.e., the recurrent event outcome), and the timing of app-based interventions (i.e., the repeated randomized treatment). 6
+
+Web Appendix A.3. Specifying the Hazard Model. In the analysis of the motivating MRT data, our hazard model is 
+
+hir (t) = h0(t) exp [ β1η1i(t) + β2η2i(t) + ˜ μi(t)] 
+
+The baseline hazard is assumed to be log-normal, with separate parameters for the pre-quit vs. post-quit period. Participants are instructed to quit on day 4 and so we use the end of day 4 as the transition between the pre-quit and post-quit periods. To allow for period-specific parameters, we specify the baseline hazard as 
+
+h0(t) = I(t < 4 days ) × ϕ (log (t′)|μ0,pre , σ 0,pre )
+
+t′ Φ (( μ0,pre − log (t′)) /σ 0,pre )+ I(t ≥ 4 days ) × ϕ (log (t′)|μ0,post , σ 0,post )
+
+t′ Φ (( μ0,post − log (t′)) /σ 0,post )
+
+where ϕ is a normal PDF and Φ is the standard normal CDF. Because we are using the clock-reset approach, time t′ corresponds to time since the most recent event. t is still time since the start of the study. In one version of the hazard model, we assume that the treatment effect parameter in the treatment model for the hazard is constant throughout the study (i.e., we have one treatment parameter in the hazard model, ˜τ .) In another version of the hazard model, we allow the treatment model in the hazard to differ across the pre- and post-quit periods by re-defining the treatment function ˜μi(t) as 
+
+˜μi(t) = X
+
+> tia ∈A i(t)
+
+˜τpre 
+
+
+
+1 − t − tia 
+
+δa
+
+
+
+> +
+
+× I(study day < 4 days )+ X
+
+> tia ∈A i(t)
+
+˜τpost 
+
+
+
+1 − t − tia 
+
+δa
+
+
+
+> +
+
+× I(study day ≥ 4 days )
+
+In ˜μi(t), time t is the time since the start of the study. Web Appendix A.4. Additional Results from Fitting the Joint Longitudinal Recurrent Event Model. We fit four different versions of the joint model, each of which corresponds to a different combination of treatment effect model in the longitudinal submodel (i.e., the additive or drift version of the treatment effect model) and hazard model (i.e., a hazard model that assumes the effect of treatment on the hazard is the same across all 10 days of the study TIME-VARYING TREATMENT EFFECTS IN A JOINT MODEL 7beta_1 beta_2 tau_tilde 
+
+sigma2_e.12. sigma2_e.13. sigma2_e.14. sigma2_e.15. mu_h0_pre sigma_h0_pre mu_h0_post sigma_h0_post 
+
+sigma2_e.4. sigma2_e.5. sigma2_e.6. sigma2_e.7. sigma2_e.8. sigma2_e.9. sigma2_e.10. sigma2_e.11. 
+
+sigma2_u.11. sigma2_u.12. sigma2_u.13. sigma2_u.14. sigma2_u.15. sigma2_e.1. sigma2_e.2. sigma2_e.3. 
+
+sigma2_u.3. sigma2_u.4. sigma2_u.5. sigma2_u.6. sigma2_u.7. sigma2_u.8. sigma2_u.9. sigma2_u.10. 
+
+lambda.10. lambda.11. lambda.12. lambda.13. lambda.14. lambda.15. sigma2_u.1. sigma2_u.2. 
+
+lambda.2. lambda.3. lambda.4. lambda.5. lambda.6. lambda.7. lambda.8. lambda.9. 
+
+theta_ou.1.1. theta_ou.2.1. theta_ou.1.2. theta_ou.2.2. rho tau.1. tau.2. lambda.1. 
+
+0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 
+
+0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 
+
+0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 
+
+0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 
+
+0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 
+
+0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 
+
+0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 
+
+0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 
+
+0.6 0.7 0.8 0.9 
+
+0.9 1.0 1.1 1.2 
+
+0.1 0.2 0.3 
+
+0.3 0.6 0.9 1.2 1.5 
+
+0.350 0.375 0.400 0.425 
+
+0.48 0.52 0.56 0.60 
+
+1.3 1.4 1.5 1.6 
+
+−0.10 −0.05 0.00 0.05 0.10 
+
+0.30 0.35 0.40 0.45 0.50 
+
+0.2 0.4 0.6 0.8 
+
+0.00 0.05 0.10 0.15 0.20 0.25 
+
+0.325 0.350 0.375 0.400 0.425 0.450 
+
+0.36 0.39 0.42 
+
+−4.8 −4.6 −4.4 −4.2 
+
+−0.10 −0.05 0.00 0.05 0.10 
+
+0.30 0.35 0.40 0.45 0.50 
+
+0.5 0.6 0.7 
+
+0.1 0.2 0.3 0.4 
+
+0.425 0.450 0.475 0.500 0.525 0.550 
+
+0.44 0.48 0.52 
+
+1.35 1.40 1.45 1.50 1.55 
+
+−0.7 −0.6 −0.5 −0.4 −0.3 
+
+0.55 0.60 0.65 0.70 0.75 0.80 
+
+0.3 0.4 0.5 0.6 
+
+0.05 0.10 0.15 0.20 
+
+0.2 0.3 0.4 0.5 
+
+0.28 0.30 0.32 0.34 
+
+−5.0 −4.8 −4.6 
+
+10 15 20 25 
+
+0.7 0.8 0.9 1.0 
+
+0.6 0.7 0.8 
+
+0.00 0.03 0.06 0.09 
+
+0.5 1.0 1.5 2.0 
+
+0.22 0.24 0.26 0.28 
+
+0.26 0.28 0.30 0.32 
+
+−12.5 −10.0 −7.5 −5.0 
+
+0.8 0.9 1.0 1.1 
+
+0.7 0.8 0.9 
+
+0.2 0.4 0.6 0.8 1.0 
+
+0.2 0.4 0.6 0.8 
+
+0.32 0.36 0.40 
+
+0.60 0.65 0.70 0.75 
+
+−0.5 −0.4 −0.3 −0.2 −0.1 
+
+−10 −5 0
+
+0.8 0.9 1.0 1.1 
+
+0.7 0.8 0.9 1.0 1.1 
+
+0.3 0.5 0.7 0.9 
+
+0.1 0.2 0.3 0.4 0.5 0.6 
+
+0.45 0.50 0.55 0.60 
+
+0.48 0.52 0.56 0.60 
+
+−0.4 −0.3 −0.2 −0.1 
+
+036912 
+
+0.8 0.9 1.0 1.1 1.2 
+
+0.5 0.6 0.7 0.8 
+
+0.2 0.4 0.6 0.8 
+
+0.3 0.5 0.7 
+
+0.60 0.65 0.70 0.75 
+
+0.275 0.300 0.325 0.350 
+
+−0.6 −0.5 −0.4 −0.3 
+
+iteration 
+
+> value
+
+chain 
+
+1
+
+2
+
+3
+
+4
+
+Web Figure 5: Trace plot for the joint model with an additive model for treatment effect in the longitudinal submodel and with a single treatment parameter in the hazard model. or a hazard model that allows the effect of the treatment on the hazard to differ across the pre- vs. post-quit period. Trace plots for each model are provided in Web Figures 5–8. Web Appendix A.4.1. Visualizing Decay in Correlation Over Time for the Latent Process. 
+
+We can plot the decay in auto- and cross-correlation for the bivariate Ornstein-Uhlenbeck (OU) process estimated from the joint models. These plots, shown in Web Figure 9, are created using the posterior means of θ and ρ.Web Appendix A.4.2. Visualizing Estimates from the Treatment Effect Models. The treatment-related parameters τ in the longitudinal submodel have different interpretations when modeled as an additive effect vs. as drift and so to compare the estimates of τ between models that assume different impacts of treatment, we can plot the terms that are added to the conditional mean of the OU process as a result of the treatment models. That is, when treatment is modeled as an additive effect, the conditional expectation of the latent process 8beta_1 beta_2 tau_tilde_pre tau_tilde_post 
+
+sigma2_e.12. sigma2_e.13. sigma2_e.14. sigma2_e.15. mu_h0_pre sigma_h0_pre mu_h0_post sigma_h0_post 
+
+sigma2_e.4. sigma2_e.5. sigma2_e.6. sigma2_e.7. sigma2_e.8. sigma2_e.9. sigma2_e.10. sigma2_e.11. 
+
+sigma2_u.11. sigma2_u.12. sigma2_u.13. sigma2_u.14. sigma2_u.15. sigma2_e.1. sigma2_e.2. sigma2_e.3. 
+
+sigma2_u.3. sigma2_u.4. sigma2_u.5. sigma2_u.6. sigma2_u.7. sigma2_u.8. sigma2_u.9. sigma2_u.10. 
+
+lambda.10. lambda.11. lambda.12. lambda.13. lambda.14. lambda.15. sigma2_u.1. sigma2_u.2. 
+
+lambda.2. lambda.3. lambda.4. lambda.5. lambda.6. lambda.7. lambda.8. lambda.9. 
+
+theta_ou.1.1. theta_ou.2.1. theta_ou.1.2. theta_ou.2.2. rho tau.1. tau.2. lambda.1. 
+
+0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 
+
+0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 
+
+0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 
+
+0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 
+
+0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 
+
+0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 
+
+0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 
+
+0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 
+
+0.6 0.7 0.8 0.9 
+
+0.9 1.0 1.1 1.2 
+
+0.1 0.2 0.3 
+
+0.5 1.0 1.5 
+
+0.33 0.36 0.39 0.42 
+
+0.50 0.55 0.60 
+
+1.3 1.4 1.5 1.6 
+
+−0.10 −0.05 0.00 0.05 0.10 
+
+0.30 0.35 0.40 0.45 
+
+0.3 0.5 0.7 0.9 
+
+0.0 0.1 0.2 
+
+0.33 0.36 0.39 0.42 
+
+0.36 0.39 0.42 
+
+−4.8 −4.6 −4.4 −4.2 
+
+−0.10 −0.05 0.00 0.05 0.10 
+
+0.30 0.35 0.40 0.45 0.50 
+
+0.45 0.50 0.55 0.60 0.65 0.70 
+
+0.1 0.2 0.3 0.4 
+
+0.44 0.48 0.52 
+
+0.45 0.50 0.55 
+
+1.35 1.40 1.45 1.50 1.55 
+
+−0.7 −0.6 −0.5 −0.4 −0.3 
+
+0.6 0.7 
+
+0.3 0.4 0.5 0.6 
+
+0.05 0.10 0.15 0.20 
+
+0.2 0.3 0.4 0.5 
+
+0.28 0.30 0.32 0.34 
+
+−5.0 −4.8 −4.6 
+
+10 15 20 
+
+0.7 0.8 0.9 1.0 
+
+0.5 0.6 0.7 0.8 
+
+0.00 0.05 0.10 
+
+0.4 0.8 1.2 1.6 
+
+0.22 0.24 0.26 0.28 
+
+0.26 0.28 0.30 0.32 
+
+−0.6 −0.4 −0.2 0.0 
+
+−12.5 −10.0 −7.5 
+
+0.8 0.9 1.0 1.1 
+
+0.7 0.8 0.9 
+
+0.25 0.50 0.75 1.00 1.25 
+
+0.25 0.50 0.75 1.00 
+
+0.32 0.34 0.36 0.38 0.40 
+
+0.60 0.65 0.70 0.75 
+
+−0.6 −0.4 −0.2 
+
+−10 −5 0
+
+0.8 0.9 1.0 1.1 
+
+0.7 0.8 0.9 1.0 
+
+0.25 0.50 0.75 
+
+0.2 0.3 0.4 0.5 0.6 
+
+0.45 0.50 0.55 0.60 
+
+0.48 0.52 0.56 0.60 
+
+−0.4 −0.3 −0.2 −0.1 
+
+036912 
+
+0.9 1.0 1.1 1.2 
+
+0.6 0.7 0.8 
+
+0.2 0.3 0.4 0.5 0.6 
+
+0.25 0.50 0.75 
+
+0.60 0.65 0.70 0.75 
+
+0.250 0.275 0.300 0.325 0.350 
+
+−0.6 −0.5 −0.4 −0.3 
+
+iteration 
+
+> value
+
+chain 
+
+1
+
+2
+
+3
+
+4
+
+Web Figure 6: Trace plot for the joint model with an additive model for treatment effect in the longitudinal submodel and with separate pre-quit and post-quit treatment parameters in the hazard model. is: 
+
+E [ηi(t)|ηi(s)] = e−θ(t−s)ηi(s) + μi(t) − e−θ(t−s)μi(s).
+
+When treatment is modeled in the drift term, the conditional expectation of the latent process is: 
+
+E [ηi(t)|ηi(s)] = e−θ(t−s)ηi(s)+ 
+
+X
+
+tia ∈A i(s−δa,t )
+
+ 
+
+1 − u − tia 
+
+δa
+
+
+
+e−θ(t−u)θ−1 + 1
+
+δa
+
+e−θ(t−u)
+
+
+
+τ
+
+u=min (t,t ia +δa)
+
+u=max (tia ,s )
+
+.
+
+To visualize the estimated effect of treatment on the latent process, we plot 
+
+μi(t) − e−θ(t−s)μi(s)TIME-VARYING TREATMENT EFFECTS IN A JOINT MODEL 9beta_1 beta_2 tau_tilde 
+
+sigma2_e.12. sigma2_e.13. sigma2_e.14. sigma2_e.15. mu_h0_pre sigma_h0_pre mu_h0_post sigma_h0_post 
+
+sigma2_e.4. sigma2_e.5. sigma2_e.6. sigma2_e.7. sigma2_e.8. sigma2_e.9. sigma2_e.10. sigma2_e.11. 
+
+sigma2_u.11. sigma2_u.12. sigma2_u.13. sigma2_u.14. sigma2_u.15. sigma2_e.1. sigma2_e.2. sigma2_e.3. 
+
+sigma2_u.3. sigma2_u.4. sigma2_u.5. sigma2_u.6. sigma2_u.7. sigma2_u.8. sigma2_u.9. sigma2_u.10. 
+
+lambda.10. lambda.11. lambda.12. lambda.13. lambda.14. lambda.15. sigma2_u.1. sigma2_u.2. 
+
+lambda.2. lambda.3. lambda.4. lambda.5. lambda.6. lambda.7. lambda.8. lambda.9. 
+
+theta_ou.1.1. theta_ou.2.1. theta_ou.1.2. theta_ou.2.2. rho tau.1. tau.2. lambda.1. 
+
+0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 
+
+0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 
+
+0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 
+
+0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 
+
+0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 
+
+0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 
+
+0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 
+
+0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 
+
+0.6 0.7 0.8 0.9 
+
+0.9 1.0 1.1 1.2 
+
+0.1 0.2 0.3 
+
+0.3 0.6 0.9 1.2 1.5 
+
+0.350 0.375 0.400 0.425 
+
+0.48 0.52 0.56 0.60 
+
+1.3 1.4 1.5 1.6 
+
+−0.10 −0.05 0.00 0.05 0.10 
+
+0.30 0.35 0.40 0.45 0.50 
+
+0.2 0.4 0.6 0.8 
+
+0.00 0.05 0.10 0.15 0.20 0.25 
+
+0.325 0.350 0.375 0.400 0.425 0.450 
+
+0.36 0.39 0.42 
+
+−4.8 −4.6 −4.4 −4.2 
+
+−0.10 −0.05 0.00 0.05 0.10 
+
+0.30 0.35 0.40 0.45 0.50 
+
+0.5 0.6 0.7 
+
+0.1 0.2 0.3 0.4 
+
+0.425 0.450 0.475 0.500 0.525 0.550 
+
+0.44 0.48 0.52 
+
+1.35 1.40 1.45 1.50 1.55 
+
+−0.7 −0.6 −0.5 −0.4 −0.3 
+
+0.55 0.60 0.65 0.70 0.75 0.80 
+
+0.3 0.4 0.5 0.6 
+
+0.05 0.10 0.15 0.20 
+
+0.2 0.3 0.4 0.5 
+
+0.28 0.30 0.32 0.34 
+
+−5.0 −4.8 −4.6 
+
+10 15 20 25 
+
+0.7 0.8 0.9 1.0 
+
+0.6 0.7 0.8 
+
+0.00 0.03 0.06 0.09 
+
+0.5 1.0 1.5 2.0 
+
+0.22 0.24 0.26 0.28 
+
+0.26 0.28 0.30 0.32 
+
+−12.5 −10.0 −7.5 −5.0 
+
+0.8 0.9 1.0 1.1 
+
+0.7 0.8 0.9 
+
+0.2 0.4 0.6 0.8 1.0 
+
+0.2 0.4 0.6 0.8 
+
+0.32 0.36 0.40 
+
+0.60 0.65 0.70 0.75 
+
+−0.5 −0.4 −0.3 −0.2 −0.1 
+
+−10 −5 0
+
+0.8 0.9 1.0 1.1 
+
+0.7 0.8 0.9 1.0 1.1 
+
+0.3 0.5 0.7 0.9 
+
+0.1 0.2 0.3 0.4 0.5 0.6 
+
+0.45 0.50 0.55 0.60 
+
+0.48 0.52 0.56 0.60 
+
+−0.4 −0.3 −0.2 −0.1 
+
+036912 
+
+0.8 0.9 1.0 1.1 1.2 
+
+0.5 0.6 0.7 0.8 
+
+0.2 0.4 0.6 0.8 
+
+0.3 0.5 0.7 
+
+0.60 0.65 0.70 0.75 
+
+0.275 0.300 0.325 0.350 
+
+−0.6 −0.5 −0.4 −0.3 
+
+iteration 
+
+> value
+
+chain 
+
+1
+
+2
+
+3
+
+4
+
+Web Figure 7: Trace plot for the joint model with a drift model for treatment effect in the longitudinal submodel and with a single treatment parameter in the hazard model. and 
+
+X
+
+tia ∈A i(s−δa,t )
+
+ 
+
+1 − u − tia 
+
+δa
+
+
+
+e−θ(t−u)θ−1 + 1
+
+δa
+
+e−θ(t−u)
+
+
+
+τ
+
+u=min (t,t ia +δa)
+
+u=max (tia ,s )
+
+,
+
+which correspond to the terms added to the conditional mean of the OU process as a result of our additive and drift treatment effects, respectively. When plotting these terms, we assume that a single treatment was delivered at time s = 0 . Plots of these treatment-related terms are given in Web Figure 10. Web Appendix A.4.3. Variability in the Longitudinal Outcomes. The posterior estimates of parameters from the longitudinal submodel show a fair amount of variability in the ran-dom intercept variance and measurement error variance components. We can compare these estimates to the variability that we see in the observed longitudinal outcomes. Web Table 2 summarizes the average within-individual variance in the reported emotions and the variance of the within-individual means of reported emotions. The rows are sorted by the rightmost column, corresponding to variance of the within-individual means. 10 beta_1 beta_2 tau_tilde_pre tau_tilde_post 
+
+sigma2_e.12. sigma2_e.13. sigma2_e.14. sigma2_e.15. mu_h0_pre sigma_h0_pre mu_h0_post sigma_h0_post 
+
+sigma2_e.4. sigma2_e.5. sigma2_e.6. sigma2_e.7. sigma2_e.8. sigma2_e.9. sigma2_e.10. sigma2_e.11. 
+
+sigma2_u.11. sigma2_u.12. sigma2_u.13. sigma2_u.14. sigma2_u.15. sigma2_e.1. sigma2_e.2. sigma2_e.3. 
+
+sigma2_u.3. sigma2_u.4. sigma2_u.5. sigma2_u.6. sigma2_u.7. sigma2_u.8. sigma2_u.9. sigma2_u.10. 
+
+lambda.10. lambda.11. lambda.12. lambda.13. lambda.14. lambda.15. sigma2_u.1. sigma2_u.2. 
+
+lambda.2. lambda.3. lambda.4. lambda.5. lambda.6. lambda.7. lambda.8. lambda.9. 
+
+theta_ou.1.1. theta_ou.2.1. theta_ou.1.2. theta_ou.2.2. rho tau.1. tau.2. lambda.1. 
+
+0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 
+
+0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 
+
+0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 
+
+0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 
+
+0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 
+
+0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 
+
+0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 
+
+0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 0 500 1000 1500 2000 
+
+0.6 0.7 0.8 0.9 1.0 
+
+0.9 1.0 1.1 1.2 
+
+0.1 0.2 0.3 0.4 0.5 
+
+0.3 0.6 0.9 1.2 
+
+0.34 0.36 0.38 0.40 0.42 0.44 
+
+0.48 0.52 0.56 0.60 
+
+1.3 1.4 1.5 1.6 
+
+−0.1 0.0 0.1 0.2 
+
+0.30 0.35 0.40 0.45 0.50 
+
+0.3 0.5 0.7 
+
+0.00 0.05 0.10 0.15 0.20 
+
+0.325 0.350 0.375 0.400 0.425 
+
+0.36 0.39 0.42 
+
+−4.9 −4.7 −4.5 −4.3 −4.1 
+
+−0.50 −0.25 0.00 0.25 
+
+0.30 0.35 0.40 0.45 0.50 
+
+0.5 0.6 0.7 
+
+0.1 0.2 0.3 0.4 
+
+0.45 0.48 0.51 0.54 
+
+0.40 0.45 0.50 0.55 
+
+1.35 1.40 1.45 1.50 1.55 
+
+−0.7 −0.6 −0.5 −0.4 −0.3 −0.2 
+
+0.55 0.60 0.65 0.70 0.75 
+
+0.3 0.4 0.5 
+
+0.05 0.10 0.15 0.20 
+
+0.2 0.3 0.4 0.5 
+
+0.27 0.29 0.31 0.33 
+
+−5.0 −4.8 −4.6 
+
+10 15 20 25 
+
+0.7 0.8 0.9 1.0 1.1 
+
+0.55 0.65 0.75 0.85 
+
+0.000 0.025 0.050 0.075 0.100 
+
+0.4 0.8 1.2 1.6 
+
+0.22 0.24 0.26 0.28 
+
+0.25 0.27 0.29 0.31 0.33 
+
+−0.6 −0.4 −0.2 0.0 
+
+−12.5 −10.0 −7.5 
+
+0.7 0.8 0.9 1.0 1.1 1.2 
+
+0.7 0.8 0.9 
+
+0.25 0.50 0.75 1.00 1.25 
+
+0.2 0.4 0.6 0.8 
+
+0.33 0.36 0.39 0.42 
+
+0.60 0.65 0.70 0.75 
+
+−0.6 −0.4 −0.2 
+
+−8 −4 0
+
+0.8 0.9 1.0 1.1 1.2 
+
+0.7 0.8 0.9 1.0 1.1 
+
+0.25 0.50 0.75 
+
+0.2 0.3 0.4 0.5 0.6 
+
+0.50 0.55 0.60 
+
+0.48 0.52 0.56 0.60 0.64 
+
+−0.4 −0.3 −0.2 −0.1 
+
+0.0 2.5 5.0 7.5 10.0 
+
+0.9 1.0 1.1 1.2 
+
+0.5 0.6 0.7 0.8 
+
+0.2 0.4 0.6 
+
+0.3 0.6 0.9 
+
+0.60 0.65 0.70 0.75 
+
+0.250 0.275 0.300 0.325 
+
+−0.65 −0.55 −0.45 −0.35 −0.25 
+
+iteration 
+
+> value
+
+chain 
+
+1
+
+2
+
+3
+
+4
+
+Web Figure 8: Trace plot for the joint model with a drift model for treatment effect in the longitudinal submodel and with separate pre-quit and post-quit treatment parameters in the hazard model. 
+
+Model index Emotion Mean of ind.-specific variances Var. of ind.-specific means 6 angry 0.537 0.258 7 ashamed 0.290 0.287 8 guilty 0.396 0.439 15 hopeless 0.436 0.542 9 irritable 0.843 0.718 2 happy 0.646 0.796 1 grateful 0.770 0.801 12 sad 0.509 0.853 13 restless 0.749 0.989 14 bored 0.798 1.002 11 anxious 0.769 1.090 3 proud 0.622 1.096 10 lonely 0.536 1.105 4 relaxed 0.859 1.151 5 enthusiastic 0.729 1.215 WEB TABLE 2
+
+Empirical variability in measured longitudinal outcomes in the motivating MRT. 
+
+Web Appendix B. Different Pathways for Treatment Effect. The treatment effect could potentially be incorporated into our joint model in three different ways. As described in the main paper, treatment could (a) directly impact the latent process, (b) alter the risk of re-TIME-VARYING TREATMENT EFFECTS IN A JOINT MODEL 11 −1.0 −0.5 0.0 0.5 1.0                                
+
+> 012345678910
+> Gap time in days: t − s, s ≤t
+> Correlation (95% CI)
+> cor( η1(s),η1(t))cor( η1(s),η2(t))cor( η1(t),η2(s))cor( η2(s),η2(t))
+
+(a) Model assumes an additive treatment effect on the latent process and a single treatment parameter in the hazard submodel. −1.0 −0.5 0.0 0.5 1.0                                
+
+> 012345678910
+> Gap time in days: t − s, s ≤t
+> Correlation (95% CI)
+> cor( η1(s),η1(t))cor( η1(s),η2(t))cor( η1(t),η2(s))cor( η2(s),η2(t))
+
+(b) Model assumes an additive treatment effect on the latent process and separate pre- and post-quit treatment parameters in the hazard submodel. −1.0 −0.5 0.0 0.5 1.0                                
+
+> 012345678910
+> Gap time in days: t − s, s ≤t
+> Correlation (95% CI)
+> cor( η1(s),η1(t))cor( η1(s),η2(t))cor( η1(t),η2(s))cor( η2(s),η2(t))
+
+(c) Model assumes a drift treatment effect on the latent process and a single treatment parameter in the hazard submodel. −1.0 −0.5 0.0 0.5 1.0                                
+
+> 012345678910
+> Gap time in days: t − s, s ≤t
+> Correlation (95% CI)
+> cor( η1(s),η1(t))cor( η1(s),η2(t))cor( η1(t),η2(s))cor( η2(s),η2(t))
+
+(d) Model assumes a drift treatment effect on the latent process and separate pre- and post-quit treatment parameters in the hazard submodel. 
+
+Web Figure 9: Decay in cross- and auto-correlation in bivariate OU process from fitted joint models. For the different joint models, each plot shows the estimated decay in autocorrelation and cross-correlation between latent factors that represent positive affect ( η1(t)) and negative affect ( η2(t)) across increasing gap times, where time is on the scale of days. current events, or (c) change the measured longitudinal outcomes. These potential pathways for treatment effect are summarized in Web Figure 11. We only consider models for (a) and (b). 
+
+Web Appendix C. Modeling the Impact of Treatment on the Latent Process. If we model the impact of treatment on the latent process by incorporating a time-varying drift term into the OU process (resulting in a process also known as a Hull-White process), then the solution to the stochastic differential equation (SDE) involves a term with an integral over the treatment effect function μi(t). As given in the main text, the conditional distribution of 
+
+ηi(t) with time-dependent drift is 12 0.000 0.005 0.010 0.015 0.020 
+
+0 5 10 15 20 25 
+
+Time t 
+
+> Difference in conditional mean at t
+
+η1
+
+η2
+
+Tx 
+
+(a) Model assumes an additive treatment effect on the latent process and a single treatment parameter in the hazard submodel. 0.000 0.005 0.010 0.015 
+
+0 5 10 15 20 25 
+
+Time t 
+
+> Difference in conditional mean at t
+
+η1
+
+η2
+
+Tx 
+
+(b) Model assumes an additive treatment effect on the latent process and separate pre- and post-quit treatment parameters in the hazard submodel. −2 −1 0
+
+0 5 10 15 20 25 
+
+Time t 
+
+> Difference in conditional mean at t
+
+η1
+
+η2
+
+Tx 
+
+(c) Model assumes a drift treatment effect on the latent process and a single treatment parameter in the hazard submodel. −1.5 −1.0 −0.5 0.0 
+
+0 5 10 15 20 25 
+
+Time t 
+
+> Difference in conditional mean at t
+
+η1
+
+η2
+
+Tx 
+
+(d) Model assumes a drift treatment effect on the latent process and separate pre- and post-quit treatment parameters in the hazard submodel. 
+
+Web Figure 10: Estimated treatment-related terms from fitted joint models. For each fitted model, the plots show the estimated value of the difference between the fitted latent process and an OU process with a constant mean of 0, if a single treatment were to be sent at time 0. If the treatment effect is modeled via a time-varying drift term, then this difference is R t
+
+0 e−θ(t−u)μi(u)du . If the treatment effect is modeled via an additive shift, then this term is 
+
+μi(t) − e−θtμi(0) <latexit sha1_base64="7u2/ePxXMw9ij8obg0b10KuEfhQ=">AAAB8XicbVBNS8NAEJ3Ur1q/qh69BItQLyWRoh6LXjxWsB/ahrDZbtq1m03YnQgl9F948aCIV/+NN/+N24+Dtj4YeLw3w8y8IBFco+N8W7mV1bX1jfxmYWt7Z3evuH/Q1HGqKGvQWMSqHRDNBJesgRwFayeKkSgQrBUMryd+64kpzWN5h6OEeRHpSx5yStBID/d+xsdl9B9P/WLJqThT2MvEnZMSzFH3i1/dXkzTiEmkgmjdcZ0EvYwo5FSwcaGbapYQOiR91jFUkohpL5tePLZPjNKzw1iZkmhP1d8TGYm0HkWB6YwIDvSiNxH/8zophpdexmWSIpN0tihMhY2xPXnf7nHFKIqRIYQqbm616YAoQtGEVDAhuIsvL5PmWcU9r1Rvq6Xa1TyOPBzBMZTBhQuowQ3UoQEUJDzDK7xZ2nqx3q2PWWvOms8cwh9Ynz8amZCO</latexit> 
+
+Yi(tj ) <latexit sha1_base64="okwtRlvY8l8qJJwnU0Shd5Ch1eE=">AAAB9XicbVBNS8NAEJ3Ur1q/qh69LBahIpREinosevFYwX5IG8Nmu23XbjZhd6OUkP/hxYMiXv0v3vw3btsctPXBwOO9GWbm+RFnStv2t5VbWl5ZXcuvFzY2t7Z3irt7TRXGktAGCXko2z5WlDNBG5ppTtuRpDjwOW35o6uJ33qkUrFQ3OpxRN0ADwTrM4K1ke7vvISlZe0lDydOeuwVS3bFngItEicjJchQ94pf3V5I4oAKTThWquPYkXYTLDUjnKaFbqxohMkID2jHUIEDqtxkenWKjozSQ/1QmhIaTdXfEwkOlBoHvukMsB6qeW8i/ud1Yt2/cBMmolhTQWaL+jFHOkSTCFCPSUo0HxuCiWTmVkSGWGKiTVAFE4Iz//IiaZ5WnLNK9aZaql1mceThAA6hDA6cQw2uoQ4NICDhGV7hzXqyXqx362PWmrOymX34A+vzB8NAkgo=</latexit> 
+
+Yi(tj+1 )
+
+<latexit sha1_base64="ZpXrZMj04oJRK4qyU0u/oFzZbP0=">AAAB+nicbVDLSsNAFJ3UV62vVJduBotQEUoiRV0W3bisYB/QhjCZTtqxkwczN0qJ+RQ3LhRx65e482+ctllo64ELh3Pu5d57vFhwBZb1bRRWVtfWN4qbpa3tnd09s7zfVlEiKWvRSESy6xHFBA9ZCzgI1o0lI4EnWMcbX0/9zgOTikfhHUxi5gRkGHKfUwJacs1ynwFxU55VwU3vT+3sxDUrVs2aAS8TOycVlKPpml/9QUSTgIVABVGqZ1sxOCmRwKlgWamfKBYTOiZD1tM0JAFTTjo7PcPHWhlgP5K6QsAz9fdESgKlJoGnOwMCI7XoTcX/vF4C/qWT8jBOgIV0vshPBIYIT3PAAy4ZBTHRhFDJ9a2YjogkFHRaJR2CvfjyMmmf1ezzWv22Xmlc5XEU0SE6QlVkowvUQDeoiVqIokf0jF7Rm/FkvBjvxse8tWDkMwfoD4zPH50/k5Y=</latexit> 
+
+⌘i(tj+1 )
+
+<latexit sha1_base64="GuMByngCGG84hof5xF3GRLr4xno=">AAAB+HicbVBNS8NAEN3Ur1o/GvXoZbEI9VISKeqx6MVjBfsBbQib7bZdu9mE3YlQQ36JFw+KePWnePPfuG1z0NYHA4/3ZpiZF8SCa3Ccb6uwtr6xuVXcLu3s7u2X7YPDto4SRVmLRiJS3YBoJrhkLeAgWDdWjISBYJ1gcjPzO49MaR7Je5jGzAvJSPIhpwSM5NvlPgPipzyrgp8+ZGe+XXFqzhx4lbg5qaAcTd/+6g8imoRMAhVE657rxOClRAGngmWlfqJZTOiEjFjPUElCpr10fniGT40ywMNImZKA5+rviZSEWk/DwHSGBMZ62ZuJ/3m9BIZXXsplnACTdLFomAgMEZ6lgAdcMQpiagihiptbMR0TRSiYrEomBHf55VXSPq+5F7X6Xb3SuM7jKKJjdIKqyEWXqIFuURO1EEUJekav6M16sl6sd+tj0Vqw8pkj9AfW5w+8MZMm</latexit> 
+
+⌘i(tj ) (c) 
+
+(b) 
+
+(a) <latexit sha1_base64="NgnnnEZ7w603Xi34KtZ/GNa0mds=">AAAB/HicbVDLSsNAFJ34rPUV7dLNYBFcSEmkqMuiG5cV+oI2hMlk0g6dPJi5EUKov+LGhSJu/RB3/o3TNAttPXDhzDn3MvceLxFcgWV9G2vrG5tb25Wd6u7e/sGheXTcU3EqKevSWMRy4BHFBI9YFzgINkgkI6EnWN+b3s39/iOTisdRB7KEOSEZRzzglICWXLPWcXMuZxd45DMBpHi4Zt1qWAXwKrFLUkcl2q75NfJjmoYsAiqIUkPbSsDJiQROBZtVR6liCaFTMmZDTSMSMuXkxfIzfKYVHwex1BUBLtTfEzkJlcpCT3eGBCZq2ZuL/3nDFIIbJ+dRkgKL6OKjIBUYYjxPAvtcMgoi04RQyfWumE6IJBR0XlUdgr188irpXTbsq0bzoVlv3ZZxVNAJOkXnyEbXqIXuURt1EUUZekav6M14Ml6Md+Nj0bpmlDM19AfG5w/CRZTc</latexit> 
+
+Tir ,  ir 
+
+<latexit sha1_base64="8B2Ssk5wW/TN/fQuaTrrWOmXAgs=">AAAB9HicbVBNS8NAEJ3Ur1q/qh69LBaxXkoiRT0WvXisYD+gDWGz3bRrN5u4uymUkN/hxYMiXv0x3vw3btsctPpg4PHeDDPz/JgzpW37yyqsrK6tbxQ3S1vbO7t75f2DtooSSWiLRDySXR8rypmgLc00p91YUhz6nHb88c3M70yoVCwS93oaUzfEQ8ECRrA2kou9lGVV7aUPp9mZV67YNXsO9Jc4OalAjqZX/uwPIpKEVGjCsVI9x461m2KpGeE0K/UTRWNMxnhIe4YKHFLlpvOjM3RilAEKImlKaDRXf06kOFRqGvqmM8R6pJa9mfif10t0cOWmTMSJpoIsFgUJRzpCswTQgElKNJ8agolk5lZERlhiok1OJROCs/zyX9I+rzkXtfpdvdK4zuMowhEcQxUcuIQG3EITWkDgEZ7gBV6tifVsvVnvi9aClc8cwi9YH99V4pHT</latexit> 
+
+ai(tj0 )
+
+Web Figure 11: Diagram illustrating potential mechanisms (a)–(c) for the effect of a single treatment at time tj′ , ai(tj′ ), on future values of the latent process ηi(tj+1 ), the measured longitudinal outcomes Yi(tj+1 ), and the recurrent event outcome (Tir , δ ir ). In the diagram, circles indicate that variables are latent and squares denote variables that are observed. We omit the random intercept and measurement error terms from this diagram for simplicity; these terms are still included in the model definition. TIME-VARYING TREATMENT EFFECTS IN A JOINT MODEL 13 
+
+ηi(t)|ηi(s) ∼ Np
+
+
+
+e−θ(t−s)ηi(s) + 
+
+Z ts
+
+e−θ(t−u)μi(u)du, V − e−θ(t−s)V e−θ⊤(t−s)
+
+
+
+(1) We let Ai(s − δa, t ) denote the set of times at which treatments were sent to individual i
+
+between time s − δa and time t; this set of treatment times corresponds to all treatments that are active at between times s and t. The analytic solution to this integral in Equation 1 is: 
+
+Z ts
+
+e−θ(t−u)μi(u)du =
+
+Z ts
+
+e−θ(t−u) X
+
+> tia ∈A i(s−δa,t )
+
+τ
+
+
+
+1 − u − tia 
+
+δa
+
+
+
+> +
+
+du 
+
+= X
+
+> tia ∈A i(s−δa,t )
+
+Z ts
+
+e−θ(t−u)τ
+
+
+
+1 − u − tia 
+
+δa
+
+
+
+> +
+
+du 
+
+= X
+
+> tia ∈A i(s−δa,t )
+
+Z min (t,t ia +δa)
+
+> max (tia ,s )
+
+e−θ(t−u)τ
+
+
+
+1 − u − tia 
+
+δa
+
+
+
+du 
+
+= X
+
+> tia ∈A i(s−δa,t )
+
+ 
+
+1 − u − tia 
+
+δa
+
+
+
+e−θ(t−u)θ−1 + 1
+
+δa
+
+e−θ(t−u)
+
+
+
+τ
+
+> min (t,t ia +δa)
+> max (tia ,s )
+
+Plugging this result into Equation 1, we can re-write the distribution in an analytic form: (2) 
+
+ηi(t)|ηi(s) ∼ Np e−θ(t−s)ηi(s)+ X
+
+> tia ∈A i(s−δa,t )
+
+ 
+
+1 − u − tia 
+
+δa
+
+
+
+e−θ(t−u)θ−1 + 1
+
+δa
+
+e−θ(t−u)
+
+
+
+τ
+
+> u=min (t,t ia +δa)
+> u=max (tia ,s )
+
+,
+
+V − e−θ(t−s)V e−θ⊤(t−s)
+
+!
+
+Web Appendix D. Prior Distributions. When fitting our joint model, we base our prior distributions on those used in Tran et al. (2021). The priors we use are: 
+
+λk ∼ half-N (1 , σ 2
+
+> λ
+
+); k = 1 , ..., K σλ ∼ half-Cauchy (0 , 5) 
+
+θOU 11 , θ OU 21 , θ OU 12 , θ OU 22 ∼ N (0 , 10 2)
+
+ρ ∼ Uniform (−0.999999 , 0.999999) 14 
+
+σuk ∼ half-Cauchy (0 , 5); k = 1 , ..., K σuϵ ∼ half-Cauchy (0 , 5); k = 1 , ..., K β0, β 1, β 2 ∼ N (0 , 52)
+
+τ1, τ 2 ∼ N (0 , 52)˜τ ∼ N (0 , 52)
+
+Web Appendix E. Simulation Study. True model parameters, which are informed by the longitudinal models fit to data from similar mobile health (mHealth) smoking cessation studies, are given below. Setting 1’s longitudinal submodel parameter values are roughly similar to those estimated in the case study in Abbott et al. (2025a) and setting 2’s longitudinal submodel parameter values are roughly similar to those estimated in the case study in Abbott et al. (2025b). 
+
+Setting 1: measurement submodel 
+
+Λ =
+
+
+
+0.9 00.5 00 10 0.8
+
+
+
+, Σu =
+
+
+
+0.16 0 0 00 0.25 0 00 0 0.64 00 0 0 1.00 
+
+
+
+, Σϵ =
+
+
+
+0.04 0 0 00 0.36 0 00 0 0.09 00 0 0 0.49 
+
+
+
+Setting 1: structural submodel 
+
+τ = [2 , −1] ⊤, θ =
+
+2.4 1 .22.9 3 .6
+
+ , σ =
+
+1.78 00 1.80 
+
+ =⇒ ρ = −0.68 
+
+Settings 1: event-time submodel 
+
+1. β0 = −1.8, β 1 = −0.5, β 2 = 0 .5, ˜τ = −0.8
+
+2. β0 = −1.5, β 1 = −0.5, β 2 = 0 .5, β 3 = 0 .4, ˜τ = −0.8
+
+Setting 2: measurement submodel 
+
+Λ =
+
+
+
+0.4 00.25 00 0.50 0.6
+
+
+
+, Σu =
+
+
+
+0.16 0 0 00 0.16 0 00 0 0.25 00 0 0 0.16 
+
+
+
+, Σϵ =
+
+
+
+0.04 0 0 00 0.01 0 00 0 0.09 00 0 0 0.04 
+
+TIME-VARYING TREATMENT EFFECTS IN A JOINT MODEL 15 setting 1 setting 2          
+
+> 0.0 2.5 5.0 7.5 10.0 0.0 2.5 5.0 7.5 10.0
+> 0.00 0.25 0.50 0.75 1.00
+> time since previous event
+> g(time)
+
+Web Figure 12: Curves for the g(·) functions that capture the association between the hazard of an event as a function of time (in days) since the most recent prior event. 
+
+Setting 2: structural submodel 
+
+τ = [2 , −1] ⊤, θ =
+
+10 .2 5 .14.9 10 
+
+ , σ =
+
+3.92 00 3.89 
+
+ =⇒ ρ = −0.50 
+
+Settings 2: event-time submodel 
+
+1. β0 = −1.8, β 1 = −0.5, β 2 = 0 .5, ˜τ = −0.8
+
+2. β0 = −1.5, β 1 = −0.5, β 2 = 0 .5, β 3 = 0 .4, ˜τ = −0.8
+
+The true hazard models used to generate the recurrent event outcomes are: 1. hir (t) = h0 exp β1η1i(t) + β2η2i(t) + ˜ μi(t)
+
+2. hir (t) = h0 exp β1η1i(t) + β2η2i(t) + β3g(t − ti,r −1) + ˜ μi(t)
+
+We generate event outcomes from both of these hazard models using the true parameter values for setting 1 and setting 2. For setting 1, g(x) = 11+exp {4( x−2) } and for setting 2, 
+
+g(x) = 11+exp {1.5( x−2) } . In both of these hazard models, we assume that the baseline hazard is constant, h0 = exp( β0). In Web Figure 12, we plot the curves for the g(·) functions that capture the association between the hazard of an event as a function of time since the most recent prior event. We also plot the trajectories of the latent bivariate OU process for a subset of individuals in a single simulated dataset, illustrating both the case when the treatment effect is modeled as an additive term and as drift, in Web Figures 13-16. We just provide these plots when using hazard model 1 to generate the recurrent event outcomes. 16 7 8 9            
+
+> 456
+> 123
+> 0510 0510 0510
+> −2.5 0.0 2.5 5.0
+> −2.5 0.0 2.5 5.0
+> −2.5 0.0 2.5 5.0
+> Days since quit
+> Value
+> rec. event status
+> 0
+> 1
+> latent factor
+> eta1
+> eta2
+
+Web Figure 13: Setting 1 : Treatment effect is additive and the hazard takes the form of 
+
+model 1 . Green lines show the trajectory of the bivariate latent process and vertical grey bars indicate the timing of the treatments, which are sent randomly once per day and are assumed to have an effect that lasts half a day ( δa = 0 .5). Events are shown as solid pink dots and censoring times are indicated with open pink dots. 7 8 9            
+
+> 456
+> 123
+> 0510 0510 0510
+> −2.5 0.0 2.5 5.0
+> −2.5 0.0 2.5 5.0
+> −2.5 0.0 2.5 5.0
+> Days since quit
+> Value
+> rec. event status
+> 0
+> 1
+> latent factor
+> eta1
+> eta2
+
+Web Figure 14: Setting 1 : Treatment effect is modeled as drift and the hazard takes the form of model 1 . Green lines show the trajectory of the bivariate latent process and vertical grey bars indicate the timing of the treatments, which are sent randomly once per day and are assumed to have an effect that lasts half a day ( δa = 0 .5). Events are shown as solid pink dots and censoring times are indicated with open pink dots. TIME-VARYING TREATMENT EFFECTS IN A JOINT MODEL 17 7 8 9            
+
+> 456
+> 123
+> 0510 0510 0510
+> −3 036
+> −3 036
+> −3 036
+> Days since quit
+> Value
+> rec. event status
+> 0
+> 1
+> latent factor
+> eta1
+> eta2
+
+Web Figure 15: Setting 2 : Treatment effect is additive and the hazard takes the form of 
+
+model 1 . Green lines show the trajectory of the bivariate latent process and vertical grey bars indicate the timing of the treatments, which are sent randomly once per day and are assumed to have an effect that lasts half a day ( δa = 0 .5). Events are shown as solid pink dots and censoring times are indicated with open pink dots. 7 8 9            
+
+> 456
+> 123
+> 0510 0510 0510
+> −5.0 −2.5 0.0 2.5 5.0 7.5
+> −5.0 −2.5 0.0 2.5 5.0 7.5
+> −5.0 −2.5 0.0 2.5 5.0 7.5
+> Days since quit
+> Value
+> rec. event status
+> 0
+> 1
+> latent factor
+> eta1
+> eta2
+
+Web Figure 16: Setting 2 : Treatment effect is modeled as drift and the hazard takes the form of model 1 . Green lines show the trajectory of the bivariate latent process and vertical grey bars indicate the timing of the treatments, which are sent randomly once per day and are assumed to have an effect that lasts half a day ( δa = 0 .5). Events are shown as solid pink dots and censoring times are indicated with open pink dots. 18 
+
+Web Appendix E.1. Additional Simulations for β3. In the simulation results shown in the main paper, we see some bias in the posterior medians for parameter β3 in the recur-rent event submodel when assuming hazard model 2. This bias results in a coverage rate that is lower than nominal. The parameter β3 is the coefficient that captures the association between the hazard of the rth recurrent event and the time since the (r − 1) th event. We investigate two factors that might be contributing to this bias: (a) the finite sample size of our simulated datasets and (b) the choice of grid width used when approximating the cumula-tive hazard function via a midpoint rule. To investigate (a), we generate data with a sample size of N = 300 individuals, an increase from the N = 100 sample size used in the original simulation study. To investigate (b), we increase the density of the grid used in the midpoint approximation of the cumulative hazard function from one point approximately each 12 hours to one point about each 4 hours. We compare the posterior medians and coverage rates for these additional simulations to a subset of the original simulations in Web Figures 17 and 18. We consider 5 replicates. The results of this small supplemental simulation study suggest that the bias in the pos-terior median for β3 is likely related to fitting a complex model to a fairly small dataset. The bias in the posterior median results in low coverage. In setting 2, we see a decrease in the bias for this parameter estimate when we increase the sample size from 100 independent individuals to 300 independent individuals. In setting 1, we see less of a decrease in bias when increasing the sample size. This differential decrease in bias could be partially due to the differences in the amount of temporal correlation across these two settings: in setting 1, the longitudinal latent process has slower decay in correlation over time than in setting 2, and so accurately estimating β3, the coefficient on another function of time, could be more challenging in setting 1 than in setting 2. If we were to substantially increase the sample size, perhaps to 3000 , we would expect to see less bias in both settings. We also hypothesized that the bias in β3 could be related to the coarseness of the approx-imation used to evaluate the cumulative hazard function. As mentioned in the main text, we approximate the cumulative hazard function by replacing the integral with a sum over a fine grid of points; we then evaluate this sum using a midpoint rule. If the grid used in the approx-imation is too coarse, then it will be poor. However, we found that decreasing the coarseness of the grid by a factor of 3 did not substantially impact the bias in our estimates. TIME-VARYING TREATMENT EFFECTS IN A JOINT MODEL 19 Setting 1 Setting 2                                                                                               
+
+> Hazard 2 with additive treatment effect  Hazard 2 with drift treatment effect
+> β0β1β2β3τ~λ1λ2λ3λ4σu1 2σu2 2σu3 2σu4 2σe1 2σe2 2σe3 2σe4 2θ11 θ12 θ21 θ22 ρτ1τ2β0β1β2β3τ~λ1λ2λ3λ4σu1 2σu2 2σu3 2σu4 2σe1 2σe2 2σe3 2σe4 2θ11 θ12 θ21 θ22 ρτ1τ2
+> β0β1β2β3τ~λ1λ2λ3λ4σu1 2σu2 2σu3 2σu4 2σe1 2σe2 2σe3 2σe4 2θ11 θ12 θ21 θ22 ρτ1τ2β0β1β2β3τ~λ1λ2λ3λ4σu1 2σu2 2σu3 2σu4 2σe1 2σe2 2σe3 2σe4 2θ11 θ12 θ21 θ22 ρτ1τ2
+> 04812
+> 048
+> −2 024
+> −1 01234
+
+Parameters 
+
+> Posterior median
+
+sim finer grid N = 300 orig 
+
+Web Figure 17: For data generated under settings 1 and 2 with hazard model 2 and different treat-ment effect models in the longitudinal submodel, we use box plots to summarize the distribution of the posterior medians for all parameters across the 5 simulated datasets. The original sim-ulation design has a sample size of N = 100 and assumes a grid width of 12-hour intervals for approximating the cumulative hazard function via a midpoint rule (sim: orig). We modify this original simulation design by either increasing the sample size to N = 300 (sim: N = 300) or decreasing the grid width to 4-hour intervals (sim: finer grid). True parameter values are indicated with colored dots. 20 Setting 1 Setting 2                                                                                           
+
+> Hazard 2 with additive treatment effect
+> Hazard 2 with drift treatment effect
+> β0β1β2β3λ1λ2λ3λ4ρ σe1 2σe2 2σe3 2σe4 2σu1 2σu2 2σu3 2σu4 2τ~τ1τ2θ11 θ12 θ21 θ22 β0β1β2β3λ1λ2λ3λ4ρ σe1 2σe2 2σe3 2σe4 2σu1 2σu2 2σu3 2σu4 2τ~τ1τ2θ11 θ12 θ21 θ22
+> β0β1β2β3λ1λ2λ3λ4ρ σe1 2σe2 2σe3 2σe4 2σu1 2σu2 2σu3 2σu4 2τ~τ1τ2θ11 θ12 θ21 θ22 β0β1β2β3λ1λ2λ3λ4ρ σe1 2σe2 2σe3 2σe4 2σu1 2σu2 2σu3 2σu4 2τ~τ1τ2θ11 θ12 θ21 θ22
+> 025 50 75 100
+> 025 50 75 100
+
+Parameters 
+
+> Posterior median
+
+sim finer grid N = 300 orig 
+
+Web Figure 18: For data generated under settings 1 and 2 with hazard model 2 and different treatment effect models in the longitudinal submodel, we summarize the coverage rate of 95% credible intervals across the 5 simulated datasets with the colored dots. The original simulation design has a sample size of N = 100 and assumes a grid width 12-hour intervals for approximating the cumulative hazard function via a midpoint rule (sim: orig). We modify this original simulation design by either increasing the sample size to N = 300 (sim: N = 300) or decreasing the grid width to 4-hour intervals (sim: finer grid). The black horizontal dashed lines indicate target coverage and the dotted grey lines corresponds to the upper and lower bounds of a 95% binomial proportion confidence interval for a probability of 0.95. 
+
+Web Appendix F. Model Comparisons. To compare the fit of different models, we consider two different measures of predictive accuracy: deviance information criterion (DIC) and widely applicable information criterion (WAIC). DIC and WAIC are both based on esti-TIME-VARYING TREATMENT EFFECTS IN A JOINT MODEL 21 
+
+mates of the log pointwise predictive density (lppd). For a general model with data y1, ..., y N
+
+and parameters Θ, Vehtari, Gelman and Gabry (2017) define the lppd as lppd =
+
+> N
+
+X
+
+> i=1
+
+log (p(yi|y)) = 
+
+> N
+
+X
+
+> i=1
+
+log 
+
+Z 
+
+p(yi|Θ) p(Θ |y)dΘ
+
+
+
+The lppd can be computed as 
+
+dlppd =
+
+> N
+
+X
+
+> i=1
+
+log 1
+
+S
+
+> S
+
+X
+
+> s=1
+
+p(yi|Θs)
+
+!
+
+where Θs, s = 1 , ..., S are draws from the “usual” posterior distribution, p(Θ |y) is the pos-terior distribution, and p(yi|y) is the posterior predictive distribution. In our joint model, the data yi would consist of the longitudinal outcomes and the recurrent event outcomes. Continuing with generic notation using y as the data and Θ as the model parameters, Gelman, Carlin and Stern (2014) define DIC and WAIC as: • DIC: 
+
+DIC = −2logp (y| ˆΘ) + 2 pDIC 
+
+where ˆΘ is the posterior mean and pDIC is the effective number of parameters, with 
+
+pDIC = 2 logp (y| ˆΘ) − 1
+
+S
+
+> S
+
+X
+
+> s=1
+
+logp (y|Θs)
+
+!
+
+where s indexes posterior samples. • WAIC: 
+
+W AIC = −2lppd + 2 pWAIC 2
+
+where the computed log pointwise predictive density is 
+
+dlppd =
+
+> N
+
+X
+
+> i=1
+
+log 1
+
+S
+
+> S
+
+X
+
+> s=1
+
+p(yi|Θs)
+
+!
+
+and the effective number of parameters is 
+
+pWAIC 2 =
+
+> N
+
+X
+
+> i=1
+
+V Ss=1 (logp (yi|Θs)) 
+
+and V Ss=1 (as) = 1
+
+> S−1
+
+PSs=1 (as − ¯a)2.Gelman, Carlin and Stern (2014) also discuss alternative ways to calculate the effective sam-ple size, but the definitions above use the suggested/standard approaches. 22 
+
+Because our setting involves latent variables, we must carefully consider the form of the likelihood that we would like to use in our calculations of the log pointwise predictive den-sity. That is, is it more appropriate to use a version of the likelihood that conditions on the latent factors and all other model parameters, or should we use a version of the likelihood in which we marginalize over the latent factors? Working in the context of latent factor models commonly used in psychometric research, Merkle, Furr and Rabe-Hesketh (2019) discuss important differences between these conditional and marginal versions of the likelihood, and how these different definitions target different types of predictive accuracy. They recommend working with the marginal version of the likelihood, which aligns with the recommendations for joint models given in Rizopoulos (2023). Before we define the computed log pointwise predictive density in our setting, we define some general notation: • y = data (in our setting, this includes both the longitudinal and recurrent event outcomes) • Θ = all parameters in our model, excluding the latent process η and its parameters θOU 
+
+and σOU 
+
+• ψ = OU process parameters θOU and σOU 
+
+• fc = joint model likelihood conditional on the latent factors • fm = joint model likelihood marginalized over the latent factors Then, the lppd can be computed as: 
+
+dlppd =
+
+> N
+
+X
+
+> i=1
+
+log EΘ,ψ |y {fm(yi|Θ, ψ )}(3) 
+
+=
+
+> N
+
+X
+
+> i=1
+
+log 
+
+Z 
+
+fm(yi|Θ, ψ )p(Θ , ψ |y)dΘdψ 
+
+
+
+(4) 
+
+=
+
+> N
+
+X
+
+> i=1
+
+log 
+
+Z 
+
+Eη|ψ {fc(yi|ηi, Θ) } p(Θ , ψ |y)dΘdψ 
+
+
+
+(5) Focus now on Eη|ψ {fc(yi|ηi, Θ) }, which requires integrating over the latent process: 
+
+Eη|ψ {fc(yi|ηi, Θ) } =
+
+Z
+
+fc(yi|ηi, Θ) p(ηi|ψ)dη i
+
+To directly approximate this integral with a sum over sampled values of η would require having draws of η from the distribution p(ηi|ψ). The posterior samples of η that are generated TIME-VARYING TREATMENT EFFECTS IN A JOINT MODEL 23 
+
+during model fitting are conditional on the data, p(ηi|y). We can use the posterior samples and importance sampling to approximate the integral. 
+
+Eη|ψ {fc(yi|ηi, Θ) } =
+
+Z
+
+fc(yi|ηi, Θ) p(ηi|ψ)dη i(6) 
+
+=
+
+Z
+
+fc(yi|ηi, Θ) p(ηi|ψ)
+
+p(ηi|y) p(ηi|y)dη i(7) 
+
+≈ 1
+
+M
+
+> M
+
+X
+
+> m=1
+
+fc(yi|ηmi , Θ) p(ηmi |ψ)
+
+p(ηmi |y)
+
+(8) where ηmi is sampled from the unconditional marginal distribution of ηi|y, as given in Ap-pendix C of Merkle, Furr and Rabe-Hesketh (2019). This unconditional marginal distribution of ηi|y is a normal distribution with a mean and variance that are based on the marginal mean and variance of the usual posterior samples of ηi. If we follow this approach to generate samples of ηmi , then we can plug Equation 6 in to Equation 3: 
+
+dlppd =
+
+> N
+
+X
+
+> i=1
+
+log 
+
+Z 
+
+E {fc(yi|ηi, Θ) } p(Θ , ψ |y)dΘdψ 
+
+
+
+(9) 
+
+≈
+
+> N
+
+X
+
+> i=1
+
+log 
+
+" Z  1
+
+M
+
+> M
+
+X
+
+> m=1
+
+fc(yi|ηmi , Θ) p(ηmi |ψ)
+
+p(ηmi |y)
+
+
+
+p(Θ , ψ |y)dΘdψ 
+
+#
+
+(10) 
+
+≈
+
+> N
+
+X
+
+> i=1
+
+log 
+
+"
+
+1
+
+S
+
+> S
+
+X
+
+> s=1
+
+ 1
+
+M
+
+> M
+
+X
+
+> m=1
+
+fc(yi|ηmi , Θs) p(ηmi |ψs)
+
+p(ηmi |y)
+
+#
+
+(11) where Θs, ψ s are the usual posterior samples. Then, to compute lppd for one individual, we would: 1. Sample M values of ηmi from the unconditional marginal distribution of ηi|y, which does not depend on Θ or ψ if we use a version of the approach in Merkle, Furr and Rabe-Hesketh (2019). Note that because we are calculating the empirical covariance matrix for the entire vector ηi, the covariance matrix is large and can be unstable. To avoid non-positive definite covariance matrices, we can add a very small amount to the diagonal of the empirical covariance matrix. 2. For each posterior sample s = 1 , ..., S of Θs and ψs, compute the density across the M
+
+sampled values of ηmi .24 
+
+We repeat steps 1 and 2 for each individual i = 1 , ..., N and sum up the values of the marginal log-likelihood to get dlppd. We can make this approach more explicit in our definition of DIC and WAIC: 
+
+DIC = − 2logp (y| ˆΘ) + 2 pDIC 
+
+= − 2logp (y| ˆΘ) + 4 
+
+"
+
+logp (y| ˆΘ) − 1
+
+S
+
+> S
+
+X
+
+> s=1
+
+logp (y|Θs)
+
+#
+
+= − 2
+
+> N
+
+X
+
+> i=1
+
+log 
+
+"
+
+1
+
+M
+
+> M
+
+X
+
+> m=1
+
+p(yi| ˆΘ, η mi ) p(ηmi | ˆψ)
+
+p(ηmi |y)
+
+#
+
++ 4 
+
+" NX
+
+> i=1
+
+log 
+
+h 1
+
+M
+
+> M
+
+X
+
+> m=1
+
+p(yi| ˆΘ, η mi ) p(ηmi | ˆψ)
+
+p(ηmi |y)
+
+i
+
+− 1
+
+S
+
+> S
+
+X
+
+> s=1
+
+h NX
+
+> i=1
+
+log  1
+
+M
+
+> M
+
+X
+
+> m=1
+
+p(yi|Θs, η mi ) p(ηmi |ψs)
+
+p(ηmi |y)
+
+i#
+
+W AIC = − 2 dlppd + 2 pW AIC 2
+
+= − 2
+
+> N
+
+X
+
+> i=1
+
+log 
+
+"
+
+1
+
+S
+
+> S
+
+X
+
+> i=1
+
+h 1
+
+M
+
+> M
+
+X
+
+> m=1
+
+p(yi|Θs, η mi ) p(ηmi |ψs)
+
+p(ηmi |y)
+
+i#
+
++ 2 
+
+> N
+
+X
+
+> i=1
+
+V Ss=1 log 
+
+h 1
+
+M
+
+> M
+
+X
+
+> m=1
+
+p(yi|Θs, η mi ) p(ηmi |ψs)
+
+p(ηmi |y)
+
+i!
+
+In the definitions above, s indexes posterior samples, ˆΘ and ˆψ are posterior means, m indexes samples of the latent process drawn from the approximate unconditional marginal distribution of ηi|y, and V Ss=1 (·) is the sample variance. y contains both our longitudinal and recurrent event data (written as (Y, T, δ ) in the main paper). In the main paper, we subsample every 5th iteration of the final 1,000 posterior samples across all chains, resulting in S = 800 . We use 
+
+M = 25 when calculating DIC and WAIC. To confirm that our approximate approach to calculate the marginal log-likelihood works reasonably well, we try calculating the marginal log-likelihood using the approximate ap-proach described above and using the exact marginal distribution for just the longitudinal submodel with the additive treatment effect model. For this longitudinal submodel, we can derive the marginal distribution algebraically. We calculate the approximate and exact log-TIME-VARYING TREATMENT EFFECTS IN A JOINT MODEL 25 −280 −260 −240 −220    
+
+> −280 −260 −240 −220
+> marginal log−likelihoods (for each i) at posterior means
+> approximate marginal log−likelihoods (for each i) at posterior means
+> g
+> 1
+> 2
+> marginal log−lik. vs. approx. log−lik. summed across i = 1, ..., N: dataset 1: −23918.30 vs. −24182.32 dataset 2: −23857.16 vs. −24114.02
+
+Web Figure 19: Comparison of approximate log-likelihood values for each individual evaluated at the posterior mean to the exact log-likelihood for each individual using the true marginal distri-bution evaluated at the posterior mean. Results from two simulated datasets and two fitted models are shown using red and blue. likelihoods at the posterior means for two simulated datasets and compare the results in Web Figure 19. If our approximation works well, then we expect the value of the marginal log-likelihood for each individual i to be roughly the same for both the approximate marginal log-likelihood vs. the algebraic/exact marginal log-likelihod evaluated at the posterior mean. Web Figure 19 shows this to be true, as indicated by the colored lines and points falling along the 0-1 axis. We do see some bias, but because this bias is consistent, it should not be problematic for the purposes of model selection. We can also repeat the same comparison but for the approximate and exact marginal log-likelihoods evaluated each posterior sample Θs,rather than the posterior mean ˆΘ (see Web Figure 20). Web Appendix F.1. Case Study Results. In Web Table 3, we provide DIC for each of the joint models fit to the case study data. Of the 8000 posterior samples across 4 chains, we subsampled every 5th iteration of the final 1,000 posterior samples (resulting in S = 800 ) to 26 −290       
+
+> −270
+> −250
+> −230
+> −210
+> −270 −250 −230
+> marginal log −likelihoods (for each i) at posterior samples
+> approximate marginal log −likelihoods (for each i) at posterior samples
+> −260
+> −240
+> −220
+> −200
+> −260 −240 −220
+> marginal log −likelihoods (for each i) at posterior samples
+> approximate marginal log −likelihoods (for each i) at posterior samples
+> Marg. log -likelihoods (for each i) at 100 posterior samples
+> Approx. log -likelihoods (for each  i) at 100 posterior samples
+> Marg. log -likelihoods (for each i) at 100 posterior samples
+> Approx. log -likelihoods (for each  i) at 100 posterior samples
+
+Web Figure 20: Comparison of approximate log-likelihood values for each individual evaluated at each posterior sample to the exact log-likelihood for each individual using the true marginal distribution evaluated at each posterior sample s. Note that we subsample 100 of the total 1000 posterior samples. Results from one simulated dataset are on the left, results from the other dataset are on the right. Linear best-fit lines are plotted across individuals for each set of posterior samples 
+
+s.
+
+DIC Impact of treatment on latent process Hazard model Additive Drift Single treatment parameter 187,857.3 187,431.8 Separate pre- and post-quit treatment parameters 188,665.5 186,805.5 
+
+WEB TABLE 3
+
+DIC for the joint models fit to the motivating MRT data. When approximating the marginal log-likelihood, we subsampled every 5th iteration of the final 1,000 posterior samples to use in our calculations. The lowest value of DIC is indicated in bold text. 
+
+use in our WAIC and DIC calculations. We used M = 25 for generating marginal posterior samples of the latent process η.
+
+Web Appendix G. Posterior Predictive Check. In addition to selecting among the fit-ted models using information criteria, we can examine the fit of the models using a posterior predictive check. When designing our posterior predictive checks, we focus on the event-time submodel as we are most interested in assessing the form of the hazard model used to model the recurrent instances of poly-substance use as a function of a time-varying treatment effect and latent variables that capture affective states. TIME-VARYING TREATMENT EFFECTS IN A JOINT MODEL 27 
+
+The goal of our posterior predictive check is to assess the fit of the model given the data at hand and so we use posterior samples from the full joint posterior distribution in our checks. Note that these posterior predictive checks are distinct from forecasting, which would require a sequential approach, rather than using samples from the full joint posterior distribution. Our posterior predictive checks involve generating a sequence of predicted events based on a set, s, of posterior samples of parameters and latent process trajectories. The timing of the predicted events is compared to the timing of the observed events using a mean cumulative function (MCF). We predict events between a specified window of time defined using tstart 
+
+and tstop , tstart < t stop . The predicted events are conditional on the observed event history up until tstart ; the observed treatment history through tstart , Ri(tstart ); and the usual set of posterior samples of the latent process η until tstop , ˆHsi (tstop ) = {ˆηsi (t) : 0 ≤ t ≤ tstop }. Note that if we were to have specified our structural submodel to depend on the event process, then we would need to re-generate posterior samples of the latent process η between tstart 
+
+and tstop as part of our posterior predictive check. But, because we defined our structural submodel such that it is not a function of the recurrent events, we can just use the usual posterior η trajectories. When predicting events, we also condition on the treatment history until time tstop ,
+
+Ai(tstop ). Recall that when specifying the structural submodel, we have allowed the latent process trajectory to depend on the treatment history. If we want to use the usual posterior samples of η to predict events, we also need to condition on the observed treatment history until time tstop . If we want to re-define the timing of treatments between tstart and tstop to, for example, demonstrate how the timing of delivering an intervention—or not delivering an intervention at all—would impact the predicted event time, then we would also need to regen-erate our posterior samples of η between tstart and tstop . Because we are focused on checking the fit of the model to the data at hand, we simply assume that the complete treatment history is known. To generate posterior predictions of events between tstart and tstop for a single set of posterior samples indexed by s, we take the following steps: 1. Condition on observed events Ri(ttstart ), the posterior trajectory of the latent process 
+
+Hsi (tstop ), the observed treatment sequence Ai(tstop ), and posterior samples of parameters from the recurrent event submodel, ΘsR.28 
+
+2. Divide the window from tstart to tstop into a finer grid of points (this is the same grid used in the midpoint approximation when fitting the model). Call these points tstart =
+
+t0, t 1, t 2, ..., t u, t u+1 = tstop .3. Start with tstart = t0. Then, generate a total number of new events between t0 and t1 by drawing from 
+
+Rsi (t0, t 1) ∼ P oisson 
+
+ˆhsi (t1|R i(tstart ), Hsi (t1), Ai(t1), ΘsR) × (t1 − t0)
+
+
+
+.
+
+Note that we have conditioned on event history Ri(t0). If the generated value of 
+
+Rsi (t0, t 1) > 0, then distribute the events across the interval between t0 and t1 by sam-pling the predicted event times from U nif orm (t0, t 1).4. Then, repeat the previous step across the rest of the grid indexed by u, generating events by sampling from 
+
+Rsi (tu, t u+1 ) ∼ P oisson 
+
+ˆhsi (tu|R i(tstart ), R si (tstart , t u), Hsi (tu), Ai(tu), ΘsR) × (tu+1 − tu)
+
+
+
+,
+
+which conditions on the observed events Ri(tstart ) and the predicted events Rsi (tstart , t u).We repeat the steps outlined above (and described in Web Figure 21) for all posterior samples s = 1 , ..., S . For each s, we use the predicted events to generate a mean cumulative function (MCF). To summarize the S posterior MCFs, we compute the median and 5th and 
+
+95 th percentiles at each time point. The predicted event times are sparse so rather than com-puting time-specific percentiles using the actual times, we compute rolling percentiles across bins of width 0.2 (e.g., the median of all MCF values within +/- 0.1 of current time). We then compare this posterior predicted median MCF to the MCF for the observed events. Web Appendix G.1. Case Study Results. We apply the approach described above to the four models fit to the case study data. We predict posterior events through the 10 days of follow-up, conditioning on 0, 2, 5, and 7 days of follow-up. Recall that the 10 days of follow-up consist of 4 pre-quit days and 6 post-quit days. Due to computational reasons, rather than computing rolling percentiles to summarize the posterior MCFs, we simply round the time to three decimal places and compute percentiles within each rounded timepoint. Comparisons of MCFs based on posterior predictions and observed data are shown in Web Figure 22 for each of the four models considered. The plots show similar patterns in the MCFs for all of the model: the MCF for posterior predictions and for observed data show close agreement TIME-VARYING TREATMENT EFFECTS IN A JOINT MODEL 29 Observed treatment  Observed event    
+
+> Posterior predictions of number of events (event times are
+> drawn from )
+> To predict events between and :
+> Predicted event
+
+Web Figure 21: To generate posterior predictions of events over the time interval between 
+
+tstart and tstop for a single set of posterior samples s, we sequentially predict the number of observed events within each subinterval defined by a finer set of grid points, conditioning on the observed event history prior to tstart and the posterior predicted event history between 
+
+tstart and prior grid points. shortly after tstart , but error accumulates as time passes since tstart and so the difference between the predicted and observed MCFs increases. 30 0510 15           
+
+> 012345678910
+
+Time 
+
+> MCF
+
+tstart = 0           
+
+> 0510 15
+> 012345678910
+
+Time 
+
+> MCF
+
+tstart = 2           
+
+> 0510 15
+> 012345678910
+
+Time 
+
+> MCF
+
+tstart = 5           
+
+> 0510 15
+> 012345678910
+
+Time 
+
+> MCF
+
+tstart = 7 
+
+(a) Model assumes an additive treatment effect on the latent process and a single treatment param-eter in the hazard submodel. 0510 15           
+
+> 012345678910
+
+Time 
+
+> MCF
+
+tstart = 0           
+
+> 0510 15
+> 012345678910
+
+Time 
+
+> MCF
+
+tstart = 2           
+
+> 0510 15
+> 012345678910
+
+Time 
+
+> MCF
+
+tstart = 5           
+
+> 0510 15
+> 012345678910
+
+Time 
+
+> MCF
+
+tstart = 7 
+
+(b) Model assumes an additive treatment effect on the latent process and separate pre- and post-quit treatment parameter sin the hazard submodel. 0510 15           
+
+> 012345678910
+
+Time 
+
+> MCF
+
+tstart = 0           
+
+> 0510 15
+> 012345678910
+
+Time 
+
+> MCF
+
+tstart = 2           
+
+> 0510 15
+> 012345678910
+
+Time 
+
+> MCF
+
+tstart = 5           
+
+> 0510 15
+> 012345678910
+
+Time 
+
+> MCF
+
+tstart = 7 
+
+(c) Model assumes a drift treatment effect on the latent process and a single treatment parameter in the hazard submodel. 0510 15           
+
+> 012345678910
+
+Time 
+
+> MCF
+
+tstart = 0           
+
+> 0510 15
+> 012345678910
+
+Time 
+
+> MCF
+
+tstart = 2           
+
+> 0510 15
+> 012345678910
+
+Time 
+
+> MCF
+
+tstart = 5           
+
+> 0510 15
+> 012345678910
+
+Time 
+
+> MCF
+
+tstart = 7 
+
+(d) Model assumes a drift treatment effect on the latent process and separate pre- and post-quit treatment parameter sin the hazard submodel. 
+
+Web Figure 22: Median and (5, 95) th percentiles of the mean cumulative function (MCF) for posterior predicted events (red line with shaded ribbon) based on conditional posterior predictions from each fitted joint model. The black lines show the MCF for observed events. TIME-VARYING TREATMENT EFFECTS IN A JOINT MODEL 31 
+
+REFERENCES 
+
+ABBOTT , M. R., D EMPSEY , W. H., N AHUM -S HANI , I., L AM , C. Y., W ETTER , D. W. and T AYLOR , J. M. G. (2025a). A Continuous-Time Dynamic Factor Model for Intensive Longitudinal Data Arising from Mobile Health Studies. Psychometrika 90 1-22. ABBOTT , M. R., D EMPSEY , W. H., N AHUM -S HANI , I., P OTTER , L. N., W ETTER , D. W., L AM , C. Y. and TAYLOR , J. M. G. (2025b). A Bayesian joint longitudinal-survival model with a latent stochastic process for intensive longitudinal data. Biometrics 81 .GELMAN , A., C ARLIN , J. B. and S TERN , H. S. (2014). Bayesian Data Analysis , third ed. 7. Chapman & Hall/CRC texts in statistical science. MERKLE , E. C., F URR , D. and R ABE -H ESKETH , S. (2019). Bayesian Comparison of Latent Variable Models: Conditional Versus Marginal Likelihoods. Psychometrika 84 802–829. PROCHASKA , J. J., V OGEL , E. A. and B ENOWITZ , N. (2022). Nicotine delivery and cigarette equivalents from vaping a JUULpod. Tobacco Control 31 e88-e93. RIZOPOULOS , D. (2023). Joint Modeling of Longitudinal and Time-to-Event Data with Applications in R. 
+
+https://www.drizopoulos.com/courses/EMC/ESP72.pdf . Accessed: 2024-06-17. TRAN , T. D., L ESAFFRE , E., V ERBEKE , G. and D UYCK , J. (2021). Latent Ornstein-Uhlenbeck mod-els for Bayesian analysis of multivariate longitudinal categorical responses. Biometrics 77 689–701. https://doi.org/10.1111/biom.13292 VEHTARI , A., G ELMAN , A. and G ABRY , J. (2017). Practical Bayesian model evaluation using leave-one-out cross-validation and WAIC. Statistics and Computing 27 1413-1432.

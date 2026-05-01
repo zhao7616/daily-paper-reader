@@ -1,0 +1,14 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.27509v1/fig-001.webp",
+      "caption": "Fig. 3: Speed-tracking performance comparison under a sinusoidal reference with τ = 5ms and periodic load disturbances. The ICODE-MPPI controller closely follows the reference throughout, while FOC and black-box MPPI show visible phase lag and amplitude attenuation.",
+      "page": 4,
+      "index": 1,
+      "width": 446,
+      "height": 280
+    }
+  ]
+}

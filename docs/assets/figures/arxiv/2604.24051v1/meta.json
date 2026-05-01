@@ -1,0 +1,46 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.24051v1/fig-001.webp",
+      "caption": "Figure 1: An illustration of Process 1 in the SWaT testbed [14]. Colored regions indicate recurrent operational contexts, each characterized by a specific actuator configuration and a consistent pattern of sensor evolution. The table summarizes the context-dependent actuator states and corresponding sensor behaviors, revealing invariant relationships between actuators and sensors under the same operational objective.",
+      "page": 2,
+      "index": 1,
+      "width": 492,
+      "height": 411
+    },
+    {
+      "url": "assets/figures/arxiv/2604.24051v1/fig-002.webp",
+      "caption": "Figure 2: Overview of the proposed SCDT framework. The left panel shows training, where normal features are extracted and multi-stage S-AC clustering forms rule prototypes. The right panel shows inference, where the Primary LLM summarizes rules and the Secondary LLM detects anomalies from the current window by matching features to the rule set.",
+      "page": 4,
+      "index": 2,
+      "width": 914,
+      "height": 358
+    },
+    {
+      "url": "assets/figures/arxiv/2604.24051v1/fig-003.webp",
+      "caption": "Table 3: Comparison with baselines on SWaT, WADI, and HAI in terms of precision(Pre) (%), recall (Rec) (%), and f1-score (F1) (%). The best performances for each evaluation metric are highlighted in bold and the second best are underlined. Baseline Results are partly from the work of Han & Woo [36], and Deng & Hooi [35]",
+      "page": 9,
+      "index": 3,
+      "width": 776,
+      "height": 342
+    },
+    {
+      "url": "assets/figures/arxiv/2604.24051v1/fig-004.webp",
+      "caption": "Figure 4: Example overview of anomaly diagnosis with LLM. The left panel shows anomaly detection results and device states. The middle plots project normal-window features of LIT101 conditioned on actuators using UMAP. The right tables report the Primary and Secondary LLM outputs.",
+      "page": 9,
+      "index": 4,
+      "width": 976,
+      "height": 390
+    },
+    {
+      "url": "assets/figures/arxiv/2604.24051v1/fig-005.webp",
+      "caption": "Table 1: Feature taxonomy for window-level representation (13 features). Each feature contributes to characterize level, shape, trend, variability, or periodicity of ICS sensor behavior.",
+      "page": 5,
+      "index": 5,
+      "width": 922,
+      "height": 407
+    }
+  ]
+}

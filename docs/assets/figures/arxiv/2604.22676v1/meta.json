@@ -1,0 +1,118 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.22676v1/fig-001.webp",
+      "caption": "Figure 7: Class-subspace geometry complexity. Each point is one class, positioned by its selected PCA dimension rc and colored by retained variance. Chameleon requires much larger class subspaces than Amazon and WebKB, indicating that its classes occupy more complex regions of the selected graph-signal space.",
+      "page": 15,
+      "index": 1,
+      "width": 847,
+      "height": 503
+    },
+    {
+      "url": "assets/figures/arxiv/2604.22676v1/fig-002.webp",
+      "caption": "Figure 10: Chameleon class-pair geometry and confusion constellation. The left panel shows pairwise PCA subspace overlap; the right panel shows bidirectional confusion. This appendix figure illustrates how the same subspace objects used for prediction can also diagnose class-pair errors.",
+      "page": 21,
+      "index": 2,
+      "width": 772,
+      "height": 306
+    },
+    {
+      "url": "assets/figures/arxiv/2604.22676v1/fig-003.webp",
+      "caption": "Table 1: Main comparison on the six evaluated datasets. Baseline numbers come from the aligned CPU rerun of the strongest reproduced baseline; WG-SRC numbers come from the final WG-SRC repeat table. We report mean test accuracy and sample standard deviation over ten aligned repeats.",
+      "page": 7,
+      "index": 3,
+      "width": 810,
+      "height": 219
+    },
+    {
+      "url": "assets/figures/arxiv/2604.22676v1/fig-004.webp",
+      "caption": "Figure 2: Dataset-wise gain of WG-SRC over the strongest aligned baseline in Table 1. Positive values indicate improvement in percentage points.",
+      "page": 7,
+      "index": 4,
+      "width": 854,
+      "height": 481
+    },
+    {
+      "url": "assets/figures/arxiv/2604.22676v1/fig-005.webp",
+      "caption": "Table 4: Aligned mechanistic intervention summary. All variants are run with the same ten split/seed protocol as the final full WG-SRC scaffold experiment. Entries are mean test accuracy in percent. The bottom rows summarize cross-dataset generalization. Rank is computed within each dataset among the listed variants; lower is better. The full model is not always the best dataset-specific specialist, but it has the best average rank, the best worst-case accuracy, and is the only variant that remains in the top three on all six datasets. The simplified variants are used as diagnostic interventions, not as a redefinition of the main benchmark model.",
+      "page": 10,
+      "index": 5,
+      "width": 980,
+      "height": 220
+    },
+    {
+      "url": "assets/figures/arxiv/2604.22676v1/fig-006.webp",
+      "caption": "Figure 6: PCA–Ridge decision phase map. Each node is plotted by PCA margin and ridge margin. Blue points are correct predictions and orange points are errors. The axes separate geometry-driven, boundary-driven, easy, and hard cases.",
+      "page": 14,
+      "index": 6,
+      "width": 931,
+      "height": 574
+    },
+    {
+      "url": "assets/figures/arxiv/2604.22676v1/fig-007.webp",
+      "caption": "Figure 5: Dense node-level signal phase portraits. Each test node is positioned by family-size-adjusted low-pass share (x-axis) and family-size-adjusted high-pass share (y-axis). Blue semi-transparent points show all test nodes and orange semi-transparent points show errors. The plots show where mistakes occur inside the signal space rather than only how many errors occur.",
+      "page": 13,
+      "index": 7,
+      "width": 942,
+      "height": 535
+    },
+    {
+      "url": "assets/figures/arxiv/2604.22676v1/fig-008.webp",
+      "caption": "Table 2: Paired random-split stability. For split s, ∆s = AccSRC,s −Accbase,s in percentage points, paired by dataset and repeat index. Baseline values are taken from the aligned CPU baseline rerun.",
+      "page": 8,
+      "index": 8,
+      "width": 874,
+      "height": 743
+    },
+    {
+      "url": "assets/figures/arxiv/2604.22676v1/fig-009.webp",
+      "caption": "Figure 1: WG-SRC pipeline. The graph is converted into named signal blocks, discriminative coordinates are selected, and prediction is produced by fusing class-subspace residuals with a closed-form ridge boundary.",
+      "page": 4,
+      "index": 9,
+      "width": 914,
+      "height": 294
+    },
+    {
+      "url": "assets/figures/arxiv/2604.22676v1/fig-010.webp",
+      "caption": "Table 6: From dataset fingerprint to post-evaluation same-dataset diagnostic guidance. The atlas signatures generate mechanism hypotheses and diagnostic guidance for later model analysis and dataset-specific modification on the measured dataset. The table is a diagnostic-consistency summary, not a test-set-tuned model search: it records whether the suggested mechanism direction agrees with aligned interventions.",
+      "page": 17,
+      "index": 10,
+      "width": 980,
+      "height": 281
+    },
+    {
+      "url": "assets/figures/arxiv/2604.22676v1/fig-011.webp",
+      "caption": "Figure 9: Mechanism atlas as a dataset diagnostic probe. WG-SRC first performs prediction with the full scaffold and then exposes an operational fingerprint m(D). The atlas is not claimed to automate model design; rather, it produces mechanism hypotheses and post-evaluation diagnostic guidance whose support is evaluated through aligned interventions, error shifts, and PCA–Ridge decision phase portraits on the same measured dataset.",
+      "page": 17,
+      "index": 11,
+      "width": 1040,
+      "height": 319
+    },
+    {
+      "url": "assets/figures/arxiv/2604.22676v1/fig-012.webp",
+      "caption": "Figure 4: Graph-signal simplex. Each dataset is positioned in a ternary coordinate system using its familysize-adjusted node-level raw, low-pass, and high-pass signal shares. Marker color encodes high-pass reliance, while callouts report the high-pass and low-pass percentages. Amazon graphs remain low-pass dominated after adjustment, whereas Chameleon and the WebKB datasets move toward a more mixed raw/high-pass regime, showing that the datasets differ not only in accuracy but also in the graph-signal mechanisms used by WG-SRC.",
+      "page": 12,
+      "index": 12,
+      "width": 909,
+      "height": 685
+    },
+    {
+      "url": "assets/figures/arxiv/2604.22676v1/fig-013.webp",
+      "caption": "Table 7: Appendix computational profile. Baseline runtime and accuracy are taken from the aligned CPU baseline rerun; WG-SRC accuracy is standardized to the ten-repeat main-table value. This table documents runtime cost and is not intended as a speedup claim.",
+      "page": 20,
+      "index": 13,
+      "width": 886,
+      "height": 185
+    },
+    {
+      "url": "assets/figures/arxiv/2604.22676v1/fig-014.webp",
+      "caption": "Figure 8: Error signal shift. The lollipop value is the family-size-adjusted high-pass share of wrong nodes minus the family-size-adjusted high-pass share of correct nodes. Positive values mean errors have more high-pass mass; negative values mean errors lose high-pass mass relative to correct nodes.",
+      "page": 16,
+      "index": 14,
+      "width": 806,
+      "height": 427
+    }
+  ]
+}
