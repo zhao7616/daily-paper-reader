@@ -1,0 +1,134 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.23514v2/fig-001.webp",
+      "caption": "Table 4. The quantitative metrics of the results in Figure 16.",
+      "page": 43,
+      "index": 1,
+      "width": 871,
+      "height": 531
+    },
+    {
+      "url": "assets/figures/arxiv/2604.23514v2/fig-002.webp",
+      "caption": "Figure 16. The inference results of four damage cases. The dependencies between component states are not considered. It can be found that there are false negatives in Case 2 and 3, this might indicate that ignoring dependencies leads to detection failures.",
+      "page": 43,
+      "index": 2,
+      "width": 817,
+      "height": 706
+    },
+    {
+      "url": "assets/figures/arxiv/2604.23514v2/fig-003.webp",
+      "caption": "Figure 10. An overview of the synthetic truss structure. (a) The main structure. (b) The layout of the structure. (c) The cross section.",
+      "page": 25,
+      "index": 3,
+      "width": 869,
+      "height": 365
+    },
+    {
+      "url": "assets/figures/arxiv/2604.23514v2/fig-004.webp",
+      "caption": "Figure 13. Instances of the fundamental structural mode. Each structural mode is calculated based on measurements from different cases. (a) intact case. (b) damaged case 2.",
+      "page": 26,
+      "index": 4,
+      "width": 654,
+      "height": 495
+    },
+    {
+      "url": "assets/figures/arxiv/2604.23514v2/fig-005.webp",
+      "caption": "Figure 2. The process of making inference on graphical models by GNNs. This figure shows the process of updating the hidden state at node 𝑗. The messages coming from adjacent nodes 𝑖 and 𝑘 are encoded by the deep neural networks. Then these messages are aggregated at node 𝑗 and the hidden state at time t is updated by GRUs. At the end of the iteration, the updated hidden state is decoded by another neural network and outputs the target distribution.",
+      "page": 15,
+      "index": 5,
+      "width": 869,
+      "height": 498
+    },
+    {
+      "url": "assets/figures/arxiv/2604.23514v2/fig-006.webp",
+      "caption": "Figure 5. The experiment results for the analysis of the influence of average unique node degree on size generalization performance. The graph order of the graphical models in (a), (b), (c) and (d) used to test the GNNs performance is set to 10, 16, 36 and 100, respectively. The horizontal and vertical axes represent the average unique node degree of the training and testing sets, respectively. The colors in the figure represent their K-L divergence values, with smaller values indicating higher inference accuracy.",
+      "page": 21,
+      "index": 6,
+      "width": 869,
+      "height": 748
+    },
+    {
+      "url": "assets/figures/arxiv/2604.23514v2/fig-007.webp",
+      "caption": "Figure 6. The structure of the IASC-ASCE benchmark (a) and its corresponding graphical model (b).",
+      "page": 22,
+      "index": 7,
+      "width": 804,
+      "height": 456
+    },
+    {
+      "url": "assets/figures/arxiv/2604.23514v2/fig-008.webp",
+      "caption": "Figure 7. The experiment to investigate the size generalization performance of GNNs at the specific average unique node degree. The horizontal axis represents the graph order of the graphical models used to train the GNNs. The vertical axis represents K-L divergence as usual.",
+      "page": 22,
+      "index": 8,
+      "width": 869,
+      "height": 727
+    },
+    {
+      "url": "assets/figures/arxiv/2604.23514v2/fig-009.webp",
+      "caption": "Figure 1. An example of the structure learning method. (a) a structure with sensors. (b) the probabilistic graphical model corresponding to (a).",
+      "page": 10,
+      "index": 9,
+      "width": 869,
+      "height": 385
+    },
+    {
+      "url": "assets/figures/arxiv/2604.23514v2/fig-010.webp",
+      "caption": "Figure 8. The scatter plot of the inference results in the size generalization experiment. The average unique node degree is fixed at 2~3, and the training graph order is set to 9. The horizontal and vertical axes represent the true results and predicted results, respectively. The closer the points in the graph are to the diagonal line, the more accurate the results are. The performance of three algorithms are compared.",
+      "page": 23,
+      "index": 10,
+      "width": 869,
+      "height": 437
+    },
+    {
+      "url": "assets/figures/arxiv/2604.23514v2/fig-011.webp",
+      "caption": "Table 1. Comparison of quantitative metrics for inference accuracy of three algorithms. The average unique node degree of training and testing graphs is fixed at 2~3, and the training graph order is set to 9.",
+      "page": 23,
+      "index": 11,
+      "width": 865,
+      "height": 298
+    },
+    {
+      "url": "assets/figures/arxiv/2604.23514v2/fig-012.webp",
+      "caption": "Figure 15. The inference results of two experiments where damage occurs in structural components that are not represented in the graphical model.",
+      "page": 40,
+      "index": 12,
+      "width": 817,
+      "height": 706
+    },
+    {
+      "url": "assets/figures/arxiv/2604.23514v2/fig-013.webp",
+      "caption": "Table 3. The quantitative metrics of the results in Figure 15. The results in Figure 15 and Table 3 show that when damage occurs in structural components that are not represented in the graphical model, there would be more false positives, which means that the proposed method is somewhat sensitive to such scenarios. Consequently, the complete structure should be modeled as much as possible when establishing the probabilistic graphical model.",
+      "page": 40,
+      "index": 13,
+      "width": 871,
+      "height": 269
+    },
+    {
+      "url": "assets/figures/arxiv/2604.23514v2/fig-014.webp",
+      "caption": "Figure 4. The experiment on finding the optimal training set size. The subfigure (a) shows the case where the average unique node degree is fixed at 2~3, and the graph order of the training graphs ranges from 4 to 10. The subfigure (b) shows the case where the graph order of the training graphs is fixed at 10, and the average unique node degree ranges from 2 to 9.",
+      "page": 19,
+      "index": 14,
+      "width": 869,
+      "height": 348
+    },
+    {
+      "url": "assets/figures/arxiv/2604.23514v2/fig-015.webp",
+      "caption": "Figure 3. Some instances of the training and testing sets. Our dataset includes graphs with node counts ranging from 4 to 100, with an average unique node degree spanning from 2 to 9. The connections between nodes are randomly generated, and the number of connections depends on the pre-set average unique node degree. (Note that when the average unique node degree is k, a graph that can meet the requirements must have at least k+1 nodes).",
+      "page": 19,
+      "index": 15,
+      "width": 869,
+      "height": 437
+    },
+    {
+      "url": "assets/figures/arxiv/2604.23514v2/fig-016.webp",
+      "caption": "Figure 9. Comparison of computational efficiency among three algorithms. The subfigure (a) shows the trend of computation time as the graph order increases and the subfigure (b) shows the trend of computation time as the average unique node degree increases.",
+      "page": 24,
+      "index": 16,
+      "width": 869,
+      "height": 347
+    }
+  ]
+}

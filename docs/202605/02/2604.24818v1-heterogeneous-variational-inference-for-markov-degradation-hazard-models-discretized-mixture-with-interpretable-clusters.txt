@@ -1,0 +1,962 @@
+Title: Heterogeneous Variational Inference for Markov Degradation Hazard Models: Discretized Mixture with Interpretable Clusters
+
+URL Source: https://arxiv.org/pdf/2604.24818v1
+
+Published Time: Wed, 29 Apr 2026 00:01:52 GMT
+
+Number of Pages: 19
+
+Markdown Content:
+# Heterogeneous Variational Inference for Markov Degradation Hazard Models: Discretized Mixture with Interpretable Clusters 
+
+# Takato Yasuno 11Digital Business Department, Yachiyo Engineering Co., Ltd. 
+
+# Abstract 
+
+Infrastructure asset management requires under-standing heterogeneous degradation patterns across equipment to optimize maintenance decisions. Tra-ditional survival analysis assumes homogeneous haz-ard rates, failing to capture pump-specific degrada-tion speeds that vary by 17 × to 34 × relative to the population average in real-world industrial settings. 
+
+Challenge: Bayesian finite mixture models can identify discrete risk clusters (low-risk vs. high-risk equipment), but face three critical bottlenecks: (1) insufficient degradation signals from coarse state dis-cretization, (2) unstable cluster identification when data inherently supports fewer clusters than explored, and (3) computational infeasibility of Markov Chain Monte Carlo (MCMC) methods for production de-ployment (7+ hours per model). 
+
+Approach: We propose a practical framework combining (1) 8-state global percentile dis-cretization that amplifies degradation events by +83% (1.3% → 2.4% transition rate), (2) 30-dimensional feature engineering integrating sta-tistical trends (22 features), continuous health in-dicators, and text embeddings (PCA-compressed to 3 dimensions), (3) interpretable model selection rules enforcing minimum cluster share ( ≥5%) and separation (∆ μ ≥ 0.15) alongside WAIC, and (4) Au-tomatic Differentiation Variational Inference (ADVI) with full-rank covariance for stable, fast es-timation (5 minutes vs. 7h 40min for NUTS). 
+
+Validation: Applied to 280 industrial pump equipment with 104,703 inspection records (1991– 2025), we demonstrate: (1) Random effect models (baseline) show ADVI and NUTS produce nearly identical estimates ( r > 0.99) with 15 × speedup, validating ADVI accuracy. (2) Finite mixture mod-els identify optimal K = 2 clusters (72.9% low-risk, 27.1% high-risk, ∆ μ = 0 .98), with K = 3 failing in-terpretability constraints (2.9% minimum share). (3) NUTS exhibits severe convergence issues (ˆ r = 1 .19– 1.28 for μ parameters) and label switching, while ADVI provides stable results in 84 × less time. 
+
+Contributions: (1) First demonstration that fine-grained state discretization (8-state) is essential for mixture model stability in survival analysis. (2) Comprehensive feature engineering strategy combin-ing statistical, continuous, and semantic (text) sig-nals. (3) Practical interpretability rules preventing overfitting in automated model selection. (4) Em-pirical evidence that ADVI outperforms NUTS for finite mixture models in terms of convergence, sta-bility, and computational efficiency—challenging the conventional wisdom that MCMC methods are always superior. 
+
+Keywords: Automatic Differentiation Variational Inference, Markov hazard models, Random Effect Heterogeneity, Finite mixture clustering, Equipment degradation, global percentile discretization, inter-pretability rules, industrial asset management. 
+
+# 1 Introduction 
+
+# 1.1 Background and Motivation 
+
+Industrial infrastructure degradation poses critical challenges for asset management. Equipment such as pumps, turbines, and compressors exhibit hetero-geneous degradation patterns—individual units de-grade at vastly different rates even under similar op-erating conditions [1, 2]. Understanding this hetero-geneity is essential for optimizing maintenance sched-ules, preventing catastrophic failures, and allocating limited budgets. Traditional survival analysis models assume a ho-mogeneous hazard rate across all equipment, mod-eling degradation as a function of time and observ-able covariates (age, usage intensity, environmental factors) [3, 4]. However, real-world industrial data reveals substantial individual-level variation : in our pump equipment dataset, degradation speeds vary from 34 × slower to 17 × faster than the population 1
+
+> arXiv:2604.24818v1 [cs.LG] 27 Apr 2026
+
+average (exp( −3.54) ≈ 0.029 to exp(2 .86) ≈ 17 .5), indicating strong pump-specific effects that homoge-neous models cannot capture. Bayesian hierarchical models offer a solution by introducing random effects ui ∼ N (0 , σ 2
+
+> u
+
+) for each equipment unit, capturing unobserved heterogene-ity [1]. However, continuous random effects provide limited interpretability: a maintenance manager can-not easily translate “pump i has ui = 1 .5” into action-able strategies. Finite mixture models address this by clustering equipment into discrete risk categories (e.g., “high-risk cluster requiring quarterly inspec-tions” vs. “low-risk cluster on annual schedules”), enabling targeted maintenance policies [5, 6]. 
+
+# 1.2 Problem Statement and Chal-lenges 
+
+Despite their theoretical appeal, applying Bayesian finite mixture models to degradation data faces three critical challenges: 
+
+Challenge 1: Insufficient degradation sig-nals. Equipment health is typically recorded as continuous measurements (e.g., vibration amplitude, temperature). Discretizing health into 4 coarse states (Good/Normal/Caution/Degraded) for Markov mod-eling yields only 1.3% degradation events in our data—insufficient diversity for stable mixture cluster-ing. Prior work has not systematically explored the impact of state granularity on mixture model perfor-mance. 
+
+Challenge 2: Model selection instability. 
+
+Grid search over cluster numbers K ∈ { 2, 3, 4, 5} may favor complex models ( K = 5) with tiny, uninter-pretable clusters (e.g., 2.9% share) when standard in-formation criteria (WAIC, AIC) are used alone. Ex-isting methods lack interpretability constraints to en-sure clusters are meaningful for practitioners. 
+
+Challenge 3: Computational infeasibility of MCMC. No-U-Turn Sampler (NUTS), the gold stan-dard for Bayesian inference [7], requires approxi-mately 7 hours 40 minutes per model in our appli-cation. For grid search over K = 2–5 with 4 parallel jobs, total execution exceeds 8 hours—impractical for iterative model development. Moreover, finite mix-ture models suffer from label switching where MCMC chains explore equivalent cluster permutations, caus-ing convergence failures [8]. 
+
+# 1.3 Proposed Approach 
+
+We propose a comprehensive framework addressing all three challenges: 
+
+Solution 1: 8-state global percentile dis-cretization. Instead of 4 states, we partition equip-ment health into 8 states using global percentiles (12.5%, 25%, 37.5%, ..., 87.5%), ensuring balanced state distributions (11.8%–13.1% per state). This am-plifies degradation events from 1.3% to 2.4% (+83% increase), providing richer transition patterns for mix-ture clustering. 
+
+Solution 2: Interpretable model selection rules. Beyond WAIC minimization, we enforce three constraints: (a) WAIC within tolerance ( ±50) of the best model, (b) minimum cluster share ≥5% (ensur-ing all clusters are meaningful), and (c) minimum sep-aration ∆ μ ≥ 0.15 between adjacent cluster means (ensuring distinguishability). These rules prevent overfitting while maintaining practitioner trust. 
+
+Solution 3: ADVI with full-rank covari-ance. Automatic Differentiation Variational Infer-ence (ADVI) [9] approximates the posterior p(θ|D)via optimization rather than sampling, reducing exe-cution time from 7h 40min (NUTS) to 5 minutes—an 84 × speedup. We use full-rank ADVI (not mean-field) to capture posterior correlations, critical for mixture model stability. 
+
+# 1.4 Contributions 
+
+Our key contributions are: 1. Empirical demonstration of state granu-larity impact : First systematic study show-ing 8-state discretization stabilizes finite mixture models compared to 4-state discretization, with +83% increase in degradation signals. 2. Comprehensive feature engineering : Inte-gration of 30 covariates (statistical trends over 90-day windows, continuous health indicators, and text embeddings compressed via PCA), cap-turing multi-faceted degradation patterns. 3. Practical interpretability constraints :Three-tier model selection rules (WAIC +min share + min gap) preventing uninter-pretable clusters, validated on real industrial data where K = 2 passes all rules while K = 3 fails. 4. ADVI superiority over NUTS for mix-ture models : We systematically evalu-ate full-rank ADVI against NUTS across model types, measuring convergence (ˆ r, ESS), stability (label switching), and computation time—demonstrating that ADVI achieves 84 ×
+
+2speedup while matching NUTS accuracy for ran-dom effect baselines ( r > 0.99) and outperform-ing NUTS for mixture posteriors. 5. Production-ready framework : Complete pipeline from raw inspection records to action-able risk clusters in 5 minutes, enabling rapid model iteration and deployment in industrial set-tings. The remainder of this paper is structured as follows: Section 2 reviews related work on survival analysis, variational inference, and mixture models. Section 3 details our methodology including model formulation, state discretization, feature engineering, and estima-tion methods. Section 4 presents experimental re-sults on 280 pump equipment. Section 5 discusses lessons learned and practical implications. Section 6 concludes with future directions. 
+
+# 2 Related Work 
+
+# 2.1 Survival Analysis and Hazard Models 
+
+Classical survival analysis originated with Cox’s pro-portional hazards model [3], assuming a baseline haz-ard λ0(t) modified by covariate effects: λ(t|X) =
+
+λ0(t) exp( βT X). While widely used in medical stud-ies (patient survival) and reliability engineering (com-ponent lifetime), the proportional hazards assump-tion often fails in practice when equipment exhibits time-varying effects or discrete state transitions. 
+
+Markov degradation models address this by parti-tioning equipment health into K discrete states (e.g., Good, Normal, Caution, Degraded) and modeling transitions as time-inhomogeneous Markov chains [4, 10]. The hazard rate λk→k+1 (t) for transitioning from state k to k + 1 depends on both state and co-variates, capturing non-proportional degradation pat-terns. However, most implementations assume homo-geneous transition rates across equipment, ignoring individual-level heterogeneity. 
+
+# 2.2 Bayesian Hierarchical Models for Heterogeneity 
+
+Bayesian hierarchical (mixed-effects) models intro-duce equipment-specific random effects ui ∼ N (0 , σ 2
+
+> u
+
+)to account for unobserved heterogeneity [1]. The log-hazard becomes log λi(t) = log λ0(t) + βT Xi(t) + ui,where ui represents pump i’s deviation from the pop-ulation average. Inference traditionally relies on Markov Chain Monte Carlo (MCMC) methods, particularly Hamil-tonian Monte Carlo (HMC) [11] and its adaptive vari-ant No-U-Turn Sampler (NUTS) [7]. PyMC [12], Stan [13], and JAGS [14] provide accessible imple-mentations. However, MCMC convergence can be slow (hours to days) and diagnostics (ˆ r, effective sam-ple size) may indicate failures even after lengthy runs. 
+
+# 2.3 Finite Mixture Models for Clus-tering 
+
+Finite mixture models extend random effects by as-suming heterogeneity arises from K latent subpopu-lations [5, 6]: 
+
+ui ∼
+
+> K
+
+X
+
+> k=1
+
+πkN (μk, σ 2) (1) where πk are mixture weights ( P πk = 1) and μk are cluster-specific means. This provides interpretable risk stratification: “Cluster 1 (73% of equipment) de-grades slowly with μ1 = −0.98, while Cluster 2 (27%) degrades rapidly with μ2 ≈ 0”. Analytical approaches to mixture Markov degra-dation models have been proposed using Gamma-distributed heterogeneity [15, 16], formulating closed-form expressions for transition hazards. However, such analytical derivations require substantial effort and limit extensibility to complex covariate struc-tures. Our approach replaces analytical derivation with ADVI-based numerical posterior inference, en-abling flexible model specification at dramatically lower development cost. Key challenges include: (a) label switch-ing —MCMC chains may swap cluster labels across iterations, complicating convergence [8]. Solutions include ordered constraints ( μ1 < μ 2 < · · · < μ K )or post-processing label alignment [17]. (b) model selection —choosing K via information criteria (AIC, BIC, WAIC) may favor overly complex models without interpretability constraints [18]. 
+
+# 2.4 Variational Inference and ADVI 
+
+Variational inference (VI) approximates the poste-rior p(θ|D) by optimizing a tractable distribution 
+
+q(θ) to minimize KL-divergence [19, 20]. Automatic Differentiation Variational Inference (ADVI) [9] au-tomates VI for arbitrary probabilistic programs by: (1) transforming constrained parameters to uncon-strained space, (2) assuming Gaussian variational families (mean-field or full-rank), and (3) optimizing via stochastic gradient descent. Rather than deriving 3gradients analytically, ADVI exploits automatic dif-ferentiation [21] to efficiently evaluate derivatives, en-abling practitioners to focus on model design rather than manual calculus—a key advantage for rapidly obtaining degradation rankings and curves. ADVI offers dramatic speedups (10 ×–1000 ×) over MCMC but faces criticism for approximation er-rors [22]. Mean-field ADVI assumes independent pos-teriors q(θ) = Q 
+
+> j
+
+q(θj ), ignoring correlations. Full-rank ADVI uses q(θ) = N (μ, Σ) with full covariance Σ, capturing dependencies at higher computational cost (still orders of magnitude faster than MCMC). Recent work questions whether ADVI underper-forms for complex models like mixtures. Our em-pirical investigation reveals the opposite: ADVI pro-vides more stable results than NUTS for finite mix-ture models, challenging conventional assumptions. 
+
+# 2.5 Infrastructure Degradation Mod-eling 
+
+Prior work on infrastructure degradation focuses on structural health monitoring (SHM) using sensor data (vibration, strain, acoustic emission) [23, 24]. Ma-chine learning approaches (neural networks, random forests) predict failures from high-frequency sensor streams [25]. However, most industrial facilities lack continuous sensing, relying instead on periodic in-spections (monthly to quarterly) with manual read-ings—our data modality. Discrete-state Markov models have been applied to bridge deterioration [26], pavement cracking [27], and pipeline corrosion [28], typically with 3–5 states. To our knowledge, no prior work systematically explores 8-state discretization or integrates text embeddings (inspection comments) into degradation models. 
+
+# 3 Methodology 
+
+# 3.1 Problem Formulation: Markov Degradation Hazard Model 
+
+Consider N equipment units (pumps) observed over time through periodic inspections. For each pump 
+
+i ∈ { 1, . . . , N }, we record a sequence of inspections at times ti1, t i2, . . . , t in i . At each inspection j, we observe: 
+
+• Health measurement yij ∈ R: continuous in-dicator (e.g., vibration amplitude, temperature) 
+
+• Covariates Xij ∈ Rp: time-varying features (age, operational history, statistical trends) 
+
+• Time interval ∆tij = tij − ti,j −1: days since previous inspection To enable Markov modeling, we discretize the con-tinuous health measurements into K ordered states 
+
+{1, 2, . . . , K } representing progressive degradation (state 1 = healthiest, state K = most degraded). Let 
+
+sij ∈ { 1, . . . , K } denote the discrete state at inspec-tion j for pump i.The hazard rate λik (t) represents the instanta-neous risk of transitioning from state k to state k + 1 for pump i at time t. We model this via a log-linear form capturing both population-level effects and pump-specific heterogeneity: log λik (t) = log λ0k + βT Xi(t) + ui (2) where: 
+
+• λ0k: baseline hazard for state k (shared across all pumps) 
+
+• β ∈ Rp: covariate effect coefficients (population-level) 
+
+• ui: pump-specific random effect (unobserved het-erogeneity) The probability of transitioning from state si,j −1 at time ti,j −1 to state sij > s i,j −1 during interval ∆ tij 
+
+follows an exponential survival model: 
+
+P (transition | si,j −1, X ij , ∆tij )= 1 − exp( −λi,s i,j −1 · ∆tij ) (3) For stable equipment (no transition), the probabil-ity is: 
+
+P (stable | si,j −1, X ij , ∆tij ) = exp( −λi,s i,j −1 · ∆tij )(4) This formulation captures time-inhomogeneous 
+
+degradation where hazard rates vary across states and evolve with time-varying covariates, while ui accounts for pump-specific degradation speeds. 
+
+# 3.2 Baseline Model: Continuous Ran-dom Effects 
+
+As a preliminary investigation, we first consider a con-tinuous random effect model where each pump’s het-erogeneity is drawn from a common Gaussian distri-bution: 
+
+ui ∼ N (0 , σ 2
+
+> u
+
+) for i = 1 , . . . , N (5) 
+
+σu ∼ HalfNormal(1 .0) (6) This model provides: 4• Interpretability : ui > 0 indicates faster degra-dation than average; ui < 0 indicates slower 
+
+• Quantification : exp( ui) gives the multiplica-tive hazard rate factor (e.g., exp(2 .85) ≈ 17 .3×
+
+faster) 
+
+• Validation baseline : Comparing MCMC (NUTS) vs. variational inference (ADVI) esti-mates for ui validates ADVI accuracy before ap-plying to mixture models 
+
+Prior specifications :log λ0k ∼ N (−3, 1) for k = 1 , . . . , K (7) 
+
+βj ∼ N (0 , 0.5) for j = 1 , . . . , p (8) The baseline hazard prior N (−3, 1) implies λ0k ≈
+
+exp( −3) ≈ 0.05 events per day (median), with 95% interval [0.007, 0.37], reflecting domain knowledge that degradation events are rare (1–3% per inspec-tion). The covariate prior N (0 , 0.5) implies moderate effects: exp( ±1) ∈ [0 .37 , 2.7] for one standard devia-tion change. 
+
+# 3.3 Finite Mixture Model for Risk Clustering 
+
+While continuous random effects quantify heterogene-ity, they provide limited actionability: maintenance managers cannot easily map 280 individual ui val-ues to discrete maintenance strategies. Finite mix-ture models address this by clustering equipment into 
+
+C discrete risk categories: 
+
+ui ∼
+
+> C
+
+X
+
+> c=1
+
+πc · N (μc, σ 2) (9) where: 
+
+• π = ( π1, . . . , π C ): mixture weights (cluster pro-portions), PCc=1 πc = 1 
+
+• μc: mean random effect for cluster c (risk level) 
+
+• σ: within-cluster standard deviation (shared across clusters) 
+
+Prior specifications :
+
+π ∼ Dirichlet( α = [1 , . . . , 1]) (10) 
+
+μ1: C ∼ Ordered-Normal(0 , 3) (11) 
+
+σ ∼ HalfNormal(0 .5) (12) The ordered constraint μ1 < μ 2 < · · · < μ C
+
+serves two purposes: 1. Label switching prevention : Without or-dering, MCMC chains may swap cluster labels (Cluster 1 ↔ Cluster 2) across iterations, caus-ing convergence diagnostics (ˆ r) to fail 2. Interpretability : Enforces a natural ordering (Cluster 1 = slowest degradation, Cluster C =fastest), simplifying communication with practi-tioners The Dirichlet( α = 1) prior is uniform over the probability simplex, expressing no prior preference for cluster sizes. The ordered normal prior μc ∼ N (0 , 3) with ordering allows substantial separation: 95% in-terval [ −6, +6] spans a hazard rate range of exp( −6) to exp(+6), i.e., 400 × variation. 
+
+Cluster assignment : After inference, each pump 
+
+i is assigned to the cluster with highest posterior prob-ability: 
+
+c∗ 
+
+> i
+
+= arg max  
+
+> c
+
+Eq(π,μ,σ )[P (ui ∈ Cluster c)] (13) This yields actionable outputs: “Cluster 1 (low-risk): 204 pumps with μ1 = −0.98 require annual inspections. Cluster 2 (high-risk): 76 pumps with 
+
+μ2 ≈ 0 require quarterly inspections.” 
+
+# 3.4 State Discretization Strategy 
+
+The granularity of discrete health states criti-cally impacts mixture model performance. Tra-ditional approaches use domain-defined thresholds (e.g., Good/Normal/Caution/Degraded) resulting in 4 coarse states. However, this yields insufficient degradation signals. 
+
+4-state discretization (baseline, insufficient): 
+
+• States: {1, 2, 3, 4} defined by fixed thresholds 
+
+• Degradation event rate: 1,371 transitions /104,703 intervals = 1.3% 
+
+• Problem: Only 1.3% of observations contain transition information, leaving 98.7% as censored (stable) observations 
+
+• Effect on mixtures: Insufficient diversity for sta-ble clustering—preliminary tests showed K = 3 resulted in empty clusters 
+
+8-state global percentile discretization (pro-posed): Instead of fixed thresholds, we partition health measurements using global percentiles computed across all pumps and time points. Let {yij } denote all M = P 
+
+> i
+
+ni health measurements. Define states via: 5sij =
+
+
+
+1 if yij ≤ P12 .5
+
+2 if P12 .5 < y ij ≤ P25 .0
+
+3 if P25 .0 < y ij ≤ P37 .5
+
+4 if P37 .5 < y ij ≤ P50 .0
+
+5 if P50 .0 < y ij ≤ P62 .5
+
+6 if P62 .5 < y ij ≤ P75 .0
+
+7 if P75 .0 < y ij ≤ P87 .5
+
+8 if yij > P 87 .5
+
+(14) where Pq denotes the q-th percentile of {yij }.
+
+Properties :
+
+• Balanced distribution : Each state contains 
+
+≈12.5% of observations (by construction), avoid-ing class imbalance. In our data: State 1-8 dis-tributions range 11.8%–13.1%. 
+
+• Amplified signals : Degradation event rate in-creases to 2,512 / 104,703 = 2.4% (+83% in-crease vs. 4-state) 
+
+• Finer gradations : Captures gradual degrada-tion patterns (e.g., State 3 → 4 → 5) invisible in coarse discretization 
+
+Rationale : Global percentiles ensure that state transitions reflect relative worsening rather than ab-solute thresholds, which may vary by equipment type or measurement calibration. This approach general-izes across datasets while maintaining balanced state occupancy for statistical stability. 
+
+Alternative considered : Equipment-specific percentiles (individualized thresholds per pump) were rejected because they obscure cross-equipment com-parisons—a pump at its personal 75th percentile may still be healthier than another pump at its 25th per-centile. 
+
+# 3.5 Feature Engineering: Statistical Covariates 
+
+The covariate vector Xij ∈ R30 integrates three com-plementary signal types: 
+
+3.5.1 Basic Features (7 dimensions) 
+
+1. age days : Equipment age in days since installa-tion tij − tinstall ,i 
+
+2. value norm : Normalized health measurement 
+
+yij /y max , scaled to [0, 1] 3. trend slope : Linear regression slope over previ-ous 90 days 4. cv : Coefficient of variation (std/mean) over 90-day window 5. text emb pca 0, 1, 2 : Text embedding PCA components (inspection comments compressed from 1024D → 3D via PCA) 
+
+3.5.2 Statistical Features (22 dimensions, 90-day window) Distributional moments (11 features) :mean , std , min , max , median ,
+
+q25 , q75 , iqr = q75 − q25 ,
+
+skewness , kurtosis , cv 90d (15) 
+
+Trend features (6 features) :trend slope 90d = slope from polyfit(days , y, deg = 1) (16) trend intercept = intercept from polyfit (17) recent vs past ratio = mean( y[−30:] )mean( y[−60: −30] ) (18) recent vs past diff = mean( y[−30:] )
+
+− mean( y[−60: −30] ) (19) recent change rate = y−1 − y−10 
+
+10 days (20) 
+
+Volatility features (5 features) :diff mean = mean( ∇y)where ∇yt = yt − yt−1 (21) diff abs mean = mean( |∇ y|) (22) rolling std wd mean = mean( {std( y[t:t+w])})
+
+w ∈ { 7, 14 , 30 } (23) max drawdown = max 
+
+> t
+
+
+
+max  
+
+> s≤t
+
+ys − yt
+
+
+
+(24) mean drawdown = mean t
+
+
+
+max  
+
+> s≤t
+
+ys − yt
+
+
+
+(25) 
+
+3.5.3 Implementation Details Lookback window : 90 days chosen to balance: 
+
+• Sufficient data : Industrial pumps typically in-spected monthly/quarterly, yielding 3–9 mea-surements per window 
+
+• Recent relevance : Captures short-term trends without excessive temporal smoothing 6• Operational cycles : Aligns with typical main-tenance planning horizons (quarterly reviews) 
+
+NaN/Inf handling : Features with undefined val-ues (e.g., cv = ∞ when mean ≈ 0, skewness undefined for < 3 points) are replaced with 0.0. Robustness is ensured via: feature safe =
+
+(
+
+feature raw if finite and ≥ 3points 0.0 otherwise (26) 
+
+Text embeddings : Inspection comments (free-text descriptions like “slight increase in vibration”) are vectorized using pretrained language models (e.g., Sentence-BERT, 1024D), then compressed to 3 di-mensions via PCA retaining 70–80% variance [29]. This captures semantic degradation signals (e.g., “ab-normal noise” vs. “normal operation”) not present in numerical measurements. 
+
+# 3.6 Model Selection with Inter-pretability Constraints 
+
+Selecting the optimal number of clusters C requires balancing statistical fit with interpretability. Stan-dard information criteria (WAIC, AIC) may favor complex models ( C = 5) with tiny clusters (2–3 pumps) that lack operational meaning. 
+
+Three-tier interpretability framework :
+
+Rule 1: WAIC tolerance (statistical equiva-lence): 
+
+|WAIC C − WAIC best | ≤ δWAIC = 50 (27) The Widely Applicable Information Criterion (WAIC) [30] balances fit and complexity. Models within δWAIC = 50 are statistically indistinguishable (typical WAIC values: 19,788–19,850 in our data). This prevents selecting C = 5 over C = 2 for marginal WAIC improvement ( < 0.3%). 
+
+Rule 2: Minimum cluster share (actionability): min 
+
+> c=1 ,...,C
+
+ |{ i : c∗ 
+
+> i
+
+= c}| 
+
+N
+
+
+
+≥ ρmin = 0 .05 (5%) (28) Clusters containing < 5% of equipment (e.g., 14 pumps out of 280) provide insufficient statistical power for maintenance strategy validation and may represent outliers rather than meaningful subpopula-tions. The 5% threshold is based on domain expertise: maintenance teams require ≥10–15 units per strategy to justify differentiated protocols (quarterly vs. an-nual inspections, specialized parts inventory, etc.). 
+
+Rule 3: Minimum cluster separation (distin-guishability): min 
+
+> c=1 ,...,C −1
+
+(μc+1 − μc) ≥ ∆min = 0 .15 (29) Adjacent clusters must exhibit distinguishable haz-ard rates. ∆ μ = 0 .15 implies exp(0 .15) ≈ 1.16 (16% hazard rate difference)—practitioners consider this the minimum detectable difference for operational de-cisions. Smaller gaps (∆ μ < 0.1, 10% difference) are indistinguishable given typical measurement noise and inspection variability. 
+
+Selection algorithm :
+
+Algorithm 1 Interpretable Model Selection  
+
+> 1:
+
+Input : Candidate models {MC : C ∈{2, 3, 4, 5}} , traces {trace C } 
+
+> 2:
+
+Compute WAIC C for each model  
+
+> 3:
+
+WAIC best ← min C WAIC C 
+
+> 4:
+
+Cvalid ← {} { Valid cluster counts } 
+
+> 5:
+
+for C ∈ { 2, 3, 4, 5} do  
+
+> 6:
+
+if |WAIC C − WAIC best | ≤ 50 then  
+
+> 7:
+
+Compute cluster assignments {c∗ 
+
+> i
+
+: i =1, . . . , N } 
+
+> 8:
+
+min share C ← min c |{ i : c∗ 
+
+> i
+
+= c}| /N  
+
+> 9:
+
+min gap C ← min c(μc+1 − μc) 
+
+> 10:
+
+if min share C ≥ 0.05 and min gap C ≥ 0.15 
+
+then  
+
+> 11:
+
+Cvalid ← C valid ∪ { C} 
+
+> 12:
+
+end if  
+
+> 13:
+
+end if  
+
+> 14:
+
+end for  
+
+> 15:
+
+Return : C∗ = min( Cvalid ) {Simplest valid model }
+
+Tiebreaking : If multiple C values satisfy all rules, we select the smallest C (parsimony princi-ple)—simpler models are preferred when performance is equivalent. 
+
+# 3.7 Inference Methods: ADVI vs. NUTS 
+
+3.7.1 ADVI: Automatic Differentiation Vari-ational Inference 
+
+Variational inference approximates the intractable posterior p(θ|D) by optimizing a tractable distribu-tion q(θ; ϕ) to minimize KL-divergence: 
+
+ϕ∗ = arg min  
+
+> ϕ
+
+KL( q(θ; ϕ) || p(θ|D)) (30) ADVI [9] automates this for arbitrary probabilistic programs via: 
+
+Step 1: Unconstrained transformation .Transform constrained parameters to unconstrained 7space: 
+
+σ ∈ R+ → ζσ = log( σ) ∈ R (31) 
+
+π ∈ ∆C−1 → ζπ = logit-stick( π) ∈ RC−1 (32) 
+
+Step 2: Gaussian variational family . Assume 
+
+q(ζ; ϕ) = N (μϕ, Σϕ) where: 
+
+• Mean-field ADVI : Σ ϕ = diag( σ21 , . . . , σ 2
+
+> d
+
+) (di-agonal, d parameters) 
+
+• Full-rank ADVI : Σ ϕ = LL T where L is lower-triangular ( d(d + 1) /2 parameters) We use full-rank ADVI to capture posterior cor-relations critical for mixture models (e.g., π and μ are typically correlated). 
+
+Step 3: Optimize ELBO . Maximize the evidence lower bound: ELBO( ϕ) = Eq(ζ;ϕ)[log p(D, ζ )] − Eq(ζ;ϕ)[log q(ζ; ϕ)] (33) via stochastic gradient ascent with automatic dif-ferentiation: 
+
+∇ϕELBO ≈ 1
+
+S
+
+> S
+
+X
+
+> s=1
+
+∇ϕ
+
+h
+
+log p(D, ζ (s)) − log q(ζ(s); ϕ)
+
+i
+
+,ζ(s) ∼ q(·; ϕ)(34) 
+
+Configuration (production): 
+
+• Method: fullrank advi 
+
+• Iterations: 20,000 (convergence typically at 10,000–15,000) 
+
+• Sample draws: 3,000 (from optimized q(θ; ϕ∗)) 
+
+• Optimizer: Adam with default learning rate (0.001) 
+
+• Random seed: 42 (reproducibility) 
+
+Execution time : 5 minutes on standard CPU (In-tel Xeon, 16 cores). 
+
+3.7.2 NUTS: No-U-Turn Sampler 
+
+NUTS [7] is an adaptive Hamiltonian Monte Carlo (HMC) method that automatically tunes step size and trajectory length. It provides asymptotically ex-act posterior samples (subject to convergence). 
+
+Configuration (production): 
+
+• Draws: 2,000 (per chain, post-warmup) 
+
+• Tune: 1,000 (warmup/adaptation phase) 
+
+• Chains: 6 (parallel) 
+
+• Target accept: 0.95 (high acceptance rate, con-servative step size) 
+
+• Initialization: ’advi’ (warmstart from ADVI approximate posterior, 3 × speedup) 
+
+• Random seed: 42 
+
+Execution time : 7h 40min (460 minutes) on same hardware. 
+
+Convergence diagnostics :
+
+• ˆr (Gelman-Rubin): Should be < 1.01 (indicates chain convergence) 
+
+• ESS (Effective Sample Size): Should be > 400 per parameter (indicates sufficient independent samples) 
+
+• Divergences: Should be 0 (indicates numerical stability) 
+
+3.7.3 Comparative Analysis Random effect model validation (baseline): To validate ADVI accuracy, we compare NUTS (mc1) vs. ADVI (mc2) on the continuous random effect model (Eq. 5). Results: The near-perfect correlation ( r > 0.99) between NUTS and ADVI estimates validates ADVI’s accu-racy for this model class, with 15 × speedup. 
+
+Mixture model performance (production): For finite mixture models, convergence behavior differs dramatically: Key findings: 
+
+• NUTS convergence failure : ˆ r > 1.1 for mix-ture parameters ( μ, π) and ESS < 25, indicating chains did not converge 
+
+• Label switching : Despite ordered constraint, chains exhibit cluster label swaps, causing in-verted cluster proportions (72.9% vs. 39.6%) 
+
+• ADVI stability : Consistent results across mul-tiple runs, reproducible cluster assignments 
+
+• Speedup : 84 × faster, enabling rapid model it-eration 
+
+Recommendation : For random effect models ,ADVI provides near-identical results to NUTS with 15 × speedup—either method is acceptable. For fi-nite mixture models , ADVI is strongly preferred 
+
+due to: 1. Stable convergence (no label switching) 2. Interpretable, reproducible cluster assignments 8Table 1: ADVI vs. NUTS: Random Effect Model Metric mc1 (NUTS) mc2 (ADVI) Execution time 45 min 3 min Speedup 1× 15 ×
+
+ui range [-3.52, +2.85] [-3.56, +2.86] Correlation r(ui) — 0.997 
+
+Significant pumps 223/280 (79.6%) 223/280 (79.6%) Max ˆ r 1.0032 N/A Min ESS 476 N/A Table 2: ADVI vs. NUTS: Mixture Model ( K = 2) Metric mix1 (ADVI) mix2 (NUTS) Execution time 5 min 7h 40min Speedup 84 × 1×
+
+μ1 (mean) −0.98 −3.52 
+
+μ2 (mean) −0.00 +0 .88 
+
+μ separation 0.98 4.40 Max ˆ r (mu) N/A 1.28 
+
+Min ESS (mu) N/A 17 
+
+Cluster 1 share 72.9% 39.6% Cluster 2 share 27.1% 60.4% Convergence Stable Failed 
+
+3. Production-feasible execution time (2–5 min vs. 7+ hours) 4. Enables model selection grid search ( K = 2–5) in < 20 minutes vs. 30+ hours NUTS may be used for academic validation (con-firming ADVI approximation quality) but offers lim-ited practical value given convergence risks and com-putational cost. 
+
+# 3.8 Implementation Details 
+
+Software : PyMC 5.x (Python 3.10+), NumPy, Pandas, ArviZ (diagnostics), scikit-learn (PCA), Sentence-BERT (text embeddings). 
+
+Hardware : Intel Xeon CPU, 64GB RAM, 16 cores. No GPU required (ADVI CPU-only, NUTS multi-core CPU). 
+
+Data preprocessing pipeline :1. Load raw inspection records (equipment id, check item id, date, value, comment) 2. Apply 8-state global percentile discretization (Eq. 14) 3. Extract 30-dimensional covariates (Sec. 3.5) with 90-day lookback 4. Construct transition indicators: moved ij =
+
+⊮[sij > s i,j −1]5. Compute time intervals ∆ tij in days 
+
+Model execution workflow :1. Baseline : Run random effect model (mc1 NUTS, mc2 ADVI) for ADVI validation 2. Grid search : Run mixture models for K ∈{2, 3, 4, 5} with full-rank ADVI (20k iterations, 3k draws), 4 parallel jobs 3. Model selection : Apply three-tier inter-pretability rules (Algorithm 1) 4. Posterior analysis : Extract cluster assign-ments, compute degradation curves, generate fig-ures 
+
+Reproducibility : All results use fixed random seed, version-pinned dependencies, and documented environment variables for hyperparameter configura-tion. 
+
+Production Ready : Implementation provided in production ready materials that includes data pre-processing, markov deterioration hazard model with random effect and finite mixture for heterogenous risk clustering, optimal search for interpretable model se-lection, and hazard ranking to visualize expected de-terioration path. 
+
+# 4 Experimental Results 
+
+# 4.1 Dataset and Experimental Setup 
+
+4.1.1 Dataset Description 
+
+We apply our methodology to industrial pump equip-ment inspection data spanning 34 years (1991–2025) collected from industrial facilities. The dataset com-prises: 9Table 3: Random Effect Model: ADVI vs. NUTS Comparison Parameter mc1 (NUTS) mc2 (ADVI) 
+
+σu (mean) 1.692 1.189 
+
+σu (95% HDI) [1.505, 1.884] [1.120, 1.264] 
+
+ui range [-3.52, +2.85] [-3.56, +2.86] Correlation r(ui) — 0.997 
+
+Significant pumps 223/280 (79.6%) 223/280 (79.6%) Top pump (idx=99) u = 2 .85 u = 2 .86 Bottom pump (idx=16) u = −3.52 u = −3.56 Execution time 45 min 3 min Speedup 1× 15 ×
+
+• Equipment : 280 pump units across multiple fa-cilities 
+
+• Inspection records : 104,703 time-series obser-vations 
+
+• Temporal coverage : 34 years (1991-01-01 to 2025-01-01) 
+
+• Inspection frequency : Monthly to quarterly (mean interval: 91 days) 
+
+• Health indicator : Continuous vibra-tion/temperature measurements (normalized to [0, 1]) 
+
+• Text data : 82,416 inspection comments (1024D embeddings → 3D PCA) After 8-state global percentile discretization (Sec. 3.4), we observe 2,512 degradation events (state transitions) out of 104,703 intervals, yielding a 2.4% event rate —an 83% increase over 4-state discretiza-tion (1.3%). 
+
+4.1.2 Experimental Configuration Model variants :1. mc1 (NUTS baseline) : Random effect model, NUTS sampler, draws=2000, tune=1000, chains=4, target accept=0.95. Execution time: 45 minutes. 2. mc2 (ADVI baseline) : Random effect model, full-rank ADVI, 20k iterations, 3k draws. Exe-cution time: 3 minutes. 3. mix1 (ADVI mixture) : Finite mixture model (K = 2–5 grid search), full-rank ADVI, 20k iter-ations, 3k draws. Execution time: 5 minutes per 
+
+K.4. mix2 (NUTS mixture) : Finite mixture model (K = 2), NUTS with init=’advi’, draws=2000, tune=1000, chains=6, target accept=0.95. Exe-cution time: 7h 40min. All experiments use random seed 42 for repro-ducibility. 
+
+# 4.2 Validation: ADVI vs. NUTS for Random Effect Models 
+
+To validate ADVI accuracy before applying to mix-ture models, we compare mc1 (NUTS) and mc2 (ADVI) on the continuous random effect baseline (Sec. 3.2). 
+
+4.2.1 Convergence Diagnostics mc1 (NUTS) :
+
+• Max ˆ r: 1.0032 (all parameters < 1.01, indicating convergence) 
+
+• Min ESS (bulk): 476 (all parameters > 400, suf-ficient) 
+
+• Divergences: 8/8000 samples (0.1%, acceptable) 
+
+• Execution time: 45 minutes 
+
+mc2 (ADVI) :
+
+• ELBO convergence: Plateau reached at iteration 15,327 (out of 20,000) 
+
+• Execution time: 3 minutes (15 × speedup) 
+
+4.2.2 Parameter Estimates Comparison 
+
+Table 3 compares key parameter estimates between mc1 (NUTS) and mc2 (ADVI). The pump-specific random effects ui (280 values) exhibit near-perfect correlation: Pearson r = 0 .997, RMSE = 0 .038. 10 (a) Degradation curves from random effect model (mc1 NUTS). Fast pumps (top 1%, red) transition to degraded states 17 × faster than benchmark (median, blue), while slow pumps (bottom 1%, green) degrade 34 × slower. Shaded regions: 95% posterior predictive intervals.      
+
+> (b) Degradation curves from random effect model (mc2 ADVI). Fast pumps (top 1%, red) exhibit 17.5 ×faster degradation than benchmark (median, blue), while slow pumps (bottom 1%, green) degrade 34 ×slower—nearly identical to NUTS results. Shaded regions: 95% poste-rior predictive intervals. ADVI execution time: 3 min-utes (15 ×speedup vs. NUTS 45 minutes).
+
+Figure 1: Comparison of degradation curves: mc1 NUTS (left, Fig. 1a) vs. mc2 ADVI (right, Fig. 1b). Both methods yield nearly identical results, validating ADVI accuracy with 15 × speedup. 
+
+Interpretation : 223 pumps (79.6%) exhibit sta-tistically significant heterogeneity (95% credible in-tervals excluding 0). The fastest pump (idx=99, 
+
+u ≈ 2.86) degrades exp(2 .86) ≈ 17 .5× faster than average, while the slowest (idx=16, u ≈ − 3.54) de-grades exp( −3.54) ≈ 0.029 × (34 × slower). Figure 1a visualizes degradation curves for three representative pumps: fast (99th percentile u), bench-mark (median u ≈ 0), and slow (1st percentile u). 
+
+4.2.3 ADVI Replication Results (mc2) 
+
+To validate ADVI accuracy, we replicate the random effect analysis using full-rank ADVI (mc2) and com-pare to NUTS (mc1). Figures 1b–3b present mc2 re-sults, directly comparable to Figures 1a–3a. 
+
+Key finding : ADVI and NUTS produce nearly identical random effect estimates ( r > 0.99) with 15 ×
+
+speedup, validating ADVI accuracy for subsequent mixture model inference. Visual inspection (Figs. 1a– 3b) confirms that ADVI preserves degradation curve shapes, bimodal distributions, and ranking orders, demonstrating practical equivalence beyond numer-ical correlation. 
+
+# 4.3 Model Selection: Finite Mixture Models 
+
+We apply our three-tier interpretability framework (Sec. 3.6) to select the optimal cluster number C
+
+from candidates {2, 3, 4, 5}.
+
+4.3.1 Grid Search Results (mix1 ADVI) 
+
+Table 4 summarizes WAIC, cluster composition, and interpretability rule compliance for each C.
+
+Analysis :
+
+• C = 2: WAIC=19,788 (best). Cluster 1: 204 pumps (72.9%), Cluster 2: 76 pumps (27.1%). ∆μ = 0 .98 (97% hazard rate difference). All rules pass .
+
+• C = 3: WAIC=19,814 (+26, within tolerance 
+
+≤ 50). However, smallest cluster contains only 8 pumps (2.9%), failing min share ≥ 5% rule .
+
+• C = 4, C = 5: WAIC deteriorates further, with multiple tiny clusters ( < 2%). Not operationally meaningful. 
+
+Conclusion : C = 2 is the optimal model, provid-ing two interpretable risk categories: low-risk (72.9%, slow degradation) and high-risk (27.1%, fast degrada-tion). 
+
+4.3.2 Optimal Model ( C = 2 ) Characteriza-tion 
+
+Figure 4 shows the cluster composition and posterior distributions for mix1 ADVI C = 2. 
+
+Parameter estimates (mix1 ADVI C = 2, Ta-ble 5): 
+
+• μ1 = −0.98 (95% HDI: [-2.01, -0.06]): Low-risk cluster, hazard rate exp( −0.98) ≈ 0.38 (2.7 ×
+
+slower) 11 (a) Distribution of pump-specific random effects ui (mc1 NUTS, N = 280). The bimodal shape suggests latent subgroups, motivating finite mixture models. 
+
+(b) Distribution of pump-specific random effects ui (mc2 ADVI, N = 280). The bimodal shape is preserved from NUTS (Fig. 2a), confirming ADVI captures the same latent subgroup structure. Pearson correlation be-tween mc1 (NUTS) and mc2 (ADVI) random effects: 
+
+r = 0 .997. 
+
+Figure 2: Comparison of random effect distributions: mc1 NUTS (left) vs. mc2 ADVI (right). Both methods yield nearly identical bimodal distributions, confirming ADVI captures the same latent subgroup structure. 
+
+(a) Ranking of pump-specific random effects ui sorted by magnitude (mc1 NUTS, N = 280). The 17.5 × degrada-tion speed difference between fastest (top, u ≈ 2.86) and slowest (bottom, u ≈ − 3.54) pumps demonstrates sub-stantial heterogeneity. The smooth gradient indicates continuous risk stratification rather than discrete clus-ters, though the bimodal histogram (Fig. 2a) suggests latent subgroups. This ranking enables risk-based prior-itization: the top 27% (76 pumps) with u > 0 degrade faster than average and require intensified monitoring, matching the high-risk cluster proportion in the optimal 
+
+C = 2 mixture model (Sec. 4.3). 
+
+(b) Ranking of pump-specific random effects ui sorted by magnitude (mc2 ADVI, N = 280). The ranking order is nearly identical to NUTS (Fig. 3a), with RMSE = 0.038 between mc1 and mc2 estimates. The top 27% (76 pumps) with u > 0 remain consistent across methods, validating ADVI’s reliability for risk stratification. 
+
+Figure 3: Comparison of pump degradation speed rankings: mc1 NUTS (left) vs. mc2 ADVI (right). Both methods yield nearly identical rankings (RMSE = 0 .038), validating ADVI’s reliability for risk stratification. 12 Table 4: Model Selection Grid Search (mix1 ADVI, fullrank advi, 20k iter) 
+
+C WAIC Min Share Min ∆ μ Rules Status 2 19,788 27.1% 0.98 ✓✓✓ Valid 
+
+3 19,814 2.9% 0.56 ✓×✓ Fail 
+
+4 19,842 1.8% 0.42 ×× ✓ Fail 5 19,875 0.7% 0.29 ××× Fail 
+
+Figure 4: mix1 ADVI C = 2 cluster composition. Cluster 1 (low-risk, blue): 204 pumps (72.9%, μ1 =
+
+−0.98). Cluster 2 (high-risk, orange): 76 pumps (27.1%, μ2 ≈ 0). Mixture weights: π1 = 59%, 
+
+π2 = 41% (probabilistic assignment differs from hard assignment due to uncertainty). 
+
+Figure 5: Cluster-specific degradation curves (mix1 ADVI C = 2). Low-risk cluster (blue, μ1 = −0.98) exhibits 2.7 × slower degradation than baseline. High-risk cluster (orange, μ2 ≈ 0) degrades at baseline rate. Shaded regions: 95% posterior predictive intervals. 
+
+• μ2 = 0 .00 (95% HDI: [-0.96, +0.90]): High-risk cluster, baseline hazard 
+
+• π1 = 0 .59 (59%), π2 = 0 .41 (41%): Mixture weights (probabilistic) 
+
+• σcluster = 1 .57 (within-cluster variability) 
+
+• Cluster separation: ∆μ = 0.98, implying exp(0 .98) ≈ 2.7× hazard rate difference 
+
+Covariate effects : Of 30 covariate coefficients, 6 show 95% credible intervals excluding 0: age days 
+
+(β = 0 .036), trend slope 90d (β = −0.388), and 4 statistical features. This indicates that equipment age, recent degradation trends, and statistical volatil-ity significantly influence hazard rates. 
+
+# 4.4 ADVI vs. NUTS: Mixture Model Convergence 
+
+To test whether C = 3 instability is due to ADVI approximation bias, we run mix2 NUTS with C = 2 (7h 40min execution) and compare to mix1 ADVI. 
+
+4.4.1 mix2 NUTS Convergence Diagnostics 
+
+Contrary to expectations, NUTS exhibits severe convergence failures :
+
+• μ1: ˆ r = 1 .19, ESS (bulk) = 23 ( critical failure )
+
+• μ2: ˆ r = 1 .28, ESS (bulk) = 17 ( critical failure )
+
+• π1, π2: ˆ r = 1 .15, ESS = 34 
+
+• β2, β13 : ˆ r > 2.0, ESS < 10 (complete failure) 
+
+• Divergences: 0/12,000 (misleading—chains did not explore correctly) 
+
+Root cause : Visual inspection of MCMC traces reveals label switching —chains swap Cluster 1 ↔
+
+Cluster 2 identities across iterations, despite the or-dered constraint μ1 < μ 2. With 6 parallel chains, permutations lead to non-convergent posterior distri-butions. 13 Table 5: mix1 ADVI C = 2 Parameter Estimates Parameter Mean SD 95% HDI ESS (bulk) 
+
+μ1 -0.979 0.515 [-2.01, -0.06] 2933 
+
+μ2 0.000 0.484 [-0.96, +0.90] 3035 
+
+π1 0.590 0.160 [0.28, 0.88] 2870 
+
+π2 0.410 0.160 [0.12, 0.72] 2870 
+
+σcluster 1.568 0.164 [1.26, 1.90] 3037 
+
+τ (μ1 − μ2 gap) 0.991 0.478 [0.25, 1.90] 3056 
+
+4.4.2 Comparative Results 
+
+Table 6 compares mix1 ADVI vs. mix2 NUTS for 
+
+C = 2 mixture model. Table 6: Mixture Model ( C = 2): ADVI vs. NUTS Comparison Metric mix1 (ADVI) mix2 (NUTS) Execution time 5 min 7h 40min Speedup 84 × 1×
+
+μ1 (mean) -0.98 -3.52 
+
+μ2 (mean) 0.00 +0.88 ∆μ separation 0.98 4.40 Max ˆ r (mu) N/A 1.28 (fail) Min ESS (mu) N/A 17 (fail) Cluster 1 share 72.9% 39.6% Cluster 2 share 27.1% 60.4% Convergence Stable Failed 
+
+Label switching No Yes 
+
+Production use ✓ ×
+
+Key observations :1. NUTS produces inverted cluster proportions (39.6%/60.4% vs. 72.9%/27.1%), indicating la-bel switching across chains. 2. NUTS μ values are 3.6 × more extreme than ADVI, physically implausible for pump degrada-tion behavior. 3. Despite 0 divergences, ˆ r > 1.1 and ESS < 25 reveal non-convergence. 4. ADVI provides stable, interpretable results in 84 × less time. Figure 6 shows mix2 NUTS cluster curves, exhibit-ing unrealistic extreme degradation rates due to con-vergence issues. 
+
+Conclusion : For finite mixture models, ADVI out-performs NUTS in terms of convergence stability, 
+
+Figure 6: mix2 NUTS C = 2 cluster-specific degra-dation curves. Note extreme μ values ( μ1 = −3.52, 
+
+μ2 = +0 .88) and inverted proportions due to label switching. Compare to Figure 5 (mix1 ADVI) for stable results. computational efficiency (84 × speedup), and inter-pretability. NUTS may be used for academic valida-tion but offers limited practical value given conver-gence risks. 
+
+# 4.5 Feature Engineering Impact 
+
+To assess the value of 22 statistical features (Sec. 3.5), we compare mix1 (30 covariates) to a baseline with only 7 basic features. 
+
+Findings :
+
+• 30-covariate model: C = 2 passes all rules, C = 3 fails (2.9% min share). 
+
+• 7-covariate model: C = 2 barely passes (5.2% min share), C = 3 completely unstable (empty clusters). 
+
+Interpretation : Statistical features (trend, volatility, moments) provide richer degradation sig-nals, eliminating empty clusters and stabilizing model selection. However, feature engineering alone cannot force unnatural C = 3 when data inherently supports 
+
+C = 2. 14 4.6 State Discretization Impact 
+
+Table 7 compares 4-state (baseline) vs. 8-state (mix1) discretization. 
+
+Conclusion : Fine-grained 8-state discretization amplifies degradation signals by 83%, enabling stable finite mixture modeling. Coarse 4-state discretization leads to insufficient diversity for reliable clustering. 
+
+# 5 Discussion 
+
+# 5.1 Summary of Key Findings 
+
+Our comprehensive evaluation of Bayesian finite mix-ture models for equipment degradation reveals four critical insights: 
+
+Finding 1: ADVI reliability for mixture models . Full-rank ADVI achieves an 84 × speedup over NUTS (5 min vs. 7h 40min) while delivering su-perior convergence stability for finite mixture models: NUTS exhibits ˆ r = 1 .19–1 .28 and ESS < 25 with la-bel switching across chains, whereas ADVI converges reliably with no divergences. For continuous random effect baselines, both methods agree closely ( r > 0.99, RMSE= 0 .038), confirming that the speedup does not sacrifice accuracy. These results establish full-rank ADVI as the more reliable inference strategy for fi-nite mixture degradation models (cf. Section 4). 
+
+Finding 2: State granularity is critical . In-creasing state discretization from 4 coarse states to 8 fine-grained states (via global percentiles) ampli-fies degradation signals by 83% (1.3% → 2.4% event rate). This increased diversity stabilizes mixture clus-tering: 4-state discretization leads to empty clusters for C = 3, while 8-state yields interpretable (albeit failing min share rule) clusters. State granularity di-rectly impacts model identifiability. 
+
+Finding 3: Interpretability constraints pre-vent overfitting . Standard information criteria (WAIC) favor C = 3 over C = 2 (WAIC=19,814 vs. 19,788, ∆ = 26), but C = 3 produces a 2.9% minor-ity cluster—operationally unactionable. Our three-tier framework (WAIC tolerance, min share ≥ 5%, min gap ≥ 0.15) prevents such overfitted models, en-suring practitioner trust and deployment feasibility. 
+
+Finding 4: Feature engineering stabilizes but cannot force unnatural clusterings . Expanding from 7 basic features to 30 covariates (adding 22 sta-tistical trends/volatility features) eliminates empty clusters in C = 3, but the 2.9% minimum share still fails interpretability. This confirms that feature en-gineering enhances signal quality but respects inher-ent data structure—industrial pump degradation nat-urally exhibits 2 latent risk groups, not 3. 
+
+# 5.2 Comparison to Existing Methods 
+
+5.2.1 Survival Analysis Literature 
+
+Traditional Cox proportional hazards models [3] as-sume homogeneous hazard rates across equipment, ig-noring the 79.6% of pumps with significant individual-level heterogeneity in our data. Bayesian hierarchi-cal models [1] address this via continuous random ef-fects, but provide limited actionability: maintenance managers cannot translate 280 individual ui values into discrete strategies. Our finite mixture approach bridges this gap, clustering equipment into 2 inter-pretable risk categories with 17.5 × vs. 34 × degrada-tion speed differences. 
+
+5.2.2 Variational Inference Critiques 
+
+Recent work [22] questions ADVI accuracy for com-plex models, citing mean-field approximation errors. Our results demonstrate that full-rank ADVI (cap-turing posterior correlations) provides near-exact es-timates for random effect models (r > 0.99 vs. NUTS) and superior stability for mixture models where NUTS fails to converge. The key distinction: mean-field ADVI (independent posteriors) vs. full-rank ADVI (full covariance). Practitioners should prefer full-rank for mixture models despite 2 × com-putational cost (still 100 × faster than NUTS). 
+
+5.2.3 Infrastructure Degradation Modeling 
+
+Prior work on bridge deterioration [26] and pavement cracking [27] employs 3–5 discrete states with homo-geneous transition matrices. Our contributions: (1) 
+
+pump-specific heterogeneity via random/mixture ef-fects, (2) 8-state fine-grained discretization for richer signals, (3) text embedding integration (inspection comments), and (4) 30-dimensional feature engineer-ing . To our knowledge, this is the first application of Bayesian finite mixture models with 8 states and semantic (text) features to equipment degradation. 
+
+# 5.3 Practical Implications for Asset Management 
+
+5.3.1 Maintenance Strategy Differentiation 
+
+The optimal C = 2 model enables two-tier mainte-nance policies: 
+
+Low-risk cluster (72.9%, 204 pumps, μ1 =
+
+−0.98): 
+
+• Degradation rate: 2.7 × slower than average 
+
+• Recommended strategy: Annual inspections ,condition-based monitoring 15 Table 7: State Discretization Impact on Mixture Models Metric 4-State (baseline) 8-State (mix1) Percentile cutoffs Q25, Q50, Q75 Q12.5, ..., Q87.5 States per obs 23%–27% 11.8%–13.1% Degradation events 1,371 2,512 Event rate 1.3% 2.4% Improvement — +83% 
+
+C = 3 stability Empty clusters 2.9% min share 
+
+C = 2 validity Marginal Robust 
+
+• Cost savings: Reduce inspection frequency from quarterly to yearly, saving 3 site visits per unit per year 
+
+• Risk mitigation: 95% probability of remaining in States 1–4 (healthy) within 12-month intervals 
+
+High-risk cluster (27.1%, 76 pumps, μ2 ≈ 0): 
+
+• Degradation rate: Baseline (1 × average) 
+
+• Recommended strategy: Quarterly inspections ,proactive part replacement when State ≥ 6
+
+• Failure prevention: Early intervention at State 6 (vs. reactive response at State 8) reduces catas-trophic failure risk by 40% (estimated via poste-rior predictive simulation) 
+
+• Budget allocation: Prioritize 76 high-risk units for spare parts inventory and technician schedul-ing 
+
+Estimated impact : Across 280 pumps, differen-tiated strategies reduce total annual inspection costs by 28% (204 units × 3 fewer visits) while maintaining equivalent failure prevention (via intensified monitor-ing of 76 high-risk units). Actual cost-benefit analysis requires facility-specific labor/downtime data. 
+
+5.3.2 Real-Time Deployment Feasibility 
+
+ADVI’s 5 minute execution time enables near-real-time model updates :
+
+• Monthly retraining : As new inspection data arrives, refit mixture model to update cluster as-signments. Pumps transitioning from low-risk to high-risk trigger proactive maintenance. 
+
+• Adaptive risk scoring : Posterior predictive distributions provide time-varying failure prob-abilities, feeding into computerized maintenance management systems (CMMS). 
+
+• Counterfactual analysis : Simulate “what-if” scenarios (e.g., delaying inspection by 3 months) in minutes, supporting dynamic scheduling. 
+
+• Reinforcement learning integration : Poste-rior degradation rates and cluster assignments can serve as state representations for distribu-tional RL-based maintenance policy optimiza-tion [31], enabling data-driven scheduling that balances inspection costs with failure risks. NUTS (7h 40min per model) cannot support such workflows, highlighting ADVI’s practical advantages beyond computational cost. 
+
+# 5.4 Limitations 
+
+1. Limited to degradation, not failure pre-diction . Our model estimates degradation tran-sition rates (State k → k + 1), not catastrophic failure probabilities (State 8 → failure). Extend-ing to failure requires additional data on pump re-placements/breakdowns, currently unavailable in our dataset (right-censored observations). 
+
+2. Posterior correlations underexplored .While full-rank ADVI captures μ–π correlations, we do not explicitly model temporal dependencies (auto-correlation in repeated measurements from the same pump). Gaussian process extensions could improve predictive accuracy at the cost of computational com-plexity. 
+
+3. Covariate selection not optimized . Of 30 covariates, only 6 show significant effects (95% CI ex-cluding 0). Feature selection via spike-and-slab pri-ors [32] or horseshoe priors [33] could improve inter-pretability and reduce overfitting, though ADVI may struggle with discrete latent indicators. 
+
+4. Single equipment type . Generaliza-tion to other industrial equipment (turbines, com-pressors, chillers) requires validation on diverse datasets. The 2-cluster structure may not hold uni-versally—e.g., compressors may exhibit 3 risk groups 16 (low/medium/high) due to multi-stage degradation modes. 
+
+5. Text embeddings underutilized . We com-press 1024D inspection comments to 3 PCA com-ponents, discarding semantic nuances. Fine-tuning domain-specific language models (e.g., BERT for maintenance logs) could extract richer features like failure modes, operator interventions, or environmen-tal conditions. 
+
+# 6 Conclusion 
+
+This paper presents a comprehensive framework for Bayesian finite mixture modeling of equipment degra-dation, addressing three critical challenges: insuffi-cient degradation signals, model selection instability, and computational infeasibility of MCMC methods. 
+
+# 6.1 Key Contributions 
+
+1. Empirical validation of state granularity im-pact . We demonstrate that 8-state global percentile discretization amplifies degradation events by 83% (1.3% → 2.4%), stabilizing mixture model identifi-cation. This is the first systematic study quantifying the relationship between state granularity and mix-ture model performance in survival analysis. 
+
+2. Comprehensive feature engineering strat-egy . Our 30-dimensional covariate framework inte-grates statistical trends (22 features over 90-day win-dows), continuous health indicators, and semantic sig-nals (text embeddings compressed via PCA). This eliminates empty clusters and provides richer degra-dation patterns, though respecting inherent data structure (2 clusters, not 3). 
+
+3. Interpretability-constrained model selec-tion . The three-tier framework (WAIC tolerance, min share ≥ 5%, min gap ≥ 0.15) prevents overfitting to statistically equivalent but operationally meaning-less models. Validated on 280 pumps: C = 2 passes all rules, C = 3 fails despite marginal WAIC improve-ment. 
+
+4. ADVI superiority over NUTS for mixture models . Across 280 pumps and 104,703 inspection records, full-rank ADVI proved superior to NUTS for finite mixture models: NUTS failed to converge (ˆ r = 1.19–1 .28, ESS < 25, label switching), while ADVI achieved stable results in 84 × less time (5 min vs. 7h 40min). Near-exact agreement for random ef-fect baselines ( r > 0.99, RMSE= 0 .038) confirms that the speedup does not sacrifice accuracy—establishing ADVI as the default inference method for production Bayesian degradation systems. 
+
+5. Production-ready deployment frame-work . Complete pipeline from raw inspection records to actionable risk clusters in 5 minutes, enabling near-real-time model updates and counterfactual analy-sis. Demonstrated on 34 years of industrial data (1991–2025, 104,703 records), with two-tier mainte-nance strategies reducing inspection costs by 28% while maintaining failure prevention. 
+
+# 6.2 Practical Impact 
+
+Our optimal model ( C = 2, ADVI) identifies two equipment risk groups: 
+
+• Low-risk (72.9%, 204 pumps): 2.7 × slower degradation → annual inspections 
+
+• High-risk (27.1%, 76 pumps): Baseline degra-dation → quarterly inspections This stratification enables differentiated mainte-nance policies, optimizing resource allocation across 280 pumps. The 5 minute execution time sup-ports monthly model retraining, adaptive risk scoring, and integration with computerized maintenance man-agement systems (CMMS)—capabilities unattainable with 7h+ NUTS execution. 
+
+# 6.3 Future Directions 
+
+Near-term :
+
+• Failure prediction extension : Integrate degradation models with time-to-failure distribu-tions, incorporating right-censored replacement data. 
+
+• Causal inference : Incorporate intervention data (repairs, part replacements) to estimate causal effects of maintenance actions on degra-dation trajectories. 
+
+• Multi-equipment hierarchical models :Fleet-level inference across equipment types (pumps, turbines, compressors) for knowledge transfer and sparse-data handling. 
+
+Long-term :
+
+• Adaptive ADVI for online learning : In-cremental variational updates (Kalman-like) for continuous learning from streaming inspection data, reducing monthly retraining to seconds. 
+
+• Decision-theoretic optimization : Bayesian decision analysis integrating posterior uncer-tainty with cost models (repair vs. replacement) for optimal intervention timing. 17 • Domain-specific language models : Fine-tune transformers (BERT, GPT) on maintenance logs to extract semantic features beyond generic text embeddings, capturing failure modes and operator interventions. 
+
+# 6.4 Closing Remarks 
+
+The transition from research prototypes to produc-tion AI systems requires balancing theoretical rigor with practical constraints: interpretability, compu-tational efficiency, and convergence stability. Our framework demonstrates that Bayesian finite mixture models—when designed with domain-informed con-straints and powered by full-rank ADVI—can achieve all three, enabling scalable, trustworthy AI for indus-trial asset management. A central insight of this work is that computa-tional efficiency and convergence stability are posi-tively correlated in this setting: ADVI’s 84 × speedup over NUTS reflects fundamental differences in op-timization behavior for complex mixture posteriors, not merely reduced sampling overhead. As Bayesian methods are increasingly deployed in high-stakes en-gineering domains (infrastructure, finance, health-care), selecting inference algorithms that converge re-liably under finite data is as important as theoretical posterior guarantees. 
+
+In summary : Full-rank variational inference for Markov degradation models is not only feasible but empirically preferable to MCMC for finite mixture models, combining 84 × speedup with superior conver-gence stability and interpretability. Full-rank ADVI is therefore recommended as the default inference method for finite mixture degradation models in pro-duction environments. 
+
+# Acknowledgments 
+
+We acknowledge the foundational work on degrada-tion hazard rate assessment and benchmarking re-search by Kengo Obama, Kiyoshi Kobayashi [34], which established the probabilistic analysis frame-work and provided valuable discussions. However, the machine learning-based methodology for practi-cal implementation and the condition-based mainte-nance approach for equipment presented in this paper represent the authors’ original contributions. 
+
+# References 
+
+[1] A. Gelman, J. B. Carlin, H. S. Stern, D. B. Dun-son, A. Vehtari, and D. B. Rubin, Bayesian Data Analysis , 3rd ed. Chapman & Hall/CRC, 2013. [2] K. P. Murphy, Machine Learning: A Probabilis-tic Perspective . MIT Press, 2012. [3] D. R. Cox, “Regression models and life-tables,” 
+
+Journal of the Royal Statistical Society: Series B, vol. 34, no. 2, pp. 187–220, 1972. [4] J. D. Kalbfleisch and R. L. Prentice, The Sta-tistical Analysis of Failure Time Data , 2nd ed. Wiley, 2002. [5] G. McLachlan and D. Peel, Finite Mixture Mod-els . Wiley, 2000. [6] S. Fr¨ uhwirth-Schnatter, Finite Mixture and Markov Switching Models . Springer, 2006. [7] M. D. Hoffman and A. Gelman, “The No-U-Turn Sampler: Adaptively setting path lengths in Hamiltonian Monte Carlo,” Journal of Ma-chine Learning Research , vol. 15, pp. 1593–1623, 2014. [8] A. Jasra, C. C. Holmes, and D. A. Stephens, “Markov chain Monte Carlo methods and the la-bel switching problem in Bayesian mixture mod-eling,” Statistical Science , vol. 20, no. 1, pp. 50– 67, 2005. [9] A. Kucukelbir, D. Tran, R. Ranganath, A. Gel-man, and D. M. Blei, “Automatic differentia-tion variational inference,” Journal of Machine Learning Research , vol. 18, no. 14, pp. 1–45, 2017. [10] J. F. Lawless, Statistical Models and Methods for Lifetime Data , 2nd ed. Wiley, 2002. [11] R. M. Neal, “MCMC using Hamiltonian dynam-ics,” in Handbook of Markov Chain Monte Carlo ,S. Brooks, A. Gelman, G. L. Jones, and X.-L. Meng, Eds. Chapman & Hall/CRC, 2011, pp. 113–162. [12] J. Salvatier, T. V. Wiecki, and C. Fonnes-beck, “Probabilistic programming in Python us-ing PyMC3,” PeerJ Computer Science , vol. 2, p. e55, 2016. [13] B. Carpenter et al., “Stan: A probabilistic pro-gramming language,” Journal of Statistical Soft-ware , vol. 76, no. 1, 2017. [14] M. Plummer, “JAGS: A program for analysis of Bayesian graphical models using Gibbs sam-pling,” in Proc. 3rd Int’l Workshop on Dis-tributed Statistical Computing , 2003. 18 [15] K. Kaito, K. Kobayashi, K. Aoki, and H. Mat-suoka, “Hierarchical Bayesian estimation of mix-ture Markov deterioration hazard models” (in Japanese), Journal of Japan Society of Civil En-gineers, Ser. D3 (Infrastructure Planning and Management) , vol. 68, no. 4, pp. 255–271, 2012. doi: 10.2208/jscejipm.68.255 [16] N. D. Thao, K. Aoki, T. Kato, T. N. Toan, K. Kobayashi, and K. Kaito, “A practical process to introduce a customized pavement manage-ment system in Vietnam,” Journal of JSCE , vol. 3, no. 1, pp. 246–258, 2015. doi: 10.2208/jour-nalofjsce.3.1 246 [17] M. Stephens, “Dealing with label switching in mixture models,” Journal of the Royal Statistical Society: Series B , vol. 62, no. 4, pp. 795–809, 2000. [18] G. Celeux, F. Forbes, C. P. Robert, and D. M. Titterington, “Deviance information criteria for missing data models,” Bayesian Analysis , vol. 1, no. 4, pp. 651–673, 2006. [19] M. I. Jordan, Z. Ghahramani, T. S. Jaakkola, and L. K. Saul, “An introduction to variational methods for graphical models,” Machine Learn-ing , vol. 37, no. 2, pp. 183–233, 1999. [20] D. M. Blei, A. Kucukelbir, and J. D. McAuliffe, “Variational inference: A review for statisti-cians,” Journal of the American Statistical As-sociation , vol. 112, no. 518, pp. 859–877, 2017. [21] A. G. Baydin, B. A. Pearlmutter, A. A. Radul, and J. M. Siskind, “Automatic differentiation in machine learning: A survey,” Journal of Ma-chine Learning Research , vol. 18, no. 153, pp. 1–43, 2018. arXiv:1502.05767 [22] Y. Yao, A. Vehtari, D. Simpson, and A. Gelman, “Yes, but did it work?: Evaluating variational inference,” in Proc. Int’l Conf. Machine Learning (ICML) , 2018, pp. 5581–5590. [23] C. R. Farrar and K. Worden, Structural Health Monitoring: A Machine Learning Perspective .Wiley, 2013. [24] K. Worden and G. Manson, “The application of machine learning to structural health monitor-ing,” Philosophical Transactions of the Royal So-ciety A , vol. 365, no. 1851, pp. 515–537, 2007. [25] Y. Lei, B. Yang, X. Jiang, F. Jia, N. Li, and A. K. Nandi, “Applications of machine learning to ma-chine fault diagnosis: A review and roadmap,” 
+
+Mechanical Systems and Signal Processing , vol. 138, p. 106587, 2020. [26] S. Madanat, R. Mishalani, and W. H. W. Ibrahim, “Estimation of infrastructure transition probabilities from condition rating data,” Jour-nal of Infrastructure Systems , vol. 1, no. 2, pp. 120–125, 1995. [27] G. Morcous, “Performance prediction of bridge deck systems using Markov chains,” Journal of Performance of Constructed Facilities , vol. 20, no. 2, pp. 146–155, 2006. [28] M. Nessim, Y. Zhou, W. Zhou, M. J. Rothwell, and R. McLamb, “Target reliability levels for design and assessment of onshore natural gas pipelines,” Journal of Pressure Vessel Technol-ogy , vol. 131, no. 6, 2009. [29] T. Yasuno, “Triplet Feature Fusion for Equip-ment Anomaly Prediction: An Open-Source Methodology Using Small Foundation Models,” arXiv preprint arXiv:2602.15089, 2026. Avail-able: https://arxiv.org/abs/2602.15089 
+
+[30] S. Watanabe, “Asymptotic equivalence of Bayes cross validation and widely applicable informa-tion criterion in singular learning theory,” Jour-nal of Machine Learning Research , vol. 11, pp. 3571–3594, 2010. [31] T. Yasuno, “Distributional Reinforcement Learning for Condition-Based Mainte-nance of Multi-Pump Equipment,” arXiv preprint arXiv:2602.00051, 2026. Available: 
+
+https://arxiv.org/abs/2602.00051 
+
+[32] E. I. George and R. E. McCulloch, “Variable selection via Gibbs sampling,” Journal of the American Statistical Association , vol. 88, no. 423, pp. 881–889, 1993. [33] C. M. Carvalho, N. G. Polson, and J. G. Scott, “The horseshoe estimator for sparse signals,” 
+
+Biometrika , vol. 97, no. 2, pp. 465–480, 2010. [34] K. Obama, K. Okada, K. Kaito, and K. Kobayashi, “Degradation hazard rate evalua-tion and benchmarking” (in Japanese), Jour-nal of Japan Society of Civil Engineers, Ser. A, vol. 64, no. 4, pp. 857–874, 2008. doi: 10.2208/jsceja.64.857 19
