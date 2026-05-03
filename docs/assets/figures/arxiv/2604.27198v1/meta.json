@@ -1,0 +1,30 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.27198v1/fig-001.webp",
+      "caption": "Figure 3: Estimated dementia-free survival functions by baseline amyloid status in the Overall cohort and in the baseline CN and MCI subgroups. Within each panel, solid lines denote posterior mean survival curves from the EDPMM, and shaded ribbons denote the corresponding 99% credible intervals. Dashed step functions denote the unadjusted Kaplan–Meier estimators for the same amyloid group. Comparisons across panels illustrate heterogeneity in dementia-free survival patterns across the Overall, CN, and MCI populations, while comparisons between the EDPMMbased curves and the Kaplan–Meier curves highlight differences between model-based adjusted estimation and the empirical unadjusted survival experience.",
+      "page": 21,
+      "index": 1,
+      "width": 950,
+      "height": 335
+    },
+    {
+      "url": "assets/figures/arxiv/2604.27198v1/fig-002.webp",
+      "caption": "Table 2: Posterior summaries of the OSQC at landmark time ν and quantile level ρ under the primary analysis. Results are shown for the Overall cohort and for the baseline MCI and CN subgroups. For each subgroup and each quantile level ρ P t0.1, 0.2, 0.3u, the table reports the posterior mean OSQC estimate together with the lower and upper endpoints of the 99% credible interval (0.5% and 99.5% posterior quantiles) at landmark times ν P t0, 5, 10u.",
+      "page": 22,
+      "index": 2,
+      "width": 850,
+      "height": 271
+    },
+    {
+      "url": "assets/figures/arxiv/2604.27198v1/fig-003.webp",
+      "caption": "Table 1: Simulation results for the proposed EDPMM and the standard DPMM in estimating the overall survivor quantile causal contrast at landmark time ν and quantile level ρ. Results are shown for two sample sizes (N “ 500 and N “ 1500) and four censoring scenarios with approximately 20%, 40%, 60%, and 80% right-censoring. For each setting, the table reports the true value of the target estimand together with the empirical bias, RMSE, and empirical CP (expressed as a percentage) of the 95% credible interval over repeated simulation replicates.",
+      "page": 17,
+      "index": 3,
+      "width": 972,
+      "height": 751
+    }
+  ]
+}

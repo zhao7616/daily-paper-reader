@@ -1,0 +1,413 @@
+Title: Remaining Useful Life Estimation for Turbofan Engines: A Comparative Study of Classical, CNN, and LSTM Approaches
+
+URL Source: https://arxiv.org/pdf/2604.27234v1
+
+Published Time: Fri, 01 May 2026 00:16:08 GMT
+
+Number of Pages: 7
+
+Markdown Content:
+# Remaining Useful Life Estimation for Turbofan Engines: A Comparative Study of Classical, CNN, and LSTM Approaches 
+
+Galchar Samarthkumar, Goel Astitva, Kanu Sumit 
+
+Khoury College of Computer Science, Northeastern University galchar.sa@northeastern.edu, goel.ast@northeastern.edu, kanu.s@northeastern.edu 
+
+Abstract —Remaining Useful Life (RUL) estimation is a critical component of Prognostics and Health Management (PHM), enabling proactive maintenance scheduling and reducing un-planned failures in industrial equipment. This paper presents a comparative study of machine learning approaches for RUL estimation on the NASA C-MAPSS turbofan engine dataset: classical baselines (Ridge Regression, Polynomial Ridge, and XGBoost), a 1D Convolutional Neural Network (CNN), and a Long Short-Term Memory (LSTM) network. All models are evaluated on the FD001 and FD003 subsets under an identical preprocessing pipeline to ensure a fair comparison. Among raw-sequence models, the LSTM achieves RMSE of 14.93 and 14.20 on FD001 and FD003 respectively, outperforming the deep LSTM reported by Zheng et al. [1] (RMSE 16.14 and 16.18) despite using a simpler single-layer architecture. The 1D CNN achieves RMSE of 16.97 on FD001 and 15.68 on FD003, demonstrating competitive performance on FD003 while producing more conser-vative RUL predictions on FD001. Ridge Regression is evaluated on raw and engineered features, while other classical models use only engineered inputs. XGBoost achieves an RMSE of 13.36 on FD003, highlighting the competitiveness of nonlinear modeling. 
+
+I. I NTRODUCTION 
+
+Predictive maintenance has emerged as a key strategy in modern industrial operations, moving away from costly sched-uled maintenance toward condition-based interventions. At its core lies the problem of RUL estimation: predicting how many operational cycles remain before a component fails. Accurate RUL estimation allows engineers to schedule maintenance in advance, reducing unnecessary downtime and preventing catastrophic failures. In high-stakes domains such as aviation, power generation, and mining, inaccurate RUL predictions can have severe safety and economic consequences. Data-driven approaches to RUL estimation have been preva-lent due to the widespread availability of sensor data from industrial equipment. These approaches learn degradation pat-terns directly from historical run-to-failure data, without re-quiring explicit physical failure models. The NASA C-MAPSS dataset [2] is one of the most widely used benchmarks for evaluating such methods, providing multivariate time-series sensor data from simulated turbofan engines under various operating and fault conditions. This work compares multiple machine learning paradigms for RUL estimation under a strictly controlled experimental setup. For classical models, we evaluate Ridge Regression 
+
+on both raw flattened sliding-window inputs and engineered statistical features, while Polynomial Ridge Regression and XGBoost are applied to the engineered features. On the deep learning side, we evaluate a 1D CNN that treats windowed sensor data as a spatial signal, and an LSTM network that explicitly models temporal dependencies across the full sensor sequence. The deep learning models are evaluated on raw sensor sequences for a fair architectural comparison, while classical models are evaluated on both raw flattened windows and engineered statistical features, with the latter serving as a strong baseline for achievable performance on this dataset. II. B ACKGROUND 
+
+RUL estimation methods fall into two broad categories: model-based and data-driven. Model-based approaches con-struct physical degradation models and are useful when failure data is scarce, but require deep domain expertise and are difficult to generalize. Data-driven methods learn from his-torical sensor observations and are more scalable in data-rich environments. Early data-driven approaches used sliding window features fed into shallow methods such as Support Vector Regression (SVR) and Multi-Layer Perceptrons (MLP) [1]. These methods represent the sensor sequence as a fixed-size feature vector, discarding temporal ordering. Hidden Markov Models (HMMs) were among the first sequence learning approaches applied to prognostics [1], but their discrete state space and Markov assumption limit capac-ity for complex, long-range dependencies. Recurrent Neural Networks (RNNs) can model sequences but suffer from the vanishing gradient problem [4], which prevents effective learn-ing over long horizons. Long Short-Term Memory networks, introduced by Hochre-iter and Schmidhuber [3], address this through a gating mechanism comprising input, forget, and output gates that selectively retain and discard information over time. Zheng et al. [1] demonstrated that a deep LSTM outperforms CNN and shallow methods on C-MAPSS, particularly on the NASA scoring function which penalizes overestimating RUL more than underestimating it. 1D CNNs have also been applied to RUL estimation by treating windowed sequences as spatial signals [5]. They are computationally efficient and effective at capturing local temporal patterns, but lack an explicit memory mechanism for long-range sequence dependencies. III. A PPROACH 
+
+A. Dataset 
+
+We use the NASA C-MAPSS dataset [2], specifically the FD001 and FD003 subsets. Each time step contains readings              
+
+> arXiv:2604.27234v1 [cs.LG] 29 Apr 2026 TABLE I C-MAPSS Dataset Characteristics
+> Subset Train Test Op. Cond. Fault Cond.
+> FD001 100 100 11FD003 100 100 12
+
+from 21 sensors and 3 operational settings. Table I summarizes the characteristics of both subsets. 
+
+B. Preprocessing 
+
+All models share an identical preprocessing pipeline. 
+
+RUL Target Function: Through EDA, we observed that engines exhibit a stable healthy phase before meaningful degradation begins. Based on this, we apply a piece-wise linear RUL target capped at 130 cycles. Early healthy cycles are assigned a constant RUL of 130, preventing the model from learning spurious degradation signals during stable operation. 
+
+Sensor Selection: Sensors with near-zero variance carry no degradation signal. We remove s1, s5, s10, s16, s18, s19 for both subsets, and additionally s6 for FD001 only, yielding 14 sensors for FD001 and 15 for FD003. This decision is grounded in EDA: the dropped sensors exhibit constant or near-constant readings across all engine lifecycles, while s6 is retained for FD003 where it shows a correlation of −0.215 with RUL and nonlinear spread near failure due to the multiple fault conditions. 
+
+Normalization: All sensor readings are z-score normalized. The scaler is fit on training data only to prevent leakage into validation and test sets. 
+
+Train/Validation Split: Engines are split 80/20 by engine ID to ensure the model is evaluated on entirely unseen degradation trajectories. 
+
+Sliding Window: A sliding window of 30 cycles with stride 1 generates training sequences, each labeled with the RUL at the final time step. For test data, the last 30 cycles of each engine are used, with zero-padding for engines shorter than 30 cycles. 
+
+C. Linear and Tree-Based Baselines 
+
+The Ridge Regression baseline is evaluated using two input representations. In the raw setting, each 30-cycle window is flattened into a vector and fed directly to the model. In the feature-engineering setting, five features are extracted per sensor from each window: mean, standard deviation, last observed value, delta (last minus first), and linear slope. This yields 70 features per window for FD001 and 75 for FD003. These are fed into a Ridge model with L2 regularization. While the engineered representation is unable to accommodate temporal ordering, the slope and delta features compensate by encoding degradation direction. Polynomial Ridge expands the engineered feature vector with degree-2 interaction and squared terms, capturing nonlinear relationships between sen-sor statistics. XGBoost uses gradient-boosted decision trees on the same engineered features, capturing complex nonlinear interactions without requiring polynomial expansion. 
+
+Algorithm 1 Ridge Regression for RUL Estimation 
+
+Require: C-MAPSS dataset D, mode ∈ { raw , engineered }
+
+Ensure: Predicted RUL ˆy per test engine  
+
+> 1:
+
+for each training engine e in D do  
+
+> 2:
+
+Compute per-cycle RUL labels, clip at MAX RUL =130  
+
+> 3:
+
+for each window W of size 30 do  
+
+> 4:
+
+if mode = engineered then  
+
+> 5:
+
+F ← [mean , std , last , delta , slope ] per sensor  
+
+> 6:
+
+else  
+
+> 7:
+
+F ← flatten (W ) 
+
+> 8:
+
+end if  
+
+> 9:
+
+Append (F, RUL at last step ) to training set  
+
+> 10:
+
+end for  
+
+> 11:
+
+end for  
+
+> 12:
+
+Normalize F using z-score normalization (fit on train only)  
+
+> 13:
+
+Train Ridge: ˆy = F w + b with L2 penalty ( α = 1 .0) 
+
+> 14:
+
+For test: extract last window per engine, apply same transformation, predict ˆy
+
+Algorithm 2 Polynomial Ridge Regression for RUL Estima-tion 
+
+Require: C-MAPSS dataset D
+
+Ensure: Predicted RUL ˆy per test engine  
+
+> 1:
+
+Extract engineered features F as in Algorithm 1 (mode = engineered)  
+
+> 2:
+
+Normalize F using z-score normalization (fit on train only)  
+
+> 3:
+
+Fpoly ← PolynomialFeatures (F, degree = 2)  
+
+> 4:
+
+Train Ridge: ˆy = Fpoly w + b with L2 penalty ( α = 1 .0) 
+
+> 5:
+
+For test: extract last window per engine, apply same transformations, predict ˆy
+
+Algorithm 3 XGBoost for RUL Estimation 
+
+Require: C-MAPSS dataset D
+
+Ensure: Predicted RUL ˆy per test engine  
+
+> 1:
+
+Extract engineered features F as in Algorithm 1 (mode = engineered)  
+
+> 2:
+
+Train XGBoost regressor:  
+
+> 3:
+
+n estimators = 500 , max depth = 6,
+
+learning rate = 0 .05  
+
+> 4:
+
+subsample = 0 .8, colsample bytree = 0 .8 
+
+> 5:
+
+Early stopping on validation set (patience = 20 ) 
+
+> 6:
+
+For test: extract last window per engine and predict ˆy
+
+D. 1D Convolutional Neural Network 
+
+The CNN treats each windowed sensor sequence as a 1D signal with sensors as channels. Three convolutional layers with kernel size 3 and same padding extract local temporal features across the 30-cycle window, progressively increasing filter depth from n to 32 to 64. Dropout ( p = 0 .3) is applied after the first two convolutional layers for regularization. The resulting feature maps are flattened and passed through a two-layer fully connected block mapping to a scalar RUL prediction with a linear output activation, appropriate for unconstrained regression. The architecture was validated through an ablation study comparing a deeper four-layer variant with varying kernel sizes (3, 5, 7, 3) and BatchNorm. The deeper model underperformed on both datasets, confirming that with only 100 training engines, regularization is more beneficial than increased model capacity. 
+
+Algorithm 4 1D CNN for RUL Estimation 
+
+Require: C-MAPSS sensor dataset D
+
+Ensure: Predicted RUL ˆy per test engine  
+
+> 1:
+
+for each engine e in D do  
+
+> 2:
+
+Compute RUL labels, clip at MAX RUL = 130  
+
+> 3:
+
+for each sliding window W of size 30 do  
+
+> 4:
+
+X ← W ⊤ ▷ transpose to (sensors, window)  
+
+> 5:
+
+Append (X, RUL at last step ) to training set  
+
+> 6:
+
+end for  
+
+> 7:
+
+end for  
+
+> 8:
+
+Normalize sensors using z-score (fit on train only)  
+
+> 9:
+
+for each training batch (Xb, y b) do  
+
+> 10:
+
+F ← Conv1D (n → 32) → ReLU → Dropout (0 .3)  
+
+> 11:
+
+F ← Conv1D (32 → 64) → ReLU → Dropout (0 .3)  
+
+> 12:
+
+F ← Conv1D (64 → 64) → ReLU  
+
+> 13:
+
+ˆyb ← Flatten → Linear (64 ×30 → 128) → ReLU →
+
+Dropout (0 .3) → Linear (128 → 1)  
+
+> 14:
+
+Update weights: L = MSE (ˆ yb, y b) 
+
+> 15:
+
+end for  
+
+> 16:
+
+For test: extract last window per engine, predict ˆy
+
+E. LSTM 
+
+The LSTM processes each sensor sequence in temporal order. The final architecture was determined through an abla-tion study on layer depth and regularization, yielding a single LSTM layer followed by a three-layer fully connected block. Only the hidden state at the final time step hT is passed to the 
+
+Algorithm 5 LSTM for RUL Estimation 
+
+Require: C-MAPSS sensor dataset D
+
+Ensure: Predicted RUL ˆy per test engine  
+
+> 1:
+
+for each engine e in D do  
+
+> 2:
+
+Compute RUL labels, clip at MAX RUL = 130  
+
+> 3:
+
+for each sliding window W of size 30 do  
+
+> 4:
+
+Append (W, RUL at last step ) to training set  
+
+> 5:
+
+end for  
+
+> 6:
+
+end for  
+
+> 7:
+
+Normalize sensors using z-score (fit on train only)  
+
+> 8:
+
+for each training batch (Xb, y b) do  
+
+> 9:
+
+h1, . . . , h T ← LSTM (n → 32 , X b) 
+
+> 10:
+
+hT ← Dropout (0 .5, h T ) 
+
+> 11:
+
+ˆyb ← Linear (32 → 8) → ReLU → Linear (8 → 8) →
+
+ReLU → Linear (8 → 1)  
+
+> 12:
+
+Update weights: L = MSE (ˆ yb, y b) 
+
+> 13:
+
+end for  
+
+> 14:
+
+For test: pad/trim to last 30 cycles per engine, predict ˆy
+
+fully connected block, as it encodes the full sequence history. 
+
+F. Training Protocol 
+
+The CNN and LSTM are trained under identical conditions. Both models use RMSprop with a learning rate of 0.001 and weight decay of 10 −5, optimizing MSE loss with a batch size of 64. A ReduceLROnPlateau scheduler (factor 0.5, patience 5) reduces the learning rate when validation loss plateaus, and training is stopped early if validation loss does not improve for 20 consecutive epochs (max 200 epochs). For classical models, Ridge and Polynomial Ridge are trained using L2
+
+regularization with α = 1 .0. XGBoost is trained using early stopping on the validation set, with a maximum of 500 trees and a patience of 20 rounds. All experiments use random seed 42 for reproducibility. 
+
+G. Evaluation Metrics 
+
+We evaluate all models on four metrics. RMSE and MAE 
+
+measure prediction error magnitude. R2 measures variance explained by the model. The NASA Scoring Function [1] applies an asymmetric penalty, more heavily penalizing overestimation of RUL since late maintenance predictions risk equipment failure: 
+
+S =
+
+> n
+
+X
+
+> i=1
+
+(
+
+e−hi/13 − 1 hi < 0
+
+ehi/10 − 1 hi ≥ 0 , hi = ˆ yi − yi (1) Lower values indicate better performance for all metrics. IV. R ESULTS 
+
+Table III presents test set results for all models on FD001 and FD003. For completeness, Table II reports additional linear model variants using engineered features on FD003.                  
+
+> TABLE II Extended Linear Model Results on FD003 (Engineered Features)
+> Model RMSE MAE R2NASA
+> Ridge 17.494 14.398 0.809 531.1 Polynomial Ridge 16.604 12.876 0.828 630.9 XGBoost 13.355 9.604 0.889 396.7
+
+A. Training Curves 
+
+Figure 1 shows the training and validation loss curves for the LSTM on both datasets. The LR scheduler reduces the learning rate when validation loss plateaus, enabling continued improvement before early stopping triggers. Figure 2 shows the corresponding curves for the CNN. Both datasets exhibit high initial validation loss followed by rapid convergence, with the characteristic spikes typical of RMSprop optimization on small datasets. The CNN converges within approximately 30 epochs on both subsets, with early stopping restoring the best validation checkpoint. TABLE III Test Results on FD001 and FD003                                                 
+
+> FD001 FD003 Model Type RMSE MAE R2NASA RMSE MAE R2NASA
+> Raw Ridge Regression Linear 16.634 13.570 0.833 469.7 17.981 15.160 0.799 622.5 1D CNN Deep CNN 16.971 12.868 0.826 365.0 15.678 11.299 0.847 647.6 LSTM Deep LSTM 14.931 11.732 0.865 410.97 14.204 10.612 0.874 409.1
+> Zheng et al. [1] Deep LSTM 16.14 ——338 16.18 ——852
+> Fig. 1 LSTM training and validation MSE loss over epochs for FD001 (left) and FD003 (right).
+> Fig. 2 CNN training and validation MSE loss over epochs for FD001 (left) and FD003 (right). High initial validation spikes stabilize rapidly as the convolutional filters adapt to sensor degradation patterns.
+
+B. Predicted vs. True RUL 
+
+Figure 3 shows predicted versus true RUL on the test sets for the LSTM. Figure 4 shows the corresponding plots for the CNN. On FD001, the CNN predictions track the actual RUL closely across most engines, with the primary errors concentrated at sharp peaks where the model slightly underestimates high RUL values. On FD003, the tracking remains strong but with greater spread, consistent with the heterogeneous degradation patterns introduced by two fault modes. Figures 5 and 6 show predicted versus true RUL for the classical models. Raw Ridge exhibits higher variance and weaker alignment, while XGBoost achieves the closest track-ing overall, particularly in mid-to-late degradation stages, with some deviations at extreme values. 
+
+C. Scatter Analysis 
+
+Although scatter plots are omitted for brevity, general trends are consistent across models and datasets. Prediction variance is higher at early life stages (high RUL values) and decreases as the engine approaches failure. This behavior reflects the increasing strength of degradation signals near end-of-life. Also, occasional late-prediction outliers, where RUL is overes-timated near failure, can disproportionately inflate the NASA score, as it applies an exponential penalty to such optimistic errors, even when most predictions remain accurate. 
+
+D. Temporal Learning Analysis 
+
+To verify that the LSTM is genuinely learning temporal degradation patterns rather than relying solely on the most recent sensor readings, we conduct two analyses: hidden state visualization and sequence length sensitivity. Figure 7 shows the hidden state activations of all 32 units across 150 consecutive windows for a single engine. On FD001, several units show clear directional transitions from healthy to degraded states as the engine approaches failure. On FD003, units display more complex and varied activation patterns, consistent with its two fault conditions. Table IV shows RMSE as input sequences are progressively shortened at test time. Both datasets show increasing RMSE as historical steps are removed, with FD003 degrading far more steeply — removing just 5 steps increases RMSE by 48% (14.20 to 21.06). Fig. 3 Predicted versus true RUL for the LSTM on the FD001 (left) and FD003 (right) test sets.               
+
+> Fig. 4 Predicted versus true RUL for the CNN on the FD001 (left) and FD003 (right) test sets.
+> Fig. 5 Predicted versus true RUL for Raw Ridge model on the FD001 (left) and FD003 (right) test sets.
+> Fig. 6 Predicted versus true RUL for XGBoost on the FD001 (left) and FD003 (right) test sets.
+> TABLE IV Effect of Sequence Length on LSTM Test RMSE
+> Steps Removed FD001 RMSE FD003 RMSE
+> 014.931 14.204 515.978 21.060 10 18.822 26.779 15 20.059 27.372
+
+V. D ISCUSSION 
+
+A. Overall Comparison 
+
+All models achieve meaningful RUL prediction on both datasets. The LSTM achieves the best RMSE and R 2 on both FD001 and FD003, demonstrating the advantage of modeling temporal dependencies. The CNN achieves the lowest NASA score on FD001 (365 vs. 411 for LSTM), indicating more conservative predictions on the simpler single-fault dataset. Among models using engineered features, Ridge Regression provides a reasonable baseline, while XGBoost achieves the strongest performance, particularly on FD003. 
+
+B. Model Analysis 
+
+Ridge Regression benefits from slope and delta features that explicitly encode sensor degradation direction. However, its linear nature limits its performance on FD003, where multi-ple fault conditions produce heterogeneous sensor trajectories, reflected in its higher RMSE (17.98) compared to the CNN (15.68) and LSTM (14.20). Within the feature engineering approach, XGBoost (RMSE 13.36, NASA 396.7 on FD003) achieves the strongest performance, outperforming the CNN and approaching LSTM results. This highlights that nonlinear Fig. 7 LSTM hidden state evolution for a single engine trajectory on FD001 (left) and FD003 (right). FD001 units show clear directional transitions toward failure while FD003 units exhibit more varied patterns reflecting its two fault conditions. 
+
+models on engineered features can effectively capture complex degradation patterns. The LSTM’s advantage is that it achieves strong performance without requiring any hand-crafted fea-tures. 
+
+1D CNN efficiently captures local temporal patterns through convolution and achieves the lowest NASA score on FD001 (365), outperforming both Ridge Regression (469) and LSTM (411). This indicates that the CNN’s local feature extraction produces more conservative and safety-aligned predictions on the single-fault FD001 dataset, where degradation patterns are consistent across engines. On FD003 however, the CNN’s NASA score (648) is considerably worse than the LSTM (409) and even Ridge Regression (622). The scatter plot analysis reveals that a small number of late predictions on engines with atypical degradation trajectories, driven by the second fault mode, disproportionately inflate the asymmetric NASA score. This confirms that local convolutional feature extraction, while sufficient for uniform single-fault degradation, is insufficient for capturing the varied long-range dependencies introduced by multiple fault modes. 
+
+LSTM leverages its gating mechanism to retain relevant degradation history across the full sequence. It achieves the best RMSE on both datasets and the best NASA score on FD003, producing safer and more consistent predictions where degradation patterns are more varied. The sequence length sen-sitivity analysis further confirms that the LSTM’s advantage on FD003 is specifically tied to its ability to integrate long-range temporal context; removing just 5 historical steps degrades FD003 RMSE by 48%, far more than the 7% degradation seen on FD001. 
+
+C. Comparison with Prior Work 
+
+Our LSTM outperforms Zheng et al. [1] on both FD001 (RMSE 14.93 vs. 16.14) and FD003 (RMSE 14.20 vs. 16.18) using a simpler single-layer architecture. Two factors drive this improvement: the addition of a learning rate scheduler absent in the original paper, and an architectural search that identi-fied a single LSTM layer as sufficient for single-operating-condition datasets. 
+
+D. Asymmetric Cost of Errors 
+
+The NASA score reveals important nuances beyond RMSE. On FD001, the CNN achieves the lowest score (365), indi-cating more conservative predictions than the LSTM (411) and Ridge Regression (469). This is a practically significant finding. In safety-critical applications, the CNN may be prefer-able on simple single-fault datasets where its local pattern extraction aligns well with consistent degradation signatures. On FD003, the LSTM score (409) is substantially better than the CNN (648) and Ridge Regression (619), demonstrating that temporal memory becomes critical when degradation patterns are heterogeneous. In such cases, the LSTM’s ability to track gradual state transitions across the full sequence prevents the late predictions that disproportionately inflate the asymmetric NASA score. 
+
+E. Limitations and Future Work 
+
+This study covers FD001 and FD003, both with a single operating condition. The FD002 and FD004 subsets introduce six operating conditions, requiring regime normalization and likely benefiting deeper or hybrid architectures. Extending this comparison to FD002 and FD004 is the natural next step. Hybrid CNN-LSTM architectures [1] and Transformer-based models also represent promising future directions. For the CNN specifically, per-regime normalization on FD003 may reduce the regime-driven variance that currently inflates late predictions and the NASA score. VI. C ONCLUSION 
+
+We compared linear baselines (Ridge Regression, Polyno-mial Ridge, XGBoost), 1D CNN, and LSTM for turbofan engine RUL estimation on NASA C-MAPSS FD001 and FD003 under a fair and identical experimental pipeline. The LSTM achieves the best results among raw-sequence models (RMSE 14.93 on FD001, 14.20 on FD003), outperforming the deeper LSTM of Zheng et al. [1] with a simpler single-layer design and a learning rate scheduler. The 1D CNN achieves RMSE of 16.97 and 15.68 on FD001 and FD003 respectively, and notably produces the most conservative and safety-aligned predictions on FD001 with the lowest NASA score (365) among all models on that dataset. This finding highlights a key tradeoff: CNN local feature extraction is well-suited to uniform single-fault degradation but is outperformed by LSTM when multiple fault modes introduce long-range temporal dependencies. Notably, extended experiments with engineered features show that XGBoost (RMSE 13.36, NASA 396.7 on FD003) can match or exceed deep learning performance, in-dicating that feature engineering and deep sequence modeling are complementary rather than competing approaches. Hidden state analysis and sequence length experiments confirm that the LSTM genuinely leverages temporal context, with FD003 showing particularly strong sensitivity to sequence history. Fu-ture work should extend this comparison to FD002 and FD004, and investigate per-regime normalization as a preprocessing improvement for multi-condition subsets. ACKNOWLEDGEMENTS 
+
+We would like to thank Dr. Jerome J. Braun for his guidance and for providing us with the knowledge necessary to carry this project forward. REFERENCES [1] S. Zheng, K. Ristovski, A. Farahat, and C. Gupta, “Long Short-Term Memory Network for Remaining Useful Life Estimation,” in Proc. IEEE Int. Conf. Prognostics and Health Management (ICPHM) , 2017, pp. 88– 95. [2] A. Saxena and K. Goebel, “Turbofan Engine Degradation Simulation Data Set,” NASA Ames Research Center, Moffett Field, CA, USA, Tech. Rep., 2008. [3] S. Hochreiter and J. Schmidhuber, “Long Short-Term Memory,” Neural Computation , vol. 9, no. 8, pp. 1735–1780, 1997. [4] Y. Bengio, P. Simard, and P. Frasconi, “Learning Long-Term Dependen-cies with Gradient Descent is Difficult,” IEEE Trans. Neural Networks ,vol. 5, no. 2, pp. 157–166, 1994. [5] G. S. Babu, P. Zhao, and X.-L. Li, “Deep Convolutional Neural Network Based Regression Approach for Estimation of Remaining Useful Life,” in 
+
+Proc. Int. Conf. Database Systems for Advanced Applications , Springer, 2016, pp. 214–228.

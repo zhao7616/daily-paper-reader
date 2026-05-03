@@ -1,0 +1,477 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-05-03T20:00:09.364286+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 1,
+    "deep_cap": 6,
+    "deep_selected": 1,
+    "quick_candidates": 13,
+    "quick_skim_target": 11,
+    "quick_selected": 11
+  },
+  "deep_dive": [
+    {
+      "id": "2604.27234v1",
+      "source": "arxiv",
+      "title": "Remaining Useful Life Estimation for Turbofan Engines: A Comparative Study of Classical, CNN, and LSTM Approaches",
+      "abstract": "Remaining Useful Life (RUL) estimation is a critical component of Prognostics and Health Management (PHM), enabling proactive maintenance scheduling and reducing unplanned failures in industrial equipment. This paper presents a comparative study of machine learning approaches for RUL estimation on the NASA C-MAPSS turbofan engine dataset: classical baselines (Ridge Regression, Polynomial Ridge, and XGBoost), a 1D Convolutional Neural Network (CNN), and a Long Short-Term Memory (LSTM) network. All models are evaluated on the FD001 and FD003 subsets under an identical preprocessing pipeline to ensure a fair comparison. Among raw-sequence models, the LSTM achieves RMSE of 14.93 and 14.20 on FD001 and FD003 respectively, outperforming the deep LSTM reported by Zheng et al.~\\cite{paper} (RMSE 16.14 and 16.18) despite using a simpler single-layer architecture. The 1D CNN achieves RMSE of 16.97 on FD001 and 15.68 on FD003, demonstrating competitive performance on FD003 while producing more conservative RUL predictions on FD001. Ridge Regression is evaluated on raw and engineered features, while other classical models use only engineered inputs. XGBoost achieves an RMSE of 13.36 on FD003, highlighting the competitiveness of nonlinear modeling.",
+      "authors": [
+        "Astitva Goel",
+        "Samarth Galchar",
+        "Sumit Kanu"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-04-29T22:11:54+00:00",
+      "link": "https://arxiv.org/pdf/2604.27234v1",
+      "tags": [
+        "keyword:PHM",
+        "query:PHM"
+      ],
+      "llm_score": 10.0,
+      "llm_evidence_en": "Remaining Useful Life (RUL) estimation for turbofan engines using CNN and LSTM",
+      "llm_evidence_cn": "使用CNN和LSTM对涡扇发动机进行剩余寿命（RUL）估计",
+      "llm_evidence": "使用CNN和LSTM对涡扇发动机进行剩余寿命（RUL）估计",
+      "canonical_evidence": "使用CNN和LSTM对涡扇发动机进行剩余寿命（RUL）估计",
+      "llm_tldr_en": "Compares deep learning and classical models for RUL estimation on the NASA C-MAPSS dataset.",
+      "llm_tldr_cn": "在NASA C-MAPSS数据集上比较了深度学习和经典模型对RUL估计的效果。",
+      "llm_tldr": "在NASA C-MAPSS数据集上比较了深度学习和经典模型对RUL估计的效果。",
+      "llm_tags": [
+        "query:rul:composite"
+      ],
+      "matched_query_tag": "query:rul:composite",
+      "matched_query_text": "Papers central to 剩余寿命预测和旋转机械设备剩余寿命预测, especially work that connects or combines: Remaining Useful Life (RUL) prediction methods; Health monitoring and RUL for rotating machinery; Remaining useful life prediction for rolling element bearings; Deep learning architectures for RUL estimation; State of the art methods for remaining useful life prediction of rotating machinery; Deep learning based RUL estimation for industrial bearings and motors; Data driven vs physics informed models for RUL prediction; Real time health assessment and RUL forecasting for rotating components.",
+      "matched_requirement_id": "req-composite-rul",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2604.23068v1",
+      "source": "arxiv",
+      "title": "Probabilistic Hazard Analysis Framework with Stochastic Optimal Control for Deteriorating Civil Infrastructure Systems",
+      "abstract": "The safety and resilience of civil infrastructure systems are increasingly threatened by compounded risks from various hazard events and structural deterioration due to environmental stressors. This study presents a comprehensive risk-informed, life-cycle optimization framework that extends the Performance-Based Earthquake Engineering (PBEE) and probabilistic seismic loss estimation paradigms by combining hazard uncertainties, nonstationary deterioration, structural damage accumulation, and state-dependent fragility assessments, with optimal, adaptive maintenance strategies in time. The life-cycle cost optimization is formulated in this work as a Markov Decision Process (MDP) problem, utilizing derived, transition matrices reflecting time-variant deterioration effects and hazard risks. To mitigate the curse of dimensionality in system-level optimization, a novel tensor-based method exploiting Kronecker-factored transition dynamics is introduced, reducing complexity from exponential to linear in the number of components while still preserving exact, global dynamic programming solutions. Overall, the framework is general and versatile, able to accommodate various hazard types. A seismic hazard application is, however, demonstrated and explained in detail in this work. The developed methodology eventually provides decision-makers with a practical, data-driven tool toward cost effective risk mitigation of civil infrastructure systems.",
+      "authors": [
+        "Sudhir P. Jodha",
+        "Konstantinos G. Papakonstantinou"
+      ],
+      "primary_category": "eess.SY",
+      "categories": [
+        "eess.SY",
+        "cs.CE",
+        "math.NA"
+      ],
+      "published": "2026-04-24T23:38:38+00:00",
+      "link": "https://arxiv.org/pdf/2604.23068v1",
+      "tags": [
+        "query:PHM"
+      ],
+      "llm_score": 7.5,
+      "llm_evidence_en": "nonstationary deterioration and structural damage accumulation",
+      "llm_evidence_cn": "非平稳退化与结构损伤累积",
+      "llm_evidence": "非平稳退化与结构损伤累积",
+      "canonical_evidence": "非平稳退化与结构损伤累积",
+      "llm_tldr_en": "A life-cycle optimization framework combining deterioration, damage accumulation, and maintenance.",
+      "llm_tldr_cn": "一种结合了退化、损伤累积和维护决策的生命周期优化框架。",
+      "llm_tldr": "一种结合了退化、损伤累积和维护决策的生命周期优化框架。",
+      "llm_tags": [
+        "query:phm:composite"
+      ],
+      "matched_query_tag": "query:phm:composite",
+      "matched_query_text": "Papers central to 同时涉及故障诊断与剩余寿命预测的研究论文, especially work that connects or combines: joint modeling of diagnosis and prognosis; multi-task learning for diagnosis and RUL; simultaneous fault diagnosis and remaining useful life prediction; integrated approach for machinery fault diagnosis and prognosis; multi task deep learning for PHM applications; joint diagnosis and RUL estimation research papers.",
+      "matched_requirement_id": "req-composite-phm",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2604.23514v1",
+      "source": "arxiv",
+      "title": "Probabilistic Graphical Model using Graph Neural Networks for Bayesian Inversion of Discrete Structural Component States",
+      "abstract": "The health condition of components in civil infrastructures can be described by various discrete states according to their performance degradation. Inferring these states from measurable responses is typically an ill-posed inverse problem. Although Bayesian methods are well-suited to tackle such problems, computing the posterior probability density function (PDF) presents challenges. The likelihood function cannot be analytically formulated due to the unclear relationship between discrete states and structural responses, and the high-dimensional state parameters resulting from numerous components severely complicates the computation of the marginal likelihood function. To address these challenges, this study proposes a novel Bayesian inversion paradigm for discrete variables based on Probabilistic Graphical Models (PGMs). The Markov networks are employed as modeling tools, with model parameters learned from data and structural topology prior. It has been proved that inferring this PGM produces the same probabilistic estimation as the posterior PDF derived from Bayesian inference, which effectively solves the above challenges. The inference is accomplished by Graph Neural Networks (GNNs), and a graph property-based GNN training strategy is developed to enable accurate inference across varying graph scales, thereby significantly reducing the computational overhead in high-dimensional problems. Both synthetic and experimental data are used to validate the proposed framework",
+      "authors": [
+        "Teng Li",
+        "Stephen Wu",
+        "Yong Huang",
+        "James L. Beck",
+        "Hui Li"
+      ],
+      "primary_category": "stat.ML",
+      "categories": [
+        "stat.ML",
+        "cs.LG",
+        "stat.ME"
+      ],
+      "published": "2026-04-26T03:22:18+00:00",
+      "link": "https://arxiv.org/pdf/2604.23514v1",
+      "tags": [
+        "query:PHM"
+      ],
+      "llm_score": 6.5,
+      "llm_evidence_en": "health condition of components and performance degradation",
+      "llm_evidence_cn": "组件健康状况与性能退化",
+      "llm_evidence": "组件健康状况与性能退化",
+      "canonical_evidence": "组件健康状况与性能退化",
+      "llm_tldr_en": "Uses GNNs and Bayesian inversion to infer structural component health states from responses.",
+      "llm_tldr_cn": "利用图神经网络和贝叶斯反演从响应中推断结构组件的健康状态。",
+      "llm_tldr": "利用图神经网络和贝叶斯反演从响应中推断结构组件的健康状态。",
+      "llm_tags": [
+        "query:rul:composite"
+      ],
+      "matched_query_tag": "query:rul:composite",
+      "matched_query_text": "Papers central to 剩余寿命预测和旋转机械设备剩余寿命预测, especially work that connects or combines: Remaining Useful Life (RUL) prediction methods; Health monitoring and RUL for rotating machinery; Remaining useful life prediction for rolling element bearings; Deep learning architectures for RUL estimation; State of the art methods for remaining useful life prediction of rotating machinery; Deep learning based RUL estimation for industrial bearings and motors; Data driven vs physics informed models for RUL prediction; Real time health assessment and RUL forecasting for rotating components.",
+      "matched_requirement_id": "req-composite-rul",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.23514v2",
+      "source": "arxiv",
+      "title": "Probabilistic Graphical Model using Graph Neural Networks for Bayesian Inversion of Discrete Structural Component States",
+      "abstract": "The health condition of components in civil infrastructures can be described by various discrete states according to their performance degradation. Inferring these states from measurable responses is typically an ill-posed inverse problem. Although Bayesian methods are well-suited to tackle such problems, computing the posterior probability density function (PDF) presents challenges. The likelihood function cannot be analytically formulated due to the unclear relationship between discrete states and structural responses, and the high-dimensional state parameters resulting from numerous components severely complicates the computation of the marginal likelihood function. To address these challenges, this study proposes a novel Bayesian inversion paradigm for discrete variables based on Probabilistic Graphical Models (PGMs). The Markov networks are employed as modeling tools, with model parameters learned from data and structural topology prior. It has been proved that inferring this PGM produces the same probabilistic estimation as the posterior PDF derived from Bayesian inference, which effectively solves the above challenges. The inference is accomplished by Graph Neural Networks (GNNs), and a graph property-based GNN training strategy is developed to enable accurate inference across varying graph scales, thereby significantly reducing the computational overhead in high-dimensional problems. Both synthetic and experimental data are used to validate the proposed framework",
+      "authors": [
+        "Teng Li",
+        "Stephen Wu",
+        "Yong Huang",
+        "James L. Beck",
+        "Hui Li"
+      ],
+      "primary_category": "stat.ML",
+      "categories": [
+        "stat.ML",
+        "cs.LG",
+        "stat.ME"
+      ],
+      "published": "2026-04-26T03:22:18+00:00",
+      "link": "https://arxiv.org/pdf/2604.23514v2",
+      "tags": [
+        "query:PHM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "inferring health condition states from performance degradation",
+      "llm_evidence_cn": "从性能退化中推断健康状况状态",
+      "llm_evidence": "从性能退化中推断健康状况状态",
+      "canonical_evidence": "从性能退化中推断健康状况状态",
+      "llm_tldr_en": "Uses Graph Neural Networks and Bayesian inversion to infer discrete health states of structural components.",
+      "llm_tldr_cn": "利用图神经网络和贝叶斯反演推断结构部件的离散健康状态。",
+      "llm_tldr": "利用图神经网络和贝叶斯反演推断结构部件的离散健康状态。",
+      "llm_tags": [
+        "query:rul:composite"
+      ],
+      "matched_query_tag": "query:rul:composite",
+      "matched_query_text": "Papers central to 剩余寿命预测和旋转机械设备剩余寿命预测, especially work that connects or combines: Remaining Useful Life (RUL) prediction methods; Health monitoring and RUL for rotating machinery; Remaining useful life prediction for rolling element bearings; Deep learning architectures for RUL estimation; State of the art methods for remaining useful life prediction of rotating machinery; Deep learning based RUL estimation for industrial bearings and motors; Data driven vs physics informed models for RUL prediction; Real time health assessment and RUL forecasting for rotating components.",
+      "matched_requirement_id": "req-composite-rul",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2604.27198v1",
+      "source": "arxiv",
+      "title": "Bayesian Nonparametric Causal Inference for Quantile Residual Life: An Application to Alzheimer's Disease",
+      "abstract": "In Alzheimer's disease research, for individuals who remain dementia-free through a given follow-up time, an important clinical question is how much longer they are likely to remain dementia-free. Quantiles of this remaining time provide clinically interpretable prognostic milestones and can help characterize prognostic heterogeneity across baseline groups. We address this question in the Alzheimer's Disease Neuroimaging Initiative (ADNI), focusing on baseline amyloid status as the exposure. Estimation is challenging because amyloid status is observed rather than randomized, requiring adjustment for confounding, and because time to dementia onset is heterogeneous and heavily right-censored. We estimate causal contrasts in quantile residual life using a Bayesian nonparametric enriched Dirichlet process mixture model for the joint distribution of event times, exposure, and baseline covariates, with inference via Bayesian g-computation. The approach accommodates ignorable missing baseline covariates through data augmentation, supports inference across clinically relevant landmark times, and allows sensitivity analysis for residual unmeasured confounding. Simulation studies show good performance under complex heterogeneity and heavy censoring. In ADNI, elevated baseline amyloid was associated with shorter quantiles of remaining dementia-free time than non-elevated baseline amyloid among individuals who remained dementia-free through relevant landmark times, overall and within baseline diagnostic subgroups.",
+      "authors": [
+        "Woojung Bae",
+        "Taekwon Hong",
+        "Sang Kyu Lee",
+        "Dongrak Choi",
+        "Jong-Hyeon Jeong"
+      ],
+      "primary_category": "stat.AP",
+      "categories": [
+        "stat.AP",
+        "stat.ME"
+      ],
+      "published": "2026-04-29T21:01:31+00:00",
+      "link": "https://arxiv.org/pdf/2604.27198v1",
+      "tags": [
+        "keyword:PHM"
+      ],
+      "llm_score": 6.5,
+      "llm_evidence_en": "inference for quantile residual life and prognostic milestones",
+      "llm_evidence_cn": "分位数剩余寿命推断与预后里程碑",
+      "llm_evidence": "分位数剩余寿命推断与预后里程碑",
+      "canonical_evidence": "分位数剩余寿命推断与预后里程碑",
+      "llm_tldr_en": "Uses Bayesian nonparametrics to estimate quantile residual life for Alzheimer's disease prognosis.",
+      "llm_tldr_cn": "使用贝叶斯非参数方法估计阿尔茨海默病预后的分位数剩余寿命。",
+      "llm_tldr": "使用贝叶斯非参数方法估计阿尔茨海默病预后的分位数剩余寿命。",
+      "llm_tags": [
+        "query:rul:composite"
+      ],
+      "matched_query_tag": "query:rul:composite",
+      "matched_query_text": "Papers central to 剩余寿命预测和旋转机械设备剩余寿命预测, especially work that connects or combines: Remaining Useful Life (RUL) prediction methods; Health monitoring and RUL for rotating machinery; Remaining useful life prediction for rolling element bearings; Deep learning architectures for RUL estimation; State of the art methods for remaining useful life prediction of rotating machinery; Deep learning based RUL estimation for industrial bearings and motors; Data driven vs physics informed models for RUL prediction; Real time health assessment and RUL forecasting for rotating components.",
+      "matched_requirement_id": "req-composite-rul",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.24818v1",
+      "source": "arxiv",
+      "title": "Heterogeneous Variational Inference for Markov Degradation Hazard Models: Discretized Mixture with Interpretable Clusters",
+      "abstract": "Bayesian finite mixture models can identify discrete risk clusters (low-risk vs. high-risk equipment), but face three critical bottlenecks: (1) insufficient degradation signals from coarse state discretization, (2) unstable cluster identification when data inherently supports fewer clusters than explored, and (3) computational infeasibility of Markov Chain Monte Carlo (MCMC) methods for production deployment (7+ hours per model). We propose a practical framework combining (1) 8-state global percentile discretization that amplifies degradation events, (2) 30-dimensional feature engineering integrating statistical trends (22 features), continuous health indicators, and text embeddings (PCA-compressed to 3 dimensions), (3) interpretable model selection rules enforcing minimum cluster share and separation alongside WAIC, and (4) Automatic Differentiation Variational Inference (ADVI) with full-rank covariance for stable, fast estimation. Applied to 280 industrial pump equipment with 104,703 inspection records, we demonstrate: (1) Random effect models (baseline) show ADVI and NUTS produce nearly identical estimates with 15$\\times$ speedup, validating ADVI accuracy. (2) Finite mixture models identify optimal number of clusters with interpretability constraints. (3) NUTS exhibits severe convergence issues and label switching, while ADVI provides stable results in 84$\\times$ less time. We contributed that (1) First demonstration that fine-grained state discretization (8-state) is essential for mixture model stability in survival analysis.(2) Comprehensive feature engineering strategy combining statistical, continuous, and semantic signals. (3) Practical interpretability rules preventing overfitting in automated model selection. (4) Empirical evidence that ADVI outperforms NUTS for finite mixture models in terms of convergence, stability, and computational efficiency.",
+      "authors": [
+        "Takato Yasuno"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-04-27T14:02:43+00:00",
+      "link": "https://arxiv.org/pdf/2604.24818v1",
+      "tags": [
+        "keyword:PHM",
+        "query:PHM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Markov degradation hazard models for identifying risk clusters in equipment",
+      "llm_evidence_cn": "用于识别设备风险集群的马尔可夫退化风险模型",
+      "llm_evidence": "用于识别设备风险集群的马尔可夫退化风险模型",
+      "canonical_evidence": "用于识别设备风险集群的马尔可夫退化风险模型",
+      "llm_tldr_en": "Proposes a Bayesian framework for equipment degradation modeling and risk cluster identification.",
+      "llm_tldr_cn": "提出了一种用于设备退化建模和风险集群识别的贝叶斯框架。",
+      "llm_tldr": "提出了一种用于设备退化建模和风险集群识别的贝叶斯框架。",
+      "llm_tags": [
+        "query:rul:composite"
+      ],
+      "matched_query_tag": "query:rul:composite",
+      "matched_query_text": "Papers central to 剩余寿命预测和旋转机械设备剩余寿命预测, especially work that connects or combines: Remaining Useful Life (RUL) prediction methods; Health monitoring and RUL for rotating machinery; Remaining useful life prediction for rolling element bearings; Deep learning architectures for RUL estimation; State of the art methods for remaining useful life prediction of rotating machinery; Deep learning based RUL estimation for industrial bearings and motors; Data driven vs physics informed models for RUL prediction; Real time health assessment and RUL forecasting for rotating components.",
+      "matched_requirement_id": "req-composite-rul",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2604.27967v1",
+      "source": "arxiv",
+      "title": "Differentiable latent structure discovery for interpretable forecasting in clinical time series",
+      "abstract": "Background: Timely, uncertainty-aware forecasting from irregular electronic health records (EHR) can support critical-care decisions, yet most approaches either impute to a grid or sacrifice interpretability. We introduce StructGP, a continuous-time multi-task Gaussian process that couples process convolutions with differentiable structure learning to uncover a sparse, ordered directed acyclic graph (DAG) of inter-variable dependencies while preserving principled uncertainty. We further propose LP-StructGP, which augments StructGP with latent pathways-shared, temporally shifted trajectories inferred via subject-specific coupling filters and a softmax gating mechanism-to capture cross-patient progression patterns. Both models are trained under sparsity and acyclicity constraints (augmented Lagrangian, Adam) using scalable low-rank updates. Results: In simulations, the approach reliably recovers ground-truth graphs (Structural Hamming Distance approaching 0 as cohorts grow) and pathway assignments (high Adjusted Rand Index). On a MIMIC-IV septic shock cohort (n=1,008; norepinephrine, creatinine, mean arterial pressure), StructGP improves short-horizon (6 h) forecasting over independent-task baselines (average RMSE 0.68 [95%CI: 0.63--0.74] vs. 0.88 [0.83-0.94]) and, with 15 additional inputs, markedly outperforms unstructured kernels (0.63 [0.58-0.69] vs. 3.02 [2.85-3.18]) with superior calibration (coverage 0.96 vs. 0.84). On the PhysioNet Challenge (12k patients, 41 variables), StructGP attains competitive accuracy (MAE 3.72e-2) relative to a state-of-the-art graph neural model while maintaining calibrated uncertainty. Conclusion: These results show that structured process convolutions with latent pathways deliver interpretable, scalable, and well-calibrated forecasting for irregular clinical time series.",
+      "authors": [
+        "Ivan Lerner",
+        "Jean Feydy",
+        "Alexandre Kalimouttou",
+        "Anita Burgun",
+        "Francis Bach"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-04-30T14:59:50+00:00",
+      "link": "https://arxiv.org/pdf/2604.27967v1",
+      "tags": [
+        "keyword:PHM",
+        "query:PHM"
+      ],
+      "llm_score": 6.5,
+      "llm_evidence_en": "multi-task Gaussian process for clinical time series forecasting and structure discovery",
+      "llm_evidence_cn": "用于临床时间序列预测和结构发现的多任务高斯过程",
+      "llm_evidence": "用于临床时间序列预测和结构发现的多任务高斯过程",
+      "canonical_evidence": "用于临床时间序列预测和结构发现的多任务高斯过程",
+      "llm_tldr_en": "Introduces a multi-task Gaussian process for interpretable forecasting in clinical time series.",
+      "llm_tldr_cn": "引入了一种用于临床时间序列可解释预测的多任务高斯过程。",
+      "llm_tldr": "引入了一种用于临床时间序列可解释预测的多任务高斯过程。",
+      "llm_tags": [
+        "query:phm"
+      ],
+      "matched_query_tag": "query:phm",
+      "matched_query_text": "joint modeling of diagnosis and prognosis",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.23368v1",
+      "source": "arxiv",
+      "title": "TEMPO: Transformers for Temporal Disease Progression from Cross-Sectional Data",
+      "abstract": "Event-Based Models (EBMs) infer biomarker progression from cross-sectional data but typically only as ordinal sequences and rely on rigid model assumptions. We propose \\textsc{Tempo}, a Transformer architecture that learns both ordinal and continuous event sequences through simulation-based supervised learning. \\textsc{Tempo} uses two Transformer modules: one treats biomarkers as tokens to infer event sequencing; the other treats patients as tokens, representing each by their per-biomarker abnormality profile, to infer patients' disease stages. On synthetic benchmarks, \\textsc{Tempo} reduces normalized Kendall's Tau distance by 52.89\\% and staging MAE by 25.33\\% compared to state-of-the-art SA-EBM, with larger reductions in high-dimensional settings (58.88\\% and 61.10\\%). Applied to ADNI, \\textsc{Tempo} recovers a biologically plausible Alzheimer's progression: early medial temporal atrophy, followed by amyloid accumulation and cognitive decline, and late-stage tau pathology with terminal acceleration of global neurodegeneration -- broadly consistent with established disease models. \\textsc{Tempo} also eliminates the need to derive custom inference algorithms and enables rapid empirical comparison of generative hypotheses.",
+      "authors": [
+        "Hongtao Hao",
+        "Joseph L. Austerweil"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-04-25T16:25:08+00:00",
+      "link": "https://arxiv.org/pdf/2604.23368v1",
+      "tags": [
+        "keyword:PHM",
+        "query:PHM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "inferring temporal disease progression and biomarker sequences",
+      "llm_evidence_cn": "推断时间疾病进展和生物标志物序列",
+      "llm_evidence": "推断时间疾病进展和生物标志物序列",
+      "canonical_evidence": "推断时间疾病进展和生物标志物序列",
+      "llm_tldr_en": "A Transformer architecture for learning temporal disease progression and staging from cross-sectional data.",
+      "llm_tldr_cn": "一种用于从横截面数据中学习时间疾病进展和分期的Transformer架构。",
+      "llm_tldr": "一种用于从横截面数据中学习时间疾病进展和分期的Transformer架构。",
+      "llm_tags": [
+        "query:rul:composite"
+      ],
+      "matched_query_tag": "query:rul:composite",
+      "matched_query_text": "Papers central to 剩余寿命预测和旋转机械设备剩余寿命预测, especially work that connects or combines: Remaining Useful Life (RUL) prediction methods; Health monitoring and RUL for rotating machinery; Remaining useful life prediction for rolling element bearings; Deep learning architectures for RUL estimation; State of the art methods for remaining useful life prediction of rotating machinery; Deep learning based RUL estimation for industrial bearings and motors; Data driven vs physics informed models for RUL prediction; Real time health assessment and RUL forecasting for rotating components.",
+      "matched_requirement_id": "req-composite-rul",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.23818v1",
+      "source": "arxiv",
+      "title": "On the Generalization Properties of Selective State-Space Models for Filtering Tasks for Unknown Systems",
+      "abstract": "Selective State-Space Models (SSMs) such as Mamba have emerged as an alternative architecture to self-attention based transformers in sequence modeling tasks. Recent works have demonstrated the use of transformers in some filtering and output prediction tasks via in-context learning. In this paper, we analyze whether structured SSMs can work equally well for filtering of unknown systems. In particular, we train the SSM on trajectory samples from a set of systems. At run-time, the SSM is given the outputs of an unknown system from the same set and is expected to predict the next output online. Theoretically, under appropriate assumptions, we derive generalization bounds as to why SSMs succeed in such tasks. Empirically, we demonstrate the performance via several numerical examples. We also discuss the advantages and disadvantages of SSMs versus transformers for this task.",
+      "authors": [
+        "Alex Tang",
+        "M. Emrullah Ildiz",
+        "Batin Kurt",
+        "Samet Oymak",
+        "Necmiye Ozay"
+      ],
+      "primary_category": "eess.SY",
+      "categories": [
+        "eess.SY"
+      ],
+      "published": "2026-04-26T17:40:05+00:00",
+      "link": "https://arxiv.org/pdf/2604.23818v1",
+      "tags": [
+        "keyword:PHM",
+        "query:PHM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "sequence modeling for filtering and output prediction tasks",
+      "llm_evidence_cn": "用于滤波和输出预测任务的序列建模",
+      "llm_evidence": "用于滤波和输出预测任务的序列建模",
+      "canonical_evidence": "用于滤波和输出预测任务的序列建模",
+      "llm_tldr_en": "Analyzes Selective State-Space Models for filtering and next-output prediction in unknown systems.",
+      "llm_tldr_cn": "分析了选择性状态空间模型在未知系统滤波和下一输出预测中的应用。",
+      "llm_tldr": "分析了选择性状态空间模型在未知系统滤波和下一输出预测中的应用。",
+      "llm_tags": [
+        "query:rul:composite"
+      ],
+      "matched_query_tag": "query:rul:composite",
+      "matched_query_text": "Papers central to 剩余寿命预测和旋转机械设备剩余寿命预测, especially work that connects or combines: Remaining Useful Life (RUL) prediction methods; Health monitoring and RUL for rotating machinery; Remaining useful life prediction for rolling element bearings; Deep learning architectures for RUL estimation; State of the art methods for remaining useful life prediction of rotating machinery; Deep learning based RUL estimation for industrial bearings and motors; Data driven vs physics informed models for RUL prediction; Real time health assessment and RUL forecasting for rotating components.",
+      "matched_requirement_id": "req-composite-rul",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.26366v1",
+      "source": "arxiv",
+      "title": "Probabilistic data quality assessment for structural monitoring data via outlier-resistant conditional diffusion model",
+      "abstract": "Data quality assessment is an essential step that ensures the reliability of the subsequent structural health monitoring (SHM) tasks. This study proposes a prediction deviation-based SHM data quality assessment method using a univariate implicit auto-regressive model, enabling outlier diagnosis and data cleaning. The proposed conditional diffusion model (CDM) augments the standard diffusion model with a conditional embedding module to incorporate temporal context, quartile normalization to mitigate distribution skew, and a Huber loss to enhance robustness against outliers. Within this univariate implicit autoregressive framework, each data point is assigned an outlier probability, quantifying its degree of \"outlier-ness\", and a global quality evaluation score is computed to characterize the overall dataset quality. Extensive case studies utilizing operational data from real-world structures demonstrate that the proposed framework significantly improves the accuracy of data quality assessment, outperforming other strong baselines representative of clustering, isolation-based, and deep reconstruction methods. The effectiveness and robustness of the proposed framework are further demonstrated by the findings of ablation experiments and hyperparameter analysis.",
+      "authors": [
+        "Qi Li",
+        "Yong Huang",
+        "Hui Li"
+      ],
+      "primary_category": "stat.ML",
+      "categories": [
+        "stat.ML",
+        "cs.LG"
+      ],
+      "published": "2026-04-29T07:26:37+00:00",
+      "link": "https://arxiv.org/pdf/2604.26366v1",
+      "tags": [
+        "keyword:PHM",
+        "query:PHM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "structural health monitoring data quality assessment and outlier diagnosis",
+      "llm_evidence_cn": "结构健康监测数据质量评估与异常诊断",
+      "llm_evidence": "结构健康监测数据质量评估与异常诊断",
+      "canonical_evidence": "结构健康监测数据质量评估与异常诊断",
+      "llm_tldr_en": "Uses a conditional diffusion model for outlier diagnosis and data cleaning in structural health monitoring.",
+      "llm_tldr_cn": "利用条件扩散模型进行结构健康监测中的异常诊断和数据清洗。",
+      "llm_tldr": "利用条件扩散模型进行结构健康监测中的异常诊断和数据清洗。",
+      "llm_tags": [
+        "query:rul:composite"
+      ],
+      "matched_query_tag": "query:rul:composite",
+      "matched_query_text": "Papers central to 剩余寿命预测和旋转机械设备剩余寿命预测, especially work that connects or combines: Remaining Useful Life (RUL) prediction methods; Health monitoring and RUL for rotating machinery; Remaining useful life prediction for rolling element bearings; Deep learning architectures for RUL estimation; State of the art methods for remaining useful life prediction of rotating machinery; Deep learning based RUL estimation for industrial bearings and motors; Data driven vs physics informed models for RUL prediction; Real time health assessment and RUL forecasting for rotating components.",
+      "matched_requirement_id": "req-composite-rul",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.26633v1",
+      "source": "arxiv",
+      "title": "SynSur: An end-to-end generative pipeline for synthetic industrial surface defect generation and detection",
+      "abstract": "The bottleneck in learning-based industrial defect detection is often limited not by model capacity, but by the scarcity of labeled defect data: defects are rare, annotations are expensive, and collecting balanced training sets is slow. We present an end-to-end pipeline for synthetic defect generation and annotation, combining Vision-Language-Model-based prompts, LoRA-adapted diffusion, mask-guided inpainting, and sample filtering with automatic label derivation, and demonstrates the potential of real data with realistic synthetic samples to overcome data scarcity. The evaluation is conducted on, a challenging dataset of pitting defects on ball screw drives, and then on a subset of the Mobile phone screen surface defect segmentation dataset (MSD) dataset to test cross-domain transfer. Beyond downstream detector performance, we analyze key stages of the pipeline, including prompt construction, LoRA selection, and sample filtering with DreamSim and CLIPScore, to understand which synthetic samples are both realistic and useful. Experiments with YOLOv26, YOLOX, and LW-DETR show that synthetic-only training does not replace real data. When combined with real data, synthetic defects can preserve performance and yield modest gains in selected BSData training regimes. The MSD transfer study shows that the overall pipeline structure carries over to a second industrial inspection domain, while also highlighting the importance of domain-specific adaptation and annotation-quality control. Overall, the paper provides an end-to-end assessment of diffusion-based industrial defect synthesis and shows that its strongest value lies in strengthening scarce real datasets rather than substituting for them.",
+      "authors": [
+        "Paul Julius Kühn",
+        "Mika Pommeranz",
+        "Arjan Kuijper",
+        "Saptarshi Neil Sinha"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.AI"
+      ],
+      "published": "2026-04-29T12:57:32+00:00",
+      "link": "https://arxiv.org/pdf/2604.26633v1",
+      "tags": [
+        "keyword:PHM",
+        "query:PHM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "industrial surface defect detection on ball screw drives",
+      "llm_evidence_cn": "滚珠丝杠驱动器的工业表面缺陷检测",
+      "llm_evidence": "滚珠丝杠驱动器的工业表面缺陷检测",
+      "canonical_evidence": "滚珠丝杠驱动器的工业表面缺陷检测",
+      "llm_tldr_en": "A generative pipeline for synthetic industrial defect data to improve detection in ball screw drives.",
+      "llm_tldr_cn": "一种用于生成合成工业缺陷数据以改进滚珠丝杠检测的生成流水线。",
+      "llm_tldr": "一种用于生成合成工业缺陷数据以改进滚珠丝杠检测的生成流水线。",
+      "llm_tags": [
+        "query:phm"
+      ],
+      "matched_query_tag": "query:phm",
+      "matched_query_text": "integrated approach for machinery fault diagnosis and prognosis",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.27653v1",
+      "source": "arxiv",
+      "title": "FUN: A Focal U-Net Combining Reconstruction and Object Detection for Snapshot Spectral Imaging",
+      "abstract": "Conventional push-broom hyperspectral imaging suffers from slow acquisition speeds, precluding real-time object detection; in contrast, snapshot spectral imaging enables instantaneous hyperspectral images (HSIs) capture, making real-time object detection feasible, yet its potential is often compromised by time-consuming post-capture reconstruction. To address this issue, we propose the Focal U-shaped Network (FUN), a novel end-to-end framework that jointly performs HSI reconstruction and object detection via multi-task learning. FUN employs a shared U-shaped backbone, where reconstruction provides underlying spectral information while detection guides semantic-aware priors learning, facilitating mutually beneficial task interaction. Crucially, we introduce focal modulation, an efficient alternative to self-attention that modulates spatial and spectral features while reducing quadratic computational complexity, enabling a self-attention-free architecture for joint reconstruction and detection. Furthermore, we contribute a new HSI object detection dataset with 8712 annotated objects across 363 HSIs to facilitate evaluation of the proposed method. Experiments demonstrate that FUN achieves state-of-the-art performance on both tasks, using 40% fewer parameters and 30% less computation than recent alternatives, making it promising for future real-time edge deployment. The code and datasets are available: https://github.com/ShawnDong98/FUN.",
+      "authors": [
+        "Dahua Gao",
+        "Yubo Dong",
+        "Anqi Li",
+        "Zhenyuan Lin",
+        "Ang Gao",
+        "Danhua Liu",
+        "Guangming Shi"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-04-30T09:48:38+00:00",
+      "link": "https://arxiv.org/pdf/2604.27653v1",
+      "tags": [
+        "keyword:PHM",
+        "query:PHM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "joint reconstruction and detection via multi-task learning",
+      "llm_evidence_cn": "通过多任务学习进行联合重建与检测",
+      "llm_evidence": "通过多任务学习进行联合重建与检测",
+      "canonical_evidence": "通过多任务学习进行联合重建与检测",
+      "llm_tldr_en": "Proposes a Focal U-Net for joint spectral reconstruction and object detection using multi-task learning.",
+      "llm_tldr_cn": "提出一种Focal U-Net，利用多任务学习联合进行光谱重建和目标检测。",
+      "llm_tldr": "提出一种Focal U-Net，利用多任务学习联合进行光谱重建和目标检测。",
+      "llm_tags": [
+        "query:phm"
+      ],
+      "matched_query_tag": "query:phm",
+      "matched_query_text": "multi task deep learning for PHM applications",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}
